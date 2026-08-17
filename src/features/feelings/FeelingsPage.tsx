@@ -26,7 +26,7 @@ function MagnetToggle({ checked, onChange }: { checked: boolean; onChange: (chec
 
 export function FeelingsPage() {
   const [query, setQuery] = useState('');
-  const [playMode, setPlayMode] = useState(false);
+  const [playMode, setPlayMode] = useState(true);
   const [shuffleVersion, setShuffleVersion] = useState(0);
 
   const matches = useMemo(() => {
