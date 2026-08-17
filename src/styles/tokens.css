@@ -1,26 +1,57 @@
 :root {
   color-scheme: light;
 
-  /* Legacy allneeds.app palette, promoted to semantic V2 tokens. */
-  --color-plum: #74569b;
-  --color-lavender: #ede4ff;
-  --color-ink: #1f1230;
-  --color-ink-soft: #392351;
-  --color-rose: #ffb3cb;
-  --color-mint: #96fbc7;
-  --color-gold: #f7ffae;
-  --color-sky: #d3f1ff;
-  --color-outline: #12081f;
+  --plum: #74569b;
+  --lavender: #ede4ff;
+  --ink: #1f1230;
+  --ink-soft: #392351;
+  --rose: #ffb3cb;
+  --mint: #96fbc7;
+  --gold: #f7ffae;
+  --sky: #d3f1ff;
+  --peach: #ffdfc9;
+  --outline: #12081f;
+  --shadow: color-mix(in srgb, var(--outline) 55%, transparent);
+  --nav-hover-shadow: color-mix(in srgb, var(--outline) 45%, transparent);
+  --nav-active-inset-shadow: color-mix(in srgb, var(--outline) 34%, transparent);
+  --nav-active-lift-shadow: color-mix(in srgb, var(--outline) 62%, transparent);
+  --btn-bg: #ffb3cb;
+  --btn-fg: #111111;
+  --chip-bg: color-mix(in srgb, #ffffff 86%, var(--sky) 14%);
+  --chip-fg: #111111;
 
-  --surface-canvas: #f9f6ff;
-  --surface-raised: color-mix(in srgb, white 94%, var(--color-lavender) 6%);
+  --corner-scale: 1;
+  --radius-xs: calc(var(--corner-scale) * 8px);
+  --radius-sm: calc(var(--corner-scale) * 10px);
+  --radius-md: calc(var(--corner-scale) * 12px);
+  --radius-md-plus: calc(var(--corner-scale) * 14px);
+  --radius-lg: calc(var(--corner-scale) * 16px);
+  --radius-xl: calc(var(--corner-scale) * 18px);
+  --radius-2xl: calc(var(--corner-scale) * 20px);
+  --radius-3xl: calc(var(--corner-scale) * 24px);
+  --radius-4xl: calc(var(--corner-scale) * 26px);
+  --radius-pill: calc(var(--corner-scale) * 999px);
+  --radius-circle: calc(var(--corner-scale) * 50%);
 
-  --font-body: 'Atkinson Hyperlegible', 'Trebuchet MS', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Manrope', 'Atkinson Hyperlegible', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Atkinson Hyperlegible', 'Trebuchet MS', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Manrope', 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
 
+  /* V2 semantic aliases deliberately resolve to the production palette. */
+  --color-plum: var(--plum);
+  --color-lavender: var(--lavender);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-rose: var(--rose);
+  --color-mint: var(--mint);
+  --color-gold: var(--gold);
+  --color-sky: var(--sky);
+  --color-outline: var(--outline);
+  --surface-canvas: var(--lavender);
+  --surface-raised: #fff;
+  --control-min: 44px;
+  --border-strong: 3px;
+  --layout-max: 960px;
   --text-sm: 0.875rem;
-  --text-base: 1rem;
-
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -28,21 +59,5 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
   --space-7: 3rem;
-
-  --radius-sm: 0.625rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-pill: 999px;
-
-  --border-strong: 3px;
-  --control-min: 2.75rem;
-  --layout-max: 72rem;
-
-  --shadow-small: 0 5px 0 color-mix(in srgb, var(--color-outline) 18%, transparent);
-  --shadow-medium: 0 8px 0 color-mix(in srgb, var(--color-outline) 20%, transparent);
-  --shadow-tactile: 0 10px 0 color-mix(in srgb, var(--color-outline) 24%, transparent);
-  --shadow-tactile-hover: 0 13px 0 color-mix(in srgb, var(--color-outline) 28%, transparent);
-
-  --motion-fast: 140ms ease;
+  --motion-fast: 0.18s ease;
 }
