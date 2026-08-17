@@ -1,0 +1,42 @@
+.page {
+  max-width: 46rem;
+  padding: clamp(var(--space-4), 7vw, var(--space-7));
+  border: var(--border-strong) solid var(--color-outline);
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-tactile);
+}
+
+.page h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 9vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.page > p:not(.eyebrow) {
+  max-width: 42rem;
+  margin: var(--space-3) 0 0;
+  color: var(--color-ink-soft);
+  font-size: 1.05rem;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--color-ink-soft);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.note {
+  margin-top: var(--space-5);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-1);
+  border: 2px dashed var(--color-outline);
+  border-radius: var(--radius-md);
+  background: var(--color-sky);
+}

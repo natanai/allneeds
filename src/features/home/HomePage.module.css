@@ -1,0 +1,186 @@
+.page {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.intro {
+  max-width: 42rem;
+}
+
+.intro h1,
+.support h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  letter-spacing: -0.035em;
+}
+
+.intro h1 {
+  font-size: clamp(2.3rem, 12vw, 4.6rem);
+  line-height: 0.95;
+}
+
+.intro > p:last-child {
+  max-width: 38rem;
+  margin: var(--space-3) 0 0;
+  color: var(--color-ink-soft);
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--color-ink-soft);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.doorGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.doorCard {
+  min-height: 12rem;
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  grid-template-rows: 1fr auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: end;
+  border: var(--border-strong) solid var(--color-outline);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-tactile);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: transform var(--motion-fast), box-shadow var(--motion-fast);
+}
+
+.doorCard:hover {
+  transform: translateY(-2px) rotate(-0.25deg);
+  box-shadow: var(--shadow-tactile-hover);
+}
+
+.observations {
+  background: var(--color-gold);
+}
+
+.feelings {
+  background: var(--color-rose);
+}
+
+.needs {
+  background: var(--color-mint);
+}
+
+.doorShape {
+  grid-row: 1 / span 2;
+  width: 5rem;
+  height: 8.5rem;
+  align-self: center;
+  position: relative;
+  display: block;
+  border: var(--border-strong) solid var(--color-outline);
+  border-bottom-width: 6px;
+  border-radius: 2.8rem 2.8rem 0.55rem 0.55rem;
+  background: color-mix(in srgb, white 74%, transparent);
+  box-shadow: inset -8px 0 0 color-mix(in srgb, var(--color-outline) 8%, transparent);
+}
+
+.doorKnob {
+  width: 0.7rem;
+  height: 0.7rem;
+  position: absolute;
+  right: 0.75rem;
+  top: 55%;
+  border: 2px solid var(--color-outline);
+  border-radius: 50%;
+  background: var(--color-outline);
+}
+
+.doorTitle {
+  align-self: end;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 6vw, 2.15rem);
+  font-weight: 850;
+  line-height: 1;
+}
+
+.doorDetail {
+  align-self: start;
+  color: var(--color-ink-soft);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.support {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-4);
+  border: var(--border-strong) solid var(--color-outline);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-lavender) 88%, white 12%);
+  box-shadow: var(--shadow-medium);
+}
+
+.support h2 {
+  font-size: clamp(1.4rem, 5vw, 2rem);
+}
+
+.support p:last-child {
+  margin: var(--space-2) 0 0;
+  color: var(--color-ink-soft);
+}
+
+.supportLink {
+  min-height: var(--control-min);
+  padding: 0.8rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  border: var(--border-strong) solid var(--color-outline);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-small);
+  color: var(--color-ink);
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+}
+
+@media (min-width: 48rem) {
+  .doorGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .doorCard {
+    min-height: 20rem;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto auto;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .doorShape {
+    grid-row: auto;
+    width: 6.5rem;
+    height: 11rem;
+  }
+
+  .support {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doorCard {
+    transition: none;
+  }
+
+  .doorCard:hover {
+    transform: none;
+  }
+}
