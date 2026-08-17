@@ -10,5 +10,5 @@ export function stableHash(value: string): number {
 }
 
 export function getMagnetTilt(id: string): number {
-  return TILT_STEPS[stableHash(id) % TILT_STEPS.length];
+  return TILT_STEPS[stableHash(id) % TILT_STEPS.length] ?? 0;
 }
