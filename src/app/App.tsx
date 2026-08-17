@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router';
 
+import { FeelingsPage } from '../features/feelings/FeelingsPage';
 import { HomePage } from '../features/home/HomePage';
 import { PlaceholderPage } from '../features/shared/PlaceholderPage';
 import { AppShell } from './AppShell';
@@ -9,16 +10,7 @@ export function App() {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<HomePage />} />
-        <Route
-          path="feelings"
-          element={
-            <PlaceholderPage
-              eyebrow="Reference"
-              title="Feelings"
-              description="The first V2 content slice will bring the canonical feelings catalog into this route with search, filtering, and stable detail links."
-            />
-          }
-        />
+        <Route path="feelings" element={<FeelingsPage />} />
         <Route
           path="feelings/body-cues"
           element={
