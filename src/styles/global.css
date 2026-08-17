@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;600&family=Manrope:wght@500;600;700&display=swap');
+
 * {
   box-sizing: border-box;
 }
@@ -5,11 +7,24 @@
 html {
   min-width: 20rem;
   min-height: 100%;
-  background: var(--surface-canvas);
+  scrollbar-gutter: auto;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--plum) 65%, #000 5%) 0%,
+    color-mix(in srgb, var(--plum) 55%, #fff 20%) 60%,
+    color-mix(in srgb, var(--plum) 45%, #fff 35%) 100%
+  );
+  background-attachment: fixed;
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: 18px;
   line-height: 1.55;
-  color: var(--color-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html {
+    scrollbar-gutter: stable;
+  }
 }
 
 body {
@@ -17,8 +32,26 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--color-lavender) 82%, transparent) 0 14rem, transparent 28rem),
-    linear-gradient(180deg, var(--surface-canvas), color-mix(in srgb, var(--color-sky) 22%, white 78%));
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--lavender) 60%, transparent) 0 30%,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--plum) 75%, #000 5%) 0%,
+      color-mix(in srgb, var(--plum) 55%, #fff 20%) 60%,
+      color-mix(in srgb, var(--plum) 45%, #fff 35%) 100%
+    );
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+  font-family: var(--font-body);
+}
+
+#root {
+  width: 100%;
 }
 
 button,
@@ -28,36 +61,59 @@ textarea {
   font: inherit;
 }
 
-a {
-  color: inherit;
+a,
+button,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
 }
 
-:focus-visible {
-  outline: 3px dashed var(--color-outline);
-  outline-offset: 4px;
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px dashed var(--ink);
+  outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--color-mint);
-  color: var(--color-ink);
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .skip-link {
-  position: fixed;
-  z-index: 1000;
-  top: var(--space-2);
-  left: var(--space-2);
-  padding: 0.65rem 0.85rem;
-  border: var(--border-strong) solid var(--color-outline);
+  position: absolute;
+  left: 1rem;
+  top: -999px;
+  padding: 0.5rem 1rem;
+  background: var(--gold);
+  color: var(--ink);
+  border: 3px solid var(--outline);
   border-radius: var(--radius-sm);
-  background: white;
-  color: var(--color-ink);
-  font-weight: 800;
-  transform: translateY(-160%);
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
 }
 
 .skip-link:focus {
-  transform: translateY(0);
+  top: 1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
