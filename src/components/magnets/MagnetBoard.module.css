@@ -22,7 +22,7 @@
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
-  will-change: transform;
+  -webkit-user-drag: none;
   transition: filter 0.12s ease, box-shadow 0.12s ease;
 }
 
@@ -31,6 +31,7 @@
   z-index: 50;
   cursor: grabbing;
   touch-action: none;
+  will-change: transform;
 }
 
 .board[data-dragging='1'] {
