@@ -73,9 +73,6 @@ function phaseFor(seed: string) {
 }
 
 function applyMagnetTransform(magnet: MagnetState) {
-  // Production rounds restored coordinates before translate3d. Keeping rendered
-  // positions on device pixels avoids the soft text Edge/Chromium can produce
-  // from fractional transforms while retaining float precision in physics state.
   magnet.element.style.setProperty('--magnet-x', `${Math.round(magnet.x)}px`);
   magnet.element.style.setProperty('--magnet-y', `${Math.round(magnet.y)}px`);
 }
@@ -622,13 +619,6 @@ export function MagnetBoard({
         () => beginDrag(candidate),
         TOUCH_HOLD_MS,
       );
-      return;
-    }
-
-    try {
-      board.setPointerCapture(event.pointerId);
-    } catch {
-      // Older browsers may decline capture; bubbling pointer events still work.
     }
   };
 
