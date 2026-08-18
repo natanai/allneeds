@@ -53,8 +53,6 @@ const DRAG_THRESHOLD = 4;
 const TOUCH_HOLD_MS = 180;
 const CLICK_SUPPRESS_MS = 320;
 
-// Deliberately quiet "slow water" motion. Magnets wander around their saved
-// position rather than receiving a constant force that eventually scatters them.
 const SPRING_ACCELERATION = 0.045;
 const WAVE_ACCELERATION = 0.42;
 const VELOCITY_DAMPING_PER_SECOND = 2.8;
@@ -436,10 +434,11 @@ export function MagnetBoard({
       for (const magnet of magnetsRef.current) {
         magnet.vx = 0;
         magnet.vy = 0;
-        magnet.x = magnet.anchorX;
-        magnet.y = magnet.anchorY;
+        magnet.x = Math.round(magnet.x);
+        magnet.y = Math.round(magnet.y);
         applyMagnetTransform(magnet);
       }
+      settleAnchors(magnetsRef.current);
       persist();
       return;
     }
