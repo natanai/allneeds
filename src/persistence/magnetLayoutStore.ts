@@ -6,7 +6,11 @@ export type StoredMagnetLayout = {
   magnets: Record<string, { xPct: number; yPct: number }>;
 };
 
-const STORAGE_PREFIX = 'allneeds:v2:magnets:';
+// The first Pages prototype wrote to `allneeds:v2:magnets:*` while its physics
+// could progressively scatter a board. Start the stabilized engine in its own
+// namespace so those experimental positions are not mistaken for intentional
+// user arrangements. Production allneeds.app storage is not touched.
+const STORAGE_PREFIX = 'allneeds:v2:magnets:stable:';
 
 function isFiniteUnit(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
