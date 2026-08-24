@@ -5,7 +5,6 @@ import {
   defaultNavSettings,
   defaultTheme,
   NAV_SETTINGS_CHANGED_EVENT,
-  palettes,
   readNavSettings,
   readTheme,
   writeTheme,
@@ -14,6 +13,7 @@ import {
   type ThemeValues,
 } from './customizerSettings';
 import { colorFromDrag, hexToHsl, normalizeHex, type HslColor } from './colorDrag';
+import { resolveThemePresetName, themePresets } from './themePresets';
 import styles from './CustomizerPanel.module.css';
 
 const labels: Record<keyof ThemeValues, string> = {
@@ -70,9 +70,10 @@ function tiltPresentation(tilt: TiltPermissionState) {
 
 export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const initial = readTheme();
+  const initialPreset = resolveThemePresetName(initial);
   const [values, setValues] = useState<ThemeValues>(initial.values);
   const [roundness, setRoundness] = useState(initial.roundness);
-  const [preset, setPreset] = useState(initial.preset);
+  const [preset, setPreset] = useState(initialPreset);
   const [navSettings, setNavSettings] = useState(readNavSettings);
   const [tiltPermission, setTiltPermission] = useState(detectTiltPermission);
   const swatchDrag = useRef<SwatchDrag | null>(null);
@@ -94,9 +95,11 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   }
 
   function choosePreset(name: string) {
-    setPreset(name);
-    const match = palettes.find((palette) => palette.name === name);
-    if (match) setValues(match.values);
+    const match = themePresets.find((candidate) => candidate.name === name);
+    if (!match) { setPreset(''); return; }
+    setPreset(match.name);
+    setValues({ ...match.values });
+    setRoundness(match.roundness);
   }
 
   function beginSwatchDrag(event: ReactPointerEvent<HTMLButtonElement>, key: keyof ThemeValues) {
@@ -149,7 +152,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   }
 
   function reset() {
-    setValues({ ...defaultTheme }); setRoundness(100); setPreset(''); setNavSettings({ ...defaultNavSettings });
+    setValues({ ...defaultTheme }); setRoundness(100); setPreset('Default'); setNavSettings({ ...defaultNavSettings });
   }
 
   async function requestTilt() {
@@ -180,9 +183,9 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
       <header className={styles.header}><div><p id="customizer-title" className={styles.eyebrow}>Customizer</p><p className={styles.subtitle}>Fine-tune colors, corners, and device controls.</p></div><button type="button" className={styles.close} onClick={onClose} aria-label="Close customizer" data-dialog-initial-focus>×</button></header>
 
       <div className={styles.scrollBody} data-customizer-scroll-body>
-        <label className={styles.preset}><span>Presets</span><select value={preset} onChange={(event) => choosePreset(event.target.value)}><option value="">Current colors</option>{palettes.map((palette) => <option key={palette.name} value={palette.name}>{palette.name}</option>)}</select></label>
+        <label className={styles.preset}><span>Presets</span><select value={preset} onChange={(event) => choosePreset(event.target.value)}><option value="">Current colors</option>{themePresets.map((themePreset) => <option key={themePreset.name} value={themePreset.name}>{themePreset.name}</option>)}</select></label>
 
-        <label className={styles.range}><span>Corner roundness <output>{roundness}%</output></span><input type="range" min="0" max="200" value={roundness} aria-label={`Corner roundness ${roundness}%`} onChange={(event) => setRoundness(Number(event.target.value))} /></label>
+        <label className={styles.range}><span>Corner roundness <output>{roundness}%</output></span><input type="range" min="0" max="200" value={roundness} aria-label={`Corner roundness ${roundness}%`} onChange={(event) => { setRoundness(Number(event.target.value)); setPreset(''); }} /></label>
 
         <div className={styles.colors}>{(Object.keys(values) as Array<keyof ThemeValues>).map((key) => <div key={key} className={styles.colorField}><span>{labels[key]}</span><div><button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${labels[key]} color. Drag to change it, or click to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} /><input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} hidden onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} /><input key={values[key]} type="text" defaultValue={values[key]} aria-label={labels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></div></div>)}</div>
 
