@@ -12,6 +12,7 @@ This file is the root-level implementation contract for automated coding agents 
 ## Product and visual contract
 
 - V2 is an implementation rewrite, not a redesign. Preserve the existing visual language, wording, proportions, tactile magnet treatment, and information architecture unless the user explicitly requests a design change.
+- **Before UI/design work, read `docs/design-language.md`.** Reuse accepted patterns recorded there before inventing a new treatment for the same job. When the user explicitly approves a new or superseding visual decision, update that document in the same PR.
 - Magnets are a core product interaction, not decorative cards.
 - **Play/physics is ON by default for magnet surfaces.** This is intentional. Do not "optimize" by changing the default to static/resting mode or by reducing the physical interaction to a hover animation.
 - Play may be made cheaper internally (sleep/wake, broadphase collision, cached measurements, fewer unnecessary frames), but it must remain instantly responsive and feel continuously available.
@@ -80,4 +81,4 @@ For behavior-affecting work, add or update regression coverage at the same layer
 
 ## Documentation priority
 
-`AGENTS.md` is the concise implementation contract. `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here, update the older documentation rather than following the stale sentence.
+`AGENTS.md` is the concise implementation contract. `docs/design-language.md` is the living record of accepted visual/interaction decisions and is required reading for UI work. `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here or in the design-language record, update the older documentation rather than following the stale sentence.
