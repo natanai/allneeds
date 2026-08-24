@@ -6,8 +6,8 @@ export const NAV_SETTINGS_CHANGED_EVENT = 'allneeds:nav-settings-changed';
 export const THEME_CHANGED_EVENT = 'allneeds:theme-changed';
 
 export const defaultTheme = {
-  plum: '#74569B', lavender: '#EDE4FF', surface: '#FFFFFF', ink: '#1F1230', inkSoft: '#392351',
-  rose: '#FFB3CB', mint: '#96FBC7', gold: '#F7FFAE', peach: '#FFDFC9', sky: '#D3F1FF', outline: '#12081F',
+  plum: '#74569B', lavender: '#EDE4FF', ink: '#1F1230', inkSoft: '#392351',
+  rose: '#FFB3CB', mint: '#96FBC7', gold: '#F7FFAE', sky: '#D3F1FF', outline: '#12081F',
 } as const;
 
 export type ThemeValues = Record<keyof typeof defaultTheme, string>;
@@ -23,8 +23,8 @@ export type NavSettings = Record<NavItemId, boolean>;
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 export const themeVariables: Record<keyof ThemeValues, string> = {
-  plum: '--plum', lavender: '--lavender', surface: '--surface-raised', ink: '--ink', inkSoft: '--ink-soft',
-  rose: '--rose', mint: '--mint', gold: '--gold', peach: '--peach', sky: '--sky', outline: '--outline',
+  plum: '--plum', lavender: '--lavender', ink: '--ink', inkSoft: '--ink-soft',
+  rose: '--rose', mint: '--mint', gold: '--gold', sky: '--sky', outline: '--outline',
 };
 
 export const defaultNavSettings: NavSettings = {
@@ -57,19 +57,7 @@ const paletteRows = [
 
 export const palettes: Array<{ name: string; values: ThemeValues }> = paletteRows.map(([name, plum, lavender, ink, inkSoft, rose, mint, gold, sky, outline]) => ({
   name,
-  values: {
-    plum,
-    lavender,
-    surface: defaultTheme.surface,
-    ink,
-    inkSoft,
-    rose,
-    mint,
-    gold,
-    peach: defaultTheme.peach,
-    sky,
-    outline,
-  },
+  values: { plum, lavender, ink, inkSoft, rose, mint, gold, sky, outline },
 }));
 
 function availableStorage(name: 'localStorage' | 'sessionStorage'): StorageLike | null {
@@ -141,6 +129,8 @@ export function themeCssValues(theme: Pick<ThemeState, 'values' | 'roundness'>) 
   (Object.keys(themeVariables) as Array<keyof ThemeValues>).forEach((key) => {
     css[themeVariables[key]] = normalizeHex(theme.values[key]) ?? defaultTheme[key];
   });
+  css['--surface-raised'] = `color-mix(in srgb, ${css['--lavender']} 12%, #FFFFFF 88%)`;
+  css['--peach'] = css['--rose']!;
   css['--corner-scale'] = String(clampRoundness(theme.roundness) / 100);
   css['--shadow'] = `color-mix(in srgb, ${css['--outline']} 55%, transparent)`;
   css['--btn-bg'] = css['--rose']!;
