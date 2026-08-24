@@ -11,7 +11,7 @@ test('mounts the app beneath an opaque full-screen splash while local resources 
   let delayedLocalResource = false;
   await page.route('**/data/reverse-inference.json', async (route) => {
     delayedLocalResource = true;
-    await new Promise((resolve) => setTimeout(resolve, 450));
+    await new Promise((resolve) => setTimeout(resolve, 1_200));
     await route.continue();
   });
 
@@ -19,9 +19,8 @@ test('mounts the app beneath an opaque full-screen splash while local resources 
 
   const boot = page.locator('#app-boot');
   await expect(boot).toBeVisible();
-  await expect(page.locator('.app-boot__card')).toBeVisible();
-  await expect(page.locator('.app-boot__label')).toHaveText('Getting everything ready…');
   await expect(page.locator('#root [aria-label="Primary navigation magnets"]')).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('loading');
   await expect(page.locator('#root')).toHaveCSS('visibility', 'hidden');
   expect(delayedLocalResource).toBe(true);
 
@@ -40,6 +39,8 @@ test('mounts the app beneath an opaque full-screen splash while local resources 
   expect(coverage.left).toBe(0);
   expect(coverage.width).toBe(coverage.viewportWidth);
   expect(coverage.height).toBe(coverage.viewportHeight);
+  await expect(page.locator('.app-boot__card')).toBeVisible();
+  await expect(page.locator('.app-boot__label')).toHaveText('Getting everything ready…');
 
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('ready');
   await expect(page.locator('#root')).toHaveCSS('visibility', 'visible');
