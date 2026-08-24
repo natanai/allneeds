@@ -198,118 +198,148 @@ export function AppShell() {
 
   const navItems = useMemo<MagnetBoardItem[]>(() => {
     const items: Array<MagnetBoardItem & { setting?: NavItemId }> = [
-    {
-      id: 'nav-menu',
-      label: 'Menu',
-      onActivate: () => setMenuOpen((current) => !current),
-      tone: 'gold',
-      kind: 'nav',
-      ariaLabel: menuOpen ? 'Close menu' : 'Open menu',
-      ariaExpanded: menuOpen,
-      ariaHasPopup: 'dialog',
-      ariaControls: 'app-menu',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16" />
-        </svg>
-      ),
-    },
-    {
-      id: 'nav-home',
-      label: 'Home',
-      to: '/',
-      tone: 'rose',
-      kind: 'nav',
-      active: pathname === '/',
-      ariaLabel: 'Home',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-5v-6h-5v6h-5A1.5 1.5 0 0 1 3 19.5z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'nav-customizer',
-      label: '+',
-      onActivate: openCustomizer,
-      kind: 'nav',
-      ariaLabel: 'Customizer',
-    },
-    {
-      id: 'nav-journal',
-      setting: 'journal',
-      label: 'Journal',
-      to: '/inventory/journal?compose=new',
-      tone: 'peach',
-      kind: 'nav',
-      active: journalComposerActive,
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 3H3v6M3 3l7 7M15 21h6v-6M21 21l-7-7M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7" />
-        </svg>
-      ),
-    },
-    {
-      id: 'nav-inventory',
-      setting: 'inventory',
-      label: 'Inventory',
-      to: '/inventory',
-      kind: 'nav',
-      active: pathname === '/inventory' || pathname === '/feed',
-      count: inventoryCount,
-    },
-    {
-      id: 'nav-observations',
-      setting: 'observations',
-      label: 'Observations',
-      to: '/observations',
-      kind: 'nav',
-      active: pathname.startsWith('/observations'),
-    },
-    {
-      id: 'nav-faux-feelings',
-      setting: 'fauxFeelings',
-      label: 'Faux feelings',
-      to: '/faux-feelings',
-      kind: 'nav',
-      active: pathname.startsWith('/faux-feelings'),
-    },
-    {
-      id: 'nav-feelings',
-      setting: 'feelings',
-      label: 'Feelings',
-      to: '/feelings',
-      kind: 'nav',
-      active: pathname.startsWith('/feelings'),
-    },
-    {
-      id: 'nav-needs',
-      setting: 'needs',
-      label: 'Needs',
-      to: '/needs',
-      kind: 'nav',
-      active: pathname.startsWith('/needs'),
-    },
-    {
-      id: 'nav-body-cues',
-      setting: 'bodyCues',
-      label: 'Body cues',
-      to: '/feelings/body-cues',
-      kind: 'nav',
-      active: pathname === '/feelings/body-cues',
-    },
-    {
-      id: 'nav-journal-dashboard',
-      setting: 'journalDashboard',
-      label: 'History',
-      to: '/inventory/journal',
-      tone: 'peach',
-      kind: 'nav',
-      active: pathname === '/inventory/journal' && !journalComposerActive,
-    },
+      {
+        id: 'nav-menu',
+        label: 'Menu',
+        onActivate: () => setMenuOpen((current) => !current),
+        tone: 'gold',
+        kind: 'nav',
+        ariaLabel: 'Open menu',
+        ariaExpanded: false,
+        ariaHasPopup: 'dialog',
+        ariaControls: 'app-menu',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        ),
+      },
+      {
+        id: 'nav-home',
+        label: 'Home',
+        to: '/',
+        tone: 'rose',
+        kind: 'nav',
+        ariaLabel: 'Home',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-5v-6h-5v6h-5A1.5 1.5 0 0 1 3 19.5z" />
+          </svg>
+        ),
+      },
+      {
+        id: 'nav-customizer',
+        label: '+',
+        onActivate: openCustomizer,
+        kind: 'nav',
+        ariaLabel: 'Customizer',
+      },
+      {
+        id: 'nav-journal',
+        setting: 'journal',
+        label: 'Journal',
+        to: '/inventory/journal?compose=new',
+        tone: 'peach',
+        kind: 'nav',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 3H3v6M3 3l7 7M15 21h6v-6M21 21l-7-7M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7" />
+          </svg>
+        ),
+      },
+      {
+        id: 'nav-inventory',
+        setting: 'inventory',
+        label: 'Inventory',
+        to: '/inventory',
+        kind: 'nav',
+        count: inventoryCount,
+      },
+      {
+        id: 'nav-observations',
+        setting: 'observations',
+        label: 'Observations',
+        to: '/observations',
+        kind: 'nav',
+      },
+      {
+        id: 'nav-faux-feelings',
+        setting: 'fauxFeelings',
+        label: 'Faux feelings',
+        to: '/faux-feelings',
+        kind: 'nav',
+      },
+      {
+        id: 'nav-feelings',
+        setting: 'feelings',
+        label: 'Feelings',
+        to: '/feelings',
+        kind: 'nav',
+      },
+      {
+        id: 'nav-needs',
+        setting: 'needs',
+        label: 'Needs',
+        to: '/needs',
+        kind: 'nav',
+      },
+      {
+        id: 'nav-body-cues',
+        setting: 'bodyCues',
+        label: 'Body cues',
+        to: '/feelings/body-cues',
+        kind: 'nav',
+      },
+      {
+        id: 'nav-journal-dashboard',
+        setting: 'journalDashboard',
+        label: 'History',
+        to: '/inventory/journal',
+        tone: 'peach',
+        kind: 'nav',
+      },
     ];
     return items.filter((item) => !item.setting || navSettings[item.setting]);
-  }, [inventoryCount, journalComposerActive, menuOpen, navSettings, openCustomizer, pathname]);
+  }, [inventoryCount, navSettings, openCustomizer]);
+
+  navItems.forEach((item) => {
+    item.active = false;
+    switch (item.id) {
+      case 'nav-menu':
+        item.ariaLabel = menuOpen ? 'Close menu' : 'Open menu';
+        item.ariaExpanded = menuOpen;
+        break;
+      case 'nav-home':
+        item.active = pathname === '/';
+        break;
+      case 'nav-journal':
+        item.active = journalComposerActive;
+        break;
+      case 'nav-inventory':
+        item.active = pathname === '/inventory' || pathname === '/feed';
+        break;
+      case 'nav-observations':
+        item.active = pathname.startsWith('/observations');
+        break;
+      case 'nav-faux-feelings':
+        item.active = pathname.startsWith('/faux-feelings');
+        break;
+      case 'nav-feelings':
+        item.active = pathname.startsWith('/feelings');
+        break;
+      case 'nav-needs':
+        item.active = pathname.startsWith('/needs');
+        break;
+      case 'nav-body-cues':
+        item.active = pathname === '/feelings/body-cues';
+        break;
+      case 'nav-journal-dashboard':
+        item.active = pathname === '/inventory/journal' && !journalComposerActive;
+        break;
+      default:
+        break;
+    }
+  });
 
   return (
     <div className={`${styles.app} ${fullBleedMobile ? styles.compactMobileFlow : ''} ${wheelRoute ? styles.wheelApp : ''}`}>
