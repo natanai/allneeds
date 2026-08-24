@@ -18,9 +18,10 @@
   left: .5rem;
   width: min(21rem, calc(100vw - 2rem));
   max-height: min(26rem, 70vh);
-  padding: .78rem;
+  padding: .62rem;
   display: grid;
-  gap: .62rem;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: .42rem .55rem;
   overflow: auto;
   border: 2px solid color-mix(in srgb, var(--outline) 52%, transparent);
   border-radius: var(--radius-lg);
@@ -28,33 +29,21 @@
   box-shadow: 0 12px 28px color-mix(in srgb, var(--outline) 22%, transparent), 0 4px 0 color-mix(in srgb, var(--outline) 12%, transparent);
 }
 
-.popover::before {
-  content: '';
-  position: absolute;
-  top: -.42rem;
-  left: 1.15rem;
-  width: .72rem;
-  height: .72rem;
-  border-top: 2px solid color-mix(in srgb, var(--outline) 52%, transparent);
-  border-left: 2px solid color-mix(in srgb, var(--outline) 52%, transparent);
-  background: color-mix(in srgb, #fff 90%, var(--lavender) 10%);
-  transform: rotate(45deg);
-}
-
 .popoverHeader {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: .55rem;
+  gap: .45rem;
 }
 
 .needLink {
   min-width: 0;
   min-height: 44px;
-  padding: .38rem .5rem;
+  padding: .3rem .45rem;
   display: grid;
   align-content: center;
-  gap: .05rem;
+  gap: .02rem;
   border: 1.5px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-md);
   background: #fff;
@@ -64,15 +53,15 @@
 
 .needLink > span {
   overflow: hidden;
-  font-size: .98rem;
+  font-size: .96rem;
   font-weight: 820;
-  line-height: 1.15;
+  line-height: 1.12;
   text-overflow: ellipsis;
 }
 
 .needLink small {
   color: var(--ink-soft);
-  font-size: .7rem;
+  font-size: .66rem;
   font-weight: 700;
 }
 
@@ -105,30 +94,32 @@
 }
 
 .detailPrompt {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: .78rem;
-  line-height: 1.35;
+  display: none;
+}
+
+.popover > p {
+  grid-column: 1 / -1;
 }
 
 .strategyShortcuts {
+  grid-column: 1 / -1;
   display: grid;
-  gap: .38rem;
+  gap: .3rem;
 }
 
 .strategyShortcuts button {
   width: 100%;
   min-height: 44px;
-  padding: .48rem .58rem;
+  padding: .42rem .55rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: .6rem;
+  gap: .55rem;
   border: 1.5px solid color-mix(in srgb, var(--outline) 32%, transparent);
   border-radius: var(--radius-md);
   background: #fff;
   color: var(--ink);
-  font: 720 .82rem/1.25 var(--font-body);
+  font: 720 .82rem/1.2 var(--font-body);
   text-align: left;
   cursor: pointer;
 }
@@ -140,7 +131,7 @@
 
 .strategyShortcuts button > span:last-child {
   color: var(--ink-soft);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 .strategyShortcuts button:hover,
@@ -150,21 +141,32 @@
 }
 
 .viewStrategies {
-  width: 100%;
-  min-height: 42px;
-  padding: .45rem .62rem;
-  border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent);
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--sky) 24%, #fff 76%);
-  color: var(--ink);
-  font: 760 .78rem/1.15 var(--font-body);
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: end;
+  align-self: center;
+  min-height: 34px;
+  padding: .25rem .1rem;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--ink-soft) 82%, transparent);
+  font: 700 .68rem/1.15 var(--font-body);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
   cursor: pointer;
 }
 
 .viewStrategies:hover,
 .viewStrategies:focus-visible {
-  border-color: var(--outline);
-  background: color-mix(in srgb, var(--sky) 36%, #fff 64%);
+  color: var(--ink);
+  background: transparent;
+}
+
+.strategyShortcuts + .viewStrategies + button {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: center;
 }
 
 .strategyContext {
@@ -207,11 +209,6 @@
     right: .5rem;
     left: auto;
   }
-
-  .needRow:nth-child(3n) .popover::before {
-    right: 1.15rem;
-    left: auto;
-  }
 }
 
 @media (max-width: 640px) {
@@ -227,9 +224,8 @@
     left: auto;
   }
 
-  .needRow:nth-child(even) .popover::before {
-    right: 1.05rem;
-    left: auto;
+  .viewStrategies {
+    min-height: 38px;
   }
 
   .strategyContext {
@@ -238,6 +234,20 @@
 }
 
 @media (max-width: 360px) {
+  .popover {
+    grid-template-columns: 1fr;
+  }
+
+  .viewStrategies,
+  .strategyShortcuts + .viewStrategies + button {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .viewStrategies {
+    justify-self: start;
+  }
+
   .strategyContext {
     margin-inline: .8rem;
   }
