@@ -717,35 +717,147 @@
 
 @media (max-width: 640px) {
   .page {
-    gap: 1.25rem;
-    padding: 0.35rem 0.8rem 0;
+    gap: .78rem;
+    padding: .12rem .38rem 0;
+  }
+
+  .pageHeader {
+    gap: .18rem;
   }
 
   .pageTitle {
-    font-size: clamp(1.05rem, calc(0.6rem + 3vw), 1.6rem);
-    letter-spacing: 0.045em;
+    gap: .46rem;
+    font-size: clamp(.98rem, 5.2vw, 1.35rem);
+    letter-spacing: .035em;
+    line-height: 1.08;
   }
 
   .titleIcon {
-    width: 1.9rem;
-    height: 1.9rem;
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .sectionTitle {
+    font-size: .88rem;
+    letter-spacing: .065em;
+    line-height: 1.1;
+  }
+
+  .evidence {
+    margin: .34rem 0 .52rem;
+    padding: .68rem .72rem;
+    gap: .5rem;
+    border-width: 1.5px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 5px 0 color-mix(in srgb, var(--outline) 18%, transparent);
+  }
+
+  .claim {
+    font-size: .84rem;
+    line-height: 1.42;
+  }
+
+  .detailsToggle {
+    min-height: 44px;
+    padding: .3rem .6rem;
+    gap: .34rem;
+    border-width: 1.5px;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-body);
+    font-size: .7rem;
+    font-weight: 760;
+    letter-spacing: .045em;
+  }
+
+  .details[open] > .detailsToggle {
+    box-shadow: 0 2px 0 color-mix(in srgb, var(--outline) 14%, transparent);
+  }
+
+  .detailsToggle:hover,
+  .detailsToggle:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 16%, transparent);
+  }
+
+  .rewrite {
+    margin-top: .4rem;
+    padding: .58rem;
+    border-width: 1px;
+    border-radius: var(--radius-md);
+  }
+
+  .rewrite p {
+    font-size: .78rem;
+    line-height: 1.4;
+  }
+
+  .sources {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: .28rem .42rem;
+  }
+
+  .sources h3 {
+    font-size: .72rem;
+    letter-spacing: .08em;
+    white-space: nowrap;
+  }
+
+  .citationRow {
+    gap: .22rem;
+    font-size: .78rem;
+    letter-spacing: .04em;
+  }
+
+  .sources > .details {
+    grid-column: 1 / -1;
+  }
+
+  .citationList {
+    margin-top: .42rem;
+    gap: .5rem;
+  }
+
+  .citationList li {
+    gap: .35rem;
+  }
+
+  .citationNumber {
+    min-width: 1.7rem;
+    height: 1.7rem;
+    padding-inline: .22rem;
+    border-width: 1px;
+    border-radius: var(--radius-lg);
+    font-size: .68rem;
+  }
+
+  .citationBody {
+    gap: .14rem;
+    font-size: .72rem;
+    line-height: 1.34;
   }
 
   .quickActions {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .quickActions a {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    padding: .4rem .65rem;
+    border-width: 1.5px;
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 16%, transparent);
+    font-size: .72rem;
+    letter-spacing: .06em;
   }
 
-  .stack {
-    height: clamp(22rem, calc(100svh - 13.5rem), 32rem);
+  .strategySection,
+  .suggestion {
+    gap: .4rem;
   }
 
   .strategySectionHeader {
     align-items: center;
+    gap: .34rem;
   }
 
   .deckHeader {
@@ -764,9 +876,47 @@
     font-size: .66rem;
   }
 
+  .stack {
+    height: clamp(22rem, calc(100svh - 13.5rem), 32rem);
+  }
+
+  .strategyCard {
+    padding: .82rem .86rem;
+    gap: .4rem;
+    border-width: 2px;
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 10px 0 var(--shadow);
+  }
+
+  .strategyCard h3 {
+    margin-bottom: .3rem;
+    font-size: 1rem;
+    line-height: 1.16;
+  }
+
+  .cardBody p {
+    font-size: .82rem;
+    line-height: 1.4;
+  }
+
+  .meta {
+    margin-top: .38rem !important;
+    font-size: .72rem !important;
+  }
+
+  .cardActions {
+    margin-top: .28rem;
+    gap: .26rem;
+  }
+
   .cardActions .appAction {
-    min-height: 36px;
-    padding: .36rem .52rem;
+    min-height: 44px;
+    padding: .34rem .54rem;
+    font-size: .7rem;
+  }
+
+  .deckControls {
+    gap: .34rem;
   }
 
   .deckControls button {
@@ -776,7 +926,64 @@
     min-height: 38px;
   }
 
+  .list .stack {
+    gap: .52rem;
+  }
+
+  .formCard {
+    padding: .5rem;
+    border-width: 1px;
+    border-radius: var(--radius-lg);
+  }
+
+  .form {
+    gap: .34rem;
+  }
+
+  .formField {
+    gap: .12rem;
+  }
+
+  .formField > span:first-child {
+    font-size: .72rem;
+  }
+
+  .visibilityHint {
+    font-size: .66rem !important;
+    line-height: 1.25;
+  }
+
+  .inputCard textarea {
+    min-height: 4.25rem;
+  }
+
+  .formRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .34rem;
+  }
+
+  .formActions {
+    gap: .34rem;
+  }
+
+  .feedback {
+    padding: .45rem .6rem;
+    border-width: 1.5px;
+    font-size: .72rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 360px) {
   .formRow {
     grid-template-columns: 1fr;
+  }
+
+  .sources {
+    grid-template-columns: 1fr;
+  }
+
+  .sources > .details {
+    grid-column: auto;
   }
 }
