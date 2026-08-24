@@ -56,7 +56,8 @@ test('mobile customizer can lock and unlock the current screen orientation', asy
   });
 
   await page.goto('/needs');
-  await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
+  const customizerButton = page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' });
+  await customizerButton.click();
   const customizer = page.getByRole('dialog', { name: 'Customizer' });
   const orientationSwitch = customizer.getByRole('switch', { name: 'Lock screen orientation' });
 
@@ -69,6 +70,12 @@ test('mobile customizer can lock and unlock the current screen orientation', asy
   await expect(orientationSwitch).toHaveAttribute('aria-checked', 'true');
   await expect(customizer.getByText(/Locked to .* orientation while this page is open\./)).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __orientationLockTarget?: string }).__orientationLockTarget)).toMatch(/portrait|landscape/);
+
+  await customizer.getByRole('button', { name: 'Close customizer' }).click();
+  await expect(customizer).toHaveCount(0);
+  await customizerButton.click();
+  await expect(orientationSwitch).toHaveText('On');
+  await expect(orientationSwitch).toHaveAttribute('aria-checked', 'true');
 
   await orientationSwitch.click();
   await expect(orientationSwitch).toHaveText('Off');
