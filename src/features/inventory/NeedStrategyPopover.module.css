@@ -1,0 +1,251 @@
+.coverageList {
+  position: relative;
+  overflow: visible;
+}
+
+.needRow {
+  position: relative;
+}
+
+.needRow[data-popover-open='true'] {
+  z-index: 20;
+}
+
+.popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% - .18rem);
+  left: .5rem;
+  width: min(21rem, calc(100vw - 2rem));
+  max-height: min(26rem, 70vh);
+  padding: .78rem;
+  display: grid;
+  gap: .62rem;
+  overflow: auto;
+  border: 2px solid color-mix(in srgb, var(--outline) 52%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, #fff 90%, var(--lavender) 10%);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--outline) 22%, transparent), 0 4px 0 color-mix(in srgb, var(--outline) 12%, transparent);
+}
+
+.popover::before {
+  content: '';
+  position: absolute;
+  top: -.42rem;
+  left: 1.15rem;
+  width: .72rem;
+  height: .72rem;
+  border-top: 2px solid color-mix(in srgb, var(--outline) 52%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--outline) 52%, transparent);
+  background: color-mix(in srgb, #fff 90%, var(--lavender) 10%);
+  transform: rotate(45deg);
+}
+
+.popoverHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .55rem;
+}
+
+.needLink {
+  min-width: 0;
+  min-height: 44px;
+  padding: .38rem .5rem;
+  display: grid;
+  align-content: center;
+  gap: .05rem;
+  border: 1.5px solid color-mix(in srgb, var(--outline) 28%, transparent);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.needLink > span {
+  overflow: hidden;
+  font-size: .98rem;
+  font-weight: 820;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+}
+
+.needLink small {
+  color: var(--ink-soft);
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.needLink:hover,
+.needLink:focus-visible {
+  border-color: var(--outline);
+  background: color-mix(in srgb, var(--sky) 16%, #fff 84%);
+}
+
+.closeButton {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid color-mix(in srgb, var(--outline) 26%, transparent);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink-soft);
+  font: 800 1.2rem/1 var(--font-body);
+  cursor: pointer;
+}
+
+.closeButton:hover,
+.closeButton:focus-visible {
+  border-color: var(--outline);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--rose) 22%, #fff 78%);
+}
+
+.detailPrompt {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: .78rem;
+  line-height: 1.35;
+}
+
+.strategyShortcuts {
+  display: grid;
+  gap: .38rem;
+}
+
+.strategyShortcuts button {
+  width: 100%;
+  min-height: 44px;
+  padding: .48rem .58rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .6rem;
+  border: 1.5px solid color-mix(in srgb, var(--outline) 32%, transparent);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--ink);
+  font: 720 .82rem/1.25 var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.strategyShortcuts button > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.strategyShortcuts button > span:last-child {
+  color: var(--ink-soft);
+  font-size: 1.1rem;
+}
+
+.strategyShortcuts button:hover,
+.strategyShortcuts button:focus-visible {
+  border-color: var(--outline);
+  background: color-mix(in srgb, var(--mint) 18%, #fff 82%);
+}
+
+.viewStrategies {
+  width: 100%;
+  min-height: 42px;
+  padding: .45rem .62rem;
+  border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--sky) 24%, #fff 76%);
+  color: var(--ink);
+  font: 760 .78rem/1.15 var(--font-body);
+  cursor: pointer;
+}
+
+.viewStrategies:hover,
+.viewStrategies:focus-visible {
+  border-color: var(--outline);
+  background: color-mix(in srgb, var(--sky) 36%, #fff 64%);
+}
+
+.strategyContext {
+  min-height: 44px;
+  padding: .48rem .62rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  border: 1.5px solid color-mix(in srgb, var(--outline) 28%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--mint) 20%, #fff 80%);
+  color: var(--ink-soft);
+  font-size: .78rem;
+}
+
+.strategyContext strong {
+  color: var(--ink);
+}
+
+.strategyContext button {
+  min-height: 36px;
+  padding: .35rem .58rem;
+  flex: 0 0 auto;
+  border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--ink);
+  font: 750 .74rem/1 var(--font-body);
+  cursor: pointer;
+}
+
+.savedCard:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--plum) 52%, transparent);
+  outline-offset: 3px;
+}
+
+@media (min-width: 641px) {
+  .needRow:nth-child(3n) .popover {
+    right: .5rem;
+    left: auto;
+  }
+
+  .needRow:nth-child(3n) .popover::before {
+    right: 1.15rem;
+    left: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .popover {
+    top: calc(100% - .12rem);
+    left: .45rem;
+    width: min(20.5rem, calc(100vw - 1.9rem));
+    max-height: 68vh;
+  }
+
+  .needRow:nth-child(even) .popover {
+    right: .45rem;
+    left: auto;
+  }
+
+  .needRow:nth-child(even) .popover::before {
+    right: 1.05rem;
+    left: auto;
+  }
+
+  .strategyContext {
+    margin-inline: .95rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .strategyContext {
+    margin-inline: .8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popover,
+  .popover * {
+    scroll-behavior: auto;
+  }
+}

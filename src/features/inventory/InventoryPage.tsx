@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router';
 
@@ -16,6 +16,7 @@ import {
 } from './inventoryRepository';
 import type { InventoryStrategy } from './inventoryRepository';
 import styles from './InventoryPage.module.css';
+import popoverStyles from './NeedStrategyPopover.module.css';
 
 type CoverageFilter = 'all' | 'missing' | 'covered';
 type InventoryView = 'needs' | 'strategies';
@@ -45,11 +46,13 @@ export function InventoryPage() {
     initialDraft.coverageFilter === 'hidden' ? 'all' : initialDraft.coverageFilter,
   );
   const [expandedNeed, setExpandedNeed] = useState<string | null>(initialDraft.expandedNeed);
+  const [strategyNeedFilter, setStrategyNeedFilter] = useState<string | null>(null);
   const [strategySearch, setStrategySearch] = useState('');
   const [addDraft, setAddDraft] = useState<InventoryDraft['add']>(initialDraft.add);
   const [editDraft, setEditDraft] = useState<InventoryDraft['edit']>(initialDraft.edit);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const addFormShellRef = useRef<HTMLDetailsElement>(null);
+  const openNeedRef = useRef<HTMLElement | null>(null);
   const workflowDraft = useMemo<InventoryDraft>(() => ({
     coverageFilter, expandedNeed, add: addDraft, edit: editDraft,
   }), [addDraft, coverageFilter, editDraft, expandedNeed]);
@@ -66,21 +69,64 @@ export function InventoryPage() {
   });
   const supportedCount = coverage.filter((entry) => entry.covered).length;
   const visibleStrategies = useMemo(() => {
+    const needFiltered = strategyNeedFilter
+      ? inventory.filter((entry) => entry.needSlugs.includes(strategyNeedFilter))
+      : inventory;
     const query = strategySearch.trim().toLocaleLowerCase();
-    if (!query) return inventory;
-    return inventory.filter((entry) => [
+    if (!query) return needFiltered;
+    return needFiltered.filter((entry) => [
       entry.title,
       entry.description,
       ...entry.needSlugs.map((slug) => needsBySlug.get(slug)?.title ?? slug),
     ].some((value) => value.toLocaleLowerCase().includes(query)));
-  }, [inventory, strategySearch]);
+  }, [inventory, strategyNeedFilter, strategySearch]);
+  const selectedStrategyNeed = strategyNeedFilter ? needsBySlug.get(strategyNeedFilter) : undefined;
+
+  useEffect(() => {
+    if (!expandedNeed) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Node) || openNeedRef.current?.contains(event.target)) return;
+      setExpandedNeed(null);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      const needSlug = expandedNeed;
+      setExpandedNeed(null);
+      window.requestAnimationFrame(() => {
+        document.getElementById(`inventory-need-${needSlug}`)?.focus();
+      });
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [expandedNeed]);
 
   const commit = (items: InventoryStrategy[], message: string) => {
     setInventory(writeInventory(items));
     setFeedback({ kind: 'success', message });
   };
 
+  const openStrategiesForNeed = (needSlug: string, entryId?: string) => {
+    setStrategyNeedFilter(needSlug);
+    setStrategySearch('');
+    setExpandedNeed(null);
+    setView('strategies');
+    window.requestAnimationFrame(() => {
+      const target = entryId
+        ? document.getElementById(`inventory-strategy-${entryId}`)
+        : document.getElementById('strategies-list');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (entryId) target?.focus({ preventScroll: true });
+    });
+  };
+
   const openAddForm = (needSlug?: string) => {
+    setExpandedNeed(null);
     if (needSlug) setAddDraft((current) => ({ ...current, selectedNeeds: [needSlug] }));
     if (addFormShellRef.current) addFormShellRef.current.open = true;
     window.requestAnimationFrame(() => {
@@ -131,6 +177,7 @@ export function InventoryPage() {
     const emptyAdd = { ...EMPTY_ADD_DRAFT, selectedNeeds: [] };
     workflowDraftRef.current = { ...workflowDraftRef.current, add: emptyAdd };
     setAddDraft(emptyAdd);
+    setStrategyNeedFilter(null);
     setView('strategies');
   };
 
@@ -169,8 +216,29 @@ export function InventoryPage() {
 
       <section className={styles.overview} aria-label="Strategy inventory views">
         <div className={styles.viewSwitch} role="tablist" aria-label="Inventory view">
-          <button id="inventory-view-needs" type="button" role="tab" aria-selected={view === 'needs'} aria-controls="inventory-needs-panel" onClick={() => setView('needs')}>Needs</button>
-          <button id="inventory-view-strategies" type="button" role="tab" aria-selected={view === 'strategies'} aria-controls="inventory-strategies-panel" onClick={() => setView('strategies')}>Strategies{inventory.length ? <span>{inventory.length}</span> : null}</button>
+          <button
+            id="inventory-view-needs"
+            type="button"
+            role="tab"
+            aria-selected={view === 'needs'}
+            aria-controls="inventory-needs-panel"
+            onClick={() => {
+              setExpandedNeed(null);
+              setView('needs');
+            }}
+          >Needs</button>
+          <button
+            id="inventory-view-strategies"
+            type="button"
+            role="tab"
+            aria-selected={view === 'strategies'}
+            aria-controls="inventory-strategies-panel"
+            onClick={() => {
+              setExpandedNeed(null);
+              setStrategyNeedFilter(null);
+              setView('strategies');
+            }}
+          >Strategies{inventory.length ? <span>{inventory.length}</span> : null}</button>
         </div>
 
         {view === 'needs' ? (
@@ -181,16 +249,40 @@ export function InventoryPage() {
             </header>
             <div className={styles.filters} role="group" aria-label="Filter needs">
               {([['all', 'All'], ['missing', 'Needs care'], ['covered', 'Supported']] as const).map(([value, label]) => (
-                <button key={value} type="button" data-filter={value} aria-pressed={coverageFilter === value} onClick={() => setCoverageFilter(value)}>{label}</button>
+                <button
+                  key={value}
+                  type="button"
+                  data-filter={value}
+                  aria-pressed={coverageFilter === value}
+                  onClick={() => {
+                    setExpandedNeed(null);
+                    setCoverageFilter(value);
+                  }}
+                >{label}</button>
               ))}
             </div>
-            <div className={styles.coverageList}>
+            <div className={`${styles.coverageList} ${popoverStyles.coverageList}`}>
               {visibleCoverage.map(({ need, covered }) => {
                 const matching = inventory.filter((item) => item.needSlugs.includes(need.slug));
                 const expanded = expandedNeed === need.slug;
+                const popoverId = `inventory-need-popover-${need.slug}`;
                 return (
-                  <article key={need.slug} className={styles.needRow} data-covered={covered}>
-                    <button type="button" className={styles.needFocus} aria-expanded={expanded} aria-label={`${need.title}, ${matching.length ? `${matching.length} saved ${matching.length === 1 ? 'strategy' : 'strategies'}` : 'no saved strategies'}. Show details.`} onClick={() => setExpandedNeed(expanded ? null : need.slug)}>
+                  <article
+                    key={need.slug}
+                    ref={expanded ? openNeedRef : undefined}
+                    className={`${styles.needRow} ${popoverStyles.needRow}`}
+                    data-covered={covered}
+                    data-popover-open={expanded || undefined}
+                  >
+                    <button
+                      id={`inventory-need-${need.slug}`}
+                      type="button"
+                      className={styles.needFocus}
+                      aria-expanded={expanded}
+                      aria-controls={expanded ? popoverId : undefined}
+                      aria-label={`${need.title}, ${matching.length ? `${matching.length} saved ${matching.length === 1 ? 'strategy' : 'strategies'}` : 'no saved strategies'}. ${expanded ? 'Close' : 'Open'} strategies.`}
+                      onClick={() => setExpandedNeed(expanded ? null : need.slug)}
+                    >
                       <span className={styles.needStatus} aria-hidden="true" />
                       <span className={styles.needText}>
                         <span className={styles.needLabel}>{need.title}</span>
@@ -199,12 +291,36 @@ export function InventoryPage() {
                       <span className={styles.chevron} aria-hidden="true">›</span>
                     </button>
                     {expanded ? (
-                      <div className={styles.needDetail}>
-                        <div className={styles.detailHeader}>
-                          <strong>{matching.length ? 'Saved strategies' : 'Nothing saved yet'}</strong>
-                          <Link to={`/needs/${need.slug}`}>About {need.title}</Link>
+                      <div id={popoverId} className={`${styles.needDetail} ${popoverStyles.popover}`} role="region" aria-label={`${need.title} strategies`}>
+                        <div className={popoverStyles.popoverHeader}>
+                          <Link className={popoverStyles.needLink} to={`/needs/${need.slug}`} onClick={() => setExpandedNeed(null)}>
+                            <span>{need.title}</span>
+                            <small>Open need details</small>
+                          </Link>
+                          <button type="button" className={popoverStyles.closeButton} aria-label={`Close ${need.title} strategies`} onClick={() => setExpandedNeed(null)}>×</button>
                         </div>
-                        {matching.length ? <div className={styles.compactStrategies}>{matching.map((item) => <span key={item.id}>{item.title}</span>)}</div> : <p>Add something that reliably helps you care for {need.title.toLocaleLowerCase()}.</p>}
+                        {matching.length ? (
+                          <>
+                            <p className={popoverStyles.detailPrompt}>Open a strategy to see its full description and controls.</p>
+                            <div className={popoverStyles.strategyShortcuts}>
+                              {matching.map((item) => (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  aria-label={`Open ${item.title} in Strategies`}
+                                  onClick={() => openStrategiesForNeed(need.slug, item.id)}
+                                >
+                                  <span>{item.title}</span><span aria-hidden="true">›</span>
+                                </button>
+                              ))}
+                            </div>
+                            <button type="button" className={popoverStyles.viewStrategies} onClick={() => openStrategiesForNeed(need.slug)}>
+                              View all {matching.length} in Strategies
+                            </button>
+                          </>
+                        ) : (
+                          <p>Add something that reliably helps you care for {need.title.toLocaleLowerCase()}.</p>
+                        )}
                         <button type="button" className={styles.detailAdd} onClick={() => openAddForm(need.slug)}>Add a strategy</button>
                       </div>
                     ) : null}
@@ -217,17 +333,31 @@ export function InventoryPage() {
           <section id="inventory-strategies-panel" className={styles.viewPanel} role="tabpanel" aria-labelledby="inventory-view-strategies">
             <header className={styles.panelHeader}>
               <div><h2>My strategies</h2><p>Everything you have saved, regardless of which needs it supports.</p></div>
-              <p className={styles.countStatus}>{inventory.length} saved</p>
+              <p className={styles.countStatus}>{selectedStrategyNeed || strategySearch.trim() ? `${visibleStrategies.length} of ${inventory.length} saved` : `${inventory.length} saved`}</p>
             </header>
             <label className={styles.search}>
               <span aria-hidden="true">⌕</span><span className="visually-hidden">Search saved strategies</span>
               <input type="search" placeholder="Search your strategies" autoComplete="off" value={strategySearch} onChange={(event) => setStrategySearch(event.target.value)} />
             </label>
+            {selectedStrategyNeed ? (
+              <div className={popoverStyles.strategyContext}>
+                <span>Showing strategies for <strong>{selectedStrategyNeed.title}</strong></span>
+                <button type="button" onClick={() => setStrategyNeedFilter(null)}>Show all</button>
+              </div>
+            ) : null}
             <div className={styles.savedList} id="strategies-list">
               {!inventory.length ? <p className={styles.empty}>Nothing saved yet. Add a personal strategy or save one from a need page.</p> : null}
-              {inventory.length > 0 && !visibleStrategies.length ? <p className={styles.empty}>No strategies match “{strategySearch}”.</p> : null}
+              {inventory.length > 0 && !visibleStrategies.length ? (
+                <p className={styles.empty}>
+                  {selectedStrategyNeed
+                    ? strategySearch.trim()
+                      ? `No ${selectedStrategyNeed.title} strategies match “${strategySearch}”.`
+                      : `No strategies are saved for ${selectedStrategyNeed.title}.`
+                    : `No strategies match “${strategySearch}”.`}
+                </p>
+              ) : null}
               {visibleStrategies.map((entry) => (
-                <article key={entry.id} className={styles.savedCard}>
+                <article key={entry.id} id={`inventory-strategy-${entry.id}`} tabIndex={-1} className={`${styles.savedCard} ${popoverStyles.savedCard}`}>
                   {editDraft?.id === entry.id ? (
                     <form onSubmit={(event) => updateEntry(event, entry)}>
                       <label>Strategy name<input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></label>
