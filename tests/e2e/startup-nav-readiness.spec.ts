@@ -131,8 +131,8 @@ test('standalone emotion wheel cannot collapse or rewrite persistent nav geometr
   await expect(page).toHaveURL(/\/feelings\/emotions-wheel\/?$/);
   await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveCount(0);
 
-  // The previous implementation left the Play-enabled board mounted at 0×0
-  // behind display:none, so a few animation frames were enough to collapse it.
+  // Keep the wheel open long enough that the previous hidden 0×0 Play board
+  // would have collapsed and later persisted the navigation at the origin.
   await page.waitForTimeout(500);
   await page.getByRole('link', { name: 'Joyful' }).click();
   await expect(page).toHaveURL(/\/feelings\/joyful\/?$/);
