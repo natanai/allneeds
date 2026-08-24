@@ -2,12 +2,16 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 jobs:
   validate:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'fix/mobile-magnet-drag-and-pusher'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
