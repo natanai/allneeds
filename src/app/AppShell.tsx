@@ -216,6 +216,7 @@ export function AppShell() {
       },
       {
         id: 'nav-home',
+        setting: 'home',
         label: 'Home',
         to: '/',
         tone: 'rose',
@@ -229,6 +230,7 @@ export function AppShell() {
       },
       {
         id: 'nav-customizer',
+        setting: 'customizer',
         label: '+',
         onActivate: openCustomizer,
         kind: 'nav',

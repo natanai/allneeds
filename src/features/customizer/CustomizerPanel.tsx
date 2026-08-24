@@ -29,6 +29,7 @@ const labels: Record<keyof ThemeValues, string> = {
 };
 
 const navLabels: Array<[NavItemId, string]> = [
+  ['home', 'Home magnet'], ['customizer', 'Customizer magnet'],
   ['journal', 'Journal magnet'], ['inventory', 'Inventory magnet'], ['observations', 'Observations magnet'],
   ['fauxFeelings', 'Faux feelings magnet'], ['feelings', 'Feelings magnet'], ['needs', 'Needs magnet'],
   ['bodyCues', 'Body cues magnet'], ['journalDashboard', 'History magnet'],
@@ -304,7 +305,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
 
         <div className={styles.colors}>{(Object.keys(values) as Array<keyof ThemeValues>).map((key) => <div key={key} className={styles.colorField}><span>{labels[key]}</span><div><button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${labels[key]} color. Drag to change it, or click to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} /><input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} hidden onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} /><input key={values[key]} type="text" defaultValue={values[key]} aria-label={labels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></div></div>)}</div>
 
-        <fieldset className={styles.navSettings}><legend>Navigation magnets</legend><p>Choose which magnets appear in the top navigation bar.</p><div className={styles.alwaysOn}><span>Menu magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Home magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Customizer magnet</span><small>Always on</small></div>{navLabels.map(([key, label]) => <label key={key}><input type="checkbox" checked={navSettings[key]} onChange={(event) => setNavSettings((current) => ({ ...current, [key]: event.target.checked }))} /><span>{label}</span></label>)}</fieldset>
+        <fieldset className={styles.navSettings}><legend>Navigation magnets</legend><p>Choose which magnets appear in the top navigation bar.</p><div className={styles.alwaysOn}><span>Menu magnet</span><small>Always on</small></div>{navLabels.map(([key, label]) => <label key={key}><input type="checkbox" checked={navSettings[key]} onChange={(event) => setNavSettings((current) => ({ ...current, [key]: event.target.checked }))} /><span>{label}</span></label>)}</fieldset>
 
         <section className={styles.deviceControls} aria-label="Device controls">
           <div className={styles.deviceControl} data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}>

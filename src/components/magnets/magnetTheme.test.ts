@@ -30,8 +30,9 @@ describe('magnet theme styling', () => {
     expect(ruleBody('.nav .peach')).toContain('var(--surface-raised)');
   });
 
-  it('gives the current route Customizer-owned 3D depth without changing geometry or text metrics', () => {
+  it('makes the current route obvious with one Customizer-owned extrusion and no geometry changes', () => {
     const activeRule = ruleBody('.nav .active');
+    const activePickedUpRule = ruleBody(".nav .active[data-picked-up='true']");
     const desktopActiveRule = ruleBody('.nav .magnet.active');
     const geometryProperties = [
       'font-size',
@@ -56,18 +57,22 @@ describe('magnet theme styling', () => {
       expect(desktopActiveRule).not.toContain(`${property}:`);
     });
 
-    expect(magnetCss).not.toContain('.nav .active::after');
-    expect(activeRule).not.toContain('filter:');
+    expect(activeRule).toContain('background: color-mix(in srgb, var(--sky) 60%, var(--plum) 40%);');
+    expect(activeRule).toContain('filter: none;');
+    expect(activeRule).toContain('box-shadow: 0 9px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);');
+    expect(activeRule.match(/box-shadow:/g)).toHaveLength(1);
+    expect(activeRule).not.toContain('background-image:');
+    expect(activeRule).not.toContain('inset');
+    expect(activeRule).not.toContain('drop-shadow(');
     expect(activeRule).not.toContain('text-shadow:');
-    expect(activeRule).not.toContain('border:');
-    expect(activeRule).toContain('background-image:');
-    expect(activeRule).toContain('box-shadow:');
-    expect(activeRule).toContain('var(--sky)');
-    expect(activeRule).toContain('var(--surface-raised)');
-    expect(activeRule).toContain('var(--outline)');
 
+    expect(activePickedUpRule).toContain('box-shadow: 0 12px 0');
+    expect(activePickedUpRule.match(/box-shadow:/g)).toHaveLength(1);
+    expect(activePickedUpRule).not.toContain('inset');
+
+    expect(desktopActiveRule).toContain('box-shadow: 0 9px 0');
+    expect(desktopActiveRule.match(/box-shadow:/g)).toHaveLength(1);
+    expect(desktopActiveRule).not.toContain('inset');
     expect(desktopActiveRule).not.toContain('filter:');
-    expect(desktopActiveRule).toContain('box-shadow:');
-    expect(desktopActiveRule).toContain('var(--sky)');
   });
 });

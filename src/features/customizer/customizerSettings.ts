@@ -17,7 +17,7 @@ export type ThemeState = {
   preset: string;
   updatedAt: number;
 };
-export type NavItemId = 'journal' | 'inventory' | 'observations' | 'fauxFeelings' | 'feelings' | 'needs' | 'bodyCues' | 'journalDashboard';
+export type NavItemId = 'home' | 'customizer' | 'journal' | 'inventory' | 'observations' | 'fauxFeelings' | 'feelings' | 'needs' | 'bodyCues' | 'journalDashboard';
 export type NavSettings = Record<NavItemId, boolean>;
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
@@ -28,6 +28,7 @@ export const themeVariables: Record<keyof ThemeValues, string> = {
 };
 
 export const defaultNavSettings: NavSettings = {
+  home: true, customizer: true,
   journal: false, inventory: true, observations: true, fauxFeelings: false,
   feelings: true, needs: true, bodyCues: false, journalDashboard: false,
 };
@@ -188,7 +189,7 @@ export function readNavSettings(
 }
 
 export function writeNavSettings(enabled: NavSettings) {
-  const serialized = JSON.stringify({ enabled: { home: true, customizer: true, ...enabled }, updatedAt: Date.now() });
+  const serialized = JSON.stringify({ enabled: { ...enabled }, updatedAt: Date.now() });
   [availableStorage('localStorage'), availableStorage('sessionStorage')].forEach((storage) => {
     try { storage?.setItem(NAV_SETTINGS_KEY, serialized); } catch { /* The current page still receives the settings. */ }
   });
