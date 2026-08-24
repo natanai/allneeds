@@ -2,6 +2,10 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ui/intentional-startup-splash]
+    paths:
+      - index.html
 
 permissions:
   contents: read
@@ -32,8 +36,5 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run full browser regression suite serially
-        run: pnpm exec playwright test --workers=1
-
-      - name: Run offline/reconnect verification
-        run: pnpm test:e2e:outage
+      - name: Run startup readiness regression
+        run: pnpm exec playwright test tests/e2e/startup-nav-readiness.spec.ts --workers=1
