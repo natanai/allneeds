@@ -44,10 +44,17 @@ async function shellCacheNames(page) {
     .filter((name) => name.startsWith('allneeds-v2-shell-')));
 }
 
-async function waitForDifferentShellCache(page, previous) {
+async function waitForShellCacheReplacement(page, previous) {
   await page.waitForFunction(async (oldNames) => {
     const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
-    return current.some((name) => !oldNames.includes(name));
+    const hasNewCache = current.some((name) => !oldNames.includes(name));
+    const oldCachesRemoved = oldNames.every((name) => !current.includes(name));
+    const registration = await navigator.serviceWorker.getRegistration();
+    return hasNewCache
+      && oldCachesRemoved
+      && registration?.active?.state === 'activated'
+      && !registration.installing
+      && !registration.waiting;
   }, previous, { timeout: 20_000 });
 }
 
@@ -90,16 +97,17 @@ try {
 
     // The already-installed shell remains instant. Its normal registration call then
     // discovers the new versioned worker/cache without putting that network check on
-    // the navigation response path.
+    // the navigation response path. Cache creation happens during install, so wait
+    // until activation has also removed the previous cache before testing the next load.
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
     await expectShell(page, 'Home');
-    await waitForDifferentShellCache(page, previousCaches);
+    await waitForShellCacheReplacement(page, previousCaches);
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
     await expectShell(page, 'Home');
     invariant(
       await page.locator('html').getAttribute('data-deployment-probe') === 'fresh',
-      'The newly installed versioned cache did not become the shell for the next navigation.',
+      'The activated versioned cache did not become the shell for the next navigation.',
     );
   } finally {
     await writeFile(indexPath, deployedIndex);
