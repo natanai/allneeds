@@ -239,10 +239,6 @@ export function NeedDetailPage() {
         </section>
       ) : null}
 
-      <div className={styles.quickActions}>
-        <a href="#suggestion-form"><span aria-hidden="true">+</span><span>Add personal strategy</span></a>
-      </div>
-
       <section className={styles.strategySection} aria-labelledby="strategy-heading">
         <div className={styles.strategySectionHeader}>
           <h2 id="strategy-heading" className={styles.sectionTitle}>Strategies</h2>
