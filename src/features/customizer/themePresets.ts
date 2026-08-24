@@ -6,6 +6,8 @@ export type ThemePreset = Readonly<{
   roundness: number;
 }>;
 
+const paperWhite = '#FFFEF8';
+
 export const themePresets: readonly ThemePreset[] = [
   {
     name: 'Default',
@@ -16,15 +18,13 @@ export const themePresets: readonly ThemePreset[] = [
     name: 'Refrigerator',
     values: {
       plum: '#6F9E91',
-      lavender: '#F4F1E7',
-      surface: '#FFFDF4',
+      lavender: paperWhite,
       ink: '#171B19',
       inkSoft: '#45524D',
-      rose: '#D96C63',
-      mint: '#B8DCCF',
-      gold: '#F2D38A',
-      peach: '#F2B59D',
-      sky: '#DDEFE9',
+      rose: paperWhite,
+      mint: paperWhite,
+      gold: paperWhite,
+      sky: paperWhite,
       outline: '#17201D',
     },
     roundness: 0,
@@ -34,13 +34,11 @@ export const themePresets: readonly ThemePreset[] = [
     values: {
       plum: '#2B1B46',
       lavender: '#F6E6FF',
-      surface: '#FFF6FF',
       ink: '#1B102B',
       inkSoft: '#4A2B63',
       rose: '#FF5DA2',
       mint: '#55E6C1',
       gold: '#FFD166',
-      peach: '#FF9F68',
       sky: '#63C5FF',
       outline: '#0B0711',
     },
@@ -51,13 +49,11 @@ export const themePresets: readonly ThemePreset[] = [
     values: {
       plum: '#0B3D1F',
       lavender: '#D8FFD8',
-      surface: '#E7FFE7',
       ink: '#061A0B',
       inkSoft: '#164D24',
       rose: '#39FF14',
       mint: '#7CFF6B',
       gold: '#C6FF00',
-      peach: '#B8FF55',
       sky: '#A8FFCF',
       outline: '#031007',
     },
@@ -68,13 +64,11 @@ export const themePresets: readonly ThemePreset[] = [
     values: {
       plum: '#0B4F8A',
       lavender: '#EAF5FF',
-      surface: '#F7FBFF',
       ink: '#08243B',
       inkSoft: '#24516F',
       rose: '#FF7A90',
       mint: '#79E5D0',
       gold: '#FFE58A',
-      peach: '#FFC49A',
       sky: '#8ED8FF',
       outline: '#061C2E',
     },
