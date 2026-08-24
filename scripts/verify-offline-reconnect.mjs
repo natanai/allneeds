@@ -1,11 +1,15 @@
-import { chromium } from '@playwright/test';
+import { execFile } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { promisify } from 'node:util';
+
+import { chromium } from '@playwright/test';
 import { preview } from 'vite';
 
 const host = '127.0.0.1';
 const port = 4192;
 const origin = `http://${host}:${port}`;
+const execFileAsync = promisify(execFile);
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -21,6 +25,10 @@ async function startPreview() {
   });
 }
 
+async function regenerateServiceWorker() {
+  await execFileAsync(process.execPath, ['scripts/generate-service-worker.mjs']);
+}
+
 async function expectShell(page, label) {
   await page.locator('html[data-app-state="ready"]').waitFor({ timeout: 15_000 });
   await page.locator('[aria-label="Primary navigation magnets"][data-ready="true"]')
@@ -29,6 +37,18 @@ async function expectShell(page, label) {
   const actualLabel = await page.locator('main').getAttribute('aria-label');
   invariant(mainCount === 1, `Expected one main landmark for ${label}; received ${mainCount}.`);
   invariant(actualLabel === label, `Expected main label “${label}”; received “${actualLabel}”.`);
+}
+
+async function shellCacheNames(page) {
+  return page.evaluate(async () => (await caches.keys())
+    .filter((name) => name.startsWith('allneeds-v2-shell-')));
+}
+
+async function waitForDifferentShellCache(page, previous) {
+  await page.waitForFunction(async (oldNames) => {
+    const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
+    return current.some((name) => !oldNames.includes(name));
+  }, previous, { timeout: 20_000 });
 }
 
 let server = null;
@@ -63,16 +83,27 @@ try {
 
   const indexPath = resolve('dist/index.html');
   const deployedIndex = await readFile(indexPath, 'utf8');
+  const previousCaches = await shellCacheNames(page);
   try {
     await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
+    await regenerateServiceWorker();
+
+    // The already-installed shell remains instant. Its normal registration call then
+    // discovers the new versioned worker/cache without putting that network check on
+    // the navigation response path.
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
+    await expectShell(page, 'Home');
+    await waitForDifferentShellCache(page, previousCaches);
+
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
     await expectShell(page, 'Home');
     invariant(
       await page.locator('html').getAttribute('data-deployment-probe') === 'fresh',
-      'An online refresh remained on the older cached app shell instead of the current deployment.',
+      'The newly installed versioned cache did not become the shell for the next navigation.',
     );
   } finally {
     await writeFile(indexPath, deployedIndex);
+    await regenerateServiceWorker();
   }
 
   await page.goto(`${origin}/needs/love-caring`);
@@ -114,7 +145,7 @@ try {
   );
 
   await context.close();
-  console.log('Verified stopped-server reload, fresh cached deep link, same-port restart, and cache-miss reconnect.');
+  console.log('Verified version-safe cache-first upgrade, stopped-server reload, fresh cached deep link, same-port restart, and cache-miss reconnect.');
 } finally {
   if (browser) await browser.close().catch(() => undefined);
   if (server) await server.close().catch(() => undefined);
