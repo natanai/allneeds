@@ -1,0 +1,78 @@
+import { expect, test } from './fixtures';
+
+const remoteBootHosts = new Set([
+  'backend.allneeds.app',
+  'esm.sh',
+  'bsky.social',
+  'plc.directory',
+]);
+
+test('mounts the app beneath the boot overlay while local resources finish', async ({ page }) => {
+  let delayedLocalResource = false;
+  await page.route('**/data/reverse-inference.json', async (route) => {
+    delayedLocalResource = true;
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    await route.continue();
+  });
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('#app-boot')).toBeVisible();
+  await expect(page.locator('#root [aria-label="Primary navigation magnets"]')).toHaveCount(1);
+  expect(delayedLocalResource).toBe(true);
+
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('ready');
+  await expect(page.locator('#app-boot')).toHaveCount(0);
+  await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveAttribute('data-ready', 'true');
+});
+
+test('fresh startup warms only the local runtime and keeps Play on by default', async ({ page }) => {
+  const remoteRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (remoteBootHosts.has(url.hostname)) remoteRequests.push(request.url());
+  });
+
+  await page.goto('/');
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('ready');
+
+  await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveAttribute('data-active', 'true');
+  expect(remoteRequests).toEqual([]);
+});
+
+test('route and menu presentation state do not re-pack persistent nav geometry', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem('magnetPositions:site-nav', JSON.stringify({
+      layoutVersion: 7,
+      layouts: {},
+      meta: { playActive: false },
+    }));
+  });
+  await page.goto('/');
+
+  const board = page.locator('[aria-label="Primary navigation magnets"]');
+  await expect(board).toHaveAttribute('data-ready', 'true');
+  await expect(board).toHaveAttribute('data-active', 'false');
+
+  const readCoordinates = () => board.locator('[data-magnet-id]').evaluateAll((elements) =>
+    Object.fromEntries(elements.map((element) => [
+      element.getAttribute('data-magnet-id'),
+      {
+        x: (element as HTMLElement).style.getPropertyValue('--magnet-x'),
+        y: (element as HTMLElement).style.getPropertyValue('--magnet-y'),
+      },
+    ])),
+  );
+
+  const initialCoordinates = await readCoordinates();
+
+  await page.locator('[data-magnet-id="nav-needs"]').click();
+  await expect(page).toHaveURL(/\/needs\/?$/);
+  await expect(board).toHaveAttribute('data-ready', 'true');
+  expect(await readCoordinates()).toEqual(initialCoordinates);
+
+  await page.locator('[data-magnet-id="nav-menu"]').click();
+  await expect(page.locator('[data-magnet-id="nav-menu"]')).toHaveAttribute('aria-expanded', 'true');
+  await expect(board).toHaveAttribute('data-ready', 'true');
+  expect(await readCoordinates()).toEqual(initialCoordinates);
+});
