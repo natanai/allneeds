@@ -18,9 +18,9 @@ describe('magnet theme styling', () => {
     expect(ruleBody('.nav .peach')).toContain('var(--surface-raised)');
   });
 
-  it('allows a visible current-route accent while semantic state stays geometry-neutral and crisp', () => {
+  it('gives the current route Customizer-owned 3D depth without changing geometry or text metrics', () => {
     const activeRule = ruleBody('.nav .active');
-    const activeAccent = ruleBody('.nav .active::after');
+    const desktopActiveRule = ruleBody('.nav .magnet.active');
     const geometryProperties = [
       'font-size',
       'font-weight',
@@ -41,14 +41,21 @@ describe('magnet theme styling', () => {
 
     geometryProperties.forEach((property) => {
       expect(activeRule).not.toContain(`${property}:`);
-      expect(activeAccent).not.toContain(`${property}:`);
+      expect(desktopActiveRule).not.toContain(`${property}:`);
     });
+
+    expect(magnetCss).not.toContain('.nav .active::after');
     expect(activeRule).not.toContain('filter:');
     expect(activeRule).not.toContain('text-shadow:');
-    expect(activeAccent).not.toContain('filter:');
-    expect(activeAccent).not.toContain('text-shadow:');
-    expect(activeAccent).toContain('var(--sky)');
-    expect(activeAccent).toContain('var(--outline)');
-    expect(activeAccent).toContain('border:');
+    expect(activeRule).not.toContain('border:');
+    expect(activeRule).toContain('background-image:');
+    expect(activeRule).toContain('box-shadow:');
+    expect(activeRule).toContain('var(--sky)');
+    expect(activeRule).toContain('var(--surface-raised)');
+    expect(activeRule).toContain('var(--outline)');
+
+    expect(desktopActiveRule).not.toContain('filter:');
+    expect(desktopActiveRule).toContain('box-shadow:');
+    expect(desktopActiveRule).toContain('var(--sky)');
   });
 });

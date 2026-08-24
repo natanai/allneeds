@@ -249,17 +249,20 @@
 .nav .mint { background: color-mix(in srgb, var(--mint) 78%, var(--surface-raised) 22%); }
 .nav .gold { background: color-mix(in srgb, var(--gold) 72%, var(--surface-raised) 28%); }
 
-/* Current-route emphasis is deliberately paint-only. It must never change text
-   metrics, box geometry, transforms, or filters: those create width jitter and
-   can trigger soft Chromium/Edge text rasterization. */
-.nav .active::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  z-index: 2;
-  border: 2px solid color-mix(in srgb, var(--sky) 64%, var(--outline) 36%);
-  border-radius: inherit;
-  pointer-events: none;
+/* Route state gets a chunky, toy-like depth treatment without touching measured
+   geometry or text rendering. Sky accent remains fully addressable in Customizer. */
+.nav .active {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--sky) 42%, transparent) 0%,
+    color-mix(in srgb, var(--sky) 18%, transparent) 48%,
+    transparent 49%
+  );
+  box-shadow:
+    0 6px 0 color-mix(in srgb, var(--sky) 70%, var(--outline) 30%),
+    0 10px 0 color-mix(in srgb, var(--outline) 15%, transparent),
+    inset 0 2px 0 color-mix(in srgb, var(--surface-raised) 76%, transparent),
+    inset 0 -3px 0 color-mix(in srgb, var(--sky) 24%, var(--outline) 76%);
 }
 
 .nav [data-magnet-id='nav-menu'],
@@ -337,11 +340,36 @@
     box-shadow: 0 13px 0 var(--shadow);
   }
 
+  .nav .magnet.active {
+    box-shadow:
+      0 6px 0 color-mix(in srgb, var(--sky) 70%, var(--outline) 30%),
+      0 10px 0 color-mix(in srgb, var(--outline) 15%, transparent),
+      inset 0 2px 0 color-mix(in srgb, var(--surface-raised) 76%, transparent),
+      inset 0 -3px 0 color-mix(in srgb, var(--sky) 24%, var(--outline) 76%);
+  }
+
+  .nav .magnet.active:hover,
+  .nav .magnet.active:focus-visible {
+    box-shadow:
+      0 7px 0 color-mix(in srgb, var(--sky) 72%, var(--outline) 28%),
+      0 11px 0 color-mix(in srgb, var(--outline) 17%, transparent),
+      inset 0 2px 0 color-mix(in srgb, var(--surface-raised) 80%, transparent),
+      inset 0 -3px 0 color-mix(in srgb, var(--sky) 28%, var(--outline) 72%);
+  }
+
   .nav .magnet[data-picked-up='true'] {
     --magnet-lift: 0px;
     scale: 1;
     filter: none;
     box-shadow: 0 13px 0 var(--shadow);
+  }
+
+  .nav .magnet.active[data-picked-up='true'] {
+    box-shadow:
+      0 7px 0 color-mix(in srgb, var(--sky) 72%, var(--outline) 28%),
+      0 11px 0 color-mix(in srgb, var(--outline) 17%, transparent),
+      inset 0 2px 0 color-mix(in srgb, var(--surface-raised) 80%, transparent),
+      inset 0 -3px 0 color-mix(in srgb, var(--sky) 28%, var(--outline) 72%);
   }
 
   .nav .magnet[data-picked-up='true']:focus-visible {
