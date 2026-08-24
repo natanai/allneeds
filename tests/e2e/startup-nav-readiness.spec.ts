@@ -55,13 +55,13 @@ test('route and menu presentation state do not re-pack persistent nav geometry',
   await expect(board).toHaveAttribute('data-active', 'false');
 
   const readCoordinates = () => board.locator('[data-magnet-id]').evaluateAll((elements) =>
-    Object.fromEntries(elements.map((element) => [
-      element.getAttribute('data-magnet-id'),
-      {
+    Object.fromEntries(elements.map((element) => {
+      const id = element.getAttribute('data-magnet-id') ?? '';
+      return [id, {
         x: (element as HTMLElement).style.getPropertyValue('--magnet-x'),
         y: (element as HTMLElement).style.getPropertyValue('--magnet-y'),
-      },
-    ])),
+      }] as const;
+    })),
   );
 
   const initialCoordinates = await readCoordinates();
