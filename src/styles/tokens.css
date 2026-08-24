@@ -2,15 +2,17 @@
   color-scheme: light;
   --plum: #74569b;
   --lavender: #ede4ff;
-  --surface-raised: #ffffff;
   --ink: #1f1230;
   --ink-soft: #392351;
   --rose: #ffb3cb;
   --mint: #96fbc7;
   --gold: #f7ffae;
-  --peach: #ffdfc9;
   --sky: #d3f1ff;
   --outline: #12081f;
+
+  /* Shared visual roles are derived rather than expanding the editable palette. */
+  --surface-raised: color-mix(in srgb, var(--lavender) 12%, #ffffff 88%);
+  --peach: var(--rose);
   --shadow: color-mix(in srgb, var(--outline) 55%, transparent);
   --btn-bg: var(--rose);
   --btn-fg: #111111;
