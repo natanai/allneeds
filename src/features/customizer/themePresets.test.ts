@@ -28,16 +28,18 @@ describe('customizer theme presets', () => {
     })).toBe('');
   });
 
-  it('makes Refrigerator square-edged with a near-white magnet palette', () => {
+  it('makes Refrigerator square-edged with warm white magnets on a retro seafoam palette', () => {
     const preset = themePresets.find(({ name }) => name === 'Refrigerator');
     expect(preset).toMatchObject({
       roundness: 0,
       values: {
-        rose: '#FFFFFF',
-        mint: '#F7F7F5',
-        gold: '#F2F2EE',
-        sky: '#FAFAFA',
-        outline: '#181818',
+        plum: '#6F9E91',
+        lavender: '#F4F1E7',
+        rose: '#D96C63',
+        mint: '#B8DCCF',
+        gold: '#F2D38A',
+        sky: '#DDEFE9',
+        outline: '#17201D',
       },
     });
   });
