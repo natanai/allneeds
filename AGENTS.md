@@ -43,6 +43,7 @@ The first branded loading surface is a real application readiness boundary, not 
 ## CSS and runtime behavior
 
 - Use CSS Modules for component/feature styling and the shared token layer for global design values.
+- **Intentional UI color roles are Customizer-owned.** Do not introduce a standalone themed surface, accent, text, outline, or similar feature color that the Customizer cannot change. Reuse an existing theme token, derive from Customizer-owned tokens with `color-mix()`/opacity, or add a new `ThemeValues` role and wire it through the Customizer, presets, saved-theme prepaint, and regression coverage before consuming it. Fixed black/white is reserved for accessibility contrast, masks, asset/data visualization, or safe pre-CSS fallback—not independent themed surfaces or accents.
 - Do not solve layout defects with runtime-injected CSS, page-specific style tags, JavaScript style monkey-patches, or accumulating override layers.
 - Imperative CSS custom-property writes are appropriate for high-frequency magnet physics positions; do not route per-frame physics through React state.
 - Fix ownership at the component/layout source. If a defect comes from lifecycle or measurement timing, repair the lifecycle rather than hiding the symptom with CSS.
