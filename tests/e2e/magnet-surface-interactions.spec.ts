@@ -30,7 +30,7 @@ async function showOnlyAcceptance(page: Page) {
   const board = page.getByLabel('Needs magnet board');
   await expect(board).toHaveAttribute('data-ready', 'true');
   await ensurePhysicsOn(board);
-  const magnet = board.getByRole('link', { name: 'Acceptance' });
+  const magnet = board.getByRole('link', { name: 'Acceptance', exact: true });
   await expect(magnet).toBeVisible();
   return { board, magnet };
 }
@@ -44,6 +44,7 @@ test.describe('mobile need magnet sizing', () => {
     await expect(board).toHaveAttribute('data-ready', 'true');
     const magnet = board.getByRole('link', {
       name: 'Do things at my own pace and in my own way',
+      exact: true,
     });
     await expect(magnet).toBeVisible();
 
