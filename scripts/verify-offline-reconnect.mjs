@@ -44,14 +44,11 @@ async function shellCacheNames(page) {
     .filter((name) => name.startsWith('allneeds-v2-shell-')));
 }
 
-async function waitForShellCacheReplacement(page, previous) {
+async function waitForNewShellCache(page, previous) {
   await page.waitForFunction(async (oldNames) => {
     const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
-    const hasNewCache = current.some((name) => !oldNames.includes(name));
-    const oldCachesRemoved = oldNames.every((name) => !current.includes(name));
     const registration = await navigator.serviceWorker.getRegistration();
-    return hasNewCache
-      && oldCachesRemoved
+    return current.some((name) => !oldNames.includes(name))
       && registration?.active?.state === 'activated'
       && !registration.installing
       && !registration.waiting;
@@ -59,7 +56,7 @@ async function waitForShellCacheReplacement(page, previous) {
 
   const current = await shellCacheNames(page);
   const replacement = current.find((name) => !previous.includes(name));
-  invariant(replacement, 'The activated service worker did not leave a replacement shell cache.');
+  invariant(replacement, 'The service-worker update did not produce a replacement shell cache.');
   return replacement;
 }
 
@@ -109,38 +106,42 @@ try {
   await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
   await regenerateServiceWorker();
 
-  // The installed shell remains instant while its normal registration discovers the
-  // new worker. Wait for install + activate (old cache removed), then prove that the
-  // replacement cache itself contains the new shell before removing the network.
+  // The current client keeps its instant cached shell while normal registration
+  // discovers the new worker. Once a replacement cache exists and installation has
+  // settled, confirm the new cache itself contains the new deployment shell.
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
   await expectShell(page, 'Home');
-  const replacementCache = await waitForShellCacheReplacement(page, previousCaches);
+  const replacementCache = await waitForNewShellCache(page, previousCaches);
   invariant(
     await cacheContainsFreshProbe(page, replacementCache),
     'The replacement versioned cache did not contain the fresh deployment shell.',
   );
 
-  // With the server stopped there is no network fallback that can make this pass.
-  // A successful fresh-marker navigation therefore proves the activated versioned
-  // shell cache owns repeat startup as intended.
+  // Do not keep an old controlled client alive while judging the replacement worker:
+  // an outgoing worker can briefly recreate its old named cache during handoff. Close
+  // that client, remove the network, and create a brand-new navigation client. A fresh
+  // marker here can only come from the active replacement shell cache.
+  await page.close();
   await server.close();
   server = null;
-  await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
-  await expectShell(page, 'Home');
+  const upgradePage = await context.newPage();
+  observeRuntime(upgradePage);
+  await upgradePage.goto(`${origin}/?diagnostics=1`, { waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await expectShell(upgradePage, 'Home');
   invariant(
-    await page.locator('html').getAttribute('data-deployment-probe') === 'fresh',
-    'The activated versioned cache did not serve the fresh shell while the network was unavailable.',
+    await upgradePage.locator('html').getAttribute('data-deployment-probe') === 'fresh',
+    'A fresh offline client did not receive the activated replacement shell.',
   );
 
   server = await startPreview();
-  await page.goto(`${origin}/needs/love-caring`);
-  await expectShell(page, 'Need for love/caring');
+  await upgradePage.goto(`${origin}/needs/love-caring`);
+  await expectShell(upgradePage, 'Need for love/caring');
 
   await server.close();
   server = null;
 
-  await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
-  await expectShell(page, 'Need for love/caring');
+  await upgradePage.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await expectShell(upgradePage, 'Need for love/caring');
 
   const freshPage = await context.newPage();
   observeRuntime(freshPage);
@@ -172,7 +173,7 @@ try {
   );
 
   await context.close();
-  console.log('Verified version-safe cache-first upgrade, stopped-server reload, fresh cached deep link, same-port restart, and cache-miss reconnect.');
+  console.log('Verified version-safe cache-first upgrade, fresh offline client, cached deep routes, same-port restart, and cache-miss reconnect.');
 } finally {
   if (browser) await browser.close().catch(() => undefined);
   if (server) await server.close().catch(() => undefined);
