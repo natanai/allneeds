@@ -35,7 +35,7 @@ jobs:
       - name: Run checks
         run: pnpm check
         env:
-          VITE_BASE_PATH: /allneeds/
+          VITE_BASE_PATH: /
 
       - name: Configure Pages
         uses: actions/configure-pages@v6
