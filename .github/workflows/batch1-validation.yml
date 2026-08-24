@@ -1,8 +1,8 @@
 name: Batch 1 validation
 
 on:
-  push:
-    branches: [perf/batch-1-startup-nav-readiness]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
