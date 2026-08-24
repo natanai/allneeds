@@ -86,15 +86,15 @@ function detectTiltPermission(): TiltPermissionState {
 }
 
 function tiltPresentation(tilt: TiltPermissionState) {
-  if (!tilt.available) return { label: 'Unavailable', status: 'Tilt controls are not supported on this device.', disabled: true };
-  if (tilt.pending) return { label: 'Requesting…', status: 'Waiting for device permission…', disabled: true };
+  if (!tilt.available) return { label: '—', status: 'Tilt is not supported on this device.', disabled: true };
+  if (tilt.pending) return { label: '…', status: 'Waiting for permission.', disabled: true };
   if (tilt.state === 'granted') return {
-    label: 'On',
-    status: tilt.supported ? 'Device tilt control is active.' : 'Tilt responds automatically.',
+    label: '✓',
+    status: tilt.supported ? 'Tilt is active.' : 'Tilt works automatically.',
     disabled: !tilt.supported,
   };
-  if (tilt.state === 'denied') return { label: 'Request again', status: 'Permission denied. Tap to try again.', disabled: false };
-  return { label: 'Request permission', status: 'Request permission to let magnets follow your device tilt.', disabled: false };
+  if (tilt.state === 'denied') return { label: 'Retry', status: 'Permission denied.', disabled: false };
+  return { label: 'Allow', status: 'Move magnets by tilting your phone.', disabled: false };
 }
 
 function isMobileLikeDevice() {
@@ -128,26 +128,56 @@ function detectOrientationLock(): OrientationLockState {
 
 function orientationLockPresentation(lock: OrientationLockState) {
   if (!lock.available) return {
-    label: 'Unavailable',
-    status: 'This browser does not offer screen orientation lock here.',
+    label: '—',
+    status: 'Not supported in this browser.',
     disabled: true,
   };
-  if (lock.pending) return { label: 'Locking…', status: 'Asking the browser to hold this orientation…', disabled: true };
+  if (lock.pending) return { label: '…', status: 'Locking current orientation.', disabled: true };
   if (lock.error) return {
-    label: 'Try again',
-    status: 'The browser blocked orientation lock. Installed or full-screen mode may be required.',
+    label: 'Retry',
+    status: 'Browser blocked orientation lock.',
     disabled: false,
   };
   if (lock.locked) return {
-    label: 'On',
-    status: `Locked to ${lock.target ?? 'the current'} orientation while this page is open.`,
+    label: '✓',
+    status: `Locked to ${lock.target ?? 'current'} orientation.`,
     disabled: false,
   };
   return {
     label: 'Off',
-    status: 'Keep the current screen orientation while you use device tilt.',
+    status: 'Keep the current screen orientation.',
     disabled: false,
   };
+}
+
+function TiltIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="7" y="3" width="10" height="18" rx="2.2" />
+      <path d="M10 17.5h4" />
+      <path d="M4.5 8.5 3 10l1.5 1.5M19.5 8.5 21 10l-1.5 1.5" />
+    </svg>
+  );
+}
+
+function OrientationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7.5 9.5a5 5 0 0 1 8.8-2.7L18 8.5" />
+      <path d="M18 5v3.5h-3.5" />
+      <rect x="8.2" y="11" width="7.6" height="7" rx="1.5" />
+      <path d="M10 11V9.8a2 2 0 0 1 4 0V11" />
+    </svg>
+  );
+}
+
+function ResetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 7v5h5" />
+      <path d="M5.2 16.5a8 8 0 1 0 .5-9.5L4 9" />
+    </svg>
+  );
 }
 
 export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
@@ -309,20 +339,23 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
 
         <section className={styles.deviceControls} aria-label="Device controls">
           <div className={styles.deviceControl} data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}>
-            <div><h3 id="tilt-title">Device tilt access</h3><p id="tilt-description">Let magnets respond to how you hold your phone.</p></div>
-            <button type="button" role="switch" aria-label="Device tilt access" aria-checked={tiltPermission.state === 'granted'} aria-describedby="tilt-description tilt-status" disabled={tilt.disabled} onClick={requestTilt}>{tilt.label}</button>
-            <small id="tilt-status" role="status">{tilt.status}</small>
+            <span className={styles.deviceIcon}><TiltIcon /></span>
+            <div className={styles.deviceCopy}><h3 id="tilt-title">Device tilt</h3><p id="tilt-description" role="status">{tilt.status}</p></div>
+            <button type="button" className={styles.controlAction} role="switch" aria-label="Device tilt access" aria-checked={tiltPermission.state === 'granted'} aria-describedby="tilt-description" disabled={tilt.disabled} onClick={requestTilt}>{tilt.label}</button>
           </div>
           {orientationLock.mobile ? (
             <div className={styles.deviceControl} data-state={orientationLock.error ? 'error' : orientationLock.pending ? 'pending' : orientationLock.locked ? 'granted' : 'unknown'}>
-              <div><h3 id="orientation-lock-title">Screen orientation lock</h3><p id="orientation-lock-description">Prevent an accidental screen rotation while using tilt.</p></div>
-              <button type="button" role="switch" aria-label="Lock screen orientation" aria-checked={orientationLock.locked} aria-describedby="orientation-lock-description orientation-lock-status" disabled={orientation.disabled} onClick={toggleOrientationLock}>{orientation.label}</button>
-              <small id="orientation-lock-status" role="status">{orientation.status}</small>
+              <span className={styles.deviceIcon}><OrientationIcon /></span>
+              <div className={styles.deviceCopy}><h3 id="orientation-lock-title">Orientation lock</h3><p id="orientation-lock-description" role="status">{orientation.status}</p></div>
+              <button type="button" className={styles.controlAction} role="switch" aria-label="Lock screen orientation" aria-checked={orientationLock.locked} aria-describedby="orientation-lock-description" disabled={orientation.disabled} onClick={toggleOrientationLock}>{orientation.label}</button>
             </div>
           ) : null}
         </section>
 
-        <footer className={styles.footer}><button type="button" onClick={reset}>Reset to default</button><button type="button" className={styles.delete} onClick={deleteLocalData}>Delete localStorage</button></footer>
+        <footer className={styles.footer}>
+          <button type="button" className={styles.resetAction} onClick={reset}><ResetIcon /><span>Reset</span></button>
+          <button type="button" className={styles.delete} onClick={deleteLocalData}>Delete local storage</button>
+        </footer>
       </div>
     </section>
   );
