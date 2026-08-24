@@ -64,7 +64,7 @@ The first branded loading surface is a real application readiness boundary, not 
 - Do not add telemetry containing journal, inventory, observation, search, route-content, or other personal content.
 - Performance diagnostics must remain local-only unless the user explicitly chooses otherwise.
 
-## Verification
+## Verification and workflow discipline
 
 For behavior-affecting work, add or update regression coverage at the same layer as the risk.
 
@@ -72,7 +72,9 @@ For behavior-affecting work, add or update regression coverage at the same layer
 - Use `pnpm check:all` for release-level/browser-sensitive work when Playwright is available.
 - Startup/navigation changes should cover boot-overlay readiness and persistent nav geometry across route/menu state changes.
 - Magnet changes should preserve drag/click suppression, compact/wide persistence, Play/rest transitions, and frame-level first-paint stability.
-- If connector-only work cannot run the local suite, rely on the PR's GitHub Actions checks and report that limitation explicitly; do not claim local validation that was not run.
+- If connector-only work cannot run the local suite, rely on an existing repository validation path or one intentionally scoped branch validation and report that limitation explicitly; do not claim local validation that was not run.
+- Do not create a push- or pull-request-triggered workflow merely to validate every small agent commit. Prefer the repository's existing CI, a manual `workflow_dispatch` validation, or a single deliberately scoped run before merge.
+- Validation workflows should be permanent only when they represent a durable repository need. Temporary agent-only workflows must not remain configured to fire on every synchronization or commit.
 
 ## Documentation priority
 
