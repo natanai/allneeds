@@ -7,22 +7,46 @@ const remoteBootHosts = new Set([
   'plc.directory',
 ]);
 
-test('mounts the app beneath the boot overlay while local resources finish', async ({ page }) => {
+test('mounts the app beneath an opaque full-screen splash while local resources finish', async ({ page }) => {
   let delayedLocalResource = false;
   await page.route('**/data/reverse-inference.json', async (route) => {
     delayedLocalResource = true;
-    await new Promise((resolve) => setTimeout(resolve, 450));
+    await new Promise((resolve) => setTimeout(resolve, 1_200));
     await route.continue();
   });
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-  await expect(page.locator('#app-boot')).toBeVisible();
+  const boot = page.locator('#app-boot');
+  await expect(boot).toBeVisible();
   await expect(page.locator('#root [aria-label="Primary navigation magnets"]')).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('loading');
+  await expect(page.locator('#root')).toHaveCSS('visibility', 'hidden');
   expect(delayedLocalResource).toBe(true);
 
+  const coverage = await boot.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      position: style.position,
+      top: style.top,
+      right: style.right,
+      bottom: style.bottom,
+      left: style.left,
+    };
+  });
+  expect(coverage).toEqual({
+    position: 'fixed',
+    top: '0px',
+    right: '0px',
+    bottom: '0px',
+    left: '0px',
+  });
+  await expect(page.locator('.app-boot__card')).toBeVisible();
+  await expect(page.locator('.app-boot__label')).toHaveText('Getting everything ready…');
+
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('ready');
-  await expect(page.locator('#app-boot')).toHaveCount(0);
+  await expect(page.locator('#root')).toHaveCSS('visibility', 'visible');
+  await expect(boot).toHaveCount(0);
   await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveAttribute('data-ready', 'true');
 });
 
