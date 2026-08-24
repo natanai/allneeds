@@ -10,13 +10,17 @@ function ruleBody(selector: string) {
 }
 
 describe('magnet theme styling', () => {
-  it('keeps navigation surface and magnet corners connected to Customizer roundness', () => {
+  it('keeps navigation surfaces and corners connected to Customizer tokens', () => {
     expect(ruleBody('.nav')).toContain('var(--corner-scale)');
     expect(ruleBody('.nav .magnet')).toContain('var(--corner-scale)');
+    expect(ruleBody('.nav .magnet')).toContain('var(--surface-raised)');
+    expect(ruleBody('.nav .peach')).toContain('var(--peach)');
+    expect(ruleBody('.nav .peach')).toContain('var(--surface-raised)');
   });
 
-  it('allows intentional nav-specific styling while route state stays geometry-neutral', () => {
+  it('allows a visible current-route accent while semantic state stays geometry-neutral and crisp', () => {
     const activeRule = ruleBody('.nav .active');
+    const activeAccent = ruleBody('.nav .active::after');
     const geometryProperties = [
       'font-size',
       'font-weight',
@@ -37,6 +41,14 @@ describe('magnet theme styling', () => {
 
     geometryProperties.forEach((property) => {
       expect(activeRule).not.toContain(`${property}:`);
+      expect(activeAccent).not.toContain(`${property}:`);
     });
+    expect(activeRule).not.toContain('filter:');
+    expect(activeRule).not.toContain('text-shadow:');
+    expect(activeAccent).not.toContain('filter:');
+    expect(activeAccent).not.toContain('text-shadow:');
+    expect(activeAccent).toContain('var(--sky)');
+    expect(activeAccent).toContain('var(--outline)');
+    expect(activeAccent).toContain('border:');
   });
 });

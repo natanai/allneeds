@@ -9,7 +9,7 @@
   overscroll-behavior: contain;
   border: 3px solid var(--outline);
   border-radius: var(--radius-2xl);
-  background: rgba(255, 255, 255, 0.85);
+  background: color-mix(in srgb, var(--surface-raised) 85%, transparent);
   box-shadow: inset 0 12px 0 color-mix(in srgb, var(--outline) 14%, transparent);
   transition: background 180ms ease;
 }
@@ -25,7 +25,7 @@
 }
 
 .playMode {
-  background: color-mix(in srgb, var(--sky) 9%, rgba(255, 255, 255, 0.94));
+  background: color-mix(in srgb, var(--sky) 9%, var(--surface-raised) 91%);
 }
 
 .board[data-dragging='true'] {
@@ -69,7 +69,7 @@
   border-radius: 50%;
   box-shadow:
     0 0 0 5px color-mix(in srgb, var(--sky) 10%, transparent),
-    inset 0 0 0 4px color-mix(in srgb, #fff 18%, transparent);
+    inset 0 0 0 4px color-mix(in srgb, var(--surface-raised) 18%, transparent);
   opacity: var(--ripple-opacity);
   transform: translate(-50%, -50%) scale(0.12);
   animation: surface-ripple 1.25s cubic-bezier(0.2, 0.64, 0.3, 1) forwards;
@@ -103,7 +103,7 @@
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--surface-raised) 80%, transparent);
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
@@ -155,7 +155,7 @@
   --magnet-lift: -12px;
   z-index: 20;
   scale: 1.065;
-  box-shadow: 0 24px 30px rgba(17, 8, 31, 0.2);
+  box-shadow: 0 24px 30px color-mix(in srgb, var(--outline) 20%, transparent);
   filter: saturate(1.05) brightness(1.025);
 }
 
@@ -187,7 +187,7 @@
 .mint { background: var(--mint); }
 .gold { background: var(--gold); }
 .sky { background: var(--sky); }
-.lavender { background: color-mix(in srgb, var(--lavender) 65%, #fff 35%); }
+.lavender { background: color-mix(in srgb, var(--lavender) 65%, var(--surface-raised) 35%); }
 .peach { background: var(--peach); }
 
 .feeling {
@@ -234,7 +234,7 @@
     calc(var(--corner-scale) * 8vw),
     calc(var(--corner-scale) * 3.75rem)
   );
-  background: color-mix(in srgb, var(--lavender) 65%, #fff 35%);
+  background: color-mix(in srgb, var(--lavender) 65%, var(--surface-raised) 35%);
   box-shadow: none;
   filter: drop-shadow(0 12px 0 var(--shadow));
   font-family: var(--font-display);
@@ -244,16 +244,23 @@
   text-transform: uppercase;
 }
 
-.nav .active {
-  text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8),
-    0 0 0.45px currentColor;
-}
+.nav .rose { background: color-mix(in srgb, var(--rose) 78%, var(--surface-raised) 22%); }
+.nav .peach { background: color-mix(in srgb, var(--peach) 78%, var(--surface-raised) 22%); }
+.nav .mint { background: color-mix(in srgb, var(--mint) 78%, var(--surface-raised) 22%); }
+.nav .gold { background: color-mix(in srgb, var(--gold) 72%, var(--surface-raised) 28%); }
 
-.nav .rose { background: color-mix(in srgb, var(--rose) 78%, #fff 22%); }
-.nav .peach { background: color-mix(in srgb, var(--peach) 78%, #fff 22%); }
-.nav .mint { background: color-mix(in srgb, var(--mint) 78%, #fff 22%); }
-.nav .gold { background: color-mix(in srgb, var(--gold) 72%, #fff 28%); }
+/* Current-route emphasis is deliberately paint-only. It must never change text
+   metrics, box geometry, transforms, or filters: those create width jitter and
+   can trigger soft Chromium/Edge text rasterization. */
+.nav .active::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  z-index: 2;
+  border: 2px solid color-mix(in srgb, var(--sky) 64%, var(--outline) 36%);
+  border-radius: inherit;
+  pointer-events: none;
+}
 
 .nav [data-magnet-id='nav-menu'],
 .nav [data-magnet-id='nav-home'],
@@ -351,7 +358,7 @@
       translateY(-3px)
       rotate(var(--magnet-rock));
     will-change: transform;
-    box-shadow: 0 16px 18px rgba(17, 8, 31, 0.16);
+    box-shadow: 0 16px 18px color-mix(in srgb, var(--outline) 16%, transparent);
     transition: none;
   }
 }

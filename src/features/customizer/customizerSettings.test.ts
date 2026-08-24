@@ -4,6 +4,7 @@ import {
   defaultNavSettings,
   defaultTheme,
   NAV_SETTINGS_KEY,
+  palettes,
   readNavSettings,
   readTheme,
   synchronizeCustomizerMirrors,
@@ -11,8 +12,8 @@ import {
   themeCssValues,
 } from './customizerSettings';
 
-function memoryStorage(entries: Record<string, string> = {}) {
-  const values = new Map(Object.entries(entries));
+function memoryStorage(initial: Record<string, string> = {}) {
+  const values = new Map(Object.entries(initial));
   return {
     getItem: (key: string) => values.get(key) ?? null,
     setItem: (key: string, value: string) => { values.set(key, value); },
@@ -55,6 +56,30 @@ describe('saved customizer settings', () => {
     });
   });
 
+  it('backfills newly Customizer-owned surface roles for older saved themes', () => {
+    const storage = memoryStorage({
+      [THEME_KEY]: JSON.stringify({
+        values: { rose: '#ABCDEF', gold: '#123456' },
+        roundness: 100,
+        updatedAt: 9,
+      }),
+    });
+
+    expect(readTheme(storage, null).values).toMatchObject({
+      rose: '#ABCDEF',
+      gold: '#123456',
+      peach: defaultTheme.peach,
+      surface: defaultTheme.surface,
+    });
+  });
+
+  it('keeps legacy palette collections visually compatible for newly added roles', () => {
+    palettes.forEach(({ values }) => {
+      expect(values.surface).toBe(defaultTheme.surface);
+      expect(values.peach).toBe(defaultTheme.peach);
+    });
+  });
+
   it('restores only boolean navigation choices from the newest mirror', () => {
     const local = memoryStorage({
       [NAV_SETTINGS_KEY]: JSON.stringify({ enabled: { feelings: false }, updatedAt: 1 }),
@@ -74,10 +99,13 @@ describe('saved customizer settings', () => {
     const light = themeCssValues({ values: { ...defaultTheme, rose: '#FFFFFF' }, roundness: 130 });
     expect(light).toMatchObject({
       '--plum': defaultTheme.plum,
+      '--surface-raised': defaultTheme.surface,
+      '--peach': defaultTheme.peach,
       '--rose': '#FFFFFF',
       '--btn-bg': '#FFFFFF',
       '--btn-fg': '#111111',
       '--chip-fg': '#111111',
+      '--chip-bg': `color-mix(in srgb, ${defaultTheme.surface} 86%, ${defaultTheme.sky} 14%)`,
       '--corner-scale': '1.3',
       '--shadow': `color-mix(in srgb, ${defaultTheme.outline} 55%, transparent)`,
     });

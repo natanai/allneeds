@@ -15,8 +15,8 @@
       (function preapplySavedTheme() {
         var key = 'nvcApp.theme';
         var variables = {
-          plum: '--plum', lavender: '--lavender', ink: '--ink', inkSoft: '--ink-soft',
-          rose: '--rose', mint: '--mint', gold: '--gold', sky: '--sky', outline: '--outline'
+          plum: '--plum', lavender: '--lavender', surface: '--surface-raised', ink: '--ink', inkSoft: '--ink-soft',
+          rose: '--rose', mint: '--mint', gold: '--gold', peach: '--peach', sky: '--sky', outline: '--outline'
         };
         var hexPattern = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
         var root = document.documentElement;
@@ -64,8 +64,11 @@
         }
         var rose = color(theme.values.rose);
         var outline = color(theme.values.outline);
+        var surface = color(theme.values.surface);
+        var sky = color(theme.values.sky);
         if (rose) root.style.setProperty('--btn-bg', rose);
         if (outline) root.style.setProperty('--shadow', 'color-mix(in srgb, ' + outline + ' 55%, transparent)');
+        if (surface && sky) root.style.setProperty('--chip-bg', 'color-mix(in srgb, ' + surface + ' 86%, ' + sky + ' 14%)');
         if (applied) root.setAttribute('data-theme-preapplied', 'true');
       })();
     </script>
@@ -82,7 +85,7 @@
         padding: 1.2rem;
         border: 3px solid var(--outline, #12081f);
         border-radius: calc(1.6rem * var(--corner-scale, 1));
-        background: color-mix(in srgb, var(--lavender, #ede4ff) 22%, rgba(255, 255, 255, 0.94));
+        background: color-mix(in srgb, var(--lavender, #ede4ff) 22%, var(--surface-raised, #ffffff) 78%);
         box-shadow: 0 14px 0 color-mix(in srgb, var(--outline, #12081f) 28%, transparent);
         color: var(--ink, #12081f);
         font: 600 1rem/1.4 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;

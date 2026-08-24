@@ -22,6 +22,17 @@ Production and the online `natanai/allneeds` work can continue changing independ
 
 Personal reflection data stays in the browser. The optional shared strategy feed reads the allneeds backend; saving a feed item always writes to local browser storage and then best-effort updates its shared add count. Bluesky profile sync is opt-in and performs no account work until sign-in or a previously active production session requires it.
 
+## Customizer color contract
+
+The Customizer is the source of truth for the site's intentional UI color roles. A feature must not introduce a standalone surface, accent, text, outline, or other themed UI color that a user cannot change through the Customizer.
+
+- New themed colors must either use an existing Customizer-owned CSS token or be derived from Customizer-owned tokens with `color-mix()`/opacity.
+- If a genuinely new independent color role is needed, add it to `ThemeValues`, expose it in the Customizer, include it in every preset and saved-theme prepaint, and add regression coverage before using it in feature CSS.
+- Do not hard-code a feature-specific palette color in a CSS Module as a shortcut. Shared surfaces should use `--surface-raised`; the Journal/History accent uses `--peach`; other accents, ink, and outlines use their corresponding theme tokens.
+- Fixed black/white values are only acceptable when they are serving a non-themed accessibility/contrast role, an icon mask, an asset/data visualization, or a safe pre-CSS fallback. They must not become an independent visual theme surface or accent.
+
+This rule exists so changing a theme remains coherent across navigation, Journal, forms, dialogs, and future features rather than leaving visually disconnected colors behind.
+
 ## Local development
 
 Requires Node 22.22+ (Node 24 is recommended) and pnpm through Corepack.
