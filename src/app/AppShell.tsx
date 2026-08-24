@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigationType } from 'react-router';
 
 import { MagnetBoard } from '../components/magnets/MagnetBoard';
@@ -6,6 +6,7 @@ import type { MagnetBoardItem } from '../components/magnets/MagnetBoard';
 import { CustomizerPanel } from '../features/customizer/CustomizerPanel';
 import { AppMenu } from '../features/menu/AppMenu';
 import { UxDiagnostics } from './UxDiagnostics';
+import { markAppShellVisualReady } from './bootReadiness';
 import { markRouteReady } from './uxMetrics';
 import { routePresentation, titleFromSegment } from './routePresentation';
 import {
@@ -141,6 +142,7 @@ export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [inventoryCount, setInventoryCount] = useState(readInventoryCount);
   const [navSettings, setNavSettings] = useState(readNavSettings);
+  const navBoardWrapperRef = useRef<HTMLDivElement>(null);
   const openCustomizer = useCallback(() => setCustomizerOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -167,6 +169,32 @@ export function AppShell() {
       window.removeEventListener('storage', update);
     };
   }, []);
+
+  useLayoutEffect(() => {
+    if (wheelRoute) {
+      markAppShellVisualReady();
+      return;
+    }
+
+    const wrapper = navBoardWrapperRef.current;
+    if (!wrapper) return;
+    const markWhenReady = () => {
+      if (!wrapper.querySelector('[data-ready="true"]')) return false;
+      markAppShellVisualReady();
+      return true;
+    };
+    if (markWhenReady()) return;
+
+    const observer = new MutationObserver(() => {
+      if (markWhenReady()) observer.disconnect();
+    });
+    observer.observe(wrapper, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-ready'],
+    });
+    return () => observer.disconnect();
+  }, [wheelRoute]);
 
   const navItems = useMemo<MagnetBoardItem[]>(() => {
     const items: Array<MagnetBoardItem & { setting?: NavItemId }> = [
@@ -289,7 +317,7 @@ export function AppShell() {
       <a className="skip-link" href="#main-content">Skip to content</a>
 
       <nav className={styles.nav} aria-label="Primary">
-        <div className={styles.navBoardWrapper}>
+        <div ref={navBoardWrapperRef} className={styles.navBoardWrapper}>
           <MagnetBoard
             items={navItems}
             playMode={navPlayMode}
