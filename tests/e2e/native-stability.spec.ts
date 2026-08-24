@@ -340,6 +340,65 @@ test.describe('mobile native-shell contracts', () => {
     expect(closeSize.height).toBeGreaterThanOrEqual(44);
     expect(runtimeProblems).toEqual([]);
   });
+
+  test('Customizer color samples drag with the legacy hue and lightness gesture', async ({ page }) => {
+    const runtimeProblems = collectRuntimeProblems(page);
+    await page.goto('/');
+    await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
+
+    const customizer = page.getByRole('dialog', { name: 'Customizer' });
+    const swatch = customizer.getByRole('button', { name: /Adjust Canvas glow color/ });
+    const hexField = customizer.getByRole('textbox', { name: 'Canvas glow' });
+    const startingHex = await hexField.inputValue();
+    const box = await swatch.boundingBox();
+    expect(box).not.toBeNull();
+
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box!.x + box!.width / 2 + 40, box!.y + box!.height / 2 - 30, { steps: 5 });
+    await expect(hexField).not.toHaveValue(startingHex);
+    await page.mouse.up();
+
+    const committedHex = await hexField.inputValue();
+    expect(committedHex).toMatch(/^#[0-9A-F]{6}$/);
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--plum').trim().toUpperCase())).toBe(committedHex);
+    expect(runtimeProblems).toEqual([]);
+  });
+
+  test('Feeling details expose the complete mobile inference and persistent evidence close control', async ({ page }) => {
+    const runtimeProblems = collectRuntimeProblems(page);
+    await page.goto('/feelings/hurt');
+    const disclosure = page.getByRole('button', { name: /How this feeling may show up/ });
+    await expect(disclosure).toBeVisible();
+    await disclosure.click();
+
+    await expect(page.getByRole('heading', { name: 'Typical pattern' })).toBeVisible();
+    await expect(page.getByText('Low energy · Unpleasant', { exact: true })).toBeVisible();
+    await expect(page.locator('[data-option-id]')).toHaveCount(11);
+    const whyThese = page.getByRole('button', { name: 'Why these?' });
+    await whyThese.click();
+
+    const dialog = page.getByRole('dialog', { name: 'Why these?' });
+    const dialogBody = dialog.locator('[data-feeling-evidence-body]');
+    const close = dialog.getByRole('button', { name: 'Close' });
+    await expect(dialog).toBeVisible();
+    await expect(close).toBeFocused();
+    await dialogBody.evaluate((body) => { body.scrollTop = body.scrollHeight; });
+    expect(await dialogBody.evaluate((body) => body.scrollTop)).toBeGreaterThan(0);
+    const dialogBox = await dialog.boundingBox();
+    const closeBox = await close.boundingBox();
+    expect(dialogBox).not.toBeNull();
+    expect(closeBox).not.toBeNull();
+    expect(closeBox!.y).toBeGreaterThanOrEqual(dialogBox!.y);
+    expect(closeBox!.y + closeBox!.height).toBeLessThanOrEqual(dialogBox!.y + dialogBox!.height);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(whyThese).toBeFocused();
+
+    await page.goto('/feelings/energized');
+    await expect(page.getByRole('button', { name: /How this feeling may show up/ })).toHaveCount(0);
+    expect(runtimeProblems).toEqual([]);
+  });
 });
 
 test('Menu Journal opens the full-screen entry and History stays compact', async ({ page }) => {

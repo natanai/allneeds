@@ -1,0 +1,253 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { useDialogFocus } from '../../app/useDialogFocus';
+import {
+  collectFeelingEvidence,
+  formatZoneLabel,
+  normalizeIntensityBand,
+  type FeelingBodyCue,
+  type FeelingInferenceEntry,
+  type ZoneSuggestion,
+} from './feelingInferenceModel';
+import styles from './FeelingInference.module.css';
+
+type Skill = {
+  buttonLabel: string;
+  duration: string;
+  description: string;
+};
+
+const skillLibrary: Record<string, Skill> = {
+  labeling: {
+    buttonLabel: 'Label it',
+    duration: '15–45s',
+    description: 'Name the feeling softly—out loud or on paper—to give your brain a handle and reduce guessing loops.',
+  },
+  physiological_sigh: {
+    buttonLabel: 'Exhale-biased breath',
+    duration: '1–2 min',
+    description: 'Take two gentle inhales through your nose, then a long sigh out through your mouth. Repeat a few times to downshift arousal.',
+  },
+  slow_446: {
+    buttonLabel: '4-4-6 breath',
+    duration: '1–2 min',
+    description: 'Inhale for four counts, pause for four, and exhale for six. The longer exhale can invite a parasympathetic tilt.',
+  },
+  resonance_6bpm: {
+    buttonLabel: 'Resonance breath',
+    duration: '3–5 min',
+    description: 'Breathe at roughly six cycles per minute (for example, inhale five counts, exhale five) to steady heart-rate variability.',
+  },
+};
+
+const arousalLabels: Record<string, string> = {
+  high: 'High energy',
+  medium: 'Moderate energy',
+  low: 'Low energy',
+};
+
+type FeelingInferenceProps = {
+  entry: FeelingInferenceEntry;
+  feelingKey: string;
+  feelingTitle: string;
+  zoneSuggestions?: Record<string, ZoneSuggestion>;
+};
+
+function groupBodyCues(cues: FeelingBodyCue[]) {
+  const groups = new Map<string, { label: string; cues: FeelingBodyCue[] }>();
+  cues.forEach((cue) => {
+    const group = groups.get(cue.regionId) ?? { label: cue.regionLabel, cues: [] };
+    group.cues.push(cue);
+    groups.set(cue.regionId, group);
+  });
+  return [...groups.entries()].map(([id, group]) => ({ id, ...group }));
+}
+
+function IntensityDisplay({ cue }: { cue: FeelingBodyCue }) {
+  const band = normalizeIntensityBand(cue.intensityBand);
+  const energyLabel = cue.arousal ? arousalLabels[cue.arousal] : '';
+  const rangeLabel = band ? `${band[0]}–${band[1]} / 10` : '';
+  const label = [energyLabel, rangeLabel].filter(Boolean).join(' · ') || 'Intensity varies';
+  const start = band ? Math.max(0, Math.min(100, band[0] * 10)) : 0;
+  const end = band ? Math.max(start, Math.min(100, band[1] * 10)) : 0;
+  const width = band ? Math.min(100 - start, Math.max(4, end - start)) : 0;
+
+  return (
+    <div className={styles.intensity}>
+      <div className={styles.intensityLabel}>{label}</div>
+      {band ? (
+        <div className={styles.intensityMeter} role="img" aria-label={`Typical intensity ${band[0]} to ${band[1]} on a 0 to 10 scale.`}>
+          <span className={styles.intensityFill} style={{ left: `${start}%`, width: `${width}%` }} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function FeelingInference({
+  entry,
+  feelingKey,
+  feelingTitle,
+  zoneSuggestions = {},
+}: FeelingInferenceProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [openSkills, setOpenSkills] = useState<Set<string>>(() => new Set());
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const panelRef = useRef<HTMLElement>(null);
+  const evidenceDialogRef = useDialogFocus<HTMLElement>({
+    open: evidenceOpen,
+    onClose: () => setEvidenceOpen(false),
+  });
+  const groups = useMemo(() => groupBodyCues(entry.bodyCues ?? []), [entry.bodyCues]);
+  const evidence = useMemo(
+    () => collectFeelingEvidence(entry, feelingKey),
+    [entry, feelingKey],
+  );
+  const panelId = `feeling-inference-${feelingKey}`;
+  const evidenceTitleId = `feeling-inference-evidence-${feelingKey}`;
+
+  useEffect(() => {
+    setExpanded(false);
+    setOpenSkills(new Set());
+    setEvidenceOpen(false);
+  }, [feelingKey]);
+
+  function togglePanel() {
+    const next = !expanded;
+    setExpanded(next);
+    if (next) {
+      window.requestAnimationFrame(() => {
+        panelRef.current?.focus({ preventScroll: true });
+        panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }
+
+  function toggleSkill(skillId: string) {
+    setOpenSkills((current) => {
+      const next = new Set(current);
+      if (next.has(skillId)) next.delete(skillId);
+      else next.add(skillId);
+      return next;
+    });
+  }
+
+  return (
+    <section className={styles.wrapper} aria-label={`Alexithymia support for ${feelingTitle}`}>
+      <button
+        type="button"
+        className={styles.toggle}
+        aria-expanded={expanded}
+        aria-controls={panelId}
+        onClick={togglePanel}
+      >
+        <span className={styles.toggleCopy}>
+          <span className={styles.badge}>Alexithymia support</span>
+          <span className={styles.toggleLabel}>How this feeling may show up</span>
+        </span>
+      </button>
+
+      {expanded ? (
+        <div id={panelId} className={styles.panel}>
+          <section ref={panelRef} className={styles.inference} tabIndex={-1}>
+            {entry.zones?.length ? (
+              <section className={styles.section}>
+                <h3 className={styles.subheading}>Typical pattern</h3>
+                <div className={styles.zones}>
+                  {entry.zones.map((zone, index) => (
+                    <span
+                      key={zone}
+                      className={`${styles.zoneChip} ${index === 0 ? styles.primaryZone : ''}`}
+                      aria-label={index === 0 ? `${formatZoneLabel(zone, zoneSuggestions)} (primary)` : undefined}
+                    >
+                      {formatZoneLabel(zone, zoneSuggestions)}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            <section className={styles.section}>
+              <h3 className={styles.subheading}>Body cues</h3>
+              <p className={styles.disclaimer}>Possible cues, not a checklist or diagnosis.</p>
+              <div className={styles.bodyGroups}>
+                {groups.map((group) => (
+                  <article key={group.id} className={styles.bodyRegion} data-region-id={group.id}>
+                    <h4 className={styles.regionTitle}>{group.label}</h4>
+                    {group.cues.map((cue) => (
+                      <div key={cue.optionId} className={styles.cue} data-option-id={cue.optionId}>
+                        <h5 className={styles.cueTitle}>{cue.title}</h5>
+                        {cue.note ? <p className={styles.cueNote}>{cue.note}</p> : null}
+                        <IntensityDisplay cue={cue} />
+                      </div>
+                    ))}
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            {entry.skills?.length ? (
+              <section className={`${styles.section} ${styles.skillsSection}`}>
+                <h3 className={styles.subheading}>Try now</h3>
+                <div className={styles.skills}>
+                  {entry.skills.map((skillId) => {
+                    const skill = skillLibrary[skillId];
+                    if (!skill) return null;
+                    const detailId = `feeling-skill-${feelingKey}-${skillId}`;
+                    const skillOpen = openSkills.has(skillId);
+                    return (
+                      <article key={skillId} className={styles.skill}>
+                        <button type="button" aria-expanded={skillOpen} aria-controls={detailId} onClick={() => toggleSkill(skillId)}>
+                          {skill.buttonLabel}<span>{skill.duration}</span>
+                        </button>
+                        {skillOpen ? <p id={detailId}>{skill.description}</p> : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
+
+            <div className={styles.actions}>
+              <button type="button" onClick={() => setEvidenceOpen(true)}>Why these?</button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {evidenceOpen ? (
+        <div className={styles.popoverBackdrop} role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setEvidenceOpen(false);
+        }}>
+          <section
+            ref={evidenceDialogRef}
+            className={styles.popover}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={evidenceTitleId}
+            tabIndex={-1}
+          >
+            <header className={styles.popoverHeader}>
+              <h3 id={evidenceTitleId}>Why these?</h3>
+              <button type="button" onClick={() => setEvidenceOpen(false)} data-dialog-initial-focus>Close</button>
+            </header>
+            <div className={styles.popoverBody} data-feeling-evidence-body>
+              <ul className={styles.evidenceList}>
+                {evidence.supports.map((support) => (
+                  <li key={`${support.label}|${support.ref ?? ''}|${support.href ?? ''}`}>
+                    <strong>{support.label}</strong>
+                    {support.ref ? support.href ? (
+                      <a href={support.href} target="_blank" rel="noopener noreferrer">{support.ref}</a>
+                    ) : <span>{support.ref}</span> : null}
+                  </li>
+                ))}
+              </ul>
+              <h4>Limitations</h4>
+              <ul className={styles.limitations}>{evidence.limitations.map((limitation) => <li key={limitation}>{limitation}</li>)}</ul>
+            </div>
+          </section>
+        </div>
+      ) : null}
+    </section>
+  );
+}

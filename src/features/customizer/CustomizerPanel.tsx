@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
 import {
@@ -13,6 +13,7 @@ import {
   type NavItemId,
   type ThemeValues,
 } from './customizerSettings';
+import { colorFromDrag, hexToHsl, normalizeHex, type HslColor } from './colorDrag';
 import styles from './CustomizerPanel.module.css';
 
 const labels: Record<keyof ThemeValues, string> = {
@@ -31,9 +32,18 @@ const navLabels: Array<[NavItemId, string]> = [
   ['bodyCues', 'Body cues magnet'], ['journalDashboard', 'History magnet'],
 ];
 
-const hexPattern = /^#[0-9a-f]{6}$/i;
-
 type CustomizerPanelProps = { onClose: () => void };
+
+type SwatchDrag = {
+  key: keyof ThemeValues;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  startHsl: HslColor;
+  startHex: string;
+  previewHex: string;
+  moved: boolean;
+};
 
 export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const initial = readTheme();
@@ -42,6 +52,9 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const [preset, setPreset] = useState('');
   const [navSettings, setNavSettings] = useState(readNavSettings);
   const [tiltStatus, setTiltStatus] = useState('Device tilt is used automatically when the browser allows it.');
+  const swatchDrag = useRef<SwatchDrag | null>(null);
+  const suppressSwatchClick = useRef(false);
+  const nativePickers = useRef<Partial<Record<keyof ThemeValues, HTMLInputElement | null>>>({});
   const panelRef = useDialogFocus<HTMLElement>({ open: true, onClose, modal: false });
 
   useEffect(() => {
@@ -57,14 +70,63 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   }, [navSettings]);
 
   function updateHex(key: keyof ThemeValues, raw: string) {
-    const next = raw.startsWith('#') ? raw : `#${raw}`;
-    if (hexPattern.test(next)) { setValues((current) => ({ ...current, [key]: next.toUpperCase() })); setPreset(''); }
+    const next = normalizeHex(raw);
+    if (next) { setValues((current) => ({ ...current, [key]: next })); setPreset(''); }
   }
 
   function choosePreset(name: string) {
     setPreset(name);
     const match = palettes.find((palette) => palette.name === name);
     if (match) setValues(match.values);
+  }
+
+  function beginSwatchDrag(event: ReactPointerEvent<HTMLButtonElement>, key: keyof ThemeValues) {
+    if (event.button !== 0) return;
+    const startHex = values[key];
+    const startHsl = hexToHsl(startHex);
+    if (!startHsl) return;
+    event.preventDefault();
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
+    swatchDrag.current = {
+      key,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startHsl,
+      startHex,
+      previewHex: startHex,
+      moved: false,
+    };
+  }
+
+  function moveSwatch(event: ReactPointerEvent<HTMLButtonElement>) {
+    const drag = swatchDrag.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+    const nextHex = colorFromDrag(drag.startHsl, deltaX, deltaY, event.shiftKey);
+    if (nextHex === drag.previewHex) return;
+    drag.previewHex = nextHex;
+    drag.moved = true;
+    setValues((current) => ({ ...current, [drag.key]: nextHex }));
+    setPreset('');
+  }
+
+  function finishSwatchDrag(event: ReactPointerEvent<HTMLButtonElement>, commit: boolean) {
+    const drag = swatchDrag.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    try { event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
+    if (!commit) setValues((current) => ({ ...current, [drag.key]: drag.startHex }));
+    suppressSwatchClick.current = drag.moved || !commit;
+    swatchDrag.current = null;
+  }
+
+  function openNativePicker(key: keyof ThemeValues) {
+    if (suppressSwatchClick.current) {
+      suppressSwatchClick.current = false;
+      return;
+    }
+    nativePickers.current[key]?.click();
   }
 
   function reset() {
@@ -99,7 +161,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
 
         <label className={styles.range}><span>Corner roundness <output>{roundness}%</output></span><input type="range" min="0" max="200" value={roundness} aria-label={`Corner roundness ${roundness}%`} onChange={(event) => setRoundness(Number(event.target.value))} /></label>
 
-        <div className={styles.colors}>{(Object.keys(values) as Array<keyof ThemeValues>).map((key) => <label key={key} className={styles.colorField}><span>{labels[key]}</span><div><input type="color" value={values[key]} aria-label={`Pick ${labels[key]} color`} onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} /><input key={values[key]} type="text" defaultValue={values[key]} aria-label={labels[key]} maxLength={7} onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></div></label>)}</div>
+        <div className={styles.colors}>{(Object.keys(values) as Array<keyof ThemeValues>).map((key) => <div key={key} className={styles.colorField}><span>{labels[key]}</span><div><button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${labels[key]} color. Drag to change it, or click to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} /><input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} hidden onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} /><input key={values[key]} type="text" defaultValue={values[key]} aria-label={labels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></div></div>)}</div>
 
         <fieldset className={styles.navSettings}><legend>Navigation magnets</legend><p>Choose which magnets appear in the top navigation bar.</p><div className={styles.alwaysOn}><span>Menu magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Home magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Customizer magnet</span><small>Always on</small></div>{navLabels.map(([key, label]) => <label key={key}><input type="checkbox" checked={navSettings[key]} onChange={(event) => setNavSettings((current) => ({ ...current, [key]: event.target.checked }))} /><span>{label}</span></label>)}</fieldset>
 

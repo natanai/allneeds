@@ -3,8 +3,11 @@ import { Link, useParams } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
+import { loadBodyCueResources, readBodyCueResources } from '../../app/appResources';
 import { assetPath, feelingsBySlug } from '../../data/catalog';
 import { readMagnetPlayPreference } from '../../persistence/magnetLayoutStore';
+import { FeelingInference } from './FeelingInference';
+import { resolveFeelingInference, type ReverseInferenceIndex, type ZoneSuggestion } from './feelingInferenceModel';
 import styles from './FeelingDetailPage.module.css';
 
 export function FeelingDetailPage() {
@@ -13,10 +16,22 @@ export function FeelingDetailPage() {
   const storageKey = `/feelings/${slug}/:0`;
   const [playMode, setPlayMode] = useState(() => readMagnetPlayPreference(storageKey));
   const [shuffleVersion, setShuffleVersion] = useState(0);
+  const [bodyCueResources, setBodyCueResources] = useState(readBodyCueResources);
 
   useEffect(() => {
     setPlayMode(readMagnetPlayPreference(storageKey));
   }, [storageKey]);
+
+  useEffect(() => {
+    if (bodyCueResources) return;
+    let active = true;
+    void loadBodyCueResources().then((resources) => {
+      if (active) setBodyCueResources(resources);
+    }).catch(() => {
+      // Feeling pages remain useful if the optional support resource cannot load.
+    });
+    return () => { active = false; };
+  }, [bodyCueResources]);
 
   const needs = useMemo<MagnetBoardItem[]>(() => (feeling?.needs ?? []).map((need) => ({
     id: `needs-${need.slug}`,
@@ -26,6 +41,11 @@ export function FeelingDetailPage() {
     tone: 'sky',
     iconUrl: assetPath(`icons/needs/${need.slug}.svg`),
   })), [feeling]);
+  const inference = useMemo(
+    () => resolveFeelingInference(bodyCueResources?.reverseInference as ReverseInferenceIndex | null, slug),
+    [bodyCueResources, slug],
+  );
+  const zoneSuggestions = bodyCueResources?.supportData.QUADRANT_SUGGESTIONS as Record<string, ZoneSuggestion> | undefined;
 
   if (!feeling) {
     return (
@@ -84,6 +104,15 @@ export function FeelingDetailPage() {
             ) : null}
           </figure>
         </section>
+      ) : null}
+
+      {inference ? (
+        <FeelingInference
+          entry={inference.entry}
+          feelingKey={inference.feelingKey}
+          feelingTitle={feeling.title}
+          zoneSuggestions={zoneSuggestions}
+        />
       ) : null}
     </article>
   );
