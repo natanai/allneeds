@@ -25,20 +25,22 @@ test('mounts the app beneath an opaque full-screen splash while local resources 
   expect(delayedLocalResource).toBe(true);
 
   const coverage = await boot.evaluate((element) => {
-    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
     return {
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-      viewportWidth: document.documentElement.clientWidth,
-      viewportHeight: document.documentElement.clientHeight,
+      position: style.position,
+      top: style.top,
+      right: style.right,
+      bottom: style.bottom,
+      left: style.left,
     };
   });
-  expect(coverage.top).toBe(0);
-  expect(coverage.left).toBe(0);
-  expect(coverage.width).toBe(coverage.viewportWidth);
-  expect(coverage.height).toBe(coverage.viewportHeight);
+  expect(coverage).toEqual({
+    position: 'fixed',
+    top: '0px',
+    right: '0px',
+    bottom: '0px',
+    left: '0px',
+  });
   await expect(page.locator('.app-boot__card')).toBeVisible();
   await expect(page.locator('.app-boot__label')).toHaveText('Getting everything ready…');
 
