@@ -17,6 +17,18 @@ import { resolveThemePresetName, themePresets } from './themePresets';
 import styles from './CustomizerPanel.module.css';
 
 const labels: Record<keyof ThemeValues, string> = {
+  plum: 'Primary',
+  lavender: 'Quiet',
+  ink: 'Text',
+  inkSoft: 'Secondary',
+  rose: 'Action',
+  mint: 'Positive',
+  gold: 'Attention',
+  sky: 'Selection',
+  outline: 'Outline',
+};
+
+const colorAriaLabels: Record<keyof ThemeValues, string> = {
   plum: 'Primary emphasis',
   lavender: 'Quiet emphasis',
   ink: 'Primary foreground',
@@ -29,10 +41,10 @@ const labels: Record<keyof ThemeValues, string> = {
 };
 
 const navLabels: Array<[NavItemId, string]> = [
-  ['home', 'Home magnet'], ['customizer', 'Customizer magnet'],
-  ['journal', 'Journal magnet'], ['inventory', 'Inventory magnet'], ['observations', 'Observations magnet'],
-  ['fauxFeelings', 'Faux feelings magnet'], ['feelings', 'Feelings magnet'], ['needs', 'Needs magnet'],
-  ['bodyCues', 'Body cues magnet'], ['journalDashboard', 'History magnet'],
+  ['home', 'Home'], ['customizer', 'Customizer'],
+  ['journal', 'Journal'], ['inventory', 'Inventory'], ['observations', 'Observations'],
+  ['fauxFeelings', 'Faux feelings'], ['feelings', 'Feelings'], ['needs', 'Needs'],
+  ['bodyCues', 'Body cues'], ['journalDashboard', 'History'],
 ];
 
 type CustomizerPanelProps = { onClose: () => void };
@@ -148,6 +160,49 @@ function orientationLockPresentation(lock: OrientationLockState) {
     status: 'Keep the current screen orientation.',
     disabled: false,
   };
+}
+
+function PresetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m12 3 1.1 3.2L16 7.5l-2.9 1.3L12 12l-1.1-3.2L8 7.5l2.9-1.3L12 3Z" />
+      <path d="m18 13 .8 2.2L21 16l-2.2.8L18 19l-.8-2.2L15 16l2.2-.8L18 13Z" />
+      <path d="m6 13 .7 1.8 1.8.7-1.8.7L6 18l-.7-1.8-1.8-.7 1.8-.7L6 13Z" />
+    </svg>
+  );
+}
+
+function CornersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 10V8a4 4 0 0 1 4-4h2" />
+      <path d="M14 4h2a4 4 0 0 1 4 4v2" />
+      <path d="M20 14v2a4 4 0 0 1-4 4h-2" />
+      <path d="M10 20H8a4 4 0 0 1-4-4v-2" />
+    </svg>
+  );
+}
+
+function PaletteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="8" cy="8" r="2" />
+      <circle cx="16" cy="8" r="2" />
+      <circle cx="8" cy="16" r="2" />
+      <circle cx="16" cy="16" r="2" />
+    </svg>
+  );
+}
+
+function NavigationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="4" rx="2" />
+      <rect x="4" y="11" width="7" height="4" rx="2" />
+      <rect x="13" y="11" width="7" height="4" rx="2" />
+      <rect x="4" y="17" width="16" height="2" rx="1" />
+    </svg>
+  );
 }
 
 function TiltIcon() {
@@ -326,16 +381,63 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
 
   return (
     <section ref={panelRef} className={styles.panel} role="dialog" aria-modal="false" aria-labelledby="customizer-title" tabIndex={-1}>
-      <header className={styles.header}><div><p id="customizer-title" className={styles.eyebrow}>Customizer</p><p className={styles.subtitle}>Fine-tune colors, corners, and device controls.</p></div><button type="button" className={styles.close} onClick={onClose} aria-label="Close customizer" data-dialog-initial-focus>×</button></header>
+      <header className={styles.header}>
+        <p id="customizer-title" className={styles.title}>Customizer</p>
+        <button type="button" className={styles.close} onClick={onClose} aria-label="Close customizer" data-dialog-initial-focus>×</button>
+      </header>
 
       <div className={styles.scrollBody} data-customizer-scroll-body>
-        <label className={styles.preset}><span>Presets</span><select value={preset} onChange={(event) => choosePreset(event.target.value)}><option value="">Current colors</option>{themePresets.map((themePreset) => <option key={themePreset.name} value={themePreset.name}>{themePreset.name}</option>)}</select></label>
+        <section className={styles.settingsGroup} aria-label="Appearance">
+          <label className={styles.settingsRow}>
+            <span className={styles.rowIcon}><PresetIcon /></span>
+            <span className={styles.rowCopy}><span>Preset</span></span>
+            <select className={styles.compactSelect} value={preset} onChange={(event) => choosePreset(event.target.value)}>
+              <option value="">Current colors</option>
+              {themePresets.map((themePreset) => <option key={themePreset.name} value={themePreset.name}>{themePreset.name}</option>)}
+            </select>
+          </label>
 
-        <label className={styles.range}><span>Corner roundness <output>{roundness}%</output></span><input type="range" min="0" max="200" value={roundness} aria-label={`Corner roundness ${roundness}%`} onChange={(event) => { setRoundness(Number(event.target.value)); setPreset(''); }} /></label>
+          <label className={styles.settingsRow}>
+            <span className={styles.rowIcon}><CornersIcon /></span>
+            <span className={styles.rowCopy}><span>Corners</span><output>{roundness}%</output></span>
+            <input className={styles.inlineRange} type="range" min="0" max="200" value={roundness} aria-label={`Corner roundness ${roundness}%`} onChange={(event) => { setRoundness(Number(event.target.value)); setPreset(''); }} />
+          </label>
+        </section>
 
-        <div className={styles.colors}>{(Object.keys(values) as Array<keyof ThemeValues>).map((key) => <div key={key} className={styles.colorField}><span>{labels[key]}</span><div><button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${labels[key]} color. Drag to change it, or click to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} /><input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} hidden onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} /><input key={values[key]} type="text" defaultValue={values[key]} aria-label={labels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></div></div>)}</div>
+        <section className={styles.compactSection} aria-labelledby="colors-title">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon}><PaletteIcon /></span>
+            <h2 id="colors-title">Colors</h2>
+            <small>Tap swatch · edit hex</small>
+          </div>
+          <div className={styles.colors}>
+            {(Object.keys(values) as Array<keyof ThemeValues>).map((key) => (
+              <div key={key} className={styles.colorField}>
+                <span className={styles.colorLabel}>{labels[key]}</span>
+                <button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${colorAriaLabels[key]} color. Drag to change it, or click to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} />
+                <input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} hidden onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} />
+                <input className={styles.hexInput} key={values[key]} type="text" defaultValue={values[key]} aria-label={colorAriaLabels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} />
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <fieldset className={styles.navSettings}><legend>Navigation magnets</legend><p>Choose which magnets appear in the top navigation bar.</p><div className={styles.alwaysOn}><span>Menu magnet</span><small>Always on</small></div>{navLabels.map(([key, label]) => <label key={key}><input type="checkbox" checked={navSettings[key]} onChange={(event) => setNavSettings((current) => ({ ...current, [key]: event.target.checked }))} /><span>{label}</span></label>)}</fieldset>
+        <section className={styles.compactSection} aria-labelledby="navigation-title">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon}><NavigationIcon /></span>
+            <h2 id="navigation-title">Navigation</h2>
+            <small>Menu always on</small>
+          </div>
+          <div className={styles.navGrid}>
+            {navLabels.map(([key, label]) => (
+              <label key={key} className={styles.navOption}>
+                <span>{label}</span>
+                <input type="checkbox" role="switch" checked={navSettings[key]} onChange={(event) => setNavSettings((current) => ({ ...current, [key]: event.target.checked }))} />
+                <span className={styles.toggleTrack} aria-hidden="true" />
+              </label>
+            ))}
+          </div>
+        </section>
 
         <section className={styles.deviceControls} aria-label="Device controls">
           <div className={styles.deviceControl} data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}>

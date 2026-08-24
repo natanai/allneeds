@@ -17,98 +17,197 @@
 .header {
   position: relative;
   flex: 0 0 auto;
-  padding: 1.1rem;
+  min-height: 3.35rem;
+  padding: 0.55rem 0.7rem 0.55rem 0.85rem;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 2px solid color-mix(in srgb, var(--outline) 32%, transparent);
+  gap: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 24%, transparent);
   background: color-mix(in srgb, var(--lavender) 82%, var(--surface-raised) 18%);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+}
+
+.close {
+  min-width: 38px;
+  min-height: 38px;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-circle, 50%);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .scrollBody {
   min-height: 0;
   flex: 1 1 auto;
-  padding: 0 1.1rem 1.1rem;
+  padding: 0.6rem 0.7rem 0.75rem;
+  display: grid;
+  gap: 0.65rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
-.eyebrow {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.settingsGroup,
+.deviceControls {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--outline) 26%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 }
 
-.subtitle {
-  margin: 0.1rem 0 0;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.close {
-  min-width: 44px;
-  min-height: 44px;
-  border: 2px solid var(--outline);
-  border-radius: var(--radius-circle, 50%);
-  background: var(--surface-raised);
-  color: var(--ink);
-  font-size: 1.6rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.preset,
-.range {
-  margin-top: 1rem;
+.settingsRow {
+  min-height: 3.15rem;
+  padding: 0.42rem 0.55rem;
   display: grid;
-  gap: 0.4rem;
-  font-weight: 700;
+  grid-template-columns: 1.85rem minmax(0, 1fr) auto;
+  gap: 0.48rem;
+  align-items: center;
 }
 
-.preset select {
-  width: 100%;
-  min-height: 44px;
-  padding: 0.55rem 0.65rem;
-  border: 2px solid var(--outline);
+.settingsRow + .settingsRow {
+  border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
+}
+
+.rowIcon,
+.sectionIcon,
+.deviceIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+}
+
+.rowIcon {
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: calc(var(--radius-md) * 0.78);
+  background: color-mix(in srgb, var(--sky) 64%, var(--surface-raised) 36%);
+}
+
+.rowIcon svg,
+.sectionIcon svg,
+.deviceIcon svg {
+  width: 1.08rem;
+  height: 1.08rem;
+}
+
+.rowCopy {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.38rem;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.rowCopy output {
+  color: var(--ink-soft);
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.compactSelect {
+  max-width: 9.6rem;
+  min-width: 7.4rem;
+  min-height: 2rem;
+  padding: 0.25rem 1.6rem 0.25rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 38%, transparent);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
   color: var(--ink);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+
+.inlineRange {
+  width: min(8.6rem, 34vw);
+  margin: 0;
+  accent-color: var(--plum);
+}
+
+.compactSection {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.sectionHeader {
+  min-height: 1.8rem;
+  padding-inline: 0.08rem;
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+}
+
+.sectionIcon {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: calc(var(--radius-md) * 0.65);
+  background: color-mix(in srgb, var(--lavender) 62%, var(--surface-raised) 38%);
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.015em;
+}
+
+.sectionHeader small {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: 0.56rem;
+  font-weight: 600;
 }
 
 .colors {
-  margin-top: 1rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
+  gap: 0.34rem;
 }
 
 .colorField {
   min-width: 0;
+  min-height: 2.35rem;
+  padding: 0.28rem 0.34rem;
   display: grid;
-  gap: 0.3rem;
-  color: var(--ink-soft);
-  font-size: 0.72rem;
-  font-weight: 600;
+  grid-template-columns: minmax(0, 1fr) 1.65rem 4.05rem;
+  gap: 0.28rem;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--outline) 20%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-raised) 84%, transparent);
 }
 
-.colorField > div {
-  display: grid;
-  grid-template-columns: 2.75rem 1fr;
+.colorLabel {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.63rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .swatch {
-  width: 100%;
-  height: 2.75rem;
-  padding: 0.15rem;
-  border: 2px solid var(--outline);
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--surface-raised) 70%, transparent);
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  border: 1.5px solid var(--outline);
+  border-radius: calc(var(--radius-md) * 0.72);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--surface-raised) 72%, transparent);
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -131,108 +230,119 @@
   border: 0;
 }
 
-.colorField input[type='text'] {
+.hexInput {
   min-width: 0;
-  height: 2.75rem;
-  padding: 0.4rem;
-  border: 2px solid var(--outline);
-  border-left: 0;
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  background: var(--surface-raised);
+  width: 100%;
+  height: 1.72rem;
+  padding: 0.16rem 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
+  border-radius: calc(var(--radius-md) * 0.72);
+  background: color-mix(in srgb, var(--surface-raised) 90%, transparent);
   color: var(--ink);
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
 }
 
-.range span {
-  display: flex;
-  justify-content: space-between;
-}
-
-.range input {
-  width: 100%;
-}
-
-.navSettings {
-  margin-top: 1rem;
-  padding: 0;
+.navGrid {
   display: grid;
-  gap: 0.45rem;
-  border: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.34rem;
 }
 
-.navSettings legend {
-  font-family: var(--font-display);
-  font-weight: 800;
-}
-
-.navSettings > p {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 0.78rem;
-}
-
-.navSettings label,
-.alwaysOn {
-  min-height: 42px;
-  padding: 0.45rem 0.65rem;
-  display: flex;
+.navOption {
+  position: relative;
+  min-width: 0;
+  min-height: 2.35rem;
+  padding: 0.35rem 0.42rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.38rem;
   align-items: center;
-  gap: 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 20%, transparent);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--surface-raised) 68%, transparent);
-  font-size: 0.82rem;
+  background: color-mix(in srgb, var(--surface-raised) 84%, transparent);
+  color: var(--ink);
+  font-size: 0.64rem;
   font-weight: 700;
+  cursor: pointer;
 }
 
-.navSettings input {
-  width: 1.25rem;
-  height: 1.25rem;
-  accent-color: var(--plum);
+.navOption > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.alwaysOn small {
-  margin-left: auto;
-  color: var(--ink-soft);
+.navOption input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggleTrack {
+  position: relative;
+  width: 1.9rem;
+  height: 1.08rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-soft) 18%, var(--surface-raised) 82%);
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.toggleTrack::after {
+  content: '';
+  position: absolute;
+  top: 0.13rem;
+  left: 0.13rem;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--outline) 28%, transparent);
+  transition: transform 140ms ease;
+}
+
+.navOption input:checked + .toggleTrack {
+  border-color: color-mix(in srgb, var(--plum) 56%, var(--outline) 44%);
+  background: color-mix(in srgb, var(--mint) 72%, var(--plum) 28%);
+}
+
+.navOption input:checked + .toggleTrack::after {
+  transform: translateX(0.8rem);
+}
+
+.navOption input:focus-visible + .toggleTrack {
+  outline: 2px solid color-mix(in srgb, var(--plum) 45%, transparent);
+  outline-offset: 2px;
 }
 
 .deviceControls {
-  margin-top: 0.8rem;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
-  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 }
 
 .deviceControl {
-  min-height: 3.65rem;
-  padding: 0.5rem 0.6rem;
+  min-height: 3.35rem;
+  padding: 0.44rem 0.52rem;
   display: grid;
-  grid-template-columns: 2.05rem minmax(0, 1fr) auto;
-  gap: 0.55rem;
+  grid-template-columns: 1.9rem minmax(0, 1fr) auto;
+  gap: 0.48rem;
   align-items: center;
 }
 
 .deviceControl + .deviceControl {
-  border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
 }
 
 .deviceIcon {
-  width: 2.05rem;
-  height: 2.05rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: calc(var(--radius-md) * 0.8);
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: calc(var(--radius-md) * 0.75);
   background: color-mix(in srgb, var(--mint) 70%, var(--surface-raised) 30%);
-  color: var(--ink);
-}
-
-.deviceIcon svg {
-  width: 1.2rem;
-  height: 1.2rem;
 }
 
 .deviceCopy {
@@ -245,27 +355,27 @@
 }
 
 .deviceCopy h3 {
-  font-size: 0.8rem;
-  line-height: 1.15;
+  font-size: 0.76rem;
+  line-height: 1.12;
 }
 
 .deviceCopy p {
-  margin-top: 0.08rem;
+  margin-top: 0.06rem;
   color: var(--ink-soft);
-  font-size: 0.65rem;
-  line-height: 1.25;
+  font-size: 0.61rem;
+  line-height: 1.2;
 }
 
 .controlAction {
-  min-width: 2.35rem;
-  min-height: 2.15rem;
-  padding: 0.28rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 34%, transparent);
+  min-width: 2.25rem;
+  min-height: 1.95rem;
+  padding: 0.24rem 0.48rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 32%, transparent);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--mint) 78%, var(--surface-raised) 22%);
   color: var(--ink);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
@@ -284,8 +394,7 @@
 }
 
 .footer {
-  margin-top: 0.65rem;
-  padding: 0 0.1rem 0.15rem;
+  padding: 0 0.08rem 0.05rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -293,37 +402,37 @@
 }
 
 .resetAction {
-  min-height: 2.2rem;
-  padding: 0.32rem 0.5rem;
+  min-height: 2rem;
+  padding: 0.28rem 0.45rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 20%, transparent);
+  gap: 0.3rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--surface-raised) 75%, transparent);
   color: var(--ink-soft);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 650;
   cursor: pointer;
 }
 
 .resetAction svg {
-  width: 0.9rem;
-  height: 0.9rem;
+  width: 0.82rem;
+  height: 0.82rem;
 }
 
 .delete {
-  min-height: 1.6rem;
-  padding: 0.2rem 0.1rem;
+  min-height: 1.45rem;
+  padding: 0.16rem 0.08rem;
   border: 0;
   background: transparent;
   color: var(--ink-soft);
   font: inherit;
-  font-size: 0.58rem;
+  font-size: 0.54rem;
   font-weight: 500;
   line-height: 1;
-  opacity: 0.32;
+  opacity: 0.28;
   cursor: pointer;
 }
 
@@ -336,45 +445,79 @@
 
 @media (max-width: 430px) {
   .header {
-    padding-top: max(0.8rem, env(safe-area-inset-top));
-    padding-right: max(0.8rem, env(safe-area-inset-right));
-    padding-bottom: 0.8rem;
-    padding-left: max(0.8rem, env(safe-area-inset-left));
-  }
-
-  .subtitle {
-    font-size: 0.9rem;
+    min-height: 3.05rem;
+    padding-top: max(0.45rem, env(safe-area-inset-top));
+    padding-right: max(0.55rem, env(safe-area-inset-right));
+    padding-bottom: 0.45rem;
+    padding-left: max(0.7rem, env(safe-area-inset-left));
   }
 
   .close {
-    min-width: 40px;
-    min-height: 40px;
+    min-width: 36px;
+    min-height: 36px;
   }
 
   .scrollBody {
-    padding-right: max(0.8rem, env(safe-area-inset-right));
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-    padding-left: max(0.8rem, env(safe-area-inset-left));
+    padding-right: max(0.58rem, env(safe-area-inset-right));
+    padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
+    padding-left: max(0.58rem, env(safe-area-inset-left));
+    gap: 0.58rem;
   }
 
-  .colors {
-    grid-template-columns: 1fr;
+  .settingsRow {
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    min-height: 2.95rem;
+    padding: 0.38rem 0.48rem;
+  }
+
+  .rowIcon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .compactSelect {
+    min-width: 6.9rem;
+    max-width: 8.4rem;
+  }
+
+  .inlineRange {
+    width: min(7.3rem, 31vw);
+  }
+
+  .colorField {
+    grid-template-columns: minmax(0, 1fr) 1.55rem 3.85rem;
+    min-height: 2.25rem;
+    padding-inline: 0.3rem;
+  }
+
+  .swatch {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+
+  .hexInput {
+    height: 1.62rem;
+    font-size: 0.57rem;
+  }
+
+  .navOption {
+    min-height: 2.25rem;
+    padding-inline: 0.38rem;
   }
 
   .deviceControl {
-    grid-template-columns: 1.9rem minmax(0, 1fr) auto;
-    gap: 0.48rem;
-    min-height: 3.45rem;
-    padding: 0.46rem 0.5rem;
+    min-height: 3.2rem;
+    padding: 0.4rem 0.48rem;
+  }
+}
+
+@media (max-width: 345px) {
+  .colors,
+  .navGrid {
+    grid-template-columns: 1fr;
   }
 
-  .deviceIcon {
-    width: 1.9rem;
-    height: 1.9rem;
-  }
-
-  .controlAction {
-    min-height: 2rem;
-    padding-inline: 0.48rem;
+  .inlineRange {
+    width: 6.4rem;
   }
 }
