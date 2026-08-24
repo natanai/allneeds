@@ -47,6 +47,22 @@ type TiltPermissionState = {
   pending: boolean;
 };
 
+type OrientationLockTarget = 'portrait' | 'landscape';
+
+type LockableScreenOrientation = ScreenOrientation & {
+  lock?: (orientation: OrientationLockTarget) => Promise<void>;
+  unlock?: () => void;
+};
+
+type OrientationLockState = {
+  mobile: boolean;
+  available: boolean;
+  locked: boolean;
+  pending: boolean;
+  error: boolean;
+  target: OrientationLockTarget | null;
+};
+
 function detectTiltPermission(): TiltPermissionState {
   const orientation = typeof window === 'undefined' ? undefined : window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
     requestPermission?: () => Promise<'granted' | 'denied'>;
@@ -68,6 +84,59 @@ function tiltPresentation(tilt: TiltPermissionState) {
   return { label: 'Request permission', status: 'Request permission to let magnets follow your device tilt.', disabled: false };
 }
 
+function isMobileLikeDevice() {
+  if (typeof window === 'undefined') return false;
+  return navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+}
+
+function getLockableOrientation() {
+  if (typeof screen === 'undefined' || !screen.orientation) return null;
+  return screen.orientation as LockableScreenOrientation;
+}
+
+function currentOrientationTarget(orientation: LockableScreenOrientation | null): OrientationLockTarget {
+  if (orientation?.type?.startsWith('landscape')) return 'landscape';
+  if (orientation?.type?.startsWith('portrait')) return 'portrait';
+  return window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+}
+
+function detectOrientationLock(): OrientationLockState {
+  const mobile = isMobileLikeDevice();
+  const orientation = getLockableOrientation();
+  return {
+    mobile,
+    available: mobile && typeof orientation?.lock === 'function' && typeof orientation?.unlock === 'function',
+    locked: false,
+    pending: false,
+    error: false,
+    target: null,
+  };
+}
+
+function orientationLockPresentation(lock: OrientationLockState) {
+  if (!lock.available) return {
+    label: 'Unavailable',
+    status: 'This browser does not offer screen orientation lock here.',
+    disabled: true,
+  };
+  if (lock.pending) return { label: 'Locking…', status: 'Asking the browser to hold this orientation…', disabled: true };
+  if (lock.error) return {
+    label: 'Try again',
+    status: 'The browser blocked orientation lock. Installed or full-screen mode may be required.',
+    disabled: false,
+  };
+  if (lock.locked) return {
+    label: 'On',
+    status: `Locked to ${lock.target ?? 'the current'} orientation while this page is open.`,
+    disabled: false,
+  };
+  return {
+    label: 'Off',
+    status: 'Keep the current screen orientation while you use device tilt.',
+    disabled: false,
+  };
+}
+
 export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const initial = readTheme();
   const initialPreset = resolveThemePresetName(initial);
@@ -76,6 +145,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const [preset, setPreset] = useState(initialPreset);
   const [navSettings, setNavSettings] = useState(readNavSettings);
   const [tiltPermission, setTiltPermission] = useState(detectTiltPermission);
+  const [orientationLock, setOrientationLock] = useState(detectOrientationLock);
   const swatchDrag = useRef<SwatchDrag | null>(null);
   const suppressSwatchClick = useRef(false);
   const nativePickers = useRef<Partial<Record<keyof ThemeValues, HTMLInputElement | null>>>({});
@@ -151,8 +221,18 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     nativePickers.current[key]?.click();
   }
 
+  function unlockOrientation() {
+    const orientation = getLockableOrientation();
+    try { orientation?.unlock?.(); } catch { /* Unlock support can disappear after a browser mode change. */ }
+    setOrientationLock((current) => ({ ...current, locked: false, pending: false, error: false, target: null }));
+  }
+
   function reset() {
-    setValues({ ...defaultTheme }); setRoundness(100); setPreset('Default'); setNavSettings({ ...defaultNavSettings });
+    setValues({ ...defaultTheme });
+    setRoundness(100);
+    setPreset('Default');
+    setNavSettings({ ...defaultNavSettings });
+    if (orientationLock.locked) unlockOrientation();
   }
 
   async function requestTilt() {
@@ -167,6 +247,25 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     } catch { setTiltPermission((current) => ({ ...current, state: 'denied', pending: false })); }
   }
 
+  async function toggleOrientationLock() {
+    if (!orientationLock.available || orientationLock.pending) return;
+    if (orientationLock.locked) {
+      unlockOrientation();
+      return;
+    }
+
+    const orientation = getLockableOrientation();
+    if (!orientation?.lock) return;
+    const target = currentOrientationTarget(orientation);
+    setOrientationLock((current) => ({ ...current, pending: true, error: false, target }));
+    try {
+      await orientation.lock(target);
+      setOrientationLock((current) => ({ ...current, locked: true, pending: false, error: false, target }));
+    } catch {
+      setOrientationLock((current) => ({ ...current, locked: false, pending: false, error: true, target: null }));
+    }
+  }
+
   function deleteLocalData() {
     if (!window.confirm('Delete all allneeds.app data stored on this local origin? Export a backup first if you want to keep it.')) return;
     window.localStorage.clear();
@@ -177,6 +276,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   }
 
   const tilt = tiltPresentation(tiltPermission);
+  const orientation = orientationLockPresentation(orientationLock);
 
   return (
     <section ref={panelRef} className={styles.panel} role="dialog" aria-modal="false" aria-labelledby="customizer-title" tabIndex={-1}>
@@ -191,7 +291,20 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
 
         <fieldset className={styles.navSettings}><legend>Navigation magnets</legend><p>Choose which magnets appear in the top navigation bar.</p><div className={styles.alwaysOn}><span>Menu magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Home magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Customizer magnet</span><small>Always on</small></div>{navLabels.map(([key, label]) => <label key={key}><input type="checkbox" checked={navSettings[key]} onChange={(event) => setNavSettings((current) => ({ ...current, [key]: event.target.checked }))} /><span>{label}</span></label>)}</fieldset>
 
-        <section className={styles.tilt} aria-labelledby="tilt-title" data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}><div><h3 id="tilt-title">Device tilt access</h3><p id="tilt-description">Let magnets respond to how you hold your phone.</p></div><button type="button" role="switch" aria-checked={tiltPermission.state === 'granted'} aria-describedby="tilt-description tilt-status" disabled={tilt.disabled} onClick={requestTilt}>{tilt.label}</button><small id="tilt-status" role="status">{tilt.status}</small></section>
+        <section className={styles.deviceControls} aria-label="Device controls">
+          <div className={styles.deviceControl} data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}>
+            <div><h3 id="tilt-title">Device tilt access</h3><p id="tilt-description">Let magnets respond to how you hold your phone.</p></div>
+            <button type="button" role="switch" aria-label="Device tilt access" aria-checked={tiltPermission.state === 'granted'} aria-describedby="tilt-description tilt-status" disabled={tilt.disabled} onClick={requestTilt}>{tilt.label}</button>
+            <small id="tilt-status" role="status">{tilt.status}</small>
+          </div>
+          {orientationLock.mobile ? (
+            <div className={styles.deviceControl} data-state={orientationLock.error ? 'error' : orientationLock.pending ? 'pending' : orientationLock.locked ? 'granted' : 'unknown'}>
+              <div><h3 id="orientation-lock-title">Screen orientation lock</h3><p id="orientation-lock-description">Prevent an accidental screen rotation while using tilt.</p></div>
+              <button type="button" role="switch" aria-label="Lock screen orientation" aria-checked={orientationLock.locked} aria-describedby="orientation-lock-description orientation-lock-status" disabled={orientation.disabled} onClick={toggleOrientationLock}>{orientation.label}</button>
+              <small id="orientation-lock-status" role="status">{orientation.status}</small>
+            </div>
+          ) : null}
+        </section>
 
         <footer className={styles.footer}><button type="button" onClick={reset}>Reset to default</button><button type="button" className={styles.delete} onClick={deleteLocalData}>Delete localStorage</button></footer>
       </div>
