@@ -161,3 +161,60 @@ test.describe('mobile deep-scroll magnet dragging', () => {
     }
   });
 });
+
+test.describe('mobile deep-scroll pickup geometry', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('picking up Predictability does not scale its board translation', async ({ page }) => {
+    await page.goto('/needs');
+    const board = page.getByLabel('Needs magnet board');
+    await expect(board).toHaveAttribute('data-ready', 'true');
+    await ensurePhysicsOn(board);
+    const magnet = board.getByRole('link', { name: 'Predictability', exact: true });
+    await magnet.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    expect(scrollBefore).toBeGreaterThan(300);
+    const positionBefore = await magnetPosition(board, magnet);
+    const boxBefore = await magnet.boundingBox();
+    expect(boxBefore).not.toBeNull();
+
+    const startX = boxBefore!.x + boxBefore!.width / 2;
+    const startY = boxBefore!.y + boxBefore!.height / 2;
+    const session = await page.context().newCDPSession(page);
+    try {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: startX, y: startY, id: 1 }],
+      });
+      await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+      await page.waitForTimeout(220);
+
+      const positionAfter = await magnetPosition(board, magnet);
+      const boxAfter = await magnet.boundingBox();
+      expect(boxAfter).not.toBeNull();
+      expect(distance(positionAfter, positionBefore)).toBeLessThanOrEqual(1);
+
+      const centerBefore = {
+        x: boxBefore!.x + boxBefore!.width / 2,
+        y: boxBefore!.y + boxBefore!.height / 2,
+      };
+      const centerAfter = {
+        x: boxAfter!.x + boxAfter!.width / 2,
+        y: boxAfter!.y + boxAfter!.height / 2,
+      };
+      expect(Math.abs(centerAfter.x - centerBefore.x)).toBeLessThanOrEqual(3);
+      expect(centerAfter.y - centerBefore.y).toBeGreaterThanOrEqual(-18);
+      expect(centerAfter.y - centerBefore.y).toBeLessThanOrEqual(2);
+      expect(boxAfter!.width).toBeGreaterThan(boxBefore!.width * 1.04);
+      expect(Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore)).toBeLessThanOrEqual(1);
+    } finally {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: [],
+      }).catch(() => undefined);
+      await session.detach();
+    }
+  });
+});

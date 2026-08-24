@@ -85,6 +85,7 @@
   --magnet-lift: 0px;
   --magnet-wobble-y: 0px;
   --magnet-rock: 0deg;
+  --magnet-scale: 1;
   position: absolute;
   left: 0;
   top: 0;
@@ -114,13 +115,13 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   translate: 0 var(--magnet-lift);
-  scale: 1;
   transform:
     translate3d(var(--magnet-x), var(--magnet-y), 0)
     translateY(var(--magnet-wobble-y))
-    rotate(calc(var(--magnet-tilt) + var(--magnet-rock)));
+    rotate(calc(var(--magnet-tilt) + var(--magnet-rock)))
+    scale(var(--magnet-scale));
   transform-origin: center;
-  transition: transform 180ms ease, translate 180ms ease, scale 160ms ease, box-shadow 180ms ease, filter 180ms ease;
+  transition: transform 180ms ease, translate 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
 .board:not([data-ready='true']) .magnet {
@@ -148,7 +149,7 @@
 
 .playMode .magnet {
   will-change: transform;
-  transition: translate 180ms ease, scale 160ms ease, box-shadow 180ms ease, filter 180ms ease;
+  transition: translate 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
 .playMode .magnet:hover {
@@ -157,8 +158,8 @@
 
 .magnet[data-picked-up='true'] {
   --magnet-lift: -12px;
+  --magnet-scale: 1.065;
   z-index: 20;
-  scale: 1.065;
   box-shadow: 0 24px 30px color-mix(in srgb, var(--outline) 20%, transparent);
   filter: saturate(1.05) brightness(1.025);
 }
@@ -334,7 +335,6 @@
     left: var(--magnet-x);
     top: var(--magnet-y);
     translate: 0 0;
-    scale: 1;
     transform: none;
     will-change: auto;
     filter: none;
@@ -359,7 +359,7 @@
 
   .nav .magnet[data-picked-up='true'] {
     --magnet-lift: 0px;
-    scale: 1;
+    --magnet-scale: 1;
     filter: none;
     box-shadow: 0 13px 0 var(--shadow);
   }
@@ -376,11 +376,11 @@
     left: 0;
     top: 0;
     translate: 0 0;
-    scale: 1.01;
     transform:
       translate3d(var(--magnet-x), var(--magnet-y), 0)
       translateY(-3px)
-      rotate(var(--magnet-rock));
+      rotate(var(--magnet-rock))
+      scale(1.01);
     will-change: transform;
     box-shadow: 0 16px 18px color-mix(in srgb, var(--outline) 16%, transparent);
     transition: none;
