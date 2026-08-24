@@ -7,7 +7,7 @@ const remoteBootHosts = new Set([
   'plc.directory',
 ]);
 
-test('mounts the app beneath the boot overlay while local resources finish', async ({ page }) => {
+test('mounts the app beneath an opaque full-screen splash while local resources finish', async ({ page }) => {
   let delayedLocalResource = false;
   await page.route('**/data/reverse-inference.json', async (route) => {
     delayedLocalResource = true;
@@ -17,12 +17,33 @@ test('mounts the app beneath the boot overlay while local resources finish', asy
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-  await expect(page.locator('#app-boot')).toBeVisible();
+  const boot = page.locator('#app-boot');
+  await expect(boot).toBeVisible();
+  await expect(page.locator('.app-boot__card')).toBeVisible();
+  await expect(page.locator('.app-boot__label')).toHaveText('Getting everything ready…');
   await expect(page.locator('#root [aria-label="Primary navigation magnets"]')).toHaveCount(1);
+  await expect(page.locator('#root')).toHaveCSS('visibility', 'hidden');
   expect(delayedLocalResource).toBe(true);
 
+  const coverage = await boot.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  expect(coverage.top).toBe(0);
+  expect(coverage.left).toBe(0);
+  expect(coverage.width).toBe(coverage.viewportWidth);
+  expect(coverage.height).toBe(coverage.viewportHeight);
+
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('ready');
-  await expect(page.locator('#app-boot')).toHaveCount(0);
+  await expect(page.locator('#root')).toHaveCSS('visibility', 'visible');
+  await expect(boot).toHaveCount(0);
   await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveAttribute('data-ready', 'true');
 });
 
