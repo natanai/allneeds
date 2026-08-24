@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
 
+import { selectRuntimePrecachePaths } from './runtime-precache-policy.mjs';
+
 const dist = resolve('dist');
 const serviceWorkerPath = resolve(dist, 'service-worker.js');
 
@@ -17,11 +19,17 @@ async function listFiles(directory) {
 const files = (await listFiles(dist))
   .filter((path) => path !== serviceWorkerPath)
   .sort((a, b) => a.localeCompare(b));
-const publicPaths = files.map((path) => `./${relative(dist, path).split(sep).join('/')}`);
+const publicPathByFile = new Map(files.map((path) => [
+  path,
+  `./${relative(dist, path).split(sep).join('/')}`,
+]));
+const allPublicPaths = [...publicPathByFile.values()];
+const publicPaths = selectRuntimePrecachePaths(allPublicPaths);
+const runtimeFiles = files.filter((path) => publicPaths.includes(publicPathByFile.get(path)));
 const versionHash = createHash('sha256');
-versionHash.update('worker-strategy:network-first-navigation-v5-skip-waiting');
+versionHash.update('worker-strategy:cache-first-navigation-v6-runtime-manifest');
 
-for (const path of files) {
+for (const path of runtimeFiles) {
   versionHash.update(relative(dist, path));
   versionHash.update(await readFile(path));
 }
@@ -65,14 +73,10 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
-      try {
-        return await fetch(request);
-      } catch (error) {
-        const cache = await caches.open(CACHE_NAME);
-        const shell = await cache.match(fallbackUrl, { ignoreVary: true });
-        if (shell) return shell;
-        throw error;
-      }
+      const cache = await caches.open(CACHE_NAME);
+      const shell = await cache.match(fallbackUrl, { ignoreVary: true });
+      if (shell) return shell;
+      return fetch(request);
     })());
     return;
   }
@@ -87,4 +91,7 @@ self.addEventListener('fetch', (event) => {
 `;
 
 await writeFile(serviceWorkerPath, source);
-console.log(`Created dist/service-worker.js with ${publicPaths.length} public assets (${version}).`);
+console.log(
+  `Created dist/service-worker.js with ${publicPaths.length} runtime assets `
+  + `(${allPublicPaths.length - publicPaths.length} deploy-only files skipped; ${version}).`,
+);

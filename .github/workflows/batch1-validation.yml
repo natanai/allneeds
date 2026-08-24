@@ -1,4 +1,4 @@
-name: Batch 1 validation
+name: Full repository validation
 
 on:
   workflow_dispatch:
@@ -34,3 +34,6 @@ jobs:
 
       - name: Run full browser regression suite serially
         run: pnpm exec playwright test --workers=1
+
+      - name: Run offline/reconnect verification
+        run: pnpm test:e2e:outage

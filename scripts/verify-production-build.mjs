@@ -2,6 +2,11 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import {
+  REQUIRED_RUNTIME_PRECACHE_PATHS,
+  selectRuntimePrecachePaths,
+} from './runtime-precache-policy.mjs';
+
 const root = resolve('.');
 const dist = resolve(root, 'dist');
 const serviceWorkerPath = resolve(dist, 'service-worker.js');
@@ -20,9 +25,10 @@ async function listFiles(directory) {
 }
 
 const files = (await listFiles(dist)).sort((a, b) => a.localeCompare(b));
-const publicPaths = files
+const deployPaths = files
   .filter((path) => path !== serviceWorkerPath)
   .map((path) => `./${relative(dist, path).split(sep).join('/')}`);
+const expectedPrecachePaths = selectRuntimePrecachePaths(deployPaths);
 const worker = await readFile(serviceWorkerPath, 'utf8');
 const manifestMatch = worker.match(/const PRECACHE_PATHS = (\[[\s\S]*?\]);/);
 if (!manifestMatch?.[1]) fail('the generated service worker has no readable precache manifest.');
@@ -35,18 +41,27 @@ if (new Set(precachePaths).size !== precachePaths.length) fail('the precache man
 if (precachePaths.some((path) => /^https?:/i.test(path) || path.includes('allneeds-api'))) {
   fail('the precache manifest contains an external URL or API route.');
 }
-if (JSON.stringify(precachePaths) !== JSON.stringify(publicPaths)) {
-  const missing = publicPaths.filter((path) => !precachePaths.includes(path));
-  const extra = precachePaths.filter((path) => !publicPaths.includes(path));
-  fail(`the precache manifest differs from dist (missing: ${missing.join(', ') || 'none'}; extra: ${extra.join(', ') || 'none'}).`);
+if (JSON.stringify(precachePaths) !== JSON.stringify(expectedPrecachePaths)) {
+  const missing = expectedPrecachePaths.filter((path) => !precachePaths.includes(path));
+  const extra = precachePaths.filter((path) => !expectedPrecachePaths.includes(path));
+  fail(`the precache manifest differs from the runtime policy (missing: ${missing.join(', ') || 'none'}; extra: ${extra.join(', ') || 'none'}).`);
+}
+for (const requiredPath of REQUIRED_RUNTIME_PRECACHE_PATHS) {
+  if (!precachePaths.includes(requiredPath)) fail(`required runtime asset ${requiredPath} is not precached.`);
+}
+if (precachePaths.some((path) => path.startsWith('./docs/') || path.startsWith('./lib/'))) {
+  fail('deploy-only documentation or compatibility libraries leaked into the runtime precache.');
+}
+if (deployPaths.includes('./data/index.json')) {
+  fail('the duplicate public legacy catalog was emitted into the production deployment.');
 }
 const navigationHandler = worker.match(/if \(request\.mode === 'navigate'\) \{([\s\S]*?)\n  \}/)?.[1] ?? '';
-const navigationFetchIndex = navigationHandler.indexOf('await fetch(request)');
-const navigationFallbackIndex = navigationHandler.indexOf('cache.match(fallbackUrl');
-if (navigationFetchIndex < 0
-  || navigationFallbackIndex < 0
-  || navigationFetchIndex > navigationFallbackIndex) {
-  fail('online navigation does not prefer the current deployment before falling back to the cached app shell.');
+const navigationCacheIndex = navigationHandler.indexOf('cache.match(fallbackUrl');
+const navigationFetchIndex = navigationHandler.indexOf('return fetch(request)');
+if (navigationCacheIndex < 0
+  || navigationFetchIndex < 0
+  || navigationCacheIndex > navigationFetchIndex) {
+  fail('installed navigation does not prefer the version-matched cached app shell before network fallback.');
 }
 if (!worker.includes('await self.skipWaiting()')) {
   fail('a newly installed worker cannot immediately replace an older cached deployment.');
@@ -72,6 +87,17 @@ for (const font of emittedFonts) {
 const appSource = await readFile(resolve(root, 'src/app/App.tsx'), 'utf8');
 if (/\blazy\s*\(|<Suspense\b|Loading page/i.test(appSource)) {
   fail('the route graph contains lazy/Suspense loading UI.');
+}
+
+const catalogSource = await readFile(resolve(root, 'src/data/catalog.ts'), 'utf8');
+const viteConfigSource = await readFile(resolve(root, 'vite.config.ts'), 'utf8');
+if (catalogSource.includes("./generated/legacyData.json")
+  || !catalogSource.includes("from 'virtual:allneeds-runtime-catalog'")) {
+  fail('the browser catalog module is performing or importing legacy catalog normalization.');
+}
+if (!viteConfigSource.includes("const runtimeCatalogId = 'virtual:allneeds-runtime-catalog'")
+  || !viteConfigSource.includes('function runtimeCatalogSource()')) {
+  fail('the legacy-to-runtime catalog transformation is no longer owned by the Vite build.');
 }
 
 const mainSource = await readFile(resolve(root, 'src/main.tsx'), 'utf8');
@@ -192,4 +218,8 @@ if (allBuiltText.some((text) => /fonts\.(googleapis|gstatic)\.com/i.test(text)))
   fail('a built HTML/CSS/JS asset still references Google Fonts.');
 }
 
-console.log(`Verified ${publicPaths.length} precached public assets, ${emittedFonts.length} local fonts, an eager route graph, a clean Observation matcher, route semantics, modal focus behavior, and compact-workflow guards.`);
+console.log(
+  `Verified ${precachePaths.length} runtime-preloaded assets from ${deployPaths.length} deploy files, `
+  + `${emittedFonts.length} local fonts, build-shaped catalog data, a cache-first installed shell, `
+  + 'an eager route graph, a clean Observation matcher, route semantics, modal focus behavior, and compact-workflow guards.',
+);

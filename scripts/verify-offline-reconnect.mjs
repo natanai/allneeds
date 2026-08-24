@@ -1,11 +1,15 @@
-import { chromium } from '@playwright/test';
+import { execFile } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { promisify } from 'node:util';
+
+import { chromium } from '@playwright/test';
 import { preview } from 'vite';
 
 const host = '127.0.0.1';
 const port = 4192;
 const origin = `http://${host}:${port}`;
+const execFileAsync = promisify(execFile);
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -21,6 +25,10 @@ async function startPreview() {
   });
 }
 
+async function regenerateServiceWorker() {
+  await execFileAsync(process.execPath, ['scripts/generate-service-worker.mjs']);
+}
+
 async function expectShell(page, label) {
   await page.locator('html[data-app-state="ready"]').waitFor({ timeout: 15_000 });
   await page.locator('[aria-label="Primary navigation magnets"][data-ready="true"]')
@@ -31,8 +39,40 @@ async function expectShell(page, label) {
   invariant(actualLabel === label, `Expected main label “${label}”; received “${actualLabel}”.`);
 }
 
+async function shellCacheNames(page) {
+  return page.evaluate(async () => (await caches.keys())
+    .filter((name) => name.startsWith('allneeds-v2-shell-')));
+}
+
+async function waitForFreshShellCache(page, previous) {
+  const deadline = Date.now() + 20_000;
+  while (Date.now() < deadline) {
+    const replacement = await page.evaluate(async ({ oldNames, appOrigin }) => {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration?.active?.state !== 'activated'
+        || registration.installing
+        || registration.waiting) return null;
+
+      const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
+      for (const name of current) {
+        if (oldNames.includes(name)) continue;
+        const cache = await caches.open(name);
+        const response = await cache.match(`${appOrigin}/index.html`, { ignoreVary: true });
+        if (response && (await response.text()).includes('data-deployment-probe="fresh"')) return name;
+      }
+      return null;
+    }, { oldNames: previous, appOrigin: origin });
+
+    if (typeof replacement === 'string' && replacement.length > 0) return replacement;
+    await page.waitForTimeout(100);
+  }
+  throw new Error('The service-worker update did not produce a fresh replacement shell cache.');
+}
+
 let server = null;
 let browser = null;
+let indexPath = null;
+let deployedIndex = null;
 
 try {
   server = await startPreview();
@@ -61,28 +101,51 @@ try {
   await expectShell(page, 'Home');
   await page.locator('html[data-offline-cache="ready"]').waitFor({ timeout: 20_000 });
 
-  const indexPath = resolve('dist/index.html');
-  const deployedIndex = await readFile(indexPath, 'utf8');
-  try {
-    await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
-    await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
-    await expectShell(page, 'Home');
-    invariant(
-      await page.locator('html').getAttribute('data-deployment-probe') === 'fresh',
-      'An online refresh remained on the older cached app shell instead of the current deployment.',
-    );
-  } finally {
-    await writeFile(indexPath, deployedIndex);
-  }
+  indexPath = resolve('dist/index.html');
+  deployedIndex = await readFile(indexPath, 'utf8');
+  const previousCaches = await shellCacheNames(page);
 
-  await page.goto(`${origin}/needs/love-caring`);
-  await expectShell(page, 'Need for love/caring');
+  // A deployment replaces the server's static release; it does not mutate files under
+  // one long-lived preview process. Stop release A, write release B, then restart the
+  // server so the browser update check sees a clean, realistic deployment boundary.
+  await server.close();
+  server = null;
+  await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
+  await regenerateServiceWorker();
+  server = await startPreview();
+
+  // The current client keeps its instant cached A shell while normal registration
+  // discovers release B. Identify B atomically by reading the fresh shell from a cache
+  // whose version name did not exist in the deployment-A baseline.
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await expectShell(page, 'Home');
+  await waitForFreshShellCache(page, previousCaches);
+
+  // Do not keep an old controlled client alive while judging the replacement worker:
+  // an outgoing worker can briefly recreate its old named cache during handoff. Close
+  // that client, remove the network, and create a brand-new navigation client. A fresh
+  // marker here can only come from the active replacement shell cache.
+  await page.close();
+  await server.close();
+  server = null;
+  const upgradePage = await context.newPage();
+  observeRuntime(upgradePage);
+  await upgradePage.goto(`${origin}/?diagnostics=1`, { waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await expectShell(upgradePage, 'Home');
+  invariant(
+    await upgradePage.locator('html').getAttribute('data-deployment-probe') === 'fresh',
+    'A fresh offline client did not receive the activated replacement shell.',
+  );
+
+  server = await startPreview();
+  await upgradePage.goto(`${origin}/needs/love-caring`);
+  await expectShell(upgradePage, 'Need for love/caring');
 
   await server.close();
   server = null;
 
-  await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
-  await expectShell(page, 'Need for love/caring');
+  await upgradePage.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await expectShell(upgradePage, 'Need for love/caring');
 
   const freshPage = await context.newPage();
   observeRuntime(freshPage);
@@ -114,8 +177,12 @@ try {
   );
 
   await context.close();
-  console.log('Verified stopped-server reload, fresh cached deep link, same-port restart, and cache-miss reconnect.');
+  console.log('Verified version-safe cache-first upgrade, fresh offline client, cached deep routes, same-port restart, and cache-miss reconnect.');
 } finally {
   if (browser) await browser.close().catch(() => undefined);
   if (server) await server.close().catch(() => undefined);
+  if (indexPath && deployedIndex) {
+    await writeFile(indexPath, deployedIndex).catch(() => undefined);
+    await regenerateServiceWorker().catch(() => undefined);
+  }
 }
