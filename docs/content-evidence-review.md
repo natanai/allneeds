@@ -29,6 +29,33 @@ The goal is to preserve good existing language, strengthen sourcing where needed
 8. Only after approval, change the canonical source, regenerate derived data if required, and update this document in the same PR.
 9. Verify links/citations, generated-data integrity, and any relevant repository checks. Do not claim validation that was not run.
 
+### Explicit user approval gate
+
+For research-facing content work, no repository change may be made until the user has explicitly approved the complete content package under discussion. Approval must cover:
+
+- the final citation set;
+- a human-reachable verification URL for every citation;
+- what each citation is being used to support;
+- the short/main description;
+- the expanded/details description;
+- the intended implementation scope.
+
+The sole exception is **this document, `docs/content-evidence-review.md`**, which the user has explicitly authorized to be updated during the review process so that future agents can recover the current specifications and approval state.
+
+Research, drafting, source checking, and discussion must otherwise remain read-only until the user gives explicit package approval. Do not create or merge branches, PRs, production data changes, copy changes, or documentation changes outside this file merely because a proposed change appears safe or helpful.
+
+## Editorial style and conceptual rules
+
+- **Do not use em dashes in proposed or production site copy.** Prefer commas, semicolons, parentheses, or sentence breaks.
+- **Do not try to formally define a need in its short description.** The user treats needs as basic concepts that are better approached by gesture, examples, motivational patterns, consequences, and scholarship than by necessary-and-sufficient-condition definitions.
+- Preserve the successful structure of the existing Connection short copy where possible: the need may **motivate or drive behavior**, and the copy should describe useful outcomes that can follow when those motivations are not suppressed or blocked.
+- The intended effect is not sentimental reassurance. The page should let readers infer that having a need can be valuable even when the need or its associated motivations are uncomfortable.
+- Reach that effect through factual, academic, and evolutionary or motivational scholarship rather than emotionally loaded claims.
+- **Use short direct quotations from primary or authoritative academic sources when they materially increase confidence or precision.** Quotations should be exact, attributed, and used selectively so the page still reads naturally.
+- The expanded Details section should not merely repeat the short description. It should explain the evidence around the need and, where useful, state **why each included citation is relevant and what role it plays**.
+- Clearly distinguish foundational theory, modern review/synthesis, evolutionary theory, mechanistic theory, and observational outcome evidence.
+- Avoid citation accumulation for its own sake. Every source in the final citation set should do a distinct job.
+
 ## Evidence standard
 
 ### Source hierarchy
@@ -73,7 +100,9 @@ A scientific citation is not complete for allneeds unless a person can follow a 
 
 Agent/crawler accessibility is **not** the standard. Publishers increasingly use anti-scraping controls, bot checks, redirects, or `robots.txt` restrictions. If an agent cannot fetch a link that the user has manually verified in a normal browser, the agent must record that limitation rather than replacing the source with a more scrape-friendly secondary page. Never downgrade from a primary/authoritative record to a blog, search result, aggregator, or other weaker source merely because automated retrieval is easier.
 
-When possible, keep identifiers and verification links separately: for example, retain the DOI as bibliographic metadata while making the clickable source URL a human-verifiable PubMed, PsycNet, or publisher record.
+When proposing citations in conversation, give the user a directly openable URL representation so they can manually verify it. Do not treat a source as approved merely because an agent can retrieve it.
+
+When possible, keep identifiers and verification links separately: for example, retain the DOI as bibliographic metadata while making the clickable source URL a human-verifiable PubMed, PsycNet, PMC, or publisher record.
 
 A source note should not overstate the paper. For example, a mortality meta-analysis can support an association between social relationships and survival across included studies; it should not by itself be used as proof that “connection is a basic psychological need.”
 
@@ -85,83 +114,97 @@ The generated catalog currently contains this claim for **Connection**:
 
 > “Forming strong social connections has profound benefits for both mental and physical health. Extensive research suggests that the quality and quantity of one’s social relationships are linked not only to psychological well-being but also to longevity and disease risk. In a large meta-analysis of 148 studies, individuals with richer social connections had about a 50% greater likelihood of survival over the study periods than those who were more isolated (Holt-Lunstad et al., 2010). In fact, the protective effect of social connection on mortality was found to be comparable to well-known health factors like not smoking and maintaining a healthy weight. Strong interpersonal connection provides emotional support, buffers stress, and contributes to greater life satisfaction, whereas lack of connection (loneliness) is associated with higher risks of depression and physical illness.”
 
-At the start of this review, the entry lists only Holt-Lunstad, Smith, & Layton (2010) as a supporting source.
+The earlier short/original copy is:
+
+> “As highly social creatures, humans often thrive on close relationships that provide mutual care. This need may drive us to spend meaningful time with others, share experiences, and cultivate trust and empathy. When we foster genuine connection, we gain emotional support and joy in companionship, and we build resilience through having others to lean on during difficult times.”
+
+The user prefers the underlying structure and tone of this earlier short copy over attempts to define Connection. In particular, preserve the ideas that the need may drive or motivate behavior and that acting on those motivations can have useful outcomes.
 
 ### Initial assessment
 
 The existing Holt-Lunstad et al. source is strong evidence that social relationship measures are associated with mortality outcomes, but it is not the best authority for the separate proposition that connection/relatedness itself should be treated as a basic or fundamental psychological need.
 
-The current paragraph also combines several distinct propositions—mortality, disease risk, stress buffering, life satisfaction, depression, and the status of connection as a need. Those propositions should not all inherit authority from one mortality meta-analysis. Before changing the paragraph, review each claim separately and either source it directly, qualify it, or remove it if it is not doing useful work.
+The current expanded paragraph also combines several distinct propositions, including mortality, disease risk, stress buffering, life satisfaction, depression, and the status of connection as a need. Those propositions should not all inherit authority from one mortality meta-analysis. Before changing the paragraph, review each claim separately and either source it directly, qualify it, or remove it if it is not doing useful work.
 
-### Candidate sources: direct support for belonging / relatedness as a need
+### Working citation pool with user-verified human links
+
+These sources have human-reachable URLs that the user manually opened and verified. They are **working candidates, not yet final approval of the Connection package**.
 
 **Baumeister, R. F., & Leary, M. R. (1995). _The need to belong: Desire for interpersonal attachments as a fundamental human motivation._ Psychological Bulletin, 117(3), 497–529.**  
 Human-verifiable record: https://psycnet.apa.org/record/1995-29052-001  
 DOI: 10.1037/0033-2909.117.3.497  
-Verification note: user manually verified the APA PsycNet record on 2026-08-24. Automated access may be blocked by APA's crawler restrictions; that is not grounds to replace this link.  
-Use for: the belongingness hypothesis; the authors evaluate evidence for a pervasive motivation to form and maintain lasting, positive interpersonal bonds.  
-Important wording note: this is a foundational theoretical/empirical review supporting a hypothesis, so prefer language such as “Baumeister and Leary argued/reviewed evidence that…” over “science proves humans need…”
+Use for: foundational belongingness review; evidence concerning a powerful motivation to form and maintain interpersonal bonds.  
+Useful exact language from the abstract: “frequent, nonaversive interactions within an ongoing relational bond.”  
+Important wording note: present this as a hypothesis evaluated against empirical literature, not as theory-free proof.
 
 **Ryan, R. M., & Deci, E. L. (2000). _Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being._ American Psychologist, 55(1), 68–78.**  
 Human-verifiable record: https://pubmed.ncbi.nlm.nih.gov/11392867/  
 DOI: 10.1037/0003-066X.55.1.68  
 PMID: 11392867  
-Verification note: user manually verified this PubMed record on 2026-08-24.  
-Use for: within Self-Determination Theory, relatedness is one of three proposed basic psychological needs (with autonomy and competence), with need satisfaction linked to motivation and well-being.  
-Important wording note: attribute the “basic psychological need” classification to SDT rather than presenting one theory’s taxonomy as theory-free fact.
+Use for: foundational Self-Determination Theory framing in which relatedness is one of three postulated psychological needs and need satisfaction is linked with motivation and well-being.  
+Important wording note: attribute the “basic psychological need” classification to SDT.
 
 **Vansteenkiste, M., Ryan, R. M., & Soenens, B. (2020). _Basic psychological need theory: Advancements, critical themes, and future directions._ Motivation and Emotion, 44, 1–31.**  
 Human-verifiable record: https://link.springer.com/article/10.1007/s11031-019-09818-1  
 DOI: 10.1007/s11031-019-09818-1  
-Verification note: user manually verified this Springer record on 2026-08-24.  
-Use for: a modern review of Basic Psychological Need Theory; relatedness is described as warmth, bonding, care, connecting to others, and feeling significant to them. The review also discusses criteria for calling a psychological motive a “basic need” and the evidence base across contexts and cultures.  
-Important wording note: especially useful for defining what “need” means in this theoretical literature and avoiding casual use of the term.
+Use for: modern review of Basic Psychological Need Theory, including the distinction between need satisfaction and need frustration and the contemporary evidence base around relatedness.  
+Useful exact language: relatedness “denotes the experience of warmth, bonding, and care” and is satisfied by “connecting to and feeling significant to others.”  
+Important wording note: use this to explain BPNT's account, not to impose a formal definition of Connection on the site.
 
-### Candidate sources: health/outcome relevance of social relationships
+**Cacioppo, J. T., Cacioppo, S., & Boomsma, D. I. (2014). _Evolutionary mechanisms for loneliness._ Cognition & Emotion, 28(1), 3–21.**  
+Human-verifiable full text: https://pmc.ncbi.nlm.nih.gov/articles/PMC3855545/  
+Human-verifiable PubMed record: https://pubmed.ncbi.nlm.nih.gov/24067110/  
+DOI: 10.1080/02699931.2013.837379  
+Use for: evolutionary theory concerning why sensitivity to perceived social isolation may have adaptive value.  
+Useful exact language from the abstract: “loneliness serves a variety of adaptive functions in specific habitats.”  
+Important wording note: this is an evolutionary account and review. Do not imply that loneliness is always adaptive, desirable, harmless, or beneficial when prolonged.
+
+**Coan, J. A., & Sbarra, D. A. (2015). _Social Baseline Theory: The Social Regulation of Risk and Effort._ Current Opinion in Psychology, 1, 87–91.**  
+Human-verifiable full text: https://pmc.ncbi.nlm.nih.gov/articles/PMC4375548/  
+Human-verifiable PubMed record: https://pubmed.ncbi.nlm.nih.gov/25825706/  
+DOI: 10.1016/j.copsyc.2014.12.021  
+Use for: Social Baseline Theory's proposal that access to relational partners can mitigate risk and reduce individual effort, supporting careful language about shared effort and social resources.  
+Useful exact language from the abstract: SBT “suggests the human brain expects access to social relationships that mitigate risk and diminish the level of effort needed.”  
+Important wording note: identify this as a theoretical perspective rather than settled mechanism.
 
 **Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). _Social relationships and mortality risk: A meta-analytic review._ PLOS Medicine, 7(7), e1000316.**  
-DOI: https://doi.org/10.1371/journal.pmed.1000316  
+Human-verifiable record: https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316  
+DOI: 10.1371/journal.pmed.1000316  
 PMID: 20668659  
-Use for: meta-analytic association between stronger social relationships and survival across 148 studies / 308,849 participants.  
-Important wording note: the paper reports observational mortality associations. Avoid turning its effect estimate into a universal individual prediction or using it alone to prove that connection is a basic psychological need.
+Use for: meta-analytic association between stronger social relationships and survival across 148 studies and 308,849 participants.  
+Useful exact language: the authors report “a 50% increased likelihood of survival for participants with stronger social relationships.”  
+Important wording note: this supports population-level observational association and consequence, not proof that Connection is a need or a guaranteed individual causal effect.
 
-**Holt-Lunstad, J., Smith, T. B., Baker, M., Harris, T., & Stephenson, D. (2015). _Loneliness and social isolation as risk factors for mortality: A meta-analytic review._ Perspectives on Psychological Science, 10(2), 227–237.**  
-DOI: https://doi.org/10.1177/1745691614568352  
-PMID: 25910392  
-Use for: associations of loneliness, social isolation, and living alone with mortality risk across included studies.  
-Important wording note: useful when discussing isolation/loneliness as distinct constructs; neither should automatically be treated as the simple inverse of “connection.”
+### Other previously identified candidates not yet user-approved for final use
 
-**Slavich, G. M. (2020). _Social Safety Theory: A biologically based evolutionary perspective on life stress, health, and behavior._ Annual Review of Clinical Psychology, 16, 265–295.**  
-DOI: https://doi.org/10.1146/annurev-clinpsy-032816-045159  
-PMID: 32141764  
-Use for: a peer-reviewed theoretical review of social safety/threat and proposed psychobiological pathways linking social experiences with stress and health.  
-Important wording note: use only if the Connection copy actually needs a mechanistic/evolutionary explanation; label it as theory/review rather than using it to decorate a simpler claim with neuroscience.
+Do not move these into the final Connection citation set unless the user is given a human-reachable URL, manually verifies it, and explicitly agrees that it belongs.
 
-### Potential additional evidence (not yet necessary for production copy)
-
-**Tang, M., Wang, D., & Guerrien, A. (2020). _A systematic review and meta-analysis on basic psychological need satisfaction, motivation, and well-being in later life: Contributions of self-determination theory._ PsyCh Journal, 9(1), 5–33.**  
-DOI: https://doi.org/10.1002/pchj.293  
-PMID: 31177644  
-Use for: synthesis of basic psychological need satisfaction and well-being in later life.  
-Limitation: age/population scope means it should not be generalized to all people without other evidence.
+- Holt-Lunstad, Smith, Baker, Harris, & Stephenson (2015), loneliness/social isolation and mortality.
+- Slavich (2020), Social Safety Theory.
+- Tang, Wang, & Guerrien (2020), basic psychological need satisfaction and later-life well-being.
 
 ### Status / approval ledger
 
 | Date | Area | Decision | Production copy changed? | Notes |
 | --- | --- | --- | --- | --- |
 | 2026-08-24 | Connection | Research initiated; candidate citations assembled | **No** | User requested a slow, careful evidence review. No replacement Connection wording has yet been approved. |
-| 2026-08-24 | Citation infrastructure / Connection | Human-verifiable links required; three direct-need sources manually verified | **No** | User supplied verified APA PsycNet, PubMed, and Springer landing pages. Agent access restrictions must not cause substitution with weaker sources. |
+| 2026-08-24 | Citation infrastructure / Connection | Human-verifiable links required | **No** | Agent access restrictions must not cause substitution with weaker sources. |
+| 2026-08-24 | Review process | Full-package approval required before any repo change except this file | **No** | User must agree to citations, human-reachable URLs, citation relevance, short copy, expanded copy, and implementation scope before production work begins. |
+| 2026-08-24 | Editorial style | Do not define needs; preserve motivational/action framing; avoid em dashes; use direct scholarly quotations selectively | **No** | Expanded Details should explain why included citations are relevant. |
+| 2026-08-24 | Connection citations | Six working sources have user-verified human-reachable URLs | **No** | Baumeister & Leary 1995; Ryan & Deci 2000; Vansteenkiste et al. 2020; Cacioppo et al. 2014; Coan & Sbarra 2015; Holt-Lunstad et al. 2010. Citation set is still provisional until user approves the complete package. |
 
 ## Handoff for the next agent
 
 1. Read this file before proposing scientific/clinical copy changes.
 2. Do **not** make a broad “professionalize all copy” pass.
 3. Continue with **Connection** unless the user chooses another item.
-4. The next useful step is to audit the existing Connection paragraph claim by claim and propose the smallest evidence-aligned revision, with each sentence mapped to a source.
-5. Do not edit production Connection copy until the user approves the proposed wording.
-6. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`; do not manually treat generated output as canonical without evidence.
-7. For every scientific citation, preserve a human-verifiable authoritative landing-page URL even when automated agents cannot crawl it. Record DOI/PMID separately when available.
-8. After an approved production change, append a ledger entry here with the exact scope, sources, limitations, files changed, and validation performed.
+4. Keep all repo activity read-only except updates to this file until the user explicitly approves the complete Connection package.
+5. Do not formalize Connection as a definition. Preserve the user's preferred orientation toward what the need may motivate and what can follow when those motivations can be acted on.
+6. Avoid em dashes in proposed site copy.
+7. Prefer concise, exact quotations from authoritative academic sources when they strengthen transparency and reader confidence.
+8. The expanded Details section should explain what each citation contributes and clearly distinguish theory from empirical outcome evidence.
+9. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`; do not manually treat generated output as canonical without evidence.
+10. After the user approves the final citation set, all human-reachable URLs, the short description, the expanded Details copy, and implementation scope, make the production change through the repository's normal branch/PR workflow and append an approval ledger entry here.
 
 ## Open questions to resolve over time
 
