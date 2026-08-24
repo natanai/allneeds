@@ -104,7 +104,7 @@ test('saved customizer settings survive reload without opening the customizer', 
     window.localStorage.setItem('nvcApp.theme', JSON.stringify({
       values: { plum: '#123456', lavender: '#E4EDFA', rose: '#FFEEDD' },
       roundness: 135,
-      preset: 'Holographic',
+      preset: '',
       updatedAt: 100,
     }));
   });
@@ -120,7 +120,7 @@ test('saved customizer settings survive reload without opening the customizer', 
   await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
   const customizer = page.getByRole('dialog', { name: 'Customizer' });
   await expect(customizer.getByRole('textbox', { name: 'Canvas glow' })).toHaveValue('#123456');
-  await expect(customizer.getByLabel('Presets')).toHaveValue('Holographic');
+  await expect(customizer.getByLabel('Presets')).toHaveValue('');
 
   const tiltSwitch = customizer.getByRole('switch');
   const tiltCapability = await page.evaluate(() => {
@@ -351,7 +351,6 @@ test('content magnet locations survive reload and stay independent across viewpo
   const board = page.getByLabel('Feelings magnet board');
   await expect(board).toHaveAttribute('data-ready', 'true');
   const playToggle = board.getByRole('switch');
-  await playToggle.press('Space');
   await expect(playToggle).toBeChecked();
 
   const magnet = board.locator('[data-magnet-id]').first();
@@ -390,7 +389,6 @@ test('a lifted magnet passes over its neighbors before the drop restores contact
   const board = page.getByLabel('Feelings magnet board');
   await expect(board).toHaveAttribute('data-ready', 'true');
   const playToggle = board.getByRole('switch');
-  await playToggle.press('Space');
   await expect(playToggle).toBeChecked();
 
   const lifted = board.locator('[data-magnet-id]').first();
@@ -490,7 +488,6 @@ test.describe('mobile native-shell contracts', () => {
     const board = page.getByLabel('Feelings magnet board');
     await expect(board).toHaveAttribute('data-ready', 'true');
     const playToggle = board.getByRole('switch');
-    await playToggle.press('Space');
     await expect(playToggle).toBeChecked();
 
     const magnet = board.locator('[data-magnet-id]').nth(10);

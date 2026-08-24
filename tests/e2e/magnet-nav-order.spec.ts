@@ -63,16 +63,14 @@ test('nav Play order becomes the compact grid order and survives reload', async 
   const board = page.getByLabel('Primary navigation magnets');
   await expect(board).toHaveAttribute('data-ready', 'true');
   const playToggle = board.getByRole('switch');
-  await expect(playToggle).not.toBeChecked();
+  await expect(playToggle).toBeChecked();
+  await expect(board).toHaveAttribute('data-active', 'true');
 
   const initialOrder = await visualOrder(board);
   const firstMagnet = board.locator('[data-magnet-id]').filter({
     has: page.getByText('+', { exact: true }),
   });
   const lastMagnet = board.locator(`[data-magnet-id="${initialOrder.at(-1)}"]`);
-
-  await playToggle.press('Space');
-  await expect(board).toHaveAttribute('data-active', 'true');
 
   const firstBox = await firstMagnet.boundingBox();
   const lastBox = await lastMagnet.boundingBox();

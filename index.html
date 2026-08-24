@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-app-state="loading">
   <head>
     <meta charset="UTF-8" />
     <script>window.__ALLNEEDS_BOOT_STARTED_MS__ = performance.now();</script>
@@ -70,9 +70,15 @@
       })();
     </script>
     <style>
+      html[data-app-state='loading'] #root {
+        visibility: hidden;
+      }
       .app-boot {
+        position: fixed;
+        z-index: 10000;
+        top: max(18vh, 5rem);
+        left: 50%;
         width: min(34rem, calc(100vw - 2rem));
-        margin: max(18vh, 5rem) auto 0;
         padding: 1.2rem;
         border: 3px solid var(--outline, #12081f);
         border-radius: calc(1.6rem * var(--corner-scale, 1));
@@ -80,6 +86,10 @@
         box-shadow: 0 14px 0 color-mix(in srgb, var(--outline, #12081f) 28%, transparent);
         color: var(--ink, #12081f);
         font: 600 1rem/1.4 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
+        transform: translateX(-50%);
+      }
+      html[data-app-state='ready'] .app-boot {
+        display: none;
       }
       .app-boot strong {
         display: block;
@@ -119,12 +129,11 @@
     <title>allneeds.app</title>
   </head>
   <body>
-    <div id="root">
-      <div class="app-boot" role="status" aria-live="polite">
-        <strong>allneeds.app</strong>
-        <div class="app-boot__track" aria-hidden="true"><div class="app-boot__bar"></div></div>
-        <span class="app-boot__label">Preparing the app for smooth navigation…</span>
-      </div>
+    <div id="root"></div>
+    <div id="app-boot" class="app-boot" role="status" aria-live="polite">
+      <strong>allneeds.app</strong>
+      <div class="app-boot__track" aria-hidden="true"><div class="app-boot__bar"></div></div>
+      <span class="app-boot__label">Preparing the app for smooth navigation…</span>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

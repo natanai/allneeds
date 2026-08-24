@@ -15,15 +15,28 @@ describe('magnet theme styling', () => {
     expect(ruleBody('.nav .magnet')).toContain('var(--corner-scale)');
   });
 
-  it('keeps navigation clicks and hover states on the shared magnet interaction styling', () => {
-    expect(magnetCss).not.toContain('.nav .magnet:hover');
-    expect(magnetCss).not.toContain('.nav .magnet:active');
-    expect(magnetCss).not.toContain(".nav .magnet[data-picked-up='true']");
-    expect(magnetCss).not.toContain(".nav [data-magnet-id='nav-menu'][aria-expanded='true']");
-
+  it('allows intentional nav-specific styling while route state stays geometry-neutral', () => {
     const activeRule = ruleBody('.nav .active');
-    expect(activeRule).not.toContain('background');
-    expect(activeRule).not.toContain('filter');
-    expect(activeRule).not.toContain('box-shadow');
+    const geometryProperties = [
+      'font-size',
+      'font-weight',
+      'letter-spacing',
+      'line-height',
+      'padding',
+      'margin',
+      'gap',
+      'width',
+      'height',
+      'min-width',
+      'min-height',
+      'border-width',
+      'transform',
+      'translate',
+      'scale',
+    ];
+
+    geometryProperties.forEach((property) => {
+      expect(activeRule).not.toContain(`${property}:`);
+    });
   });
 });

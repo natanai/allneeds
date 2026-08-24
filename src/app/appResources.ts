@@ -148,7 +148,5 @@ export async function warmAppResources() {
   await Promise.all([
     loadBodyCueResources(),
     loadObservationResources(),
-    loadSharedFeedResources('public', 'recent'),
-    loadSharedFeedResources('public', 'popular'),
   ]);
 }

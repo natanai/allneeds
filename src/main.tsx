@@ -3,7 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 
 import { App } from './app/App';
+import { warmAppResources } from './app/appResources';
 import { remainingBootGateMs } from './app/bootTiming';
+import { waitForAppShellVisualReady } from './app/bootReadiness';
 import { preloadAppAssets } from './app/preloadAppAssets';
 import { registerServiceWorker } from './app/registerServiceWorker';
 import { markAppReady, startUxMetrics } from './app/uxMetrics';
@@ -37,22 +39,16 @@ const bootStartedAt = Number((window as Window & {
 
 async function mountApp() {
   document.documentElement.dataset.appState = 'loading';
-  const appReady = Promise.all([
+
+  const localPreparation = Promise.all([
     preloadAppAssets(),
+    warmAppResources(),
     document.fonts?.ready ?? Promise.resolve(),
   ]).then(() => {
     document.documentElement.dataset.appPreload = 'ready';
   }).catch(() => {
     document.documentElement.dataset.appPreload = 'degraded';
   });
-  const gateRemaining = remainingBootGateMs(bootStartedAt, performance.now());
-  await Promise.race([
-    appReady,
-    new Promise<void>((resolve) => window.setTimeout(resolve, gateRemaining)),
-  ]);
-  if (!document.documentElement.dataset.appPreload) {
-    document.documentElement.dataset.appPreload = 'background';
-  }
 
   createRoot(appRoot).render(
     <StrictMode>
@@ -61,8 +57,25 @@ async function mountApp() {
       </BrowserRouter>
     </StrictMode>,
   );
+
+  const visuallyReady = Promise.all([
+    localPreparation,
+    waitForAppShellVisualReady(),
+  ]);
+  const gateRemaining = remainingBootGateMs(bootStartedAt, performance.now());
+
+  await Promise.race([
+    visuallyReady,
+    new Promise<void>((resolve) => window.setTimeout(resolve, gateRemaining)),
+  ]);
+
+  if (!document.documentElement.dataset.appPreload) {
+    document.documentElement.dataset.appPreload = 'background';
+  }
+
   window.requestAnimationFrame(() => {
     document.documentElement.dataset.appState = 'ready';
+    document.getElementById('app-boot')?.remove();
     markAppReady();
   });
 }
