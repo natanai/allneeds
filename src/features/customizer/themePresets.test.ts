@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { defaultTheme, themeCssValues } from './customizerSettings';
-import { themePresets } from './themePresets';
+import { resolveThemePresetName, themePresets } from './themePresets';
 
 describe('customizer theme presets', () => {
   it('keeps a focused set of five meaningful presets', () => {
@@ -17,6 +17,15 @@ describe('customizer theme presets', () => {
   it('keeps Default identical to the production palette', () => {
     const preset = themePresets.find(({ name }) => name === 'Default');
     expect(preset).toMatchObject({ values: defaultTheme, roundness: 100 });
+  });
+
+  it('recognizes untouched default values while leaving legacy custom themes unnamed', () => {
+    expect(resolveThemePresetName({ values: { ...defaultTheme }, roundness: 100, preset: '' })).toBe('Default');
+    expect(resolveThemePresetName({
+      values: { ...defaultTheme, rose: '#FFFFFF' },
+      roundness: 100,
+      preset: 'Old palette',
+    })).toBe('');
   });
 
   it('makes Refrigerator square-edged with a near-white magnet palette', () => {
