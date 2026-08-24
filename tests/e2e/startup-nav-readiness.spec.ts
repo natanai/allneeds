@@ -100,3 +100,44 @@ test('route and menu presentation state do not re-pack persistent nav geometry',
   await expect(board).toHaveAttribute('data-ready', 'true');
   expect(await readCoordinates()).toEqual(initialCoordinates);
 });
+
+test('standalone emotion wheel cannot collapse or rewrite persistent nav geometry', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem('magnetPositions:site-nav', JSON.stringify({
+      layoutVersion: 7,
+      layouts: {},
+      meta: { playActive: true },
+    }));
+  });
+  await page.goto('/feelings');
+
+  let board = page.locator('[aria-label="Primary navigation magnets"]');
+  await expect(board).toHaveAttribute('data-ready', 'true');
+  await expect(board).toHaveAttribute('data-active', 'true');
+
+  const readCoordinates = () => board.locator('[data-magnet-id]').evaluateAll((elements) =>
+    Object.fromEntries(elements.map((element) => {
+      const id = element.getAttribute('data-magnet-id') ?? '';
+      return [id, {
+        x: (element as HTMLElement).style.getPropertyValue('--magnet-x'),
+        y: (element as HTMLElement).style.getPropertyValue('--magnet-y'),
+      }] as const;
+    })),
+  );
+
+  const initialCoordinates = await readCoordinates();
+
+  await page.getByRole('link', { name: 'Open interactive emotions wheel' }).click();
+  await expect(page).toHaveURL(/\/feelings\/emotions-wheel\/?$/);
+  await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveCount(0);
+
+  // Keep the wheel open long enough that the previous hidden 0×0 Play board
+  // would have collapsed and later persisted the navigation at the origin.
+  await page.waitForTimeout(500);
+  await page.getByRole('link', { name: 'Joyful' }).click();
+  await expect(page).toHaveURL(/\/feelings\/joyful\/?$/);
+
+  board = page.locator('[aria-label="Primary navigation magnets"]');
+  await expect(board).toHaveAttribute('data-ready', 'true');
+  expect(await readCoordinates()).toEqual(initialCoordinates);
+});
