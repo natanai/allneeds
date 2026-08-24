@@ -4,6 +4,7 @@ import {
   defaultNavSettings,
   defaultTheme,
   NAV_SETTINGS_KEY,
+  palettes,
   readNavSettings,
   readTheme,
   synchronizeCustomizerMirrors,
@@ -69,6 +70,13 @@ describe('saved customizer settings', () => {
       gold: '#123456',
       peach: defaultTheme.peach,
       surface: defaultTheme.surface,
+    });
+  });
+
+  it('keeps legacy palette collections visually compatible for newly added roles', () => {
+    palettes.forEach(({ values }) => {
+      expect(values.surface).toBe(defaultTheme.surface);
+      expect(values.peach).toBe(defaultTheme.peach);
     });
   });
 
