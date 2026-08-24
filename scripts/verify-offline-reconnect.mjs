@@ -44,28 +44,27 @@ async function shellCacheNames(page) {
     .filter((name) => name.startsWith('allneeds-v2-shell-')));
 }
 
-async function waitForNewShellCache(page, previous) {
-  await page.waitForFunction(async (oldNames) => {
-    const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
+async function waitForFreshShellCache(page, previous) {
+  const result = await page.waitForFunction(async ({ oldNames, appOrigin }) => {
     const registration = await navigator.serviceWorker.getRegistration();
-    return current.some((name) => !oldNames.includes(name))
-      && registration?.active?.state === 'activated'
-      && !registration.installing
-      && !registration.waiting;
-  }, previous, { timeout: 20_000 });
+    if (registration?.active?.state !== 'activated'
+      || registration.installing
+      || registration.waiting) return null;
 
-  const current = await shellCacheNames(page);
-  const replacement = current.find((name) => !previous.includes(name));
-  invariant(replacement, 'The service-worker update did not produce a replacement shell cache.');
+    const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
+    for (const name of current) {
+      if (oldNames.includes(name)) continue;
+      const cache = await caches.open(name);
+      const response = await cache.match(`${appOrigin}/index.html`, { ignoreVary: true });
+      if (response && (await response.text()).includes('data-deployment-probe="fresh"')) return name;
+    }
+    return null;
+  }, { oldNames: previous, appOrigin: origin }, { timeout: 20_000 });
+
+  const replacement = await result.jsonValue();
+  invariant(typeof replacement === 'string' && replacement.length > 0,
+    'The service-worker update did not produce a fresh replacement shell cache.');
   return replacement;
-}
-
-async function cacheContainsFreshProbe(page, cacheName) {
-  return page.evaluate(async ({ name, appOrigin }) => {
-    const cache = await caches.open(name);
-    const response = await cache.match(`${appOrigin}/index.html`, { ignoreVary: true });
-    return response ? (await response.text()).includes('data-deployment-probe="fresh"') : false;
-  }, { name: cacheName, appOrigin: origin });
 }
 
 let server = null;
@@ -114,15 +113,11 @@ try {
   server = await startPreview();
 
   // The current client keeps its instant cached A shell while normal registration
-  // discovers release B. Once a replacement cache exists and installation has
-  // settled, confirm the new cache itself contains the new deployment shell.
+  // discovers release B. Identify B atomically by reading the fresh shell from a cache
+  // whose version name did not exist in the deployment-A baseline.
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
   await expectShell(page, 'Home');
-  const replacementCache = await waitForNewShellCache(page, previousCaches);
-  invariant(
-    await cacheContainsFreshProbe(page, replacementCache),
-    'The replacement versioned cache did not contain the fresh deployment shell.',
-  );
+  await waitForFreshShellCache(page, previousCaches);
 
   // Do not keep an old controlled client alive while judging the replacement worker:
   // an outgoing worker can briefly recreate its old named cache during handoff. Close
