@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CSSProperties, FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
@@ -62,6 +62,12 @@ export function NeedDetailPage() {
   const [strategyOrder, setStrategyOrder] = useState<string[]>(() => canonicalStrategies.map((item) => item.slug));
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAll, setShowAll] = useState(false);
+  const deckGestureRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    horizontal: boolean;
+  } | null>(null);
   const [inventory, setInventory] = useState<InventoryStrategy[]>(readInventory);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [formFeedback, setFormFeedback] = useState<Feedback>(null);
@@ -189,6 +195,84 @@ export function NeedDetailPage() {
     setActiveIndex((current) => (current + offset + orderedStrategies.length) % orderedStrategies.length);
   };
 
+  const resetDeckGesture = (event?: PointerEvent<HTMLDivElement>) => {
+    const gesture = deckGestureRef.current;
+    if (gesture && event?.currentTarget.hasPointerCapture(gesture.pointerId)) {
+      event.currentTarget.releasePointerCapture(gesture.pointerId);
+    }
+    deckGestureRef.current = null;
+  };
+
+  const handleDeckPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (showAll || orderedStrategies.length < 2 || (event.pointerType === 'mouse' && event.button !== 0)) {
+      return;
+    }
+
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('button, a, input, textarea, select, label')) {
+      return;
+    }
+
+    deckGestureRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      horizontal: false,
+    };
+
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture can fail if the pointer has already ended; the gesture simply stays inert.
+    }
+  };
+
+  const handleDeckPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = deckGestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+    const dx = event.clientX - gesture.startX;
+    const dy = event.clientY - gesture.startY;
+    const horizontalDistance = Math.abs(dx);
+    const verticalDistance = Math.abs(dy);
+
+    if (!gesture.horizontal) {
+      if (verticalDistance > horizontalDistance + 6 && verticalDistance > 12) {
+        resetDeckGesture(event);
+        return;
+      }
+      if (horizontalDistance <= verticalDistance + 6 || horizontalDistance <= 12) {
+        return;
+      }
+      gesture.horizontal = true;
+    }
+
+    event.preventDefault();
+  };
+
+  const handleDeckPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = deckGestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+    const dx = event.clientX - gesture.startX;
+    if (gesture.horizontal && Math.abs(dx) > 40) {
+      move(dx > 0 ? -1 : 1);
+      event.preventDefault();
+    }
+    resetDeckGesture(event);
+  };
+
+  const handleDeckKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (showAll || orderedStrategies.length < 2) return;
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      move(-1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      move(1);
+    }
+  };
+
   const iconStyle = {
     '--need-icon': `url("${assetPath(`icons/needs/${need.slug}.svg`)}")`,
   } as CSSProperties;
@@ -257,7 +341,17 @@ export function NeedDetailPage() {
 
         {orderedStrategies.length ? (
           <>
-            <div className={`${styles.deck} ${showAll ? styles.list : ''}`} tabIndex={0}>
+            <div
+              className={`${styles.deck} ${showAll ? styles.list : ''}`}
+              data-strategy-deck
+              tabIndex={0}
+              aria-label="Strategy card deck"
+              onKeyDown={handleDeckKeyDown}
+              onPointerDown={handleDeckPointerDown}
+              onPointerMove={handleDeckPointerMove}
+              onPointerUp={handleDeckPointerUp}
+              onPointerCancel={resetDeckGesture}
+            >
               <div className={styles.stack}>
                 {orderedStrategies.map((strategy, index) => {
                   const nextIndex = (activeIndex + 1) % orderedStrategies.length;

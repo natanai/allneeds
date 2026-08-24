@@ -305,7 +305,7 @@
 
 .stack {
   position: relative;
-  height: clamp(22rem, 70vh, 27rem);
+  height: clamp(22rem, 70svh, 27rem);
 }
 
 .strategyCard {
@@ -357,6 +357,7 @@
 
 .cardBody {
   position: relative;
+  min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
   padding-right: 0.15rem;
@@ -706,7 +707,7 @@
   }
 
   .stack {
-    height: clamp(17.5rem, 48dvh, 20rem);
+    height: clamp(22rem, calc(100svh - 13.5rem), 32rem);
   }
 
   .strategySectionHeader {
