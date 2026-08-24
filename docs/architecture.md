@@ -4,7 +4,7 @@
 
 `natanai/nvc-app` is a reference implementation and must remain read-only from this project. V2 code lives only in `natanai/allneeds`.
 
-The initial audit was performed against the production `backend` branch while its latest observed commit was `fbf26ce9b7ef2b5b966c3191c4334389274e184f`. Production can continue changing independently. V2 must therefore record provenance when legacy data is intentionally imported rather than assuming a permanently synchronized tree.
+The initial audit was performed against the production `backend` branch at `fbf26ce9b7ef2b5b966c3191c4334389274e184f`. The current parity refresh uses `performance/immediate-response-v1` at `7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3` (observed 2026-08-23). Production can continue changing independently. V2 must therefore record provenance when legacy data is intentionally imported rather than assuming a permanently synchronized tree.
 
 ## Architecture decision
 
@@ -40,7 +40,8 @@ The magnet behavior is part of the product identity and should be rebuilt delibe
 - Saved positions use normalized/percentage coordinates so arrangements survive reasonable viewport changes.
 - Board height is persisted where the user can alter it and should not silently collapse or force overlap.
 - There is no automatic shuffle on mount. Shuffle happens only from an explicit user action.
-- Turning physics/play off leaves magnets fixed and non-draggable.
+- Turning physics/play off leaves content magnets fixed and non-draggable.
+- Navigation is the deliberate exception: its loose play-state arrangement is read top-to-bottom and left-to-right, then packed into tight non-overlapping rows in that same user-arranged sequence. The sequence is persisted independently for compact and wide viewports.
 - Turning physics/play on must not resize magnets, drop them from the top, or otherwise re-layout the board as a side effect.
 
 ### Physics / “Play With” state
@@ -130,6 +131,8 @@ Known production keys from the initial audit are recorded in `src/persistence/le
 
 For small settings and early personal-data slices, localStorage remains reasonable. The repository boundary keeps IndexedDB available later for larger journal/history datasets without coupling components to a storage engine.
 
+Unsaved Journal, Observation, Body Cues, Inventory add/edit, per-Need personal-strategy, and Alexithymia lane work uses separate schema-versioned draft stores. Drafts are debounced during interaction, flushed on page hide/mobile backgrounding and unmount, restored on return or reload, and cleared only by the feature's explicit Clear/Reset/Cancel boundary or a successful handoff/save. The guided breathing timer is deliberately not resumed mid-cycle. Browse-page search terms use session storage so Back/Forward restores the working set without turning a temporary filter into permanent personal data.
+
 ## Routing
 
 Use browser-history URLs and retain important route families where practical:
@@ -148,6 +151,18 @@ Use browser-history URLs and retain important route families where practical:
 - `/alexithymia-support/`
 
 Do not use hash routing: it would unnecessarily break the public URL model.
+
+## App loading and continuity
+
+V2 uses one explicit application boot boundary. Its navigation-wide deadline starts in inline HTML before the eager module graph executes, so import and parse time cannot be followed by a second full wait. The initial entrance may show a short branded preparation state while the complete route graph, self-hosted fonts, core magnet artwork, feature modules, compiled Observation matcher, Body Cues data, and local reference files warm up. The usable shell mounts by the deadline even if warming must finish in the background or record a degraded retryable state. After that boundary, client-side route changes use the shared in-memory resource graph and must not replace page content with a route-level loading message.
+
+Preloading means data and code are immediately available, not that every hidden interface subtree must already exist in the DOM. Large optional disclosures such as the Observation research guide keep their data in memory and instantiate their markup only when opened, avoiding invisible render work without introducing a fetch or route loading state.
+
+The navigation magnet surface belongs to the persistent app shell, not to an individual route. It remains the consistent first surface while normal routed pages render below it, but it scrolls normally with the document so it does not consume the mobile working viewport. The production-parity emotions-wheel route deliberately keeps its standalone wheel shell and hides the navigation surface. Production builds generate a content-versioned service worker that precaches only public build assets, replaces old app-shell caches atomically, bypasses `/allneeds-api`, and never includes personal local data. Once installed, navigations use the version-matched cached shell first, and hashed asset matches ignore transport-only `Vary` headers so offline module loading cannot miss identical cached URLs.
+
+Detailed targets and follow-up work are tracked in `docs/ux-stability-roadmap.md`.
+
+For local measurement, `?diagnostics=1` enables a non-transmitting panel backed by `PerformanceObserver` plus the service-worker lifecycle. It exposes only numeric entrance, layout-shift, interaction-duration, warm-route response measurements, and the public offline-cache readiness state. It never reads journal, observation, inventory, search, or route content.
 
 The initial GitHub Pages build includes a `404.html` SPA fallback so deep links function during development. That fallback still returns an HTTP 404 on a first request. Before V2 replaces public reference pages, important index/detail routes should be prerendered or emitted as static HTML entry points so they receive real 200 responses and remain friendly to search/indexing and sharing.
 
@@ -171,6 +186,8 @@ Accessibility is a component contract, not a late audit:
 
 - native landmarks and controls first;
 - route changes move focus to the main content region;
+- the persistent shell owns the only `main` landmark, gives it the current route’s accessible name, and updates the document title from the same catalog-aware route presentation;
+- full-screen dialogs share focus containment, Escape handling, background scroll locking, and opener restoration, while the non-modal Customizer deliberately does not trap focus;
 - keyboard behavior is tested with each interactive slice;
 - controls receive accessible names from visible labels wherever possible;
 - status/live regions are added only for state changes that need announcement;
@@ -187,7 +204,16 @@ Layer tests by risk:
 5. **Visual-parity checks** — compare key V2 screens against production reference screenshots/viewports so architecture work does not silently redesign the product.
 6. **End-to-end smoke tests** — mobile viewport, direct deep links, browser back/forward, import/export, magnet play/resting transitions, and critical guided flows.
 
-CI begins with typecheck + unit tests + production build. UI/a11y/E2E dependencies should be added when the first interactive content slice needs them rather than front-loading unused tooling.
+The local `check:all` gate runs typecheck, unit tests, the verified production
+build, and checked-in Playwright production-browser flows. The browser layer
+covers frame-level magnet initialization, nav/content persistence, warm routes,
+modal focus, offline deep links, every direct route at mobile/desktop widths,
+non-sticky shell persistence, Back/Forward working-position continuity, workflow
+draft boundaries, real backup recovery, and stopped-listener/same-port reconnect. Automated
+accessibility and canonical visual-diff tooling remain milestone work rather
+than being implied by the current smoke coverage.
+
+The production build also runs `scripts/verify-production-build.mjs`. It fails when the service-worker manifest differs from `dist`, an API/external URL enters the precache, navigations or hashed assets lose their cache-first/`Vary`-safe contract, either local product font disappears, Google Fonts returns as a runtime dependency, lazy/Suspense route-loading UI is introduced, the Observation matcher skips cue/module detectors or its public copy drifts, routed features create nested `main` landmarks, route title/naming behavior disappears, shared modal focus behavior becomes incomplete, or the compact shell regresses its single Customizer entry and primary-work-before-guidance contracts.
 
 ## GitHub Pages
 

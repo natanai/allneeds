@@ -1,6 +1,5 @@
 :root {
   color-scheme: light;
-
   --plum: #74569b;
   --lavender: #ede4ff;
   --ink: #1f1230;
@@ -12,14 +11,10 @@
   --peach: #ffdfc9;
   --outline: #12081f;
   --shadow: color-mix(in srgb, var(--outline) 55%, transparent);
-  --nav-hover-shadow: color-mix(in srgb, var(--outline) 45%, transparent);
-  --nav-active-inset-shadow: color-mix(in srgb, var(--outline) 34%, transparent);
-  --nav-active-lift-shadow: color-mix(in srgb, var(--outline) 62%, transparent);
-  --btn-bg: #ffb3cb;
+  --btn-bg: var(--rose);
   --btn-fg: #111111;
   --chip-bg: color-mix(in srgb, #ffffff 86%, var(--sky) 14%);
   --chip-fg: #111111;
-
   --corner-scale: 1;
   --radius-xs: calc(var(--corner-scale) * 8px);
   --radius-sm: calc(var(--corner-scale) * 10px);
@@ -31,12 +26,11 @@
   --radius-3xl: calc(var(--corner-scale) * 24px);
   --radius-4xl: calc(var(--corner-scale) * 26px);
   --radius-pill: calc(var(--corner-scale) * 999px);
-  --radius-circle: calc(var(--corner-scale) * 50%);
-
   --font-body: 'Atkinson Hyperlegible', 'Trebuchet MS', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Manrope', 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
+  --layout-max: 960px;
 
-  /* V2 semantic aliases deliberately resolve to the production palette. */
+  /* Transitional aliases keep every feature slice on the production palette. */
   --color-plum: var(--plum);
   --color-lavender: var(--lavender);
   --color-ink: var(--ink);
@@ -47,11 +41,9 @@
   --color-sky: var(--sky);
   --color-outline: var(--outline);
   --surface-canvas: var(--lavender);
-  --surface-raised: #fff;
-  --control-min: 44px;
-  --border-strong: 3px;
-  --layout-max: 960px;
+  --surface-raised: #ffffff;
   --text-sm: 0.875rem;
+  --text-base: 1rem;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -59,5 +51,11 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
   --space-7: 3rem;
-  --motion-fast: 0.18s ease;
+  --border-strong: 3px;
+  --control-min: 44px;
+  --shadow-small: 0 5px 0 color-mix(in srgb, var(--outline) 18%, transparent);
+  --shadow-medium: 0 8px 0 color-mix(in srgb, var(--outline) 20%, transparent);
+  --shadow-tactile: 0 10px 0 color-mix(in srgb, var(--outline) 24%, transparent);
+  --shadow-tactile-hover: 0 13px 0 color-mix(in srgb, var(--outline) 28%, transparent);
+  --motion-fast: 140ms ease;
 }

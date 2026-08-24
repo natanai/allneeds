@@ -1,0 +1,109 @@
+.page {
+  width: 100%;
+  display: grid;
+  gap: 1rem;
+}
+
+.header {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.header h1,
+.header p {
+  margin: 0;
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, calc(0.75rem + 3.6vw), 2.5rem);
+  letter-spacing: .06em;
+  line-height: 1.55;
+  text-transform: uppercase;
+}
+
+.shell {
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
+  border-radius: var(--radius-2xl);
+  background: color-mix(in srgb, #fff 84%, var(--lavender));
+}
+
+.wheel {
+  width: min(100%, 900px);
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+.wheel svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.slicePath {
+  stroke: #fff;
+  stroke-width: 1.5;
+  transition: filter 140ms ease;
+}
+
+.sliceLink:hover .slicePath,
+.sliceLink:focus .slicePath,
+.sliceLink:focus-visible .slicePath {
+  filter: brightness(1.06) saturate(1.15);
+}
+
+.sliceLink:focus-visible .slicePath {
+  stroke: var(--outline);
+  stroke-width: 3;
+}
+
+.label {
+  fill: var(--ink);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.center {
+  fill: color-mix(in srgb, #fff 80%, var(--rose));
+  stroke: color-mix(in srgb, var(--outline) 30%, transparent);
+  stroke-width: 1.25;
+}
+
+.centerText {
+  fill: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.help {
+  margin: 0.85rem 0 0;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 520px) {
+  .header h1 {
+    font-size: clamp(1.05rem, calc(.6rem + 3vw), 1.6rem);
+    letter-spacing: .045em;
+  }
+
+  .shell {
+    padding: 0.45rem;
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .help {
+    padding-inline: 0.4rem;
+    font-size: 0.86rem;
+  }
+}

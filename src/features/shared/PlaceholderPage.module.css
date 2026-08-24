@@ -30,13 +30,3 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-
-.note {
-  margin-top: var(--space-5);
-  padding: var(--space-3);
-  display: grid;
-  gap: var(--space-1);
-  border: 2px dashed var(--color-outline);
-  border-radius: var(--radius-md);
-  background: var(--color-sky);
-}

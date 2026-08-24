@@ -1,0 +1,277 @@
+import { useMemo, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link } from 'react-router';
+
+import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
+import { needs, needsBySlug } from '../../data/catalog';
+import { readInventoryDraft, writeInventoryDraft } from '../../persistence/workflowDrafts';
+import type { InventoryDraft } from '../../persistence/workflowDrafts';
+import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
+import {
+  createPersonalInventoryEntry,
+  isDuplicateStrategy,
+  readInventory,
+  writeInventory,
+} from './inventoryRepository';
+import type { InventoryStrategy } from './inventoryRepository';
+import styles from './InventoryPage.module.css';
+
+type CoverageFilter = 'all' | 'missing' | 'covered';
+type InventoryView = 'needs' | 'strategies';
+type Feedback = { kind: 'success' | 'warning' | 'error'; message: string } | null;
+
+const inventoryNeeds = [...needs].sort((left, right) => left.title.localeCompare(right.title));
+
+const EMPTY_ADD_DRAFT: InventoryDraft['add'] = {
+  title: '', description: '', selectedNeeds: [], firstName: '', location: '',
+};
+
+function emptyInventoryDraft(): InventoryDraft {
+  return {
+    coverageFilter: 'all',
+    expandedNeed: null,
+    add: { ...EMPTY_ADD_DRAFT, selectedNeeds: [] },
+    edit: null,
+  };
+}
+
+export function InventoryPage() {
+  const [initialDraft] = useState(() => readInventoryDraft() ?? emptyInventoryDraft());
+  const [inventory, setInventory] = useState<InventoryStrategy[]>(readInventory);
+  const [view, setView] = useState<InventoryView>('needs');
+  const [coverageFilter, setCoverageFilter] = useState<CoverageFilter>(
+    initialDraft.coverageFilter === 'hidden' ? 'all' : initialDraft.coverageFilter,
+  );
+  const [expandedNeed, setExpandedNeed] = useState<string | null>(initialDraft.expandedNeed);
+  const [strategySearch, setStrategySearch] = useState('');
+  const [addDraft, setAddDraft] = useState<InventoryDraft['add']>(initialDraft.add);
+  const [editDraft, setEditDraft] = useState<InventoryDraft['edit']>(initialDraft.edit);
+  const [feedback, setFeedback] = useState<Feedback>(null);
+  const addFormShellRef = useRef<HTMLDetailsElement>(null);
+  const workflowDraft = useMemo<InventoryDraft>(() => ({
+    coverageFilter, expandedNeed, add: addDraft, edit: editDraft,
+  }), [addDraft, coverageFilter, editDraft, expandedNeed]);
+  const workflowDraftRef = useWorkflowDraftPersistence(workflowDraft, writeInventoryDraft);
+
+  const coverage = useMemo(() => {
+    const covered = new Set(inventory.flatMap((item) => item.needSlugs));
+    return inventoryNeeds.map((need) => ({ need, covered: covered.has(need.slug) }));
+  }, [inventory]);
+  const visibleCoverage = coverage.filter((entry) => {
+    if (coverageFilter === 'covered') return entry.covered;
+    if (coverageFilter === 'missing') return !entry.covered;
+    return true;
+  });
+  const supportedCount = coverage.filter((entry) => entry.covered).length;
+  const visibleStrategies = useMemo(() => {
+    const query = strategySearch.trim().toLocaleLowerCase();
+    if (!query) return inventory;
+    return inventory.filter((entry) => [
+      entry.title,
+      entry.description,
+      ...entry.needSlugs.map((slug) => needsBySlug.get(slug)?.title ?? slug),
+    ].some((value) => value.toLocaleLowerCase().includes(query)));
+  }, [inventory, strategySearch]);
+
+  const commit = (items: InventoryStrategy[], message: string) => {
+    setInventory(writeInventory(items));
+    setFeedback({ kind: 'success', message });
+  };
+
+  const openAddForm = (needSlug?: string) => {
+    if (needSlug) setAddDraft((current) => ({ ...current, selectedNeeds: [needSlug] }));
+    if (addFormShellRef.current) addFormShellRef.current.open = true;
+    window.requestAnimationFrame(() => {
+      document.getElementById('inventory-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('inventory-title')?.focus({ preventScroll: true });
+    });
+  };
+
+  const handleAdd = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const title = addDraft.title.trim();
+    const description = addDraft.description.trim();
+    const needSlugs = addDraft.selectedNeeds.filter(Boolean);
+    if (!title || !description || !needSlugs.length) {
+      setFeedback({ kind: 'error', message: 'Add a strategy name, description, and at least one need.' });
+      return;
+    }
+    if (isDuplicateStrategy(inventory, title, needSlugs)
+      && !window.confirm('You already saved a strategy with this title for one of the selected needs. Save another copy?')) {
+      setFeedback({ kind: 'warning', message: 'Skipped saving duplicate strategy.' });
+      return;
+    }
+    const primaryNeed = needsBySlug.get(needSlugs[0] ?? '');
+    const entry = createPersonalInventoryEntry({
+      title,
+      description,
+      needSlugs,
+      needTitle: primaryNeed?.title ?? 'Need',
+      firstName: addDraft.firstName,
+      location: addDraft.location,
+      visibility: 'private',
+    });
+    commit([...inventory, entry], `Saved “${title}” to this device.`);
+    const emptyAdd = { ...EMPTY_ADD_DRAFT, selectedNeeds: [] };
+    workflowDraftRef.current = { ...workflowDraftRef.current, add: emptyAdd };
+    setAddDraft(emptyAdd);
+    setView('strategies');
+  };
+
+  const updateEntry = (event: FormEvent<HTMLFormElement>, entry: InventoryStrategy) => {
+    event.preventDefault();
+    const title = editDraft?.id === entry.id ? editDraft.title.trim() : '';
+    const description = editDraft?.id === entry.id ? editDraft.description.trim() : '';
+    if (!title) return;
+    commit(inventory.map((item) => item.id === entry.id ? { ...item, title, description } : item), `Updated “${title}”.`);
+    workflowDraftRef.current = { ...workflowDraftRef.current, edit: null };
+    setEditDraft(null);
+  };
+
+  const removeEntry = (entry: InventoryStrategy) => {
+    if (!window.confirm(`Remove “${entry.title}” from this device?`)) return;
+    commit(inventory.filter((item) => item.id !== entry.id), `Removed “${entry.title}”.`);
+    if (editDraft?.id === entry.id) {
+      workflowDraftRef.current = { ...workflowDraftRef.current, edit: null };
+      setEditDraft(null);
+    }
+  };
+
+  return (
+    <article className={styles.page}>
+      <header className={styles.header}>
+        <div className={styles.headingCopy}>
+          <h1>Strategy inventory</h1>
+          <p>Build a personal library of strategies that help you care for your needs. Browse by need or review everything you have saved.</p>
+        </div>
+        <button type="button" className={styles.addAction} onClick={() => openAddForm()}>
+          <span aria-hidden="true">+</span> Add strategy
+        </button>
+      </header>
+
+      {feedback ? <p className={`${styles.feedback} ${styles[feedback.kind]}`} role="status">{feedback.message}</p> : null}
+
+      <section className={styles.overview} aria-label="Strategy inventory views">
+        <div className={styles.viewSwitch} role="tablist" aria-label="Inventory view">
+          <button id="inventory-view-needs" type="button" role="tab" aria-selected={view === 'needs'} aria-controls="inventory-needs-panel" onClick={() => setView('needs')}>Needs</button>
+          <button id="inventory-view-strategies" type="button" role="tab" aria-selected={view === 'strategies'} aria-controls="inventory-strategies-panel" onClick={() => setView('strategies')}>Strategies{inventory.length ? <span>{inventory.length}</span> : null}</button>
+        </div>
+
+        {view === 'needs' ? (
+          <section id="inventory-needs-panel" className={styles.viewPanel} role="tabpanel" aria-labelledby="inventory-view-needs">
+            <header className={styles.panelHeader}>
+              <div><h2>Needs</h2><p>Tap a need to see the strategies you have saved for it.</p></div>
+              <p className={styles.countStatus}>{supportedCount} supported · {inventoryNeeds.length - supportedCount} without strategies</p>
+            </header>
+            <div className={styles.filters} role="group" aria-label="Filter needs">
+              {([['all', 'All'], ['missing', 'Needs care'], ['covered', 'Supported']] as const).map(([value, label]) => (
+                <button key={value} type="button" data-filter={value} aria-pressed={coverageFilter === value} onClick={() => setCoverageFilter(value)}>{label}</button>
+              ))}
+            </div>
+            <div className={styles.coverageList}>
+              {visibleCoverage.map(({ need, covered }) => {
+                const matching = inventory.filter((item) => item.needSlugs.includes(need.slug));
+                const expanded = expandedNeed === need.slug;
+                return (
+                  <article key={need.slug} className={styles.needRow} data-covered={covered}>
+                    <button type="button" className={styles.needFocus} aria-expanded={expanded} aria-label={`${need.title}, ${matching.length ? `${matching.length} saved ${matching.length === 1 ? 'strategy' : 'strategies'}` : 'no saved strategies'}. Show details.`} onClick={() => setExpandedNeed(expanded ? null : need.slug)}>
+                      <span className={styles.needStatus} aria-hidden="true" />
+                      <span className={styles.needText}>
+                        <span className={styles.needLabel}>{need.title}</span>
+                        <small>{matching.length ? `${matching.length} saved` : 'No strategies'}</small>
+                      </span>
+                      <span className={styles.chevron} aria-hidden="true">›</span>
+                    </button>
+                    {expanded ? (
+                      <div className={styles.needDetail}>
+                        <div className={styles.detailHeader}>
+                          <strong>{matching.length ? 'Saved strategies' : 'Nothing saved yet'}</strong>
+                          <Link to={`/needs/${need.slug}`}>About {need.title}</Link>
+                        </div>
+                        {matching.length ? <div className={styles.compactStrategies}>{matching.map((item) => <span key={item.id}>{item.title}</span>)}</div> : <p>Add something that reliably helps you care for {need.title.toLocaleLowerCase()}.</p>}
+                        <button type="button" className={styles.detailAdd} onClick={() => openAddForm(need.slug)}>Add a strategy</button>
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        ) : (
+          <section id="inventory-strategies-panel" className={styles.viewPanel} role="tabpanel" aria-labelledby="inventory-view-strategies">
+            <header className={styles.panelHeader}>
+              <div><h2>My strategies</h2><p>Everything you have saved, regardless of which needs it supports.</p></div>
+              <p className={styles.countStatus}>{inventory.length} saved</p>
+            </header>
+            <label className={styles.search}>
+              <span aria-hidden="true">⌕</span><span className="visually-hidden">Search saved strategies</span>
+              <input type="search" placeholder="Search your strategies" autoComplete="off" value={strategySearch} onChange={(event) => setStrategySearch(event.target.value)} />
+            </label>
+            <div className={styles.savedList} id="strategies-list">
+              {!inventory.length ? <p className={styles.empty}>Nothing saved yet. Add a personal strategy or save one from a need page.</p> : null}
+              {inventory.length > 0 && !visibleStrategies.length ? <p className={styles.empty}>No strategies match “{strategySearch}”.</p> : null}
+              {visibleStrategies.map((entry) => (
+                <article key={entry.id} className={styles.savedCard}>
+                  {editDraft?.id === entry.id ? (
+                    <form onSubmit={(event) => updateEntry(event, entry)}>
+                      <label>Strategy name<input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></label>
+                      <label>Description<textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} /></label>
+                      <div><button type="submit">Save changes</button><button type="button" onClick={() => setEditDraft(null)}>Cancel</button></div>
+                    </form>
+                  ) : (
+                    <>
+                      <h3>{entry.title}</h3><p>{entry.description}</p>
+                      <div className={styles.tags}>{entry.needSlugs.map((slug) => <Link key={slug} to={`/needs/${slug}`}>{needsBySlug.get(slug)?.title ?? slug}</Link>)}</div>
+                      <small>{entry.personal ? 'Personal strategy' : 'Saved strategy'} · Stored on this device</small>
+                      <div className={styles.cardButtons}><button type="button" onClick={() => setEditDraft({ id: entry.id, title: entry.title, description: entry.description })}>Edit</button><button type="button" onClick={() => removeEntry(entry)}>Remove</button></div>
+                    </>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </section>
+
+      <details ref={addFormShellRef} className={styles.formShell} id="inventory-form-shell">
+        <summary><span>Add a personal strategy</span><span aria-hidden="true">+</span></summary>
+        <div className={styles.formBody}>
+          <form id="inventory-form" className={styles.formCard} onSubmit={handleAdd}>
+            <label className={styles.formField}>
+              <span>Strategy name</span>
+              <span className={styles.inputCard}><input id="inventory-title" name="title" type="text" value={addDraft.title} onChange={(event) => setAddDraft({ ...addDraft, title: event.target.value })} required /></span>
+            </label>
+            <label className={styles.formField}>
+              <span>How do you put it into practice?</span>
+              <span className={styles.inputCard}><textarea name="description" rows={4} value={addDraft.description} onChange={(event) => setAddDraft({ ...addDraft, description: event.target.value })} required /></span>
+            </label>
+            <div className={`${styles.formField} ${styles.needsFormField}`}>
+              <span id="inventory-needs-label">Needs</span>
+              <span className={styles.inputCard}>
+                <NeedCatalogPicker
+                  labelId="inventory-needs-label"
+                  selectedNeeds={addDraft.selectedNeeds}
+                  onChange={(selectedNeeds) => setAddDraft({ ...addDraft, selectedNeeds })}
+                />
+              </span>
+            </div>
+            <div className={styles.formRow}>
+              <label className={styles.formField}><span>First name (optional)</span><span className={styles.inputCard}><input name="name" type="text" value={addDraft.firstName} onChange={(event) => setAddDraft({ ...addDraft, firstName: event.target.value })} /></span></label>
+              <label className={styles.formField}><span>Location (optional)</span><span className={styles.inputCard}><input name="location" type="text" value={addDraft.location} onChange={(event) => setAddDraft({ ...addDraft, location: event.target.value })} /></span></label>
+            </div>
+            <label className={styles.formField}>
+              <span>Visibility</span>
+              <small className={styles.visibilityHint}>Choose who can see this strategy when you export or share it. Sign in with Bluesky to enable Followers/Public. While signed out, strategies stay only on this browser.</small>
+              <span className={styles.inputCard}><select name="strategy-visibility" defaultValue="private"><option value="private">Private (only on this browser)</option><option disabled>Followers (Bluesky followers when synced)</option><option disabled>Public</option></select></span>
+            </label>
+            <div className={styles.formActions}>
+              <button type="submit" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Device</button>
+              <button type="button" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled>Profile</button>
+            </div>
+          </form>
+          <p className={styles.formNote}>Backup, restore, and account sync are in Menu → Account &amp; data.</p>
+        </div>
+      </details>
+    </article>
+  );
+}

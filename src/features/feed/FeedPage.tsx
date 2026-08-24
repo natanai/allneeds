@@ -1,0 +1,134 @@
+import { useEffect, useState } from 'react';
+
+import {
+  loadSharedFeedResources,
+  readSharedFeedResources,
+} from '../../app/appResources';
+import type { SharedFeedStrategy } from '../../app/appResources';
+import {
+  createSharedInventoryEntry,
+  inventoryHasStrategy,
+  readInventory,
+  writeInventory,
+  type InventoryVisibility,
+} from '../inventory/inventoryRepository';
+import styles from './FeedPage.module.css';
+
+function formatDate(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? ''
+    : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+}
+
+function normalizeNeeds(strategy: SharedFeedStrategy) {
+  const raw = Array.isArray(strategy.needIds) ? strategy.needIds
+    : Array.isArray(strategy.supportsNeeds) ? strategy.supportsNeeds
+      : Array.isArray(strategy.needs) ? strategy.needs : [];
+  return [...new Set(raw.map((item) => {
+    if (typeof item === 'string') return item.trim();
+    if (item && typeof item === 'object') {
+      const record = item as Record<string, unknown>;
+      return typeof record.title === 'string' ? record.title : typeof record.slug === 'string' ? record.slug : '';
+    }
+    return '';
+  }).filter(Boolean))];
+}
+
+function visibility(value?: InventoryVisibility) {
+  if (value === 'public') return 'Public';
+  if (value === 'followers') return 'Followers only';
+  return 'Private';
+}
+
+function initialFeed(scope: string, sort: string) {
+  return readSharedFeedResources(scope, sort) ?? {
+    strategies: [],
+    error: '',
+  };
+}
+
+export function FeedPage() {
+  const [scope, setScope] = useState('public');
+  const [sort, setSort] = useState('recent');
+  const [feed, setFeed] = useState(() => initialFeed('public', 'recent'));
+  const [loading, setLoading] = useState(() => !readSharedFeedResources('public', 'recent'));
+  const [statusOverride, setStatusOverride] = useState('');
+  const [savedIds, setSavedIds] = useState(() => new Set(readInventory().map((item) => item.strategySlug).filter(Boolean)));
+
+  useEffect(() => {
+    let cancelled = false;
+    const cached = readSharedFeedResources(scope, sort);
+    if (cached) {
+      setFeed(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+    setStatusOverride('');
+    void loadSharedFeedResources(scope, sort).then((next) => {
+      if (cancelled) return;
+      setFeed(next);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [scope, sort]);
+
+  function save(strategy: SharedFeedStrategy) {
+    const strategyId = String(strategy.id);
+    const current = readInventory();
+    if (inventoryHasStrategy(current, strategyId)) {
+      setStatusOverride('This shared strategy is already saved in your inventory.');
+      return;
+    }
+    const authorName = strategy.author?.displayName || strategy.author?.handle || strategy.author?.did || '';
+    const entry = createSharedInventoryEntry({
+      id: strategyId,
+      title: strategy.title || 'Untitled strategy',
+      description: strategy.body || '',
+      needSlugs: normalizeNeeds(strategy),
+      visibility: strategy.visibility,
+      contributor: authorName ? { name: authorName } : undefined,
+    });
+    writeInventory([...current, entry]);
+    setSavedIds((values) => new Set(values).add(strategyId.toLocaleLowerCase()));
+    setStatusOverride('Saved to your inventory. Shared add count could not be updated from this localhost build.');
+  }
+
+  const status = statusOverride
+    || (loading ? 'Loading…' : feed.error || (!feed.strategies.length ? 'No shared strategies found for this view yet.' : ''));
+
+  return (
+    <div className={styles.page}>
+      <header className={styles.header}><h1>Shared strategies</h1></header>
+
+      <section className={styles.controls} aria-label="Shared strategy filters">
+        <div className={styles.controlRow}>
+          <label><span>Show</span><select value={scope} onChange={(event) => setScope(event.target.value)}><option value="follows" disabled>From people you follow</option><option value="public">All public strategies</option></select></label>
+          <label><span>Sort by</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recent">Most recent</option><option value="popular">Most added</option></select></label>
+        </div>
+        {status ? <p className={styles.status} role="status">{status}</p> : null}
+        <p className={styles.authHint}>Following requires Bluesky sign-in in Menu → Account &amp; data.</p>
+      </section>
+
+      <section className={styles.feed} aria-label="Shared strategies">
+        {feed.strategies.map((strategy) => {
+          const author = strategy.author ?? {};
+          const authorLabel = author.displayName || author.handle || author.did || 'Unknown author';
+          const handle = author.handle ? `@${author.handle}` : '';
+          const timestamp = formatDate(strategy.createdAt);
+          const strategyNeeds = normalizeNeeds(strategy);
+          const isSaved = savedIds.has(String(strategy.id).toLocaleLowerCase());
+          return (
+            <article className={styles.card} key={strategy.id}>
+              <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${authorLabel}${handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
+              <div className={styles.body}><p>{strategy.body || ''}</p></div>
+              <footer><span>{visibility(strategy.visibility)}</span>{strategyNeeds.length ? <details><summary>Needs supported</summary><ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul></details> : null}<button type="button" disabled={isSaved} onClick={() => save(strategy)}>{isSaved ? 'Saved to inventory' : 'Save to inventory'}</button></footer>
+            </article>
+          );
+        })}
+      </section>
+    </div>
+  );
+}

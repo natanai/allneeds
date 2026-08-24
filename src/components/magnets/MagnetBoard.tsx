@@ -1,1187 +1,885 @@
 import {
-  type CSSProperties,
-  type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react';
+import type {
+  AriaAttributes,
+  CSSProperties,
+  DragEvent as ReactDragEvent,
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+} from 'react';
+import { Link } from 'react-router';
 
-import { readMagnetLayout, writeMagnetLayout } from '../../persistence/magnetLayoutStore';
-import { getMagnetTilt, stableHash } from './magnetMath';
+import {
+  getAabbCollision,
+  getMagnetTilt,
+  limitVector,
+  mergeVisibleMagnetOrder,
+  NAV_REST_PACKING,
+  orderMagnetsByVisualRows,
+  packMagnets,
+} from './magnetMath';
+import {
+  magnetViewportForWidth,
+  readMagnetViewportLayout,
+  writeMagnetViewportLayout,
+} from '../../persistence/magnetLayoutStore';
 import styles from './MagnetBoard.module.css';
+import { PhysicsToggle } from './PhysicsToggle';
+
+export type MagnetTone = 'rose' | 'mint' | 'gold' | 'sky' | 'lavender' | 'peach';
+export type MagnetKind = 'default' | 'feeling' | 'need' | 'nav';
+
+export type MagnetBoardItem = {
+  id: string;
+  label: string;
+  to?: string;
+  onActivate?: () => void;
+  tone?: MagnetTone;
+  kind?: MagnetKind;
+  icon?: ReactNode;
+  iconUrl?: string;
+  active?: boolean;
+  count?: number;
+  ariaLabel?: string;
+  ariaExpanded?: boolean;
+  ariaHasPopup?: AriaAttributes['aria-haspopup'];
+  ariaControls?: string;
+};
 
 type Point = { x: number; y: number };
+type MagnetElement = HTMLAnchorElement | HTMLButtonElement;
 
-type MagnetState = Point & {
+type KineticMagnet = {
   id: string;
-  element: HTMLElement;
-  w: number;
-  h: number;
+  element: MagnetElement;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
   vx: number;
   vy: number;
-  homeX: number;
-  homeY: number;
-  phase: number;
-  phase2: number;
+  mass: number;
+  wobble: number;
+  wobbleVelocity: number;
   dragging: boolean;
 };
 
-type DragCandidate = {
+type DragState = {
+  id: string;
   pointerId: number;
-  pointerType: string;
-  magnet: MagnetState;
-  down: Point;
+  element: MagnetElement;
+  startPointer: Point;
   offset: Point;
-  started: boolean;
-  moved: boolean;
-  holdTimer: number | null;
   lastPointer: Point;
   lastTime: number;
-  pointerVx: number;
-  pointerVy: number;
+  releaseVx: number;
+  releaseVy: number;
+  moved: boolean;
 };
 
 type MagnetBoardProps = {
-  children: ReactNode;
+  items: MagnetBoardItem[];
   playMode: boolean;
+  onPlayModeChange: (checked: boolean) => void;
+  ariaLabel?: string;
   storageKey: string;
+  variant?: 'content' | 'nav';
   shuffleVersion?: number;
   className?: string;
-  ariaLabel?: string;
 };
 
-const BOARD_PADDING = 12;
-const FLOW_GAP = 12;
-const DRAG_THRESHOLD = 4;
-const TOUCH_HOLD_MS = 180;
-const CLICK_SUPPRESS_MS = 320;
-
-const CURRENT_ACCELERATION = 1.35;
-const FLUID_DAMPING_PER_SECOND = 1.05;
-const HOME_DEAD_ZONE = 52;
-const HOME_ACCELERATION = 0.065;
-const HOME_MAX_ACCELERATION = 7.5;
-
-const SOFT_COLLISION_GAP = 10;
-const PAIR_ACCELERATION = 34;
-const CONTACT_SLOP = 1.75;
-const PENETRATION_CORRECTION = 0.42;
-
-const EDGE_CUSHION = 24;
-const EDGE_ACCELERATION = 18;
-const EDGE_BOUNCE = 0.32;
-
-const POINTER_RADIUS = 124;
-const POINTER_ACCELERATION = 7;
-
-const MAX_SPEED = 110;
-const RELEASE_VELOCITY_SCALE = 0.14;
-const MAX_RELEASE_SPEED = 72;
-
-const DRAG_WAKE_MIN_RADIUS = 112;
-const DRAG_WAKE_MAX_RADIUS = 188;
-const DRAG_WAKE_TRANSFER = 0.105;
-const DRAG_RADIAL_IMPULSE = 30;
-const DRAG_HOME_CARRY = 0.24;
+const DRAG_THRESHOLD = 6;
+const CLICK_SUPPRESSION_MS = 320;
+const MAX_FLING_SPEED = 880;
+const LINEAR_DRAG = 3.6;
+const EDGE_RESTITUTION = 0.18;
+const COLLISION_RESTITUTION = 0.24;
+const SURFACE_RADIUS = 195;
+const SURFACE_COUPLING = 0.32;
+const WOBBLE_SPRING = 52;
+const WOBBLE_DAMPING = 7.4;
 
 function clamp(value: number, min: number, max: number) {
-  if (max < min) return min;
+  if (min > max) return min;
   return Math.min(max, Math.max(min, value));
 }
 
-function phaseFor(seed: string) {
-  return ((stableHash(seed) % 3600) / 3600) * Math.PI * 2;
+function applyPosition(magnet: KineticMagnet) {
+  magnet.element.style.setProperty('--magnet-x', `${magnet.x.toFixed(2)}px`);
+  magnet.element.style.setProperty('--magnet-y', `${magnet.y.toFixed(2)}px`);
+  magnet.element.style.setProperty('--magnet-wobble-y', `${clamp(magnet.wobble, -3, 3).toFixed(2)}px`);
+  magnet.element.style.setProperty('--magnet-rock', `${clamp(magnet.vx * 0.0035 + magnet.wobble * 0.2, -2.6, 2.6).toFixed(2)}deg`);
 }
 
-function applyMagnetTransform(magnet: MagnetState, smooth = false) {
-  const x = smooth ? Math.round(magnet.x * 4) / 4 : Math.round(magnet.x);
-  const y = smooth ? Math.round(magnet.y * 4) / 4 : Math.round(magnet.y);
-  magnet.element.style.setProperty('--magnet-x', `${x}px`);
-  magnet.element.style.setProperty('--magnet-y', `${y}px`);
-}
-
-function overlaps(a: MagnetState, b: MagnetState, gap = 0) {
-  return !(
-    a.x + a.w + gap <= b.x ||
-    b.x + b.w + gap <= a.x ||
-    a.y + a.h + gap <= b.y ||
-    b.y + b.h + gap <= a.y
+function kickWobble(magnet: KineticMagnet, impulse: number) {
+  magnet.wobbleVelocity = clamp(
+    magnet.wobbleVelocity + impulse / Math.max(magnet.mass, 0.5),
+    -95,
+    95,
   );
 }
 
-function clampMagnet(magnet: MagnetState, boardWidth: number, boardHeight: number) {
-  magnet.x = clamp(
-    magnet.x,
-    BOARD_PADDING,
-    Math.max(BOARD_PADDING, boardWidth - magnet.w - BOARD_PADDING),
-  );
-  magnet.y = clamp(
-    magnet.y,
-    BOARD_PADDING,
-    Math.max(BOARD_PADDING, boardHeight - magnet.h - BOARD_PADDING),
-  );
-  magnet.homeX = clamp(
-    magnet.homeX,
-    BOARD_PADDING,
-    Math.max(BOARD_PADDING, boardWidth - magnet.w - BOARD_PADDING),
-  );
-  magnet.homeY = clamp(
-    magnet.homeY,
-    BOARD_PADDING,
-    Math.max(BOARD_PADDING, boardHeight - magnet.h - BOARD_PADDING),
-  );
-}
-
-function correctPenetration(
-  a: MagnetState,
-  b: MagnetState,
-  boardWidth: number,
-  boardHeight: number,
-) {
-  const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-  const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-
-  if (overlapX <= CONTACT_SLOP || overlapY <= CONTACT_SLOP) return false;
-
-  const centerAX = a.x + a.w / 2;
-  const centerAY = a.y + a.h / 2;
-  const centerBX = b.x + b.w / 2;
-  const centerBY = b.y + b.h / 2;
-
-  const aMovable = !a.dragging;
-  const bMovable = !b.dragging;
-  if (!aMovable && !bMovable) return false;
-
-  const divisor = aMovable && bMovable ? 2 : 1;
-
-  if (overlapX < overlapY) {
-    const direction = centerAX <= centerBX ? -1 : 1;
-    const correction =
-      Math.max(overlapX - CONTACT_SLOP, 0) * PENETRATION_CORRECTION / divisor;
-
-    if (aMovable) {
-      a.x += direction * correction;
-      a.vx *= 0.82;
-    }
-    if (bMovable) {
-      b.x -= direction * correction;
-      b.vx *= 0.82;
-    }
-  } else {
-    const direction = centerAY <= centerBY ? -1 : 1;
-    const correction =
-      Math.max(overlapY - CONTACT_SLOP, 0) * PENETRATION_CORRECTION / divisor;
-
-    if (aMovable) {
-      a.y += direction * correction;
-      a.vy *= 0.82;
-    }
-    if (bMovable) {
-      b.y -= direction * correction;
-      b.vy *= 0.82;
-    }
+function shuffled<T>(values: T[]) {
+  const copy = [...values];
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const other = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[other]] = [copy[other]!, copy[index]!];
   }
-
-  if (aMovable) clampMagnet(a, boardWidth, boardHeight);
-  if (bMovable) clampMagnet(b, boardWidth, boardHeight);
-  return true;
-}
-
-function applySoftPairForce(
-  a: MagnetState,
-  b: MagnetState,
-  boardWidth: number,
-  boardHeight: number,
-  dt: number,
-) {
-  const centerAX = a.x + a.w / 2;
-  const centerAY = a.y + a.h / 2;
-  const centerBX = b.x + b.w / 2;
-  const centerBY = b.y + b.h / 2;
-  let dx = centerBX - centerAX;
-  let dy = centerBY - centerAY;
-
-  if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
-    const direction = phaseFor(`${a.id}:${b.id}`);
-    dx = Math.cos(direction);
-    dy = Math.sin(direction);
-  }
-
-  const reachX = (a.w + b.w) / 2 + SOFT_COLLISION_GAP;
-  const reachY = (a.h + b.h) / 2 + SOFT_COLLISION_GAP;
-  const scaledDistance = Math.hypot(dx / Math.max(reachX, 1), dy / Math.max(reachY, 1));
-
-  if (scaledDistance < 1) {
-    const distance = Math.max(Math.hypot(dx, dy), 0.001);
-    const nx = dx / distance;
-    const ny = dy / distance;
-    const closeness = 1 - scaledDistance;
-    const acceleration = closeness * closeness * PAIR_ACCELERATION;
-
-    if (!a.dragging) {
-      a.vx -= nx * acceleration * dt;
-      a.vy -= ny * acceleration * dt;
-    }
-    if (!b.dragging) {
-      b.vx += nx * acceleration * dt;
-      b.vy += ny * acceleration * dt;
-    }
-  }
-
-  correctPenetration(a, b, boardWidth, boardHeight);
-}
-
-function settleHomes(states: MagnetState[]) {
-  for (const magnet of states) {
-    magnet.homeX = magnet.x;
-    magnet.homeY = magnet.y;
-  }
-}
-
-function resolveInitialLayout(
-  states: MagnetState[],
-  boardWidth: number,
-  initialHeight: number,
-) {
-  let boardHeight = Math.max(initialHeight, 1);
-
-  for (let attempt = 0; attempt < 45; attempt += 1) {
-    let changed = false;
-
-    for (let i = 0; i < states.length; i += 1) {
-      const a = states[i];
-      if (!a) continue;
-
-      for (let j = i + 1; j < states.length; j += 1) {
-        const b = states[j];
-        if (!b) continue;
-
-        const beforeAX = a.x;
-        const beforeAY = a.y;
-        const beforeBX = b.x;
-        const beforeBY = b.y;
-
-        if (overlaps(a, b, 1)) {
-          const centerAX = a.x + a.w / 2;
-          const centerAY = a.y + a.h / 2;
-          const centerBX = b.x + b.w / 2;
-          const centerBY = b.y + b.h / 2;
-          const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-          const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-
-          if (overlapX < overlapY) {
-            const direction = centerAX <= centerBX ? -1 : 1;
-            const correction = (overlapX + 2) / 2;
-            a.x += direction * correction;
-            b.x -= direction * correction;
-          } else {
-            const direction = centerAY <= centerBY ? -1 : 1;
-            const correction = (overlapY + 2) / 2;
-            a.y += direction * correction;
-            b.y -= direction * correction;
-          }
-
-          a.x = clamp(
-            a.x,
-            BOARD_PADDING,
-            Math.max(BOARD_PADDING, boardWidth - a.w - BOARD_PADDING),
-          );
-          b.x = clamp(
-            b.x,
-            BOARD_PADDING,
-            Math.max(BOARD_PADDING, boardWidth - b.w - BOARD_PADDING),
-          );
-          a.y = clamp(a.y, BOARD_PADDING, Math.max(BOARD_PADDING, boardHeight - a.h - BOARD_PADDING));
-          b.y = clamp(b.y, BOARD_PADDING, Math.max(BOARD_PADDING, boardHeight - b.h - BOARD_PADDING));
-        }
-
-        if (
-          a.x !== beforeAX ||
-          a.y !== beforeAY ||
-          b.x !== beforeBX ||
-          b.y !== beforeBY
-        ) {
-          changed = true;
-        }
-      }
-    }
-
-    if (!changed) break;
-  }
-
-  const hasOverlap = states.some((a, index) =>
-    states.slice(index + 1).some((b) => overlaps(a, b, 1)),
-  );
-
-  if (hasOverlap) {
-    let x = BOARD_PADDING;
-    let y = BOARD_PADDING;
-    let rowHeight = 0;
-
-    for (const magnet of states) {
-      if (x > BOARD_PADDING && x + magnet.w > boardWidth - BOARD_PADDING) {
-        x = BOARD_PADDING;
-        y += rowHeight + FLOW_GAP;
-        rowHeight = 0;
-      }
-
-      magnet.x = x;
-      magnet.y = y;
-      magnet.vx = 0;
-      magnet.vy = 0;
-      x += magnet.w + FLOW_GAP;
-      rowHeight = Math.max(rowHeight, magnet.h);
-    }
-
-    boardHeight = Math.max(boardHeight, y + rowHeight + BOARD_PADDING);
-  } else {
-    const bottom = states.reduce(
-      (max, magnet) => Math.max(max, magnet.y + magnet.h + BOARD_PADDING),
-      0,
-    );
-    boardHeight = Math.max(boardHeight, bottom);
-  }
-
-  settleHomes(states);
-  return boardHeight;
-}
-
-function saveStoredLayout(
-  storageKey: string,
-  board: HTMLElement,
-  states: MagnetState[],
-) {
-  const width = Math.max(board.clientWidth, 1);
-  const height = Math.max(board.clientHeight, 1);
-  const boardHeight = Math.max(board.getBoundingClientRect().height, 1);
-  const magnets: Record<string, { xPct: number; yPct: number }> = {};
-
-  for (const magnet of states) {
-    magnets[magnet.id] = {
-      xPct: clamp(magnet.x / width, 0, 1),
-      yPct: clamp(magnet.y / height, 0, 1),
-    };
-  }
-
-  writeMagnetLayout(storageKey, { version: 1, boardHeight, magnets });
-}
-
-function clientToBorderBoxHeight(
-  board: HTMLElement,
-  desiredClientHeight: number,
-) {
-  const borderDelta = Math.max(
-    board.getBoundingClientRect().height - board.clientHeight,
-    0,
-  );
-  return Math.max(desiredClientHeight + borderDelta, 1);
-}
-
-function shuffleIntoRows(states: MagnetState[], boardWidth: number) {
-  const order = [...states]
-    .map((magnet) => ({ magnet, random: Math.random() }))
-    .sort((a, b) => a.random - b.random)
-    .map(({ magnet }) => magnet);
-
-  let x = BOARD_PADDING;
-  let y = BOARD_PADDING;
-  let rowHeight = 0;
-
-  for (const magnet of order) {
-    if (x > BOARD_PADDING && x + magnet.w > boardWidth - BOARD_PADDING) {
-      x = BOARD_PADDING;
-      y += rowHeight + FLOW_GAP;
-      rowHeight = 0;
-    }
-
-    magnet.x = x;
-    magnet.y = y;
-    magnet.vx = 0;
-    magnet.vy = 0;
-    magnet.homeX = x;
-    magnet.homeY = y;
-    x += magnet.w + FLOW_GAP;
-    rowHeight = Math.max(rowHeight, magnet.h);
-  }
-
-  return y + rowHeight + BOARD_PADDING;
-}
-
-function applyHomeTether(magnet: MagnetState, dt: number) {
-  const dx = magnet.homeX - magnet.x;
-  const dy = magnet.homeY - magnet.y;
-  const distance = Math.hypot(dx, dy);
-
-  if (distance <= HOME_DEAD_ZONE || distance <= 0.001) return;
-
-  const excess = distance - HOME_DEAD_ZONE;
-  const acceleration = Math.min(
-    excess * HOME_ACCELERATION,
-    HOME_MAX_ACCELERATION,
-  );
-
-  magnet.vx += (dx / distance) * acceleration * dt;
-  magnet.vy += (dy / distance) * acceleration * dt;
-}
-
-function applyEdgePressure(
-  magnet: MagnetState,
-  boardWidth: number,
-  boardHeight: number,
-  dt: number,
-) {
-  const maxX = Math.max(
-    BOARD_PADDING,
-    boardWidth - magnet.w - BOARD_PADDING,
-  );
-  const maxY = Math.max(
-    BOARD_PADDING,
-    boardHeight - magnet.h - BOARD_PADDING,
-  );
-
-  const leftDistance = magnet.x - BOARD_PADDING;
-  const rightDistance = maxX - magnet.x;
-  const topDistance = magnet.y - BOARD_PADDING;
-  const bottomDistance = maxY - magnet.y;
-
-  if (leftDistance < EDGE_CUSHION) {
-    magnet.vx +=
-      (1 - clamp(leftDistance / EDGE_CUSHION, 0, 1)) *
-      EDGE_ACCELERATION *
-      dt;
-  }
-  if (rightDistance < EDGE_CUSHION) {
-    magnet.vx -=
-      (1 - clamp(rightDistance / EDGE_CUSHION, 0, 1)) *
-      EDGE_ACCELERATION *
-      dt;
-  }
-  if (topDistance < EDGE_CUSHION) {
-    magnet.vy +=
-      (1 - clamp(topDistance / EDGE_CUSHION, 0, 1)) *
-      EDGE_ACCELERATION *
-      dt;
-  }
-  if (bottomDistance < EDGE_CUSHION) {
-    magnet.vy -=
-      (1 - clamp(bottomDistance / EDGE_CUSHION, 0, 1)) *
-      EDGE_ACCELERATION *
-      dt;
-  }
-
-  if (magnet.x <= BOARD_PADDING || magnet.x >= maxX) {
-    magnet.x = clamp(magnet.x, BOARD_PADDING, maxX);
-    magnet.vx *= -EDGE_BOUNCE;
-  }
-  if (magnet.y <= BOARD_PADDING || magnet.y >= maxY) {
-    magnet.y = clamp(magnet.y, BOARD_PADDING, maxY);
-    magnet.vy *= -EDGE_BOUNCE;
-  }
-}
-
-function limitVelocity(magnet: MagnetState, maxSpeed = MAX_SPEED) {
-  const speed = Math.hypot(magnet.vx, magnet.vy);
-  if (speed <= maxSpeed || speed <= 0.001) return;
-
-  magnet.vx = (magnet.vx / speed) * maxSpeed;
-  magnet.vy = (magnet.vy / speed) * maxSpeed;
-}
-
-function applyDragWake(
-  dragged: MagnetState,
-  states: MagnetState[],
-  moveX: number,
-  moveY: number,
-  pointerVx: number,
-  pointerVy: number,
-  boardWidth: number,
-  boardHeight: number,
-) {
-  const dragCenterX = dragged.x + dragged.w / 2;
-  const dragCenterY = dragged.y + dragged.h / 2;
-
-  for (const other of states) {
-    if (other === dragged || other.dragging) continue;
-
-    const otherCenterX = other.x + other.w / 2;
-    const otherCenterY = other.y + other.h / 2;
-    let dx = otherCenterX - dragCenterX;
-    let dy = otherCenterY - dragCenterY;
-    let distance = Math.hypot(dx, dy);
-
-    if (distance < 0.001) {
-      const angle = phaseFor(`${dragged.id}:wake:${other.id}`);
-      dx = Math.cos(angle);
-      dy = Math.sin(angle);
-      distance = 1;
-    }
-
-    const radius = clamp(
-      (dragged.w + other.w) * 0.72 + 72,
-      DRAG_WAKE_MIN_RADIUS,
-      DRAG_WAKE_MAX_RADIUS,
-    );
-
-    if (distance >= radius) continue;
-
-    const influence = Math.pow(1 - distance / radius, 1.55);
-    const nx = dx / distance;
-    const ny = dy / distance;
-
-    const transferX = clamp(pointerVx * DRAG_WAKE_TRANSFER, -52, 52);
-    const transferY = clamp(pointerVy * DRAG_WAKE_TRANSFER, -52, 52);
-
-    other.vx +=
-      (nx * DRAG_RADIAL_IMPULSE + transferX) * influence;
-    other.vy +=
-      (ny * DRAG_RADIAL_IMPULSE + transferY) * influence;
-
-    // A magnet pushed through the "water" gently carries nearby resting spots
-    // with it so displaced magnets do not immediately spring back.
-    other.homeX += moveX * DRAG_HOME_CARRY * influence;
-    other.homeY += moveY * DRAG_HOME_CARRY * influence;
-    clampMagnet(other, boardWidth, boardHeight);
-    limitVelocity(other);
-  }
+  return copy;
 }
 
 export function MagnetBoard({
-  children,
+  items,
   playMode,
+  onPlayModeChange,
+  ariaLabel = 'Magnet board',
   storageKey,
+  variant = 'content',
   shuffleVersion = 0,
   className = '',
-  ariaLabel,
 }: MagnetBoardProps) {
   const boardRef = useRef<HTMLDivElement>(null);
-  const magnetsRef = useRef<MagnetState[]>([]);
-  const playModeRef = useRef(playMode);
-  const frameRef = useRef<number | null>(null);
-  const lastFrameRef = useRef<number | null>(null);
-  const dragRef = useRef<DragCandidate | null>(null);
-  const pointerRef = useRef({ active: false, x: 0, y: 0 });
+  const surfaceRef = useRef<HTMLSpanElement>(null);
+  const elementsRef = useRef(new Map<string, MagnetElement>());
+  const magnetsRef = useRef(new Map<string, KineticMagnet>());
+  const dragRef = useRef<DragState | null>(null);
   const suppressClickUntilRef = useRef(new Map<string, number>());
-  const lastShuffleRef = useRef(shuffleVersion);
+  const pointerFieldRef = useRef({ active: false, x: 0, y: 0 });
+  const tiltFieldRef = useRef({ x: 0, y: 0, baselineGamma: null as number | null, baselineBeta: null as number | null });
+  const motionDirtyRef = useRef(false);
+  const settledSinceRef = useRef(0);
+  const lastCollisionRippleRef = useRef(0);
+  const readyRef = useRef(false);
+  const lastLayoutWidthRef = useRef(0);
+  const lastLayoutHeightRef = useRef(0);
+  const lastStorageKeyRef = useRef(storageKey);
+  const navOrderRef = useRef<string[]>([]);
+  const navOrderViewportRef = useRef<ReturnType<typeof magnetViewportForWidth> | null>(null);
+  const previousShuffleVersionRef = useRef(shuffleVersion);
+  const [layoutReady, setLayoutReady] = useState(false);
 
-  playModeRef.current = playMode;
+  const emitRipple = useCallback((x: number, y: number, intensity = 0.5) => {
+    const surface = surfaceRef.current;
+    if (!surface || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ripple = document.createElement('span');
+    const strength = clamp(intensity, 0.18, 1);
+    ripple.className = styles.ripple ?? '';
+    ripple.style.left = `${x.toFixed(1)}px`;
+    ripple.style.top = `${y.toFixed(1)}px`;
+    ripple.style.setProperty('--ripple-size', `${64 + strength * 94}px`);
+    ripple.style.setProperty('--ripple-opacity', `${0.045 + strength * 0.085}`);
+    surface.append(ripple);
+    window.setTimeout(() => ripple.remove(), 1_350);
+  }, []);
 
-  const persist = () => {
+  const persist = useCallback((layoutWidth?: number, layoutHeight?: number) => {
     const board = boardRef.current;
-    if (board && magnetsRef.current.length) {
-      saveStoredLayout(storageKey, board, magnetsRef.current);
-    }
-  };
+    if (!board || !readyRef.current) return;
+    const width = Math.max(layoutWidth ?? board.clientWidth, 1);
+    const height = Math.max(layoutHeight ?? board.clientHeight, 1);
+    const magnets: Record<string, { x: number; y: number; xPct: number; yPct: number }> = {};
 
-  useLayoutEffect(() => {
+    magnetsRef.current.forEach((magnet) => {
+      magnets[magnet.id] = {
+        x: Number(magnet.x.toFixed(2)),
+        y: Number(magnet.y.toFixed(2)),
+        xPct: Number((magnet.x / width).toFixed(4)),
+        yPct: Number((magnet.y / height).toFixed(4)),
+      };
+    });
+
+    let order: string[] | undefined;
+    if (variant === 'nav') {
+      const visibleOrder = orderMagnetsByVisualRows(
+        [...magnetsRef.current.values()],
+      ).map((magnet) => magnet.id);
+      navOrderRef.current = mergeVisibleMagnetOrder(navOrderRef.current, visibleOrder);
+      order = navOrderRef.current;
+    }
+
+    try {
+      writeMagnetViewportLayout(storageKey, {
+        magnets,
+        boardWidth: Number(width.toFixed(2)),
+        boardHeight: Number(height.toFixed(2)),
+        ...(order ? { order } : {}),
+      }, playMode);
+    } catch {
+      // Persistence is optional in restricted/private browser contexts.
+    }
+  }, [playMode, storageKey, variant]);
+
+  const layout = useCallback((
+    shouldShuffle = false,
+    preferStored = true,
+    forceNavRestPack = false,
+  ) => {
     const board = boardRef.current;
     if (!board) return;
 
-    board.dataset.magnetReady = '0';
-    board.dataset.physics = playModeRef.current ? 'on' : 'off';
-    board.style.removeProperty('height');
-
-    const elements = Array.from(
-      board.querySelectorAll<HTMLElement>(':scope > [data-magnet-id]'),
-    ).filter(
-      (element) =>
-        !element.hidden && element.getAttribute('aria-hidden') !== 'true',
-    );
-
-    for (const element of elements) {
-      element.style.removeProperty('position');
-      element.style.removeProperty('width');
-      element.style.removeProperty('height');
-      element.style.removeProperty('--magnet-x');
-      element.style.removeProperty('--magnet-y');
-      element.style.setProperty(
-        '--magnet-tilt',
-        `${getMagnetTilt(element.dataset.magnetId ?? '')}deg`,
-      );
-      if (element instanceof HTMLAnchorElement) element.draggable = false;
+    const boardWidth = board.clientWidth;
+    if (boardWidth < 80) {
+      readyRef.current = false;
+      setLayoutReady(false);
+      return;
     }
 
-    const boardRect = board.getBoundingClientRect();
-    const naturalHeight = Math.max(board.scrollHeight, boardRect.height, 1);
-    const stored = readMagnetLayout(storageKey);
-    const initialBorderHeight = Math.max(
-      stored?.boardHeight ?? 0,
-      naturalHeight,
-    );
-    board.style.height = `${initialBorderHeight}px`;
-    let boardHeight = Math.max(board.clientHeight, 1);
+    const elements = items
+      .map((item) => ({ item, element: elementsRef.current.get(item.id) }))
+      .filter((entry): entry is { item: MagnetBoardItem; element: MagnetElement } => Boolean(entry.element));
+    const mobileNavOrder = [
+      'nav-menu',
+      'nav-home',
+      'nav-customizer',
+      'nav-journal',
+      'nav-observations',
+      'nav-faux-feelings',
+      'nav-feelings',
+      'nav-needs',
+      'nav-body-cues',
+      'nav-journal-dashboard',
+      'nav-inventory',
+    ];
+    const displayElements = variant === 'nav' && boardWidth <= 640
+      ? [...elements].sort((a, b) => mobileNavOrder.indexOf(a.item.id) - mobileNavOrder.indexOf(b.item.id))
+      : elements;
+    if (!displayElements.length || displayElements.some(({ element }) => element.offsetWidth <= 0 || element.offsetHeight <= 0)) {
+      readyRef.current = false;
+      setLayoutReady(false);
+      return;
+    }
 
-    const states = elements.map((element) => {
-      const rect = element.getBoundingClientRect();
-      const id =
-        element.dataset.magnetId ?? element.textContent?.trim() ?? '';
-      const saved = stored?.magnets[id];
-      const x = saved
-        ? saved.xPct * Math.max(board.clientWidth, 1)
-        : rect.left - boardRect.left - board.clientLeft;
-      const y = saved
-        ? saved.yPct * Math.max(board.clientHeight, 1)
-        : rect.top - boardRect.top - board.clientTop;
-
+    const packNavAtRest = variant === 'nav' && (forceNavRestPack || !playMode);
+    const stored = preferStored
+      ? readMagnetViewportLayout(storageKey, boardWidth)
+      : null;
+    const viewportClass = magnetViewportForWidth(boardWidth);
+    if (variant === 'nav' && navOrderViewportRef.current !== viewportClass) {
+      navOrderViewportRef.current = viewportClass;
+      navOrderRef.current = stored?.order ?? [];
+    }
+    const canReuseCurrent = preferStored
+      && !shouldShuffle
+      && !packNavAtRest
+      && lastStorageKeyRef.current === storageKey
+      && Math.abs(lastLayoutWidthRef.current - boardWidth) < 0.5;
+    if (!canReuseCurrent) {
+      pointerFieldRef.current.active = false;
+    }
+    const elementById = new Map(displayElements.map((entry) => [entry.item.id, entry]));
+    const orderEntries = (ids: string[]) => {
+      const seen = new Set<string>();
+      const result: typeof displayElements = [];
+      ids.forEach((id) => {
+        const entry = elementById.get(id);
+        if (!entry || seen.has(id)) return;
+        seen.add(id);
+        result.push(entry);
+      });
+      displayElements.forEach((entry) => {
+        if (seen.has(entry.item.id)) return;
+        seen.add(entry.item.id);
+        result.push(entry);
+      });
+      return result;
+    };
+    const sameViewportClass = lastLayoutWidthRef.current > 0
+      && magnetViewportForWidth(lastLayoutWidthRef.current) === magnetViewportForWidth(boardWidth);
+    const currentNavOrder = packNavAtRest && sameViewportClass && magnetsRef.current.size > 0
+      ? orderMagnetsByVisualRows(
+          [...magnetsRef.current.values()].filter((magnet) => elementById.has(magnet.id)),
+        ).map((magnet) => magnet.id)
+      : [];
+    if (variant === 'nav' && currentNavOrder.length > 0) {
+      navOrderRef.current = mergeVisibleMagnetOrder(navOrderRef.current, currentNavOrder);
+    } else if (variant === 'nav' && navOrderRef.current.length === 0 && stored?.order?.length) {
+      navOrderRef.current = stored.order;
+    }
+    const ordered = shouldShuffle
+      ? shuffled(displayElements)
+      : variant === 'nav'
+        ? orderEntries(navOrderRef.current)
+        : displayElements;
+    const measured = ordered.map(({ item, element }) => ({
+      id: item.id,
+      width: element.offsetWidth,
+      height: element.offsetHeight,
+    }));
+    const packing = variant === 'nav'
+      ? NAV_REST_PACKING
+      : { padding: 12, gapX: 12, gapY: 14, firstRowRightInset: 46 };
+    const padding = packing.padding;
+    const packed = packMagnets(measured, {
+      boardWidth,
+      ...packing,
+    });
+    const minimumHeight = variant === 'nav' ? 78 : 112;
+    const boardHeight = Math.max(packed.height, minimumHeight);
+    const sameStoredSize = stored
+      && Math.abs(stored.boardWidth - boardWidth) < 1
+      && Math.abs(stored.boardHeight - boardHeight) < 1;
+    const placements = packed.placements.map((placement) => {
+      const current = canReuseCurrent ? magnetsRef.current.get(placement.id) : null;
+      const saved = packNavAtRest ? undefined : stored?.magnets[placement.id];
+      const restoredX = current?.x
+        ?? (sameStoredSize ? saved?.x : saved?.xPct === undefined ? undefined : saved.xPct * boardWidth);
+      const restoredY = current?.y
+        ?? (sameStoredSize ? saved?.y : saved?.yPct === undefined ? undefined : saved.yPct * boardHeight);
+      if (restoredX === undefined || restoredY === undefined) return placement;
       return {
-        id,
-        element,
-        x,
-        y,
-        w: rect.width,
-        h: rect.height,
-        vx: 0,
-        vy: 0,
-        homeX: x,
-        homeY: y,
-        phase: phaseFor(`${storageKey}:${id}`),
-        phase2: phaseFor(`${id}:${storageKey}:surface`),
-        dragging: false,
-      } satisfies MagnetState;
+        ...placement,
+        x: clamp(restoredX, padding, boardWidth - padding - placement.width),
+        y: clamp(restoredY, padding, boardHeight - padding - placement.height),
+      };
     });
 
-    boardHeight = resolveInitialLayout(
-      states,
-      Math.max(board.clientWidth, 1),
-      boardHeight,
-    );
-    board.style.height = `${clientToBorderBoxHeight(board, boardHeight)}px`;
+    board.style.height = `${boardHeight}px`;
+    const next = new Map<string, KineticMagnet>();
+    const placementById = new Map(placements.map((placement) => [placement.id, placement]));
 
-    for (const magnet of states) {
-      magnet.element.style.position = 'absolute';
-      magnet.element.style.left = '0';
-      magnet.element.style.top = '0';
-      applyMagnetTransform(magnet);
-    }
+    elements.forEach(({ item, element }) => {
+      const placement = placementById.get(item.id);
+      if (!placement) return;
+      const previous = magnetsRef.current.get(item.id);
+      const magnet: KineticMagnet = {
+        id: item.id,
+        element,
+        x: placement.x,
+        y: placement.y,
+        width: placement.width,
+        height: placement.height,
+        vx: canReuseCurrent ? previous?.vx ?? 0 : 0,
+        vy: canReuseCurrent ? previous?.vy ?? 0 : 0,
+        mass: clamp((placement.width * placement.height) / 3_400, 0.75, 3.2),
+        wobble: canReuseCurrent ? previous?.wobble ?? 0 : 0,
+        wobbleVelocity: canReuseCurrent ? previous?.wobbleVelocity ?? 0 : 0,
+        dragging: false,
+      };
+      next.set(item.id, magnet);
+      applyPosition(magnet);
+    });
 
-    magnetsRef.current = states;
-    board.dataset.magnetReady = '1';
-    persist();
+    magnetsRef.current = next;
+    lastLayoutWidthRef.current = boardWidth;
+    lastLayoutHeightRef.current = boardHeight;
+    lastStorageKeyRef.current = storageKey;
+    readyRef.current = true;
+    setLayoutReady(true);
+  }, [items, playMode, storageKey, variant]);
 
-    let lastWidth = Math.max(board.clientWidth, 1);
-    let resizeFrame: number | null = null;
-
-    const scheduleRepair = () => {
-      if (resizeFrame !== null) return;
-
-      resizeFrame = window.requestAnimationFrame(() => {
-        resizeFrame = null;
-        if (!magnetsRef.current.length) return;
-
-        const newWidth = Math.max(board.clientWidth, 1);
-        const oldWidth = lastWidth;
-        const widthChanged = Math.abs(newWidth - oldWidth) >= 2;
-        let sizeChanged = false;
-        const currentHeight = Math.max(board.clientHeight, 1);
-
-        for (const magnet of magnetsRef.current) {
-          const nextW = magnet.element.offsetWidth || magnet.w;
-          const nextH = magnet.element.offsetHeight || magnet.h;
-
-          if (
-            Math.abs(nextW - magnet.w) >= 0.5 ||
-            Math.abs(nextH - magnet.h) >= 0.5
-          ) {
-            sizeChanged = true;
-          }
-
-          magnet.w = nextW;
-          magnet.h = nextH;
-
-          if (widthChanged) {
-            const xPct = clamp(
-              magnet.x / Math.max(oldWidth, 1),
-              0,
-              1,
-            );
-            const homePct = clamp(
-              magnet.homeX / Math.max(oldWidth, 1),
-              0,
-              1,
-            );
-            magnet.x = xPct * newWidth;
-            magnet.homeX = homePct * newWidth;
-          }
-
-          clampMagnet(
-            magnet,
-            newWidth,
-            currentHeight,
-          );
-        }
-
-        if (!widthChanged && !sizeChanged) return;
-
-        const nextClientHeight = resolveInitialLayout(
-          magnetsRef.current,
-          newWidth,
-          currentHeight,
-        );
-        board.style.height = `${clientToBorderBoxHeight(
-          board,
-          nextClientHeight,
-        )}px`;
-        magnetsRef.current.forEach((magnet) =>
-          applyMagnetTransform(magnet, playModeRef.current),
-        );
-        lastWidth = newWidth;
-        persist();
+  useLayoutEffect(() => {
+    let cancelled = false;
+    let fontsReady = !document.fonts || document.fonts.status === 'loaded';
+    let observedWidth = boardRef.current?.clientWidth ?? 0;
+    const run = () => {
+      if (!cancelled && fontsReady) {
+        layout(false, true, variant === 'nav' && !playMode);
+      }
+    };
+    readyRef.current = false;
+    setLayoutReady(false);
+    if (fontsReady) {
+      run();
+    } else {
+      void document.fonts.ready.then(() => {
+        fontsReady = true;
+        run();
       });
-    };
-
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined'
-        ? new ResizeObserver(scheduleRepair)
-        : null;
-
-    resizeObserver?.observe(board);
-    for (const magnet of states) resizeObserver?.observe(magnet.element);
-
-    void document.fonts?.ready?.then(scheduleRepair).catch(() => undefined);
-
+    }
+    const observer = new ResizeObserver((entries) => {
+      const nextWidth = entries[0]?.contentRect.width ?? boardRef.current?.clientWidth ?? 0;
+      if (Math.abs(nextWidth - observedWidth) < 0.5) return;
+      observedWidth = nextWidth;
+      run();
+    });
+    if (boardRef.current) observer.observe(boardRef.current);
     return () => {
-      resizeObserver?.disconnect();
-      if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
+      cancelled = true;
+      observer.disconnect();
     };
-  }, [storageKey]);
+  }, [layout, playMode, variant]);
+
+  useEffect(() => {
+    if (shuffleVersion === previousShuffleVersionRef.current) return;
+    previousShuffleVersionRef.current = shuffleVersion;
+    layout(true, false);
+    persist();
+  }, [layout, persist, shuffleVersion]);
+
+  useEffect(() => {
+    if (!playMode || typeof window.DeviceOrientationEvent === 'undefined') return;
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      const field = tiltFieldRef.current;
+      if (typeof event.gamma === 'number') {
+        if (field.baselineGamma === null) field.baselineGamma = event.gamma;
+        field.x = clamp((event.gamma - field.baselineGamma) / 30, -1, 1);
+      }
+      if (typeof event.beta === 'number') {
+        if (field.baselineBeta === null) field.baselineBeta = event.beta;
+        field.y = clamp((event.beta - field.baselineBeta) / 30, -1, 1);
+      }
+    };
+    window.addEventListener('deviceorientation', handleOrientation);
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+      tiltFieldRef.current = { x: 0, y: 0, baselineGamma: null, baselineBeta: null };
+    };
+  }, [playMode]);
 
   useEffect(() => {
     const board = boardRef.current;
-    if (!board) return;
-
-    board.dataset.physics = playMode ? 'on' : 'off';
-
-    if (!playMode) {
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-      lastFrameRef.current = null;
-      pointerRef.current.active = false;
-
-      for (const magnet of magnetsRef.current) {
+    if (!board || !playMode) {
+      pointerFieldRef.current.active = false;
+      magnetsRef.current.forEach((magnet) => {
+        magnet.dragging = false;
         magnet.vx = 0;
         magnet.vy = 0;
-        magnet.x = Math.round(magnet.x);
-        magnet.y = Math.round(magnet.y);
-        applyMagnetTransform(magnet);
-      }
-
-      settleHomes(magnetsRef.current);
+        magnet.wobble = 0;
+        magnet.wobbleVelocity = 0;
+        delete magnet.element.dataset.dragging;
+        applyPosition(magnet);
+      });
+      if (board) delete board.dataset.dragging;
       persist();
       return;
     }
 
-    const reduceMotion =
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ??
-      false;
-    if (reduceMotion) return;
-
+    let frame = 0;
+    let previousTime = performance.now();
     const tick = (time: number) => {
-      const states = magnetsRef.current;
-      const width = Math.max(board.clientWidth, 1);
-      const height = Math.max(board.clientHeight, 1);
-      const previous = lastFrameRef.current ?? time;
-      const dt = Math.min(Math.max((time - previous) / 1000, 0), 0.04);
-      lastFrameRef.current = time;
-      const damping = Math.exp(-FLUID_DAMPING_PER_SECOND * dt);
-      const t = time / 1000;
+      const dt = Math.min(Math.max((time - previousTime) / 1000, 0), 0.034);
+      previousTime = time;
+      const magnets = [...magnetsRef.current.values()];
+      const stepCount = Math.max(1, Math.min(4, Math.ceil(dt / (1 / 100))));
+      const step = dt / stepCount;
+      const pointer = pointerFieldRef.current;
+      const tilt = tiltFieldRef.current;
+      let layoutChanged = false;
 
-      for (const magnet of states) {
-        if (magnet.dragging) continue;
+      for (let substep = 0; substep < stepCount; substep += 1) {
+        magnets.forEach((magnet) => {
+          if (!magnet.dragging) {
+            if (pointer.active) {
+              const dx = magnet.x + magnet.width / 2 - pointer.x;
+              const dy = magnet.y + magnet.height / 2 - pointer.y;
+              const distance = Math.hypot(dx, dy);
+              if (distance > 0 && distance < 155) {
+                const influence = (1 - distance / 155) ** 2;
+                magnet.vx += (dx / distance) * influence * 24 * step;
+                magnet.vy += (dy / distance) * influence * 24 * step;
+                kickWobble(magnet, influence * 4 * step);
+              }
+            }
 
-        // Two long-period currents keep the surface alive without a single
-        // back-and-forth spring rhythm.
-        const currentX =
-          (Math.sin(t * 0.28 + magnet.phase) +
-            0.52 * Math.sin(t * 0.13 + magnet.phase2)) *
-          CURRENT_ACCELERATION;
-        const currentY =
-          (Math.cos(t * 0.23 + magnet.phase2) +
-            0.46 * Math.sin(t * 0.17 + magnet.phase * 1.31)) *
-          CURRENT_ACCELERATION;
+            magnet.vx += tilt.x * 72 * step;
+            magnet.vy += tilt.y * 72 * step;
+            const damping = Math.exp(-LINEAR_DRAG * step);
+            magnet.vx *= damping;
+            magnet.vy *= damping;
+            magnet.x += magnet.vx * step;
+            magnet.y += magnet.vy * step;
 
-        magnet.vx = (magnet.vx + currentX * dt) * damping;
-        magnet.vy = (magnet.vy + currentY * dt) * damping;
+            const maxX = Math.max(board.clientWidth - magnet.width, 0);
+            const maxY = Math.max(board.clientHeight - magnet.height, 0);
+            if (magnet.x < 0 || magnet.x > maxX) {
+              magnet.x = clamp(magnet.x, 0, maxX);
+              magnet.vx *= -EDGE_RESTITUTION;
+              kickWobble(magnet, Math.sign(magnet.vx || 1) * Math.min(Math.abs(magnet.vx) * 0.09, 35));
+            }
+            if (magnet.y < 0 || magnet.y > maxY) {
+              magnet.y = clamp(magnet.y, 0, maxY);
+              magnet.vy *= -EDGE_RESTITUTION;
+              kickWobble(magnet, Math.sign(magnet.vy || 1) * Math.min(Math.abs(magnet.vy) * 0.09, 35));
+            }
+          }
 
-        // The home position has a large dead zone. It is only a safety tether
-        // against long-term migration, not something the user should feel.
-        applyHomeTether(magnet, dt);
+          magnet.wobbleVelocity += -magnet.wobble * WOBBLE_SPRING * step;
+          magnet.wobbleVelocity *= Math.exp(-WOBBLE_DAMPING * step);
+          magnet.wobble += magnet.wobbleVelocity * step;
+          if (Math.abs(magnet.wobble) < 0.02 && Math.abs(magnet.wobbleVelocity) < 0.08) {
+            magnet.wobble = 0;
+            magnet.wobbleVelocity = 0;
+          }
+        });
 
-        if (pointerRef.current.active) {
-          const centerX = magnet.x + magnet.w / 2;
-          const centerY = magnet.y + magnet.h / 2;
-          const dx = centerX - pointerRef.current.x;
-          const dy = centerY - pointerRef.current.y;
-          const distance = Math.hypot(dx, dy);
+        for (let first = 0; first < magnets.length; first += 1) {
+          const a = magnets[first]!;
+          for (let second = first + 1; second < magnets.length; second += 1) {
+            const b = magnets[second]!;
+            const aCenterX = a.x + a.width / 2;
+            const aCenterY = a.y + a.height / 2;
+            const bCenterX = b.x + b.width / 2;
+            const bCenterY = b.y + b.height / 2;
+            const dx = bCenterX - aCenterX;
+            const dy = bCenterY - aCenterY;
+            const distance = Math.max(Math.hypot(dx, dy), 0.001);
+            const falloff = distance < SURFACE_RADIUS ? (1 - distance / SURFACE_RADIUS) ** 2 : 0;
 
-          if (distance > 0 && distance < POINTER_RADIUS) {
-            const influence = Math.pow(1 - distance / POINTER_RADIUS, 1.7);
-            magnet.vx +=
-              (dx / distance) * POINTER_ACCELERATION * influence * dt;
-            magnet.vy +=
-              (dy / distance) * POINTER_ACCELERATION * influence * dt;
+            if (falloff > 0) {
+              const aSpeed = Math.hypot(a.vx, a.vy);
+              const bSpeed = Math.hypot(b.vx, b.vy);
+              if (aSpeed > 45 && !b.dragging) {
+                const transfer = falloff * SURFACE_COUPLING * (a.dragging ? 0.18 : 1) * step;
+                b.vx += (a.vx + (dx / distance) * aSpeed * 0.2) * transfer;
+                b.vy += (a.vy + (dy / distance) * aSpeed * 0.2) * transfer;
+                kickWobble(b, aSpeed * falloff * 0.12 * step);
+              }
+              if (bSpeed > 45 && !a.dragging) {
+                const transfer = falloff * SURFACE_COUPLING * (b.dragging ? 0.18 : 1) * step;
+                a.vx += (b.vx - (dx / distance) * bSpeed * 0.2) * transfer;
+                a.vy += (b.vy - (dy / distance) * bSpeed * 0.2) * transfer;
+                kickWobble(a, -bSpeed * falloff * 0.12 * step);
+              }
+            }
+
+            const collision = getAabbCollision(a, b);
+            if (!collision) continue;
+            const inverseMassA = a.dragging ? 0 : 1 / a.mass;
+            const inverseMassB = b.dragging ? 0 : 1 / b.mass;
+            const inverseMassTotal = inverseMassA + inverseMassB;
+            if (inverseMassTotal === 0) continue;
+
+            const involvesLiftedMagnet = a.dragging || b.dragging;
+            const correction = Math.max(collision.depth - 0.15, 0) * (involvesLiftedMagnet ? 0.075 : 0.42);
+            if (correction > 0) layoutChanged = true;
+            a.x -= collision.normalX * correction * (inverseMassA / inverseMassTotal);
+            a.y -= collision.normalY * correction * (inverseMassA / inverseMassTotal);
+            b.x += collision.normalX * correction * (inverseMassB / inverseMassTotal);
+            b.y += collision.normalY * correction * (inverseMassB / inverseMassTotal);
+
+            const relativeNormalVelocity =
+              (b.vx - a.vx) * collision.normalX +
+              (b.vy - a.vy) * collision.normalY;
+            if (relativeNormalVelocity >= 0) continue;
+            const impulse = -(1 + COLLISION_RESTITUTION) * relativeNormalVelocity / inverseMassTotal
+              * (involvesLiftedMagnet ? 0.1 : 1);
+            a.vx -= impulse * inverseMassA * collision.normalX;
+            a.vy -= impulse * inverseMassA * collision.normalY;
+            b.vx += impulse * inverseMassB * collision.normalX;
+            b.vy += impulse * inverseMassB * collision.normalY;
+            kickWobble(a, -Math.min(impulse * 0.08, 55));
+            kickWobble(b, Math.min(impulse * 0.08, 55));
+
+            if (impulse > 190 && time - lastCollisionRippleRef.current > 220) {
+              lastCollisionRippleRef.current = time;
+              emitRipple((aCenterX + bCenterX) / 2, (aCenterY + bCenterY) / 2, impulse / 700);
+            }
           }
         }
-
-        applyEdgePressure(magnet, width, height, dt);
-        limitVelocity(magnet);
-
-        magnet.x += magnet.vx * dt;
-        magnet.y += magnet.vy * dt;
-        clampMagnet(magnet, width, height);
       }
 
-      // Soft pressure begins before contact. Hard positional correction is
-      // reserved only for genuine penetration, which avoids idle jitter.
-      for (let i = 0; i < states.length; i += 1) {
-        const a = states[i];
-        if (!a) continue;
+      let isMoving = false;
+      magnets.forEach((magnet) => {
+        const speed = Math.hypot(magnet.vx, magnet.vy);
+        if (!magnet.dragging && speed < 1.25) {
+          magnet.vx = 0;
+          magnet.vy = 0;
+        }
+        applyPosition(magnet);
+        if (magnet.dragging
+          || Math.hypot(magnet.vx, magnet.vy) > 3
+          || Math.abs(magnet.wobble) > 0.05) {
+          isMoving = true;
+        }
+      });
 
-        for (let j = i + 1; j < states.length; j += 1) {
-          const b = states[j];
-          if (!b) continue;
-          applySoftPairForce(a, b, width, height, dt);
+      if (layoutChanged) {
+        motionDirtyRef.current = true;
+        settledSinceRef.current = 0;
+      }
+
+      if (isMoving) {
+        motionDirtyRef.current = true;
+        settledSinceRef.current = 0;
+      } else if (motionDirtyRef.current) {
+        if (!settledSinceRef.current) settledSinceRef.current = time;
+        if (time - settledSinceRef.current > 320) {
+          motionDirtyRef.current = false;
+          settledSinceRef.current = 0;
+          persist();
         }
       }
 
-      states.forEach((magnet) => {
-        limitVelocity(magnet);
-        applyMagnetTransform(magnet, true);
-      });
-
-      if (playModeRef.current) {
-        frameRef.current = requestAnimationFrame(tick);
-      }
+      frame = window.requestAnimationFrame(tick);
     };
-
-    frameRef.current = requestAnimationFrame(tick);
-
+    frame = window.requestAnimationFrame(tick);
     return () => {
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-      lastFrameRef.current = null;
+      window.cancelAnimationFrame(frame);
+      persist();
     };
-  }, [playMode, storageKey]);
+  }, [emitRipple, persist, playMode]);
 
   useEffect(() => {
-    if (shuffleVersion === lastShuffleRef.current) return;
-    lastShuffleRef.current = shuffleVersion;
-
-    const board = boardRef.current;
-    if (!board || !magnetsRef.current.length) return;
-
-    const height = shuffleIntoRows(
-      magnetsRef.current,
-      Math.max(board.clientWidth, 1),
-    );
-    const nextClientHeight = Math.max(height, board.clientHeight);
-    board.style.height = `${clientToBorderBoxHeight(
-      board,
-      nextClientHeight,
-    )}px`;
-    magnetsRef.current.forEach((magnet) =>
-      applyMagnetTransform(magnet, playModeRef.current),
-    );
-    persist();
-  }, [shuffleVersion]);
-
-  useEffect(() => {
-    const board = boardRef.current;
-    if (!board) return;
-
-    const preventTouchScrollWhileDragging = (event: TouchEvent) => {
-      if (dragRef.current?.started && event.cancelable) {
-        event.preventDefault();
-      }
+    const saveBeforeLeaving = () => persist();
+    const saveBeforeViewportRelayout = () => {
+      if (lastLayoutWidthRef.current <= 0 || lastLayoutHeightRef.current <= 0) return;
+      persist(lastLayoutWidthRef.current, lastLayoutHeightRef.current);
     };
-
-    board.addEventListener('touchmove', preventTouchScrollWhileDragging, {
-      passive: false,
-    });
-
+    const saveWhenHidden = () => {
+      if (document.visibilityState === 'hidden') persist();
+    };
+    window.addEventListener('pagehide', saveBeforeLeaving);
+    window.addEventListener('resize', saveBeforeViewportRelayout);
+    document.addEventListener('visibilitychange', saveWhenHidden);
     return () => {
-      board.removeEventListener(
-        'touchmove',
-        preventTouchScrollWhileDragging,
-      );
+      window.removeEventListener('pagehide', saveBeforeLeaving);
+      window.removeEventListener('resize', saveBeforeViewportRelayout);
+      document.removeEventListener('visibilitychange', saveWhenHidden);
     };
-  }, []);
+  }, [persist]);
 
-  const findMagnet = (element: HTMLElement) =>
-    magnetsRef.current.find((magnet) => magnet.element === element) ??
-    null;
-
-  const beginDrag = (candidate: DragCandidate) => {
-    const board = boardRef.current;
-    if (candidate.started || !playModeRef.current || !board) return;
-
-    candidate.started = true;
-    candidate.magnet.dragging = true;
-    candidate.magnet.vx = 0;
-    candidate.magnet.vy = 0;
-    candidate.magnet.element.dataset.dragging = 'true';
-    board.dataset.dragging = '1';
-
-    try {
-      board.setPointerCapture(candidate.pointerId);
-    } catch {
-      // Capture can fail if a touch gesture was already claimed for scrolling.
+  const completeDrag = useCallback((pointerId: number, cancelled = false) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== pointerId) return;
+    const magnet = magnetsRef.current.get(drag.id);
+    if (magnet) {
+      magnet.dragging = false;
+      if (drag.moved && !cancelled) {
+        const releaseDelay = Math.max((performance.now() - drag.lastTime) / 1000, 0);
+        const releaseDecay = Math.exp(-releaseDelay * 9);
+        const release = limitVector(
+          drag.releaseVx * releaseDecay,
+          drag.releaseVy * releaseDecay,
+          MAX_FLING_SPEED,
+        );
+        magnet.vx = Math.abs(release.x) < 14 ? 0 : release.x;
+        magnet.vy = Math.abs(release.y) < 14 ? 0 : release.y;
+        const speed = Math.hypot(magnet.vx, magnet.vy);
+        kickWobble(magnet, clamp((magnet.vy - magnet.vx * 0.2) * 0.035, -52, 52));
+        const centerX = magnet.x + magnet.width / 2;
+        const centerY = magnet.y + magnet.height / 2;
+        emitRipple(
+          centerX,
+          centerY,
+          0.28 + speed / MAX_FLING_SPEED,
+        );
+        motionDirtyRef.current = true;
+      } else if (cancelled) {
+        magnet.vx = 0;
+        magnet.vy = 0;
+        motionDirtyRef.current = true;
+      }
     }
-  };
+    if (drag.moved) {
+      suppressClickUntilRef.current.set(drag.id, performance.now() + CLICK_SUPPRESSION_MS);
+    }
+    delete drag.element.dataset.dragging;
+    delete drag.element.dataset.pickedUp;
+    if (boardRef.current) delete boardRef.current.dataset.dragging;
+    dragRef.current = null;
+    if (drag.element.hasPointerCapture(pointerId)) {
+      drag.element.releasePointerCapture(pointerId);
+    }
+    persist();
+  }, [emitRipple, persist]);
 
-  const handlePointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>,
-  ) => {
+  useEffect(() => {
+    if (!playMode) return;
+    const handlePointerEnd = (event: PointerEvent) => {
+      completeDrag(event.pointerId, event.type === 'pointercancel');
+    };
+    const handleBlur = () => {
+      const drag = dragRef.current;
+      if (drag) completeDrag(drag.pointerId, true);
+    };
+    window.addEventListener('pointerup', handlePointerEnd, true);
+    window.addEventListener('pointercancel', handlePointerEnd, true);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      window.removeEventListener('pointerup', handlePointerEnd, true);
+      window.removeEventListener('pointercancel', handlePointerEnd, true);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [completeDrag, playMode]);
+
+  const handlePointerDown = (event: ReactPointerEvent<MagnetElement>, id: string) => {
+    if (!playMode || event.button !== 0 || dragRef.current) return;
+    const magnet = magnetsRef.current.get(id);
     const board = boardRef.current;
-    if (!board || !playModeRef.current || event.button !== 0) return;
-
-    const target = (event.target as HTMLElement).closest<HTMLElement>(
-      '[data-magnet-id]',
-    );
-    if (!target || !board.contains(target)) return;
-
-    const magnet = findMagnet(target);
-    if (!magnet) return;
-
+    if (!magnet || !board) return;
     const boardRect = board.getBoundingClientRect();
-    const now = event.timeStamp || performance.now();
-
-    const candidate: DragCandidate = {
+    const now = performance.now();
+    magnet.dragging = true;
+    magnet.vx = 0;
+    magnet.vy = 0;
+    event.currentTarget.dataset.pickedUp = 'true';
+    dragRef.current = {
+      id,
       pointerId: event.pointerId,
-      pointerType: event.pointerType,
-      magnet,
-      down: { x: event.clientX, y: event.clientY },
+      element: event.currentTarget,
+      startPointer: { x: event.clientX, y: event.clientY },
+      lastPointer: { x: event.clientX, y: event.clientY },
+      lastTime: now,
+      releaseVx: 0,
+      releaseVy: 0,
       offset: {
         x: event.clientX - boardRect.left - magnet.x,
         y: event.clientY - boardRect.top - magnet.y,
       },
-      started: false,
       moved: false,
-      holdTimer: null,
-      lastPointer: { x: event.clientX, y: event.clientY },
-      lastTime: now,
-      pointerVx: 0,
-      pointerVy: 0,
     };
-
-    dragRef.current = candidate;
-
-    if (event.pointerType === 'touch') {
-      candidate.holdTimer = window.setTimeout(
-        () => beginDrag(candidate),
-        TOUCH_HOLD_MS,
-      );
-    }
+    event.currentTarget.focus({ preventScroll: true });
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const handlePointerMove = (
-    event: ReactPointerEvent<HTMLDivElement>,
-  ) => {
+  const handlePointerMove = (event: ReactPointerEvent<MagnetElement>) => {
+    const drag = dragRef.current;
     const board = boardRef.current;
-    if (!board || !playModeRef.current) return;
-
-    const candidate = dragRef.current;
-
-    if (candidate && candidate.pointerId === event.pointerId) {
-      const dx = event.clientX - candidate.down.x;
-      const dy = event.clientY - candidate.down.y;
-      const distance = Math.hypot(dx, dy);
-
-      if (!candidate.started) {
-        if (candidate.pointerType === 'touch') {
-          if (distance > DRAG_THRESHOLD) {
-            if (candidate.holdTimer !== null) {
-              clearTimeout(candidate.holdTimer);
-            }
-            dragRef.current = null;
-          }
-          return;
-        }
-
-        if (distance < DRAG_THRESHOLD) return;
-        beginDrag(candidate);
-      }
-
-      candidate.moved = true;
-      if (event.cancelable) event.preventDefault();
-
-      const now = event.timeStamp || performance.now();
-      const pointerDt = Math.max((now - candidate.lastTime) / 1000, 1 / 240);
-      const rawVx =
-        (event.clientX - candidate.lastPointer.x) / pointerDt;
-      const rawVy =
-        (event.clientY - candidate.lastPointer.y) / pointerDt;
-
-      candidate.pointerVx =
-        candidate.pointerVx * 0.62 + rawVx * 0.38;
-      candidate.pointerVy =
-        candidate.pointerVy * 0.62 + rawVy * 0.38;
-      candidate.lastPointer = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-      candidate.lastTime = now;
-
-      const rect = board.getBoundingClientRect();
-      const magnet = candidate.magnet;
-      const previousX = magnet.x;
-      const previousY = magnet.y;
-
-      magnet.x = clamp(
-        event.clientX - rect.left - candidate.offset.x,
-        BOARD_PADDING,
-        Math.max(
-          BOARD_PADDING,
-          board.clientWidth - magnet.w - BOARD_PADDING,
-        ),
-      );
-      magnet.y = clamp(
-        event.clientY - rect.top - candidate.offset.y,
-        BOARD_PADDING,
-        Math.max(
-          BOARD_PADDING,
-          board.clientHeight - magnet.h - BOARD_PADDING,
-        ),
-      );
-
-      const moveX = magnet.x - previousX;
-      const moveY = magnet.y - previousY;
-
-      applyDragWake(
-        magnet,
-        magnetsRef.current,
-        moveX,
-        moveY,
-        candidate.pointerVx,
-        candidate.pointerVy,
-        board.clientWidth,
-        board.clientHeight,
-      );
-
-      for (const other of magnetsRef.current) {
-        if (other !== magnet) {
-          applySoftPairForce(
-            magnet,
-            other,
-            board.clientWidth,
-            board.clientHeight,
-            1 / 60,
-          );
-        }
-      }
-
-      magnetsRef.current.forEach((item) =>
-        applyMagnetTransform(item, true),
-      );
+    if (!playMode || !drag || drag.pointerId !== event.pointerId || !board) return;
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
+      completeDrag(event.pointerId);
       return;
     }
-
-    if (event.pointerType === 'mouse' && event.buttons === 0) {
-      const rect = board.getBoundingClientRect();
-      pointerRef.current = {
-        active: true,
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
-    }
-  };
-
-  const finishPointer = (
-    event: ReactPointerEvent<HTMLDivElement>,
-  ) => {
-    const board = boardRef.current;
-    const candidate = dragRef.current;
-
-    if (!candidate || candidate.pointerId !== event.pointerId) return;
-
-    if (candidate.holdTimer !== null) {
-      clearTimeout(candidate.holdTimer);
-    }
-
-    if (candidate.started) {
-      const magnet = candidate.magnet;
-      magnet.dragging = false;
-      delete magnet.element.dataset.dragging;
-      board?.removeAttribute('data-dragging');
-
-      magnet.homeX = magnet.x;
-      magnet.homeY = magnet.y;
-      magnet.vx = clamp(
-        candidate.pointerVx * RELEASE_VELOCITY_SCALE,
-        -MAX_RELEASE_SPEED,
-        MAX_RELEASE_SPEED,
-      );
-      magnet.vy = clamp(
-        candidate.pointerVy * RELEASE_VELOCITY_SCALE,
-        -MAX_RELEASE_SPEED,
-        MAX_RELEASE_SPEED,
-      );
-      limitVelocity(magnet, MAX_RELEASE_SPEED);
-
-      if (candidate.moved || candidate.pointerType === 'touch') {
-        suppressClickUntilRef.current.set(
-          magnet.id,
-          performance.now() + CLICK_SUPPRESS_MS,
-        );
-      }
-
-      persist();
-    }
-
-    try {
-      if (board?.hasPointerCapture(event.pointerId)) {
-        board.releasePointerCapture(event.pointerId);
-      }
-    } catch {
-      // Ignore capture cleanup races.
-    }
-
-    dragRef.current = null;
-  };
-
-  const handleClickCapture = (
-    event:
-      | ReactPointerEvent<HTMLDivElement>
-      | ReactMouseEvent<HTMLDivElement>,
-  ) => {
-    const target = (event.target as HTMLElement).closest<HTMLElement>(
-      '[data-magnet-id]',
+    const magnet = magnetsRef.current.get(drag.id);
+    if (!magnet) return;
+    const distance = Math.hypot(
+      event.clientX - drag.startPointer.x,
+      event.clientY - drag.startPointer.y,
     );
-    if (!target) return;
+    if (!drag.moved && distance < DRAG_THRESHOLD) return;
+    if (!drag.moved) {
+      drag.moved = true;
+      drag.element.dataset.dragging = 'true';
+      board.dataset.dragging = 'true';
+    }
+    event.preventDefault();
+    const rect = board.getBoundingClientRect();
+    const nextX = clamp(event.clientX - rect.left - drag.offset.x, 0, board.clientWidth - magnet.width);
+    const nextY = clamp(event.clientY - rect.top - drag.offset.y, 0, board.clientHeight - magnet.height);
+    const now = performance.now();
+    const elapsed = clamp((now - drag.lastTime) / 1000, 1 / 240, 0.08);
+    const pointerVelocity = limitVector(
+      (event.clientX - drag.lastPointer.x) / elapsed,
+      (event.clientY - drag.lastPointer.y) / elapsed,
+      MAX_FLING_SPEED,
+    );
+    drag.releaseVx = drag.releaseVx * 0.38 + pointerVelocity.x * 0.62;
+    drag.releaseVy = drag.releaseVy * 0.38 + pointerVelocity.y * 0.62;
+    drag.lastPointer = { x: event.clientX, y: event.clientY };
+    drag.lastTime = now;
+    magnet.x = nextX;
+    magnet.y = nextY;
+    magnet.vx = drag.releaseVx;
+    magnet.vy = drag.releaseVy;
+    kickWobble(magnet, clamp((pointerVelocity.y - pointerVelocity.x * 0.25) * 0.025, -28, 28));
+    motionDirtyRef.current = true;
+    applyPosition(magnet);
+  };
 
-    const id = target.dataset.magnetId ?? '';
-    const until = suppressClickUntilRef.current.get(id) ?? 0;
+  const finishDrag = (event: ReactPointerEvent<MagnetElement>) => {
+    completeDrag(event.pointerId, event.type === 'pointercancel');
+  };
 
-    if (performance.now() < until) {
+  const handleClick = (event: ReactMouseEvent<MagnetElement>, id: string) => {
+    const suppressUntil = suppressClickUntilRef.current.get(id) ?? 0;
+    if (performance.now() < suppressUntil) {
       event.preventDefault();
-      event.stopPropagation();
       suppressClickUntilRef.current.delete(id);
     }
   };
 
-  const boardStyle = {
-    '--magnet-board-padding': `${BOARD_PADDING}px`,
-  } as CSSProperties;
+  const handleBoardPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.buttons !== 0) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    pointerFieldRef.current = {
+      active: true,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  };
+
+  const handlePlayModeChange = (nextPlayMode: boolean) => {
+    if (variant === 'nav' && playMode && !nextPlayMode) {
+      const visibleOrder = orderMagnetsByVisualRows(
+        [...magnetsRef.current.values()],
+      ).map((magnet) => magnet.id);
+      navOrderRef.current = mergeVisibleMagnetOrder(navOrderRef.current, visibleOrder);
+      persist();
+    }
+    onPlayModeChange(nextPlayMode);
+  };
 
   return (
     <div
       ref={boardRef}
-      className={`${styles.board} ${className}`}
-      style={boardStyle}
+      className={`${styles.board} ${styles[variant]} ${playMode ? styles.playMode : ''} ${className}`}
+      style={{ visibility: layoutReady ? 'visible' : 'hidden' }}
       aria-label={ariaLabel}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={finishPointer}
-      onPointerCancel={finishPointer}
-      onPointerLeave={(event: ReactPointerEvent<HTMLDivElement>) => {
-        if (event.pointerType === 'mouse' && !dragRef.current) {
-          pointerRef.current.active = false;
-        }
-      }}
-      onDragStart={(event: ReactMouseEvent<HTMLDivElement>) => event.preventDefault()}
-      onClickCapture={handleClickCapture}
+      aria-busy={!layoutReady}
+      data-ready={layoutReady ? 'true' : undefined}
+      data-active={playMode ? 'true' : 'false'}
+      onPointerMove={handleBoardPointerMove}
+      onPointerLeave={() => { pointerFieldRef.current.active = false; }}
     >
-      {children}
+      <span ref={surfaceRef} className={styles.surface} aria-hidden="true" />
+      <PhysicsToggle
+        checked={playMode}
+        onChange={handlePlayModeChange}
+        className={styles.boardToggle}
+      />
+      {items.map((item) => {
+        const customProperties = {
+          '--magnet-tilt': `${getMagnetTilt(item.id)}deg`,
+          ...(item.iconUrl ? { '--magnet-icon': `url("${item.iconUrl}")` } : {}),
+        } as CSSProperties;
+        const classes = [
+          styles.magnet,
+          styles[item.tone ?? 'lavender'],
+          styles[item.kind ?? 'default'],
+          item.active ? styles.active : '',
+        ].filter(Boolean).join(' ');
+        const content = (
+          <>
+            {item.icon ? <span className={styles.icon} aria-hidden="true">{item.icon}</span> : null}
+            <span className={styles.label}>{item.label}</span>
+            {typeof item.count === 'number' ? <span className={styles.count}>{item.count}</span> : null}
+          </>
+        );
+        const shared = {
+          className: classes,
+          style: customProperties,
+          'data-magnet-id': item.id,
+          'aria-label': item.ariaLabel,
+          'aria-current': item.active ? ('page' as const) : undefined,
+          'aria-expanded': item.ariaExpanded,
+          'aria-haspopup': item.ariaHasPopup,
+          'aria-controls': item.ariaControls,
+          draggable: false,
+          ref: (element: MagnetElement | null) => {
+            if (element) elementsRef.current.set(item.id, element);
+            else elementsRef.current.delete(item.id);
+          },
+          onPointerDown: (event: ReactPointerEvent<MagnetElement>) => handlePointerDown(event, item.id),
+          onPointerMove: handlePointerMove,
+          onPointerUp: finishDrag,
+          onPointerCancel: finishDrag,
+          onDragStart: (event: ReactDragEvent<MagnetElement>) => event.preventDefault(),
+          onClick: (event: ReactMouseEvent<MagnetElement>) => handleClick(event, item.id),
+        };
+
+        if (item.to) {
+          return <Link key={item.id} to={item.to} {...shared}>{content}</Link>;
+        }
+        return (
+          <button
+            key={item.id}
+            type="button"
+            {...shared}
+            onClick={(event) => {
+              handleClick(event, item.id);
+              if (!event.defaultPrevented) item.onActivate?.();
+            }}
+          >
+            {content}
+          </button>
+        );
+      })}
     </div>
   );
 }

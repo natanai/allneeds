@@ -1,13 +1,13 @@
 # allneeds.app V2
 
-A parallel rebuild of [allneeds.app](https://allneeds.app) focused on a cleaner, mobile-first, accessible foundation.
+A local, parallel React rebuild of [allneeds.app](https://allneeds.app), preserving the production visual language and complete public feature set on a cleaner, mobile-first foundation.
 
 ## Repository boundary
 
 - `natanai/nvc-app` is the production reference implementation. It is **read-only** for V2 work.
-- `natanai/allneeds` is the V2 workspace. All V2 code and commits live here.
+- This checkout at `C:\allneedsV2` is the V2 comparison workspace. It intentionally has no Git metadata and is not connected to a remote repository.
 
-Production can continue changing independently while V2 is developed in small vertical slices.
+Production and the online `natanai/allneeds` work can continue changing independently. Nothing in this directory is committed, pushed, or opened as a pull request unless that is explicitly requested later.
 
 ## Stack
 
@@ -17,24 +17,35 @@ Production can continue changing independently while V2 is developed in small ve
 - React Router
 - CSS Modules + CSS custom-property design tokens
 - Vitest
+- Playwright
 - Static GitHub Pages deployment
 
-No backend is required for the baseline application. Personal reflection data should remain on the user's device wherever practical.
+Personal reflection data stays in the browser. The optional shared strategy feed reads the public allneeds backend through a development-only proxy; saving a feed item in this local build writes only to local browser storage.
 
 ## Local development
 
-Requires Node 22.22+ (Node 24 is used in CI).
+Requires Node 22.22+ (Node 24 is recommended) and pnpm through Corepack.
 
 ```bash
-npm install
-npm run dev
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev
 ```
+
+Open `http://127.0.0.1:5173/` (or the next port Vite prints if 5173 is already in use).
 
 Run the full foundation checks with:
 
 ```bash
-npm run check
+pnpm check
 ```
+
+After installing the local Playwright Chromium once, run the foundation and
+production-browser regression layers together with `pnpm check:all`.
+
+See [`docs/local-testing.md`](docs/local-testing.md) for the complete smoke-test checklist, production preview commands, local-data reset steps, and side-by-side comparison workflow.
+
+See [`docs/parity-status.md`](docs/parity-status.md) for the full public-route matrix, canonical snapshot checks, and the one intentional localhost-only OAuth boundary.
 
 ## Architecture
 

@@ -1,0 +1,23 @@
+.page { display: grid; gap: clamp(1.5rem, 4vw, 2.5rem); }
+.page > h1 {
+  max-width: 100%; margin: 0; font-family: var(--font-display);
+  font-size: clamp(1.05rem, calc(.68rem + 3.4vw), 2.35rem); letter-spacing: .06em;
+  line-height: 1.18; text-transform: uppercase; text-wrap: balance; overflow-wrap: anywhere;
+}
+.related { min-width: 0; display: grid; gap: 1rem; }
+.sectionHeader { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.sectionHeader h2 { margin: 0; font-family: var(--font-display); font-size: 1.2rem; letter-spacing: .08em; text-transform: uppercase; }
+.sectionHeader button {
+  width: 2.7rem; min-width: 2.7rem; min-height: 44px; padding: .55rem; display: inline-flex;
+  align-items: center; justify-content: center; border: 2px solid var(--outline); border-radius: var(--radius-lg);
+  background: #fff; box-shadow: 0 8px 0 color-mix(in srgb, var(--outline) 22%, transparent); color: var(--outline); cursor: pointer;
+}
+.sectionHeader button:hover, .sectionHeader button:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 0 color-mix(in srgb, var(--outline) 28%, transparent); }
+.sectionHeader svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.boardWrapper { position: relative; }
+.notFound { display: grid; gap: 1rem; }
+.notFound h1 { margin: 0; }
+.notFound a { text-decoration: underline; }
+@media (max-width: 640px) {
+  .page { padding-inline: .8rem; }
+}

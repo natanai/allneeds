@@ -1,26 +1,14 @@
 .page {
-  background: var(--lavender);
-  border: 4px solid var(--outline);
-  border-radius: var(--radius-4xl);
-  box-shadow: 0 26px 0 var(--shadow);
-  padding: clamp(1.75rem, 4vw, 2.75rem);
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1.25rem, 3vw, 2rem);
-}
-
-.homeDoorways {
   display: grid;
   gap: 1.6rem;
-  text-align: center;
   justify-items: center;
+  text-align: center;
 }
 
 .prompt {
   margin: 0;
   display: flex;
   justify-content: center;
-  color: var(--ink);
 }
 
 .doorGrid {
@@ -33,15 +21,16 @@
 .doorCard {
   --door-fill: var(--rose);
   position: relative;
+  padding: 1.6rem 1.1rem 3.4rem;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 1.6rem 1.1rem 3.4rem;
   border: 3px solid var(--outline);
   border-radius: var(--radius-2xl);
   background: color-mix(in srgb, var(--outline) 8%, transparent);
   box-shadow: 0 16px 0 var(--shadow);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  text-align: center;
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
 .doorCard:hover,
@@ -51,36 +40,34 @@
 }
 
 .doorLink {
-  flex: 1 1 auto;
   width: 100%;
-  min-height: 17rem;
+  min-height: clamp(11.5rem, 32vw, 14rem);
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  color: inherit;
-  text-decoration: none;
+  gap: 0.75rem;
 }
 
 .door {
+  width: min(9rem, 82%);
+  aspect-ratio: 3 / 5;
+  padding: clamp(0.4rem, 2vw, 0.6rem);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(9rem, 82%);
-  aspect-ratio: 3 / 5;
-  border-radius: 2.4rem 2.4rem 1.1rem 1.1rem;
   border: 3px solid color-mix(in srgb, var(--outline) 72%, transparent);
+  border-radius: 2.4rem 2.4rem 1.1rem 1.1rem;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--door-fill) 90%, #fff 10%) 0%,
+    color-mix(in srgb, var(--door-fill) 90%, #ffffff 10%) 0%,
     var(--door-fill) 100%
   );
   box-shadow: inset 0 -12px 0 color-mix(in srgb, var(--outline) 20%, transparent);
-  padding: clamp(0.4rem, 2vw, 0.6rem);
 }
 
-.doorIcon {
+.icon {
   width: 70%;
   height: auto;
   image-rendering: pixelated;
@@ -89,7 +76,6 @@
 .label {
   font-family: var(--font-display);
   font-size: 0.95rem;
-  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -98,18 +84,22 @@
   position: absolute;
   inset-block-end: 1.1rem;
   left: 50%;
-  transform: translateX(-50%);
+  padding: 0.3rem 0.6rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  padding: 0.3rem 0.6rem;
-  border: 2px solid var(--outline);
+  border: 2px solid color-mix(in srgb, var(--outline) 70%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, #fff 86%, var(--lavender) 14%);
-  box-shadow: 0 5px 0 color-mix(in srgb, var(--outline) 24%, transparent);
-  font-size: 0.72rem;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--outline) 22%, transparent);
+  color: var(--outline);
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  transition: transform 180ms ease, box-shadow 180ms ease;
   white-space: nowrap;
 }
 
@@ -123,23 +113,34 @@
 .feelings { --door-fill: #e19bd9; }
 .needs { --door-fill: #8fe1b5; }
 
+.mobileSupport {
+  display: none;
+  margin: 0.5rem auto 0;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mobileSupport a {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: color-mix(in srgb, var(--outline) 70%, transparent);
+}
+
 @media (max-width: 640px) {
   .page {
-    padding: clamp(1rem, 4vw, 1.5rem);
+    gap: 1.2rem;
+  }
+
+  .prompt {
+    max-width: 34ch;
+    font-size: 0.86rem;
   }
 
   .doorGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0;
-  }
-
-  .homeDoorways {
-    gap: 0.9rem;
-  }
-
-  .prompt {
-    font-size: 0.85rem;
-    line-height: 1.35;
   }
 
   .doorCard {
@@ -151,15 +152,14 @@
 
   .doorCard:hover,
   .doorCard:focus-within {
-    transform: none;
     box-shadow: none;
   }
 
   .doorLink {
-    gap: 0.35rem;
     min-height: auto;
     padding: 0.35rem 0 0.75rem;
     align-items: stretch;
+    gap: 0.35rem;
   }
 
   .door {
@@ -171,20 +171,17 @@
     width: 100%;
     padding-inline: 0.35rem;
     font-size: 0.6rem;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
     line-height: 1.2;
-    text-align: center;
+    letter-spacing: 0.07em;
   }
 
   .support {
     display: none;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .doorCard,
-  .support {
-    transition: none;
+  .mobileSupport {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
   }
 }

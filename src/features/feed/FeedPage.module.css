@@ -1,0 +1,35 @@
+.page { min-width: 0; display: grid; gap: .75rem; }
+.header { margin-inline: .78rem; }
+.header h1 { margin: 0; font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: .04em; text-transform: uppercase; }
+.controls { margin-inline: .72rem; padding: .75rem; border: 1.5px solid color-mix(in srgb, var(--outline) 26%, transparent); border-radius: var(--radius-xl); background: color-mix(in srgb, #fff 70%, var(--lavender) 30%); }
+.controlRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .48rem; align-items: end; }
+.controlRow label { min-width: 0; display: grid; gap: .18rem; }
+.controlRow label span { color: var(--ink-soft); font-size: .66rem; font-weight: 800; letter-spacing: .055em; line-height: 1.15; text-transform: uppercase; }
+.controlRow select { width: 100%; min-width: 0; min-height: 42px; padding: .4rem 1.7rem .4rem .55rem; border: 1.5px solid var(--outline); border-radius: var(--radius-lg); background: #fff; color: var(--ink); font: inherit; font-size: .78rem; line-height: 1.2; }
+.status, .authHint { margin: .42rem .05rem 0; color: var(--ink-soft); font-size: .7rem; line-height: 1.35; }
+.status { font-weight: 700; }
+.feed { min-width: 0; display: grid; gap: .62rem; padding-inline: .72rem; }
+.card { min-width: 0; padding: .85rem; border: 2px solid var(--outline); border-radius: var(--radius-xl); background: #fff; box-shadow: 0 5px 0 color-mix(in srgb, var(--outline) 16%, transparent); }
+.card header { display: grid; gap: .18rem; }
+.card header h3 { margin: 0; font-family: var(--font-display); font-size: 1.05rem; line-height: 1.18; }
+.card header p { margin: 0; color: var(--ink-soft); font-size: .72rem; line-height: 1.35; }
+.body { margin-top: .62rem; font-size: .9rem; line-height: 1.45; }
+.body p { margin: 0; }
+.card footer { margin-top: .72rem; display: flex; align-items: center; gap: .48rem; flex-wrap: wrap; }
+.card footer > span, .card details summary, .card button { min-height: 40px; padding: .38rem .62rem; display: inline-flex; align-items: center; border: 1.5px solid var(--outline); border-radius: var(--radius-pill); background: #fff; color: var(--ink); font-size: .76rem; font-weight: 750; }
+.card footer > span { background: color-mix(in srgb, var(--mint) 50%, #fff 50%); }
+.card details { position: relative; }
+.card details summary { cursor: pointer; list-style: none; }
+.card details summary::-webkit-details-marker { display: none; }
+.card details ul { position: absolute; z-index: 3; left: 0; top: calc(100% + .25rem); min-width: 12rem; margin: 0; padding: .65rem .65rem .65rem 1.7rem; border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent); border-radius: var(--radius-md); background: #fff; box-shadow: 0 8px 20px color-mix(in srgb, var(--outline) 18%, transparent); }
+.card button { margin-left: auto; background: color-mix(in srgb, var(--rose) 72%, #fff 28%); cursor: pointer; }
+.card button:disabled { opacity: .62; cursor: default; }
+
+@media (max-width: 640px) {
+  .page { width: calc(100% + 2rem); margin-inline: -1rem; padding-top: .72rem; gap: .65rem; }
+  .header h1 { font-family: var(--font-body); font-size: clamp(1.38rem, 7vw, 1.72rem); font-weight: 820; line-height: 1.05; letter-spacing: -.015em; text-transform: none; }
+}
+
+@media (max-width: 360px) {
+  .controlRow { grid-template-columns: minmax(0, 1fr); }
+}

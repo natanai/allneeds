@@ -1,0 +1,149 @@
+.page {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.magnetSection {
+  display: grid;
+  gap: 1rem;
+}
+
+.sectionHeader {
+  padding-block-end: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.shuffle {
+  width: 2.7rem;
+  min-width: 2.7rem;
+  min-height: 44px;
+  padding: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: 0 8px 0 color-mix(in srgb, var(--outline) 22%, transparent);
+  cursor: pointer;
+}
+
+.shuffle:hover,
+.shuffle:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 0 color-mix(in srgb, var(--outline) 28%, transparent);
+}
+
+.shuffle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.boardWrapper {
+  position: relative;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, calc(0.75rem + 3.6vw), 2.5rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.header p {
+  max-width: 60ch;
+  margin: 0;
+  color: color-mix(in srgb, var(--ink) 75%, transparent);
+}
+
+.poem {
+  max-width: 60ch;
+  margin-top: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(1.1rem, 3vw, 1.6rem) clamp(1rem, 3vw, 1.4rem);
+  border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
+  border-radius: calc(22px * var(--corner-scale));
+  background: color-mix(in srgb, var(--lavender) 22%, white 78%);
+  box-shadow: 0 18px 0 color-mix(in srgb, var(--outline) 14%, transparent);
+}
+
+.poem figure {
+  margin: 0;
+  display: grid;
+  gap: clamp(0.75rem, 2.5vw, 1rem);
+}
+
+.poem blockquote {
+  margin: 0;
+  color: color-mix(in srgb, var(--ink) 82%, var(--ink-soft) 18%);
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  font-style: italic;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.poem figcaption {
+  margin: 0;
+}
+
+.poem a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 0.14em;
+  text-underline-offset: 0.2em;
+}
+
+.poem a::after {
+  content: '↗';
+  font-size: 0.95em;
+}
+
+.notFound h1 {
+  margin-top: 0;
+}
+
+.notFound a {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .page { padding-inline: .8rem; }
+
+  .sectionTitle {
+    font-size: clamp(1rem, 4.2vw, 1.2rem);
+  }
+
+  .poem {
+    max-width: none;
+    padding: clamp(0.9rem, 4vw, 1.2rem) clamp(0.6rem, 5vw, 1rem);
+    border-color: color-mix(in srgb, var(--outline) 18%, transparent);
+    border-radius: calc(18px * var(--corner-scale));
+    background: color-mix(in srgb, var(--lavender) 12%, white 88%);
+    box-shadow: none;
+  }
+}

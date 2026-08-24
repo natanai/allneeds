@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "packageManager": "pnpm@11.19.0",
   "engines": {
     "node": ">=22.22.0"
   },
@@ -11,9 +12,15 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc -b && vite build && node scripts/copy-spa-fallback.mjs",
+    "test:e2e": "pnpm test:e2e:playwright && pnpm test:e2e:outage",
+    "test:e2e:playwright": "playwright test",
+    "test:e2e:outage": "node scripts/verify-offline-reconnect.mjs",
+    "test:e2e:headed": "playwright test --headed",
+    "build": "tsc -b && vite build && node scripts/copy-spa-fallback.mjs && node scripts/generate-service-worker.mjs && node scripts/verify-production-build.mjs",
     "preview": "vite preview",
-    "check": "npm run typecheck && npm run test && npm run build"
+    "check": "pnpm typecheck && pnpm test && pnpm build",
+    "check:browser": "pnpm build && pnpm test:e2e",
+    "check:all": "pnpm check && pnpm test:e2e"
   },
   "dependencies": {
     "react": "19.2.8",
@@ -21,6 +28,7 @@
     "react-router": "8.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
