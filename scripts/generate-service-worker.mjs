@@ -19,7 +19,7 @@ const files = (await listFiles(dist))
   .sort((a, b) => a.localeCompare(b));
 const publicPaths = files.map((path) => `./${relative(dist, path).split(sep).join('/')}`);
 const versionHash = createHash('sha256');
-versionHash.update('worker-strategy:network-first-navigation-v4-ignore-vary');
+versionHash.update('worker-strategy:network-first-navigation-v5-skip-waiting');
 
 for (const path of files) {
   versionHash.update(relative(dist, path));
@@ -43,6 +43,7 @@ self.addEventListener('install', (event) => {
       { cache: 'reload' },
     ));
     await cache.addAll(requests);
+    await self.skipWaiting();
   })());
 });
 
