@@ -45,26 +45,28 @@ async function shellCacheNames(page) {
 }
 
 async function waitForFreshShellCache(page, previous) {
-  const result = await page.waitForFunction(async ({ oldNames, appOrigin }) => {
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (registration?.active?.state !== 'activated'
-      || registration.installing
-      || registration.waiting) return null;
+  const deadline = Date.now() + 20_000;
+  while (Date.now() < deadline) {
+    const replacement = await page.evaluate(async ({ oldNames, appOrigin }) => {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration?.active?.state !== 'activated'
+        || registration.installing
+        || registration.waiting) return null;
 
-    const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
-    for (const name of current) {
-      if (oldNames.includes(name)) continue;
-      const cache = await caches.open(name);
-      const response = await cache.match(`${appOrigin}/index.html`, { ignoreVary: true });
-      if (response && (await response.text()).includes('data-deployment-probe="fresh"')) return name;
-    }
-    return null;
-  }, { oldNames: previous, appOrigin: origin }, { timeout: 20_000 });
+      const current = (await caches.keys()).filter((name) => name.startsWith('allneeds-v2-shell-'));
+      for (const name of current) {
+        if (oldNames.includes(name)) continue;
+        const cache = await caches.open(name);
+        const response = await cache.match(`${appOrigin}/index.html`, { ignoreVary: true });
+        if (response && (await response.text()).includes('data-deployment-probe="fresh"')) return name;
+      }
+      return null;
+    }, { oldNames: previous, appOrigin: origin });
 
-  const replacement = await result.jsonValue();
-  invariant(typeof replacement === 'string' && replacement.length > 0,
-    'The service-worker update did not produce a fresh replacement shell cache.');
-  return replacement;
+    if (typeof replacement === 'string' && replacement.length > 0) return replacement;
+    await page.waitForTimeout(100);
+  }
+  throw new Error('The service-worker update did not produce a fresh replacement shell cache.');
 }
 
 let server = null;
