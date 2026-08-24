@@ -2,23 +2,6 @@ import { expect, test } from './fixtures';
 
 const savedAt = '2026-08-24T10:00:00.000Z';
 
-function freedomStrategy(id: string, title: string, description: string) {
-  return {
-    id,
-    title,
-    description,
-    need: 'Freedom',
-    needSlug: 'freedom',
-    needSlugs: ['freedom'],
-    tags: ['freedom'],
-    personal: true,
-    sourceNeedPage: 'freedom',
-    strategySlug: '',
-    createdAt: savedAt,
-    visibility: 'private',
-  };
-}
-
 test('need rows open a floating strategy popover without stretching the grid row', async ({ page }) => {
   await page.addInitScript(({ timestamp }) => {
     window.localStorage.setItem('allneeds.v2.inventory', JSON.stringify({
