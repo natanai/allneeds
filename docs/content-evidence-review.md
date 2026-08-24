@@ -62,9 +62,18 @@ For each externally verifiable scientific claim, aim to retain enough structured
 - year;
 - article/report title;
 - journal or issuing body;
-- DOI, PMID, or stable publisher URL;
+- DOI and/or PMID when one exists;
+- **a stable, human-verifiable scholarly landing-page URL**;
 - a short note stating **exactly what this source supports**;
 - any important limitation that affects wording.
+
+### Human-verifiable link requirement
+
+A scientific citation is not complete for allneeds unless a person can follow a stored link to a recognizable scholarly record and independently verify the source's identity. Prefer the publisher's article page, PubMed/PMC, APA PsycNet, or another authoritative bibliographic landing page. A bare DOI may be retained as an identifier, but it should not be the only practical verification route when a stable human-facing record is available.
+
+Agent/crawler accessibility is **not** the standard. Publishers increasingly use anti-scraping controls, bot checks, redirects, or `robots.txt` restrictions. If an agent cannot fetch a link that the user has manually verified in a normal browser, the agent must record that limitation rather than replacing the source with a more scrape-friendly secondary page. Never downgrade from a primary/authoritative record to a blog, search result, aggregator, or other weaker source merely because automated retrieval is easier.
+
+When possible, keep identifiers and verification links separately: for example, retain the DOI as bibliographic metadata while making the clickable source URL a human-verifiable PubMed, PsycNet, or publisher record.
 
 A source note should not overstate the paper. For example, a mortality meta-analysis can support an association between social relationships and survival across included studies; it should not by itself be used as proof that “connection is a basic psychological need.”
 
@@ -87,18 +96,24 @@ The current paragraph also combines several distinct propositions—mortality, d
 ### Candidate sources: direct support for belonging / relatedness as a need
 
 **Baumeister, R. F., & Leary, M. R. (1995). _The need to belong: Desire for interpersonal attachments as a fundamental human motivation._ Psychological Bulletin, 117(3), 497–529.**  
-DOI: https://doi.org/10.1037/0033-2909.117.3.497  
+Human-verifiable record: https://psycnet.apa.org/record/1995-29052-001  
+DOI: 10.1037/0033-2909.117.3.497  
+Verification note: user manually verified the APA PsycNet record on 2026-08-24. Automated access may be blocked by APA's crawler restrictions; that is not grounds to replace this link.  
 Use for: the belongingness hypothesis; the authors evaluate evidence for a pervasive motivation to form and maintain lasting, positive interpersonal bonds.  
 Important wording note: this is a foundational theoretical/empirical review supporting a hypothesis, so prefer language such as “Baumeister and Leary argued/reviewed evidence that…” over “science proves humans need…”
 
 **Ryan, R. M., & Deci, E. L. (2000). _Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being._ American Psychologist, 55(1), 68–78.**  
-DOI: https://doi.org/10.1037/0003-066X.55.1.68  
+Human-verifiable record: https://pubmed.ncbi.nlm.nih.gov/11392867/  
+DOI: 10.1037/0003-066X.55.1.68  
 PMID: 11392867  
+Verification note: user manually verified this PubMed record on 2026-08-24.  
 Use for: within Self-Determination Theory, relatedness is one of three proposed basic psychological needs (with autonomy and competence), with need satisfaction linked to motivation and well-being.  
 Important wording note: attribute the “basic psychological need” classification to SDT rather than presenting one theory’s taxonomy as theory-free fact.
 
 **Vansteenkiste, M., Ryan, R. M., & Soenens, B. (2020). _Basic psychological need theory: Advancements, critical themes, and future directions._ Motivation and Emotion, 44, 1–31.**  
-DOI: https://doi.org/10.1007/s11031-019-09818-1  
+Human-verifiable record: https://link.springer.com/article/10.1007/s11031-019-09818-1  
+DOI: 10.1007/s11031-019-09818-1  
+Verification note: user manually verified this Springer record on 2026-08-24.  
 Use for: a modern review of Basic Psychological Need Theory; relatedness is described as warmth, bonding, care, connecting to others, and feeling significant to them. The review also discusses criteria for calling a psychological motive a “basic need” and the evidence base across contexts and cultures.  
 Important wording note: especially useful for defining what “need” means in this theoretical literature and avoiding casual use of the term.
 
@@ -135,6 +150,7 @@ Limitation: age/population scope means it should not be generalized to all peopl
 | Date | Area | Decision | Production copy changed? | Notes |
 | --- | --- | --- | --- | --- |
 | 2026-08-24 | Connection | Research initiated; candidate citations assembled | **No** | User requested a slow, careful evidence review. No replacement Connection wording has yet been approved. |
+| 2026-08-24 | Citation infrastructure / Connection | Human-verifiable links required; three direct-need sources manually verified | **No** | User supplied verified APA PsycNet, PubMed, and Springer landing pages. Agent access restrictions must not cause substitution with weaker sources. |
 
 ## Handoff for the next agent
 
@@ -144,7 +160,8 @@ Limitation: age/population scope means it should not be generalized to all peopl
 4. The next useful step is to audit the existing Connection paragraph claim by claim and propose the smallest evidence-aligned revision, with each sentence mapped to a source.
 5. Do not edit production Connection copy until the user approves the proposed wording.
 6. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`; do not manually treat generated output as canonical without evidence.
-7. After an approved production change, append a ledger entry here with the exact scope, sources, limitations, files changed, and validation performed.
+7. For every scientific citation, preserve a human-verifiable authoritative landing-page URL even when automated agents cannot crawl it. Record DOI/PMID separately when available.
+8. After an approved production change, append a ledger entry here with the exact scope, sources, limitations, files changed, and validation performed.
 
 ## Open questions to resolve over time
 
