@@ -18,6 +18,7 @@ This file is the root-level implementation contract for automated coding agents 
 - Navigation magnets are allowed to have intentional navigation-specific styling. Their typography, sizing, shadows, crisp-rendering strategy, hover/focus/pick-up treatment, or compact presentation do not have to be identical to content magnets when the difference is purposeful.
 - Do not interpret "shared magnet behavior" as "identical CSS." What must remain consistent are the physical interaction semantics, drag/fling correctness, persistence, accessibility, and lifecycle guarantees unless the user explicitly asks for a behavioral difference.
 - Navigation-specific presentation must not make route-active, menu, ARIA, or other semantic state change the measured magnet geometry or cause the persistent nav to repack. Physics-state styling may visually move/lift a magnet as part of interaction; semantic/presentation state must stay dimension-neutral.
+- The Menu magnet is the only non-removable navigation magnet. Home and Customizer are enabled by default but must remain user-toggleable through Navigation magnets settings.
 - Saved compact and wide magnet layouts remain independent. Do not collapse them into one cross-viewport coordinate set.
 
 ## Startup and native-app continuity
