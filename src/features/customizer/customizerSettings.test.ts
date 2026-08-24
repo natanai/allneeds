@@ -84,18 +84,39 @@ describe('saved customizer settings', () => {
     });
   });
 
-  it('restores only boolean navigation choices from the newest mirror', () => {
+  it('keeps Home and Customizer on by default while restoring explicit opt-outs', () => {
+    expect(defaultNavSettings.home).toBe(true);
+    expect(defaultNavSettings.customizer).toBe(true);
+
     const local = memoryStorage({
       [NAV_SETTINGS_KEY]: JSON.stringify({ enabled: { feelings: false }, updatedAt: 1 }),
     });
     const session = memoryStorage({
-      [NAV_SETTINGS_KEY]: JSON.stringify({ enabled: { feelings: true, needs: false, inventory: 'no' }, updatedAt: 2 }),
+      [NAV_SETTINGS_KEY]: JSON.stringify({
+        enabled: { home: false, customizer: false, feelings: true, needs: false, inventory: 'no' },
+        updatedAt: 2,
+      }),
     });
 
     expect(readNavSettings(local, session)).toEqual({
       ...defaultNavSettings,
+      home: false,
+      customizer: false,
       feelings: true,
       needs: false,
+    });
+  });
+
+  it('backfills Home and Customizer as enabled for older saved navigation settings', () => {
+    const storage = memoryStorage({
+      [NAV_SETTINGS_KEY]: JSON.stringify({ enabled: { inventory: false, feelings: false }, updatedAt: 5 }),
+    });
+
+    expect(readNavSettings(storage, null)).toMatchObject({
+      home: true,
+      customizer: true,
+      inventory: false,
+      feelings: false,
     });
   });
 
