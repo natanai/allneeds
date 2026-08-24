@@ -77,6 +77,7 @@ type DragState = {
   element: MagnetElement;
   startPointer: Point;
   origin: Point;
+  pointerScale: Point;
   lastPointer: Point;
   lastTime: number;
   releaseVx: number;
@@ -994,6 +995,11 @@ export function MagnetBoard({
     const board = boardRef.current;
     if (!magnet || !board) return;
     const now = performance.now();
+    const boardRect = board.getBoundingClientRect();
+    const pointerScale = {
+      x: boardRect.width > 0 ? board.offsetWidth / boardRect.width : 1,
+      y: boardRect.height > 0 ? board.offsetHeight / boardRect.height : 1,
+    };
     magnet.dragging = true;
     magnet.vx = 0;
     magnet.vy = 0;
@@ -1002,12 +1008,16 @@ export function MagnetBoard({
       id,
       pointerId: event.pointerId,
       element: event.currentTarget,
-      startPointer: { x: event.pageX, y: event.pageY },
-      lastPointer: { x: event.pageX, y: event.pageY },
+      // iOS Safari can report page coordinates inconsistently after pointer
+      // capture on a deeply scrolled document. Client coordinates stay in one
+      // viewport coordinate space and therefore cannot accumulate scrollY.
+      startPointer: { x: event.clientX, y: event.clientY },
+      lastPointer: { x: event.clientX, y: event.clientY },
       lastTime: now,
       releaseVx: 0,
       releaseVy: 0,
       origin: { x: magnet.x, y: magnet.y },
+      pointerScale,
       moved: false,
     };
     if (event.pointerType !== 'touch') {
@@ -1033,8 +1043,8 @@ export function MagnetBoard({
     if (!magnet) return;
     magnet.dragging = true;
     const distance = Math.hypot(
-      event.pageX - drag.startPointer.x,
-      event.pageY - drag.startPointer.y,
+      event.clientX - drag.startPointer.x,
+      event.clientY - drag.startPointer.y,
     );
     if (!drag.moved && distance < DRAG_THRESHOLD) return;
     if (!drag.moved) {
@@ -1043,27 +1053,18 @@ export function MagnetBoard({
       board.dataset.dragging = 'true';
     }
     if (event.cancelable) event.preventDefault();
-    const rect = board.getBoundingClientRect();
-    const delta = scalePointerDelta(
-      event.pageX - drag.startPointer.x,
-      event.pageY - drag.startPointer.y,
-      board.offsetWidth,
-      board.offsetHeight,
-      rect.width,
-      rect.height,
-    );
+    const delta = {
+      x: (event.clientX - drag.startPointer.x) * drag.pointerScale.x,
+      y: (event.clientY - drag.startPointer.y) * drag.pointerScale.y,
+    };
     const nextX = clamp(drag.origin.x + delta.x, 0, board.clientWidth - magnet.width);
     const nextY = clamp(drag.origin.y + delta.y, 0, board.clientHeight - magnet.height);
     const now = performance.now();
     const elapsed = clamp((now - drag.lastTime) / 1000, 1 / 240, 0.08);
-    const frameDelta = scalePointerDelta(
-      event.pageX - drag.lastPointer.x,
-      event.pageY - drag.lastPointer.y,
-      board.offsetWidth,
-      board.offsetHeight,
-      rect.width,
-      rect.height,
-    );
+    const frameDelta = {
+      x: (event.clientX - drag.lastPointer.x) * drag.pointerScale.x,
+      y: (event.clientY - drag.lastPointer.y) * drag.pointerScale.y,
+    };
     const pointerVelocity = limitVector(
       frameDelta.x / elapsed,
       frameDelta.y / elapsed,
@@ -1071,7 +1072,7 @@ export function MagnetBoard({
     );
     drag.releaseVx = drag.releaseVx * 0.38 + pointerVelocity.x * 0.62;
     drag.releaseVy = drag.releaseVy * 0.38 + pointerVelocity.y * 0.62;
-    drag.lastPointer = { x: event.pageX, y: event.pageY };
+    drag.lastPointer = { x: event.clientX, y: event.clientY };
     drag.lastTime = now;
     magnet.x = nextX;
     magnet.y = nextY;

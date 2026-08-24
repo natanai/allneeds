@@ -109,3 +109,55 @@ test('holding and dragging empty desktop board space pushes magnets as a collide
   const after = await magnetPosition(board, magnet);
   expect(distance(after, before)).toBeGreaterThan(8);
 });
+
+test.describe('mobile deep-scroll magnet dragging', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('keeps a held need magnet aligned after scrolling deep into the board', async ({ page }) => {
+    await page.goto('/needs');
+    const board = page.getByLabel('Needs magnet board');
+    await expect(board).toHaveAttribute('data-ready', 'true');
+    await ensurePhysicsOn(board);
+    const magnet = board.getByRole('link', { name: 'Acceptance', exact: true });
+    await magnet.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(120);
+
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    expect(scrollBefore).toBeGreaterThan(300);
+    const before = await magnetPosition(board, magnet);
+    const box = await magnet.boundingBox();
+    expect(box).not.toBeNull();
+
+    const startX = box!.x + box!.width / 2;
+    const startY = box!.y + box!.height / 2;
+    const session = await page.context().newCDPSession(page);
+    try {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: startX, y: startY, id: 1 }],
+      });
+      await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: startX + 14, y: startY + 18, id: 1 }],
+      });
+      await page.waitForTimeout(80);
+
+      const during = await magnetPosition(board, magnet);
+      const movedX = during.x - before.x;
+      const movedY = during.y - before.y;
+      expect(movedX).toBeGreaterThan(8);
+      expect(movedX).toBeLessThan(22);
+      expect(movedY).toBeGreaterThan(11);
+      expect(movedY).toBeLessThan(28);
+      expect(Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore)).toBeLessThanOrEqual(1);
+    } finally {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: [],
+      }).catch(() => undefined);
+      await session.detach();
+    }
+  });
+});
