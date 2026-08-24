@@ -100,9 +100,12 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Strategy browsing controls should be lighter than the cards.
 - Device/Profile save actions use compact icon + text controls; do not let routine save controls dominate the card.
 - Previous/next deck navigation uses compact circular arrow controls with the position count between them.
+- In one-at-a-time mode, horizontal swipes on the card deck move to the previous/next strategy while vertical gestures remain normal page scrolling; interactive controls inside a card do not initiate deck swipes.
+- The focused deck also supports Left/Right Arrow navigation as a non-pointer alternative.
+- Mobile deck height should use stable viewport sizing rather than dynamic viewport height, so Safari browser chrome does not visibly squash or stretch the card while scrolling. Give the deck generous vertical space before its card body becomes internally scrollable.
 - Shuffle uses the canonical Shuffle control above.
 - View-all/view-one icons follow the destination-arrangement rule above.
-- All existing save, profile, shuffle, view-mode, and previous/next functionality must remain present during visual cleanup.
+- All existing save, profile, shuffle, view-mode, previous/next, swipe, and keyboard functionality must remain present during visual cleanup.
 
 ### Shared strategy feed
 
@@ -124,3 +127,5 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Shared strategy feed and Need-detail strategy controls moved toward denser app-like presentation without behavior changes.
 - Shuffle standardized on the existing crossed-arrows icon-only browser control.
 - Strategy view-mode icons standardized to depict the destination card arrangement.
+- Need-detail one-at-a-time strategy decks restored horizontal swipe navigation with vertical-scroll gesture discrimination and Left/Right Arrow support.
+- Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
