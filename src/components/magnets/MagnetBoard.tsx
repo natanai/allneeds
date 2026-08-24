@@ -23,6 +23,7 @@ import {
   NAV_REST_PACKING,
   orderMagnetsByVisualRows,
   packMagnets,
+  scalePointerDelta,
 } from './magnetMath';
 import {
   magnetViewportForWidth,
@@ -75,12 +76,31 @@ type DragState = {
   pointerId: number;
   element: MagnetElement;
   startPointer: Point;
-  offset: Point;
+  origin: Point;
   lastPointer: Point;
   lastTime: number;
   releaseVx: number;
   releaseVy: number;
   moved: boolean;
+};
+
+type PointerField = {
+  active: boolean;
+  pressed: boolean;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  lastTime: number;
+};
+
+type SurfaceGesture = {
+  pointerId: number;
+  pointerType: string;
+  startPointer: Point;
+  lastPointer: Point;
+  active: boolean;
+  holdTimer: number | null;
 };
 
 type DropWave = {
@@ -122,6 +142,12 @@ const DROP_WAVE_SPEED = 235;
 const DROP_WAVE_IMPULSE = 9;
 const WOBBLE_SPRING = 34;
 const WOBBLE_DAMPING = 6.8;
+const PUSHER_SIZE = 44;
+const PUSHER_CONTACT_CORRECTION = 0.76;
+const PUSHER_VELOCITY_TRANSFER = 0.82;
+const PUSHER_MAX_IMPULSE_SPEED = 520;
+const TOUCH_PUSH_HOLD_MS = 240;
+const TOUCH_PUSH_CANCEL_DISTANCE = 8;
 
 function clamp(value: number, min: number, max: number) {
   if (min > max) return min;
@@ -152,6 +178,26 @@ function shuffled<T>(values: T[]) {
   return copy;
 }
 
+function boardPointFromClient(
+  board: HTMLDivElement,
+  clientX: number,
+  clientY: number,
+): Point {
+  const rect = board.getBoundingClientRect();
+  const point = scalePointerDelta(
+    clientX - rect.left,
+    clientY - rect.top,
+    board.offsetWidth,
+    board.offsetHeight,
+    rect.width,
+    rect.height,
+  );
+  return {
+    x: point.x - board.clientLeft,
+    y: point.y - board.clientTop,
+  };
+}
+
 export function MagnetBoard({
   items,
   playMode,
@@ -167,8 +213,17 @@ export function MagnetBoard({
   const elementsRef = useRef(new Map<string, MagnetElement>());
   const magnetsRef = useRef(new Map<string, KineticMagnet>());
   const dragRef = useRef<DragState | null>(null);
+  const surfaceGestureRef = useRef<SurfaceGesture | null>(null);
   const suppressClickUntilRef = useRef(new Map<string, number>());
-  const pointerFieldRef = useRef({ active: false, x: 0, y: 0 });
+  const pointerFieldRef = useRef<PointerField>({
+    active: false,
+    pressed: false,
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+    lastTime: 0,
+  });
   const tiltFieldRef = useRef({ x: 0, y: 0, baselineGamma: null as number | null, baselineBeta: null as number | null });
   const dropWavesRef = useRef<DropWave[]>([]);
   const motionDirtyRef = useRef(false);
@@ -290,6 +345,9 @@ export function MagnetBoard({
       && Math.abs(lastLayoutWidthRef.current - boardWidth) < 0.5;
     if (!canReuseCurrent) {
       pointerFieldRef.current.active = false;
+      pointerFieldRef.current.pressed = false;
+      pointerFieldRef.current.vx = 0;
+      pointerFieldRef.current.vy = 0;
     }
     const elementById = new Map(displayElements.map((entry) => [entry.item.id, entry]));
     const orderEntries = (ids: string[]) => {
@@ -455,7 +513,27 @@ export function MagnetBoard({
     const board = boardRef.current;
     if (!board || !playMode) {
       dropWavesRef.current = [];
-      pointerFieldRef.current.active = false;
+      const surfaceGesture = surfaceGestureRef.current;
+      if (surfaceGesture?.holdTimer !== null && surfaceGesture?.holdTimer !== undefined) {
+        window.clearTimeout(surfaceGesture.holdTimer);
+      }
+      if (board && surfaceGesture) {
+        try {
+          if (board.hasPointerCapture(surfaceGesture.pointerId)) {
+            board.releasePointerCapture(surfaceGesture.pointerId);
+          }
+        } catch {
+          // Pointer capture may already be gone when play mode changes.
+        }
+      }
+      surfaceGestureRef.current = null;
+      pointerFieldRef.current = {
+        ...pointerFieldRef.current,
+        active: false,
+        pressed: false,
+        vx: 0,
+        vy: 0,
+      };
       magnetsRef.current.forEach((magnet) => {
         magnet.dragging = false;
         magnet.vx = 0;
@@ -465,7 +543,10 @@ export function MagnetBoard({
         delete magnet.element.dataset.dragging;
         applyPosition(magnet);
       });
-      if (board) delete board.dataset.dragging;
+      if (board) {
+        delete board.dataset.dragging;
+        delete board.dataset.pushing;
+      }
       persist();
       return;
     }
@@ -487,7 +568,41 @@ export function MagnetBoard({
         const hasLiftedMagnet = liftedId !== null;
         magnets.forEach((magnet) => {
           if (!magnet.dragging && magnet.id !== liftedId) {
-            if (pointer.active) {
+            if (pointer.active && pointer.pressed) {
+              const collision = getAabbCollision(
+                {
+                  x: pointer.x - PUSHER_SIZE / 2,
+                  y: pointer.y - PUSHER_SIZE / 2,
+                  width: PUSHER_SIZE,
+                  height: PUSHER_SIZE,
+                },
+                magnet,
+              );
+              if (collision) {
+                const correction = Math.max(collision.depth - 0.1, 0) * PUSHER_CONTACT_CORRECTION;
+                if (correction > 0) {
+                  magnet.x += collision.normalX * correction;
+                  magnet.y += collision.normalY * correction;
+                  layoutChanged = true;
+                }
+
+                const relativeNormalVelocity =
+                  (magnet.vx - pointer.vx) * collision.normalX
+                  + (magnet.vy - pointer.vy) * collision.normalY;
+                const transferredSpeed = clamp(
+                  -relativeNormalVelocity * (1 + COLLISION_RESTITUTION) * PUSHER_VELOCITY_TRANSFER,
+                  0,
+                  PUSHER_MAX_IMPULSE_SPEED,
+                );
+                if (transferredSpeed > 0) {
+                  magnet.vx += collision.normalX * transferredSpeed;
+                  magnet.vy += collision.normalY * transferredSpeed;
+                  kickWobble(magnet, clamp(transferredSpeed * 0.055, -38, 38));
+                } else if (correction > 0) {
+                  kickWobble(magnet, clamp(correction * 0.35, -12, 12));
+                }
+              }
+            } else if (pointer.active) {
               const dx = magnet.x + magnet.width / 2 - pointer.x;
               const dy = magnet.y + magnet.height / 2 - pointer.y;
               const distance = Math.hypot(dx, dy);
@@ -781,14 +896,71 @@ export function MagnetBoard({
     persist();
   }, [emitRipple, persist]);
 
+  const updatePointerField = useCallback((
+    board: HTMLDivElement,
+    clientX: number,
+    clientY: number,
+    pressed: boolean,
+  ) => {
+    const point = boardPointFromClient(board, clientX, clientY);
+    const previous = pointerFieldRef.current;
+    const now = performance.now();
+    const elapsed = clamp((now - previous.lastTime) / 1000, 1 / 240, 0.08);
+    const velocity = previous.active
+      ? limitVector(
+          (point.x - previous.x) / elapsed,
+          (point.y - previous.y) / elapsed,
+          MAX_POINTER_SPEED,
+        )
+      : { x: 0, y: 0 };
+    pointerFieldRef.current = {
+      active: true,
+      pressed,
+      x: point.x,
+      y: point.y,
+      vx: velocity.x,
+      vy: velocity.y,
+      lastTime: now,
+    };
+  }, []);
+
+  const completeSurfaceGesture = useCallback((pointerId: number) => {
+    const gesture = surfaceGestureRef.current;
+    if (!gesture || gesture.pointerId !== pointerId) return;
+    if (gesture.holdTimer !== null) window.clearTimeout(gesture.holdTimer);
+    const board = boardRef.current;
+    if (board) {
+      delete board.dataset.pushing;
+      try {
+        if (board.hasPointerCapture(pointerId)) {
+          board.releasePointerCapture(pointerId);
+        }
+      } catch {
+        // Capture can already be released by a browser scroll/cancel gesture.
+      }
+    }
+    pointerFieldRef.current = {
+      ...pointerFieldRef.current,
+      active: false,
+      pressed: false,
+      vx: 0,
+      vy: 0,
+      lastTime: performance.now(),
+    };
+    surfaceGestureRef.current = null;
+  }, []);
+
   useEffect(() => {
     if (!playMode) return;
     const handlePointerEnd = (event: PointerEvent) => {
       completeDrag(event.pointerId, event.type === 'pointercancel');
+      completeSurfaceGesture(event.pointerId);
     };
     const handleBlur = () => {
       const drag = dragRef.current;
       if (drag) completeDrag(drag.pointerId, true);
+      const surfaceGesture = surfaceGestureRef.current;
+      if (surfaceGesture) completeSurfaceGesture(surfaceGesture.pointerId);
     };
     window.addEventListener('pointerup', handlePointerEnd, true);
     window.addEventListener('pointercancel', handlePointerEnd, true);
@@ -798,19 +970,21 @@ export function MagnetBoard({
       window.removeEventListener('pointercancel', handlePointerEnd, true);
       window.removeEventListener('blur', handleBlur);
     };
-  }, [completeDrag, playMode]);
+  }, [completeDrag, completeSurfaceGesture, playMode]);
 
   useEffect(() => {
     const board = boardRef.current;
     if (!board || !playMode) return;
 
-    const keepTouchGestureOnMagnet = (event: TouchEvent) => {
-      if (dragRef.current && event.cancelable) event.preventDefault();
+    const keepInteractiveTouchGesture = (event: TouchEvent) => {
+      if ((dragRef.current || surfaceGestureRef.current?.active) && event.cancelable) {
+        event.preventDefault();
+      }
     };
 
-    board.addEventListener('touchmove', keepTouchGestureOnMagnet, { passive: false });
+    board.addEventListener('touchmove', keepInteractiveTouchGesture, { passive: false });
     return () => {
-      board.removeEventListener('touchmove', keepTouchGestureOnMagnet);
+      board.removeEventListener('touchmove', keepInteractiveTouchGesture);
     };
   }, [playMode]);
 
@@ -819,7 +993,6 @@ export function MagnetBoard({
     const magnet = magnetsRef.current.get(id);
     const board = boardRef.current;
     if (!magnet || !board) return;
-    const boardRect = board.getBoundingClientRect();
     const now = performance.now();
     magnet.dragging = true;
     magnet.vx = 0;
@@ -829,15 +1002,12 @@ export function MagnetBoard({
       id,
       pointerId: event.pointerId,
       element: event.currentTarget,
-      startPointer: { x: event.clientX, y: event.clientY },
-      lastPointer: { x: event.clientX, y: event.clientY },
+      startPointer: { x: event.pageX, y: event.pageY },
+      lastPointer: { x: event.pageX, y: event.pageY },
       lastTime: now,
       releaseVx: 0,
       releaseVy: 0,
-      offset: {
-        x: event.clientX - boardRect.left - magnet.x,
-        y: event.clientY - boardRect.top - magnet.y,
-      },
+      origin: { x: magnet.x, y: magnet.y },
       moved: false,
     };
     if (event.pointerType !== 'touch') {
@@ -863,8 +1033,8 @@ export function MagnetBoard({
     if (!magnet) return;
     magnet.dragging = true;
     const distance = Math.hypot(
-      event.clientX - drag.startPointer.x,
-      event.clientY - drag.startPointer.y,
+      event.pageX - drag.startPointer.x,
+      event.pageY - drag.startPointer.y,
     );
     if (!drag.moved && distance < DRAG_THRESHOLD) return;
     if (!drag.moved) {
@@ -874,18 +1044,34 @@ export function MagnetBoard({
     }
     if (event.cancelable) event.preventDefault();
     const rect = board.getBoundingClientRect();
-    const nextX = clamp(event.clientX - rect.left - drag.offset.x, 0, board.clientWidth - magnet.width);
-    const nextY = clamp(event.clientY - rect.top - drag.offset.y, 0, board.clientHeight - magnet.height);
+    const delta = scalePointerDelta(
+      event.pageX - drag.startPointer.x,
+      event.pageY - drag.startPointer.y,
+      board.offsetWidth,
+      board.offsetHeight,
+      rect.width,
+      rect.height,
+    );
+    const nextX = clamp(drag.origin.x + delta.x, 0, board.clientWidth - magnet.width);
+    const nextY = clamp(drag.origin.y + delta.y, 0, board.clientHeight - magnet.height);
     const now = performance.now();
     const elapsed = clamp((now - drag.lastTime) / 1000, 1 / 240, 0.08);
+    const frameDelta = scalePointerDelta(
+      event.pageX - drag.lastPointer.x,
+      event.pageY - drag.lastPointer.y,
+      board.offsetWidth,
+      board.offsetHeight,
+      rect.width,
+      rect.height,
+    );
     const pointerVelocity = limitVector(
-      (event.clientX - drag.lastPointer.x) / elapsed,
-      (event.clientY - drag.lastPointer.y) / elapsed,
+      frameDelta.x / elapsed,
+      frameDelta.y / elapsed,
       MAX_POINTER_SPEED,
     );
     drag.releaseVx = drag.releaseVx * 0.38 + pointerVelocity.x * 0.62;
     drag.releaseVy = drag.releaseVy * 0.38 + pointerVelocity.y * 0.62;
-    drag.lastPointer = { x: event.clientX, y: event.clientY };
+    drag.lastPointer = { x: event.pageX, y: event.pageY };
     drag.lastTime = now;
     magnet.x = nextX;
     magnet.y = nextY;
@@ -908,14 +1094,92 @@ export function MagnetBoard({
     }
   };
 
-  const handleBoardPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== 'mouse' || event.buttons !== 0) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    pointerFieldRef.current = {
-      active: true,
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+  const handleBoardPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!playMode
+      || !event.isPrimary
+      || event.button !== 0
+      || dragRef.current
+      || surfaceGestureRef.current
+      || event.target !== event.currentTarget) return;
+
+    const board = event.currentTarget;
+    const gesture: SurfaceGesture = {
+      pointerId: event.pointerId,
+      pointerType: event.pointerType,
+      startPointer: { x: event.clientX, y: event.clientY },
+      lastPointer: { x: event.clientX, y: event.clientY },
+      active: event.pointerType !== 'touch',
+      holdTimer: null,
     };
+    surfaceGestureRef.current = gesture;
+
+    const activate = () => {
+      const current = surfaceGestureRef.current;
+      if (!current || current.pointerId !== gesture.pointerId || current.active) return;
+      current.active = true;
+      current.holdTimer = null;
+      updatePointerField(board, current.lastPointer.x, current.lastPointer.y, true);
+      board.dataset.pushing = 'true';
+      try {
+        board.setPointerCapture(current.pointerId);
+      } catch {
+        // Window cleanup still ends the gesture if capture is unavailable.
+      }
+    };
+
+    if (gesture.active) {
+      updatePointerField(board, event.clientX, event.clientY, true);
+      board.dataset.pushing = 'true';
+      if (event.cancelable) event.preventDefault();
+      try {
+        board.setPointerCapture(event.pointerId);
+      } catch {
+        // Window cleanup still ends the gesture if capture is unavailable.
+      }
+      return;
+    }
+
+    gesture.holdTimer = window.setTimeout(activate, TOUCH_PUSH_HOLD_MS);
+  };
+
+  const handleBoardPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!playMode || dragRef.current) return;
+    const gesture = surfaceGestureRef.current;
+    if (gesture && gesture.pointerId === event.pointerId) {
+      gesture.lastPointer = { x: event.clientX, y: event.clientY };
+      if (!gesture.active) {
+        const distance = Math.hypot(
+          event.clientX - gesture.startPointer.x,
+          event.clientY - gesture.startPointer.y,
+        );
+        if (distance >= TOUCH_PUSH_CANCEL_DISTANCE) {
+          if (gesture.holdTimer !== null) window.clearTimeout(gesture.holdTimer);
+          pointerFieldRef.current.active = false;
+          pointerFieldRef.current.pressed = false;
+          surfaceGestureRef.current = null;
+        }
+        return;
+      }
+
+      if (event.pointerType === 'mouse' && event.buttons === 0) {
+        completeSurfaceGesture(event.pointerId);
+        return;
+      }
+      updatePointerField(event.currentTarget, event.clientX, event.clientY, true);
+      if (event.cancelable) event.preventDefault();
+      return;
+    }
+
+    if (event.pointerType !== 'mouse' || event.buttons !== 0) return;
+    updatePointerField(event.currentTarget, event.clientX, event.clientY, false);
+  };
+
+  const handleBoardPointerLeave = () => {
+    if (surfaceGestureRef.current) return;
+    pointerFieldRef.current.active = false;
+    pointerFieldRef.current.pressed = false;
+    pointerFieldRef.current.vx = 0;
+    pointerFieldRef.current.vy = 0;
   };
 
   const handlePlayModeChange = (nextPlayMode: boolean) => {
@@ -938,8 +1202,9 @@ export function MagnetBoard({
       aria-busy={!layoutReady}
       data-ready={layoutReady ? 'true' : undefined}
       data-active={playMode ? 'true' : 'false'}
+      onPointerDown={handleBoardPointerDown}
       onPointerMove={handleBoardPointerMove}
-      onPointerLeave={() => { pointerFieldRef.current.active = false; }}
+      onPointerLeave={handleBoardPointerLeave}
     >
       <span ref={surfaceRef} className={styles.surface} aria-hidden="true" />
       <PhysicsToggle
