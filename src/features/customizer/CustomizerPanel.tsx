@@ -13,7 +13,7 @@ import {
   type ThemeValues,
 } from './customizerSettings';
 import { colorFromDrag, hexToHsl, normalizeHex, type HslColor } from './colorDrag';
-import { themePresets } from './themePresets';
+import { resolveThemePresetName, themePresets } from './themePresets';
 import styles from './CustomizerPanel.module.css';
 
 const labels: Record<keyof ThemeValues, string> = {
@@ -70,7 +70,7 @@ function tiltPresentation(tilt: TiltPermissionState) {
 
 export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const initial = readTheme();
-  const initialPreset = themePresets.some(({ name }) => name === initial.preset) ? initial.preset : '';
+  const initialPreset = resolveThemePresetName(initial);
   const [values, setValues] = useState<ThemeValues>(initial.values);
   const [roundness, setRoundness] = useState(initial.roundness);
   const [preset, setPreset] = useState(initialPreset);
