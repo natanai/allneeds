@@ -1,0 +1,43 @@
+name: Batch 1 validation
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run foundation checks
+        run: pnpm check
+        env:
+          VITE_BASE_PATH: /
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run focused browser regressions
+        run: >-
+          pnpm exec playwright test
+          tests/e2e/startup-nav-readiness.spec.ts
+          tests/e2e/magnet-nav-order.spec.ts
+          tests/e2e/native-stability.spec.ts
+          --grep "saved customizer settings|first paint never|warm primary routes|content magnet locations|lifted magnet|Play mode keeps a touch drag|mounts the app beneath|fresh startup warms|route and menu presentation"
+          --workers=1
