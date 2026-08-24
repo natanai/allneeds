@@ -103,11 +103,18 @@ try {
   indexPath = resolve('dist/index.html');
   deployedIndex = await readFile(indexPath, 'utf8');
   const previousCaches = await shellCacheNames(page);
+
+  // A deployment replaces the server's static release; it does not mutate files under
+  // one long-lived preview process. Stop release A, write release B, then restart the
+  // server so the browser update check sees a clean, realistic deployment boundary.
+  await server.close();
+  server = null;
   await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
   await regenerateServiceWorker();
+  server = await startPreview();
 
-  // The current client keeps its instant cached shell while normal registration
-  // discovers the new worker. Once a replacement cache exists and installation has
+  // The current client keeps its instant cached A shell while normal registration
+  // discovers release B. Once a replacement cache exists and installation has
   // settled, confirm the new cache itself contains the new deployment shell.
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
   await expectShell(page, 'Home');
