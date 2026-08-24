@@ -334,7 +334,7 @@ export function ObservationsPage() {
         <div className={styles.dialogBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setHelpTopic(null); }}>
           <section ref={helpDialogRef} className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="observation-help-title" tabIndex={-1}>
             <header><h2 id="observation-help-title">Observation help</h2><button type="button" onClick={() => setHelpTopic(null)} aria-label="Close observation help" data-dialog-initial-focus>×</button></header>
-            <div>{infoCopy(helpTopic)}</div>
+            <div className={styles.dialogBody} data-observation-dialog-body>{infoCopy(helpTopic)}</div>
           </section>
         </div>
       ) : null}

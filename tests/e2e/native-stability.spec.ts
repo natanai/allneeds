@@ -286,6 +286,60 @@ test.describe('mobile native-shell contracts', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
     expect(runtimeProblems).toEqual([]);
   });
+
+  test('long mobile overlays keep their dismissal controls on screen', async ({ page }) => {
+    const runtimeProblems = collectRuntimeProblems(page);
+    await page.goto('/');
+
+    await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
+    const customizer = page.getByRole('dialog', { name: 'Customizer' });
+    const customizerBody = customizer.locator('[data-customizer-scroll-body]');
+    const closeCustomizer = customizer.getByRole('button', { name: 'Close customizer' });
+    await expect(customizer).toBeVisible();
+    await expect(customizerBody).toHaveJSProperty('scrollTop', 0);
+    await customizerBody.evaluate((body) => { body.scrollTop = body.scrollHeight; });
+    expect(await customizerBody.evaluate((body) => body.scrollTop)).toBeGreaterThan(0);
+    const customizerBox = await customizer.boundingBox();
+    const customizerCloseBox = await closeCustomizer.boundingBox();
+    expect(customizerBox).not.toBeNull();
+    expect(customizerCloseBox).not.toBeNull();
+    expect(customizerCloseBox!.y).toBeGreaterThanOrEqual(customizerBox!.y);
+    expect(customizerCloseBox!.y + customizerCloseBox!.height).toBeLessThanOrEqual(customizerBox!.y + customizerBox!.height);
+
+    await closeCustomizer.click();
+    await page.goto('/observations');
+    await page.getByRole('button', { name: 'Observation basics' }).click();
+    const observationHelp = page.getByRole('dialog', { name: 'Observation help' });
+    const helpBody = observationHelp.locator('[data-observation-dialog-body]');
+    const closeHelp = observationHelp.getByRole('button', { name: 'Close observation help' });
+    await helpBody.evaluate((body) => {
+      body.append(...Array.from({ length: 18 }, (_, index) => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = `Overflow regression content ${index + 1}`;
+        return paragraph;
+      }));
+      body.scrollTop = body.scrollHeight;
+    });
+    expect(await helpBody.evaluate((body) => body.scrollTop)).toBeGreaterThan(0);
+    const helpBox = await observationHelp.boundingBox();
+    const helpCloseBox = await closeHelp.boundingBox();
+    expect(helpBox).not.toBeNull();
+    expect(helpCloseBox).not.toBeNull();
+    expect(helpCloseBox!.y).toBeGreaterThanOrEqual(helpBox!.y);
+    expect(helpCloseBox!.y + helpCloseBox!.height).toBeLessThanOrEqual(helpBox!.y + helpBox!.height);
+
+    await closeHelp.click();
+    await page.getByRole('button', { name: 'Open menu' }).click();
+    const menu = page.getByRole('dialog', { name: 'allneeds.app menu' });
+    const closeMenu = menu.getByRole('button', { name: 'Close menu' });
+    const closeSize = await closeMenu.evaluate((button) => {
+      const style = getComputedStyle(button);
+      return { width: Number.parseFloat(style.width), height: Number.parseFloat(style.height) };
+    });
+    expect(closeSize.width).toBeGreaterThanOrEqual(44);
+    expect(closeSize.height).toBeGreaterThanOrEqual(44);
+    expect(runtimeProblems).toEqual([]);
+  });
 });
 
 test('Menu Journal opens the full-screen entry and History stays compact', async ({ page }) => {

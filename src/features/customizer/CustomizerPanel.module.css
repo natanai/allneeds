@@ -5,8 +5,9 @@
   bottom: clamp(5rem, 8vw, 6rem);
   width: min(25rem, calc(100vw - 1.5rem));
   max-height: min(44rem, calc(100dvh - 7rem));
-  padding: 1.1rem;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border: 3px solid var(--outline);
   border-radius: var(--radius-3xl);
   background: color-mix(in srgb, var(--lavender) 82%, #fff 18%);
@@ -14,10 +15,24 @@
 }
 
 .header {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 1.1rem;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--outline) 32%, transparent);
+  background: color-mix(in srgb, var(--lavender) 82%, #fff 18%);
+}
+
+.scrollBody {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 0 1.1rem 1.1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .eyebrow {
@@ -226,6 +241,17 @@
 }
 
 @media (max-width: 430px) {
+  .header {
+    padding-top: max(1.1rem, env(safe-area-inset-top));
+    padding-right: max(1.1rem, env(safe-area-inset-right));
+  }
+
+  .scrollBody {
+    padding-right: max(1.1rem, env(safe-area-inset-right));
+    padding-bottom: max(1.1rem, env(safe-area-inset-bottom));
+    padding-left: max(1.1rem, env(safe-area-inset-left));
+  }
+
   .colors,
   .footer {
     grid-template-columns: 1fr;

@@ -71,7 +71,7 @@
 
 .close,
 .back {
-  min-height: 42px;
+  min-height: 44px;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -80,8 +80,8 @@
 }
 
 .close {
-  width: 42px;
-  min-width: 42px;
+  width: 44px;
+  min-width: 44px;
   padding: 0;
   border-radius: 50%;
   font-size: 1.35rem;
