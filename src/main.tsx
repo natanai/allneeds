@@ -37,6 +37,28 @@ const bootStartedAt = Number((window as Window & {
   __ALLNEEDS_BOOT_STARTED_MS__?: number;
 }).__ALLNEEDS_BOOT_STARTED_MS__);
 
+function dismissBootOverlay() {
+  const overlay = document.getElementById('app-boot');
+  if (!overlay) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    overlay.remove();
+    return;
+  }
+
+  let removed = false;
+  const remove = () => {
+    if (removed) return;
+    removed = true;
+    overlay.remove();
+  };
+
+  overlay.addEventListener('transitionend', (event) => {
+    if (event.propertyName === 'opacity') remove();
+  }, { once: true });
+  window.setTimeout(remove, 260);
+}
+
 async function mountApp() {
   document.documentElement.dataset.appState = 'loading';
 
@@ -75,7 +97,7 @@ async function mountApp() {
 
   window.requestAnimationFrame(() => {
     document.documentElement.dataset.appState = 'ready';
-    document.getElementById('app-boot')?.remove();
+    dismissBootOverlay();
     markAppReady();
   });
 }
