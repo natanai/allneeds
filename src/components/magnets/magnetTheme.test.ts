@@ -10,20 +10,24 @@ function ruleBody(selector: string) {
 }
 
 describe('magnet theme styling', () => {
-  it('keeps navigation surface and magnet corners connected to Customizer roundness', () => {
+  it('keeps navigation surface and magnet corners connected to Customizer tokens', () => {
     expect(ruleBody('.nav')).toContain('var(--corner-scale)');
     expect(ruleBody('.nav .magnet')).toContain('var(--corner-scale)');
+    expect(ruleBody('.nav .magnet')).toContain('var(--surface-raised)');
+    expect(ruleBody('.nav .peach')).toContain('var(--peach)');
+    expect(ruleBody('.nav .peach')).toContain('var(--surface-raised)');
   });
 
-  it('keeps navigation clicks and hover states on the shared magnet interaction styling', () => {
-    expect(magnetCss).not.toContain('.nav .magnet:hover');
-    expect(magnetCss).not.toContain('.nav .magnet:active');
-    expect(magnetCss).not.toContain(".nav .magnet[data-picked-up='true']");
-    expect(magnetCss).not.toContain(".nav [data-magnet-id='nav-menu'][aria-expanded='true']");
+  it('marks the current route without changing nav text metrics or compositing', () => {
+    const activeAccent = ruleBody('.nav .active::after');
+    expect(activeAccent).toContain('var(--sky)');
+    expect(activeAccent).toContain('var(--outline)');
+    expect(activeAccent).toContain('border:');
 
-    const activeRule = ruleBody('.nav .active');
-    expect(activeRule).not.toContain('background');
-    expect(activeRule).not.toContain('filter');
-    expect(activeRule).not.toContain('box-shadow');
+    ['font-weight', 'letter-spacing', 'font-size', 'padding', 'filter', 'transform', 'scale']
+      .forEach((property) => expect(activeAccent).not.toContain(property));
+
+    expect(magnetCss).not.toMatch(/\.nav \.active\s*\{[^}]*font-weight/s);
+    expect(magnetCss).not.toMatch(/\.nav \.active\s*\{[^}]*letter-spacing/s);
   });
 });
