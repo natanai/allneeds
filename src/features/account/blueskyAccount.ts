@@ -320,17 +320,12 @@ export function initializeBlueskyForCurrentPage() {
   if (typeof window === 'undefined') return;
   const hint = safeStorage('localStorage')?.getItem(SESSION_HINT_STORAGE_KEY) ?? '';
   const mustInitialize = isOAuthReturn() || hasLoginIntent() || hint === 'active';
-  if (mustInitialize) {
-    const signedInReturn = hasLoginIntent();
-    void initializeBlueskyOAuth().then(async (session) => {
-      if (session && signedInReturn) await loadProfileIntoCurrentBrowser();
-    }).catch(() => undefined);
-    return;
-  }
-  if (hint === 'none' || window.location.hostname !== 'allneeds.app') return;
-  const discover = () => { void initializeBlueskyOAuth().catch(() => undefined); };
-  if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(discover, { timeout: 1_800 });
-  else globalThis.setTimeout(discover, 900);
+  if (!mustInitialize) return;
+
+  const signedInReturn = hasLoginIntent();
+  void initializeBlueskyOAuth().then(async (session) => {
+    if (session && signedInReturn) await loadProfileIntoCurrentBrowser();
+  }).catch(() => undefined);
 }
 
 declare global {
