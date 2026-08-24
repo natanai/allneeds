@@ -307,6 +307,25 @@
   font-size: 0.7rem;
 }
 
+/* Desktop Chromium/Edge rasterize the always-transformed nav magnets softly at
+   common zoom levels. Keep genuinely resting nav magnets on the normal
+   layout/text path; hover, focus, pickup, and drag use the shared magnet
+   interaction path rather than nav-specific interaction overrides. */
+@media (hover: hover) and (pointer: fine) {
+  .nav .magnet:not(:hover):not(:focus-visible):not([data-picked-up='true']):not([data-dragging='true']),
+  .playMode.nav .magnet:not(:hover):not(:focus-visible):not([data-picked-up='true']):not([data-dragging='true']) {
+    left: var(--magnet-x);
+    top: var(--magnet-y);
+    translate: 0 0;
+    scale: 1;
+    transform: none;
+    will-change: auto;
+    filter: none;
+    box-shadow: 0 12px 0 var(--shadow);
+    transition: box-shadow 120ms ease, background 120ms ease;
+  }
+}
+
 @media (max-width: 640px) {
   .board:not(.nav) .magnet {
     min-height: 44px;
