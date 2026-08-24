@@ -97,8 +97,50 @@
 }
 
 @media (max-width: 640px) {
+  .page {
+    gap: .72rem;
+    padding: .1rem .35rem 0;
+  }
+
+  .pageHeader {
+    gap: .2rem;
+  }
+
+  .pageTitle {
+    font-size: clamp(1.15rem, 6vw, 1.45rem);
+    letter-spacing: .045em;
+    line-height: 1.08;
+  }
+
+  .magnetSection {
+    gap: .58rem;
+  }
+
+  .toolbar {
+    align-items: center;
+    gap: .35rem;
+  }
+
   .searchField {
     flex: 1 1 10rem;
   }
 
+  .searchField input {
+    min-height: 44px;
+    padding: .48rem .68rem;
+    border-width: 2px;
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--outline) 24%, transparent);
+    font-size: .82rem;
+  }
+
+  .searchField input:focus-visible {
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--outline) 28%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .empty {
+    padding: .72rem;
+    border-width: 1.5px;
+    font-size: .8rem;
+  }
 }
