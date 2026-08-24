@@ -1,13 +1,7 @@
 name: Full repository validation
 
 on:
-  push:
-    branches:
-      - maintenance/runtime-hygiene-pass
-    paths:
-      - src/main.tsx
-      - src/app/uxMetrics.ts
-      - .github/workflows/batch1-validation.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
