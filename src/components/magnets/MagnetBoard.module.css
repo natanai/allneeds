@@ -306,6 +306,55 @@
   font-size: 0.7rem;
 }
 
+/* Desktop Chromium/Edge rasterize the always-transformed nav magnets softly at
+   common zoom levels. Keep resting nav magnets on the normal layout/text path,
+   and only switch to a transform while the pointer has actually begun a drag. */
+@media (hover: hover) and (pointer: fine) {
+  .nav .magnet,
+  .playMode.nav .magnet {
+    left: var(--magnet-x);
+    top: var(--magnet-y);
+    translate: 0 0;
+    scale: 1;
+    transform: none;
+    will-change: auto;
+    filter: none;
+    box-shadow: 0 12px 0 var(--shadow);
+    transition: box-shadow 120ms ease, background 120ms ease;
+  }
+
+  .nav .magnet:hover,
+  .nav .magnet:focus-visible {
+    --magnet-lift: 0px;
+    box-shadow: 0 13px 0 var(--shadow);
+  }
+
+  .nav .magnet[data-picked-up='true'] {
+    --magnet-lift: 0px;
+    scale: 1;
+    filter: none;
+    box-shadow: 0 13px 0 var(--shadow);
+  }
+
+  .nav .magnet[data-picked-up='true']:focus-visible {
+    outline: none;
+  }
+
+  .nav .magnet[data-dragging='true'] {
+    left: 0;
+    top: 0;
+    translate: 0 0;
+    scale: 1.01;
+    transform:
+      translate3d(var(--magnet-x), var(--magnet-y), 0)
+      translateY(-3px)
+      rotate(var(--magnet-rock));
+    will-change: transform;
+    box-shadow: 0 16px 18px rgba(17, 8, 31, 0.16);
+    transition: none;
+  }
+}
+
 @media (max-width: 640px) {
   .board:not(.nav) .magnet {
     min-height: 44px;
