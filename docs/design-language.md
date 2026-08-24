@@ -90,6 +90,27 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - It should remain findable to someone intentionally looking for it and retain confirmation before deletion.
 - Reset is secondary utility UI, not a dominant CTA.
 
+## Need pages
+
+**Accepted 2026-08-24.** Mobile Need pages should use the available screen like a compact native reading interface while preserving every disclosure, source, strategy, save, navigation, and form function.
+
+### Need detail mobile hierarchy
+
+- The need icon/title is an identity header, not a hero banner: keep it clear but compact, with restrained gaps and mobile title sizing.
+- Evidence is supporting reading content rather than a giant standalone card. On mobile use tighter padding, lighter borders/shadows, and compact section spacing while keeping the claim fully readable.
+- `Details` and `Citations` are secondary disclosure controls. Their visible treatment should be small and quiet while retaining an approximately 44px touch target and the existing expand/collapse behavior.
+- Supporting-source labels and numbered source links may share one row on ordinary phone widths; narrow screens fall back to a single-column flow rather than clipping content.
+- Expanded citation rows use compact numbering and typography but must retain the full description and external link.
+- Strategy cards remain tactile/prominent, but mobile card padding, border weight, and shadow should be more restrained than desktop chrome.
+- Do not shrink or reintroduce instability into the stable-viewport one-at-a-time strategy deck merely to save space; density improvements should come from surrounding chrome and card padding first.
+- Add-a-strategy forms keep every existing field and save target. Related short fields such as optional name/location may share a row on normal phone widths, with a one-column fallback on very narrow screens.
+
+### Needs index mobile hierarchy
+
+- Keep Search + the canonical Shuffle control in one compact toolbar.
+- Search should use a normal mobile touch height (about 44px), restrained border/shadow, and should not visually outweigh the magnet board.
+- Reduce ornamental gaps around the title, toolbar, and board rather than removing magnet interaction or browse functions.
+
 ## Strategy UI
 
 **Accepted 2026-08-24.** Strategy browsing should be information-first with compact controls.
@@ -129,3 +150,5 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Strategy view-mode icons standardized to depict the destination card arrangement.
 - Need-detail one-at-a-time strategy decks restored horizontal swipe navigation with vertical-scroll gesture discrimination and Left/Right Arrow support.
 - Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
+- Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
+- Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
