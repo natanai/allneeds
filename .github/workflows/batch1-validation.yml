@@ -2,10 +2,10 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ui/intentional-startup-splash]
+  pull_request:
+    branches: [main]
     paths:
-      - index.html
+      - .github/workflows/batch1-validation.yml
 
 permissions:
   contents: read
