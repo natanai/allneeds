@@ -1,4 +1,4 @@
-import { defaultTheme, type ThemeValues } from './customizerSettings';
+import { defaultTheme, type ThemeState, type ThemeValues } from './customizerSettings';
 
 export type ThemePreset = Readonly<{
   name: string;
@@ -73,3 +73,16 @@ export const themePresets: readonly ThemePreset[] = [
     roundness: 25,
   },
 ];
+
+const themeKeys = Object.keys(defaultTheme) as Array<keyof ThemeValues>;
+
+export function resolveThemePresetName(theme: Pick<ThemeState, 'values' | 'roundness' | 'preset'>) {
+  const named = themePresets.find(({ name }) => name === theme.preset);
+  if (named) return named.name;
+
+  const exact = themePresets.find((candidate) =>
+    candidate.roundness === theme.roundness
+      && themeKeys.every((key) => candidate.values[key].toUpperCase() === theme.values[key].toUpperCase()),
+  );
+  return exact?.name ?? '';
+}
