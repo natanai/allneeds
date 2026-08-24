@@ -41,8 +41,12 @@ if (JSON.stringify(precachePaths) !== JSON.stringify(publicPaths)) {
   fail(`the precache manifest differs from dist (missing: ${missing.join(', ') || 'none'}; extra: ${extra.join(', ') || 'none'}).`);
 }
 const navigationHandler = worker.match(/if \(request\.mode === 'navigate'\) \{([\s\S]*?)\n  \}/)?.[1] ?? '';
-if (!navigationHandler.includes('cache.match(fallbackUrl') || navigationHandler.includes('await fetch(request)')) {
-  fail('navigation requests are not served from the cached app shell before the network.');
+const navigationFetchIndex = navigationHandler.indexOf('await fetch(request)');
+const navigationFallbackIndex = navigationHandler.indexOf('cache.match(fallbackUrl');
+if (navigationFetchIndex < 0
+  || navigationFallbackIndex < 0
+  || navigationFetchIndex > navigationFallbackIndex) {
+  fail('online navigation does not prefer the current deployment before falling back to the cached app shell.');
 }
 if (!worker.includes("cache.match(request, { ignoreVary: true })")
   || !worker.includes("cache.match(fallbackUrl, { ignoreVary: true })")) {

@@ -19,7 +19,7 @@ const files = (await listFiles(dist))
   .sort((a, b) => a.localeCompare(b));
 const publicPaths = files.map((path) => `./${relative(dist, path).split(sep).join('/')}`);
 const versionHash = createHash('sha256');
-versionHash.update('worker-strategy:cache-first-app-shell-v3-ignore-vary');
+versionHash.update('worker-strategy:network-first-navigation-v4-ignore-vary');
 
 for (const path of files) {
   versionHash.update(relative(dist, path));
@@ -64,10 +64,14 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const shell = await cache.match(fallbackUrl, { ignoreVary: true });
-      if (shell) return shell;
-      return fetch(request);
+      try {
+        return await fetch(request);
+      } catch (error) {
+        const cache = await caches.open(CACHE_NAME);
+        const shell = await cache.match(fallbackUrl, { ignoreVary: true });
+        if (shell) return shell;
+        throw error;
+      }
     })());
     return;
   }

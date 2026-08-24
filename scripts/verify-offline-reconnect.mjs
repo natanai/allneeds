@@ -1,4 +1,6 @@
 import { chromium } from '@playwright/test';
+import { readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { preview } from 'vite';
 
 const host = '127.0.0.1';
@@ -58,6 +60,20 @@ try {
   await page.goto(`${origin}/?diagnostics=1`);
   await expectShell(page, 'Home');
   await page.locator('html[data-offline-cache="ready"]').waitFor({ timeout: 20_000 });
+
+  const indexPath = resolve('dist/index.html');
+  const deployedIndex = await readFile(indexPath, 'utf8');
+  try {
+    await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
+    await expectShell(page, 'Home');
+    invariant(
+      await page.locator('html').getAttribute('data-deployment-probe') === 'fresh',
+      'An online refresh remained on the older cached app shell instead of the current deployment.',
+    );
+  } finally {
+    await writeFile(indexPath, deployedIndex);
+  }
 
   await page.goto(`${origin}/needs/love-caring`);
   await expectShell(page, 'Need for love/caring');
