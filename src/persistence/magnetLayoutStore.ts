@@ -58,7 +58,7 @@ function readRawState(key: string, storage: StorageReader): ReadableMagnetBoardS
 
 export function readMagnetPlayPreference(
   key: string,
-  fallback = false,
+  fallback = true,
   storage: StorageReader = window.localStorage,
 ) {
   const stored = readRawState(key, storage);
