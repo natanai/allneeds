@@ -5,8 +5,20 @@ import { describe, expect, it } from 'vitest';
 const magnetCss = readFileSync(new URL('./MagnetBoard.module.css', import.meta.url), 'utf8');
 
 function ruleBody(selector: string) {
-  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return magnetCss.match(new RegExp(`${escaped}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? '';
+  const marker = `${selector} {`;
+  const selectorStart = magnetCss.indexOf(marker);
+  if (selectorStart < 0) return '';
+
+  const bodyStart = selectorStart + marker.length;
+  let depth = 1;
+  for (let index = bodyStart; index < magnetCss.length; index += 1) {
+    const character = magnetCss[index];
+    if (character === '{') depth += 1;
+    if (character !== '}') continue;
+    depth -= 1;
+    if (depth === 0) return magnetCss.slice(bodyStart, index);
+  }
+  return '';
 }
 
 describe('magnet theme styling', () => {
