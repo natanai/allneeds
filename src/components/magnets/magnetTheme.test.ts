@@ -14,4 +14,16 @@ describe('magnet theme styling', () => {
     expect(ruleBody('.nav')).toContain('var(--corner-scale)');
     expect(ruleBody('.nav .magnet')).toContain('var(--corner-scale)');
   });
+
+  it('keeps navigation clicks and hover states on the shared magnet interaction styling', () => {
+    expect(magnetCss).not.toContain('.nav .magnet:hover');
+    expect(magnetCss).not.toContain('.nav .magnet:active');
+    expect(magnetCss).not.toContain(".nav .magnet[data-picked-up='true']");
+    expect(magnetCss).not.toContain(".nav [data-magnet-id='nav-menu'][aria-expanded='true']");
+
+    const activeRule = ruleBody('.nav .active');
+    expect(activeRule).not.toContain('background');
+    expect(activeRule).not.toContain('filter');
+    expect(activeRule).not.toContain('box-shadow');
+  });
 });

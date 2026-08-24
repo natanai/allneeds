@@ -244,31 +244,7 @@
   text-transform: uppercase;
 }
 
-.nav .magnet:hover,
-.nav .magnet:focus-visible {
-  box-shadow: none;
-  filter: drop-shadow(0 12px 0 color-mix(in srgb, var(--outline) 45%, transparent));
-}
-
-.nav .magnet:active {
-  --magnet-lift: 0px;
-  box-shadow: none;
-  filter: drop-shadow(0 12px 0 var(--shadow));
-}
-
-.nav .magnet[data-picked-up='true'] {
-  box-shadow: none;
-  filter: drop-shadow(0 20px 9px rgba(17, 8, 31, 0.24)) saturate(1.04) brightness(1.025);
-}
-
 .nav .active {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--sky) 88%, #fff 12%) 0%,
-    color-mix(in srgb, var(--sky) 70%, var(--lavender) 30%) 100%
-  );
-  box-shadow: inset 0 -10px 0 color-mix(in srgb, var(--outline) 34%, transparent);
-  filter: drop-shadow(0 12px 0 color-mix(in srgb, var(--outline) 62%, transparent));
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -287,11 +263,6 @@
 .nav [data-magnet-id='nav-menu'] .label,
 .nav [data-magnet-id='nav-home'] .label {
   display: none;
-}
-
-.nav [data-magnet-id='nav-menu'][aria-expanded='true'] {
-  background: color-mix(in srgb, var(--gold) 88%, #fff 12%);
-  box-shadow: inset 0 -8px 0 color-mix(in srgb, var(--outline) 18%, transparent);
 }
 
 .nav [data-magnet-id='nav-customizer'] .label {
