@@ -255,7 +255,6 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const [orientationLock, setOrientationLock] = useState(detectOrientationLock);
   const swatchDrag = useRef<SwatchDrag | null>(null);
   const suppressSwatchClick = useRef(false);
-  const nativePickers = useRef<Partial<Record<keyof ThemeValues, HTMLInputElement | null>>>({});
   const panelRef = useDialogFocus<HTMLElement>({ open: true, onClose, modal: false });
 
   useEffect(() => {
@@ -279,12 +278,11 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     setRoundness(match.roundness);
   }
 
-  function beginSwatchDrag(event: ReactPointerEvent<HTMLButtonElement>, key: keyof ThemeValues) {
+  function beginSwatchDrag(event: ReactPointerEvent<HTMLInputElement>, key: keyof ThemeValues) {
     if (event.button !== 0) return;
     const startHex = values[key];
     const startHsl = hexToHsl(startHex);
     if (!startHsl) return;
-    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
     swatchDrag.current = {
       key,
       pointerId: event.pointerId,
@@ -297,13 +295,16 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     };
   }
 
-  function moveSwatch(event: ReactPointerEvent<HTMLButtonElement>) {
+  function moveSwatch(event: ReactPointerEvent<HTMLInputElement>) {
     const drag = swatchDrag.current;
     if (!drag || event.pointerId !== drag.pointerId) return;
     const deltaX = event.clientX - drag.startX;
     const deltaY = event.clientY - drag.startY;
     if (!drag.moved && Math.hypot(deltaX, deltaY) < 6) return;
-    drag.moved = true;
+    if (!drag.moved) {
+      drag.moved = true;
+      try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
+    }
     const nextHex = colorFromDrag(drag.startHsl, deltaX, deltaY, event.shiftKey);
     if (nextHex === drag.previewHex) return;
     drag.previewHex = nextHex;
@@ -311,30 +312,15 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     setPreset('');
   }
 
-  function finishSwatchDrag(event: ReactPointerEvent<HTMLButtonElement>, commit: boolean) {
+  function finishSwatchDrag(event: ReactPointerEvent<HTMLInputElement>, commit: boolean) {
     const drag = swatchDrag.current;
     if (!drag || event.pointerId !== drag.pointerId) return;
-    try { event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
+    if (drag.moved) {
+      try { event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
+    }
     if (!commit) setValues((current) => ({ ...current, [drag.key]: drag.startHex }));
-    suppressSwatchClick.current = drag.moved || !commit;
+    suppressSwatchClick.current = commit && drag.moved;
     swatchDrag.current = null;
-  }
-
-  function openNativePicker(key: keyof ThemeValues) {
-    if (suppressSwatchClick.current) {
-      suppressSwatchClick.current = false;
-      return;
-    }
-    const picker = nativePickers.current[key];
-    if (!picker) return;
-    const pickerWithShow = picker as HTMLInputElement & { showPicker?: () => void };
-    if (typeof pickerWithShow.showPicker === 'function') {
-      try {
-        pickerWithShow.showPicker();
-        return;
-      } catch { /* Fall back to click for browsers that reject showPicker here. */ }
-    }
-    picker.click();
   }
 
   function unlockOrientation() {
@@ -432,8 +418,25 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
             {(Object.keys(values) as Array<keyof ThemeValues>).map((key) => (
               <div key={key} className={styles.colorField}>
                 <span className={styles.colorLabel}>{labels[key]}</span>
-                <button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${colorAriaLabels[key]} color. Drag to change it, or tap to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} />
-                <input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} aria-hidden="true" onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} />
+                <input
+                  className={styles.swatch}
+                  type="color"
+                  value={values[key]}
+                  aria-label={`Adjust ${colorAriaLabels[key]} color. Drag to change it, or tap to open the color picker.`}
+                  onPointerDown={(event) => beginSwatchDrag(event, key)}
+                  onPointerMove={moveSwatch}
+                  onPointerUp={(event) => finishSwatchDrag(event, true)}
+                  onPointerCancel={(event) => finishSwatchDrag(event, false)}
+                  onClick={(event) => {
+                    if (!suppressSwatchClick.current) return;
+                    event.preventDefault();
+                    suppressSwatchClick.current = false;
+                  }}
+                  onChange={(event) => {
+                    setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() }));
+                    setPreset('');
+                  }}
+                />
                 <input className={styles.hexInput} key={values[key]} type="text" defaultValue={values[key]} aria-label={colorAriaLabels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} />
               </div>
             ))}
