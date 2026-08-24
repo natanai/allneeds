@@ -64,6 +64,28 @@ export function limitVector(x: number, y: number, maximum: number): Vector {
   return { x: x * scale, y: y * scale };
 }
 
+/**
+ * Converts a movement measured in visual-viewport pixels into the board's
+ * layout coordinate space. Mobile Safari can change the visual viewport while
+ * a long board is scrolled, so drag math must depend on pointer deltas rather
+ * than mixing client coordinates with absolute board positions.
+ */
+export function scalePointerDelta(
+  x: number,
+  y: number,
+  layoutWidth: number,
+  layoutHeight: number,
+  visualWidth: number,
+  visualHeight: number,
+): Vector {
+  const scaleX = visualWidth > 0 ? layoutWidth / visualWidth : 1;
+  const scaleY = visualHeight > 0 ? layoutHeight / visualHeight : 1;
+  return {
+    x: x * scaleX,
+    y: y * scaleY,
+  };
+}
+
 export function getAabbCollision(a: CollisionBox, b: CollisionBox): AabbCollision | null {
   const overlapX = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
   const overlapY = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);

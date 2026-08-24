@@ -119,7 +119,7 @@ test('saved customizer settings survive reload without opening the customizer', 
 
   await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
   const customizer = page.getByRole('dialog', { name: 'Customizer' });
-  await expect(customizer.getByRole('textbox', { name: 'Canvas glow' })).toHaveValue('#123456');
+  await expect(customizer.getByRole('textbox', { name: 'Primary emphasis' })).toHaveValue('#123456');
   await expect(customizer.getByLabel('Presets')).toHaveValue('');
 
   const tiltSwitch = customizer.getByRole('switch');
@@ -643,8 +643,8 @@ test.describe('mobile native-shell contracts', () => {
     await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
 
     const customizer = page.getByRole('dialog', { name: 'Customizer' });
-    const swatch = customizer.getByRole('button', { name: /Adjust Canvas glow color/ });
-    const hexField = customizer.getByRole('textbox', { name: 'Canvas glow' });
+    const swatch = customizer.getByRole('button', { name: /Adjust Primary emphasis color/ });
+    const hexField = customizer.getByRole('textbox', { name: 'Primary emphasis' });
     const startingHex = await hexField.inputValue();
     const box = await swatch.boundingBox();
     expect(box).not.toBeNull();

@@ -9,6 +9,7 @@ import {
   orderMagnetsByVisualRows,
   packMagnets,
   placementsOverlap,
+  scalePointerDelta,
   stableHash,
 } from './magnetMath';
 
@@ -121,6 +122,17 @@ describe('magnet math', () => {
     const limited = limitVector(1200, 1600, 1000);
     expect(limited.x).toBeCloseTo(600);
     expect(limited.y).toBeCloseTo(800);
+  });
+
+  it('projects pointer deltas into board layout space without an absolute scroll offset', () => {
+    expect(scalePointerDelta(8, 16, 400, 1000, 320, 800)).toEqual({
+      x: 10,
+      y: 20,
+    });
+    expect(scalePointerDelta(8, 16, 400, 1000, 0, 0)).toEqual({
+      x: 8,
+      y: 16,
+    });
   });
 
   it('finds the shallowest collision axis for a stable response', () => {

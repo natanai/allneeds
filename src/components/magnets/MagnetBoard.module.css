@@ -33,6 +33,10 @@
   cursor: grabbing;
 }
 
+.board[data-pushing='true'] {
+  cursor: grabbing;
+}
+
 .boardToggle {
   position: absolute;
   z-index: 30;
@@ -213,8 +217,15 @@
 }
 
 .need {
+  max-width: calc(100% - 24px);
   padding-inline: 0.9rem;
   background: var(--sky);
+}
+
+.need .label {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .need::before {
