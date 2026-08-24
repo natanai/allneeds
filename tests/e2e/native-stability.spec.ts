@@ -384,6 +384,52 @@ test('content magnet locations survive reload and stay independent across viewpo
   expect(runtimeProblems).toEqual([]);
 });
 
+test('a lifted magnet passes over its neighbors before the drop restores contact', async ({ page }) => {
+  const runtimeProblems = collectRuntimeProblems(page);
+  await page.goto('/feelings');
+  const board = page.getByLabel('Feelings magnet board');
+  await expect(board).toHaveAttribute('data-ready', 'true');
+  const playToggle = board.getByRole('switch');
+  await playToggle.press('Space');
+  await expect(playToggle).toBeChecked();
+
+  const lifted = board.locator('[data-magnet-id]').first();
+  const underneath = board.locator('[data-magnet-id]').nth(5);
+  const liftedBox = await lifted.boundingBox();
+  const underneathBox = await underneath.boundingBox();
+  expect(liftedBox).not.toBeNull();
+  expect(underneathBox).not.toBeNull();
+  const underneathBefore = await relativePosition(board, underneath);
+
+  const startX = liftedBox!.x + liftedBox!.width / 2;
+  const startY = liftedBox!.y + liftedBox!.height / 2;
+  const targetX = underneathBox!.x + underneathBox!.width / 2;
+  const targetY = underneathBox!.y + underneathBox!.height / 2;
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  for (let step = 1; step <= 16; step += 1) {
+    const progress = step / 16;
+    await page.mouse.move(
+      startX + (targetX - startX) * progress,
+      startY + (targetY - startY) * progress,
+    );
+    await page.waitForTimeout(28);
+  }
+  await expect(lifted).toHaveAttribute('data-picked-up', 'true');
+  const underneathWhileHeld = await relativePosition(board, underneath);
+  expect(positionDistance(underneathBefore, underneathWhileHeld)).toBeLessThan(5);
+
+  await page.waitForTimeout(180);
+  await page.mouse.up();
+  await expect(lifted).not.toHaveAttribute('data-picked-up', 'true');
+  await page.waitForTimeout(900);
+  const underneathAfterDrop = await relativePosition(board, underneath);
+  const dropResponse = positionDistance(underneathWhileHeld, underneathAfterDrop);
+  expect(dropResponse).toBeGreaterThan(2);
+  expect(dropResponse).toBeLessThan(50);
+  expect(runtimeProblems).toEqual([]);
+});
+
 test('modal surfaces own keyboard focus and restore it on Escape', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   await page.goto('/observations');
@@ -437,6 +483,92 @@ test('the precached production shell serves deep routes while offline', async ({
 
 test.describe('mobile native-shell contracts', () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test('Play mode keeps a touch drag on the magnet instead of scrolling the page', async ({ page }) => {
+    const runtimeProblems = collectRuntimeProblems(page);
+    await page.goto('/feelings');
+    const board = page.getByLabel('Feelings magnet board');
+    await expect(board).toHaveAttribute('data-ready', 'true');
+    const playToggle = board.getByRole('switch');
+    await playToggle.press('Space');
+    await expect(playToggle).toBeChecked();
+
+    const magnet = board.locator('[data-magnet-id]').nth(10);
+    await magnet.scrollIntoViewIfNeeded();
+    await expect(magnet).toHaveCSS('touch-action', 'none');
+    const before = await relativePosition(board, magnet);
+    const magnetBox = await magnet.boundingBox();
+    const boardBox = await board.boundingBox();
+    expect(magnetBox).not.toBeNull();
+    expect(boardBox).not.toBeNull();
+
+    const startX = magnetBox!.x + magnetBox!.width / 2;
+    const startY = magnetBox!.y + magnetBox!.height / 2;
+    const direction = startY > 150 ? -1 : 1;
+    const targetY = Math.min(
+      boardBox!.y + boardBox!.height - magnetBox!.height / 2 - 6,
+      Math.max(boardBox!.y + magnetBox!.height / 2 + 6, startY + direction * 72),
+    );
+    const targetX = Math.min(
+      boardBox!.x + boardBox!.width - magnetBox!.width / 2 - 6,
+      startX + 34,
+    );
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    const session = await page.context().newCDPSession(page);
+
+    try {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: startX, y: startY, id: 1 }],
+      });
+      await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+
+      for (let step = 1; step <= 8; step += 1) {
+        const progress = step / 8;
+        await session.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [{
+            x: startX + (targetX - startX) * progress,
+            y: startY + (targetY - startY) * progress,
+            id: 1,
+          }],
+        });
+        await page.waitForTimeout(18);
+      }
+
+      const during = await relativePosition(board, magnet);
+      expect(positionDistance(before, during)).toBeGreaterThan(24);
+      expect(Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore)).toBeLessThanOrEqual(1);
+
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: [],
+      });
+      await expect(magnet).not.toHaveAttribute('data-picked-up', 'true');
+      await expect(magnet).not.toHaveAttribute('data-dragging', 'true');
+
+      const tapTarget = board.getByRole('link', { name: 'Hurt', exact: true });
+      const tapBox = await tapTarget.boundingBox();
+      expect(tapBox).not.toBeNull();
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{
+          x: tapBox!.x + tapBox!.width / 2,
+          y: tapBox!.y + tapBox!.height / 2,
+          id: 2,
+        }],
+      });
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: [],
+      });
+      await expect(page).toHaveURL(/\/feelings\/hurt$/);
+    } finally {
+      await session.detach();
+    }
+
+    expect(runtimeProblems).toEqual([]);
+  });
 
   test('mobile keeps the editor first, avoids duplicate controls, and never overflows', async ({ page }) => {
     const runtimeProblems = collectRuntimeProblems(page);

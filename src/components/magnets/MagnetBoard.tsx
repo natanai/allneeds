@@ -83,6 +83,15 @@ type DragState = {
   moved: boolean;
 };
 
+type DropWave = {
+  sourceId: string;
+  x: number;
+  y: number;
+  startedAt: number;
+  strength: number;
+  reached: Set<string>;
+};
+
 type MagnetBoardProps = {
   items: MagnetBoardItem[];
   playMode: boolean;
@@ -96,14 +105,23 @@ type MagnetBoardProps = {
 
 const DRAG_THRESHOLD = 6;
 const CLICK_SUPPRESSION_MS = 320;
-const MAX_FLING_SPEED = 880;
-const LINEAR_DRAG = 3.6;
-const EDGE_RESTITUTION = 0.18;
-const COLLISION_RESTITUTION = 0.24;
-const SURFACE_RADIUS = 195;
-const SURFACE_COUPLING = 0.32;
-const WOBBLE_SPRING = 52;
-const WOBBLE_DAMPING = 7.4;
+const MAX_POINTER_SPEED = 560;
+const RELEASE_VELOCITY_SCALE = 0.22;
+const MAX_RELEASE_SPEED = 150;
+const RELEASE_DEAD_ZONE = 10;
+const LINEAR_DRAG = 2.4;
+const EDGE_RESTITUTION = 0.1;
+const COLLISION_RESTITUTION = 0.07;
+const SURFACE_RADIUS = 170;
+const SURFACE_COUPLING = 0.14;
+const LIFTED_CLEARANCE = 22;
+const LIFTED_CLEARING_ACCELERATION = 16;
+const LIFTED_NEIGHBOR_MAX_SPEED = 7;
+const REST_CONTACT_CORRECTION = 0.2;
+const DROP_WAVE_SPEED = 235;
+const DROP_WAVE_IMPULSE = 9;
+const WOBBLE_SPRING = 34;
+const WOBBLE_DAMPING = 6.8;
 
 function clamp(value: number, min: number, max: number) {
   if (min > max) return min;
@@ -152,6 +170,7 @@ export function MagnetBoard({
   const suppressClickUntilRef = useRef(new Map<string, number>());
   const pointerFieldRef = useRef({ active: false, x: 0, y: 0 });
   const tiltFieldRef = useRef({ x: 0, y: 0, baselineGamma: null as number | null, baselineBeta: null as number | null });
+  const dropWavesRef = useRef<DropWave[]>([]);
   const motionDirtyRef = useRef(false);
   const settledSinceRef = useRef(0);
   const lastCollisionRippleRef = useRef(0);
@@ -359,7 +378,7 @@ export function MagnetBoard({
         mass: clamp((placement.width * placement.height) / 3_400, 0.75, 3.2),
         wobble: canReuseCurrent ? previous?.wobble ?? 0 : 0,
         wobbleVelocity: canReuseCurrent ? previous?.wobbleVelocity ?? 0 : 0,
-        dragging: false,
+        dragging: dragRef.current?.id === item.id,
       };
       next.set(item.id, magnet);
       applyPosition(magnet);
@@ -435,6 +454,7 @@ export function MagnetBoard({
   useEffect(() => {
     const board = boardRef.current;
     if (!board || !playMode) {
+      dropWavesRef.current = [];
       pointerFieldRef.current.active = false;
       magnetsRef.current.forEach((magnet) => {
         magnet.dragging = false;
@@ -463,8 +483,10 @@ export function MagnetBoard({
       let layoutChanged = false;
 
       for (let substep = 0; substep < stepCount; substep += 1) {
+        const liftedId = dragRef.current?.id ?? null;
+        const hasLiftedMagnet = liftedId !== null;
         magnets.forEach((magnet) => {
-          if (!magnet.dragging) {
+          if (!magnet.dragging && magnet.id !== liftedId) {
             if (pointer.active) {
               const dx = magnet.x + magnet.width / 2 - pointer.x;
               const dy = magnet.y + magnet.height / 2 - pointer.y;
@@ -508,6 +530,28 @@ export function MagnetBoard({
           }
         });
 
+        const boardDiagonal = Math.hypot(board.clientWidth, board.clientHeight);
+        dropWavesRef.current.forEach((wave) => {
+          const waveAge = Math.max((time - wave.startedAt) / 1000, 0);
+          const waveRadius = waveAge * DROP_WAVE_SPEED;
+          magnets.forEach((magnet) => {
+            if (magnet.dragging || magnet.id === wave.sourceId || wave.reached.has(magnet.id)) return;
+            const dx = magnet.x + magnet.width / 2 - wave.x;
+            const dy = magnet.y + magnet.height / 2 - wave.y;
+            const distance = Math.max(Math.hypot(dx, dy), 0.001);
+            if (distance > waveRadius) return;
+            wave.reached.add(magnet.id);
+            const falloff = 0.45 + 0.55 * (1 - clamp(distance / Math.max(boardDiagonal, 1), 0, 1));
+            const impulse = DROP_WAVE_IMPULSE * wave.strength * falloff / magnet.mass;
+            magnet.vx += (dx / distance) * impulse;
+            magnet.vy += (dy / distance) * impulse;
+            kickWobble(magnet, impulse * 0.7);
+          });
+        });
+        dropWavesRef.current = dropWavesRef.current.filter((wave) =>
+          time - wave.startedAt < ((boardDiagonal + 80) / DROP_WAVE_SPEED) * 1000,
+        );
+
         for (let first = 0; first < magnets.length; first += 1) {
           const a = magnets[first]!;
           for (let second = first + 1; second < magnets.length; second += 1) {
@@ -519,19 +563,56 @@ export function MagnetBoard({
             const dx = bCenterX - aCenterX;
             const dy = bCenterY - aCenterY;
             const distance = Math.max(Math.hypot(dx, dy), 0.001);
+            const involvesLiftedMagnet = a.dragging
+              || b.dragging
+              || a.id === liftedId
+              || b.id === liftedId;
+
+            if (involvesLiftedMagnet) {
+              const lifted = a.dragging || a.id === liftedId ? a : b;
+              const resting = lifted === a ? b : a;
+              const liftedCenterX = lifted.x + lifted.width / 2;
+              const liftedCenterY = lifted.y + lifted.height / 2;
+              const restingCenterX = resting.x + resting.width / 2;
+              const restingCenterY = resting.y + resting.height / 2;
+              let clearX = restingCenterX - liftedCenterX;
+              let clearY = restingCenterY - liftedCenterY;
+              let clearDistance = Math.hypot(clearX, clearY);
+              if (clearDistance < 0.001) {
+                clearX = lifted.id < resting.id ? -1 : 1;
+                clearY = 0;
+                clearDistance = 1;
+              }
+              const reachX = (lifted.width + resting.width) / 2 + LIFTED_CLEARANCE;
+              const reachY = (lifted.height + resting.height) / 2 + LIFTED_CLEARANCE;
+              const scaledDistance = Math.hypot(clearX / Math.max(reachX, 1), clearY / Math.max(reachY, 1));
+              if (scaledDistance < 1) {
+                const influence = (1 - scaledDistance) ** 2;
+                resting.vx += (clearX / clearDistance) * LIFTED_CLEARING_ACCELERATION * influence * step;
+                resting.vy += (clearY / clearDistance) * LIFTED_CLEARING_ACCELERATION * influence * step;
+                kickWobble(resting, influence * 2.2 * step);
+              }
+              continue;
+            }
+
+            // While a magnet is above the surface, resting magnets stay in a
+            // viscous layer. Their tiny avoidance motion must not cascade
+            // through a tightly packed row as a chain of hard contacts.
+            if (hasLiftedMagnet) continue;
+
             const falloff = distance < SURFACE_RADIUS ? (1 - distance / SURFACE_RADIUS) ** 2 : 0;
 
             if (falloff > 0) {
               const aSpeed = Math.hypot(a.vx, a.vy);
               const bSpeed = Math.hypot(b.vx, b.vy);
               if (aSpeed > 45 && !b.dragging) {
-                const transfer = falloff * SURFACE_COUPLING * (a.dragging ? 0.18 : 1) * step;
+                const transfer = falloff * SURFACE_COUPLING * step;
                 b.vx += (a.vx + (dx / distance) * aSpeed * 0.2) * transfer;
                 b.vy += (a.vy + (dy / distance) * aSpeed * 0.2) * transfer;
                 kickWobble(b, aSpeed * falloff * 0.12 * step);
               }
               if (bSpeed > 45 && !a.dragging) {
-                const transfer = falloff * SURFACE_COUPLING * (b.dragging ? 0.18 : 1) * step;
+                const transfer = falloff * SURFACE_COUPLING * step;
                 a.vx += (b.vx - (dx / distance) * bSpeed * 0.2) * transfer;
                 a.vy += (b.vy - (dy / distance) * bSpeed * 0.2) * transfer;
                 kickWobble(a, -bSpeed * falloff * 0.12 * step);
@@ -545,8 +626,7 @@ export function MagnetBoard({
             const inverseMassTotal = inverseMassA + inverseMassB;
             if (inverseMassTotal === 0) continue;
 
-            const involvesLiftedMagnet = a.dragging || b.dragging;
-            const correction = Math.max(collision.depth - 0.15, 0) * (involvesLiftedMagnet ? 0.075 : 0.42);
+            const correction = Math.max(collision.depth - 0.15, 0) * REST_CONTACT_CORRECTION;
             if (correction > 0) layoutChanged = true;
             a.x -= collision.normalX * correction * (inverseMassA / inverseMassTotal);
             a.y -= collision.normalY * correction * (inverseMassA / inverseMassTotal);
@@ -557,8 +637,9 @@ export function MagnetBoard({
               (b.vx - a.vx) * collision.normalX +
               (b.vy - a.vy) * collision.normalY;
             if (relativeNormalVelocity >= 0) continue;
-            const impulse = -(1 + COLLISION_RESTITUTION) * relativeNormalVelocity / inverseMassTotal
-              * (involvesLiftedMagnet ? 0.1 : 1);
+            const impulse = -(1 + COLLISION_RESTITUTION)
+              * relativeNormalVelocity
+              / inverseMassTotal;
             a.vx -= impulse * inverseMassA * collision.normalX;
             a.vy -= impulse * inverseMassA * collision.normalY;
             b.vx += impulse * inverseMassB * collision.normalX;
@@ -571,6 +652,15 @@ export function MagnetBoard({
               emitRipple((aCenterX + bCenterX) / 2, (aCenterY + bCenterY) / 2, impulse / 700);
             }
           }
+        }
+
+        if (hasLiftedMagnet) {
+          magnets.forEach((magnet) => {
+            if (magnet.dragging || magnet.id === liftedId) return;
+            const limited = limitVector(magnet.vx, magnet.vy, LIFTED_NEIGHBOR_MAX_SPEED);
+            magnet.vx = limited.x;
+            magnet.vy = limited.y;
+          });
         }
       }
 
@@ -644,20 +734,28 @@ export function MagnetBoard({
         const releaseDelay = Math.max((performance.now() - drag.lastTime) / 1000, 0);
         const releaseDecay = Math.exp(-releaseDelay * 9);
         const release = limitVector(
-          drag.releaseVx * releaseDecay,
-          drag.releaseVy * releaseDecay,
-          MAX_FLING_SPEED,
+          drag.releaseVx * releaseDecay * RELEASE_VELOCITY_SCALE,
+          drag.releaseVy * releaseDecay * RELEASE_VELOCITY_SCALE,
+          MAX_RELEASE_SPEED,
         );
-        magnet.vx = Math.abs(release.x) < 14 ? 0 : release.x;
-        magnet.vy = Math.abs(release.y) < 14 ? 0 : release.y;
+        magnet.vx = Math.abs(release.x) < RELEASE_DEAD_ZONE ? 0 : release.x;
+        magnet.vy = Math.abs(release.y) < RELEASE_DEAD_ZONE ? 0 : release.y;
         const speed = Math.hypot(magnet.vx, magnet.vy);
-        kickWobble(magnet, clamp((magnet.vy - magnet.vx * 0.2) * 0.035, -52, 52));
+        kickWobble(magnet, clamp((magnet.vy - magnet.vx * 0.2) * 0.024, -34, 34));
         const centerX = magnet.x + magnet.width / 2;
         const centerY = magnet.y + magnet.height / 2;
+        dropWavesRef.current.push({
+          sourceId: magnet.id,
+          x: centerX,
+          y: centerY,
+          startedAt: performance.now(),
+          strength: 0.65 + (speed / MAX_RELEASE_SPEED) * 0.55,
+          reached: new Set([magnet.id]),
+        });
         emitRipple(
           centerX,
           centerY,
-          0.28 + speed / MAX_FLING_SPEED,
+          0.2 + (speed / MAX_RELEASE_SPEED) * 0.34,
         );
         motionDirtyRef.current = true;
       } else if (cancelled) {
@@ -673,8 +771,12 @@ export function MagnetBoard({
     delete drag.element.dataset.pickedUp;
     if (boardRef.current) delete boardRef.current.dataset.dragging;
     dragRef.current = null;
-    if (drag.element.hasPointerCapture(pointerId)) {
-      drag.element.releasePointerCapture(pointerId);
+    try {
+      if (drag.element.hasPointerCapture(pointerId)) {
+        drag.element.releasePointerCapture(pointerId);
+      }
+    } catch {
+      // Pointer capture can already be gone after a browser gesture cancel.
     }
     persist();
   }, [emitRipple, persist]);
@@ -698,8 +800,22 @@ export function MagnetBoard({
     };
   }, [completeDrag, playMode]);
 
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board || !playMode) return;
+
+    const keepTouchGestureOnMagnet = (event: TouchEvent) => {
+      if (dragRef.current && event.cancelable) event.preventDefault();
+    };
+
+    board.addEventListener('touchmove', keepTouchGestureOnMagnet, { passive: false });
+    return () => {
+      board.removeEventListener('touchmove', keepTouchGestureOnMagnet);
+    };
+  }, [playMode]);
+
   const handlePointerDown = (event: ReactPointerEvent<MagnetElement>, id: string) => {
-    if (!playMode || event.button !== 0 || dragRef.current) return;
+    if (!playMode || !event.isPrimary || event.button !== 0 || dragRef.current) return;
     const magnet = magnetsRef.current.get(id);
     const board = boardRef.current;
     if (!magnet || !board) return;
@@ -724,8 +840,15 @@ export function MagnetBoard({
       },
       moved: false,
     };
-    event.currentTarget.focus({ preventScroll: true });
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (event.pointerType !== 'touch') {
+      event.currentTarget.focus({ preventScroll: true });
+    }
+    if (event.pointerType !== 'mouse' && event.cancelable) event.preventDefault();
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Window-level pointer cleanup still completes the drag if capture is unavailable.
+    }
   };
 
   const handlePointerMove = (event: ReactPointerEvent<MagnetElement>) => {
@@ -738,6 +861,7 @@ export function MagnetBoard({
     }
     const magnet = magnetsRef.current.get(drag.id);
     if (!magnet) return;
+    magnet.dragging = true;
     const distance = Math.hypot(
       event.clientX - drag.startPointer.x,
       event.clientY - drag.startPointer.y,
@@ -748,7 +872,7 @@ export function MagnetBoard({
       drag.element.dataset.dragging = 'true';
       board.dataset.dragging = 'true';
     }
-    event.preventDefault();
+    if (event.cancelable) event.preventDefault();
     const rect = board.getBoundingClientRect();
     const nextX = clamp(event.clientX - rect.left - drag.offset.x, 0, board.clientWidth - magnet.width);
     const nextY = clamp(event.clientY - rect.top - drag.offset.y, 0, board.clientHeight - magnet.height);
@@ -757,7 +881,7 @@ export function MagnetBoard({
     const pointerVelocity = limitVector(
       (event.clientX - drag.lastPointer.x) / elapsed,
       (event.clientY - drag.lastPointer.y) / elapsed,
-      MAX_FLING_SPEED,
+      MAX_POINTER_SPEED,
     );
     drag.releaseVx = drag.releaseVx * 0.38 + pointerVelocity.x * 0.62;
     drag.releaseVy = drag.releaseVy * 0.38 + pointerVelocity.y * 0.62;
@@ -859,6 +983,7 @@ export function MagnetBoard({
           onPointerMove: handlePointerMove,
           onPointerUp: finishDrag,
           onPointerCancel: finishDrag,
+          onLostPointerCapture: finishDrag,
           onDragStart: (event: ReactDragEvent<MagnetElement>) => event.preventDefault(),
           onClick: (event: ReactMouseEvent<MagnetElement>) => handleClick(event, item.id),
         };
