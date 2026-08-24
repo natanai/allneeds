@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
-import magnetCss from './MagnetBoard.module.css?raw';
+const magnetCss = readFileSync(new URL('./MagnetBoard.module.css', import.meta.url), 'utf8');
 
 function ruleBody(selector: string) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
