@@ -17,8 +17,15 @@ import { resolveThemePresetName, themePresets } from './themePresets';
 import styles from './CustomizerPanel.module.css';
 
 const labels: Record<keyof ThemeValues, string> = {
-  plum: 'Canvas glow', lavender: 'Panel mist', surface: 'Raised surface', ink: 'Ink', inkSoft: 'Soft ink',
-  rose: 'Blush accent', mint: 'Mint accent', gold: 'Sunbeam accent', peach: 'Journal accent', sky: 'Sky accent', outline: 'Outline',
+  plum: 'Primary emphasis',
+  lavender: 'Quiet emphasis',
+  ink: 'Primary foreground',
+  inkSoft: 'Secondary foreground',
+  rose: 'Action emphasis',
+  mint: 'Positive emphasis',
+  gold: 'Attention emphasis',
+  sky: 'Selection emphasis',
+  outline: 'Structural contrast',
 };
 
 const navLabels: Array<[NavItemId, string]> = [
