@@ -205,6 +205,15 @@ function NavigationIcon() {
   );
 }
 
+function DeviceSectionIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="7" y="3" width="10" height="18" rx="2.2" />
+      <path d="M10 17.5h4" />
+    </svg>
+  );
+}
+
 function TiltIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -275,7 +284,6 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     const startHex = values[key];
     const startHsl = hexToHsl(startHex);
     if (!startHsl) return;
-    event.preventDefault();
     try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
     swatchDrag.current = {
       key,
@@ -294,10 +302,11 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     if (!drag || event.pointerId !== drag.pointerId) return;
     const deltaX = event.clientX - drag.startX;
     const deltaY = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(deltaX, deltaY) < 6) return;
+    drag.moved = true;
     const nextHex = colorFromDrag(drag.startHsl, deltaX, deltaY, event.shiftKey);
     if (nextHex === drag.previewHex) return;
     drag.previewHex = nextHex;
-    drag.moved = true;
     setValues((current) => ({ ...current, [drag.key]: nextHex }));
     setPreset('');
   }
@@ -316,7 +325,16 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
       suppressSwatchClick.current = false;
       return;
     }
-    nativePickers.current[key]?.click();
+    const picker = nativePickers.current[key];
+    if (!picker) return;
+    const pickerWithShow = picker as HTMLInputElement & { showPicker?: () => void };
+    if (typeof pickerWithShow.showPicker === 'function') {
+      try {
+        pickerWithShow.showPicker();
+        return;
+      } catch { /* Fall back to click for browsers that reject showPicker here. */ }
+    }
+    picker.click();
   }
 
   function unlockOrientation() {
@@ -408,14 +426,14 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
           <div className={styles.sectionHeader}>
             <span className={styles.sectionIcon}><PaletteIcon /></span>
             <h2 id="colors-title">Colors</h2>
-            <small>Tap swatch · edit hex</small>
+            <small>Drag swatch · tap for picker</small>
           </div>
           <div className={styles.colors}>
             {(Object.keys(values) as Array<keyof ThemeValues>).map((key) => (
               <div key={key} className={styles.colorField}>
                 <span className={styles.colorLabel}>{labels[key]}</span>
-                <button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${colorAriaLabels[key]} color. Drag to change it, or click to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} />
-                <input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} hidden onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} />
+                <button type="button" className={styles.swatch} style={{ backgroundColor: values[key] }} aria-label={`Adjust ${colorAriaLabels[key]} color. Drag to change it, or tap to open the color picker.`} onPointerDown={(event) => beginSwatchDrag(event, key)} onPointerMove={moveSwatch} onPointerUp={(event) => finishSwatchDrag(event, true)} onPointerCancel={(event) => finishSwatchDrag(event, false)} onClick={() => openNativePicker(key)} />
+                <input ref={(element) => { nativePickers.current[key] = element; }} className={styles.nativePicker} type="color" value={values[key]} tabIndex={-1} aria-hidden="true" onChange={(event) => { setValues((current) => ({ ...current, [key]: event.target.value.toUpperCase() })); setPreset(''); }} />
                 <input className={styles.hexInput} key={values[key]} type="text" defaultValue={values[key]} aria-label={colorAriaLabels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} />
               </div>
             ))}
@@ -439,19 +457,25 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
           </div>
         </section>
 
-        <section className={styles.deviceControls} aria-label="Device controls">
-          <div className={styles.deviceControl} data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}>
-            <span className={styles.deviceIcon}><TiltIcon /></span>
-            <div className={styles.deviceCopy}><h3 id="tilt-title">Device tilt</h3><p id="tilt-description" role="status">{tilt.status}</p></div>
-            <button type="button" className={styles.controlAction} role="switch" aria-label="Device tilt access" aria-checked={tiltPermission.state === 'granted'} aria-describedby="tilt-description" disabled={tilt.disabled} onClick={requestTilt}>{tilt.label}</button>
+        <section className={styles.compactSection} aria-labelledby="device-title">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon}><DeviceSectionIcon /></span>
+            <h2 id="device-title">Device</h2>
           </div>
-          {orientationLock.mobile ? (
-            <div className={styles.deviceControl} data-state={orientationLock.error ? 'error' : orientationLock.pending ? 'pending' : orientationLock.locked ? 'granted' : 'unknown'}>
-              <span className={styles.deviceIcon}><OrientationIcon /></span>
-              <div className={styles.deviceCopy}><h3 id="orientation-lock-title">Orientation lock</h3><p id="orientation-lock-description" role="status">{orientation.status}</p></div>
-              <button type="button" className={styles.controlAction} role="switch" aria-label="Lock screen orientation" aria-checked={orientationLock.locked} aria-describedby="orientation-lock-description" disabled={orientation.disabled} onClick={toggleOrientationLock}>{orientation.label}</button>
+          <div className={styles.deviceControls}>
+            <div className={styles.deviceControl} data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}>
+              <span className={styles.deviceIcon}><TiltIcon /></span>
+              <div className={styles.deviceCopy}><h3 id="tilt-title">Device tilt</h3><p id="tilt-description" role="status">{tilt.status}</p></div>
+              <button type="button" className={styles.controlAction} role="switch" aria-label="Device tilt access" aria-checked={tiltPermission.state === 'granted'} aria-describedby="tilt-description" disabled={tilt.disabled} onClick={requestTilt}>{tilt.label}</button>
             </div>
-          ) : null}
+            {orientationLock.mobile ? (
+              <div className={styles.deviceControl} data-state={orientationLock.error ? 'error' : orientationLock.pending ? 'pending' : orientationLock.locked ? 'granted' : 'unknown'}>
+                <span className={styles.deviceIcon}><OrientationIcon /></span>
+                <div className={styles.deviceCopy}><h3 id="orientation-lock-title">Orientation lock</h3><p id="orientation-lock-description" role="status">{orientation.status}</p></div>
+                <button type="button" className={styles.controlAction} role="switch" aria-label="Lock screen orientation" aria-checked={orientationLock.locked} aria-describedby="orientation-lock-description" disabled={orientation.disabled} onClick={toggleOrientationLock}>{orientation.label}</button>
+              </div>
+            ) : null}
+          </div>
         </section>
 
         <footer className={styles.footer}>
