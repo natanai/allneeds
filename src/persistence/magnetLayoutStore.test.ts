@@ -20,6 +20,11 @@ function memoryStorage(initial: Record<string, string> = {}) {
 }
 
 describe('magnet layout store', () => {
+  it('defaults fresh magnet boards to play mode', () => {
+    const storage = memoryStorage();
+    expect(readMagnetPlayPreference('fresh-board', undefined, storage)).toBe(true);
+  });
+
   it('keeps independent compact and wide arrangements', () => {
     const storage = memoryStorage();
     writeMagnetViewportLayout('feelings', {
