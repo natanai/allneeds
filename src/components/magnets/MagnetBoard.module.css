@@ -17,7 +17,11 @@
 .nav {
   min-height: 4.35rem;
   padding: 1rem 1rem 0.55rem;
-  border-radius: clamp(1.5rem, 4vw, 2.75rem);
+  border-radius: clamp(
+    calc(var(--corner-scale) * 1.5rem),
+    calc(var(--corner-scale) * 4vw),
+    calc(var(--corner-scale) * 2.75rem)
+  );
 }
 
 .playMode {
@@ -225,7 +229,11 @@
 
 .nav .magnet {
   padding: 0.55rem 1rem;
-  border-radius: clamp(2.5rem, 8vw, 3.75rem);
+  border-radius: clamp(
+    calc(var(--corner-scale) * 2.5rem),
+    calc(var(--corner-scale) * 8vw),
+    calc(var(--corner-scale) * 3.75rem)
+  );
   background: color-mix(in srgb, var(--lavender) 65%, #fff 35%);
   box-shadow: none;
   filter: drop-shadow(0 12px 0 var(--shadow));
