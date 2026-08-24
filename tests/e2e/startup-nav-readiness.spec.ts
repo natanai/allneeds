@@ -31,8 +31,8 @@ test('mounts the app beneath an opaque full-screen splash while local resources 
       left: rect.left,
       width: rect.width,
       height: rect.height,
-      viewportWidth: window.innerWidth,
-      viewportHeight: window.innerHeight,
+      viewportWidth: document.documentElement.clientWidth,
+      viewportHeight: document.documentElement.clientHeight,
     };
   });
   expect(coverage.top).toBe(0);
