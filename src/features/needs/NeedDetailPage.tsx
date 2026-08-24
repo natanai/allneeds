@@ -12,6 +12,7 @@ import {
 } from '../../persistence/workflowDrafts';
 import type { NeedStrategyDraft } from '../../persistence/workflowDrafts';
 import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
+import { saveCurrentBrowserToProfile, useBlueskySession } from '../account/blueskyAccount';
 import {
   createCatalogInventoryEntry,
   createPersonalInventoryEntry,
@@ -49,6 +50,7 @@ function emptyNeedStrategyDraft(needSlug: string): NeedStrategyDraft {
 }
 
 export function NeedDetailPage() {
+  const session = useBlueskySession();
   const { slug = '' } = useParams();
   const need = needsBySlug.get(slug);
   const canonicalStrategies = useMemo(
@@ -112,21 +114,30 @@ export function NeedDetailPage() {
     return true;
   };
 
-  const saveCatalogStrategy = (strategy: Strategy) => {
+  const saveCatalogStrategy = async (strategy: Strategy, saveToProfile = false) => {
     const entry = createCatalogInventoryEntry({
       strategy,
       needSlug: need.slug,
       needTitle: `Need for ${need.title}`,
     });
-    persistEntry(
+    const saved = persistEntry(
       entry,
       'You already saved a strategy with this title for this need. Save another copy?',
-      `Saved “${strategy.title}” to your device for ${need.title}.`,
+      `Saved “${strategy.title}” to your device for ${need.title}${saveToProfile ? ' and preparing profile sync' : ''}.`,
     );
+    if (!saved || !saveToProfile) return;
+    try {
+      const result = await saveCurrentBrowserToProfile();
+      setFeedback({ kind: 'success', message: `Saved “${strategy.title}” to your profile and device.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}` });
+    } catch {
+      setFeedback({ kind: 'warning', message: `Saved “${strategy.title}” to this device, but profile sync did not finish.` });
+    }
   };
 
-  const handlePersonalStrategy = (event: FormEvent<HTMLFormElement>) => {
+  const handlePersonalStrategy = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const saveToProfile = submitter?.value === 'profile';
     const title = formDraft.title.trim();
     const description = formDraft.description.trim();
     const selectedNeedSlugs = formDraft.selectedNeeds.filter(Boolean);
@@ -138,6 +149,10 @@ export function NeedDetailPage() {
       return;
     }
     const primaryNeed = needsBySlug.get(selectedNeedSlugs[0] ?? '') ?? need;
+    const requestedVisibility = new FormData(event.currentTarget).get('strategy-visibility');
+    const visibility = session && (requestedVisibility === 'followers' || requestedVisibility === 'public')
+      ? requestedVisibility
+      : 'private';
     const entry = createPersonalInventoryEntry({
       title,
       description,
@@ -145,7 +160,7 @@ export function NeedDetailPage() {
       needTitle: primaryNeed.title,
       firstName: formDraft.firstName,
       location: formDraft.location,
-      visibility: 'private',
+      visibility,
     });
     if (isDuplicateStrategy(inventory, entry.title, entry.needSlugs)
       && !window.confirm('You already saved a strategy with this title for one of the selected needs. Save another copy?')) {
@@ -154,7 +169,15 @@ export function NeedDetailPage() {
     }
     const next = writeInventory([...inventory, entry]);
     setInventory(next);
-    setFormFeedback({ kind: 'success', message: `Saved “${title}” to your device.` });
+    setFormFeedback({ kind: 'success', message: `Saved “${title}” to your device${saveToProfile ? ' and preparing profile sync' : ''}.` });
+    if (saveToProfile) {
+      try {
+        const result = await saveCurrentBrowserToProfile();
+        setFormFeedback({ kind: 'success', message: `Saved “${title}” to your profile and device.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}` });
+      } catch {
+        setFormFeedback({ kind: 'warning', message: `Saved “${title}” to this device, but profile sync did not finish.` });
+      }
+    }
     const empty = emptyNeedStrategyDraft(need.slug);
     formDraftRef.current = empty;
     clearNeedStrategyDraft(need.slug);
@@ -260,11 +283,11 @@ export function NeedDetailPage() {
                           className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction} ${saved ? styles.saved : ''}`}
                           aria-pressed={saved}
                           aria-label={saved ? 'Saved to device' : 'Save to device'}
-                          onClick={() => saveCatalogStrategy(strategy)}
+                          onClick={() => void saveCatalogStrategy(strategy)}
                         >
                           Device
                         </button>
-                        <button type="button" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} aria-label="Save to profile" disabled>Profile</button>
+                        <button type="button" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} aria-label="Save to profile" disabled={!session} onClick={() => void saveCatalogStrategy(strategy, true)}>Profile</button>
                       </div>
                     </article>
                   );
@@ -316,18 +339,18 @@ export function NeedDetailPage() {
             </div>
             <label className={styles.formField}>
               <span>Visibility</span>
-              <span className={styles.visibilityHint}>Choose who can see this strategy when you export or share it. Sign in with Bluesky to enable Followers/Public. While signed out, strategies stay only on this browser.</span>
+              <span className={styles.visibilityHint}>Choose who can see this strategy when you export or share it. {session ? 'Followers/Public can be shared when you save to your profile.' : 'Sign in with Bluesky to enable Followers/Public. While signed out, strategies stay only on this browser.'}</span>
               <span className={styles.inputCard}>
                 <select name="strategy-visibility" defaultValue="private">
                   <option value="private">Private (only on this browser)</option>
-                  <option value="followers" disabled>Followers (Bluesky followers when synced)</option>
-                  <option value="public" disabled>Public</option>
+                  <option value="followers" disabled={!session}>Followers (Bluesky followers when synced)</option>
+                  <option value="public" disabled={!session}>Public</option>
                 </select>
               </span>
             </label>
             <div className={styles.formActions}>
-              <button type="submit" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Device</button>
-              <button type="button" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled>Profile</button>
+              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Device</button>
+              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Profile</button>
             </div>
           </form>
         </div>

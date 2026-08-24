@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
 import { feelings, needs, needsBySlug } from '../../data/catalog';
+import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import {
   clearJournalDraft,
   readJournalDraft,
@@ -14,6 +15,7 @@ import type { JournalComposerDraft } from '../../persistence/workflowDrafts';
 import { readInventory } from '../inventory/inventoryRepository';
 import { createJournalRecord, readJournal, writeJournal } from './journalRepository';
 import type { JournalFeelingRating, JournalRecord } from './journalRepository';
+import { journalHistoryNote } from './journalHistoryNote';
 import styles from './JournalPage.module.css';
 
 type SortOrder = 'newest' | 'oldest' | 'highest' | 'lowest';
@@ -277,6 +279,7 @@ export function JournalPage() {
       try {
         window.localStorage.clear();
         Object.entries(snapshot).forEach(([key, value]) => window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value)));
+        synchronizeCustomizerMirrors(snapshot as Record<string, unknown>);
       } catch (error) {
         window.localStorage.clear();
         Object.entries(previous).forEach(([key, value]) => window.localStorage.setItem(key, value));
@@ -369,9 +372,9 @@ export function JournalPage() {
           <form className={styles.historyControls} onSubmit={(event) => event.preventDefault()}>
             <label className={styles.historySearch}><span className="visually-hidden">Search journal</span><input type="search" placeholder="Search journal" autoComplete="off" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
             <div className={styles.filterGrid} aria-label="Filter journal history">
-              <label><span>Feeling</span><select aria-label="Feeling" value={feelingFilter} onChange={(event) => setFeelingFilter(event.target.value)}><option value="">Any feeling</option>{filterOptions.feelings.map((value) => <option key={value}>{value}</option>)}</select></label>
-              <label><span>Need</span><select aria-label="Need" value={needFilter} onChange={(event) => setNeedFilter(event.target.value)}><option value="">Any need</option>{filterOptions.needs.map((value) => <option key={value} value={value}>{needsBySlug.get(value)?.title ?? value}</option>)}</select></label>
-              <label><span>Tag</span><select aria-label="Tag" value={tagFilter} onChange={(event) => setTagFilter(event.target.value)}><option value="">Any tag</option>{filterOptions.tags.map((value) => <option key={value}>{value}</option>)}</select></label>
+              {filterOptions.feelings.length ? <label><span>Feeling</span><select aria-label="Feeling" value={feelingFilter} onChange={(event) => setFeelingFilter(event.target.value)}><option value="">Any feeling</option>{filterOptions.feelings.map((value) => <option key={value}>{value}</option>)}</select></label> : null}
+              {filterOptions.needs.length ? <label><span>Need</span><select aria-label="Need" value={needFilter} onChange={(event) => setNeedFilter(event.target.value)}><option value="">Any need</option>{filterOptions.needs.map((value) => <option key={value} value={value}>{needsBySlug.get(value)?.title ?? value}</option>)}</select></label> : null}
+              {filterOptions.tags.length ? <label><span>Tag</span><select aria-label="Tag" value={tagFilter} onChange={(event) => setTagFilter(event.target.value)}><option value="">Any tag</option>{filterOptions.tags.map((value) => <option key={value}>{value}</option>)}</select></label> : null}
               <label><span>Date</span><select aria-label="Date" value={dateRange} onChange={(event) => setDateRange(event.target.value as DateRange)}><option value="all">Any time</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option></select></label>
               <label><span>Sort</span><select aria-label="Sort" value={sortOrder} onChange={(event) => setSortOrder(event.target.value as SortOrder)}><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="highest">Highest intensity</option><option value="lowest">Lowest intensity</option></select></label>
             </div>
@@ -386,15 +389,20 @@ export function JournalPage() {
         ) : (
           <div className={styles.entryList}>{filteredEntries.map((entry) => {
             const entryRatings = recordFeelings(entry);
+            const note = journalHistoryNote(entry.notes);
             return (
               <article key={entry.id} className={styles.entry}>
-                <header><div><h3>{entry.emotion || 'Reflection'}</h3><time dateTime={entry.dateISO}>{formatDate(entry.dateISO)}</time></div>{typeof entry.intensity === 'number' ? <span>{entry.intensity}/10</span> : null}</header>
-                {entry.notes ? <p>{entry.notes}</p> : null}
-                <div className={styles.chips}>
-                  {entryRatings.map((item) => <span key={item.feeling}>{item.feeling} · {item.intensity}/10</span>)}
-                  {entry.needs.map((slug) => <span key={slug} data-need>{needsBySlug.get(slug)?.title ?? slug}</span>)}
+                <header><div><h3>{entryRatings.length ? entryRatings.map((item) => `${item.feeling} ${item.intensity}/10`).join(' · ') : 'Reflection'}</h3><time dateTime={entry.dateISO}>{formatDate(entry.dateISO)}</time></div></header>
+                {note?.collapsible ? (
+                  <details className={styles.noteDisclosure}>
+                    <summary><span className={styles.notePreview}>{note.preview}</span><span className={styles.noteToggleClosed}>Read full entry</span><span className={styles.noteToggleOpen}>Show less</span></summary>
+                    <p className={styles.noteFull}>{note.full}</p>
+                  </details>
+                ) : note ? <p>{note.full}</p> : null}
+                {entry.needs.length || entry.tags.length ? <div className={styles.chips}>
+                  {entry.needs.map((slug) => <Link key={slug} to={`/needs/${slug}`} data-need>{needsBySlug.get(slug)?.title ?? slug}</Link>)}
                   {entry.tags.map((tag) => <span key={tag}>#{tag}</span>)}
-                </div>
+                </div> : null}
                 <footer><button type="button" onClick={() => edit(entry)}>Edit</button><button type="button" onClick={() => remove(entry)}>Delete</button></footer>
               </article>
             );

@@ -1,6 +1,9 @@
+import { normalizeHex } from './colorDrag';
+
 export const THEME_KEY = 'nvcApp.theme';
 export const NAV_SETTINGS_KEY = 'nvcApp.navSettings';
 export const NAV_SETTINGS_CHANGED_EVENT = 'allneeds:nav-settings-changed';
+export const THEME_CHANGED_EVENT = 'allneeds:theme-changed';
 
 export const defaultTheme = {
   plum: '#74569B', lavender: '#EDE4FF', ink: '#1F1230', inkSoft: '#392351',
@@ -8,8 +11,21 @@ export const defaultTheme = {
 } as const;
 
 export type ThemeValues = Record<keyof typeof defaultTheme, string>;
+export type ThemeState = {
+  values: ThemeValues;
+  roundness: number;
+  preset: string;
+  updatedAt: number;
+};
 export type NavItemId = 'journal' | 'inventory' | 'observations' | 'fauxFeelings' | 'feelings' | 'needs' | 'bodyCues' | 'journalDashboard';
 export type NavSettings = Record<NavItemId, boolean>;
+
+type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+
+export const themeVariables: Record<keyof ThemeValues, string> = {
+  plum: '--plum', lavender: '--lavender', ink: '--ink', inkSoft: '--ink-soft',
+  rose: '--rose', mint: '--mint', gold: '--gold', sky: '--sky', outline: '--outline',
+};
 
 export const defaultNavSettings: NavSettings = {
   journal: false, inventory: true, observations: true, fauxFeelings: false,
@@ -43,21 +59,149 @@ export const palettes: Array<{ name: string; values: ThemeValues }> = paletteRow
   name, values: { plum, lavender, ink, inkSoft, rose, mint, gold, sky, outline },
 }));
 
-export function readTheme() {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(THEME_KEY) ?? '{}') as { values?: Partial<ThemeValues>; roundness?: number };
-    return { values: { ...defaultTheme, ...parsed.values } as ThemeValues, roundness: typeof parsed.roundness === 'number' ? parsed.roundness : 100 };
-  } catch { return { values: { ...defaultTheme } as ThemeValues, roundness: 100 }; }
+function availableStorage(name: 'localStorage' | 'sessionStorage'): StorageLike | null {
+  if (typeof window === 'undefined') return null;
+  try { return window[name]; } catch { return null; }
 }
 
-export function readNavSettings(): NavSettings {
+function clampRoundness(value: unknown) {
+  const number = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(number) ? Math.min(200, Math.max(0, Math.round(number))) : 100;
+}
+
+function updatedAt(value: unknown) {
+  if (!value || typeof value !== 'object') return 0;
+  const number = (value as { updatedAt?: unknown }).updatedAt;
+  return typeof number === 'number' && Number.isFinite(number) ? number : 0;
+}
+
+function parseStored(storage: StorageLike | null, key: string) {
+  if (!storage) return null;
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(NAV_SETTINGS_KEY) ?? '{}') as { enabled?: Partial<NavSettings> };
-    return { ...defaultNavSettings, ...parsed.enabled };
-  } catch { return { ...defaultNavSettings }; }
+    const raw = storage.getItem(key);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+  } catch { return null; }
+}
+
+function newestStored(local: StorageLike | null, session: StorageLike | null, key: string) {
+  const localValue = parseStored(local, key);
+  const sessionValue = parseStored(session, key);
+  if (!localValue) return sessionValue;
+  if (!sessionValue) return localValue;
+  return updatedAt(sessionValue) > updatedAt(localValue) ? sessionValue : localValue;
+}
+
+export function readTheme(
+  local: StorageLike | null = availableStorage('localStorage'),
+  session: StorageLike | null = availableStorage('sessionStorage'),
+): ThemeState {
+  const parsed = newestStored(local, session, THEME_KEY) as {
+    values?: unknown; roundness?: unknown; preset?: unknown; updatedAt?: unknown;
+  } | null;
+  const rawValues = parsed?.values && typeof parsed.values === 'object' && !Array.isArray(parsed.values)
+    ? parsed.values as Partial<Record<keyof ThemeValues, unknown>>
+    : {};
+  const values = { ...defaultTheme } as ThemeValues;
+  (Object.keys(defaultTheme) as Array<keyof ThemeValues>).forEach((key) => {
+    const normalized = typeof rawValues[key] === 'string' ? normalizeHex(rawValues[key]) : null;
+    if (normalized) values[key] = normalized;
+  });
+  return {
+    values,
+    roundness: clampRoundness(parsed?.roundness),
+    preset: typeof parsed?.preset === 'string' ? parsed.preset : '',
+    updatedAt: updatedAt(parsed),
+  };
+}
+
+function relativeLuminance(hex: string) {
+  const normalized = normalizeHex(hex) ?? '#000000';
+  const channels = [1, 3, 5].map((start) => Number.parseInt(normalized.slice(start, start + 2), 16) / 255)
+    .map((channel) => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+}
+
+export function themeCssValues(theme: Pick<ThemeState, 'values' | 'roundness'>) {
+  const css: Record<string, string> = {};
+  (Object.keys(themeVariables) as Array<keyof ThemeValues>).forEach((key) => {
+    css[themeVariables[key]] = normalizeHex(theme.values[key]) ?? defaultTheme[key];
+  });
+  css['--corner-scale'] = String(clampRoundness(theme.roundness) / 100);
+  css['--shadow'] = `color-mix(in srgb, ${css['--outline']} 55%, transparent)`;
+  css['--btn-bg'] = css['--rose']!;
+  const backgroundLuminance = relativeLuminance(css['--btn-bg']!);
+  const blackRatio = (backgroundLuminance + 0.05) / (relativeLuminance('#111111') + 0.05);
+  const whiteRatio = (relativeLuminance('#FFFFFF') + 0.05) / (backgroundLuminance + 0.05);
+  css['--btn-fg'] = blackRatio >= whiteRatio ? '#111111' : '#FFFFFF';
+  css['--chip-fg'] = css['--btn-fg']!;
+  return css;
+}
+
+export function applyThemeToRoot(
+  theme: Pick<ThemeState, 'values' | 'roundness'>,
+  root: HTMLElement | null = typeof document === 'undefined' ? null : document.documentElement,
+) {
+  if (!root) return;
+  const css = themeCssValues(theme);
+  Object.entries(css).forEach(([property, value]) => root.style.setProperty(property, value));
+  root.dataset.themePreapplied = 'true';
+}
+
+export function writeTheme(theme: Pick<ThemeState, 'values' | 'roundness' | 'preset'>) {
+  const payload: ThemeState = {
+    values: { ...defaultTheme },
+    roundness: clampRoundness(theme.roundness),
+    preset: theme.preset,
+    updatedAt: Date.now(),
+  };
+  (Object.keys(defaultTheme) as Array<keyof ThemeValues>).forEach((key) => {
+    payload.values[key] = normalizeHex(theme.values[key]) ?? defaultTheme[key];
+  });
+  const serialized = JSON.stringify(payload);
+  [availableStorage('localStorage'), availableStorage('sessionStorage')].forEach((storage) => {
+    try { storage?.setItem(THEME_KEY, serialized); } catch { /* The current page still receives the theme. */ }
+  });
+  applyThemeToRoot(payload);
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(THEME_CHANGED_EVENT, { detail: payload }));
+  return payload;
+}
+
+export function readNavSettings(
+  local: StorageLike | null = availableStorage('localStorage'),
+  session: StorageLike | null = availableStorage('sessionStorage'),
+): NavSettings {
+  const parsed = newestStored(local, session, NAV_SETTINGS_KEY) as { enabled?: unknown } | null;
+  const enabled = parsed?.enabled && typeof parsed.enabled === 'object' && !Array.isArray(parsed.enabled)
+    ? parsed.enabled as Partial<NavSettings>
+    : {};
+  const settings = { ...defaultNavSettings };
+  (Object.keys(defaultNavSettings) as NavItemId[]).forEach((key) => {
+    if (typeof enabled[key] === 'boolean') settings[key] = enabled[key];
+  });
+  return settings;
 }
 
 export function writeNavSettings(enabled: NavSettings) {
-  window.localStorage.setItem(NAV_SETTINGS_KEY, JSON.stringify({ enabled: { home: true, customizer: true, ...enabled }, updatedAt: Date.now() }));
-  window.dispatchEvent(new CustomEvent(NAV_SETTINGS_CHANGED_EVENT, { detail: enabled }));
+  const serialized = JSON.stringify({ enabled: { home: true, customizer: true, ...enabled }, updatedAt: Date.now() });
+  [availableStorage('localStorage'), availableStorage('sessionStorage')].forEach((storage) => {
+    try { storage?.setItem(NAV_SETTINGS_KEY, serialized); } catch { /* The current page still receives the settings. */ }
+  });
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(NAV_SETTINGS_CHANGED_EVENT, { detail: enabled }));
+}
+
+export function synchronizeCustomizerMirrors(
+  snapshot: Record<string, unknown>,
+  session: StorageLike | null = availableStorage('sessionStorage'),
+) {
+  if (!session) return;
+  [THEME_KEY, NAV_SETTINGS_KEY].forEach((key) => {
+    try {
+      const value = snapshot[key];
+      if (typeof value === 'string') session.setItem(key, value);
+      else if (value === undefined || value === null) session.removeItem(key);
+      else session.setItem(key, JSON.stringify(value));
+    } catch { /* Reload will still use the restored local snapshot where session storage is unavailable. */ }
+  });
 }

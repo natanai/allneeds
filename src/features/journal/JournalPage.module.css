@@ -29,9 +29,18 @@
 .entry time { display: block; margin-top: .18rem; color: var(--ink-soft); font-size: .73rem; }
 .entry header > span { flex: 0 0 auto; color: var(--ink-soft); font-size: .84rem; font-weight: 700; }
 .entry p { color: var(--ink-soft); line-height: 1.45; overflow-wrap: anywhere; }
+.noteDisclosure { min-width: 0; margin: 0; }
+.noteDisclosure summary { min-width: 0; min-height: 44px; display: block; color: inherit; cursor: pointer; list-style: none; }
+.noteDisclosure summary::-webkit-details-marker { display: none; }
+.notePreview { display: block; margin-bottom: .35rem; color: var(--ink-soft); line-height: 1.45; overflow-wrap: anywhere; }
+.noteFull { margin-top: .55rem !important; }
+.noteToggleClosed, .noteToggleOpen { display: inline-block; color: color-mix(in srgb, var(--ink) 78%, var(--ink-soft) 22%); font-size: .78rem; font-weight: 700; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.noteToggleOpen { display: none; }
+.noteDisclosure[open] .notePreview, .noteDisclosure[open] .noteToggleClosed { display: none; }
+.noteDisclosure[open] .noteToggleOpen { display: inline-block; }
 .chips { display: flex; flex-wrap: wrap; gap: .32rem; }
-.chips span { min-height: 32px; padding: .24rem .54rem; display: inline-flex; align-items: center; border: 1px solid color-mix(in srgb, var(--outline) 13%, transparent); border-radius: var(--radius-pill); background: color-mix(in srgb, #fff 88%, var(--lavender) 12%); font-size: .8rem; font-weight: 650; }
-.chips span[data-need] { background: color-mix(in srgb, #fff 82%, var(--mint) 18%); }
+.chips :is(span, a) { min-height: 32px; padding: .24rem .54rem; display: inline-flex; align-items: center; border: 1px solid color-mix(in srgb, var(--outline) 13%, transparent); border-radius: var(--radius-pill); background: color-mix(in srgb, #fff 88%, var(--lavender) 12%); color: var(--ink); font-size: .8rem; font-weight: 650; text-decoration: none; }
+.chips :is(span, a)[data-need] { background: color-mix(in srgb, #fff 82%, var(--mint) 18%); }
 .entry footer { display: flex; justify-content: flex-end; gap: .4rem; }
 .entry footer button { min-height: 40px; padding: .38rem .62rem; border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent); border-radius: var(--radius-md); background: #fff; color: var(--ink); font-weight: 700; cursor: pointer; }
 .entry footer button:last-child { background: color-mix(in srgb, #fff 60%, var(--rose) 40%); }

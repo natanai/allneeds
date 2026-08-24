@@ -7,9 +7,19 @@ import { remainingBootGateMs } from './app/bootTiming';
 import { preloadAppAssets } from './app/preloadAppAssets';
 import { registerServiceWorker } from './app/registerServiceWorker';
 import { markAppReady, startUxMetrics } from './app/uxMetrics';
+import { initializeBlueskyForCurrentPage } from './features/account/blueskyAccount';
+import { applyThemeToRoot, readTheme, THEME_CHANGED_EVENT, THEME_KEY } from './features/customizer/customizerSettings';
 import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/global.css';
+
+const applyStoredTheme = () => applyThemeToRoot(readTheme());
+applyStoredTheme();
+window.addEventListener(THEME_CHANGED_EVENT, applyStoredTheme);
+window.addEventListener('storage', (event) => {
+  if (!event.key || event.key === THEME_KEY) applyStoredTheme();
+});
+initializeBlueskyForCurrentPage();
 
 const root = document.getElementById('root');
 

@@ -7,7 +7,7 @@ A local, parallel React rebuild of [allneeds.app](https://allneeds.app), preserv
 - `natanai/nvc-app` is the production reference implementation. It is **read-only** for V2 work.
 - This checkout at `C:\allneedsV2` is the V2 comparison workspace. It intentionally has no Git metadata and is not connected to a remote repository.
 
-Production and the online `natanai/allneeds` work can continue changing independently. Nothing in this directory is committed, pushed, or opened as a pull request unless that is explicitly requested later.
+Production and the online `natanai/allneeds` work can continue changing independently. This local checkout remains the comparison and test source; publishing happens only when explicitly requested.
 
 ## Stack
 
@@ -20,7 +20,7 @@ Production and the online `natanai/allneeds` work can continue changing independ
 - Playwright
 - Static GitHub Pages deployment
 
-Personal reflection data stays in the browser. The optional shared strategy feed reads the public allneeds backend through a development-only proxy; saving a feed item in this local build writes only to local browser storage.
+Personal reflection data stays in the browser. The optional shared strategy feed reads the allneeds backend; saving a feed item always writes to local browser storage and then best-effort updates its shared add count. Bluesky profile sync is opt-in and performs no account work until sign-in or a previously active production session requires it.
 
 ## Local development
 
@@ -45,7 +45,7 @@ production-browser regression layers together with `pnpm check:all`.
 
 See [`docs/local-testing.md`](docs/local-testing.md) for the complete smoke-test checklist, production preview commands, local-data reset steps, and side-by-side comparison workflow.
 
-See [`docs/parity-status.md`](docs/parity-status.md) for the full public-route matrix, canonical snapshot checks, and the one intentional localhost-only OAuth boundary.
+See [`docs/parity-status.md`](docs/parity-status.md) for the full public-route matrix, canonical snapshot checks, and the OAuth origin boundary for local/GitHub Pages previews.
 
 ## Architecture
 

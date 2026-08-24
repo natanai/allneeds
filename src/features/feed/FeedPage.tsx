@@ -5,6 +5,7 @@ import {
   readSharedFeedResources,
 } from '../../app/appResources';
 import type { SharedFeedStrategy } from '../../app/appResources';
+import { notifySharedStrategyAdded, useBlueskySession } from '../account/blueskyAccount';
 import {
   createSharedInventoryEntry,
   inventoryHasStrategy,
@@ -50,6 +51,7 @@ function initialFeed(scope: string, sort: string) {
 }
 
 export function FeedPage() {
+  const session = useBlueskySession();
   const [scope, setScope] = useState('public');
   const [sort, setSort] = useState('recent');
   const [feed, setFeed] = useState(() => initialFeed('public', 'recent'));
@@ -75,7 +77,11 @@ export function FeedPage() {
     return () => { cancelled = true; };
   }, [scope, sort]);
 
-  function save(strategy: SharedFeedStrategy) {
+  useEffect(() => {
+    if (!session && scope === 'follows') setScope('public');
+  }, [scope, session]);
+
+  async function save(strategy: SharedFeedStrategy) {
     const strategyId = String(strategy.id);
     const current = readInventory();
     if (inventoryHasStrategy(current, strategyId)) {
@@ -93,7 +99,9 @@ export function FeedPage() {
     });
     writeInventory([...current, entry]);
     setSavedIds((values) => new Set(values).add(strategyId.toLocaleLowerCase()));
-    setStatusOverride('Saved to your inventory. Shared add count could not be updated from this localhost build.');
+    setStatusOverride('Saved to your inventory.');
+    try { await notifySharedStrategyAdded(strategyId); }
+    catch { setStatusOverride('Saved to your inventory. Shared add count could not be updated.'); }
   }
 
   const status = statusOverride
@@ -105,11 +113,11 @@ export function FeedPage() {
 
       <section className={styles.controls} aria-label="Shared strategy filters">
         <div className={styles.controlRow}>
-          <label><span>Show</span><select value={scope} onChange={(event) => setScope(event.target.value)}><option value="follows" disabled>From people you follow</option><option value="public">All public strategies</option></select></label>
+          <label><span>Show</span><select value={scope} onChange={(event) => setScope(event.target.value)}><option value="follows" disabled={!session}>From people you follow</option><option value="public">All public strategies</option></select></label>
           <label><span>Sort by</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recent">Most recent</option><option value="popular">Most added</option></select></label>
         </div>
         {status ? <p className={styles.status} role="status">{status}</p> : null}
-        <p className={styles.authHint}>Following requires Bluesky sign-in in Menu → Account &amp; data.</p>
+        <p className={styles.authHint}>{session ? `Following feed available${session.handle ? ` for @${session.handle.replace(/^@/, '')}` : ''}.` : 'Following requires Bluesky sign-in in Menu → Account & data.'}</p>
       </section>
 
       <section className={styles.feed} aria-label="Shared strategies">

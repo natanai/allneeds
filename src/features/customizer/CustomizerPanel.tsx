@@ -8,7 +8,7 @@ import {
   palettes,
   readNavSettings,
   readTheme,
-  THEME_KEY,
+  writeTheme,
   writeNavSettings,
   type NavItemId,
   type ThemeValues,
@@ -19,11 +19,6 @@ import styles from './CustomizerPanel.module.css';
 const labels: Record<keyof ThemeValues, string> = {
   plum: 'Canvas glow', lavender: 'Panel mist', ink: 'Ink', inkSoft: 'Soft ink',
   rose: 'Blush accent', mint: 'Mint accent', gold: 'Sunbeam accent', sky: 'Sky accent', outline: 'Outline',
-};
-
-const variables: Record<keyof ThemeValues, string> = {
-  plum: '--plum', lavender: '--lavender', ink: '--ink', inkSoft: '--ink-soft',
-  rose: '--rose', mint: '--mint', gold: '--gold', sky: '--sky', outline: '--outline',
 };
 
 const navLabels: Array<[NavItemId, string]> = [
@@ -45,25 +40,49 @@ type SwatchDrag = {
   moved: boolean;
 };
 
+type TiltPermissionState = {
+  available: boolean;
+  supported: boolean;
+  state: 'unknown' | 'granted' | 'denied';
+  pending: boolean;
+};
+
+function detectTiltPermission(): TiltPermissionState {
+  const orientation = typeof window === 'undefined' ? undefined : window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+    requestPermission?: () => Promise<'granted' | 'denied'>;
+  };
+  const available = typeof orientation !== 'undefined';
+  const supported = available && typeof orientation.requestPermission === 'function';
+  return { available, supported, state: available && !supported ? 'granted' : 'unknown', pending: false };
+}
+
+function tiltPresentation(tilt: TiltPermissionState) {
+  if (!tilt.available) return { label: 'Unavailable', status: 'Tilt controls are not supported on this device.', disabled: true };
+  if (tilt.pending) return { label: 'Requesting…', status: 'Waiting for device permission…', disabled: true };
+  if (tilt.state === 'granted') return {
+    label: 'On',
+    status: tilt.supported ? 'Device tilt control is active.' : 'Tilt responds automatically.',
+    disabled: !tilt.supported,
+  };
+  if (tilt.state === 'denied') return { label: 'Request again', status: 'Permission denied. Tap to try again.', disabled: false };
+  return { label: 'Request permission', status: 'Request permission to let magnets follow your device tilt.', disabled: false };
+}
+
 export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const initial = readTheme();
   const [values, setValues] = useState<ThemeValues>(initial.values);
   const [roundness, setRoundness] = useState(initial.roundness);
-  const [preset, setPreset] = useState('');
+  const [preset, setPreset] = useState(initial.preset);
   const [navSettings, setNavSettings] = useState(readNavSettings);
-  const [tiltStatus, setTiltStatus] = useState('Device tilt is used automatically when the browser allows it.');
+  const [tiltPermission, setTiltPermission] = useState(detectTiltPermission);
   const swatchDrag = useRef<SwatchDrag | null>(null);
   const suppressSwatchClick = useRef(false);
   const nativePickers = useRef<Partial<Record<keyof ThemeValues, HTMLInputElement | null>>>({});
   const panelRef = useDialogFocus<HTMLElement>({ open: true, onClose, modal: false });
 
   useEffect(() => {
-    const root = document.documentElement;
-    (Object.keys(values) as Array<keyof ThemeValues>).forEach((key) => root.style.setProperty(variables[key], values[key]));
-    root.style.setProperty('--corner-scale', String(roundness / 100));
-    root.style.setProperty('--shadow', `color-mix(in srgb, ${values.outline} 55%, transparent)`);
-    try { window.localStorage.setItem(THEME_KEY, JSON.stringify({ values, roundness, updatedAt: Date.now() })); } catch { /* Current-page customization still works. */ }
-  }, [roundness, values]);
+    writeTheme({ values, roundness, preset });
+  }, [preset, roundness, values]);
 
   useEffect(() => {
     try { writeNavSettings(navSettings); } catch { window.dispatchEvent(new CustomEvent(NAV_SETTINGS_CHANGED_EVENT, { detail: navSettings })); }
@@ -134,23 +153,27 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   }
 
   async function requestTilt() {
+    if (!tiltPermission.available || tiltPermission.pending) return;
     const orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission?: () => Promise<'granted' | 'denied'> };
-    if (!orientation) { setTiltStatus('Device orientation is unavailable in this browser.'); return; }
+    if (!orientation) return;
+    setTiltPermission((current) => ({ ...current, pending: true }));
     try {
       const permission = typeof orientation.requestPermission === 'function' ? await orientation.requestPermission() : 'granted';
-      setTiltStatus(permission === 'granted' ? 'Device tilt control is active when magnet physics is on.' : 'Device tilt permission was not granted.');
+      setTiltPermission((current) => ({ ...current, state: permission, pending: false }));
       if (permission === 'granted') window.dispatchEvent(new CustomEvent('allneeds:tilt-permission-granted'));
-    } catch { setTiltStatus('Device tilt permission could not be requested.'); }
+    } catch { setTiltPermission((current) => ({ ...current, state: 'denied', pending: false })); }
   }
 
   function deleteLocalData() {
     if (!window.confirm('Delete all allneeds.app data stored on this local origin? Export a backup first if you want to keep it.')) return;
     window.localStorage.clear();
+    window.sessionStorage.clear();
     reset();
     window.dispatchEvent(new CustomEvent('allneeds:inventory-changed', { detail: { count: 0 } }));
     window.dispatchEvent(new CustomEvent('allneeds:journal-changed', { detail: { count: 0 } }));
-    setTiltStatus('Local storage was deleted.');
   }
+
+  const tilt = tiltPresentation(tiltPermission);
 
   return (
     <section ref={panelRef} className={styles.panel} role="dialog" aria-modal="false" aria-labelledby="customizer-title" tabIndex={-1}>
@@ -165,7 +188,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
 
         <fieldset className={styles.navSettings}><legend>Navigation magnets</legend><p>Choose which magnets appear in the top navigation bar.</p><div className={styles.alwaysOn}><span>Menu magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Home magnet</span><small>Always on</small></div><div className={styles.alwaysOn}><span>Customizer magnet</span><small>Always on</small></div>{navLabels.map(([key, label]) => <label key={key}><input type="checkbox" checked={navSettings[key]} onChange={(event) => setNavSettings((current) => ({ ...current, [key]: event.target.checked }))} /><span>{label}</span></label>)}</fieldset>
 
-        <section className={styles.tilt} aria-labelledby="tilt-title"><div><h3 id="tilt-title">Device tilt access</h3><p>Let magnets respond to how you hold your phone.</p></div><button type="button" role="switch" aria-checked="true" onClick={requestTilt}>On</button><small role="status">{tiltStatus}</small></section>
+        <section className={styles.tilt} aria-labelledby="tilt-title" data-state={tiltPermission.pending ? 'pending' : tiltPermission.state}><div><h3 id="tilt-title">Device tilt access</h3><p id="tilt-description">Let magnets respond to how you hold your phone.</p></div><button type="button" role="switch" aria-checked={tiltPermission.state === 'granted'} aria-describedby="tilt-description tilt-status" disabled={tilt.disabled} onClick={requestTilt}>{tilt.label}</button><small id="tilt-status" role="status">{tilt.status}</small></section>
 
         <footer className={styles.footer}><button type="button" onClick={reset}>Reset to default</button><button type="button" className={styles.delete} onClick={deleteLocalData}>Delete localStorage</button></footer>
       </div>

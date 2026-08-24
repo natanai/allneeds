@@ -1,6 +1,6 @@
 # Local testing guide
 
-This workspace is a local comparison build. It has no `.git` directory and does not commit, push, open pull requests, or modify the online `natanai/allneeds` repository.
+This workspace is the local comparison build. It can be run and validated independently of the online `natanai/allneeds` work; publishing remains an explicit step.
 
 ## 1. Install and start
 
@@ -14,7 +14,7 @@ pnpm dev
 
 Open the URL Vite prints, normally `http://127.0.0.1:5173/`.
 
-The optional shared feed uses `/allneeds-api`, which Vite proxies read-only feed requests to `https://backend.allneeds.app/api`. “Save to device” never posts an add-count update from this local build.
+The optional shared feed uses `/allneeds-api` for development reads and the production backend for shared add-count/account actions. “Save to inventory” writes locally first, so it remains useful if the count update is unavailable.
 
 ## 2. Run the complete automated check
 
@@ -104,7 +104,8 @@ Record milestone measurements in [`ux-validation-log.md`](ux-validation-log.md),
 - Draft continuity: type unsaved text in Observations and Journal, navigate away/back, close the Journal composer, reload, and confirm the exact text returns. Save or Clear should remove the corresponding draft.
 - Browse continuity: filter Feelings, Needs, and Faux Feelings, open a result, use Back, and confirm the same query and filtered magnets return for the current tab session.
 - Alexithymia Support: complete a body selection, use the compass, select/reject a suggested feeling, navigate away/back and reload, and confirm the lane, body value, compass values, and selected emotion return. Continue to the shared Journal when useful, try the care and communication steps, then use “Start over” and confirm the cleared lane stays cleared after reload.
-- Shared feed in `pnpm dev`: pull public strategies and save one locally; confirm the Inventory count changes without a live add-count write.
+- Shared feed in `pnpm dev`: pull public strategies and save one locally; confirm the Inventory count changes even if the best-effort live add-count update is unavailable. With a restored production session, confirm the following feed unlocks.
+- Account & data: confirm Bluesky handle validation is active, Profile actions remain unavailable while signed out, and backup/restore stays fully local. Complete OAuth redirect/profile-cookie acceptance on `https://allneeds.app`; the registered client intentionally returns localhost/GitHub preview sign-ins to the official origin.
 - Customizer: change colors/roundness, reload, and confirm the choices persist.
 - Responsive checks: repeat every primary route around 390 × 844 and 1280 × 900; move a magnet in each size and confirm switching sizes does not overwrite the other arrangement. On mobile, confirm Customizer appears only in navigation, the Observation editor appears before its collapsed recipe, and Feed filters/Pull appear before optional sign-in guidance. On desktop, confirm all enabled resting navigation magnets form tight rows while preserving the user's reading order.
 - Browser history: scroll a long browse page, open a visible result without first scrolling, use Back, and confirm the exact working position returns; deliberate forward navigation should still begin at the top.

@@ -72,6 +72,173 @@ async function dragMagnetBy(page: Page, board: Locator, magnet: Locator, dx: num
   await page.waitForTimeout(1_400);
 }
 
+test('saved customizer colors and roundness are applied before the React bundle loads', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem('nvcApp.theme', JSON.stringify({
+      values: { plum: '#0A1234', lavender: '#DDEEFF', ink: '#101820', inkSoft: '#334455', rose: '#FFEECC', mint: '#77CCAA', gold: '#EEAA22', sky: '#77AADD', outline: '#222244' },
+      roundness: 150,
+      preset: 'First paint proof',
+      updatedAt: 20,
+    }));
+    window.sessionStorage.setItem('nvcApp.theme', JSON.stringify({
+      values: { plum: '#445566' },
+      roundness: 25,
+      updatedAt: 10,
+    }));
+  });
+  await page.route('**/assets/index-*.js', (route) => route.abort());
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  const root = page.locator('html');
+  await expect(root).toHaveAttribute('data-theme-preapplied', 'true');
+  await expect(page.locator('.app-boot')).toBeVisible();
+  await expect.poll(() => root.evaluate((element) => element.style.getPropertyValue('--plum'))).toBe('#0A1234');
+  await expect.poll(() => root.evaluate((element) => element.style.getPropertyValue('--corner-scale'))).toBe('1.5');
+  await expect(page.locator('.app-boot')).toHaveCSS('color', 'rgb(16, 24, 32)');
+});
+
+test('saved customizer settings survive reload without opening the customizer', async ({ page }) => {
+  const runtimeProblems = collectRuntimeProblems(page);
+  await page.addInitScript(() => {
+    if (window.localStorage.getItem('nvcApp.theme')) return;
+    window.localStorage.setItem('nvcApp.theme', JSON.stringify({
+      values: { plum: '#123456', lavender: '#E4EDFA', rose: '#FFEEDD' },
+      roundness: 135,
+      preset: 'Holographic',
+      updatedAt: 100,
+    }));
+  });
+
+  await page.goto('/needs');
+  await expect(page.getByRole('dialog', { name: 'Customizer' })).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--plum').trim())).toBe('#123456');
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--corner-scale').trim())).toBe('1.35');
+  await page.reload();
+  await expect(page.getByRole('dialog', { name: 'Customizer' })).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--plum').trim())).toBe('#123456');
+
+  await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
+  const customizer = page.getByRole('dialog', { name: 'Customizer' });
+  await expect(customizer.getByRole('textbox', { name: 'Canvas glow' })).toHaveValue('#123456');
+  await expect(customizer.getByLabel('Presets')).toHaveValue('Holographic');
+
+  const tiltSwitch = customizer.getByRole('switch');
+  const tiltCapability = await page.evaluate(() => {
+    const orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission?: unknown };
+    return { available: typeof orientation !== 'undefined', permissionRequired: typeof orientation?.requestPermission === 'function' };
+  });
+  if (!tiltCapability.available) {
+    await expect(tiltSwitch).toHaveText('Unavailable');
+    await expect(tiltSwitch).toHaveAttribute('aria-checked', 'false');
+    await expect(tiltSwitch).toBeDisabled();
+  } else if (!tiltCapability.permissionRequired) {
+    await expect(tiltSwitch).toHaveText('On');
+    await expect(tiltSwitch).toHaveAttribute('aria-checked', 'true');
+    await expect(tiltSwitch).toBeDisabled();
+  } else {
+    await expect(tiltSwitch).toHaveText('Request permission');
+    await expect(tiltSwitch).toHaveAttribute('aria-checked', 'false');
+    await expect(tiltSwitch).toBeEnabled();
+  }
+  expect(runtimeProblems).toEqual([]);
+});
+
+test('Journal History keeps long entries compact and puts feeling ratings first', async ({ page }) => {
+  const runtimeProblems = collectRuntimeProblems(page);
+  const fullReflection = Array.from({ length: 90 }, (_, index) => `reflection${index + 1}`).join(' ');
+  const preview = `${Array.from({ length: 55 }, (_, index) => `reflection${index + 1}`).join(' ')}…`;
+  await page.addInitScript(({ reflection }) => {
+    window.localStorage.setItem('allneeds.v2.journal', JSON.stringify({
+      schemaVersion: 1,
+      savedAt: '2026-08-24T05:00:00.000Z',
+      data: {
+        entries: [{
+          id: 'long-history-entry',
+          dateISO: '2026-08-24T05:00:00.000Z',
+          emotion: 'Relieved, Tender',
+          intensity: 7,
+          feelings: [{ feeling: 'Relieved', intensity: 7 }, { feeling: 'Tender', intensity: 4 }],
+          needs: ['autonomy'],
+          tags: ['weekend'],
+          notes: reflection,
+          sensations: [],
+          strategies: [],
+          source: 'journal',
+        }],
+      },
+    }));
+  }, { reflection: fullReflection });
+
+  await page.goto('/inventory/journal');
+  await expect(page.getByRole('heading', { level: 3, name: 'Relieved 7/10 · Tender 4/10' })).toBeVisible();
+  await expect(page.getByText(preview, { exact: true })).toBeVisible();
+  await expect(page.getByText(fullReflection, { exact: true })).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Autonomy', exact: true })).toHaveAttribute('href', '/needs/autonomy');
+  await expect(page.getByText('#weekend', { exact: true })).toBeVisible();
+  const historyFilters = page.getByLabel('Filter journal history');
+  await expect(historyFilters.getByLabel('Feeling', { exact: true })).toHaveValue('');
+  await expect(historyFilters.getByLabel('Need', { exact: true })).toHaveValue('');
+  await expect(historyFilters.getByLabel('Tag', { exact: true })).toHaveValue('');
+
+  await page.getByText('Read full entry', { exact: true }).click();
+  await expect(page.getByText(fullReflection, { exact: true })).toBeVisible();
+  await expect(page.getByText('Show less', { exact: true })).toBeVisible();
+  await page.getByText('Show less', { exact: true }).click();
+  await expect(page.getByText(fullReflection, { exact: true })).toBeHidden();
+  expect(runtimeProblems).toEqual([]);
+});
+
+test('Bluesky account and profile paths are actionable instead of placeholder controls', async ({ page }) => {
+  const runtimeProblems = collectRuntimeProblems(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const menu = page.getByRole('dialog', { name: 'allneeds.app menu' });
+  await menu.getByRole('button', { name: /Account & data/ }).click();
+  const accountHeading = menu.getByRole('heading', { name: 'Account & data', level: 2 });
+  await expect(accountHeading).toBeVisible();
+  const menuBox = await menu.boundingBox();
+  const accountHeadingBox = await accountHeading.boundingBox();
+  expect(menuBox).not.toBeNull();
+  expect(accountHeadingBox).not.toBeNull();
+  expect(accountHeadingBox!.y).toBeGreaterThanOrEqual(menuBox!.y);
+  expect(accountHeadingBox!.y + accountHeadingBox!.height).toBeLessThanOrEqual(menuBox!.y + menuBox!.height);
+  const handle = menu.getByLabel('Bluesky handle');
+  const signIn = menu.getByRole('button', { name: 'Sign in', exact: true });
+  await expect(handle).toBeEnabled();
+  await expect(signIn).toBeDisabled();
+  await handle.fill('name');
+  await expect(signIn).toBeEnabled();
+  await signIn.click();
+  await expect(menu.getByRole('status')).toHaveText('Bluesky handles must include a domain (for example: yourname.bsky.social).');
+  await handle.fill('nathanael.ink');
+  await expect(signIn).toBeEnabled();
+  await expect(menu.getByRole('button', { name: 'Save this browser' })).toBeDisabled();
+  await expect(menu.getByRole('button', { name: 'Load saved profile' })).toBeDisabled();
+  expect(runtimeProblems).toEqual([]);
+});
+
+test('a restored Bluesky session unlocks profile visibility and follower feeds', async ({ page }) => {
+  const runtimeProblems = collectRuntimeProblems(page);
+  await page.addInitScript(() => {
+    (window as typeof window & { allneedsSession?: { did: string; handle: string } }).allneedsSession = {
+      did: 'did:plc:allneeds-browser-test',
+      handle: 'nathanael.ink',
+    };
+  });
+
+  await page.goto('/inventory');
+  await page.getByText('Add a personal strategy', { exact: true }).click();
+  const form = page.locator('#inventory-form');
+  await expect(form.getByRole('option', { name: 'Followers (Bluesky followers when synced)' })).toBeEnabled();
+  await expect(form.getByRole('option', { name: 'Public', exact: true })).toBeEnabled();
+  await expect(form.getByRole('button', { name: 'Profile', exact: true })).toBeEnabled();
+
+  await page.goto('/feed');
+  await expect(page.getByRole('option', { name: 'From people you follow' })).toBeEnabled();
+  await expect(page.getByText('Following feed available for @nathanael.ink.', { exact: true })).toBeVisible();
+  expect(runtimeProblems).toEqual([]);
+});
+
 test('first paint never exposes an upper-left magnet pile', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   await page.addInitScript(() => {

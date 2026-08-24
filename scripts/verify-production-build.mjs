@@ -177,8 +177,10 @@ if (!/\.recipeDisclosure\s*\{[^}]*overflow:\s*hidden;/.test(observationStyles)
 }
 
 const feedSource = await readFile(resolve(root, 'src/features/feed/FeedPage.tsx'), 'utf8');
-if (!feedSource.includes(`<p className={styles.authHint}>Following requires Bluesky sign-in in Menu → Account &amp; data.</p>`)) {
-  fail('the local Shared strategies boundary no longer points sign-in intent to Menu → Account & data.');
+if (!feedSource.includes(`<option value="follows" disabled={!session}>From people you follow</option>`)
+  || !feedSource.includes(`'Following requires Bluesky sign-in in Menu → Account & data.'`)
+  || !feedSource.includes('await notifySharedStrategyAdded(strategyId)')) {
+  fail('the Shared strategies account boundary, follower feed, or backend add-count path has drifted.');
 }
 
 const allBuiltText = await Promise.all(

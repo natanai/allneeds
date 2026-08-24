@@ -7,6 +7,7 @@ import { needs, needsBySlug } from '../../data/catalog';
 import { readInventoryDraft, writeInventoryDraft } from '../../persistence/workflowDrafts';
 import type { InventoryDraft } from '../../persistence/workflowDrafts';
 import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
+import { saveCurrentBrowserToProfile, useBlueskySession } from '../account/blueskyAccount';
 import {
   createPersonalInventoryEntry,
   isDuplicateStrategy,
@@ -36,6 +37,7 @@ function emptyInventoryDraft(): InventoryDraft {
 }
 
 export function InventoryPage() {
+  const session = useBlueskySession();
   const [initialDraft] = useState(() => readInventoryDraft() ?? emptyInventoryDraft());
   const [inventory, setInventory] = useState<InventoryStrategy[]>(readInventory);
   const [view, setView] = useState<InventoryView>('needs');
@@ -87,8 +89,10 @@ export function InventoryPage() {
     });
   };
 
-  const handleAdd = (event: FormEvent<HTMLFormElement>) => {
+  const handleAdd = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const saveToProfile = submitter?.value === 'profile';
     const title = addDraft.title.trim();
     const description = addDraft.description.trim();
     const needSlugs = addDraft.selectedNeeds.filter(Boolean);
@@ -102,6 +106,10 @@ export function InventoryPage() {
       return;
     }
     const primaryNeed = needsBySlug.get(needSlugs[0] ?? '');
+    const requestedVisibility = new FormData(event.currentTarget).get('strategy-visibility');
+    const visibility = session && (requestedVisibility === 'followers' || requestedVisibility === 'public')
+      ? requestedVisibility
+      : 'private';
     const entry = createPersonalInventoryEntry({
       title,
       description,
@@ -109,9 +117,17 @@ export function InventoryPage() {
       needTitle: primaryNeed?.title ?? 'Need',
       firstName: addDraft.firstName,
       location: addDraft.location,
-      visibility: 'private',
+      visibility,
     });
-    commit([...inventory, entry], `Saved “${title}” to this device.`);
+    commit([...inventory, entry], `Saved “${title}” to this device${saveToProfile ? ' and preparing profile sync' : ''}.`);
+    if (saveToProfile) {
+      try {
+        const result = await saveCurrentBrowserToProfile();
+        setFeedback({ kind: 'success', message: `Saved “${title}” to your profile and device.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}` });
+      } catch {
+        setFeedback({ kind: 'warning', message: `Saved “${title}” to this device, but profile sync did not finish.` });
+      }
+    }
     const emptyAdd = { ...EMPTY_ADD_DRAFT, selectedNeeds: [] };
     workflowDraftRef.current = { ...workflowDraftRef.current, add: emptyAdd };
     setAddDraft(emptyAdd);
@@ -261,12 +277,12 @@ export function InventoryPage() {
             </div>
             <label className={styles.formField}>
               <span>Visibility</span>
-              <small className={styles.visibilityHint}>Choose who can see this strategy when you export or share it. Sign in with Bluesky to enable Followers/Public. While signed out, strategies stay only on this browser.</small>
-              <span className={styles.inputCard}><select name="strategy-visibility" defaultValue="private"><option value="private">Private (only on this browser)</option><option disabled>Followers (Bluesky followers when synced)</option><option disabled>Public</option></select></span>
+              <small className={styles.visibilityHint}>Choose who can see this strategy when you export or share it. {session ? 'Followers/Public can be shared when you save to your profile.' : 'Sign in with Bluesky to enable Followers/Public. While signed out, strategies stay only on this browser.'}</small>
+              <span className={styles.inputCard}><select name="strategy-visibility" defaultValue="private"><option value="private">Private (only on this browser)</option><option value="followers" disabled={!session}>Followers (Bluesky followers when synced)</option><option value="public" disabled={!session}>Public</option></select></span>
             </label>
             <div className={styles.formActions}>
-              <button type="submit" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Device</button>
-              <button type="button" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled>Profile</button>
+              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Device</button>
+              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Profile</button>
             </div>
           </form>
           <p className={styles.formNote}>Backup, restore, and account sync are in Menu → Account &amp; data.</p>

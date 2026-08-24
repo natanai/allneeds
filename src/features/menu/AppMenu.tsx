@@ -3,6 +3,14 @@ import type { ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
+import {
+  loadProfileIntoCurrentBrowser,
+  saveCurrentBrowserToProfile,
+  signInWithBluesky,
+  signOutFromBluesky,
+  useBlueskySession,
+} from '../account/blueskyAccount';
+import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
 import styles from './AppMenu.module.css';
 
@@ -84,6 +92,9 @@ export function AppMenu({
   const navigate = useNavigate();
   const [view, setView] = useState<MenuView>('root');
   const [status, setStatus] = useState('');
+  const [handle, setHandle] = useState('');
+  const [accountBusy, setAccountBusy] = useState(false);
+  const session = useBlueskySession();
   const importRef = useRef<HTMLInputElement>(null);
   const dialogRef = useDialogFocus<HTMLElement>({ open, onClose });
 
@@ -93,6 +104,11 @@ export function AppMenu({
       setStatus('');
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    window.requestAnimationFrame(() => dialogRef.current?.scrollTo({ top: 0, behavior: 'auto' }));
+  }, [dialogRef, open, view]);
 
   if (!open) return null;
 
@@ -109,6 +125,47 @@ export function AppMenu({
   const exportAll = () => {
     downloadBackup();
     setStatus('Backup downloaded.');
+  };
+
+  const toggleBluesky = async () => {
+    setAccountBusy(true);
+    setStatus('');
+    try {
+      if (session) {
+        await signOutFromBluesky();
+        setStatus('Signed out of Bluesky on this browser.');
+      } else {
+        setStatus('Opening Bluesky sign-in…');
+        await signInWithBluesky(handle);
+      }
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Unable to use Bluesky sign-in right now.');
+    } finally {
+      setAccountBusy(false);
+    }
+  };
+
+  const saveProfile = async () => {
+    setAccountBusy(true);
+    setStatus('Saving this browser to your profile…');
+    try {
+      const result = await saveCurrentBrowserToProfile();
+      setStatus(`Profile saved.${result.strategiesSynced ? ' Shared strategies synced.' : ' Shared strategies could not be synced.'}`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Unable to save this browser to your profile.');
+    } finally { setAccountBusy(false); }
+  };
+
+  const loadProfile = async () => {
+    setAccountBusy(true);
+    setStatus('Loading your saved profile…');
+    try {
+      const result = await loadProfileIntoCurrentBrowser();
+      if (result === 'empty') setStatus('No saved profile snapshot was found.');
+      else if (result === 'canceled') setStatus('Profile load canceled. No changes were made.');
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Unable to load your saved profile.');
+    } finally { setAccountBusy(false); }
   };
 
   const importAll = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -131,6 +188,7 @@ export function AppMenu({
         Object.entries(snapshot).forEach(([key, value]) => {
           window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
         });
+        synchronizeCustomizerMirrors(snapshot as Record<string, unknown>);
       } catch (error) {
         window.localStorage.clear();
         Object.entries(previous).forEach(([key, value]) => window.localStorage.setItem(key, value));
@@ -227,14 +285,15 @@ export function AppMenu({
               <div className={styles.systemCard}>
                 <h4>Bluesky</h4>
                 <p>Optional production sign-in can sync a profile snapshot across browsers and devices.</p>
-                <label>Bluesky handle<input type="text" placeholder="yourname.bsky.social" disabled /></label>
-                <button type="button" disabled>Sign in</button>
-                <small>Sign-in stays disabled in this localhost comparison build.</small>
+                {session ? <p><strong>{session.handle ? `Signed in as @${session.handle.replace(/^@/, '')}` : 'Signed in with Bluesky'}</strong></p> : <label>Bluesky handle<input type="text" value={handle} placeholder="yourname.bsky.social" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={(event) => { setHandle(event.target.value); setStatus(''); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); void toggleBluesky(); } }} /></label>}
+                <button type="button" disabled={accountBusy || (!session && !handle.trim())} onClick={() => void toggleBluesky()}>{accountBusy ? 'Please wait…' : session ? 'Sign out' : 'Sign in'}</button>
+                <small>Your allneeds data remains local unless you choose a profile action.</small>
               </div>
               <div className={styles.systemCard}>
                 <h4>Profile snapshot</h4>
-                <p>Production can save this browser’s allneeds data to your profile or load a saved profile here.</p>
-                <div className={styles.actionPair}><button type="button" disabled>Save this browser</button><button type="button" disabled>Load saved profile</button></div>
+                <p>Save this browser’s allneeds data to your profile or load a saved profile here.</p>
+                <div className={styles.actionPair}><button type="button" disabled={!session || accountBusy} onClick={() => void saveProfile()}>Save this browser</button><button type="button" disabled={!session || accountBusy} onClick={() => void loadProfile()}>Load saved profile</button></div>
+                {!session ? <small>Sign in with Bluesky to enable profile sync.</small> : null}
               </div>
             </section>
 

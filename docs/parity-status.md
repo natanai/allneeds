@@ -3,7 +3,7 @@
 Reference repository: `natanai/nvc-app`  
 Reference branch: `performance/immediate-response-v1`  
 Reference commit: `7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3`  
-Local workspace: `C:\allneedsV2` (no Git metadata or remote writes)
+Local workspace: `C:\allneedsV2` (independent comparison and publishing worktree)
 
 ## Public route coverage
 
@@ -21,7 +21,7 @@ Local workspace: `C:\allneedsV2` (no Git metadata or remote writes)
 | `/observations/` | Current single-input Load flow, exact/nearby matching, quick check, recipe, guide, and direct Journal handoff |
 | `/inventory/` | Current compact Needs/Strategies inventory, filtering, details, editing, and personal strategy form |
 | `/inventory/journal/` | History-first journal with filters, disclosures, migrations, and full-screen entry composer |
-| `/feed/` | Live public read-only pull plus local-only saving |
+| `/feed/` | Live public/following feeds, local saving, and shared add-count updates |
 | `/alexithymia-support/` | Complete progressive body/compass/emotion/care/journal/communication lane |
 
 ## Canonical snapshot checks
@@ -55,7 +55,10 @@ Local workspace: `C:\allneedsV2` (no Git metadata or remote writes)
 - schema-versioned drafts for Journal, Observations, Body Cues, Inventory add/edit, per-Need personal strategies, and Alexithymia lane progress
 - background-safe draft flushes plus feature-specific Save, Clear, Cancel, and Start-over boundaries
 - backup and restore cover the local origin’s full localStorage
-- feed saves remain local in this comparison build
+- profile restore synchronizes theme/navigation session mirrors before reload
+- Bluesky profile save/load uses the production backend snapshot contract
+- Followers/Public strategy visibility and Profile save targets unlock only for an authenticated session
+- feed saves remain local-first and best-effort update the shared add count
 
 ## Repeat-load resilience
 
@@ -64,17 +67,15 @@ Local workspace: `C:\allneedsV2` (no Git metadata or remote writes)
 - `/allneeds-api` and personal browser data are excluded from the worker manifest
 - a stopped-server production test passes current-route reload, fresh-tab deep linking, and reconnect recovery
 
-## Deliberate local-test boundary
+## OAuth origin boundary
 
-Bluesky OAuth/profile sync is represented by the same signed-out and disabled controls as production, but OAuth sign-in and backend profile writes are disabled in this local comparison build. OAuth metadata and redirect URIs belong to the production origin and cannot be exercised accurately from an arbitrary localhost port. The public feed remains testable through Vite’s read-only development proxy.
+The real Bluesky and backend profile code is present, including session restore, profile snapshot save/load, follower feed access, visibility choices, and Profile save targets. Bluesky’s registered client metadata intentionally redirects to `https://allneeds.app/inventory/`, so an OAuth round trip begun from localhost or the GitHub Pages preview completes on the official production origin. Signed-out UI, validation, local backup/restore, public feeds, and injected-session account contracts remain locally testable; the complete redirect/cookie flow must be accepted on `allneeds.app`.
 
-No source code in this workspace has been committed, pushed, or sent to the online `natanai/allneeds` repository.
-
-## Local verification (2026-08-23)
+## Local verification (2026-08-24)
 
 - strict TypeScript validation passed
-- `49/49` unit and persistence tests passed across `13/13` files
-- the production build passed with `177` precached public assets and two local fonts
-- `18/18` production-Chromium flows passed, including mobile/desktop route sweeps, Play-order grid packing and reload persistence, full-screen Menu → Journal behavior, backup recovery, draft continuity, modal focus, warm navigation, and offline deep routes
+- `66/66` unit and persistence tests passed across `18/18` files
+- the production build passed with `178` precached public assets and two local fonts
+- `26/26` production-Chromium flows passed, including mobile/desktop route sweeps, pre-React saved-theme restoration, long Journal disclosures, account/profile session contracts, Play-order grid packing and reload persistence, full-screen Menu → Journal behavior, backup recovery, draft continuity, modal focus, warm navigation, and offline deep routes
 - the isolated stopped-server reload, fresh cached deep link, same-port reconnect, and cache-miss probe passed
 - current-reference comparisons were performed at `390×844` and `1440×1000` for the key Observation, Body Cues, Emotions Wheel, Inventory, Journal, and navigation surfaces; automatic pixel-diff baselines remain future hardening rather than an unverified claim
