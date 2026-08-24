@@ -39,6 +39,7 @@ function round(value: number, places = 1) {
 }
 
 function publish() {
+  if (!started) return;
   const snapshot = readUxMetrics();
   document.documentElement.dataset.uxMetrics = JSON.stringify(snapshot);
   window.dispatchEvent(new CustomEvent(UX_METRICS_EVENT, { detail: snapshot }));
@@ -107,6 +108,7 @@ export function startUxMetrics() {
 }
 
 export function markAppReady() {
+  if (!started) return;
   metrics.appReadyMs = round(performance.now());
   publish();
   window.setTimeout(() => {
@@ -115,7 +117,7 @@ export function markAppReady() {
 }
 
 export function markRouteReady() {
-  if (pendingRouteIntent === null) return;
+  if (!started || pendingRouteIntent === null) return;
   const intent = pendingRouteIntent;
   pendingRouteIntent = null;
   window.requestAnimationFrame(() => {
