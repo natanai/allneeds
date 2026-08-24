@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 
 import { App } from './app/App';
-import { warmAppResources } from './app/appResources';
 import { remainingBootGateMs } from './app/bootTiming';
 import { waitForAppShellVisualReady } from './app/bootReadiness';
 import { preloadAppAssets } from './app/preloadAppAssets';
@@ -29,7 +28,8 @@ if (!root) {
   throw new Error('Unable to find the application root.');
 }
 const appRoot = root;
-startUxMetrics();
+const diagnosticsEnabled = new URLSearchParams(window.location.search).get('diagnostics') === '1';
+if (diagnosticsEnabled) startUxMetrics();
 registerServiceWorker();
 
 const basename = import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL;
@@ -64,7 +64,6 @@ async function mountApp() {
 
   const localPreparation = Promise.all([
     preloadAppAssets(),
-    warmAppResources(),
     document.fonts?.ready ?? Promise.resolve(),
   ]).then(() => {
     document.documentElement.dataset.appPreload = 'ready';
