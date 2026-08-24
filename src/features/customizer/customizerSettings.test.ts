@@ -56,27 +56,31 @@ describe('saved customizer settings', () => {
     });
   });
 
-  it('backfills newly Customizer-owned surface roles for older saved themes', () => {
+  it('retires standalone surface and journal colors from older saved themes', () => {
     const storage = memoryStorage({
       [THEME_KEY]: JSON.stringify({
-        values: { rose: '#ABCDEF', gold: '#123456' },
+        values: {
+          rose: '#ABCDEF',
+          lavender: '#123456',
+          surface: '#FEDCBA',
+          peach: '#654321',
+        },
         roundness: 100,
         updatedAt: 9,
       }),
     });
 
-    expect(readTheme(storage, null).values).toMatchObject({
-      rose: '#ABCDEF',
-      gold: '#123456',
-      peach: defaultTheme.peach,
-      surface: defaultTheme.surface,
-    });
+    const values = readTheme(storage, null).values;
+    expect(values).toEqual({ ...defaultTheme, rose: '#ABCDEF', lavender: '#123456' });
+    expect(Object.keys(values)).toHaveLength(9);
+    expect(values).not.toHaveProperty('surface');
+    expect(values).not.toHaveProperty('peach');
   });
 
-  it('keeps legacy palette collections visually compatible for newly added roles', () => {
+  it('keeps legacy palette collections on the same compact nine-role model', () => {
     palettes.forEach(({ values }) => {
-      expect(values.surface).toBe(defaultTheme.surface);
-      expect(values.peach).toBe(defaultTheme.peach);
+      expect(Object.keys(values).sort()).toEqual(Object.keys(defaultTheme).sort());
+      expect(Object.keys(values)).toHaveLength(9);
     });
   });
 
@@ -95,23 +99,25 @@ describe('saved customizer settings', () => {
     });
   });
 
-  it('derives the complete runtime CSS contract and readable foreground colors', () => {
+  it('derives shared runtime surfaces and aliases instead of adding palette roles', () => {
     const light = themeCssValues({ values: { ...defaultTheme, rose: '#FFFFFF' }, roundness: 130 });
+    const surface = `color-mix(in srgb, ${defaultTheme.lavender} 12%, #FFFFFF 88%)`;
     expect(light).toMatchObject({
       '--plum': defaultTheme.plum,
-      '--surface-raised': defaultTheme.surface,
-      '--peach': defaultTheme.peach,
+      '--surface-raised': surface,
+      '--peach': '#FFFFFF',
       '--rose': '#FFFFFF',
       '--btn-bg': '#FFFFFF',
       '--btn-fg': '#111111',
       '--chip-fg': '#111111',
-      '--chip-bg': `color-mix(in srgb, ${defaultTheme.surface} 86%, ${defaultTheme.sky} 14%)`,
+      '--chip-bg': `color-mix(in srgb, ${surface} 86%, ${defaultTheme.sky} 14%)`,
       '--corner-scale': '1.3',
       '--shadow': `color-mix(in srgb, ${defaultTheme.outline} 55%, transparent)`,
     });
 
     const dark = themeCssValues({ values: { ...defaultTheme, rose: '#000000' }, roundness: -20 });
     expect(dark['--btn-fg']).toBe('#FFFFFF');
+    expect(dark['--peach']).toBe('#000000');
     expect(dark['--corner-scale']).toBe('0');
   });
 
