@@ -51,21 +51,16 @@
   line-height: 1.3;
 }
 
-.close,
-.footer button,
-.deviceControl button {
+.close {
   min-width: 44px;
   min-height: 44px;
   border: 2px solid var(--outline);
+  border-radius: var(--radius-circle, 50%);
   background: var(--surface-raised);
   color: var(--ink);
-  cursor: pointer;
-}
-
-.close {
-  border-radius: var(--radius-circle, 50%);
   font-size: 1.6rem;
   line-height: 1;
+  cursor: pointer;
 }
 
 .preset,
@@ -204,94 +199,182 @@
 }
 
 .deviceControls {
-  margin-top: 1rem;
+  margin-top: 0.8rem;
   overflow: hidden;
-  border: 2px solid var(--outline);
+  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 }
 
 .deviceControl {
-  padding: 0.75rem;
+  min-height: 3.65rem;
+  padding: 0.5rem 0.6rem;
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.3rem 0.7rem;
+  grid-template-columns: 2.05rem minmax(0, 1fr) auto;
+  gap: 0.55rem;
   align-items: center;
 }
 
 .deviceControl + .deviceControl {
-  border-top: 1px solid color-mix(in srgb, var(--outline) 24%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
 }
 
-.deviceControl h3,
-.deviceControl p {
+.deviceIcon {
+  width: 2.05rem;
+  height: 2.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--radius-md) * 0.8);
+  background: color-mix(in srgb, var(--mint) 70%, var(--surface-raised) 30%);
+  color: var(--ink);
+}
+
+.deviceIcon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.deviceCopy {
+  min-width: 0;
+}
+
+.deviceCopy h3,
+.deviceCopy p {
   margin: 0;
 }
 
-.deviceControl h3 {
-  font-size: 0.88rem;
+.deviceCopy h3 {
+  font-size: 0.8rem;
+  line-height: 1.15;
 }
 
-.deviceControl p,
-.deviceControl small {
+.deviceCopy p {
+  margin-top: 0.08rem;
   color: var(--ink-soft);
-  font-size: 0.72rem;
+  font-size: 0.65rem;
+  line-height: 1.25;
 }
 
-.deviceControl small {
-  grid-column: 1 / -1;
-}
-
-.deviceControl button {
-  min-width: 3.4rem;
-  padding-inline: 0.7rem;
+.controlAction {
+  min-width: 2.35rem;
+  min-height: 2.15rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 34%, transparent);
   border-radius: var(--radius-pill);
-  background: var(--mint);
+  background: color-mix(in srgb, var(--mint) 78%, var(--surface-raised) 22%);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.68rem;
   font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
 }
 
-.deviceControl button:disabled {
+.controlAction:disabled {
+  background: color-mix(in srgb, var(--surface-raised) 82%, var(--ink-soft) 18%);
+  color: var(--ink-soft);
   cursor: default;
-  opacity: 0.7;
+  opacity: 0.58;
 }
 
-.deviceControl[data-state='denied'] button,
-.deviceControl[data-state='error'] button {
-  background: color-mix(in srgb, var(--rose) 70%, var(--surface-raised));
+.deviceControl[data-state='denied'] .controlAction,
+.deviceControl[data-state='error'] .controlAction {
+  background: color-mix(in srgb, var(--rose) 56%, var(--surface-raised));
 }
 
 .footer {
-  margin-top: 1rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
+  margin-top: 0.65rem;
+  padding: 0 0.1rem 0.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.footer button {
-  padding: 0.5rem;
+.resetAction {
+  min-height: 2.2rem;
+  padding: 0.32rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 20%, transparent);
   border-radius: var(--radius-pill);
-  box-shadow: 0 7px 0 color-mix(in srgb, var(--outline) 24%, transparent);
-  font-weight: 600;
+  background: color-mix(in srgb, var(--surface-raised) 75%, transparent);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 650;
+  cursor: pointer;
 }
 
-.footer .delete {
-  background: color-mix(in srgb, var(--rose) 70%, var(--surface-raised));
+.resetAction svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.delete {
+  min-height: 1.6rem;
+  padding: 0.2rem 0.1rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 500;
+  line-height: 1;
+  opacity: 0.32;
+  cursor: pointer;
+}
+
+.delete:hover,
+.delete:focus-visible {
+  opacity: 0.72;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
 }
 
 @media (max-width: 430px) {
   .header {
-    padding-top: max(1.1rem, env(safe-area-inset-top));
-    padding-right: max(1.1rem, env(safe-area-inset-right));
+    padding-top: max(0.8rem, env(safe-area-inset-top));
+    padding-right: max(0.8rem, env(safe-area-inset-right));
+    padding-bottom: 0.8rem;
+    padding-left: max(0.8rem, env(safe-area-inset-left));
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .close {
+    min-width: 40px;
+    min-height: 40px;
   }
 
   .scrollBody {
-    padding-right: max(1.1rem, env(safe-area-inset-right));
-    padding-bottom: max(1.1rem, env(safe-area-inset-bottom));
-    padding-left: max(1.1rem, env(safe-area-inset-left));
+    padding-right: max(0.8rem, env(safe-area-inset-right));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    padding-left: max(0.8rem, env(safe-area-inset-left));
   }
 
-  .colors,
-  .footer {
+  .colors {
     grid-template-columns: 1fr;
+  }
+
+  .deviceControl {
+    grid-template-columns: 1.9rem minmax(0, 1fr) auto;
+    gap: 0.48rem;
+    min-height: 3.45rem;
+    padding: 0.46rem 0.5rem;
+  }
+
+  .deviceIcon {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .controlAction {
+    min-height: 2rem;
+    padding-inline: 0.48rem;
   }
 }
