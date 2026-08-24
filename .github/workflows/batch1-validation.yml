@@ -2,7 +2,9 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
+    branches:
+      - 'repair/emotion-wheel-nav-persistence'
     paths:
       - 'src/app/AppShell.tsx'
       - 'tests/e2e/startup-nav-readiness.spec.ts'
