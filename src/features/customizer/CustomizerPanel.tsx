@@ -63,6 +63,11 @@ type OrientationLockState = {
   target: OrientationLockTarget | null;
 };
 
+let orientationLockSession: Pick<OrientationLockState, 'locked' | 'target'> = {
+  locked: false,
+  target: null,
+};
+
 function detectTiltPermission(): TiltPermissionState {
   const orientation = typeof window === 'undefined' ? undefined : window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
     requestPermission?: () => Promise<'granted' | 'denied'>;
@@ -106,10 +111,10 @@ function detectOrientationLock(): OrientationLockState {
   return {
     mobile,
     available: mobile && typeof orientation?.lock === 'function' && typeof orientation?.unlock === 'function',
-    locked: false,
+    locked: orientationLockSession.locked,
     pending: false,
     error: false,
-    target: null,
+    target: orientationLockSession.target,
   };
 }
 
@@ -224,6 +229,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   function unlockOrientation() {
     const orientation = getLockableOrientation();
     try { orientation?.unlock?.(); } catch { /* Unlock support can disappear after a browser mode change. */ }
+    orientationLockSession = { locked: false, target: null };
     setOrientationLock((current) => ({ ...current, locked: false, pending: false, error: false, target: null }));
   }
 
@@ -260,8 +266,10 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     setOrientationLock((current) => ({ ...current, pending: true, error: false, target }));
     try {
       await orientation.lock(target);
+      orientationLockSession = { locked: true, target };
       setOrientationLock((current) => ({ ...current, locked: true, pending: false, error: false, target }));
     } catch {
+      orientationLockSession = { locked: false, target: null };
       setOrientationLock((current) => ({ ...current, locked: false, pending: false, error: true, target: null }));
     }
   }
