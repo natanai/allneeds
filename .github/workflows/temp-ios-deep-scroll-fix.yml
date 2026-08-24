@@ -1,0 +1,166 @@
+name: One-shot iOS deep-scroll magnet fix
+
+on:
+  push:
+    branches:
+      - fix/ios-deep-scroll-magnet-drag
+
+permissions:
+  contents: write
+
+jobs:
+  patch-validate-commit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/ios-deep-scroll-magnet-drag
+          fetch-depth: 0
+
+      - name: Apply source-level drag coordinate repair
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/components/magnets/MagnetBoard.tsx')
+          text = path.read_text()
+
+          replacements = [
+              (
+                  "  origin: Point;\n  lastPointer: Point;",
+                  "  origin: Point;\n  pointerScale: Point;\n  lastPointer: Point;",
+              ),
+              (
+                  "    const now = performance.now();\n    magnet.dragging = true;",
+                  "    const now = performance.now();\n    const boardRect = board.getBoundingClientRect();\n    const pointerScale = {\n      x: boardRect.width > 0 ? board.offsetWidth / boardRect.width : 1,\n      y: boardRect.height > 0 ? board.offsetHeight / boardRect.height : 1,\n    };\n    magnet.dragging = true;",
+              ),
+              (
+                  "      startPointer: { x: event.pageX, y: event.pageY },\n      lastPointer: { x: event.pageX, y: event.pageY },",
+                  "      // iOS Safari can report page coordinates inconsistently after pointer\n      // capture on a deeply scrolled document. Client coordinates stay in one\n      // viewport coordinate space and therefore cannot accumulate scrollY.\n      startPointer: { x: event.clientX, y: event.clientY },\n      lastPointer: { x: event.clientX, y: event.clientY },",
+              ),
+              (
+                  "      origin: { x: magnet.x, y: magnet.y },\n      moved: false,",
+                  "      origin: { x: magnet.x, y: magnet.y },\n      pointerScale,\n      moved: false,",
+              ),
+              (
+                  "      event.pageX - drag.startPointer.x,\n      event.pageY - drag.startPointer.y,",
+                  "      event.clientX - drag.startPointer.x,\n      event.clientY - drag.startPointer.y,",
+              ),
+              (
+                  "    const rect = board.getBoundingClientRect();\n    const delta = scalePointerDelta(\n      event.pageX - drag.startPointer.x,\n      event.pageY - drag.startPointer.y,\n      board.offsetWidth,\n      board.offsetHeight,\n      rect.width,\n      rect.height,\n    );",
+                  "    const delta = {\n      x: (event.clientX - drag.startPointer.x) * drag.pointerScale.x,\n      y: (event.clientY - drag.startPointer.y) * drag.pointerScale.y,\n    };",
+              ),
+              (
+                  "    const frameDelta = scalePointerDelta(\n      event.pageX - drag.lastPointer.x,\n      event.pageY - drag.lastPointer.y,\n      board.offsetWidth,\n      board.offsetHeight,\n      rect.width,\n      rect.height,\n    );",
+                  "    const frameDelta = {\n      x: (event.clientX - drag.lastPointer.x) * drag.pointerScale.x,\n      y: (event.clientY - drag.lastPointer.y) * drag.pointerScale.y,\n    };",
+              ),
+              (
+                  "    drag.lastPointer = { x: event.pageX, y: event.pageY };",
+                  "    drag.lastPointer = { x: event.clientX, y: event.clientY };",
+              ),
+          ]
+
+          for old, new in replacements:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected exactly one source match, found {count}: {old[:90]!r}')
+              text = text.replace(old, new, 1)
+
+          if 'event.pageX' in text or 'event.pageY' in text:
+              raise SystemExit('Direct magnet drag still contains page-coordinate reads')
+
+          path.write_text(text)
+          PY
+
+      - name: Add deep-scroll touch regression
+        run: |
+          cat >> tests/e2e/magnet-surface-interactions.spec.ts <<'EOF'
+
+          test.describe('mobile deep-scroll magnet dragging', () => {
+            test.use({ viewport: { width: 390, height: 844 } });
+
+            test('keeps a held need magnet aligned after scrolling deep into the board', async ({ page }) => {
+              await page.goto('/needs');
+              const board = page.getByLabel('Needs magnet board');
+              await expect(board).toHaveAttribute('data-ready', 'true');
+              await ensurePhysicsOn(board);
+              const magnet = board.getByRole('link', { name: 'Acceptance', exact: true });
+              await magnet.scrollIntoViewIfNeeded();
+              await page.waitForTimeout(120);
+
+              const scrollBefore = await page.evaluate(() => window.scrollY);
+              expect(scrollBefore).toBeGreaterThan(300);
+              const before = await magnetPosition(board, magnet);
+              const box = await magnet.boundingBox();
+              expect(box).not.toBeNull();
+
+              const startX = box!.x + box!.width / 2;
+              const startY = box!.y + box!.height / 2;
+              const session = await page.context().newCDPSession(page);
+              try {
+                await session.send('Input.dispatchTouchEvent', {
+                  type: 'touchStart',
+                  touchPoints: [{ x: startX, y: startY, id: 1 }],
+                });
+                await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+
+                await session.send('Input.dispatchTouchEvent', {
+                  type: 'touchMove',
+                  touchPoints: [{ x: startX + 14, y: startY + 18, id: 1 }],
+                });
+                await page.waitForTimeout(80);
+
+                const during = await magnetPosition(board, magnet);
+                const movedX = during.x - before.x;
+                const movedY = during.y - before.y;
+                expect(movedX).toBeGreaterThan(8);
+                expect(movedX).toBeLessThan(22);
+                expect(movedY).toBeGreaterThan(11);
+                expect(movedY).toBeLessThan(28);
+                expect(Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore)).toBeLessThanOrEqual(1);
+              } finally {
+                await session.send('Input.dispatchTouchEvent', {
+                  type: 'touchEnd',
+                  touchPoints: [],
+                }).catch(() => undefined);
+                await session.detach();
+              }
+            });
+          });
+          EOF
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run foundation checks
+        run: pnpm check
+        env:
+          VITE_BASE_PATH: /
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run full browser regression suite serially
+        run: pnpm exec playwright test --workers=1
+
+      - name: Run offline/reconnect verification
+        run: pnpm test:e2e:outage
+
+      - name: Commit validated repair and remove one-shot workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/components/magnets/MagnetBoard.tsx tests/e2e/magnet-surface-interactions.spec.ts
+          git rm .github/workflows/temp-ios-deep-scroll-fix.yml
+          git commit -m 'Fix iOS deep-scroll magnet drag coordinates'
+          git push origin HEAD:fix/ios-deep-scroll-magnet-drag
