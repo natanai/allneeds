@@ -56,10 +56,25 @@ async function waitForShellCacheReplacement(page, previous) {
       && !registration.installing
       && !registration.waiting;
   }, previous, { timeout: 20_000 });
+
+  const current = await shellCacheNames(page);
+  const replacement = current.find((name) => !previous.includes(name));
+  invariant(replacement, 'The activated service worker did not leave a replacement shell cache.');
+  return replacement;
+}
+
+async function cacheContainsFreshProbe(page, cacheName) {
+  return page.evaluate(async ({ name, appOrigin }) => {
+    const cache = await caches.open(name);
+    const response = await cache.match(`${appOrigin}/index.html`, { ignoreVary: true });
+    return response ? (await response.text()).includes('data-deployment-probe="fresh"') : false;
+  }, { name: cacheName, appOrigin: origin });
 }
 
 let server = null;
 let browser = null;
+let indexPath = null;
+let deployedIndex = null;
 
 try {
   server = await startPreview();
@@ -88,32 +103,36 @@ try {
   await expectShell(page, 'Home');
   await page.locator('html[data-offline-cache="ready"]').waitFor({ timeout: 20_000 });
 
-  const indexPath = resolve('dist/index.html');
-  const deployedIndex = await readFile(indexPath, 'utf8');
+  indexPath = resolve('dist/index.html');
+  deployedIndex = await readFile(indexPath, 'utf8');
   const previousCaches = await shellCacheNames(page);
-  try {
-    await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
-    await regenerateServiceWorker();
+  await writeFile(indexPath, deployedIndex.replace('<html', '<html data-deployment-probe="fresh"'));
+  await regenerateServiceWorker();
 
-    // The already-installed shell remains instant. Its normal registration call then
-    // discovers the new versioned worker/cache without putting that network check on
-    // the navigation response path. Cache creation happens during install, so wait
-    // until activation has also removed the previous cache before testing the next load.
-    await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
-    await expectShell(page, 'Home');
-    await waitForShellCacheReplacement(page, previousCaches);
+  // The installed shell remains instant while its normal registration discovers the
+  // new worker. Wait for install + activate (old cache removed), then prove that the
+  // replacement cache itself contains the new shell before removing the network.
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await expectShell(page, 'Home');
+  const replacementCache = await waitForShellCacheReplacement(page, previousCaches);
+  invariant(
+    await cacheContainsFreshProbe(page, replacementCache),
+    'The replacement versioned cache did not contain the fresh deployment shell.',
+  );
 
-    await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
-    await expectShell(page, 'Home');
-    invariant(
-      await page.locator('html').getAttribute('data-deployment-probe') === 'fresh',
-      'The activated versioned cache did not become the shell for the next navigation.',
-    );
-  } finally {
-    await writeFile(indexPath, deployedIndex);
-    await regenerateServiceWorker();
-  }
+  // With the server stopped there is no network fallback that can make this pass.
+  // A successful fresh-marker navigation therefore proves the activated versioned
+  // shell cache owns repeat startup as intended.
+  await server.close();
+  server = null;
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await expectShell(page, 'Home');
+  invariant(
+    await page.locator('html').getAttribute('data-deployment-probe') === 'fresh',
+    'The activated versioned cache did not serve the fresh shell while the network was unavailable.',
+  );
 
+  server = await startPreview();
   await page.goto(`${origin}/needs/love-caring`);
   await expectShell(page, 'Need for love/caring');
 
@@ -157,4 +176,8 @@ try {
 } finally {
   if (browser) await browser.close().catch(() => undefined);
   if (server) await server.close().catch(() => undefined);
+  if (indexPath && deployedIndex) {
+    await writeFile(indexPath, deployedIndex).catch(() => undefined);
+    await regenerateServiceWorker().catch(() => undefined);
+  }
 }
