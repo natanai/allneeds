@@ -9,9 +9,9 @@
   overflow: auto;
   border: 2px solid var(--outline);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, #fff 94%, var(--lavender) 6%);
+  background: color-mix(in srgb, #fff 94%, var(--quiet) 6%);
   box-shadow: 0 8px 0 color-mix(in srgb, var(--outline) 30%, transparent);
-  color: var(--ink);
+  color: var(--text);
   font-size: 0.72rem;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .panel header span {
-  color: var(--ink-soft);
+  color: var(--secondary);
 }
 
 .panel dl {
@@ -43,11 +43,11 @@
   min-width: 0;
   padding: 0.35rem 0.45rem;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--sky) 45%, #fff 55%);
+  background: color-mix(in srgb, var(--selection) 45%, #fff 55%);
 }
 
 .panel dt {
-  color: var(--ink-soft);
+  color: var(--secondary);
 }
 
 .panel dd {
