@@ -6,8 +6,8 @@ export const NAV_SETTINGS_CHANGED_EVENT = 'allneeds:nav-settings-changed';
 export const THEME_CHANGED_EVENT = 'allneeds:theme-changed';
 
 export const defaultTheme = {
-  plum: '#74569B', lavender: '#EDE4FF', ink: '#1F1230', inkSoft: '#392351',
-  rose: '#FFB3CB', mint: '#96FBC7', gold: '#F7FFAE', sky: '#D3F1FF', outline: '#12081F',
+  primary: '#74569B', quiet: '#EDE4FF', text: '#1F1230', secondary: '#392351',
+  action: '#FFB3CB', positive: '#96FBC7', attention: '#F7FFAE', selection: '#D3F1FF', outline: '#12081F',
 } as const;
 
 export type ThemeValues = Record<keyof typeof defaultTheme, string>;
@@ -22,9 +22,41 @@ export type NavSettings = Record<NavItemId, boolean>;
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
-export const themeVariables: Record<keyof ThemeValues, string> = {
-  plum: '--plum', lavender: '--lavender', ink: '--ink', inkSoft: '--ink-soft',
-  rose: '--rose', mint: '--mint', gold: '--gold', sky: '--sky', outline: '--outline',
+export const themeRoleMetadata: Record<keyof ThemeValues, Readonly<{
+  label: string;
+  ariaLabel: string;
+  cssVariable: string;
+}>> = {
+  primary: { label: 'Primary', ariaLabel: 'Primary emphasis', cssVariable: '--primary' },
+  quiet: { label: 'Quiet', ariaLabel: 'Quiet emphasis', cssVariable: '--quiet' },
+  text: { label: 'Text', ariaLabel: 'Primary foreground', cssVariable: '--text' },
+  secondary: { label: 'Secondary', ariaLabel: 'Secondary foreground', cssVariable: '--secondary' },
+  action: { label: 'Action', ariaLabel: 'Action emphasis', cssVariable: '--action' },
+  positive: { label: 'Positive', ariaLabel: 'Positive emphasis', cssVariable: '--positive' },
+  attention: { label: 'Attention', ariaLabel: 'Attention emphasis', cssVariable: '--attention' },
+  selection: { label: 'Selection', ariaLabel: 'Selection emphasis', cssVariable: '--selection' },
+  outline: { label: 'Outline', ariaLabel: 'Structural contrast', cssVariable: '--outline' },
+};
+
+export const themeVariables: Record<keyof ThemeValues, string> = Object.fromEntries(
+  (Object.keys(themeRoleMetadata) as Array<keyof ThemeValues>).map((key) => [key, themeRoleMetadata[key].cssVariable]),
+) as Record<keyof ThemeValues, string>;
+
+/*
+ * Stored themes created before the semantic-role migration used hue-based field names.
+ * Those identifiers are accepted only at this read/migration boundary. Never emit them
+ * or use them as runtime CSS/theme vocabulary.
+ */
+const legacyThemeValueKeys: Record<keyof ThemeValues, string> = {
+  primary: 'plum',
+  quiet: 'lavender',
+  text: 'ink',
+  secondary: 'inkSoft',
+  action: 'rose',
+  positive: 'mint',
+  attention: 'gold',
+  selection: 'sky',
+  outline: 'outline',
 };
 
 export const defaultNavSettings: NavSettings = {
@@ -56,9 +88,11 @@ const paletteRows = [
   ['Argeebey 8','#000000','#1f246a','#8a1181','#d14444','#2ca53e','#68cbcb','#e3c72d','#ffffff','#000000'],
 ] as const;
 
-export const palettes: Array<{ name: string; values: ThemeValues }> = paletteRows.map(([name, plum, lavender, ink, inkSoft, rose, mint, gold, sky, outline]) => ({
+export const palettes: Array<{ name: string; values: ThemeValues }> = paletteRows.map(([
+  name, primary, quiet, text, secondary, action, positive, attention, selection, outline,
+]) => ({
   name,
-  values: { plum, lavender, ink, inkSoft, rose, mint, gold, sky, outline },
+  values: { primary, quiet, text, secondary, action, positive, attention, selection, outline },
 }));
 
 function availableStorage(name: 'localStorage' | 'sessionStorage'): StorageLike | null {
@@ -95,6 +129,24 @@ function newestStored(local: StorageLike | null, session: StorageLike | null, ke
   return updatedAt(sessionValue) > updatedAt(localValue) ? sessionValue : localValue;
 }
 
+function normalizeStoredThemeValues(raw: unknown): ThemeValues {
+  const stored = raw && typeof raw === 'object' && !Array.isArray(raw)
+    ? raw as Record<string, unknown>
+    : {};
+  const values = { ...defaultTheme } as ThemeValues;
+  (Object.keys(defaultTheme) as Array<keyof ThemeValues>).forEach((key) => {
+    const modern = stored[key];
+    const legacy = stored[legacyThemeValueKeys[key]];
+    const normalized = typeof modern === 'string'
+      ? normalizeHex(modern)
+      : typeof legacy === 'string'
+        ? normalizeHex(legacy)
+        : null;
+    if (normalized) values[key] = normalized;
+  });
+  return values;
+}
+
 export function readTheme(
   local: StorageLike | null = availableStorage('localStorage'),
   session: StorageLike | null = availableStorage('sessionStorage'),
@@ -102,16 +154,8 @@ export function readTheme(
   const parsed = newestStored(local, session, THEME_KEY) as {
     values?: unknown; roundness?: unknown; preset?: unknown; updatedAt?: unknown;
   } | null;
-  const rawValues = parsed?.values && typeof parsed.values === 'object' && !Array.isArray(parsed.values)
-    ? parsed.values as Partial<Record<keyof ThemeValues, unknown>>
-    : {};
-  const values = { ...defaultTheme } as ThemeValues;
-  (Object.keys(defaultTheme) as Array<keyof ThemeValues>).forEach((key) => {
-    const normalized = typeof rawValues[key] === 'string' ? normalizeHex(rawValues[key]) : null;
-    if (normalized) values[key] = normalized;
-  });
   return {
-    values,
+    values: normalizeStoredThemeValues(parsed?.values),
     roundness: clampRoundness(parsed?.roundness),
     preset: typeof parsed?.preset === 'string' ? parsed.preset : '',
     updatedAt: updatedAt(parsed),
@@ -130,12 +174,11 @@ export function themeCssValues(theme: Pick<ThemeState, 'values' | 'roundness'>) 
   (Object.keys(themeVariables) as Array<keyof ThemeValues>).forEach((key) => {
     css[themeVariables[key]] = normalizeHex(theme.values[key]) ?? defaultTheme[key];
   });
-  css['--surface-raised'] = `color-mix(in srgb, ${css['--lavender']} 12%, #FFFFFF 88%)`;
-  css['--peach'] = css['--rose']!;
+  css['--surface-raised'] = `color-mix(in srgb, ${css['--quiet']} 12%, #FFFFFF 88%)`;
   css['--corner-scale'] = String(clampRoundness(theme.roundness) / 100);
   css['--shadow'] = `color-mix(in srgb, ${css['--outline']} 55%, transparent)`;
-  css['--btn-bg'] = css['--rose']!;
-  css['--chip-bg'] = `color-mix(in srgb, ${css['--surface-raised']} 86%, ${css['--sky']} 14%)`;
+  css['--btn-bg'] = css['--action']!;
+  css['--chip-bg'] = `color-mix(in srgb, ${css['--surface-raised']} 86%, ${css['--selection']} 14%)`;
   const backgroundLuminance = relativeLuminance(css['--btn-bg']!);
   const blackRatio = (backgroundLuminance + 0.05) / (relativeLuminance('#111111') + 0.05);
   const whiteRatio = (relativeLuminance('#FFFFFF') + 0.05) / (backgroundLuminance + 0.05);
