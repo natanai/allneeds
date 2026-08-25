@@ -4,19 +4,9 @@ import styles from './StrategySharingFields.module.css';
 
 type StrategySharingFieldsProps = {
   signedIn: boolean;
-  firstName: string;
-  location: string;
-  onFirstNameChange: (value: string) => void;
-  onLocationChange: (value: string) => void;
 };
 
-export function StrategySharingFields({
-  signedIn,
-  firstName,
-  location,
-  onFirstNameChange,
-  onLocationChange,
-}: StrategySharingFieldsProps) {
+export function StrategySharingFields({ signedIn }: StrategySharingFieldsProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const shareWithNatRef = useRef<HTMLInputElement>(null);
   const visibilityRef = useRef<HTMLSelectElement>(null);
@@ -27,8 +17,7 @@ export function StrategySharingFields({
 
     const handleFormData = () => {
       // `formdata` fires after the current FormData entry list has been built.
-      // Reset only the per-submission privacy controls after capture; parent
-      // draft state clears the optional attribution fields after a save.
+      // Reset the controls only after this submission has captured its values.
       queueMicrotask(() => {
         if (shareWithNatRef.current) shareWithNatRef.current.checked = false;
         if (visibilityRef.current) visibilityRef.current.value = 'private';
@@ -42,35 +31,11 @@ export function StrategySharingFields({
 
   return (
     <details ref={detailsRef} className={styles.menu}>
-      <summary aria-label="More strategy options" title="More strategy options">
+      <summary aria-label="Sharing and privacy options" title="Sharing and privacy">
         <span aria-hidden="true">•••</span>
       </summary>
       <fieldset className={styles.panel}>
-        <legend>More strategy options</legend>
-
-        <label className={styles.settingRow}>
-          <span>First name</span>
-          <input
-            className={styles.compactInput}
-            name="name"
-            type="text"
-            value={firstName}
-            onChange={(event) => onFirstNameChange(event.target.value)}
-            aria-label="First name, optional"
-          />
-        </label>
-
-        <label className={styles.settingRow}>
-          <span>Location</span>
-          <input
-            className={styles.compactInput}
-            name="location"
-            type="text"
-            value={location}
-            onChange={(event) => onLocationChange(event.target.value)}
-            aria-label="Location, optional"
-          />
-        </label>
+        <legend>Sharing &amp; privacy</legend>
 
         <label className={styles.settingRow}>
           <span>Share with Nat</span>
