@@ -13,6 +13,7 @@ import {
   writeInventory,
   type InventoryVisibility,
 } from '../inventory/inventoryRepository';
+import { hideSharedStrategy } from './sharedStrategyModeration';
 import {
   normalizeSharedStrategyNeeds,
   sharedStrategyAuthorName,
@@ -95,6 +96,20 @@ export function FeedPage() {
     catch { setStatusOverride('Saved to your inventory. Shared add count could not be updated.'); }
   }
 
+  async function hide(strategy: SharedFeedStrategy) {
+    const title = strategy.title || 'this strategy';
+    if (!window.confirm(`Hide “${title}” from community discovery? The author keeps their strategy and sharing setting.`)) return;
+    setStatusOverride(`Hiding “${title}”…`);
+    try {
+      await hideSharedStrategy(strategy.id);
+      const next = await loadSharedFeedResources(scope, sort, true);
+      setFeed(next);
+      setStatusOverride(`“${title}” is hidden from community discovery.`);
+    } catch (error) {
+      setStatusOverride(error instanceof Error ? error.message : 'Unable to hide this strategy from the community.');
+    }
+  }
+
   const status = statusOverride
     || (loading ? 'Loading…' : feed.error || (!feed.strategies.length ? 'No shared strategies found for this view yet.' : ''));
 
@@ -123,7 +138,19 @@ export function FeedPage() {
             <article className={styles.card} key={strategy.id}>
               <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${authorLabel}${handle && authorLabel !== author.handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
               <div className={styles.body}><p>{strategy.body || ''}</p></div>
-              <footer><span>{visibility(strategy.visibility)}</span>{strategyNeeds.length ? <details><summary>Needs supported</summary><ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul></details> : null}<button type="button" disabled={isSaved} onClick={() => save(strategy)}>{isSaved ? 'Saved to inventory' : 'Save to inventory'}</button></footer>
+              <footer>
+                <span>{visibility(strategy.visibility)}</span>
+                {strategyNeeds.length ? <details><summary>Needs supported</summary><ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul></details> : null}
+                {session?.admin ? (
+                  <details className={styles.adminMenu}>
+                    <summary aria-label={`Admin actions for ${strategy.title || 'strategy'}`}>⋯</summary>
+                    <div className={styles.adminMenuPopover}>
+                      <button type="button" onClick={() => void hide(strategy)}>Hide from community</button>
+                    </div>
+                  </details>
+                ) : null}
+                <button type="button" disabled={isSaved} onClick={() => save(strategy)}>{isSaved ? 'Saved to inventory' : 'Save to inventory'}</button>
+              </footer>
             </article>
           );
         })}
