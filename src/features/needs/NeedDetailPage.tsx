@@ -158,9 +158,11 @@ export function NeedDetailPage() {
     const primaryNeed = needsBySlug.get(selectedNeedSlugs[0] ?? '') ?? need;
     const formData = new FormData(event.currentTarget);
     const requestedVisibility = formData.get('strategy-visibility');
-    const visibility = session && (requestedVisibility === 'followers' || requestedVisibility === 'public')
-      ? requestedVisibility
-      : 'private';
+    const visibility = requestedVisibility === 'public'
+      ? 'public'
+      : session && requestedVisibility === 'followers'
+        ? 'followers'
+        : 'private';
     const entry = createPersonalInventoryEntry({
       title,
       description,
