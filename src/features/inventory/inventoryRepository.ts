@@ -18,6 +18,7 @@ export interface InventoryStrategy {
   needSlugs: string[];
   tags: string[];
   personal: boolean;
+  shareWithNat: boolean;
   sourceNeedPage: string;
   strategySlug: string;
   createdAt: string;
@@ -79,6 +80,7 @@ function normalizeEntry(value: unknown): InventoryStrategy | null {
     needSlugs,
     tags,
     personal: value.personal === true,
+    shareWithNat: value.shareWithNat === true,
     sourceNeedPage,
     strategySlug: typeof value.strategySlug === 'string'
       ? value.strategySlug.trim().toLocaleLowerCase()
@@ -137,7 +139,11 @@ export function readInventory(storage: StorageDriver | null = getBrowserStorage(
   if (!storage) return [];
   const store = createStore(storage);
   const stored = store.read();
-  if (stored.status === 'ready') return stored.value.items;
+  if (stored.status === 'ready') {
+    return stored.value.items
+      .map(normalizeEntry)
+      .filter((entry): entry is InventoryStrategy => entry !== null);
+  }
   if (stored.status !== 'empty') return [];
 
   const legacyItems = readLegacy(storage);
@@ -197,6 +203,7 @@ export function createCatalogInventoryEntry({
     needSlugs,
     tags: needSlugs,
     personal: false,
+    shareWithNat: false,
     sourceNeedPage: needSlug,
     strategySlug: strategy.slug,
     createdAt: new Date().toISOString(),
@@ -215,6 +222,7 @@ export type PersonalStrategyInput = {
   firstName?: string;
   location?: string;
   visibility?: InventoryVisibility;
+  shareWithNat?: boolean;
 };
 
 export function createPersonalInventoryEntry(input: PersonalStrategyInput): InventoryStrategy {
@@ -233,6 +241,7 @@ export function createPersonalInventoryEntry(input: PersonalStrategyInput): Inve
     needSlugs,
     tags: needSlugs,
     personal: true,
+    shareWithNat: input.shareWithNat === true,
     sourceNeedPage: '',
     strategySlug: '',
     createdAt: new Date().toISOString(),
@@ -264,12 +273,13 @@ export function createSharedInventoryEntry(input: {
     needSlugs,
     tags: needSlugs,
     personal: false,
+    shareWithNat: false,
     sourceNeedPage: '',
     strategySlug: input.id.trim().toLocaleLowerCase(),
     createdAt: new Date().toISOString(),
     visibility: visibility(input.visibility),
     ...(contributor ? { contributor } : {}),
     ...(contributor?.name ? { firstName: contributor.name } : {}),
-    ...(contributor?.location ? { location: contributor.location } : {}),
+    ...(contributor?.location ? { location } : {}),
   };
 }

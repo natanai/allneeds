@@ -18,7 +18,18 @@ export function buildPersonalStrategiesExport(
   return {
     version: 1,
     exportedAt,
-    personalStrategies: inventory.filter((strategy) => strategy.personal),
+    personalStrategies: inventory.filter((strategy) => strategy.personal && strategy.shareWithNat),
+  };
+}
+
+export function buildSingleStrategyExport(
+  strategy: InventoryStrategy,
+  exportedAt = new Date().toISOString(),
+): PersonalStrategiesExport {
+  return {
+    version: 1,
+    exportedAt,
+    personalStrategies: strategy.personal ? [{ ...strategy, shareWithNat: true }] : [],
   };
 }
 
@@ -30,18 +41,39 @@ export function personalStrategiesEmailHref() {
   return `mailto:${PERSONAL_STRATEGIES_EMAIL_ADDRESS}?${query.toString()}`;
 }
 
-export function downloadPersonalStrategiesExport(inventory: InventoryStrategy[]) {
-  const payload = buildPersonalStrategiesExport(inventory);
+function downloadExport(payload: PersonalStrategiesExport, filename: string) {
   if (!payload.personalStrategies.length) return { downloaded: false as const, count: 0 };
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `allneeds-personal-strategies-${payload.exportedAt.replace(/:/g, '-')}.json`;
+  link.download = filename;
   document.body.append(link);
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
   return { downloaded: true as const, count: payload.personalStrategies.length };
+}
+
+export function downloadPersonalStrategiesExport(inventory: InventoryStrategy[]) {
+  const payload = buildPersonalStrategiesExport(inventory);
+  return downloadExport(
+    payload,
+    `allneeds-personal-strategies-${payload.exportedAt.replace(/:/g, '-')}.json`,
+  );
+}
+
+export function downloadStrategyForNat(strategy: InventoryStrategy) {
+  const payload = buildSingleStrategyExport(strategy);
+  const safeTitle = strategy.title
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48) || 'strategy';
+  return downloadExport(
+    payload,
+    `allneeds-strategy-${safeTitle}-${payload.exportedAt.replace(/:/g, '-')}.json`,
+  );
 }

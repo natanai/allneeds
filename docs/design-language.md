@@ -128,6 +128,27 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - View-all/view-one icons follow the destination-arrangement rule above.
 - All existing save, profile, shuffle, view-mode, previous/next, swipe, and keyboard functionality must remain present during visual cleanup.
 
+### Personal strategy composer and sharing
+
+**Accepted 2026-08-24.** Personal strategy privacy has two independent dimensions and the UI must not collapse them into one ambiguous “visibility” choice.
+
+Canonical references:
+- `src/features/inventory/InventoryPage.tsx`
+- `src/features/inventory/StrategySharingFields.tsx`
+- `src/features/inventory/personalStrategiesExport.ts`
+- `src/features/needs/NeedDetailPage.tsx`
+
+Rules:
+- **Share with Nat** is explicit consent for a personal strategy to be included in the user-initiated Nat export. It does not automatically send, upload, publish, or sync anything.
+- **Bluesky visibility** remains a separate profile/feed choice (`Private`, `Followers`, `Public`) and must not imply consent to include a strategy in Nat exports.
+- New personal strategies and older entries that predate this setting default to private from Nat exports until the user explicitly opts in.
+- The Add Strategy composer uses compact settings rows for these decisions rather than a single overloaded Visibility field.
+- Keep the existing strategy name, description, Needs picker, optional contributor fields, and device/profile save targets.
+- Personal strategy cards show a quiet `Private` / `Shareable with Nat` status; sharing state should be legible without becoming the visual focus of the card.
+- Secondary and maintenance actions belong behind a roughly 44px ellipsis control on personal strategy cards. This includes one-strategy Nat sharing, Nat-export eligibility changes, Edit, and Remove.
+- **Share with Nat…** from a card exports only that personal strategy, marks it shareable for future Nat exports, and then offers the same pre-addressed email follow-up as the bulk export.
+- Bulk Nat export includes only personal strategies explicitly marked `Share with Nat`.
+
 ### Shared strategy feed
 
 - Treat the feed as a compact app list rather than a stack of oversized web-form cards.
@@ -152,3 +173,4 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
 - Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
 - Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
+- Personal strategy sharing now separates Nat-export consent from Bluesky visibility; personal card maintenance/share controls use the compact ellipsis pattern.

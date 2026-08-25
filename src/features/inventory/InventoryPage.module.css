@@ -52,22 +52,36 @@
 .search input { width: 100%; min-width: 0; min-height: 44px; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; }
 .savedList { display: grid; gap: .65rem; }
 .empty { margin: 0; padding: 1rem; border: 1.5px dashed color-mix(in srgb, var(--outline) 40%, transparent); border-radius: var(--radius-lg); background: rgba(255,255,255,.72); color: var(--ink-soft); }
-.savedCard { padding: .8rem; display: grid; gap: .55rem; border: 1.5px solid color-mix(in srgb, var(--outline) 38%, transparent); border-radius: var(--radius-lg); background: #fff; box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 11%, transparent); }
+.savedCard { position: relative; padding: .8rem; display: grid; gap: .55rem; border: 1.5px solid color-mix(in srgb, var(--outline) 38%, transparent); border-radius: var(--radius-lg); background: #fff; box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 11%, transparent); }
 .savedCard h3, .savedCard p { margin: 0; }
-.savedCard p, .savedCard > small { color: var(--ink-soft); }
+.savedCard p { color: var(--ink-soft); }
+.cardHeading { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: .5rem; }
+.cardHeading h3 { min-width: 0; padding-top: .14rem; }
 .tags { display: flex; flex-wrap: wrap; gap: .35rem; }
 .tags a { padding: .25rem .5rem; border: 1px solid var(--outline); border-radius: var(--radius-pill); background: #fff; font-size: .75rem; }
-.cardButtons, .savedCard form > div { display: flex; justify-content: flex-end; gap: .4rem; }
-.cardButtons button, .savedCard form button { min-height: 40px; padding: .35rem .65rem; border: 1.5px solid var(--outline); border-radius: var(--radius-md); background: #fff; color: var(--ink); cursor: pointer; }
-.cardButtons button:last-child { background: #ffd4d4; }
+.cardMeta { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: .45rem .7rem; flex-wrap: wrap; }
+.cardMeta small { color: var(--ink-soft); font-size: .72rem; }
+.shareStatus { padding: .18rem .44rem; border: 1px solid color-mix(in srgb, var(--outline) 24%, transparent); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--lavender) 18%, #fff 82%); color: var(--ink-soft); font-size: .68rem; font-weight: 760; line-height: 1.2; }
+.shareStatus[data-shareable='true'] { background: color-mix(in srgb, var(--mint) 34%, #fff 66%); color: var(--ink); }
+.cardMenu { position: relative; justify-self: end; }
+.cardMenu > summary { width: 44px; height: 44px; margin: -.5rem -.48rem -.25rem 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--ink-soft); cursor: pointer; list-style: none; font: 800 .92rem/1 var(--font-body); letter-spacing: .08em; user-select: none; }
+.cardMenu > summary::-webkit-details-marker { display: none; }
+.cardMenu > summary:hover, .cardMenu > summary:focus-visible { background: color-mix(in srgb, var(--sky) 18%, transparent); color: var(--ink); outline: none; }
+.cardMenu[open] > summary { background: color-mix(in srgb, var(--sky) 22%, transparent); color: var(--ink); }
+.cardMenuPanel { position: absolute; top: calc(100% - .2rem); right: 0; z-index: 30; width: max-content; min-width: 13.5rem; max-width: min(19rem, calc(100vw - 2rem)); padding: .3rem; display: grid; gap: .08rem; border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent); border-radius: var(--radius-lg); background: color-mix(in srgb, #fff 95%, var(--lavender) 5%); box-shadow: 0 8px 20px color-mix(in srgb, var(--outline) 18%, transparent); }
+.cardMenuPanel button, .cardMenuPanel a { width: 100%; min-height: 40px; padding: .48rem .58rem; display: flex; align-items: center; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--ink); font: 680 .78rem/1.25 var(--font-body); text-align: left; text-decoration: none; cursor: pointer; }
+.cardMenuPanel button:hover, .cardMenuPanel button:focus-visible, .cardMenuPanel a:hover, .cardMenuPanel a:focus-visible { background: color-mix(in srgb, var(--sky) 18%, transparent); outline: none; }
+.cardMenuPanel .destructiveMenuItem:hover, .cardMenuPanel .destructiveMenuItem:focus-visible { background: color-mix(in srgb, var(--rose) 38%, #fff 62%); }
 .savedCard form { display: grid; gap: .65rem; }
 .savedCard form label { display: grid; gap: .25rem; }
 .savedCard form input, .savedCard form textarea { width: 100%; padding: .55rem; border: 2px solid var(--outline); border-radius: var(--radius-md); font: inherit; }
+.savedCard form > div { display: flex; justify-content: flex-end; gap: .4rem; }
+.savedCard form button { min-height: 40px; padding: .35rem .65rem; border: 1.5px solid var(--outline); border-radius: var(--radius-md); background: #fff; color: var(--ink); cursor: pointer; }
 
 .feedback { margin: 0; padding: .65rem .8rem; border: 2px solid var(--outline); border-radius: var(--radius-md); font-weight: 700; }
 .success { background: var(--mint); }
-.warning { background: #fff2c2; }
-.error { background: #ffd4d4; }
+.warning { background: color-mix(in srgb, var(--rose) 22%, #fff 78%); }
+.error { background: color-mix(in srgb, var(--rose) 52%, #fff 48%); }
 .formShell { border: 2px solid color-mix(in srgb, var(--outline) 40%, transparent); border-radius: var(--radius-xl); background: color-mix(in srgb, #fff 90%, var(--lavender) 10%); box-shadow: 0 5px 0 color-mix(in srgb, var(--outline) 10%, transparent); overflow: hidden; }
 .formShell > summary { min-height: 50px; padding: .68rem .8rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; cursor: pointer; list-style: none; font-weight: 800; }
 .formShell > summary::-webkit-details-marker { display: none; }
@@ -75,9 +89,11 @@
 .formShell[open] > summary > span:last-child { transform: rotate(45deg); }
 .formBody { padding: 0 .8rem .85rem; }
 .formCard { padding: clamp(.58rem, 1.6vw, .78rem); display: grid; gap: .42rem; border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent); border-radius: var(--radius-xl); background: color-mix(in srgb, #fff 70%, var(--mint) 30%); box-shadow: none; }
+.formIntro { display: grid; gap: .04rem; margin-bottom: .08rem; }
+.formIntro strong { font-size: .86rem; line-height: 1.2; }
+.formIntro span { color: var(--ink-soft); font-size: .72rem; line-height: 1.3; }
 .formField { display: grid; gap: .16rem; }
 .formField > span:first-child { color: var(--ink-soft); font-size: .78rem; font-weight: 720; }
-.visibilityHint { margin: 0; color: var(--ink-soft); font-size: .72rem; font-weight: 400; line-height: 1.3; }
 .inputCard { padding: 0; display: block; overflow: hidden; border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, #fff 94%, var(--mint) 6%); box-shadow: none; }
 .inputCard:focus-within { outline: 2px solid color-mix(in srgb, var(--plum) 52%, transparent); outline-offset: 1px; }
 .needsFormField .inputCard { overflow: visible; }
@@ -97,11 +113,7 @@
 .formNote { margin: .75rem 0 0; color: var(--ink-soft); font-size: .78rem; }
 
 @media (min-width: 760px) {
-  .formCard { padding: clamp(.9rem, 2vw, 1.15rem); grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem .65rem; }
-  .formCard > .formField:nth-child(1) { grid-column: 1; grid-row: 1; }
-  .formCard > .formField:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
-  .formCard > .needsFormField { grid-column: 2; grid-row: 1; }
-  .formRow, .formCard > .formField:nth-child(5), .formActions { grid-column: 1 / -1; }
+  .formCard { padding: clamp(.9rem, 2vw, 1.15rem); gap: .55rem; }
   .inputCard input, .inputCard select { min-height: 48px; }
   .inputCard textarea { min-height: 6.25rem; }
 }
@@ -157,6 +169,7 @@
   .search, .savedList { margin-inline: .95rem; }
   .formShell { margin-inline: 1rem; }
   .formRow { grid-template-columns: 1fr; }
+  .cardMenuPanel { max-width: min(18rem, calc(100vw - 2.2rem)); }
 }
 
 @media (max-width: 360px) {
