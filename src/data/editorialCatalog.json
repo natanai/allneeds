@@ -1,0 +1,94 @@
+{
+  "needs": {
+    "connection": {
+      "summary": "Humans are a highly social species, and evolutionary accounts propose that strong motivations for connection developed in environments where social bonds affected survival and reproduction. Relationships supported protection, caregiving, cooperation, and group living. This need may drive us to seek others, maintain relationships, repair social ruptures, and coordinate with the people around us. Evolutionary theories of loneliness further propose that the discomfort of disconnection can help direct attention and behavior toward socially important bonds.",
+      "narrative": "Research on belonging and relatedness helps explain why motivation toward connection can be so persistent. Baumeister and Leary reviewed evidence for the need to belong as a “powerful, fundamental, and extremely pervasive motivation.” Self-Determination Theory likewise treats relatedness as one of three basic psychological needs, alongside autonomy and competence, and links their satisfaction with motivation and well-being. A later review of Basic Psychological Need Theory further distinguishes need satisfaction from active need frustration and examines relatedness across a broader contemporary evidence base. [1][2][3]\n\nEvolutionary accounts offer another layer of explanation. Cacioppo, Cacioppo, and Boomsma note that early humans “survived and prospered by banding together” and propose that loneliness may have developed as an aversive signal related to socially important relationships. In this view, the discomfort of disconnection is not necessarily evidence that the underlying motivation is dysfunctional. It may reflect a system that historically helped direct attention and behavior toward relationships relevant to protection, caregiving, cooperation, and reproduction. [4]\n\nSocial Baseline Theory extends this idea by proposing that humans normally expect access to social relationships that can “mitigate risk and diminish the level of effort needed.” From this perspective, social partners can function as part of the resources available for managing demands, allowing effort and risk to be distributed rather than carried entirely by one individual. [5]\n\nThe importance of social relationships also appears in large-scale outcome research. Holt-Lunstad, Smith, and Layton combined 148 prospective studies involving 308,849 participants and reported “a 50% increased likelihood of survival for participants with stronger social relationships.” Because this evidence is largely observational, it should not be read as proof that increasing connection will cause any particular individual to live longer. Taken together, these literatures suggest that connection is deeply embedded in human motivation, that sensitivity to disconnection may have functional origins, and that social relationships are associated with consequential psychological and physical outcomes. [6]",
+      "sources": [
+        {
+          "url": "https://psycnet.apa.org/record/1995-29052-001",
+          "description": "Baumeister, R. F., & Leary, M. R. (1995). The need to belong: Desire for interpersonal attachments as a fundamental human motivation. Psychological Bulletin, 117(3), 497–529."
+        },
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/11392867/",
+          "description": "Ryan, R. M., & Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. American Psychologist, 55(1), 68–78."
+        },
+        {
+          "url": "https://link.springer.com/article/10.1007/s11031-019-09818-1",
+          "description": "Vansteenkiste, M., Ryan, R. M., & Soenens, B. (2020). Basic psychological need theory: Advancements, critical themes, and future directions. Motivation and Emotion, 44, 1–31."
+        },
+        {
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3855545/",
+          "description": "Cacioppo, J. T., Cacioppo, S., & Boomsma, D. I. (2014). Evolutionary mechanisms for loneliness. Cognition & Emotion, 28(1), 3–21."
+        },
+        {
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4375548/",
+          "description": "Coan, J. A., & Sbarra, D. A. (2015). Social Baseline Theory: The Social Regulation of Risk and Effort. Current Opinion in Psychology, 1, 87–91."
+        },
+        {
+          "url": "https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316",
+          "description": "Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. PLOS Medicine, 7(7), e1000316."
+        }
+      ],
+      "strategies": [
+        { "title": "Call a friend", "slug": "call-a-friend" },
+        { "title": "Play a social video game", "slug": "play-a-social-video-game" },
+        { "title": "Read a character driven novel", "slug": "read-a-character-driven-novel" },
+        { "title": "Write a letter", "slug": "write-a-letter" },
+        { "title": "Remember a connected moment", "slug": "remember-a-connected-moment" },
+        { "title": "Map your connection options", "slug": "map-your-connection-options" },
+        { "title": "Notice where you are", "slug": "notice-where-you-are" }
+      ]
+    }
+  },
+  "strategies": [
+    {
+      "title": "Write a letter",
+      "slug": "write-a-letter",
+      "summary": "Set a five-minute timer. Choose someone you trust, miss, or would like to feel closer to. Write what has been happening in your life and one thing you wish they knew. Sending it is optional.",
+      "needs": [{ "title": "Connection", "slug": "connection" }],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40643373/",
+        "description": "LaVela et al. Peer letter-writing study examining writing, reflection, social connection, and loneliness."
+      }
+    },
+    {
+      "title": "Remember a connected moment",
+      "slug": "remember-a-connected-moment",
+      "summary": "Recall one moment when you felt connected to a person, animal, place, group, or activity. Write where you were, what was happening, one detail that made the moment feel connected, and one part of the experience you could recreate.",
+      "needs": [{ "title": "Connection", "slug": "connection" }],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26751632/",
+        "description": "Sedikides et al. Experimental research on nostalgic social memories and social connectedness."
+      }
+    },
+    {
+      "title": "Map your connection options",
+      "slug": "map-your-connection-options",
+      "summary": "On paper, make three headings: People, Places, Groups. List any person, place, or group where you have felt even slightly more connected. Leave a heading blank if needed. Circle the easiest option to move toward and write one specific next step.",
+      "needs": [{ "title": "Connection", "slug": "connection" }],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535",
+        "description": "Lloyd-Evans et al. Community Navigator feasibility study using social-network mapping and concrete planning to strengthen connections."
+      }
+    },
+    {
+      "title": "Notice where you are",
+      "slug": "notice-where-you-are",
+      "summary": "Stop for one minute. Notice one thing you can see, one sound you can hear, one physical sensation, and one detail that makes the place distinct. Write it down, photograph it, or simply spend a few seconds with it.",
+      "needs": [{ "title": "Connection", "slug": "connection" }],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://www.sciencedirect.com/science/article/pii/S0272494409000620",
+        "description": "Scannell, L., & Gifford, R. (2010). Defining place attachment: A tripartite organizing framework. Journal of Environmental Psychology, 30(1), 1–10."
+      }
+    }
+  ],
+  "strategyProvenance": {
+    "call-a-friend": "user",
+    "play-a-social-video-game": "user",
+    "read-a-character-driven-novel": "user"
+  }
+}
