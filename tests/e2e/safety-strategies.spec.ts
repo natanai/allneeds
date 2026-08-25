@@ -1,17 +1,15 @@
 import { expect, test } from './fixtures';
 
-test('Safety shows protected human strategies, cited system strategies, and approved support-line resources', async ({ page }) => {
+test('Safety shows the approved human, scholarly, and official-resource strategy set', async ({ page }) => {
   await page.goto('/needs/safety');
 
   const deck = page.locator('[data-strategy-deck]');
-  await expect(deck.locator('article')).toHaveCount(11);
+  await expect(deck.locator('article')).toHaveCount(9);
 
   for (const title of [
-    'Crunch the numbers',
     'Stare off',
     'Self holding',
     'Snuggle a pet',
-    'Road trip',
     'Watch a comfort show',
     'Comfy gaming',
     '5-4-3-2-1 check',
@@ -50,6 +48,8 @@ test('Safety shows protected human strategies, cited system strategies, and appr
     );
 
   for (const title of [
+    'Crunch the numbers',
+    'Road trip',
     'Back to wall lean',
     'Butterfly taps',
     'Hand on heart breaths',
