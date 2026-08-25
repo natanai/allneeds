@@ -56,6 +56,22 @@ Research, drafting, source checking, and discussion must otherwise remain read-o
 - Clearly distinguish foundational theory, modern review/synthesis, evolutionary theory, mechanistic theory, and observational outcome evidence.
 - Avoid citation accumulation for its own sake. Every source in the final citation set should do a distinct job.
 
+## Strategy audit rules
+
+Strategies are reviewed alongside each need, but they are a distinct evidence layer from the need description.
+
+- **Establish provenance before changing any strategy.** A strategy with a named contributor or other evidence of genuine user authorship is user-submitted.
+- **Never rewrite, rename, delete, remap, or otherwise clean up a user-submitted strategy.** User strategies are experiential contributions and do not have to pass the same research-evidence gate as system-authored strategies.
+- System/AI-authored strategies must earn their place. Do not retain or add strategies merely to make a list look complete.
+- Prefer system strategies that are low-friction, portable, and feasible in ordinary life. The ideal action can be attempted in many settings and does not require a special purchase, location, appointment, program, or large block of time.
+- A strategy should have a direct, intelligible pathway to the need being audited. If a system strategy fits another need better, prefer removing only the current need association rather than deleting the strategy globally before its other uses are reviewed.
+- For system strategies, seek direct empirical support for the underlying behavioral mechanism when good research exists. Evidence supports a plausible strategy mechanism, not a guaranteed individual outcome.
+- Require human-reachable scholarly URLs for strategy evidence under the same verification rules used for need-copy citations. Do not treat new strategy evidence as approved until the user has manually verified the URLs and agreed to the strategy change.
+- Prefer a set of strategies that demonstrates flexibility. Different strategies should expose genuinely different routes toward the same need so users are not implicitly taught that one particular person, behavior, or solution is the only way to tend it.
+- Avoid unnecessary duplication. Several strategies may involve social contact, for example, but each system strategy should add a meaningfully different action or mechanism.
+- Accessibility matters. Do not turn a study-specific behavior such as eye contact into a universal requirement when a broader accessible action such as brief conversation or a follow-up question captures the supported mechanism.
+- No system-strategy addition, removal, rewrite, or need-association change enters production until the user approves the exact strategy package and its evidence.
+
 ## Evidence standard
 
 ### Source hierarchy
@@ -192,6 +208,7 @@ Do not move these into the final Connection citation set unless the user is give
 | 2026-08-24 | Review process | Full-package approval required before any repo change except this file | **No** | User must agree to citations, human-reachable URLs, citation relevance, short copy, expanded copy, and implementation scope before production work begins. |
 | 2026-08-24 | Editorial style | Do not define needs; preserve motivational/action framing; avoid em dashes; use direct scholarly quotations selectively | **No** | Expanded Details should explain why included citations are relevant. |
 | 2026-08-24 | Connection citations | Six working sources have user-verified human-reachable URLs | **No** | Baumeister & Leary 1995; Ryan & Deci 2000; Vansteenkiste et al. 2020; Cacioppo et al. 2014; Coan & Sbarra 2015; Holt-Lunstad et al. 2010. Citation set is still provisional until user approves the complete package. |
+| 2026-08-24 | Strategy review | Strategy provenance and evidence audit added to the review process | **No** | User-submitted strategies are immutable. System-authored strategies must be portable, directly relevant, evidence-aligned, non-filler, and meaningfully distinct. Exact Connection strategy changes remain provisional pending user approval and manual verification of any new evidence URLs. |
 
 ## Handoff for the next agent
 
@@ -203,8 +220,9 @@ Do not move these into the final Connection citation set unless the user is give
 6. Avoid em dashes in proposed site copy.
 7. Prefer concise, exact quotations from authoritative academic sources when they strengthen transparency and reader confidence.
 8. The expanded Details section should explain what each citation contributes and clearly distinguish theory from empirical outcome evidence.
-9. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`; do not manually treat generated output as canonical without evidence.
-10. After the user approves the final citation set, all human-reachable URLs, the short description, the expanded Details copy, and implementation scope, make the production change through the repository's normal branch/PR workflow and append an approval ledger entry here.
+9. Audit strategies for provenance before content review. Never alter user-submitted strategies. System strategies need direct relevance, portability, distinctness, and appropriate evidence.
+10. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`; do not manually treat generated output as canonical without evidence.
+11. After the user approves the final citation set, all human-reachable URLs, the short description, the expanded Details copy, strategy changes, and implementation scope, make the production change through the repository's normal branch/PR workflow and append an approval ledger entry here.
 
 ## Open questions to resolve over time
 
@@ -212,5 +230,6 @@ Do not move these into the final Connection citation set unless the user is give
 - What citation presentation should users see in the UI (inline author-year, expandable sources, source notes, etc.) versus what should remain structured data?
 - Should certain sentences be framed explicitly as NVC/SDT/framework language rather than general psychological fact?
 - Which categories of copy require empirical sourcing, and which are clearly labeled reflective prompts or practical suggestions that should not be dressed up as scientific claims?
+- How should evidence metadata for system-authored strategies be stored and surfaced so strategy research is auditable without implying guaranteed outcomes?
 
 Keep this document cumulative but concise enough that a future agent can recover the editorial state without needing the original conversation.
