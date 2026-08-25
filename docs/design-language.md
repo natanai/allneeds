@@ -32,6 +32,19 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - The Design Lab main and actual-size previews inherit the live Customizer palette and roundness from the page. The lab must not maintain duplicate live palette or roundness controls. Fixed preset-comparison swatches may render independent preset snapshots because their purpose is explicit side-by-side comparison.
 - The semantic-vocabulary regression test is permanent and should fail if a removed hue-named CSS token or magnet tone is reintroduced into runtime source.
 
+## Need magnet identities
+
+**Accepted 2026-08-25.** Need magnets may develop distinct full-face identities while preserving the shared physical magnet shell.
+
+- Identity art must not change magnet geometry, physics, tactile outline/shadow, label behavior, or Customizer roundness. Visual identity belongs inside the existing shell.
+- Full-face art should use Customizer-owned functional roles and remain legible across every real preset, including near-monochrome Refrigerator. Do not hard-code rescue colors for one design.
+- The live Design Lab at `/design-lab/need-magnets` is the canonical approval surface. Main/actual-size candidates inherit the real page Customizer, fixed rows show every preset, and candidates should be judged through the full 0–200% roundness range.
+- Standalone mockup HTML is not the normal audit path. Put previews into the live lab unless the user explicitly asks for an offline artifact.
+- Production controls are optional comparison aids. Remove them when the direction has narrowed or they waste review space. Once a candidate is approved and promoted, remove it from the active lab set; Git history is the archive.
+- If a concept intentionally removes the visible icon while keeping its label offset, preserve the real icon slot and hide only the glyph rather than faking the spacing with audit-only padding.
+- Artwork intended to meet a magnet edge must reach the true SVG/view-box edge, especially at 0% roundness where accidental gaps become obvious.
+- **Connection · Constellation is the first approved Need identity.** It retains the existing Connection link icon, uses a networked path-and-node mask across the full face, and derives its icon/art fade from `Positive` to `Primary` over a `Selection`/`Quiet` face. Canonical production references are `src/features/needs/NeedsPage.module.css` and `public/icons/needs/art/connection-constellation.svg`.
+
 ## Magnet physics
 
 **Accepted 2026-08-25; superseded and expanded 2026-08-25.** A magnet being actively held behaves like a pressure source above the shared magnet surface. Think of lifting it as pushing air down into the board: nearby resting magnets are forced radially away, then their own motion, coupling, and collisions carry that disturbance outward through the packed container.
@@ -199,6 +212,8 @@ Rules:
 
 ### 2026-08-25
 
+- Connection's Constellation treatment became the first approved production Need-magnet identity: full-face node/path artwork with the existing link icon, all derived from functional Customizer roles without changing the shared magnet shell or physics.
+- Need-magnet concept work now belongs in the deployed Design Lab rather than standalone preview HTML by default; controls are removed when no longer useful, and approved designs leave the active review set after promotion.
 - Theme internals now use functional Customizer roles site-wide instead of hue-named runtime tokens. Legacy hue-keyed saved themes are migrated only at the read/prepaint boundary, and the Design Lab inherits the live Customizer palette and roundness rather than maintaining duplicate controls.
 - Held magnets now act as pressure sources above a single shared physics surface: local force pushes nearby magnets outward, resting-resting coupling and collisions remain active so the disturbance can ripple through a packed board, and the former lifted-neighbor speed cap/suppression code is removed. Pointer pickup continues to suppress pointer-created focus at the interaction source rather than hiding a held focus ring.
 
