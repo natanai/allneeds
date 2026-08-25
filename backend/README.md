@@ -25,7 +25,12 @@ REPLACE_WITH_ALLNEEDS_DB_ID
 
 Before the first deployment, replace that placeholder with the database ID shown for `allneeds-db` in Cloudflare D1. Do not create a second database.
 
-The Worker also supports an `ADMIN_DIDS` environment variable. It is a comma-separated allowlist of verified Bluesky DIDs that may hide/restore community strategies. Do not populate it with a handle or a guessed DID. Add an admin DID only after the backend OAuth flow has authenticated that profile and `/api/me` reports `verified: true`.
+The Worker supports these Cloudflare environment variables:
+
+- `ADMIN_DIDS`: comma-separated allowlist of **verified** Bluesky DIDs that may hide/restore community strategies. Do not populate it with a handle or a guessed DID. Add an admin DID only after the backend OAuth flow has authenticated that profile and `/api/me` reports `verified: true`.
+- `ALLOW_LEGACY_AUTH`: temporary cutover switch. Set exactly `1` only while the old browser-OAuth frontend still needs `/auth/session`. Remove it (or set anything other than `1`) as part of the React auth cutover. With the switch off, `/auth/session` is disabled and private `/api/*` operations reject old unverified sessions.
+
+`ALLOW_LEGACY_AUTH=1` deliberately preserves the previous security boundary for a short staging window; it is not the intended steady state.
 
 ## Deployment order
 
@@ -35,22 +40,28 @@ The backend and frontend auth cutover must not be deployed in the wrong order.
 2. Apply `migrations/0001_strategy_ownership.sql`.
 3. Apply `migrations/0002_backend_oauth.sql`.
 4. Replace the D1 database-id placeholder in `wrangler.jsonc`.
-5. Install dependencies from this directory.
-6. Run the Worker dry-run check.
-7. Deploy `allneeds-backend` and verify:
+5. During the backend-first staging window only, set `ALLOW_LEGACY_AUTH=1` so the currently live GitHub Pages frontend keeps working while the replacement login is tested.
+6. Install dependencies from this directory.
+7. Run the Worker dry-run check.
+8. Deploy `allneeds-backend` and verify:
    - `/api/health`
    - `/oauth-client-metadata.json`
    - the existing public strategy feed
    - existing signed-out site behavior
-8. Test the new `/auth/login` → `/auth/callback` flow before merging the frontend auth cutover.
-9. After a verified profile is confirmed, add its DID to `ADMIN_DIDS` if that profile should have moderation privileges.
-10. Only then merge/deploy the React changes that use verified backend login and stable strategy sync.
+   - the old live frontend still functions while `ALLOW_LEGACY_AUTH=1`
+9. Test the new `/auth/login` → `/auth/callback` flow directly and confirm `/api/me` reports `verified: true` for that new session.
+10. Add that verified DID to `ADMIN_DIDS` if the profile should have moderation privileges, then confirm `/api/me` reports `admin: true`.
+11. Merge/deploy the React changes that use verified backend login and stable strategy sync.
+12. Immediately remove `ALLOW_LEGACY_AUTH` (or set it to a value other than `1`) and confirm:
+    - `POST /auth/session` is rejected;
+    - an old unverified cookie cannot read/write private profile APIs;
+    - the verified login can still save/load profile data and sync owned strategies.
 
-Keeping this order means the live GitHub Pages site never points at endpoints that have not been deployed yet.
+Keeping this order lets the replacement backend be exercised before the frontend cutover without silently making the insecure compatibility path permanent.
 
 ## Authentication model
 
-The former browser flow forwarded a DPoP-bound access token to `/auth/session` while separately asserting a DID. That endpoint is retained temporarily for compatibility, but sessions created through it are deliberately **unverified** and cannot use privileged owner/admin endpoints.
+The former browser flow forwarded a DPoP-bound access token to `/auth/session` while separately asserting a DID. That endpoint remains only as a temporary staging compatibility path. Sessions created through it are deliberately **unverified** and can never use stable owner/admin endpoints. Once `ALLOW_LEGACY_AUTH` is removed, the endpoint itself and private API access from those unverified sessions are rejected.
 
 The replacement flow uses the official AT Protocol OAuth client in the Worker:
 
@@ -59,7 +70,7 @@ The replacement flow uses the official AT Protocol OAuth client in the Worker:
 - the Worker creates its own HttpOnly `allneeds_session` with `verified_at` set;
 - the temporary Bluesky OAuth credential is immediately revoked/deleted because allneeds only needs the verified identity for its own data.
 
-Privileged ownership and moderation always require a verified allneeds session.
+Privileged ownership and moderation always require a verified allneeds session. With the cutover switch off, ordinary private profile APIs require that verified session as well.
 
 ## Strategy ownership and moderation
 
