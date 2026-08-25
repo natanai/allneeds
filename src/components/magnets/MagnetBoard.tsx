@@ -135,10 +135,11 @@ const EDGE_RESTITUTION = 0.16;
 const COLLISION_RESTITUTION = 0.07;
 const SURFACE_RADIUS = 170;
 const SURFACE_COUPLING = 0.14;
-const LIFTED_CLEARANCE = 38;
-const LIFTED_CLEARING_ACCELERATION = 52;
-const LIFTED_APPROACH_ACCELERATION = 70;
-const LIFTED_NEIGHBOR_MAX_SPEED = 30;
+const LIFTED_CLEARANCE = 54;
+const LIFTED_ESCAPE_BASE_SPEED = 96;
+const LIFTED_ESCAPE_APPROACH_SPEED = 144;
+const LIFTED_ESCAPE_ACCELERATION = 920;
+const LIFTED_NEIGHBOR_MAX_SPEED = 220;
 const REST_CONTACT_CORRECTION = 0.2;
 const DROP_WAVE_SPEED = 235;
 const DROP_WAVE_IMPULSE = 9;
@@ -704,17 +705,27 @@ export function MagnetBoard({
               const reachY = (lifted.height + resting.height) / 2 + LIFTED_CLEARANCE;
               const scaledDistance = Math.hypot(clearX / Math.max(reachX, 1), clearY / Math.max(reachY, 1));
               if (scaledDistance < 1) {
-                const influence = (1 - scaledDistance) ** 2;
+                const influence = (1 - scaledDistance) ** 1.2;
+                const normalX = clearX / clearDistance;
+                const normalY = clearY / clearDistance;
                 const approachSpeed = Math.max(
-                  (lifted.vx * clearX + lifted.vy * clearY) / clearDistance,
+                  lifted.vx * normalX + lifted.vy * normalY,
                   0,
                 );
-                const approachBoost = clamp(approachSpeed / 420, 0, 1);
-                const escapeAcceleration = LIFTED_CLEARING_ACCELERATION
-                  + LIFTED_APPROACH_ACCELERATION * approachBoost;
-                resting.vx += (clearX / clearDistance) * escapeAcceleration * influence * step;
-                resting.vy += (clearY / clearDistance) * escapeAcceleration * influence * step;
-                kickWobble(resting, influence * (2.2 + approachBoost * 1.8) * step);
+                const approachBoost = clamp(approachSpeed / 360, 0, 1);
+                const targetEscapeSpeed = (
+                  LIFTED_ESCAPE_BASE_SPEED
+                  + LIFTED_ESCAPE_APPROACH_SPEED * approachBoost
+                ) * influence;
+                const outwardSpeed = resting.vx * normalX + resting.vy * normalY;
+                const speedGain = clamp(
+                  targetEscapeSpeed - outwardSpeed,
+                  0,
+                  LIFTED_ESCAPE_ACCELERATION * step,
+                );
+                resting.vx += normalX * speedGain;
+                resting.vy += normalY * speedGain;
+                kickWobble(resting, influence * (7 + approachBoost * 7) * step);
               }
               continue;
             }
@@ -1028,10 +1039,11 @@ export function MagnetBoard({
       pointerScale,
       moved: false,
     };
-    if (event.pointerType !== 'touch') {
-      event.currentTarget.focus({ preventScroll: true });
-    }
-    if (event.pointerType !== 'mouse' && event.cancelable) event.preventDefault();
+    // Pointer pickup is a direct-manipulation state, not keyboard focus.
+    // Clear any existing keyboard focus and suppress native pointer focusing so
+    // a held magnet never needs a CSS rule that merely hides a focus ring.
+    event.currentTarget.blur();
+    if (event.cancelable) event.preventDefault();
     try {
       event.currentTarget.setPointerCapture(event.pointerId);
     } catch {
