@@ -7,7 +7,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 
 type EntityRef = { slug: string; title: string };
-type EvidenceSource = { url: string; description?: string };
+type SupportingSourceKind = 'scholarly' | 'official-resource';
+type EvidenceSource = { url: string; description?: string; kind?: SupportingSourceKind };
 type StrategyProvenance = 'system' | 'user';
 type CatalogStrategySource = {
   title: string;
