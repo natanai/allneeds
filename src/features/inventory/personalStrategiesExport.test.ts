@@ -43,7 +43,9 @@ describe('personal strategy export', () => {
 
   it('builds the same pre-addressed email target used by the legacy share flow', () => {
     const href = personalStrategiesEmailHref();
-    expect(href).toContain(`mailto:${PERSONAL_STRATEGIES_EMAIL_ADDRESS}?`);
-    expect(decodeURIComponent(href)).toContain(PERSONAL_STRATEGIES_EMAIL_SUBJECT);
+    const url = new URL(href);
+    expect(url.protocol).toBe('mailto:');
+    expect(url.pathname).toBe(PERSONAL_STRATEGIES_EMAIL_ADDRESS);
+    expect(url.searchParams.get('subject')).toBe(PERSONAL_STRATEGIES_EMAIL_SUBJECT);
   });
 });
