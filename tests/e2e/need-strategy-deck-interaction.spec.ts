@@ -60,75 +60,116 @@ test.describe('need strategy deck visual and gesture contract', () => {
     expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.viewportWidth + 1);
   });
 
-  test('a thumb-like diagonal swipe advances while clearly vertical intent does not', async ({ page }) => {
+  test('the active card owns touch, follows the thumb, and navigates in both directions', async ({ page }) => {
     const deck = page.locator('[data-strategy-deck]');
     const counter = deck.locator('[data-strategy-counter]');
     await expect(counter).toBeVisible();
 
     const before = await counter.textContent();
-    await deck.dispatchEvent('pointerdown', {
+    let active = deck.locator('[data-position="active"]');
+    await expect(active).toBeVisible();
+    expect(await active.evaluate((element) => getComputedStyle(element).touchAction)).toBe('none');
+
+    const start = await active.boundingBox();
+    expect(start).not.toBeNull();
+    if (!start) return;
+    const startX = start.x + start.width * 0.72;
+    const startY = start.y + Math.min(150, start.height * 0.35);
+
+    await active.dispatchEvent('pointerdown', {
       pointerId: 91,
       pointerType: 'touch',
       isPrimary: true,
       bubbles: true,
       button: 0,
       buttons: 1,
-      clientX: 260,
-      clientY: 300,
+      clientX: startX,
+      clientY: startY,
     });
-    await deck.dispatchEvent('pointermove', {
+    await active.dispatchEvent('pointermove', {
       pointerId: 91,
       pointerType: 'touch',
       isPrimary: true,
       bubbles: true,
       buttons: 1,
-      clientX: 248,
-      clientY: 316,
+      clientX: startX - 88,
+      clientY: startY + 48,
     });
-    await deck.dispatchEvent('pointerup', {
+
+    const draggedLeft = await active.boundingBox();
+    expect(draggedLeft).not.toBeNull();
+    if (!draggedLeft) return;
+    expect(draggedLeft.x).toBeLessThan(start.x - 58);
+
+    const leftReveal = await deck.evaluate((element) => ({
+      next: Number(getComputedStyle(element.querySelector<HTMLElement>('[data-position="next"]')!).zIndex),
+      previous: Number(getComputedStyle(element.querySelector<HTMLElement>('[data-position="prev"]')!).zIndex),
+    }));
+    expect(leftReveal.next).toBeGreaterThan(leftReveal.previous);
+
+    await active.dispatchEvent('pointerup', {
       pointerId: 91,
       pointerType: 'touch',
       isPrimary: true,
       bubbles: true,
       button: 0,
       buttons: 0,
-      clientX: 234,
-      clientY: 332,
+      clientX: startX - 88,
+      clientY: startY + 48,
     });
 
     await expect(counter).not.toHaveText(before ?? '');
-    const afterHorizontal = await counter.textContent();
 
-    await deck.dispatchEvent('pointerdown', {
+    active = deck.locator('[data-position="active"]');
+    await expect(active).toBeVisible();
+    const returnStart = await active.boundingBox();
+    expect(returnStart).not.toBeNull();
+    if (!returnStart) return;
+    const returnX = returnStart.x + returnStart.width * 0.28;
+    const returnY = returnStart.y + Math.min(150, returnStart.height * 0.35);
+
+    await active.dispatchEvent('pointerdown', {
       pointerId: 92,
       pointerType: 'touch',
       isPrimary: true,
       bubbles: true,
       button: 0,
       buttons: 1,
-      clientX: 240,
-      clientY: 300,
+      clientX: returnX,
+      clientY: returnY,
     });
-    await deck.dispatchEvent('pointermove', {
+    await active.dispatchEvent('pointermove', {
       pointerId: 92,
       pointerType: 'touch',
       isPrimary: true,
       bubbles: true,
       buttons: 1,
-      clientX: 247,
-      clientY: 324,
+      clientX: returnX + 88,
+      clientY: returnY + 44,
     });
-    await deck.dispatchEvent('pointerup', {
+
+    const draggedRight = await active.boundingBox();
+    expect(draggedRight).not.toBeNull();
+    if (!draggedRight) return;
+    expect(draggedRight.x).toBeGreaterThan(returnStart.x + 58);
+
+    const rightReveal = await deck.evaluate((element) => ({
+      next: Number(getComputedStyle(element.querySelector<HTMLElement>('[data-position="next"]')!).zIndex),
+      previous: Number(getComputedStyle(element.querySelector<HTMLElement>('[data-position="prev"]')!).zIndex),
+    }));
+    expect(rightReveal.previous).toBeGreaterThan(rightReveal.next);
+
+    await active.dispatchEvent('pointerup', {
       pointerId: 92,
       pointerType: 'touch',
       isPrimary: true,
       bubbles: true,
       button: 0,
       buttons: 0,
-      clientX: 250,
-      clientY: 344,
+      clientX: returnX + 88,
+      clientY: returnY + 44,
     });
 
-    await expect(counter).toHaveText(afterHorizontal ?? '');
+    await expect(counter).toHaveText(before ?? '');
   });
 });
