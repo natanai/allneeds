@@ -23,7 +23,7 @@ function strategy(overrides: Partial<InventoryStrategy>): InventoryStrategy {
 }
 
 describe('profile strategy publishing', () => {
-  it('publishes only signed-in users own public or followers strategies', () => {
+  it('publishes only signed-in users own public or followers strategies with stable local keys', () => {
     const result = profilePublishableStrategies([
       strategy({ id: 'mine-public', title: 'Mine public', personal: true, visibility: 'public' }),
       strategy({ id: 'mine-followers', title: 'Mine followers', personal: true, visibility: 'followers' }),
@@ -38,8 +38,20 @@ describe('profile strategy publishing', () => {
     ]);
 
     expect(result).toEqual([
-      { title: 'Mine public', body: 'Example description', needIds: ['safety'], visibility: 'public' },
-      { title: 'Mine followers', body: 'Example description', needIds: ['safety'], visibility: 'followers' },
+      {
+        clientKey: 'mine-public',
+        title: 'Mine public',
+        body: 'Example description',
+        needIds: ['safety'],
+        visibility: 'public',
+      },
+      {
+        clientKey: 'mine-followers',
+        title: 'Mine followers',
+        body: 'Example description',
+        needIds: ['safety'],
+        visibility: 'followers',
+      },
     ]);
   });
 });
