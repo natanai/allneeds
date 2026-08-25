@@ -13,13 +13,13 @@ The goal is to preserve good existing language, strengthen sourcing where needed
 ## Non-negotiable workflow for content changes
 
 1. **Retrieve the exact current production copy first.** Do not rewrite from memory or from a paraphrase in conversation.
-2. **Identify the canonical content source before editing.** `src/data/generated/legacyData.json` is generated output; do not assume generated output is the correct authoring surface.
+2. **Identify the canonical content source before editing.** The imported `src/data/generated/legacyData.json` snapshot is not automatically the current editorial authoring surface. Reviewed V2 editorial changes now belong in `src/data/editorialCatalog.json`, which is merged with the imported snapshot at build time.
 3. **Audit one small unit at a time**, usually one need, feeling, strategy, section, or a few closely related sentences.
 4. For each sentence, distinguish among definition/framework language, empirical description, causal claim, association, theoretical interpretation, clinical guidance, and editorial/value framing.
 5. **Check source-to-claim fit.** A citation must support the particular proposition being made, not merely concern the same broad topic.
 6. Prefer the smallest edit that makes the claim accurate. Do not rewrite surrounding copy merely for stylistic consistency unless the user asks for it.
 7. **Present proposed copy, strategy changes, and evidence to the user before changing site content.**
-8. Only after approval, change the canonical source, regenerate derived data if required, and update this document in the same PR.
+8. Only after approval, change the canonical source, regenerate or materialize derived data if required, and update this document in the same PR.
 9. Verify links/citations, generated-data integrity, and relevant repository checks. Do not claim validation that was not run.
 
 ### Explicit user approval gate
@@ -57,6 +57,8 @@ Strategies are reviewed alongside each need, but they are a distinct evidence la
 - **Establish provenance before changing any strategy.** A strategy with a named contributor or other evidence of genuine user authorship is user-submitted.
 - **Never rewrite, rename, delete, remap, or otherwise clean up a user-submitted strategy.** User strategies are experiential contributions and do not have to pass the same research-evidence gate as system-authored strategies.
 - System/AI-authored strategies must earn their place. Do not retain or add strategies merely to make a list look complete.
+- **A user-approved global discard is a deletion decision, not a hiding decision.** Do not keep an approved-for-discard system strategy eligible as a dead legacy fallback. Remove it from the current catalog materialization and from the maintained source/snapshot when that source is rewritten. Git history is sufficient historical record.
+- **A rejection for one need is not automatically a global deletion.** If a system strategy may still fit another need, remove only the audited need association until its other uses are reviewed.
 - Prefer low-friction, portable strategies feasible in ordinary life. The ideal action can be attempted in many settings and does not require a purchase, appointment, program, special location, or large block of time.
 - A strategy should have a direct, intelligible pathway to the need being audited. If a system strategy fits another need better, prefer changing only the need association rather than deleting it globally before its other uses are reviewed.
 - For system strategies, seek direct empirical support for the underlying mechanism when good research exists. Evidence supports plausibility, not a guaranteed individual outcome.
@@ -78,8 +80,7 @@ Strategy cards should make the source of their authority legible without treatin
 - The preferred card presentation is parallel rather than additive: where a human-authored card shows its contributor, a system-authored card should usually show a concise clickable research attribution such as `Evidence: Author et al., year` or equivalent. Do not present the paper's authors as though they authored the strategy itself.
 - One citation is intended to make the strategy auditable and answer “why is this here?” It does not imply that the exact wording of the card was directly tested or that the action guarantees an outcome. The source may support the underlying mechanism or an evidence-informed clinical translation.
 - If no defensible single scholarly source can be identified, reconsider whether the system strategy has earned its place. A review or meta-analysis may be the best single source when the strategy is based on a broader intervention principle. Uncited system strategies should be rare and explicitly justified during review.
-- Provenance should ultimately be explicit in the data model rather than inferred only from whether `contributor` happens to be blank. This prevents future imported, migrated, or incomplete records from being misclassified.
-- **Current implementation gap:** the React `Strategy` model currently has an optional `contributor` but no strategy-level evidence/source field, and the need-page strategy card renders only contributor metadata. Do not change that production model or UI until the relevant content package and implementation scope are explicitly approved.
+- Provenance is explicit in the V2 `Strategy` model through `provenance: 'system' | 'user'`; reviewed system strategies may additionally carry one `evidence` source. Legacy contributor fields are normalized during catalog materialization so genuine human submissions remain human-attributed.
 
 ## Therapeutic strategy design method
 
@@ -98,28 +99,32 @@ Use the following design test:
 9. **Reject AI-sounding filler.** Avoid titles such as “One kind text,” “Specific thank-you,” or other synthetic micro-challenge phrasing when an ordinary human action name is clearer. Strategy names should sound like things a clinician or client might naturally say.
 10. **Favor autonomy and optionality.** Good strategy sets demonstrate that one need can be tended in multiple ways. They should reduce the sense of being trapped by the single strategy, person, or outcome currently on the user's mind.
 
-### Connection example: how this method was applied
+### Connection example: approved package
 
-The Connection audit clarified the method above.
+The Connection audit clarified the method above and the complete package was explicitly approved by the user on 2026-08-24.
 
-Protected user-submitted strategies currently associated with Connection include:
+Protected user-submitted strategies associated with Connection:
 
 - `Call a friend`
 - `Play a social video game`
 - `Read a character driven novel`
 
-These remain exactly as submitted.
+These remain exactly as submitted and use their human contributor metadata as provenance.
 
-For system-authored strategies, the review rejected adding extra social-skills-style micro-challenges merely to increase count. It also rejected treating interpersonal contact as the only legitimate route to Connection. The preferred candidate directions are:
+Approved system-authored strategies:
 
-- **Write a letter.** Set a five-minute timer. Choose someone you trust, miss, or would like to feel closer to. Write what has been happening in your life and one thing you wish they knew. Sending it is optional.
-- **Remember a connected moment.** Recall one moment when you felt connected to a person, animal, place, group, or activity. Write where you were, what was happening, one detail that made the moment feel connected, and one part of the experience you could recreate.
-- **Map your connection options.** On paper, make three headings: People, Places, Groups. List any person, place, or group where you have felt even slightly more connected. Leave a heading blank if needed. Circle the easiest option to move toward and write one specific next step.
-- **Notice where you are.** Stop for one minute. Notice one thing you can see, one sound you can hear, one physical sensation, and one detail that makes the place distinct. Write it down, photograph it, or simply spend a few seconds with it.
+- **Write a letter.** Set a five-minute timer. Choose someone you trust, miss, or would like to feel closer to. Write what has been happening in your life and one thing you wish they knew. Sending it is optional. Evidence: https://pubmed.ncbi.nlm.nih.gov/40643373/
+- **Remember a connected moment.** Recall one moment when you felt connected to a person, animal, place, group, or activity. Write where you were, what was happening, one detail that made the moment feel connected, and one part of the experience you could recreate. Evidence: https://pubmed.ncbi.nlm.nih.gov/26751632/
+- **Map your connection options.** On paper, make three headings: People, Places, Groups. List any person, place, or group where you have felt even slightly more connected. Leave a heading blank if needed. Circle the easiest option to move toward and write one specific next step. Evidence: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535
+- **Notice where you are.** Stop for one minute. Notice one thing you can see, one sound you can hear, one physical sensation, and one detail that makes the place distinct. Write it down, photograph it, or simply spend a few seconds with it. Evidence: https://www.sciencedirect.com/science/article/pii/S0272494409000620
 
-These are **approved in direction and wording by the user as strategy candidates**, but they are not production-approved until the associated evidence URLs are manually verified and the complete Connection package is approved.
+Approved strategy removals/association changes:
 
-The reasoning matters more than the exact examples: each action is concrete, can usually be attempted without special resources, does not require another person to cooperate, and represents a different pathway toward Connection. Future audits should seek this kind of diversity rather than reproducing these exact four cards for unrelated needs.
+- `one-kind-text`: globally discarded system strategy.
+- `specific-thank-you`: globally discarded system strategy.
+- `ambient-postcard`: remove the Connection association only; do not globally delete before its other need associations are reviewed.
+
+The reasoning matters more than the exact examples: each approved system action is concrete, can usually be attempted without special resources, does not require another person to cooperate, and represents a different pathway toward Connection. Future audits should seek this kind of diversity rather than reproducing these exact four cards for unrelated needs.
 
 ## Evidence standard
 
@@ -181,9 +186,7 @@ Earlier short/original copy:
 
 The user prefers the motivational structure of the earlier short copy, but wants the final short description to lean more clearly on evolutionary scholarship and less on emotionally dependent framing.
 
-### Working citation pool with user-verified human links
-
-These six sources have human-reachable URLs the user manually opened and verified. They are working sources until the complete Connection package is approved.
+### Approved Connection citation set with user-verified human links
 
 **Baumeister, R. F., & Leary, M. R. (1995). _The need to belong: Desire for interpersonal attachments as a fundamental human motivation._ Psychological Bulletin, 117(3), 497–529.**  
 Human-verifiable record: https://psycnet.apa.org/record/1995-29052-001  
@@ -219,20 +222,11 @@ DOI: 10.1371/journal.pmed.1000316
 PMID: 20668659  
 Use for: population-level association between stronger social relationships and survival across 148 studies and 308,849 participants. Do not turn the association into an individual causal guarantee.
 
-### Other previously identified candidates not yet approved for final use
+### Other previously identified candidates not included in the approved Connection set
 
 - Holt-Lunstad, Smith, Baker, Harris, & Stephenson (2015), loneliness/social isolation and mortality.
 - Slavich (2020), Social Safety Theory.
 - Tang, Wang, & Guerrien (2020), basic psychological need satisfaction and later-life well-being.
-
-### Strategy evidence awaiting manual URL verification
-
-The following evidence was discussed for the four preferred Connection strategy candidates. Do not treat it as approved until the user manually verifies the associated human-reachable URLs.
-
-- loneliness/social-connection intervention reviews for the general principle that effective approaches can target different pathways rather than only increasing social contact;
-- expressive-writing evidence for relational writing, with the limitation that writing is not established as a direct loneliness treatment in every study;
-- reminiscence-based evidence for recalling connection, with population/generalizability limits where relevant;
-- broader environmental/place-connection literature for orienting toward present environment, without claiming the exact one-minute exercise is a validated loneliness intervention.
 
 ## Status / approval ledger
 
@@ -242,31 +236,35 @@ The following evidence was discussed for the four preferred Connection strategy 
 | 2026-08-24 | Citation infrastructure | Human-verifiable links required | **No** | User verification beats crawler accessibility. |
 | 2026-08-24 | Review process | Full-package approval required before production change | **No** | Includes copy, citations, URLs, strategy changes, and implementation scope. |
 | 2026-08-24 | Editorial style | Do not formally define needs; preserve motivational framing; avoid em dashes; use direct scholarly quotations selectively | **No** | Details should integrate sources naturally rather than explain “why this paper was included.” |
-| 2026-08-24 | Connection citations | Six working sources have user-verified URLs | **No** | Citation set remains provisional until complete-package approval. |
+| 2026-08-24 | Connection citations | Six working sources have user-verified URLs | **No** | Citation set was provisional until complete-package approval. |
 | 2026-08-24 | Strategy review | Provenance and evidence audit added | **No** | User-submitted strategies immutable; system strategies must earn their place. |
-| 2026-08-24 | Therapeutic strategy method | Strategy-generation method clarified and Connection candidate directions accepted | **No** | Future agents should propose small, specific therapeutic experiments, avoid prerequisites and dependence on others, and deliberately consider multiple pathways including self/environment. Connection strategy evidence still requires manual URL verification. |
-| 2026-08-24 | Strategy citation provenance | System strategy citation display direction established | **No** | User strategies must never require citations. System-authored cards should usually carry exactly one human-clickable scholarly citation in the provenance area where a human contributor would otherwise appear. Current React strategy model/UI does not yet support this and must not be changed before package approval. |
+| 2026-08-24 | Therapeutic strategy method | Strategy-generation method clarified and Connection candidate directions accepted | **No** | Future agents should propose small, specific therapeutic experiments, avoid prerequisites and dependence on others, and deliberately consider multiple pathways including self/environment. |
+| 2026-08-24 | Strategy citation provenance | System strategy citation display direction established | **No** | User strategies must never require citations. System-authored cards should usually carry exactly one human-clickable scholarly citation in the provenance area where a human contributor would otherwise appear. |
+| 2026-08-24 | Connection complete package | User explicitly approved the full copy, citation, strategy, evidence, provenance, removal, and implementation package | **Yes, in the implementation PR** | Seven Connection strategies total: three protected human submissions plus four reviewed system strategies. `one-kind-text` and `specific-thank-you` are global discards; `ambient-postcard` loses only its Connection association. |
+| 2026-08-24 | Strategy discard semantics | Global discard means deletion; need-specific rejection means association removal | **Yes, in the implementation PR** | Do not allow globally discarded system strategies to remain eligible as hidden legacy fallbacks. |
 
 ## Handoff for the next agent
 
 1. Read this file before proposing scientific, clinical, or strategy changes.
 2. Do not make a broad “professionalize all copy” pass.
-3. Continue with Connection unless the user chooses another item.
-4. Keep repo activity read-only except updates to this file until the user explicitly approves the complete package.
+3. Connection has completed its approval cycle. Do not revise its approved package without a new explicit review/approval cycle.
+4. For a new content audit, keep repo activity read-only except updates to this file until the user explicitly approves the complete package.
 5. Do not formalize a need as a definition. Describe motivation, function, consequences, and relevant scholarship.
 6. Avoid em dashes in proposed site copy.
 7. Prefer concise, exact quotations from authoritative sources when they strengthen transparency and reader confidence.
 8. Integrate citations into the Details narrative so their relevance is self-evident.
 9. Audit strategy provenance first. Never alter user-submitted strategies and never ask users to supply citations.
 10. For system strategies, use the therapeutic strategy design method above. Favor concrete, low-friction experiments with clear steps, few assumptions, minimal dependence on others, and distinct pathways to the need.
-11. For each system-authored strategy, normally select one best human-verifiable scholarly source supporting its core mechanism and plan to surface it as clickable evidence/provenance rather than as a human author.
-12. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`.
-13. After the user approves the final citation set, all human-reachable URLs, short copy, expanded Details, exact strategy package, strategy evidence, citation display implementation scope, and other implementation scope, make the production change through the repository's normal branch/PR workflow and append an approval ledger entry here.
+11. For each system-authored strategy, normally select one best human-verifiable scholarly source supporting its core mechanism and surface it as clickable evidence/provenance rather than as a human author.
+12. Reviewed V2 editorial changes belong in `src/data/editorialCatalog.json`; the imported legacy snapshot supplies unreviewed baseline data. Global discard and need-specific removal directives must be honored during materialization so stale imported associations cannot leak back into runtime.
+13. After a future package is approved, make the production change through the repository's normal branch/PR workflow and append an approval ledger entry here.
 
-## Open questions
+## Current implementation notes
 
-- What file/process is the canonical authoring source for the generated legacy catalog?
-- What exact field names and rendering component should implement the one-source system-strategy provenance model once production changes are approved?
-- Which strategy evidence URLs for the current Connection candidates will the user manually verify and approve?
+- `src/data/editorialCatalog.json` is the V2-owned authoring surface for approved post-import editorial changes.
+- `vite.config.ts` merges that source with the imported snapshot at build time and applies explicit global discard and need-association removal directives.
+- The V2 `Strategy` model now carries explicit `provenance` and optional single-source `evidence` metadata.
+- Need strategy cards display a human contributor for user-authored strategies and a clickable Evidence source for reviewed system-authored strategies.
+- `src/data/generated/legacyData.json` remains the historical import snapshot. Approved global discards are barred from the live catalog even if an old imported row still exists there; when that snapshot is next safely materialized from a generator/importer, globally discarded rows must be omitted rather than preserved as dead content.
 
 Keep this document cumulative but concise enough that a future agent can recover the editorial state without needing the original conversation.
