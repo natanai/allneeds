@@ -23,7 +23,7 @@ export function FauxFeelingsPage() {
     id: `faux-feelings-${feeling.slug}`,
     label: feeling.title,
     to: `/faux-feelings/${feeling.slug}`,
-    tone: 'sky',
+    tone: 'selection',
   })), [visible]);
 
   return (

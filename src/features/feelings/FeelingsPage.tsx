@@ -27,7 +27,7 @@ export function FeelingsPage() {
     label: feeling.title,
     to: `/feelings/${feeling.slug}`,
     kind: 'feeling',
-    tone: 'sky',
+    tone: 'selection',
     iconUrl: assetPath(`icons/feelings/${feeling.slug}.svg`),
   })), [visibleFeelings]);
 

@@ -25,7 +25,7 @@
   overflow: auto;
   border: 2px solid color-mix(in srgb, var(--outline) 52%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, #fff 90%, var(--lavender) 10%);
+  background: color-mix(in srgb, #fff 90%, var(--quiet) 10%);
   box-shadow: 0 12px 28px color-mix(in srgb, var(--outline) 22%, transparent), 0 4px 0 color-mix(in srgb, var(--outline) 12%, transparent);
 }
 
@@ -47,7 +47,7 @@
   border: 1.5px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-md);
   background: #fff;
-  color: var(--ink);
+  color: var(--text);
   text-decoration: none;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .needLink small {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .66rem;
   font-weight: 700;
 }
@@ -68,7 +68,7 @@
 .needLink:hover,
 .needLink:focus-visible {
   border-color: var(--outline);
-  background: color-mix(in srgb, var(--sky) 16%, #fff 84%);
+  background: color-mix(in srgb, var(--selection) 16%, #fff 84%);
 }
 
 .closeButton {
@@ -81,7 +81,7 @@
   border: 1.5px solid color-mix(in srgb, var(--outline) 26%, transparent);
   border-radius: 50%;
   background: #fff;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font: 800 1.2rem/1 var(--font-body);
   cursor: pointer;
 }
@@ -89,8 +89,8 @@
 .closeButton:hover,
 .closeButton:focus-visible {
   border-color: var(--outline);
-  color: var(--ink);
-  background: color-mix(in srgb, var(--rose) 22%, #fff 78%);
+  color: var(--text);
+  background: color-mix(in srgb, var(--action) 22%, #fff 78%);
 }
 
 .detailPrompt {
@@ -118,7 +118,7 @@
   border: 1.5px solid color-mix(in srgb, var(--outline) 32%, transparent);
   border-radius: var(--radius-md);
   background: #fff;
-  color: var(--ink);
+  color: var(--text);
   font: 720 .82rem/1.2 var(--font-body);
   text-align: left;
   cursor: pointer;
@@ -130,14 +130,14 @@
 }
 
 .strategyShortcuts button > span:last-child {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 1.05rem;
 }
 
 .strategyShortcuts button:hover,
 .strategyShortcuts button:focus-visible {
   border-color: var(--outline);
-  background: color-mix(in srgb, var(--mint) 18%, #fff 82%);
+  background: color-mix(in srgb, var(--positive) 18%, #fff 82%);
 }
 
 .viewStrategies {
@@ -149,7 +149,7 @@
   padding: .25rem .1rem;
   border: 0;
   background: transparent;
-  color: color-mix(in srgb, var(--ink-soft) 82%, transparent);
+  color: color-mix(in srgb, var(--secondary) 82%, transparent);
   font: 700 .68rem/1.15 var(--font-body);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -159,7 +159,7 @@
 
 .viewStrategies:hover,
 .viewStrategies:focus-visible {
-  color: var(--ink);
+  color: var(--text);
   background: transparent;
 }
 
@@ -178,13 +178,13 @@
   gap: .65rem;
   border: 1.5px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--mint) 20%, #fff 80%);
-  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--positive) 20%, #fff 80%);
+  color: var(--secondary);
   font-size: .78rem;
 }
 
 .strategyContext strong {
-  color: var(--ink);
+  color: var(--text);
 }
 
 .strategyContext button {
@@ -194,13 +194,13 @@
   border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent);
   border-radius: var(--radius-pill);
   background: #fff;
-  color: var(--ink);
+  color: var(--text);
   font: 750 .74rem/1 var(--font-body);
   cursor: pointer;
 }
 
 .savedCard:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--plum) 52%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--primary) 52%, transparent);
   outline-offset: 3px;
 }
 

@@ -13,7 +13,7 @@
   gap: .46rem;
   border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-raised) 92%, var(--sky) 8%);
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--selection) 8%);
 }
 
 .icon {
@@ -23,8 +23,8 @@
   align-items: center;
   justify-content: center;
   border-radius: calc(var(--radius-md) * .78);
-  background: color-mix(in srgb, var(--sky) 48%, var(--surface-raised) 52%);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--selection) 48%, var(--surface-raised) 52%);
+  color: var(--text);
 }
 
 .icon svg {
@@ -39,12 +39,12 @@
 }
 
 .sharingCopy strong {
-  color: var(--ink);
+  color: var(--text);
   font: 760 .73rem/1.15 var(--font-body);
 }
 
 .sharingCopy small {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font: 520 .61rem/1.2 var(--font-body);
 }
 
@@ -56,13 +56,13 @@
   border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
-  color: var(--ink);
+  color: var(--text);
   font: 680 .7rem/1 var(--font-body);
 }
 
 .profileSharing select:focus-visible,
 .exportVisibility select:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--plum) 52%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--primary) 52%, transparent);
   outline-offset: 2px;
 }
 
@@ -81,7 +81,7 @@
 
 .localStatus {
   min-width: 0;
-  color: color-mix(in srgb, var(--ink-soft) 78%, transparent);
+  color: color-mix(in srgb, var(--secondary) 78%, transparent);
   font: 610 .64rem/1.25 var(--font-body);
 }
 
@@ -98,7 +98,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  color: var(--ink-soft);
+  color: var(--secondary);
   font: 800 .92rem/1 var(--font-body);
   letter-spacing: .08em;
   cursor: pointer;
@@ -113,8 +113,8 @@
 .actionMenu > summary:hover,
 .actionMenu > summary:focus-visible,
 .actionMenu[open] > summary {
-  background: color-mix(in srgb, var(--sky) 20%, transparent);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--selection) 20%, transparent);
+  color: var(--text);
   outline: none;
 }
 
@@ -131,7 +131,7 @@
   gap: .08rem;
   border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-raised) 96%, var(--lavender) 4%);
+  background: color-mix(in srgb, var(--surface-raised) 96%, var(--quiet) 4%);
   box-shadow: 0 8px 20px color-mix(in srgb, var(--outline) 16%, transparent);
 }
 
@@ -145,7 +145,7 @@
   border: 0;
   border-radius: var(--radius-md);
   background: transparent;
-  color: var(--ink);
+  color: var(--text);
   font: 680 .76rem/1.25 var(--font-body);
   text-align: left;
   text-decoration: none;
@@ -156,7 +156,7 @@
 .actionMenuPanel button:focus-visible,
 .actionMenuPanel a:hover,
 .actionMenuPanel a:focus-visible {
-  background: color-mix(in srgb, var(--sky) 18%, transparent);
+  background: color-mix(in srgb, var(--selection) 18%, transparent);
   outline: none;
 }
 
@@ -177,12 +177,12 @@
 }
 
 .exportVisibility strong {
-  color: var(--ink);
+  color: var(--text);
   font: 720 .7rem/1.2 var(--font-body);
 }
 
 .exportVisibility small {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font: 500 .6rem/1.2 var(--font-body);
 }
 
@@ -201,13 +201,13 @@
   gap: .42rem;
   border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
   border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--surface-raised) 96%, var(--mint) 4%);
+  background: color-mix(in srgb, var(--surface-raised) 96%, var(--positive) 4%);
   box-shadow: none;
 }
 
 :global(#inventory-form) > label > span:first-child,
 :global(#suggestion-form) > label > span:first-child {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .72rem;
   font-weight: 720;
   line-height: 1.2;
@@ -219,7 +219,7 @@
 :global(#suggestion-form) textarea {
   min-height: 44px;
   padding: .5rem .58rem;
-  color: var(--ink);
+  color: var(--text);
   font-size: .84rem;
   line-height: 1.35;
 }

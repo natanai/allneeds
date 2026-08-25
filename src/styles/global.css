@@ -8,12 +8,12 @@ html {
   scrollbar-gutter: auto;
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--plum) 65%, #000 5%) 0%,
-    color-mix(in srgb, var(--plum) 55%, #fff 20%) 60%,
-    color-mix(in srgb, var(--plum) 45%, #fff 35%) 100%
+    color-mix(in srgb, var(--primary) 65%, #000 5%) 0%,
+    color-mix(in srgb, var(--primary) 55%, #fff 20%) 60%,
+    color-mix(in srgb, var(--primary) 45%, #fff 35%) 100%
   );
   background-attachment: fixed;
-  color: var(--ink);
+  color: var(--text);
   font-family: var(--font-body);
   font-size: 18px;
   line-height: 1.55;
@@ -33,12 +33,12 @@ body {
   display: flex;
   justify-content: center;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--lavender) 60%, transparent) 0 30%, transparent 60%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--quiet) 60%, transparent) 0 30%, transparent 60%),
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--plum) 75%, #000 5%) 0%,
-      color-mix(in srgb, var(--plum) 55%, #fff 20%) 60%,
-      color-mix(in srgb, var(--plum) 45%, #fff 35%) 100%
+      color-mix(in srgb, var(--primary) 75%, #000 5%) 0%,
+      color-mix(in srgb, var(--primary) 55%, #fff 20%) 60%,
+      color-mix(in srgb, var(--primary) 45%, #fff 35%) 100%
     );
 }
 
@@ -69,8 +69,8 @@ a {
 }
 
 ::selection {
-  background: var(--mint);
-  color: var(--ink);
+  background: var(--positive);
+  color: var(--text);
 }
 
 .skip-link {
@@ -81,8 +81,8 @@ a {
   padding: 0.5rem 1rem;
   border: 3px solid var(--outline);
   border-radius: var(--radius-sm);
-  background: var(--gold);
-  color: var(--ink);
+  background: var(--attention);
+  color: var(--text);
   font-weight: 700;
 }
 

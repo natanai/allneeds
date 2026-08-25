@@ -10,7 +10,7 @@
   overflow: hidden;
   border: 3px solid var(--outline);
   border-radius: var(--radius-3xl);
-  background: color-mix(in srgb, var(--lavender) 82%, var(--surface-raised) 18%);
+  background: color-mix(in srgb, var(--quiet) 82%, var(--surface-raised) 18%);
   box-shadow: 0 18px 0 var(--shadow), 0 26px 40px color-mix(in srgb, var(--outline) 22%, transparent);
 }
 
@@ -24,7 +24,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   border-bottom: 1px solid color-mix(in srgb, var(--outline) 24%, transparent);
-  background: color-mix(in srgb, var(--lavender) 82%, var(--surface-raised) 18%);
+  background: color-mix(in srgb, var(--quiet) 82%, var(--surface-raised) 18%);
 }
 
 .title {
@@ -41,7 +41,7 @@
   border: 1.5px solid var(--outline);
   border-radius: var(--radius-circle, 50%);
   background: var(--surface-raised);
-  color: var(--ink);
+  color: var(--text);
   font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
@@ -91,14 +91,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink);
+  color: var(--text);
 }
 
 .rowIcon {
   width: 1.85rem;
   height: 1.85rem;
   border-radius: calc(var(--radius-md) * 0.78);
-  background: color-mix(in srgb, var(--sky) 64%, var(--surface-raised) 36%);
+  background: color-mix(in srgb, var(--selection) 64%, var(--surface-raised) 36%);
 }
 
 .rowIcon svg,
@@ -118,7 +118,7 @@
 }
 
 .rowCopy output {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.62rem;
   font-weight: 600;
 }
@@ -131,7 +131,7 @@
   border: 1px solid color-mix(in srgb, var(--outline) 38%, transparent);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
-  color: var(--ink);
+  color: var(--text);
   font: inherit;
   font-size: 0.7rem;
   font-weight: 650;
@@ -140,7 +140,7 @@
 .inlineRange {
   width: min(8.6rem, 34vw);
   margin: 0;
-  accent-color: var(--plum);
+  accent-color: var(--primary);
 }
 
 .compactSection {
@@ -161,7 +161,7 @@
   width: 1.4rem;
   height: 1.4rem;
   border-radius: calc(var(--radius-md) * 0.65);
-  background: color-mix(in srgb, var(--lavender) 62%, var(--surface-raised) 38%);
+  background: color-mix(in srgb, var(--quiet) 62%, var(--surface-raised) 38%);
 }
 
 .sectionHeader h2 {
@@ -173,7 +173,7 @@
 
 .sectionHeader small {
   margin-left: auto;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.56rem;
   font-weight: 600;
 }
@@ -200,7 +200,7 @@
 .colorLabel {
   min-width: 0;
   overflow: hidden;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.63rem;
   font-weight: 700;
   line-height: 1.1;
@@ -245,7 +245,7 @@
   border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: calc(var(--radius-md) * 0.72);
   background: color-mix(in srgb, var(--surface-raised) 90%, transparent);
-  color: var(--ink);
+  color: var(--text);
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -270,7 +270,7 @@
   border: 1px solid color-mix(in srgb, var(--outline) 20%, transparent);
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--surface-raised) 84%, transparent);
-  color: var(--ink);
+  color: var(--text);
   font-size: 0.64rem;
   font-weight: 700;
   cursor: pointer;
@@ -297,7 +297,7 @@
   height: 1.08rem;
   border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--ink-soft) 18%, var(--surface-raised) 82%);
+  background: color-mix(in srgb, var(--secondary) 18%, var(--surface-raised) 82%);
   transition: background 140ms ease, border-color 140ms ease;
 }
 
@@ -315,8 +315,8 @@
 }
 
 .navOption input:checked + .toggleTrack {
-  border-color: color-mix(in srgb, var(--plum) 56%, var(--outline) 44%);
-  background: color-mix(in srgb, var(--mint) 72%, var(--plum) 28%);
+  border-color: color-mix(in srgb, var(--primary) 56%, var(--outline) 44%);
+  background: color-mix(in srgb, var(--positive) 72%, var(--primary) 28%);
 }
 
 .navOption input:checked + .toggleTrack::after {
@@ -324,7 +324,7 @@
 }
 
 .navOption input:focus-visible + .toggleTrack {
-  outline: 2px solid color-mix(in srgb, var(--plum) 45%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
   outline-offset: 2px;
 }
 
@@ -349,7 +349,7 @@
   width: 1.9rem;
   height: 1.9rem;
   border-radius: calc(var(--radius-md) * 0.75);
-  background: color-mix(in srgb, var(--mint) 70%, var(--surface-raised) 30%);
+  background: color-mix(in srgb, var(--positive) 70%, var(--surface-raised) 30%);
 }
 
 .deviceCopy {
@@ -368,7 +368,7 @@
 
 .deviceCopy p {
   margin-top: 0.06rem;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.61rem;
   line-height: 1.2;
 }
@@ -379,8 +379,8 @@
   padding: 0.24rem 0.48rem;
   border: 1px solid color-mix(in srgb, var(--outline) 32%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--mint) 78%, var(--surface-raised) 22%);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--positive) 78%, var(--surface-raised) 22%);
+  color: var(--text);
   font: inherit;
   font-size: 0.64rem;
   font-weight: 800;
@@ -389,15 +389,15 @@
 }
 
 .controlAction:disabled {
-  background: color-mix(in srgb, var(--surface-raised) 82%, var(--ink-soft) 18%);
-  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--surface-raised) 82%, var(--secondary) 18%);
+  color: var(--secondary);
   cursor: default;
   opacity: 0.58;
 }
 
 .deviceControl[data-state='denied'] .controlAction,
 .deviceControl[data-state='error'] .controlAction {
-  background: color-mix(in srgb, var(--rose) 56%, var(--surface-raised));
+  background: color-mix(in srgb, var(--action) 56%, var(--surface-raised));
 }
 
 .footer {
@@ -417,7 +417,7 @@
   border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--surface-raised) 75%, transparent);
-  color: var(--ink-soft);
+  color: var(--secondary);
   font: inherit;
   font-size: 0.64rem;
   font-weight: 650;
@@ -434,7 +434,7 @@
   padding: 0.16rem 0.08rem;
   border: 0;
   background: transparent;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font: inherit;
   font-size: 0.54rem;
   font-weight: 500;

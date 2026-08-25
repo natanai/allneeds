@@ -39,7 +39,7 @@ export function FauxFeelingDetailPage() {
     label: feeling.title,
     to: `/feelings/${feeling.slug}`,
     kind: 'feeling',
-    tone: 'sky',
+    tone: 'selection',
     iconUrl: assetPath(`icons/feelings/${feeling.slug}.svg`),
   })) ?? [], [fauxFeeling]);
   const needItems = useMemo<MagnetBoardItem[]>(() => fauxFeeling?.needs.map((need) => ({
@@ -47,7 +47,7 @@ export function FauxFeelingDetailPage() {
     label: need.title,
     to: `/needs/${need.slug}`,
     kind: 'need',
-    tone: 'sky',
+    tone: 'selection',
     iconUrl: assetPath(`icons/needs/${need.slug}.svg`),
   })) ?? [], [fauxFeeling]);
 

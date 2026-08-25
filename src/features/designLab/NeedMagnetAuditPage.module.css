@@ -16,12 +16,12 @@
 
 .header > p:last-child {
   max-width: 72ch;
-  color: var(--ink-soft);
+  color: var(--secondary);
   line-height: 1.5;
 }
 
 .eyebrow {
-  color: var(--plum);
+  color: var(--primary);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -34,7 +34,7 @@
   padding: 1rem;
   border: 2px solid color-mix(in srgb, var(--outline) 16%, transparent);
   border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--surface-raised) 92%, var(--lavender) 8%);
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--quiet) 8%);
 }
 
 .controls {
@@ -47,7 +47,7 @@
 .controls label {
   display: grid;
   gap: 0.35rem;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -58,7 +58,7 @@
   border: 2px solid var(--outline);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
-  color: var(--ink);
+  color: var(--text);
   font: inherit;
 }
 
@@ -107,7 +107,7 @@
 }
 
 .card p {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.82rem;
   line-height: 1.45;
 }
@@ -141,7 +141,7 @@
 
 .actualLabel,
 .presetLabel {
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.68rem;
 }
 
@@ -173,7 +173,7 @@
 .presetItem > span:last-child {
   min-width: 0;
   overflow: hidden;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: 0.68rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -194,7 +194,7 @@
   translate: none;
   transform: none;
   transition: none;
-  background: var(--audit-face, var(--sky));
+  background: var(--audit-face, var(--selection));
   cursor: default;
   pointer-events: none;
 }

@@ -188,12 +188,11 @@
   to { filter: saturate(1.08); }
 }
 
-.rose { background: var(--action); }
-.mint { background: var(--positive); }
-.gold { background: var(--attention); }
-.sky { background: var(--selection); }
-.lavender { background: color-mix(in srgb, var(--quiet) 65%, var(--surface-raised) 35%); }
-.peach { background: var(--action); }
+.action { background: var(--action); }
+.positive { background: var(--positive); }
+.attention { background: var(--attention); }
+.selection { background: var(--selection); }
+.quiet { background: color-mix(in srgb, var(--quiet) 65%, var(--surface-raised) 35%); }
 
 .feeling {
   isolation: isolate;
@@ -256,10 +255,10 @@
   text-transform: uppercase;
 }
 
-.nav .rose { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
-.nav .peach { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
-.nav .mint { background: color-mix(in srgb, var(--positive) 78%, var(--surface-raised) 22%); }
-.nav .gold { background: color-mix(in srgb, var(--attention) 72%, var(--surface-raised) 28%); }
+.nav .action { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
+.nav .action { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
+.nav .positive { background: color-mix(in srgb, var(--positive) 78%, var(--surface-raised) 22%); }
+.nav .attention { background: color-mix(in srgb, var(--attention) 72%, var(--surface-raised) 28%); }
 
 /* Current-route emphasis uses a stronger Customizer-owned face and one physical
    extrusion. It intentionally replaces the resting nav drop-shadow on mobile so

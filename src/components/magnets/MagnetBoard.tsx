@@ -33,7 +33,7 @@ import {
 import styles from './MagnetBoard.module.css';
 import { PhysicsToggle } from './PhysicsToggle';
 
-export type MagnetTone = 'rose' | 'mint' | 'gold' | 'sky' | 'lavender' | 'peach';
+export type MagnetTone = 'action' | 'positive' | 'attention' | 'selection' | 'quiet' | 'primary';
 export type MagnetKind = 'default' | 'feeling' | 'need' | 'nav';
 
 export type MagnetBoardItem = {
@@ -1235,7 +1235,7 @@ export function MagnetBoard({
         } as CSSProperties;
         const classes = [
           styles.magnet,
-          styles[item.tone ?? 'lavender'],
+          styles[item.tone ?? 'quiet'],
           styles[item.kind ?? 'default'],
           item.active ? styles.active : '',
         ].filter(Boolean).join(' ');

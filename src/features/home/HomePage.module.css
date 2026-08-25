@@ -19,7 +19,7 @@
 }
 
 .doorCard {
-  --door-fill: var(--rose);
+  --door-fill: var(--action);
   position: relative;
   padding: 1.6rem 1.1rem 3.4rem;
   display: flex;

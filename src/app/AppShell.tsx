@@ -202,7 +202,7 @@ export function AppShell() {
         id: 'nav-menu',
         label: 'Menu',
         onActivate: () => setMenuOpen((current) => !current),
-        tone: 'gold',
+        tone: 'attention',
         kind: 'nav',
         ariaLabel: 'Open menu',
         ariaExpanded: false,
@@ -219,7 +219,7 @@ export function AppShell() {
         setting: 'home',
         label: 'Home',
         to: '/',
-        tone: 'rose',
+        tone: 'action',
         kind: 'nav',
         ariaLabel: 'Home',
         icon: (
@@ -241,7 +241,7 @@ export function AppShell() {
         setting: 'journal',
         label: 'Journal',
         to: '/inventory/journal?compose=new',
-        tone: 'peach',
+        tone: 'action',
         kind: 'nav',
         icon: (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -297,7 +297,7 @@ export function AppShell() {
         setting: 'journalDashboard',
         label: 'History',
         to: '/inventory/journal',
-        tone: 'peach',
+        tone: 'action',
         kind: 'nav',
       },
     ];
