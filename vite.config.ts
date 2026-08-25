@@ -63,6 +63,8 @@ type EditorialCatalog = {
   needs: Record<string, EditorialNeed>;
   strategies: CatalogStrategySource[];
   strategyProvenance?: Record<string, StrategyProvenance>;
+  discardedStrategySlugs?: string[];
+  strategyNeedRemovals?: Record<string, string[]>;
 };
 
 const runtimeCatalogId = 'virtual:allneeds-runtime-catalog';
@@ -97,6 +99,18 @@ function runtimeCatalogSource() {
   const legacy = JSON.parse(readFileSync(legacyCatalogPath, 'utf8')) as LegacyCatalog;
   const editorial = JSON.parse(readFileSync(editorialCatalogPath, 'utf8')) as EditorialCatalog;
   const userStrategies = JSON.parse(readFileSync(userStrategiesPath, 'utf8')) as CatalogStrategySource[];
+  const discardedStrategySlugs = new Set(editorial.discardedStrategySlugs ?? []);
+  const removedNeedsByStrategy = new Map(
+    Object.entries(editorial.strategyNeedRemovals ?? {}).map(([strategySlug, needSlugs]) => [
+      strategySlug,
+      new Set(needSlugs),
+    ]),
+  );
+  const strategyAllowedForNeed = (strategySlug: string, needSlug: string) => (
+    !discardedStrategySlugs.has(strategySlug)
+    && !removedNeedsByStrategy.get(strategySlug)?.has(needSlug)
+  );
+
   const addedStrategyRefsByNeed = new Map<string, EntityRef[]>();
   addStrategyReferences(editorial.strategies, addedStrategyRefsByNeed);
   addStrategyReferences(userStrategies, addedStrategyRefsByNeed);
@@ -116,9 +130,11 @@ function runtimeCatalogSource() {
 
   const needs = legacy.needs.map((need) => {
     const override = editorial.needs[need.slug];
-    const strategies = [...(override?.strategies ?? need.strategies ?? [])];
+    const strategies = [...(override?.strategies ?? need.strategies ?? [])]
+      .filter((reference) => strategyAllowedForNeed(reference.slug, need.slug));
     (addedStrategyRefsByNeed.get(need.slug) ?? []).forEach((reference) => {
-      if (!strategies.some((candidate) => candidate.slug === reference.slug)) {
+      if (strategyAllowedForNeed(reference.slug, need.slug)
+        && !strategies.some((candidate) => candidate.slug === reference.slug)) {
         strategies.push(reference);
       }
     });
@@ -148,9 +164,15 @@ function runtimeCatalogSource() {
 
   const userStrategySlugs = new Set(userStrategies.map((strategy) => strategy.slug));
   const strategySources = new Map<string, CatalogStrategySource>();
-  legacy.strategies.forEach((strategy) => strategySources.set(strategy.slug, strategy));
-  editorial.strategies.forEach((strategy) => strategySources.set(strategy.slug, strategy));
-  userStrategies.forEach((strategy) => strategySources.set(strategy.slug, strategy));
+  legacy.strategies.forEach((strategy) => {
+    if (!discardedStrategySlugs.has(strategy.slug)) strategySources.set(strategy.slug, strategy);
+  });
+  editorial.strategies.forEach((strategy) => {
+    if (!discardedStrategySlugs.has(strategy.slug)) strategySources.set(strategy.slug, strategy);
+  });
+  userStrategies.forEach((strategy) => {
+    if (!discardedStrategySlugs.has(strategy.slug)) strategySources.set(strategy.slug, strategy);
+  });
 
   const strategies = [...strategySources.values()].map((strategy) => {
     const contributor = normalizedContributor(strategy);
@@ -159,12 +181,14 @@ function runtimeCatalogSource() {
       : strategy.provenance
         ?? editorial.strategyProvenance?.[strategy.slug]
         ?? (contributor ? 'user' : 'system');
+    const supportedNeeds = (strategy.needs ?? [])
+      .filter((need) => strategyAllowedForNeed(strategy.slug, need.slug));
 
     return {
       slug: strategy.slug,
       title: strategy.title,
       summary: strategy.summary || strategy.description || '',
-      supportedNeeds: strategy.needs ?? [],
+      supportedNeeds,
       provenance,
       ...(contributor ? { contributor } : {}),
       ...(strategy.evidence ? { evidence: strategy.evidence } : {}),
