@@ -48,9 +48,9 @@ Both migrations were applied to the existing production `allneeds-db` on 2026-08
 - final verification: 4 existing strategies preserved, 22 normalized Need links, empty OAuth tables, clean foreign-key check, and `PRAGMA quick_check = ok`
 - legacy Worker verification after migration: `/api/health` and the existing public strategy feed both returned HTTP 200
 
-The replacement Worker was deployed to production on 2026-08-25 as version `e0990d3f-3f8d-49e7-b0aa-fbe5c2e19f1a`. The rollback version is `1eb3fa0a-d5d1-4eac-b08e-23f0ea3fd59b`. The React frontend has not been deployed.
+The replacement Worker was deployed to production on 2026-08-25. The current verified-login fix is version `61f16ab7-5434-4332-b8e3-d365a12af3a4`; the pre-cutover rollback version is `1eb3fa0a-d5d1-4eac-b08e-23f0ea3fd59b`. The React frontend has not been deployed.
 
-The production Worker configuration is now repository-owned as well: `allneeds.app/auth/*`, `allneeds.app/api/*`, the `backend.allneeds.app` custom domain, observability, disabled preview URLs, `DB`, and the temporary legacy-auth value are all explicit in `wrangler.jsonc`. Post-deployment checks passed for all three Worker routes, CORS, OAuth client metadata, signed-out `/api/me`, the public strategy feed, legacy-session compatibility, and the signed-out live site.
+The production Worker configuration is now repository-owned as well: `allneeds.app/auth/*`, `allneeds.app/api/*`, the `backend.allneeds.app` custom domain, observability, disabled preview URLs, `DB`, and the temporary legacy-auth value are all explicit in `wrangler.jsonc`. Post-deployment checks passed for all three Worker routes, CORS, OAuth client metadata, signed-out `/api/me`, the public strategy feed, legacy-session compatibility, the signed-out live site, and a production `/auth/login` start that redirects to Bluesky OAuth.
 
 The Worker supports these Cloudflare environment variables:
 
