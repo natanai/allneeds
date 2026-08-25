@@ -14,6 +14,7 @@ export type NeedMagnetAuditCandidate = Readonly<{
 }>;
 
 const gradientIcon = 'linear-gradient(135deg, var(--audit-art-a), var(--audit-art-b))';
+const refrigeratorSafe = (color: string) => `color-mix(in srgb, ${color} 72%, var(--plum) 28%)`;
 
 export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
   {
@@ -38,8 +39,8 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     artMaskPath: 'design-lab/need-magnets/connection-weave.svg',
     faceBackground: 'color-mix(in srgb, var(--sky) 82%, var(--lavender) 18%)',
     iconFill: gradientIcon,
-    artA: 'var(--rose)',
-    artB: 'var(--mint)',
+    artA: refrigeratorSafe('var(--rose)'),
+    artB: refrigeratorSafe('var(--mint)'),
     artOpacity: 0.9,
   },
   {
@@ -92,8 +93,8 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     artMaskPath: 'design-lab/need-magnets/support-cradle.svg',
     faceBackground: 'color-mix(in srgb, var(--sky) 82%, var(--mint) 18%)',
     iconFill: gradientIcon,
-    artA: 'var(--gold)',
-    artB: 'var(--mint)',
+    artA: refrigeratorSafe('var(--gold)'),
+    artB: refrigeratorSafe('var(--mint)'),
     artOpacity: 0.9,
   },
   {
