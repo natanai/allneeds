@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router';
 
 import { AlexithymiaSupportPage } from '../features/alexithymia/AlexithymiaSupportPage';
 import { BodyCuesPage } from '../features/bodyCues/BodyCuesPage';
+import { NeedMagnetAuditPage } from '../features/designLab/NeedMagnetAuditPage';
 import { EmotionsWheelPage } from '../features/emotionsWheel/EmotionsWheelPage';
 import { FauxFeelingDetailPage } from '../features/fauxFeelings/FauxFeelingDetailPage';
 import { FauxFeelingsPage } from '../features/fauxFeelings/FauxFeelingsPage';
@@ -35,6 +36,7 @@ export function App() {
         <Route path="inventory/journal" element={<JournalPage />} />
         <Route path="feed" element={<FeedPage />} />
         <Route path="alexithymia-support" element={<AlexithymiaSupportPage />} />
+        <Route path="design-lab/need-magnets" element={<NeedMagnetAuditPage />} />
         <Route
           path="*"
           element={

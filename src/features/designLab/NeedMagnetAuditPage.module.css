@@ -1,0 +1,253 @@
+.page {
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.header {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.header h1,
+.header p {
+  margin: 0;
+}
+
+.header > p:last-child {
+  max-width: 72ch;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.eyebrow {
+  color: var(--plum);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.controls,
+.group {
+  min-width: 0;
+  padding: 1rem;
+  border: 2px solid color-mix(in srgb, var(--outline) 16%, transparent);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--lavender) 8%);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.25rem;
+  align-items: end;
+}
+
+.controls label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.controls select {
+  min-height: 44px;
+  padding: 0.45rem 0.65rem;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: inherit;
+}
+
+.roundnessControl {
+  min-width: min(18rem, 100%);
+}
+
+.roundnessControl input {
+  width: 100%;
+}
+
+.group {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.group h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.grid {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15.5rem, 100%), 1fr));
+  gap: 0.85rem;
+}
+
+.card {
+  min-width: 0;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 14%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
+.card h3,
+.card p {
+  margin: 0;
+}
+
+.card h3 {
+  font-size: 0.98rem;
+}
+
+.card p {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.heroStage {
+  min-height: 7.2rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.heroScale {
+  display: inline-flex;
+  transform: scale(2.1);
+  transform-origin: center;
+}
+
+.actualRow,
+.presetArea {
+  min-width: 0;
+  padding-top: 0.65rem;
+  border-top: 1px dashed color-mix(in srgb, var(--outline) 18%, transparent);
+}
+
+.actualRow {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.actualLabel,
+.presetLabel {
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+}
+
+.actualLabel {
+  width: 3.8rem;
+  flex: 0 0 auto;
+}
+
+.presetArea {
+  display: grid;
+  grid-template-columns: 3.8rem minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.presetGrid {
+  min-width: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.presetItem {
+  min-width: 0;
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.presetItem > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewMagnet {
+  --magnet-x: 0px;
+  --magnet-y: 0px;
+  --magnet-lift: 0px;
+  --magnet-wobble-y: 0px;
+  --magnet-rock: 0deg;
+  --magnet-tilt: 0deg;
+  --magnet-scale: 1;
+  position: relative;
+  left: auto;
+  top: auto;
+  max-width: none;
+  translate: none;
+  transform: none;
+  transition: none;
+  background: var(--audit-face, var(--sky));
+  cursor: default;
+  pointer-events: none;
+}
+
+.previewMagnet:hover,
+.previewMagnet:focus-visible {
+  --magnet-lift: 0px;
+  box-shadow: 0 10px 0 var(--shadow);
+}
+
+.previewMagnet::before {
+  position: relative;
+  z-index: 2;
+  background: var(--audit-icon-fill, #000000);
+}
+
+.art {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, var(--audit-art-a), var(--audit-art-b));
+  opacity: var(--audit-art-opacity, 0);
+  mask: var(--audit-art-mask) left center / 100% 100% no-repeat;
+  -webkit-mask: var(--audit-art-mask) left center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.presetItem .previewMagnet {
+  transform: scale(0.82);
+  transform-origin: left center;
+  margin-right: -1.2rem;
+}
+
+@media (max-width: 560px) {
+  .controls {
+    display: grid;
+  }
+
+  .roundnessControl {
+    min-width: 0;
+  }
+
+  .heroScale {
+    transform: scale(1.7);
+  }
+
+  .presetArea {
+    grid-template-columns: 1fr;
+  }
+
+  .presetLabel,
+  .actualLabel {
+    width: auto;
+  }
+}
