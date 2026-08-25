@@ -3,6 +3,10 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const needsCss = readFileSync(new URL('./NeedsPage.module.css', import.meta.url), 'utf8');
+const supportArt = readFileSync(
+  new URL('../../../public/icons/needs/art/support-soft-terraces.svg', import.meta.url),
+  'utf8',
+);
 
 describe('approved Need magnet identities', () => {
   it('ships Connection with the approved Constellation artwork and semantic Customizer roles', () => {
@@ -10,6 +14,19 @@ describe('approved Need magnet identities', () => {
     expect(needsCss).toContain("/icons/needs/art/connection-constellation.svg");
     expect(needsCss).toContain('var(--positive)');
     expect(needsCss).toContain('var(--primary)');
+  });
+
+  it('ships Support with the approved Soft Terraces artwork and preserved icon spacing', () => {
+    expect(needsCss).toContain("[data-magnet-id='needs-support']");
+    expect(needsCss).toContain("/icons/needs/art/support-soft-terraces.svg");
+    expect(needsCss).toContain('color-mix(in srgb, var(--selection) 82%, var(--positive) 18%)');
+    expect(needsCss).toContain('color-mix(in srgb, var(--primary) 76%, var(--quiet) 24%)');
+    expect(needsCss).toMatch(/\[data-magnet-id='needs-support'\]\)::before[\s\S]*?opacity: 0;/);
+    expect(supportArt).toContain('preserveAspectRatio="none"');
+    expect(supportArt).toContain('viewBox="0 0 220 64"');
+  });
+
+  it('uses only functional Customizer roles in approved Need identity CSS', () => {
     expect(needsCss).not.toMatch(/var\(--(?:plum|lavender|ink|rose|mint|gold|sky|peach)\)/);
   });
 });
