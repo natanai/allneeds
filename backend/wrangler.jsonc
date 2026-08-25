@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "allneeds-backend",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-25",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "allneeds-db",
+      "database_id": "REPLACE_WITH_ALLNEEDS_DB_ID"
+    }
+  ]
+}
