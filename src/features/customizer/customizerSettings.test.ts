@@ -10,6 +10,7 @@ import {
   synchronizeCustomizerMirrors,
   THEME_KEY,
   themeCssValues,
+  themeRoleMetadata,
 } from './customizerSettings';
 
 function memoryStorage(initial: Record<string, string> = {}) {
@@ -24,11 +25,11 @@ function memoryStorage(initial: Record<string, string> = {}) {
 describe('saved customizer settings', () => {
   it('uses the newest valid local or session theme mirror', () => {
     const local = memoryStorage({
-      [THEME_KEY]: JSON.stringify({ values: { plum: '#111111' }, roundness: 80, preset: 'Older', updatedAt: 10 }),
+      [THEME_KEY]: JSON.stringify({ values: { primary: '#111111' }, roundness: 80, preset: 'Older', updatedAt: 10 }),
     });
     const session = memoryStorage({
       [THEME_KEY]: JSON.stringify({
-        values: { plum: '#abc', rose: 'not-a-color' },
+        values: { primary: '#abc', action: 'not-a-color' },
         roundness: 245,
         preset: 'Newest',
         updatedAt: 20,
@@ -36,7 +37,7 @@ describe('saved customizer settings', () => {
     });
 
     expect(readTheme(local, session)).toEqual({
-      values: { ...defaultTheme, plum: '#AABBCC' },
+      values: { ...defaultTheme, primary: '#AABBCC' },
       roundness: 200,
       preset: 'Newest',
       updatedAt: 20,
@@ -45,41 +46,50 @@ describe('saved customizer settings', () => {
 
   it('keeps local settings on equal timestamps and safely falls back on malformed data', () => {
     const local = memoryStorage({
-      [THEME_KEY]: JSON.stringify({ values: { gold: '#123456' }, roundness: '50', updatedAt: 7 }),
+      [THEME_KEY]: JSON.stringify({ values: { attention: '#123456' }, roundness: '50', updatedAt: 7 }),
     });
     const session = memoryStorage({ [THEME_KEY]: '{broken json' });
 
     expect(readTheme(local, session)).toMatchObject({
-      values: { ...defaultTheme, gold: '#123456' },
+      values: { ...defaultTheme, attention: '#123456' },
       roundness: 50,
       updatedAt: 7,
     });
   });
 
-  it('retires standalone surface and journal colors from older saved themes', () => {
+  it('migrates hue-keyed saved themes into the semantic role model', () => {
     const storage = memoryStorage({
       [THEME_KEY]: JSON.stringify({
         values: {
-          rose: '#ABCDEF',
-          lavender: '#123456',
-          surface: '#FEDCBA',
-          peach: '#654321',
+          plum: '#111111', lavender: '#222222', ink: '#333333', inkSoft: '#444444',
+          rose: '#555555', mint: '#666666', gold: '#777777', sky: '#888888', outline: '#999999',
+          surface: '#ABCDEF', peach: '#FEDCBA',
         },
         roundness: 100,
         updatedAt: 9,
       }),
     });
 
-    const values = readTheme(storage, null).values;
-    expect(values).toEqual({ ...defaultTheme, rose: '#ABCDEF', lavender: '#123456' });
-    expect(Object.keys(values)).toHaveLength(9);
-    expect(values).not.toHaveProperty('surface');
-    expect(values).not.toHaveProperty('peach');
+    expect(readTheme(storage, null).values).toEqual({
+      primary: '#111111', quiet: '#222222', text: '#333333', secondary: '#444444',
+      action: '#555555', positive: '#666666', attention: '#777777', selection: '#888888', outline: '#999999',
+    });
   });
 
-  it('keeps legacy palette collections on the same compact nine-role model', () => {
+  it('prefers semantic values when modern and legacy fields coexist', () => {
+    const storage = memoryStorage({
+      [THEME_KEY]: JSON.stringify({ values: { primary: '#ABCDEF', plum: '#111111' }, updatedAt: 4 }),
+    });
+    expect(readTheme(storage, null).values.primary).toBe('#ABCDEF');
+  });
+
+  it('keeps all palette collections on the same compact nine-role semantic model', () => {
+    const semanticKeys = Object.keys(themeRoleMetadata).sort();
+    expect(semanticKeys).toEqual([
+      'action', 'attention', 'outline', 'positive', 'primary', 'quiet', 'secondary', 'selection', 'text',
+    ]);
     palettes.forEach(({ values }) => {
-      expect(Object.keys(values).sort()).toEqual(Object.keys(defaultTheme).sort());
+      expect(Object.keys(values).sort()).toEqual(semanticKeys);
       expect(Object.keys(values)).toHaveLength(9);
     });
   });
@@ -120,25 +130,30 @@ describe('saved customizer settings', () => {
     });
   });
 
-  it('derives shared runtime surfaces and aliases instead of adding palette roles', () => {
-    const light = themeCssValues({ values: { ...defaultTheme, rose: '#FFFFFF' }, roundness: 130 });
-    const surface = `color-mix(in srgb, ${defaultTheme.lavender} 12%, #FFFFFF 88%)`;
+  it('derives shared runtime surfaces from semantic roles', () => {
+    const light = themeCssValues({ values: { ...defaultTheme, action: '#FFFFFF' }, roundness: 130 });
+    const surface = `color-mix(in srgb, ${defaultTheme.quiet} 12%, #FFFFFF 88%)`;
     expect(light).toMatchObject({
-      '--plum': defaultTheme.plum,
+      '--primary': defaultTheme.primary,
+      '--quiet': defaultTheme.quiet,
+      '--text': defaultTheme.text,
+      '--secondary': defaultTheme.secondary,
+      '--action': '#FFFFFF',
+      '--positive': defaultTheme.positive,
+      '--attention': defaultTheme.attention,
+      '--selection': defaultTheme.selection,
       '--surface-raised': surface,
-      '--peach': '#FFFFFF',
-      '--rose': '#FFFFFF',
       '--btn-bg': '#FFFFFF',
       '--btn-fg': '#111111',
       '--chip-fg': '#111111',
-      '--chip-bg': `color-mix(in srgb, ${surface} 86%, ${defaultTheme.sky} 14%)`,
+      '--chip-bg': `color-mix(in srgb, ${surface} 86%, ${defaultTheme.selection} 14%)`,
       '--corner-scale': '1.3',
       '--shadow': `color-mix(in srgb, ${defaultTheme.outline} 55%, transparent)`,
     });
+    expect(Object.keys(light).some((key) => /plum|lavender|ink|rose|mint|gold|sky|peach/i.test(key))).toBe(false);
 
-    const dark = themeCssValues({ values: { ...defaultTheme, rose: '#000000' }, roundness: -20 });
+    const dark = themeCssValues({ values: { ...defaultTheme, action: '#000000' }, roundness: -20 });
     expect(dark['--btn-fg']).toBe('#FFFFFF');
-    expect(dark['--peach']).toBe('#000000');
     expect(dark['--corner-scale']).toBe('0');
   });
 
@@ -147,7 +162,7 @@ describe('saved customizer settings', () => {
       [THEME_KEY]: 'stale-theme',
       [NAV_SETTINGS_KEY]: 'stale-navigation',
     });
-    const restoredTheme = JSON.stringify({ values: { plum: '#ABCDEF' }, updatedAt: 40 });
+    const restoredTheme = JSON.stringify({ values: { primary: '#ABCDEF' }, updatedAt: 40 });
     synchronizeCustomizerMirrors({
       [THEME_KEY]: restoredTheme,
       [NAV_SETTINGS_KEY]: { enabled: { needs: false }, updatedAt: 41 },
