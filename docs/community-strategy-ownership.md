@@ -39,7 +39,9 @@ This is the correct model for contributions such as the existing Autumn strategy
 
 ## Need-page deck composition
 
-Opening a need page may load the public shared-strategy resource for that feature. This request is feature-scoped and must not move into basic application startup.
+During the branded startup preload, allneeds starts one best-effort request for the recent public shared-strategy snapshot so community strategies can already be available when a Need page opens. The request shares the same in-memory cache and in-flight promise used by the Need pages; a successful boot request therefore does not create another network request for every Need the person visits.
+
+The public snapshot is an enhancement, not a startup dependency. The existing maximum boot deadline still releases the interface even if Cloudflare is slow or unavailable. A failed shared-feed request is not stored as the feed cache, so a later Need-page open or explicit refresh can retry. If the boot request is merely still in flight when the interface opens, the Need page joins that same promise instead of starting a duplicate request.
 
 The need page combines:
 
@@ -127,7 +129,9 @@ Once the backend exposes an authenticated moderation capability, public communit
 
 ## Current backend scaling limitation
 
-The production feed API currently supports scope/sort/limit but no need-specific server filter. The frontend therefore requests the backend's current maximum feed page and filters it by need client-side. This works at the site's current scale, but a future backend should support a need filter or pagination so older relevant strategies cannot fall outside the first feed page.
+The production feed API currently supports scope/sort/limit but no need-specific server filter. At the site's current scale, startup therefore requests one recent public snapshot at the backend maximum (`limit=100`) and Need pages filter that cached snapshot client-side. This minimizes Worker requests and makes community cards immediately available after boot.
+
+As the public catalog grows, the backend should support a need filter and/or pagination so older relevant strategies cannot fall outside the first snapshot. That scaling change should preserve the startup rule that Cloudflare is optional: local/system strategies must remain usable even when the shared service is unavailable.
 
 ## Import workflow compatibility
 
