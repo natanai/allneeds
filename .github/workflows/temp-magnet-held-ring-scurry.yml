@@ -51,7 +51,6 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           path = Path('src/components/magnets/MagnetBoard.module.css')
           text = path.read_text()
           obsolete = """\n  .nav .magnet[data-picked-up='true']:focus-visible {\n    outline: none;\n  }\n"""
@@ -63,126 +62,123 @@ jobs:
           path.write_text(text)
           PY
 
-      - name: Strengthen regression coverage for packed and mobile scurry
+      - name: Strengthen existing scurry regression
         run: |
           python - <<'PY'
           from pathlib import Path
-
           path = Path('tests/e2e/magnet-surface-interactions.spec.ts')
           text = path.read_text()
-          text = text.replace(
-              "expect(escapeDistance).toBeGreaterThan(4);\n  expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(4);",
-              "expect(escapeDistance).toBeGreaterThan(14);\n  expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(14);",
-              1,
-          )
-          addition = r'''
-
-test('pointer pickup clears keyboard focus instead of covering its focus ring', async ({ page }) => {
-  const { board, magnet } = await showOnlyAcceptance(page);
-  await magnet.focus();
-  await expect(magnet).toBeFocused();
-
-  const box = await magnet.boundingBox();
-  expect(box).not.toBeNull();
-  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
-  await page.mouse.down();
-  await expect(magnet).toHaveAttribute('data-picked-up', 'true');
-  await expect(magnet).not.toBeFocused();
-  expect(await magnet.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe('none');
-  await page.mouse.up();
-});
-
-test.describe('mobile packed magnet scurry', () => {
-  test.use({ viewport: { width: 390, height: 844 } });
-
-  test('a touch-dragged magnet visibly clears a tightly packed neighbor', async ({ page }) => {
-    await page.goto('/needs');
-    const board = page.getByLabel('Needs magnet board');
-    await expect(board).toHaveAttribute('data-ready', 'true');
-    await ensurePhysicsOn(board);
-
-    const dragged = board.getByRole('link', { name: 'Control', exact: true });
-    const neighbor = board.getByRole('link', { name: 'Predictability', exact: true });
-    await dragged.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(420);
-
-    const draggedBefore = await magnetPosition(board, dragged);
-    const neighborBefore = await magnetPosition(board, neighbor);
-    const draggedBox = await dragged.boundingBox();
-    const neighborBox = await neighbor.boundingBox();
-    expect(draggedBox).not.toBeNull();
-    expect(neighborBox).not.toBeNull();
-
-    const draggedCenter = {
-      x: draggedBox!.x + draggedBox!.width / 2,
-      y: draggedBox!.y + draggedBox!.height / 2,
-    };
-    const neighborCenter = {
-      x: neighborBox!.x + neighborBox!.width / 2,
-      y: neighborBox!.y + neighborBox!.height / 2,
-    };
-    const separationX = neighborCenter.x - draggedCenter.x;
-    const separationY = neighborCenter.y - draggedCenter.y;
-    const separationLength = Math.max(Math.hypot(separationX, separationY), 1);
-    const escapeX = separationX / separationLength;
-    const escapeY = separationY / separationLength;
-    const target = {
-      x: neighborCenter.x - escapeX * 6,
-      y: neighborCenter.y - escapeY * 6,
-    };
-
-    const session = await page.context().newCDPSession(page);
-    try {
-      await session.send('Input.dispatchTouchEvent', {
-        type: 'touchStart',
-        touchPoints: [{ x: draggedCenter.x, y: draggedCenter.y, id: 1 }],
-      });
-      for (let step = 1; step <= 14; step += 1) {
-        const progress = step / 14;
-        await session.send('Input.dispatchTouchEvent', {
-          type: 'touchMove',
-          touchPoints: [{
-            x: draggedCenter.x + (target.x - draggedCenter.x) * progress,
-            y: draggedCenter.y + (target.y - draggedCenter.y) * progress,
-            id: 1,
-          }],
-        });
-        await page.waitForTimeout(18);
-      }
-      await page.waitForTimeout(320);
-
-      const draggedDuring = await magnetPosition(board, dragged);
-      const neighborDuring = await magnetPosition(board, neighbor);
-      const neighborDelta = {
-        x: neighborDuring.x - neighborBefore.x,
-        y: neighborDuring.y - neighborBefore.y,
-      };
-      const escapeDistance = neighborDelta.x * escapeX + neighborDelta.y * escapeY;
-
-      expect(distance(draggedDuring, draggedBefore)).toBeGreaterThan(30);
-      expect(escapeDistance).toBeGreaterThan(12);
-      expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(12);
-    } finally {
-      await session.send('Input.dispatchTouchEvent', {
-        type: 'touchEnd',
-        touchPoints: [],
-      }).catch(() => undefined);
-      await session.detach();
-    }
-  });
-});
-'''
-          if "pointer pickup clears keyboard focus" in text:
-              raise SystemExit('New pickup/scurry regressions already exist')
-          text += addition
-          path.write_text(text)
+          old = """  expect(escapeDistance).toBeGreaterThan(4);\n  expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(4);"""
+          new = """  expect(escapeDistance).toBeGreaterThan(14);\n  expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(14);"""
+          if text.count(old) != 1:
+              raise SystemExit('Existing scurry assertions changed unexpectedly')
+          path.write_text(text.replace(old, new, 1))
           PY
+
+      - name: Add pointer-focus and mobile packed-scurry regressions
+        run: |
+          cat >> tests/e2e/magnet-surface-interactions.spec.ts <<'EOF'
+
+          test('pointer pickup clears keyboard focus instead of covering its focus ring', async ({ page }) => {
+            const { magnet } = await showOnlyAcceptance(page);
+            await magnet.focus();
+            await expect(magnet).toBeFocused();
+
+            const box = await magnet.boundingBox();
+            expect(box).not.toBeNull();
+            await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+            await page.mouse.down();
+            await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+            await expect(magnet).not.toBeFocused();
+            expect(await magnet.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe('none');
+            await page.mouse.up();
+          });
+
+          test.describe('mobile packed magnet scurry', () => {
+            test.use({ viewport: { width: 390, height: 844 } });
+
+            test('a touch-dragged magnet visibly clears a tightly packed neighbor', async ({ page }) => {
+              await page.goto('/needs');
+              const board = page.getByLabel('Needs magnet board');
+              await expect(board).toHaveAttribute('data-ready', 'true');
+              await ensurePhysicsOn(board);
+
+              const dragged = board.getByRole('link', { name: 'Control', exact: true });
+              const neighbor = board.getByRole('link', { name: 'Predictability', exact: true });
+              await dragged.scrollIntoViewIfNeeded();
+              await page.waitForTimeout(420);
+
+              const draggedBefore = await magnetPosition(board, dragged);
+              const neighborBefore = await magnetPosition(board, neighbor);
+              const draggedBox = await dragged.boundingBox();
+              const neighborBox = await neighbor.boundingBox();
+              expect(draggedBox).not.toBeNull();
+              expect(neighborBox).not.toBeNull();
+
+              const draggedCenter = {
+                x: draggedBox!.x + draggedBox!.width / 2,
+                y: draggedBox!.y + draggedBox!.height / 2,
+              };
+              const neighborCenter = {
+                x: neighborBox!.x + neighborBox!.width / 2,
+                y: neighborBox!.y + neighborBox!.height / 2,
+              };
+              const separationX = neighborCenter.x - draggedCenter.x;
+              const separationY = neighborCenter.y - draggedCenter.y;
+              const separationLength = Math.max(Math.hypot(separationX, separationY), 1);
+              const escapeX = separationX / separationLength;
+              const escapeY = separationY / separationLength;
+              const target = {
+                x: neighborCenter.x - escapeX * 6,
+                y: neighborCenter.y - escapeY * 6,
+              };
+
+              const session = await page.context().newCDPSession(page);
+              try {
+                await session.send('Input.dispatchTouchEvent', {
+                  type: 'touchStart',
+                  touchPoints: [{ x: draggedCenter.x, y: draggedCenter.y, id: 1 }],
+                });
+                for (let step = 1; step <= 14; step += 1) {
+                  const progress = step / 14;
+                  await session.send('Input.dispatchTouchEvent', {
+                    type: 'touchMove',
+                    touchPoints: [{
+                      x: draggedCenter.x + (target.x - draggedCenter.x) * progress,
+                      y: draggedCenter.y + (target.y - draggedCenter.y) * progress,
+                      id: 1,
+                    }],
+                  });
+                  await page.waitForTimeout(18);
+                }
+                await page.waitForTimeout(320);
+
+                const draggedDuring = await magnetPosition(board, dragged);
+                const neighborDuring = await magnetPosition(board, neighbor);
+                const neighborDelta = {
+                  x: neighborDuring.x - neighborBefore.x,
+                  y: neighborDuring.y - neighborBefore.y,
+                };
+                const escapeDistance = neighborDelta.x * escapeX + neighborDelta.y * escapeY;
+
+                expect(distance(draggedDuring, draggedBefore)).toBeGreaterThan(30);
+                expect(escapeDistance).toBeGreaterThan(12);
+                expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(12);
+              } finally {
+                await session.send('Input.dispatchTouchEvent', {
+                  type: 'touchEnd',
+                  touchPoints: [],
+                }).catch(() => undefined);
+                await session.detach();
+              }
+            });
+          });
+          EOF
 
       - name: Record superseding magnet interaction decision
         run: |
           python - <<'PY'
           from pathlib import Path
-
           path = Path('docs/design-language.md')
           text = path.read_text()
           old = """- Avoidance should begin slightly before hard overlap and become more responsive when the held magnet is moving toward another magnet.\n- Keep the response controlled rather than explosive: nearby magnets may scurry aside, but the held magnet remains attached to the pointer and avoidance must not cascade into a large chain reaction across the board.\n- Resting magnets remain speed-limited while another magnet is lifted so the board still feels viscous and deliberate rather than chaotic."""
@@ -190,13 +186,11 @@ test.describe('mobile packed magnet scurry', () => {
           if text.count(old) != 1:
               raise SystemExit('Magnet physics design-language block changed unexpectedly')
           text = text.replace(old, new, 1)
-
           old_decision = """- Held/dragged magnets now make nearby resting magnets visibly dodge away before overlap, with extra responsiveness when the held magnet is moving toward them, while preserving the existing viscous speed cap and all prior magnet interactions."""
           new_decision = """- Held/dragged magnets now establish a visibly stronger outward escape target for nearby magnets so the scurry reads clearly even in the default tightly packed layout on touch and desktop; pointer pickup also clears/suppresses pointer focus at the interaction source so no held-state focus-ring hiding workaround is needed."""
           if text.count(old_decision) != 1:
               raise SystemExit('Magnet decision-log entry changed unexpectedly')
-          text = text.replace(old_decision, new_decision, 1)
-          path.write_text(text)
+          path.write_text(text.replace(old_decision, new_decision, 1))
           PY
 
       - name: Setup Node
