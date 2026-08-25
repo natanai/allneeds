@@ -218,3 +218,66 @@ test.describe('mobile deep-scroll pickup geometry', () => {
     }
   });
 });
+
+test('a dragged magnet makes a nearby resting magnet dodge out of its path', async ({ page }) => {
+  await page.goto('/needs');
+  const board = page.getByLabel('Needs magnet board');
+  await expect(board).toHaveAttribute('data-ready', 'true');
+  await ensurePhysicsOn(board);
+
+  const dragged = board.getByRole('link', { name: 'Control', exact: true });
+  const neighbor = board.getByRole('link', { name: 'Predictability', exact: true });
+  await dragged.scrollIntoViewIfNeeded();
+  await expect(neighbor).toBeVisible();
+  await page.waitForTimeout(420);
+
+  const draggedBefore = await magnetPosition(board, dragged);
+  const neighborBefore = await magnetPosition(board, neighbor);
+  const draggedBox = await dragged.boundingBox();
+  const neighborBox = await neighbor.boundingBox();
+  expect(draggedBox).not.toBeNull();
+  expect(neighborBox).not.toBeNull();
+
+  const draggedCenter = {
+    x: draggedBox!.x + draggedBox!.width / 2,
+    y: draggedBox!.y + draggedBox!.height / 2,
+  };
+  const neighborCenter = {
+    x: neighborBox!.x + neighborBox!.width / 2,
+    y: neighborBox!.y + neighborBox!.height / 2,
+  };
+  const separationX = neighborCenter.x - draggedCenter.x;
+  const separationY = neighborCenter.y - draggedCenter.y;
+  const separationLength = Math.max(Math.hypot(separationX, separationY), 1);
+  const escapeX = separationX / separationLength;
+  const escapeY = separationY / separationLength;
+  const target = {
+    x: neighborCenter.x - escapeX * 6,
+    y: neighborCenter.y - escapeY * 6,
+  };
+
+  await page.mouse.move(draggedCenter.x, draggedCenter.y);
+  await page.mouse.down();
+  for (let step = 1; step <= 14; step += 1) {
+    const progress = step / 14;
+    await page.mouse.move(
+      draggedCenter.x + (target.x - draggedCenter.x) * progress,
+      draggedCenter.y + (target.y - draggedCenter.y) * progress,
+    );
+    await page.waitForTimeout(18);
+  }
+  await page.waitForTimeout(420);
+
+  const draggedDuring = await magnetPosition(board, dragged);
+  const neighborDuring = await magnetPosition(board, neighbor);
+  const neighborDelta = {
+    x: neighborDuring.x - neighborBefore.x,
+    y: neighborDuring.y - neighborBefore.y,
+  };
+  const escapeDistance = neighborDelta.x * escapeX + neighborDelta.y * escapeY;
+
+  expect(distance(draggedDuring, draggedBefore)).toBeGreaterThan(30);
+  expect(escapeDistance).toBeGreaterThan(4);
+  expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(4);
+  await page.mouse.up();
+});

@@ -135,9 +135,10 @@ const EDGE_RESTITUTION = 0.16;
 const COLLISION_RESTITUTION = 0.07;
 const SURFACE_RADIUS = 170;
 const SURFACE_COUPLING = 0.14;
-const LIFTED_CLEARANCE = 22;
-const LIFTED_CLEARING_ACCELERATION = 16;
-const LIFTED_NEIGHBOR_MAX_SPEED = 7;
+const LIFTED_CLEARANCE = 38;
+const LIFTED_CLEARING_ACCELERATION = 52;
+const LIFTED_APPROACH_ACCELERATION = 70;
+const LIFTED_NEIGHBOR_MAX_SPEED = 30;
 const REST_CONTACT_CORRECTION = 0.2;
 const DROP_WAVE_SPEED = 235;
 const DROP_WAVE_IMPULSE = 9;
@@ -704,9 +705,16 @@ export function MagnetBoard({
               const scaledDistance = Math.hypot(clearX / Math.max(reachX, 1), clearY / Math.max(reachY, 1));
               if (scaledDistance < 1) {
                 const influence = (1 - scaledDistance) ** 2;
-                resting.vx += (clearX / clearDistance) * LIFTED_CLEARING_ACCELERATION * influence * step;
-                resting.vy += (clearY / clearDistance) * LIFTED_CLEARING_ACCELERATION * influence * step;
-                kickWobble(resting, influence * 2.2 * step);
+                const approachSpeed = Math.max(
+                  (lifted.vx * clearX + lifted.vy * clearY) / clearDistance,
+                  0,
+                );
+                const approachBoost = clamp(approachSpeed / 420, 0, 1);
+                const escapeAcceleration = LIFTED_CLEARING_ACCELERATION
+                  + LIFTED_APPROACH_ACCELERATION * approachBoost;
+                resting.vx += (clearX / clearDistance) * escapeAcceleration * influence * step;
+                resting.vy += (clearY / clearDistance) * escapeAcceleration * influence * step;
+                kickWobble(resting, influence * (2.2 + approachBoost * 1.8) * step);
               }
               continue;
             }
