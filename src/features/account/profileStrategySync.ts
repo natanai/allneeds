@@ -1,6 +1,7 @@
 import type { InventoryStrategy } from '../inventory/inventoryRepository';
 
 export type ProfilePublishableStrategy = {
+  clientKey: string;
   title: string;
   body: string;
   needIds: string[];
@@ -11,6 +12,7 @@ export function profilePublishableStrategies(inventory: InventoryStrategy[]): Pr
   return inventory
     .filter((entry) => entry.personal && (entry.visibility === 'public' || entry.visibility === 'followers'))
     .map((entry) => ({
+      clientKey: entry.id,
       title: entry.title,
       body: entry.description,
       needIds: entry.needSlugs,
