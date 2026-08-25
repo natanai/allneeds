@@ -135,11 +135,10 @@ const EDGE_RESTITUTION = 0.16;
 const COLLISION_RESTITUTION = 0.07;
 const SURFACE_RADIUS = 170;
 const SURFACE_COUPLING = 0.14;
-const LIFTED_CLEARANCE = 54;
-const LIFTED_ESCAPE_BASE_SPEED = 96;
-const LIFTED_ESCAPE_APPROACH_SPEED = 144;
-const LIFTED_ESCAPE_ACCELERATION = 920;
-const LIFTED_NEIGHBOR_MAX_SPEED = 220;
+const LIFTED_PRESSURE_REACH = 1.9;
+const LIFTED_PRESSURE_ACCELERATION = 1450;
+const LIFTED_PRESSURE_APPROACH_GAIN = 0.7;
+const LIFTED_SURFACE_COUPLING = 0.34;
 const REST_CONTACT_CORRECTION = 0.2;
 const DROP_WAVE_SPEED = 235;
 const DROP_WAVE_IMPULSE = 9;
@@ -568,7 +567,6 @@ export function MagnetBoard({
 
       for (let substep = 0; substep < stepCount; substep += 1) {
         const liftedId = dragRef.current?.id ?? null;
-        const hasLiftedMagnet = liftedId !== null;
         magnets.forEach((magnet) => {
           if (!magnet.dragging && magnet.id !== liftedId) {
             if (pointer.active && pointer.pressed) {
@@ -701,53 +699,58 @@ export function MagnetBoard({
                 clearY = 0;
                 clearDistance = 1;
               }
-              const reachX = (lifted.width + resting.width) / 2 + LIFTED_CLEARANCE;
-              const reachY = (lifted.height + resting.height) / 2 + LIFTED_CLEARANCE;
-              const scaledDistance = Math.hypot(clearX / Math.max(reachX, 1), clearY / Math.max(reachY, 1));
+              const reachX = Math.max(
+                ((lifted.width + resting.width) / 2) * LIFTED_PRESSURE_REACH,
+                1,
+              );
+              const reachY = Math.max(
+                ((lifted.height + resting.height) / 2) * LIFTED_PRESSURE_REACH,
+                1,
+              );
+              const scaledDistance = Math.hypot(clearX / reachX, clearY / reachY);
               if (scaledDistance < 1) {
-                const influence = (1 - scaledDistance) ** 1.2;
+                const influence = (1 - scaledDistance) ** 1.15;
                 const normalX = clearX / clearDistance;
                 const normalY = clearY / clearDistance;
                 const approachSpeed = Math.max(
                   lifted.vx * normalX + lifted.vy * normalY,
                   0,
                 );
-                const approachBoost = clamp(approachSpeed / 360, 0, 1);
-                const targetEscapeSpeed = (
-                  LIFTED_ESCAPE_BASE_SPEED
-                  + LIFTED_ESCAPE_APPROACH_SPEED * approachBoost
-                ) * influence;
-                const outwardSpeed = resting.vx * normalX + resting.vy * normalY;
-                const speedGain = clamp(
-                  targetEscapeSpeed - outwardSpeed,
-                  0,
-                  LIFTED_ESCAPE_ACCELERATION * step,
+                const approachMultiplier = 1 + (
+                  clamp(approachSpeed / MAX_POINTER_SPEED, 0, 1)
+                  * LIFTED_PRESSURE_APPROACH_GAIN
                 );
-                resting.vx += normalX * speedGain;
-                resting.vy += normalY * speedGain;
-                kickWobble(resting, influence * (7 + approachBoost * 7) * step);
+                const pressureAcceleration = (
+                  LIFTED_PRESSURE_ACCELERATION
+                  * influence
+                  * approachMultiplier
+                ) / Math.max(resting.mass, 0.5);
+                resting.vx += normalX * pressureAcceleration * step;
+                resting.vy += normalY * pressureAcceleration * step;
+                kickWobble(resting, influence * approachMultiplier * 14 * step);
               }
               continue;
             }
 
-            // While a magnet is above the surface, resting magnets stay in a
-            // viscous layer. Their tiny avoidance motion must not cascade
-            // through a tightly packed row as a chain of hard contacts.
-            if (hasLiftedMagnet) continue;
-
+            // A held magnet sits above the board, but every resting magnet stays
+            // in the same surface physics layer. Pressure applied under the held
+            // magnet can therefore propagate through coupling and hard contacts.
             const falloff = distance < SURFACE_RADIUS ? (1 - distance / SURFACE_RADIUS) ** 2 : 0;
+            const surfaceCoupling = liftedId === null
+              ? SURFACE_COUPLING
+              : LIFTED_SURFACE_COUPLING;
 
             if (falloff > 0) {
               const aSpeed = Math.hypot(a.vx, a.vy);
               const bSpeed = Math.hypot(b.vx, b.vy);
               if (aSpeed > 45 && !b.dragging) {
-                const transfer = falloff * SURFACE_COUPLING * step;
+                const transfer = falloff * surfaceCoupling * step;
                 b.vx += (a.vx + (dx / distance) * aSpeed * 0.2) * transfer;
                 b.vy += (a.vy + (dy / distance) * aSpeed * 0.2) * transfer;
                 kickWobble(b, aSpeed * falloff * 0.12 * step);
               }
               if (bSpeed > 45 && !a.dragging) {
-                const transfer = falloff * SURFACE_COUPLING * step;
+                const transfer = falloff * surfaceCoupling * step;
                 a.vx += (b.vx - (dx / distance) * bSpeed * 0.2) * transfer;
                 a.vy += (b.vy - (dy / distance) * bSpeed * 0.2) * transfer;
                 kickWobble(a, -bSpeed * falloff * 0.12 * step);
@@ -789,14 +792,6 @@ export function MagnetBoard({
           }
         }
 
-        if (hasLiftedMagnet) {
-          magnets.forEach((magnet) => {
-            if (magnet.dragging || magnet.id === liftedId) return;
-            const limited = limitVector(magnet.vx, magnet.vy, LIFTED_NEIGHBOR_MAX_SPEED);
-            magnet.vx = limited.x;
-            magnet.vy = limited.y;
-          });
-        }
       }
 
       let isMoving = false;

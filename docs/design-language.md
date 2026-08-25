@@ -23,13 +23,13 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 
 ## Magnet physics
 
-**Accepted 2026-08-25.** A magnet being actively held should make nearby resting magnets visibly yield and dodge away as it passes over them, creating a restrained "scurry out from under it" response.
+**Accepted 2026-08-25; superseded and expanded 2026-08-25.** A magnet being actively held behaves like a pressure source above the shared magnet surface. Think of lifting it as pushing air down into the board: nearby resting magnets are forced radially away, then their own motion, coupling, and collisions carry that disturbance outward through the packed container.
 
 - This is an enhancement to the existing physics, not a replacement: preserve pickup alignment, direct drag tracking, fling/release behavior, collisions, wobble, empty-space pushing, persistence, and Play/rest semantics.
-- Avoidance should begin slightly before hard overlap and become more responsive when the held magnet is moving toward another magnet.
-- The dodge must remain plainly visible in the ordinary default packed layout on both desktop and touch devices. It must establish its own outward escape motion rather than depending on the resting collision/repulsion forces to create visible separation.
-- Keep the response controlled rather than explosive: nearby magnets may scurry aside, but the held magnet remains attached to the pointer and avoidance must not cascade into a large chain reaction across the board.
-- Resting magnets remain speed-limited while another magnet is lifted, but the lifted-state cap must be high enough for a nearby magnet to visibly clear the held magnet's path.
+- The held magnet remains attached to the pointer and is conceptually above the surface, so resting magnets yield to its pressure rather than pushing the held magnet off the pointer.
+- Pressure reach scales from the physical sizes of the interacting magnets instead of using a separate displacement target. The held interaction applies acceleration/force; normal damping, mass, edge restitution, and collision response dissipate the energy.
+- Do not impose a special held-state speed cap on neighboring magnets. The board is one physics system: while one magnet is held, all resting magnets must continue their ordinary surface coupling and hard-contact response so motion can propagate beyond the first neighbor as a visible ripple through tightly packed magnets.
+- The response should be clearly perceptible on both desktop and touch without becoming an unbounded explosion; tune force, damping, mass, and restitution rather than stopping propagation with an artificial per-neighbor cap or by disabling resting-resting collisions.
 - Pointer pickup is direct manipulation, not a focus treatment. A pointer-held magnet must not acquire an extra focus/selection ring; keyboard focus remains visibly indicated when navigating without pointer pickup. Do not implement this by hiding a held-state focus ring in CSS—prevent pointer pickup from creating/retaining that focus state at the interaction source.
 
 ## Touch and control sizing
@@ -188,7 +188,7 @@ Rules:
 
 ### 2026-08-25
 
-- Held/dragged magnets now establish a visibly stronger outward escape target for nearby magnets so the scurry reads clearly even in the default tightly packed layout on touch and desktop; pointer pickup also clears/suppresses pointer focus at the interaction source so no held-state focus-ring hiding workaround is needed.
+- Held magnets now act as pressure sources above a single shared physics surface: local force pushes nearby magnets outward, resting-resting coupling and collisions remain active so the disturbance can ripple through a packed board, and the former lifted-neighbor speed cap/suppression code is removed. Pointer pickup continues to suppress pointer-created focus at the interaction source rather than hiding a held focus ring.
 
 ### 2026-08-24
 
