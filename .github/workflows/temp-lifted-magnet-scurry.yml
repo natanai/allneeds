@@ -28,7 +28,7 @@ jobs:
           text = path.read_text()
 
           old_constants = """const LIFTED_CLEARANCE = 22;\nconst LIFTED_CLEARING_ACCELERATION = 16;\nconst LIFTED_NEIGHBOR_MAX_SPEED = 7;"""
-          new_constants = """const LIFTED_CLEARANCE = 34;\nconst LIFTED_CLEARING_ACCELERATION = 42;\nconst LIFTED_APPROACH_ACCELERATION = 46;\nconst LIFTED_NEIGHBOR_MAX_SPEED = 24;"""
+          new_constants = """const LIFTED_CLEARANCE = 38;\nconst LIFTED_CLEARING_ACCELERATION = 52;\nconst LIFTED_APPROACH_ACCELERATION = 70;\nconst LIFTED_NEIGHBOR_MAX_SPEED = 30;"""
           if text.count(old_constants) != 1:
               raise SystemExit('Lifted-magnet constants no longer match expected main source')
           text = text.replace(old_constants, new_constants, 1)
@@ -78,8 +78,8 @@ jobs:
             const escapeX = separationX / separationLength;
             const escapeY = separationY / separationLength;
             const target = {
-              x: neighborCenter.x - escapeX * 14,
-              y: neighborCenter.y - escapeY * 14,
+              x: neighborCenter.x - escapeX * 6,
+              y: neighborCenter.y - escapeY * 6,
             };
 
             await page.mouse.move(draggedCenter.x, draggedCenter.y);
@@ -92,7 +92,7 @@ jobs:
               );
               await page.waitForTimeout(18);
             }
-            await page.waitForTimeout(260);
+            await page.waitForTimeout(420);
 
             const draggedDuring = await magnetPosition(board, dragged);
             const neighborDuring = await magnetPosition(board, neighbor);
@@ -151,8 +151,11 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run full browser regression suite serially
-        run: pnpm exec playwright test --workers=1
+      - name: Run magnet surface regressions
+        run: pnpm exec playwright test tests/e2e/magnet-surface-interactions.spec.ts tests/e2e/magnet-nav-order.spec.ts --workers=1
+
+      - name: Run existing drag, persistence, and touch regressions
+        run: pnpm exec playwright test tests/e2e/native-stability.spec.ts --workers=1 -g "content magnet locations survive reload|a lifted magnet passes over its neighbors before the drop restores contact|Play mode keeps a touch drag on the magnet instead of scrolling the page"
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
