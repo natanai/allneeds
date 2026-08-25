@@ -25,8 +25,21 @@ describe('production catalog snapshot', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    expect(strategies).toHaveLength(136);
+    expect(strategies).toHaveLength(137);
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
+  });
+
+  it('includes curated user-contributed strategies in their supported needs', () => {
+    expect(strategiesBySlug.get('comfy-gaming')).toMatchObject({
+      title: 'Comfy gaming',
+      summary: 'Stardew Valley or Skyrim or something else I have played a million times before that I cherish and can decompress with after a long day of uncomfortability.',
+      supportedNeeds: [{ title: 'Safety', slug: 'safety' }],
+      contributor: { name: 'Autumn' },
+    });
+    expect(needsBySlug.get('safety')?.strategies).toContainEqual({
+      title: 'Comfy gaming',
+      slug: 'comfy-gaming',
+    });
   });
 
   it('keeps every catalog relationship pointed at an existing public record', () => {

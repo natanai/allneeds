@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Comfy gaming",
+    "slug": "comfy-gaming",
+    "summary": "Stardew Valley or Skyrim or something else I have played a million times before that I cherish and can decompress with after a long day of uncomfortability.",
+    "needs": [
+      {
+        "title": "Safety",
+        "slug": "safety"
+      }
+    ],
+    "contributor": {
+      "name": "Autumn"
+    }
+  }
+]
