@@ -136,9 +136,11 @@ export function loadSharedFeedResources(scope: string, sort: string, refresh = f
     feedResources.set(key, result);
     return result;
   }).catch(() => {
-    const result = { strategies: [], error: 'Unable to load shared strategies right now.' };
-    feedResources.set(key, result);
-    return result;
+    const cached = feedResources.get(key);
+    return {
+      strategies: cached?.strategies ?? [],
+      error: 'Unable to load shared strategies right now.',
+    };
   }).finally(() => {
     feedPromises.delete(key);
   });
@@ -150,5 +152,6 @@ export async function warmAppResources() {
   await Promise.all([
     loadBodyCueResources(),
     loadObservationResources(),
+    loadSharedFeedResources('public', 'recent'),
   ]);
 }
