@@ -113,6 +113,36 @@
   pointer-events: none;
 }
 
+/* Approved Need identity: Support · Soft Terraces.
+   Keep the production icon slot as spacing, hide only the glyph, and let the
+   full-face mountain range carry the identity without changing magnet geometry. */
+.boardWrapper :global([data-magnet-id='needs-support']) {
+  background: color-mix(in srgb, var(--selection) 82%, var(--positive) 18%);
+}
+
+.boardWrapper :global([data-magnet-id='needs-support'])::before {
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+}
+
+.boardWrapper :global([data-magnet-id='needs-support'])::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--primary) 76%, var(--quiet) 24%),
+    color-mix(in srgb, var(--positive) 68%, var(--primary) 32%)
+  );
+  opacity: 0.91;
+  mask: url('/icons/needs/art/support-soft-terraces.svg') left center / 100% 100% no-repeat;
+  -webkit-mask: url('/icons/needs/art/support-soft-terraces.svg') left center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
 .empty {
   margin: 0;
   padding: 1rem;
