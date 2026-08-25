@@ -219,7 +219,7 @@ test.describe('mobile deep-scroll pickup geometry', () => {
   });
 });
 
-test('a dragged magnet makes a nearby resting magnet dodge out of its path', async ({ page }) => {
+test('a held magnet pushes its local surface neighbors out of its path', async ({ page }) => {
   await page.goto('/needs');
   const board = page.getByLabel('Needs magnet board');
   await expect(board).toHaveAttribute('data-ready', 'true');
@@ -367,6 +367,84 @@ test.describe('mobile packed magnet scurry', () => {
       expect(distance(draggedDuring, draggedBefore)).toBeGreaterThan(30);
       expect(escapeDistance).toBeGreaterThan(12);
       expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(12);
+    } finally {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: [],
+      }).catch(() => undefined);
+      await session.detach();
+    }
+  });
+});
+
+
+test.describe('mobile held-pressure propagation', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('pressure from one held magnet propagates through several resting magnets', async ({ page }) => {
+    await page.goto('/needs');
+    const board = page.getByLabel('Needs magnet board');
+    await expect(board).toHaveAttribute('data-ready', 'true');
+    await ensurePhysicsOn(board);
+
+    const dragged = board.getByRole('link', { name: 'Control', exact: true });
+    await dragged.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(520);
+
+    const magnets = board.locator('[data-magnet-id]');
+    const before = await magnets.evaluateAll((elements) => elements.map((element) => ({
+      id: (element as HTMLElement).dataset.magnetId ?? '',
+      x: Number.parseFloat((element as HTMLElement).style.getPropertyValue('--magnet-x')),
+      y: Number.parseFloat((element as HTMLElement).style.getPropertyValue('--magnet-y')),
+    })));
+    const draggedId = await dragged.getAttribute('data-magnet-id');
+    const draggedBox = await dragged.boundingBox();
+    expect(draggedBox).not.toBeNull();
+    const boardBox = await board.boundingBox();
+    expect(boardBox).not.toBeNull();
+
+    const start = {
+      x: draggedBox!.x + draggedBox!.width / 2,
+      y: draggedBox!.y + draggedBox!.height / 2,
+    };
+    const target = {
+      x: Math.min(start.x + 72, boardBox!.x + boardBox!.width - 34),
+      y: start.y,
+    };
+
+    const session = await page.context().newCDPSession(page);
+    try {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: start.x, y: start.y, id: 1 }],
+      });
+      for (let step = 1; step <= 18; step += 1) {
+        const progress = step / 18;
+        await session.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [{
+            x: start.x + (target.x - start.x) * progress,
+            y: start.y,
+            id: 1,
+          }],
+        });
+        await page.waitForTimeout(18);
+      }
+      await page.waitForTimeout(520);
+
+      const after = await magnets.evaluateAll((elements) => elements.map((element) => ({
+        id: (element as HTMLElement).dataset.magnetId ?? '',
+        x: Number.parseFloat((element as HTMLElement).style.getPropertyValue('--magnet-x')),
+        y: Number.parseFloat((element as HTMLElement).style.getPropertyValue('--magnet-y')),
+      })));
+      const beforeById = new Map(before.map((magnet) => [magnet.id, magnet]));
+      const movedRestingMagnets = after.filter((magnet) => {
+        if (!magnet.id || magnet.id === draggedId) return false;
+        const original = beforeById.get(magnet.id);
+        return original ? distance(magnet, original) > 5 : false;
+      });
+
+      expect(movedRestingMagnets.length).toBeGreaterThanOrEqual(3);
     } finally {
       await session.send('Input.dispatchTouchEvent', {
         type: 'touchEnd',
