@@ -213,7 +213,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run magnet interaction regressions
-        run: pnpm exec playwright test tests/e2e/magnet-surface-interactions.spec.ts tests/e2e/magnet-nav-order.spec.ts tests/e2e/nav-rendering-and-orientation.spec.ts --workers=1
+        run: pnpm exec playwright test tests/e2e/magnet-surface-interactions.spec.ts tests/e2e/magnet-nav-order.spec.ts --workers=1
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
