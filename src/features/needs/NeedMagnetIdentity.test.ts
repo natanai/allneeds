@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
-import needsCss from './NeedsPage.module.css?raw';
+const needsCss = readFileSync(new URL('./NeedsPage.module.css', import.meta.url), 'utf8');
 
 describe('approved Need magnet identities', () => {
   it('ships Connection with the approved Constellation artwork and semantic Customizer roles', () => {
