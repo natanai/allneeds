@@ -20,4 +20,13 @@ describe('need magnet audit candidates', () => {
         expect(candidate.iconPath).toBe(`icons/needs/${candidate.needSlug}.svg`);
       });
   });
+
+  it('keeps every full-face proposal tied to a contrast-bearing Customizer role', () => {
+    const contrastRole = /var\(--(?:plum|ink|outline)\)/;
+    needMagnetAuditCandidates
+      .filter((candidate) => candidate.artMaskPath)
+      .forEach((candidate) => {
+        expect(`${candidate.artA} ${candidate.artB}`).toMatch(contrastRole);
+      });
+  });
 });
