@@ -26,7 +26,7 @@ describe('production catalog snapshot', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    expect(strategies).toHaveLength(136 - 2 + 4 + userStrategies.length);
+    expect(strategies).toHaveLength(136 - 2 + 5 + userStrategies.length);
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
   });
 
@@ -87,6 +87,60 @@ describe('production catalog snapshot', () => {
     expect(strategiesBySlug.get('ambient-postcard')?.supportedNeeds).not.toContainEqual({
       title: 'Connection',
       slug: 'connection',
+    });
+  });
+
+  it('keeps Safety to human submissions plus two evidence-backed system strategies', () => {
+    const safety = needsBySlug.get('safety');
+    expect(safety?.strategies).toEqual([
+      { title: 'Crunch the numbers', slug: 'crunch-the-numbers' },
+      { title: 'Stare off', slug: 'stare-off' },
+      { title: 'Self holding', slug: 'self-holding' },
+      { title: 'Snuggle a pet', slug: 'snuggle-a-pet' },
+      { title: 'Road trip', slug: 'road-trip' },
+      { title: 'Watch a comfort show', slug: 'watch-a-comfort-show' },
+      { title: '5-4-3-2-1 check', slug: '5-4-3-2-1-check' },
+      { title: 'Slow breathing', slug: 'slow-breathing-safety' },
+      { title: 'Comfy gaming', slug: 'comfy-gaming' },
+    ]);
+
+    [
+      'crunch-the-numbers',
+      'stare-off',
+      'self-holding',
+      'snuggle-a-pet',
+      'road-trip',
+      'watch-a-comfort-show',
+      'comfy-gaming',
+    ].forEach((slug) => {
+      expect(strategiesBySlug.get(slug)?.provenance).toBe('user');
+    });
+
+    expect(strategiesBySlug.get('5-4-3-2-1-check')).toMatchObject({
+      provenance: 'system',
+      evidence: {
+        url: 'https://www.sciencedirect.com/science/article/pii/S1557308725002999',
+      },
+    });
+    expect(strategiesBySlug.get('slow-breathing-safety')).toMatchObject({
+      provenance: 'system',
+      evidence: {
+        url: 'https://pubmed.ncbi.nlm.nih.gov/38137060/',
+      },
+    });
+
+    [
+      'back-to-wall-lean',
+      'butterfly-taps',
+      'hand-on-heart-breaths',
+      'floor-starfish',
+      'feel-your-feet',
+      'wrap-in-a-blanket',
+      'name-support-options',
+      'exit-count',
+      'seat-press',
+    ].forEach((slug) => {
+      expect(strategiesBySlug.get(slug)?.supportedNeeds).not.toContainEqual({ title: 'Safety', slug: 'safety' });
     });
   });
 

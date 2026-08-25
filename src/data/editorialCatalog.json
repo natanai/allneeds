@@ -84,6 +84,31 @@
         "url": "https://www.sciencedirect.com/science/article/pii/S0272494409000620",
         "description": "Scannell, L., & Gifford, R. (2010). Defining place attachment: A tripartite organizing framework. Journal of Environmental Psychology, 30(1), 1–10."
       }
+    },
+    {
+      "title": "5-4-3-2-1 check",
+      "slug": "5-4-3-2-1-check",
+      "summary": "Name 5 things you see, 4 feel, 3 hear, 2 smell, 1 taste.",
+      "needs": [
+        { "title": "Safety", "slug": "safety" },
+        { "title": "Clarity", "slug": "clarity" }
+      ],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://www.sciencedirect.com/science/article/pii/S1557308725002999",
+        "description": "Ground yourself: Using five senses technique to cope with test anxiety among nursing students. Teaching and Learning in Nursing, 21(1), 35–40 (2026)."
+      }
+    },
+    {
+      "title": "Slow breathing",
+      "slug": "slow-breathing-safety",
+      "summary": "Set a timer for five minutes. Breathe slowly at a comfortable depth. If counting helps, try about four seconds in and six seconds out. Keep the breath easy rather than forcing it, and stop if you feel lightheaded.",
+      "needs": [{ "title": "Safety", "slug": "safety" }],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/38137060/",
+        "description": "Bentley et al. (2023). Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature."
+      }
     }
   ],
   "strategyProvenance": {
@@ -96,6 +121,15 @@
     "specific-thank-you"
   ],
   "strategyNeedRemovals": {
-    "ambient-postcard": ["connection"]
+    "ambient-postcard": ["connection"],
+    "back-to-wall-lean": ["safety"],
+    "butterfly-taps": ["safety"],
+    "hand-on-heart-breaths": ["safety"],
+    "floor-starfish": ["safety"],
+    "feel-your-feet": ["safety"],
+    "wrap-in-a-blanket": ["safety"],
+    "name-support-options": ["safety"],
+    "exit-count": ["safety"],
+    "seat-press": ["safety"]
   }
 }
