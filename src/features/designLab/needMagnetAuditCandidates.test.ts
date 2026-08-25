@@ -3,12 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { needMagnetAuditCandidates } from './needMagnetAuditCandidates';
 
 describe('need magnet audit candidates', () => {
-  it('contains only the unresolved Safety visual review', () => {
+  it('contains only the focused Safety canopy review', () => {
     expect(needMagnetAuditCandidates.map(({ id, needSlug, title }) => ({ id, needSlug, title }))).toEqual([
-      { id: 'safety-fortress', needSlug: 'safety', title: 'S1 · Fortress' },
-      { id: 'safety-sheltered-home', needSlug: 'safety', title: 'S2 · Sheltered Home' },
-      { id: 'safety-protective-canopy', needSlug: 'safety', title: 'S3 · Protective Canopy' },
-      { id: 'safety-safe-nest', needSlug: 'safety', title: 'S4 · Safe Nest' },
+      { id: 'safety-protective-canopy', needSlug: 'safety', title: 'S3a · Protective Canopy' },
+      { id: 'safety-shelter-arc', needSlug: 'safety', title: 'S3b · Shelter Arc' },
+      { id: 'safety-layered-cover', needSlug: 'safety', title: 'S3c · Layered Cover' },
+      { id: 'safety-quiet-understory', needSlug: 'safety', title: 'S3d · Quiet Understory' },
+      { id: 'safety-enfolding-field', needSlug: 'safety', title: 'S3e · Enfolding Field' },
     ]);
   });
 
