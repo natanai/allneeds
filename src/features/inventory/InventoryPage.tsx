@@ -15,6 +15,12 @@ import {
   writeInventory,
 } from './inventoryRepository';
 import type { InventoryStrategy } from './inventoryRepository';
+import {
+  downloadStrategyForNat,
+  personalStrategiesEmailHref,
+  PERSONAL_STRATEGIES_EMAIL_ADDRESS,
+} from './personalStrategiesExport';
+import { StrategySharingFields } from './StrategySharingFields';
 import styles from './InventoryPage.module.css';
 import popoverStyles from './NeedStrategyPopover.module.css';
 
@@ -51,6 +57,7 @@ export function InventoryPage() {
   const [addDraft, setAddDraft] = useState<InventoryDraft['add']>(initialDraft.add);
   const [editDraft, setEditDraft] = useState<InventoryDraft['edit']>(initialDraft.edit);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [shareEmailReadyFor, setShareEmailReadyFor] = useState<string | null>(null);
   const addFormShellRef = useRef<HTMLDetailsElement>(null);
   const openNeedRef = useRef<HTMLElement | null>(null);
   const workflowDraft = useMemo<InventoryDraft>(() => ({
@@ -152,7 +159,8 @@ export function InventoryPage() {
       return;
     }
     const primaryNeed = needsBySlug.get(needSlugs[0] ?? '');
-    const requestedVisibility = new FormData(event.currentTarget).get('strategy-visibility');
+    const formData = new FormData(event.currentTarget);
+    const requestedVisibility = formData.get('strategy-visibility');
     const visibility = session && (requestedVisibility === 'followers' || requestedVisibility === 'public')
       ? requestedVisibility
       : 'private';
@@ -164,6 +172,7 @@ export function InventoryPage() {
       firstName: addDraft.firstName,
       location: addDraft.location,
       visibility,
+      shareWithNat: formData.get('share-with-nat') === 'yes',
     });
     commit([...inventory, entry], `Saved “${title}” to this device${saveToProfile ? ' and preparing profile sync' : ''}.`);
     if (saveToProfile) {
@@ -191,6 +200,33 @@ export function InventoryPage() {
     setEditDraft(null);
   };
 
+  const setNatSharing = (entry: InventoryStrategy, shareWithNat: boolean) => {
+    commit(
+      inventory.map((item) => item.id === entry.id ? { ...item, shareWithNat } : item),
+      shareWithNat
+        ? `“${entry.title}” will be included when you export strategies to Nat.`
+        : `“${entry.title}” is private from Nat exports.`,
+    );
+    if (!shareWithNat) setShareEmailReadyFor((current) => current === entry.id ? null : current);
+  };
+
+  const shareOneWithNat = (entry: InventoryStrategy) => {
+    if (!entry.personal) return;
+    const shareableEntry = { ...entry, shareWithNat: true };
+    const next = writeInventory(inventory.map((item) => item.id === entry.id ? shareableEntry : item));
+    setInventory(next);
+    const result = downloadStrategyForNat(shareableEntry);
+    if (!result.downloaded) {
+      setFeedback({ kind: 'error', message: 'That strategy could not be exported.' });
+      return;
+    }
+    setShareEmailReadyFor(entry.id);
+    setFeedback({
+      kind: 'success',
+      message: `Exported “${entry.title}”. Attach the downloaded file to an email to ${PERSONAL_STRATEGIES_EMAIL_ADDRESS}.`,
+    });
+  };
+
   const removeEntry = (entry: InventoryStrategy) => {
     if (!window.confirm(`Remove “${entry.title}” from this device?`)) return;
     commit(inventory.filter((item) => item.id !== entry.id), `Removed “${entry.title}”.`);
@@ -198,6 +234,7 @@ export function InventoryPage() {
       workflowDraftRef.current = { ...workflowDraftRef.current, edit: null };
       setEditDraft(null);
     }
+    setShareEmailReadyFor((current) => current === entry.id ? null : current);
   };
 
   return (
@@ -366,10 +403,35 @@ export function InventoryPage() {
                     </form>
                   ) : (
                     <>
-                      <h3>{entry.title}</h3><p>{entry.description}</p>
+                      <div className={styles.cardHeading}>
+                        <h3>{entry.title}</h3>
+                        <details className={styles.cardMenu}>
+                          <summary aria-label={`More actions for ${entry.title}`}><span aria-hidden="true">•••</span></summary>
+                          <div className={styles.cardMenuPanel}>
+                            {entry.personal ? (
+                              <>
+                                <button type="button" onClick={() => shareOneWithNat(entry)}>Share with Nat…</button>
+                                <button type="button" onClick={() => setNatSharing(entry, !entry.shareWithNat)}>
+                                  {entry.shareWithNat ? 'Keep private from Nat exports' : 'Include in Nat exports'}
+                                </button>
+                                {shareEmailReadyFor === entry.id ? <a href={personalStrategiesEmailHref()}>Start email to Nat</a> : null}
+                              </>
+                            ) : null}
+                            <button type="button" onClick={() => setEditDraft({ id: entry.id, title: entry.title, description: entry.description })}>Edit</button>
+                            <button type="button" className={styles.destructiveMenuItem} onClick={() => removeEntry(entry)}>Remove</button>
+                          </div>
+                        </details>
+                      </div>
+                      <p>{entry.description}</p>
                       <div className={styles.tags}>{entry.needSlugs.map((slug) => <Link key={slug} to={`/needs/${slug}`}>{needsBySlug.get(slug)?.title ?? slug}</Link>)}</div>
-                      <small>{entry.personal ? 'Personal strategy' : 'Saved strategy'} · Stored on this device</small>
-                      <div className={styles.cardButtons}><button type="button" onClick={() => setEditDraft({ id: entry.id, title: entry.title, description: entry.description })}>Edit</button><button type="button" onClick={() => removeEntry(entry)}>Remove</button></div>
+                      <div className={styles.cardMeta}>
+                        <small>{entry.personal ? 'Personal strategy' : 'Saved strategy'} · Stored on this device</small>
+                        {entry.personal ? (
+                          <span className={styles.shareStatus} data-shareable={entry.shareWithNat || undefined}>
+                            {entry.shareWithNat ? 'Shareable with Nat' : 'Private'}
+                          </span>
+                        ) : null}
+                      </div>
                     </>
                   )}
                 </article>
@@ -383,6 +445,10 @@ export function InventoryPage() {
         <summary><span>Add a personal strategy</span><span aria-hidden="true">+</span></summary>
         <div className={styles.formBody}>
           <form id="inventory-form" className={styles.formCard} onSubmit={handleAdd}>
+            <div className={styles.formIntro}>
+              <strong>What helps?</strong>
+              <span>Save it privately by default, then choose separately whether it can be shared.</span>
+            </div>
             <label className={styles.formField}>
               <span>Strategy name</span>
               <span className={styles.inputCard}><input id="inventory-title" name="title" type="text" value={addDraft.title} onChange={(event) => setAddDraft({ ...addDraft, title: event.target.value })} required /></span>
@@ -405,14 +471,10 @@ export function InventoryPage() {
               <label className={styles.formField}><span>First name (optional)</span><span className={styles.inputCard}><input name="name" type="text" value={addDraft.firstName} onChange={(event) => setAddDraft({ ...addDraft, firstName: event.target.value })} /></span></label>
               <label className={styles.formField}><span>Location (optional)</span><span className={styles.inputCard}><input name="location" type="text" value={addDraft.location} onChange={(event) => setAddDraft({ ...addDraft, location: event.target.value })} /></span></label>
             </div>
-            <label className={styles.formField}>
-              <span>Visibility</span>
-              <small className={styles.visibilityHint}>Choose who can see this strategy when you export or share it. {session ? 'Followers/Public can be shared when you save to your profile.' : 'Sign in with Bluesky to enable Followers/Public. While signed out, strategies stay only on this browser.'}</small>
-              <span className={styles.inputCard}><select name="strategy-visibility" defaultValue="private"><option value="private">Private (only on this browser)</option><option value="followers" disabled={!session}>Followers (Bluesky followers when synced)</option><option value="public" disabled={!session}>Public</option></select></span>
-            </label>
+            <StrategySharingFields signedIn={Boolean(session)} />
             <div className={styles.formActions}>
-              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Device</button>
-              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Profile</button>
+              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Save to device</button>
+              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Save to profile</button>
             </div>
           </form>
           <p className={styles.formNote}>Backup, restore, and account sync are in Menu → Account &amp; data.</p>
