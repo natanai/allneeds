@@ -5,8 +5,6 @@ import { readInventory } from '../inventory/inventoryRepository';
 import { readJournal } from '../journal/journalRepository';
 import { profilePublishableStrategies } from './profileStrategySync';
 
-const OAUTH_CLIENT_MODULE_URL = 'https://esm.sh/@atproto/oauth-client-browser@0.3.36';
-const CLIENT_METADATA_URL = 'https://allneeds.app/oauth-client-metadata.json';
 const BACKEND_BASE_URL = 'https://backend.allneeds.app';
 const BACKEND_API_URL = `${BACKEND_BASE_URL}/api`;
 const BACKEND_SNAPSHOT_KEY = 'allneeds_export_v1';
@@ -14,34 +12,24 @@ const LOGIN_INTENT_STORAGE_KEY = 'allneeds:bsky-login-intent';
 const SESSION_HINT_STORAGE_KEY = 'allneeds:bsky-session-hint';
 export const BLUESKY_SESSION_CHANGED_EVENT = 'allneeds:bsky-login-changed';
 
-export type BlueskySession = { did: string; handle: string | null };
+export type BlueskySession = {
+  did: string;
+  handle: string | null;
+  verified: boolean;
+  admin: boolean;
+};
 
-type RawOAuthSession = Record<string, unknown> & {
-  sub?: string;
+type BackendSessionResponse = {
+  status?: string;
+  signedIn?: boolean;
   did?: string;
-  handle?: string;
-  preferred_username?: string;
-  signOut?: () => Promise<void>;
-  getAccessToken?: () => Promise<unknown>;
+  handle?: string | null;
+  verified?: boolean;
+  admin?: boolean;
 };
 
-type OAuthClient = {
-  init: () => Promise<{ session?: RawOAuthSession } | null>;
-  authorize: (handle: string, options: { scope: string }) => Promise<URL | string>;
-};
-
-type BrowserOAuthClientModule = {
-  BrowserOAuthClient: {
-    load: (options: { clientId: string; handleResolver: string; plcDirectoryUrl: string }) => Promise<OAuthClient>;
-  };
-};
-
-let oauthClient: OAuthClient | null = null;
-let rawSession: RawOAuthSession | null = null;
 let currentSession: BlueskySession | null = null;
 let initializePromise: Promise<BlueskySession | null> | null = null;
-let backendSessionDid = '';
-let backendSessionAccessToken = '';
 
 function safeStorage(name: 'localStorage' | 'sessionStorage') {
   if (typeof window === 'undefined') return null;
@@ -49,7 +37,11 @@ function safeStorage(name: 'localStorage' | 'sessionStorage') {
 }
 
 function writeSessionHint(active: boolean) {
-  try { safeStorage('localStorage')?.setItem(SESSION_HINT_STORAGE_KEY, active ? 'active' : 'none'); } catch { /* This hint is optional. */ }
+  try { safeStorage('localStorage')?.setItem(SESSION_HINT_STORAGE_KEY, active ? 'active' : 'none'); } catch { /* Optional hint. */ }
+}
+
+function hasLoginIntent() {
+  try { return safeStorage('sessionStorage')?.getItem(LOGIN_INTENT_STORAGE_KEY) === '1'; } catch { return false; }
 }
 
 function consumeLoginIntent() {
@@ -59,10 +51,6 @@ function consumeLoginIntent() {
     if (intended) storage?.removeItem(LOGIN_INTENT_STORAGE_KEY);
     return intended;
   } catch { return false; }
-}
-
-function hasLoginIntent() {
-  try { return safeStorage('sessionStorage')?.getItem(LOGIN_INTENT_STORAGE_KEY) === '1'; } catch { return false; }
 }
 
 function publishSession(session: BlueskySession | null, reason: string) {
@@ -75,64 +63,28 @@ function publishSession(session: BlueskySession | null, reason: string) {
   }));
 }
 
-function normalizeSession(session: RawOAuthSession | null | undefined): BlueskySession | null {
-  const did = typeof session?.sub === 'string' ? session.sub : typeof session?.did === 'string' ? session.did : '';
-  if (!did) return null;
-  const rawHandle = typeof session?.handle === 'string'
-    ? session.handle
-    : typeof session?.preferred_username === 'string' ? session.preferred_username : '';
-  return { did, handle: rawHandle || null };
-}
-
-async function loadOAuthClient() {
-  if (oauthClient) return oauthClient;
-  const module = await import(/* @vite-ignore */ OAUTH_CLIENT_MODULE_URL) as BrowserOAuthClientModule;
-  oauthClient = await module.BrowserOAuthClient.load({
-    clientId: CLIENT_METADATA_URL,
-    handleResolver: 'https://bsky.social',
-    plcDirectoryUrl: 'https://plc.directory',
-  });
-  return oauthClient;
-}
-
-async function resolveAccessToken(session: RawOAuthSession) {
-  if (typeof session.getAccessToken === 'function') {
-    try {
-      const token = await session.getAccessToken();
-      if (typeof token === 'string') return token;
-      if (token && typeof token === 'object') {
-        const record = token as Record<string, unknown>;
-        if (typeof record.accessToken === 'string') return record.accessToken;
-        if (typeof record.access_token === 'string') return record.access_token;
-      }
-    } catch { /* Continue through compatible SDK token shapes. */ }
+function normalizeBackendSession(data: unknown): BlueskySession | null {
+  if (!data || typeof data !== 'object') return null;
+  const result = data as BackendSessionResponse;
+  if (result.status !== 'ok' || result.signedIn !== true || typeof result.did !== 'string' || !result.did.startsWith('did:')) {
+    return null;
   }
-  for (const candidate of [session.token, session.tokens, session.credentials, session.auth, session]) {
-    if (!candidate || typeof candidate !== 'object') continue;
-    const record = candidate as Record<string, unknown>;
-    if (typeof record.accessToken === 'string') return record.accessToken;
-    if (typeof record.access_token === 'string') return record.access_token;
-    if (record.accessToken && typeof record.accessToken === 'object' && typeof (record.accessToken as { value?: unknown }).value === 'string') return (record.accessToken as { value: string }).value;
-    if (record.access_token && typeof record.access_token === 'object' && typeof (record.access_token as { value?: unknown }).value === 'string') return (record.access_token as { value: string }).value;
-  }
-  return '';
+  return {
+    did: result.did,
+    handle: typeof result.handle === 'string' && result.handle ? result.handle : null,
+    verified: result.verified === true,
+    admin: result.admin === true && result.verified === true,
+  };
 }
 
-async function ensureBackendSession(session: BlueskySession, raw: RawOAuthSession) {
-  const accessToken = await resolveAccessToken(raw);
-  if (backendSessionDid === session.did && backendSessionAccessToken === accessToken) return;
-  const response = await fetch(`${BACKEND_BASE_URL}/auth/session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+async function readBackendSession() {
+  const response = await fetch(`${BACKEND_API_URL}/me`, {
     credentials: 'include',
-    body: JSON.stringify({ did: session.did, accessToken: accessToken || null, handle: session.handle }),
+    cache: 'no-store',
   });
   const data: unknown = await response.json().catch(() => null);
-  if (!response.ok || !data || typeof data !== 'object' || (data as { status?: string }).status !== 'ok') {
-    throw new Error('Could not start the allneeds profile session.');
-  }
-  backendSessionDid = session.did;
-  backendSessionAccessToken = accessToken;
+  if (!response.ok) return null;
+  return normalizeBackendSession(data);
 }
 
 export function getBlueskySession() {
@@ -151,15 +103,16 @@ export function useBlueskySession() {
   return session;
 }
 
+/**
+ * Compatibility name retained for existing callers. Identity is now established by
+ * the allneeds backend's verified AT Protocol OAuth callback rather than by a browser
+ * OAuth client forwarding a DPoP-bound access token to Cloudflare.
+ */
 export async function initializeBlueskyOAuth() {
   if (initializePromise) return initializePromise;
   initializePromise = (async () => {
-    const client = await loadOAuthClient();
+    const session = await readBackendSession();
     const loginIntent = consumeLoginIntent();
-    const result = await client.init();
-    rawSession = result?.session ?? null;
-    const session = normalizeSession(rawSession);
-    if (session && rawSession) await ensureBackendSession(session, rawSession);
     publishSession(session, session ? (loginIntent ? 'signin' : 'restore') : 'signout');
     return session;
   })().catch((error) => {
@@ -181,24 +134,25 @@ export function normalizeBlueskyHandle(input: string) {
 
 export async function signInWithBluesky(input: string) {
   const handle = normalizeBlueskyHandle(input);
-  await initializeBlueskyOAuth();
-  const client = await loadOAuthClient();
   safeStorage('sessionStorage')?.setItem(LOGIN_INTENT_STORAGE_KEY, '1');
-  const authorizationUrl = await client.authorize(handle, { scope: 'atproto' });
-  window.location.href = authorizationUrl.toString();
+  const returnTo = typeof window === 'undefined'
+    ? '/inventory/'
+    : `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const loginUrl = new URL(`${BACKEND_BASE_URL}/auth/login`);
+  loginUrl.searchParams.set('handle', handle);
+  loginUrl.searchParams.set('returnTo', returnTo);
+  window.location.assign(loginUrl.toString());
 }
 
 export async function signOutFromBluesky() {
   try {
-    if (rawSession?.signOut) await rawSession.signOut();
+    await fetch(`${BACKEND_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
   } finally {
-    await fetch(`${BACKEND_BASE_URL}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => undefined);
-    rawSession = null;
     currentSession = null;
     initializePromise = null;
-    oauthClient = null;
-    backendSessionDid = '';
-    backendSessionAccessToken = '';
     publishSession(null, 'signout');
   }
 }
@@ -235,12 +189,11 @@ async function buildCurrentBrowserBackup() {
 async function requireBackendSession() {
   const session = getBlueskySession() ?? await initializeBlueskyOAuth();
   if (!session) throw new Error('Sign in with Bluesky first.');
-  if (rawSession) await ensureBackendSession(session, rawSession);
   return session;
 }
 
 export async function saveCurrentBrowserToProfile() {
-  await requireBackendSession();
+  const session = await requireBackendSession();
   const snapshot = await buildCurrentBrowserBackup();
   const response = await fetch(`${BACKEND_API_URL}/user-settings`, {
     method: 'POST',
@@ -254,7 +207,8 @@ export async function saveCurrentBrowserToProfile() {
   }
 
   const strategies = profilePublishableStrategies(snapshot.inventory);
-  const syncResponse = await fetch(`${BACKEND_API_URL}/strategies/sync`, {
+  const syncPath = session.verified ? '/strategies/sync-owned' : '/strategies/sync';
+  const syncResponse = await fetch(`${BACKEND_API_URL}${syncPath}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -309,21 +263,31 @@ export async function notifySharedStrategyAdded(strategyId: string) {
   if (!response.ok) throw new Error('Unable to update the shared add count.');
 }
 
-function isOAuthReturn() {
+function isVerifiedAuthReturn() {
   if (typeof window === 'undefined') return false;
-  const params = new URL(window.location.href).searchParams;
-  return params.has('state') && (params.has('code') || params.has('error') || params.has('iss'));
+  return new URL(window.location.href).searchParams.get('auth') === 'verified';
+}
+
+function clearVerifiedAuthReturn() {
+  if (typeof window === 'undefined' || !isVerifiedAuthReturn()) return;
+  const url = new URL(window.location.href);
+  url.searchParams.delete('auth');
+  window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
 export function initializeBlueskyForCurrentPage() {
   if (typeof window === 'undefined') return;
   const hint = safeStorage('localStorage')?.getItem(SESSION_HINT_STORAGE_KEY) ?? '';
-  const mustInitialize = isOAuthReturn() || hasLoginIntent() || hint === 'active';
+  const returningFromLogin = isVerifiedAuthReturn() || hasLoginIntent();
+  const mustInitialize = returningFromLogin || hint === 'active';
   if (!mustInitialize) return;
 
-  const signedInReturn = hasLoginIntent();
   void initializeBlueskyOAuth().then(async (session) => {
-    if (session && signedInReturn) await loadProfileIntoCurrentBrowser();
+    if (!session) return;
+    if (returningFromLogin) {
+      clearVerifiedAuthReturn();
+      await loadProfileIntoCurrentBrowser();
+    }
   }).catch(() => undefined);
 }
 
