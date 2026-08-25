@@ -10,8 +10,8 @@
   gap: clamp(.6rem, 2vw, .8rem);
   border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
   border-radius: calc(30px * var(--corner-scale));
-  background: color-mix(in srgb, var(--mint) 18%, #fff 82%);
-  color: color-mix(in srgb, var(--ink) 86%, var(--ink-soft) 14%);
+  background: color-mix(in srgb, var(--positive) 18%, #fff 82%);
+  color: color-mix(in srgb, var(--text) 86%, var(--secondary) 14%);
   cursor: pointer;
   font: 600 clamp(.92rem, 2.3vw, 1.02rem)/1.35 var(--font-body);
   text-align: left;
@@ -31,10 +31,10 @@
 }
 
 .toggle[aria-expanded='true']::after { transform: rotate(-135deg); }
-.toggle:hover { background: color-mix(in srgb, var(--mint) 28%, #fff 72%); border-color: color-mix(in srgb, var(--outline) 72%, transparent); color: var(--ink); }
-.toggle:focus-visible { outline: 2px solid color-mix(in srgb, var(--mint) 55%, transparent); outline-offset: 3px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--mint) 22%, transparent); }
+.toggle:hover { background: color-mix(in srgb, var(--positive) 28%, #fff 72%); border-color: color-mix(in srgb, var(--outline) 72%, transparent); color: var(--text); }
+.toggle:focus-visible { outline: 2px solid color-mix(in srgb, var(--positive) 55%, transparent); outline-offset: 3px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--positive) 22%, transparent); }
 .toggleCopy { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(.15rem, 1vw, .25rem); }
-.badge { padding: .1rem .5rem; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--mint) 40%, #fff 60%); color: color-mix(in srgb, var(--ink) 70%, var(--ink-soft) 30%); font-size: clamp(.66rem, 1.6vw, .72rem); font-weight: 700; letter-spacing: .08em; line-height: 1.1; text-transform: uppercase; }
+.badge { padding: .1rem .5rem; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--positive) 40%, #fff 60%); color: color-mix(in srgb, var(--text) 70%, var(--secondary) 30%); font-size: clamp(.66rem, 1.6vw, .72rem); font-weight: 700; letter-spacing: .08em; line-height: 1.1; text-transform: uppercase; }
 .toggleLabel { color: inherit; font-size: inherit; font-weight: inherit; line-height: 1.3; }
 .panel { margin-top: clamp(.75rem, 3vw, 1.2rem); }
 
@@ -45,8 +45,8 @@
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--outline) 65%, transparent);
   border-radius: calc(20px * var(--corner-scale));
-  background: color-mix(in srgb, var(--sky) 14%, transparent);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--selection) 14%, transparent);
+  color: var(--text);
 }
 .inference:focus-visible { outline: 1px solid var(--outline); outline-offset: 0; }
 
@@ -55,43 +55,43 @@
 .subheading { margin: 0 0 .75rem; font-size: clamp(1.05rem, 2.4vw, 1.25rem); font-weight: 600; }
 .zones { display: flex; flex-wrap: wrap; gap: .5rem; }
 .zoneChip { padding: .35rem .85rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--chip-bg) 80%, transparent); font-size: .95rem; }
-.primaryZone { border-color: color-mix(in srgb, var(--mint) 60%, transparent); background: color-mix(in srgb, var(--mint) 55%, transparent); font-weight: 600; }
-.disclaimer { margin: 0 0 1rem; color: color-mix(in srgb, var(--ink) 70%, transparent); font-size: .95rem; }
+.primaryZone { border-color: color-mix(in srgb, var(--positive) 60%, transparent); background: color-mix(in srgb, var(--positive) 55%, transparent); font-weight: 600; }
+.disclaimer { margin: 0 0 1rem; color: color-mix(in srgb, var(--text) 70%, transparent); font-size: .95rem; }
 .bodyGroups { display: grid; gap: 1.5rem; }
 .bodyRegion { padding: 1rem 1.25rem; border: 1px solid color-mix(in srgb, var(--outline) 50%, transparent); border-radius: calc(16px * var(--corner-scale)); background: color-mix(in srgb, #fff 82%, transparent); box-shadow: 0 8px 16px color-mix(in srgb, var(--outline) 12%, transparent); }
 .regionTitle { margin: 0 0 .75rem; font-size: 1.05rem; font-weight: 600; }
 .cue { padding-block: .75rem; border-top: 1px solid color-mix(in srgb, var(--outline) 40%, transparent); }
 .cue:first-of-type { padding-top: 0; border-top: 0; }
 .cueTitle { margin: 0 0 .35rem; font-size: 1rem; font-weight: 600; }
-.cueNote { margin: 0 0 .5rem; color: color-mix(in srgb, var(--ink) 75%, transparent); font-size: .95rem; }
-.intensity { margin: 0 0 .6rem; display: grid; gap: .35rem; color: color-mix(in srgb, var(--ink) 65%, transparent); font-size: .9rem; }
+.cueNote { margin: 0 0 .5rem; color: color-mix(in srgb, var(--text) 75%, transparent); font-size: .95rem; }
+.intensity { margin: 0 0 .6rem; display: grid; gap: .35rem; color: color-mix(in srgb, var(--text) 65%, transparent); font-size: .9rem; }
 .intensityLabel { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem; font-style: italic; }
 .intensityMeter { position: relative; height: .5rem; overflow: hidden; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--outline) 24%, transparent); }
-.intensityFill { position: absolute; inset-block: 0; border-radius: inherit; background: color-mix(in srgb, var(--mint) 65%, transparent); }
+.intensityFill { position: absolute; inset-block: 0; border-radius: inherit; background: color-mix(in srgb, var(--positive) 65%, transparent); }
 
 /* Regulation exercises stay in the dedicated support tools in the current production design. */
 .skillsSection { display: none; }
 .skills { display: grid; gap: 1rem; }
 .skill { padding: .85rem 1rem; display: flex; flex-direction: column; gap: .75rem; border: 1px solid color-mix(in srgb, var(--outline) 40%, transparent); border-radius: calc(14px * var(--corner-scale)); background: color-mix(in srgb, #fff 85%, transparent); }
 .skill button { padding: 0; display: flex; align-items: center; justify-content: space-between; gap: .5rem; border: 0; background: none; color: inherit; cursor: pointer; font: 600 1rem var(--font-body); text-align: left; }
-.skill button span { color: color-mix(in srgb, var(--ink) 65%, transparent); font-size: .85rem; font-weight: 500; }
-.skill p { margin: 0; color: color-mix(in srgb, var(--ink) 75%, transparent); font-size: .95rem; }
+.skill button span { color: color-mix(in srgb, var(--text) 65%, transparent); font-size: .85rem; font-weight: 500; }
+.skill p { margin: 0; color: color-mix(in srgb, var(--text) 75%, transparent); font-size: .95rem; }
 .actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; }
 .actions button { min-height: 40px; padding: .45rem 1.1rem; border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--chip-bg) 70%, transparent); color: inherit; cursor: pointer; font: 600 1rem var(--font-body); }
-.actions button:hover, .actions button:focus-visible { outline: none; background: color-mix(in srgb, var(--mint) 55%, transparent); }
+.actions button:hover, .actions button:focus-visible { outline: none; background: color-mix(in srgb, var(--positive) 55%, transparent); }
 
-.popoverBackdrop { position: fixed; inset: 0; z-index: 1200; padding: 1rem; display: grid; place-items: center; overflow: auto; background: color-mix(in srgb, var(--ink) 35%, transparent); }
-.popover { width: min(32rem, 100%); max-height: calc(100dvh - 2rem); display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; border-radius: calc(18px * var(--corner-scale)); background: #fff; color: var(--ink); box-shadow: 0 18px 40px color-mix(in srgb, var(--ink) 18%, transparent); }
+.popoverBackdrop { position: fixed; inset: 0; z-index: 1200; padding: 1rem; display: grid; place-items: center; overflow: auto; background: color-mix(in srgb, var(--text) 35%, transparent); }
+.popover { width: min(32rem, 100%); max-height: calc(100dvh - 2rem); display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; border-radius: calc(18px * var(--corner-scale)); background: #fff; color: var(--text); box-shadow: 0 18px 40px color-mix(in srgb, var(--text) 18%, transparent); }
 .popoverHeader { position: relative; z-index: 2; padding: .75rem .75rem .45rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid color-mix(in srgb, var(--outline) 18%, transparent); background: #fff; }
 .popoverHeader h3 { margin: 0; font-size: 1.25rem; font-weight: 700; }
-.popoverHeader button { min-width: 44px; min-height: 44px; padding: 0 .75rem; display: flex; align-items: center; justify-content: center; border: 0; border-radius: var(--radius-pill); background: color-mix(in srgb, #fff 92%, var(--sky) 8%); color: inherit; cursor: pointer; font: 600 1rem var(--font-body); }
-.popoverHeader button:focus-visible { outline: 2px solid color-mix(in srgb, var(--mint) 60%, transparent); outline-offset: 2px; }
+.popoverHeader button { min-width: 44px; min-height: 44px; padding: 0 .75rem; display: flex; align-items: center; justify-content: center; border: 0; border-radius: var(--radius-pill); background: color-mix(in srgb, #fff 92%, var(--selection) 8%); color: inherit; cursor: pointer; font: 600 1rem var(--font-body); }
+.popoverHeader button:focus-visible { outline: 2px solid color-mix(in srgb, var(--positive) 60%, transparent); outline-offset: 2px; }
 .popoverBody { min-height: 0; padding: 1rem 1.5rem 1.5rem; overflow-y: auto; overscroll-behavior: contain; }
 .evidenceList, .limitations { margin: 0 0 1rem; padding-left: 1.25rem; font-size: .95rem; }
 .evidenceList li, .limitations li { margin-block: .45rem; }
 .evidenceList strong, .evidenceList a, .evidenceList span { display: block; }
 .evidenceList strong { font-weight: 600; }
-.evidenceList a, .evidenceList span { color: color-mix(in srgb, var(--ink) 70%, transparent); font-size: .85rem; }
+.evidenceList a, .evidenceList span { color: color-mix(in srgb, var(--text) 70%, transparent); font-size: .85rem; }
 .evidenceList a { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--outline) 70%, transparent); text-decoration-thickness: 2px; }
 .popoverBody h4 { margin: 0 0 .5rem; font-size: 1rem; font-weight: 600; }
 
@@ -106,23 +106,23 @@
   .section:first-child { padding-top: .5rem; border-top: 0; }
   .subheading { margin: 0 0 .45rem; font-size: .88rem; line-height: 1.25; font-weight: 700; letter-spacing: .015em; }
   .zones { gap: .35rem; }
-  .zoneChip { min-width: 0; min-height: 0; padding: .3rem .55rem; border-color: color-mix(in srgb, var(--outline) 24%, transparent); background: color-mix(in srgb, #fff 72%, var(--lavender) 28%); box-shadow: none; font: 500 .76rem/1.25 var(--font-body); text-align: left; }
-  .primaryZone { border-color: color-mix(in srgb, var(--outline) 30%, transparent); background: color-mix(in srgb, var(--mint) 48%, #fff 52%); font-weight: 650; }
-  .disclaimer { max-width: none; margin: -.1rem 0 .5rem; color: color-mix(in srgb, var(--ink-soft) 72%, transparent); font-size: .72rem; line-height: 1.35; }
+  .zoneChip { min-width: 0; min-height: 0; padding: .3rem .55rem; border-color: color-mix(in srgb, var(--outline) 24%, transparent); background: color-mix(in srgb, #fff 72%, var(--quiet) 28%); box-shadow: none; font: 500 .76rem/1.25 var(--font-body); text-align: left; }
+  .primaryZone { border-color: color-mix(in srgb, var(--outline) 30%, transparent); background: color-mix(in srgb, var(--positive) 48%, #fff 52%); font-weight: 650; }
+  .disclaimer { max-width: none; margin: -.1rem 0 .5rem; color: color-mix(in srgb, var(--secondary) 72%, transparent); font-size: .72rem; line-height: 1.35; }
   .bodyGroups { grid-template-columns: 1fr; gap: 0; }
   .bodyRegion { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
   .bodyRegion + .bodyRegion { margin-top: .65rem; padding-top: .65rem; border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent); }
-  .regionTitle { margin: 0 0 .2rem; color: color-mix(in srgb, var(--ink) 82%, transparent); font-size: .78rem; line-height: 1.3; font-weight: 700; letter-spacing: .025em; }
+  .regionTitle { margin: 0 0 .2rem; color: color-mix(in srgb, var(--text) 82%, transparent); font-size: .78rem; line-height: 1.3; font-weight: 700; letter-spacing: .025em; }
   .cue { padding: .6rem 0; border-top-color: color-mix(in srgb, var(--outline) 11%, transparent); }
   .cue:first-of-type { padding-top: .35rem; }
   .cueTitle { margin: 0; font-size: .92rem; line-height: 1.3; font-weight: 650; }
-  .cueNote { margin: .18rem 0 0; color: color-mix(in srgb, var(--ink-soft) 78%, transparent); font-size: .78rem; line-height: 1.38; }
+  .cueNote { margin: .18rem 0 0; color: color-mix(in srgb, var(--secondary) 78%, transparent); font-size: .78rem; line-height: 1.38; }
   .intensity { margin: .4rem 0 0; gap: .28rem; }
-  .intensityLabel { width: fit-content; padding: .16rem .42rem; display: inline-flex; align-items: center; gap: 0; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--mint) 18%, #fff 82%); color: color-mix(in srgb, var(--ink) 72%, transparent); font-size: .67rem; line-height: 1.25; font-style: normal; font-weight: 600; }
+  .intensityLabel { width: fit-content; padding: .16rem .42rem; display: inline-flex; align-items: center; gap: 0; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--positive) 18%, #fff 82%); color: color-mix(in srgb, var(--text) 72%, transparent); font-size: .67rem; line-height: 1.25; font-style: normal; font-weight: 600; }
   .intensityMeter { height: .28rem; background: color-mix(in srgb, var(--outline) 13%, transparent); }
-  .intensityFill { background: color-mix(in srgb, var(--mint) 65%, var(--plum) 10%); }
+  .intensityFill { background: color-mix(in srgb, var(--positive) 65%, var(--primary) 10%); }
   .actions { margin-top: .15rem; padding: .65rem .2rem .2rem; border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent); }
-  .actions button { padding: .35rem .65rem; border-width: 1px; background: color-mix(in srgb, #fff 82%, var(--sky) 18%); font-size: .72rem; }
+  .actions button { padding: .35rem .65rem; border-width: 1px; background: color-mix(in srgb, #fff 82%, var(--selection) 18%); font-size: .72rem; }
   .popoverBackdrop { padding: .5rem; }
   .popover { max-height: calc(100dvh - 1rem); }
   .popoverHeader { padding: max(.55rem, env(safe-area-inset-top)) .55rem .4rem 1rem; }

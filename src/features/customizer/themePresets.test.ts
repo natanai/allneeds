@@ -19,40 +19,40 @@ describe('customizer theme presets', () => {
     expect(preset).toMatchObject({ values: defaultTheme, roundness: 100 });
   });
 
-  it('recognizes untouched default values while leaving legacy custom themes unnamed', () => {
+  it('recognizes untouched default values while leaving older custom themes unnamed', () => {
     expect(resolveThemePresetName({ values: { ...defaultTheme }, roundness: 100, preset: '' })).toBe('Default');
     expect(resolveThemePresetName({
-      values: { ...defaultTheme, rose: '#FFFFFF' },
+      values: { ...defaultTheme, action: '#FFFFFF' },
       roundness: 100,
       preset: 'Old palette',
     })).toBe('');
   });
 
-  it('makes Refrigerator square-edged and reuses one paper white across magnet-face roles', () => {
+  it('makes Refrigerator square-edged and reuses one paper white across quiet magnet-face roles', () => {
     const preset = themePresets.find(({ name }) => name === 'Refrigerator');
     const paperWhite = '#FFFEF8';
     expect(preset).toMatchObject({
       roundness: 0,
       values: {
-        plum: '#6F9E91',
-        lavender: paperWhite,
-        rose: paperWhite,
-        mint: paperWhite,
-        gold: paperWhite,
-        sky: paperWhite,
+        primary: '#6F9E91',
+        quiet: paperWhite,
+        action: paperWhite,
+        positive: paperWhite,
+        attention: paperWhite,
+        selection: paperWhite,
         outline: '#17201D',
       },
     });
     expect(new Set([
-      preset?.values.lavender,
-      preset?.values.rose,
-      preset?.values.mint,
-      preset?.values.gold,
-      preset?.values.sky,
+      preset?.values.quiet,
+      preset?.values.action,
+      preset?.values.positive,
+      preset?.values.attention,
+      preset?.values.selection,
     ])).toEqual(new Set([paperWhite]));
   });
 
-  it('gives every preset a distinct complete runtime theme without expanding the editable palette', () => {
+  it('gives every preset a distinct complete runtime theme without expanding the editable role set', () => {
     expect(new Set(themePresets.map((preset) => JSON.stringify([preset.roundness, preset.values]))).size)
       .toBe(themePresets.length);
 
@@ -62,8 +62,8 @@ describe('customizer theme presets', () => {
       expect(preset.roundness).toBeGreaterThanOrEqual(0);
       expect(preset.roundness).toBeLessThanOrEqual(200);
       const css = themeCssValues(preset);
-      expect(css['--surface-raised']).toBe(`color-mix(in srgb, ${preset.values.lavender} 12%, #FFFFFF 88%)`);
-      expect(css['--peach']).toBe(preset.values.rose);
+      expect(css['--surface-raised']).toBe(`color-mix(in srgb, ${preset.values.quiet} 12%, #FFFFFF 88%)`);
+      expect(css['--btn-bg']).toBe(preset.values.action);
       expect(css['--corner-scale']).toBe(String(preset.roundness / 100));
       expect(css['--btn-fg']).toMatch(/^#[0-9A-F]{6}$/);
     });

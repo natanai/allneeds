@@ -1,22 +1,21 @@
 :root {
   color-scheme: light;
-  --plum: #74569b;
-  --lavender: #ede4ff;
-  --ink: #1f1230;
-  --ink-soft: #392351;
-  --rose: #ffb3cb;
-  --mint: #96fbc7;
-  --gold: #f7ffae;
-  --sky: #d3f1ff;
+  --primary: #74569b;
+  --quiet: #ede4ff;
+  --text: #1f1230;
+  --secondary: #392351;
+  --action: #ffb3cb;
+  --positive: #96fbc7;
+  --attention: #f7ffae;
+  --selection: #d3f1ff;
   --outline: #12081f;
 
   /* Shared visual roles are derived rather than expanding the editable palette. */
-  --surface-raised: color-mix(in srgb, var(--lavender) 12%, #ffffff 88%);
-  --peach: var(--rose);
+  --surface-raised: color-mix(in srgb, var(--quiet) 12%, #ffffff 88%);
   --shadow: color-mix(in srgb, var(--outline) 55%, transparent);
-  --btn-bg: var(--rose);
+  --btn-bg: var(--action);
   --btn-fg: #111111;
-  --chip-bg: color-mix(in srgb, var(--surface-raised) 86%, var(--sky) 14%);
+  --chip-bg: color-mix(in srgb, var(--surface-raised) 86%, var(--selection) 14%);
   --chip-fg: #111111;
   --corner-scale: 1;
   --radius-xs: calc(var(--corner-scale) * 8px);
@@ -35,18 +34,17 @@
   --font-display: 'Manrope', 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
   --layout-max: 960px;
 
-  /* Transitional aliases keep every feature slice on the production palette. */
-  --color-plum: var(--plum);
-  --color-lavender: var(--lavender);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-rose: var(--rose);
-  --color-mint: var(--mint);
-  --color-gold: var(--gold);
-  --color-peach: var(--peach);
-  --color-sky: var(--sky);
+  /* Semantic aliases are available to feature slices that prefer a color namespace. */
+  --color-primary: var(--primary);
+  --color-quiet: var(--quiet);
+  --color-text: var(--text);
+  --color-secondary: var(--secondary);
+  --color-action: var(--action);
+  --color-positive: var(--positive);
+  --color-attention: var(--attention);
+  --color-selection: var(--selection);
   --color-outline: var(--outline);
-  --surface-canvas: var(--lavender);
+  --surface-canvas: var(--quiet);
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --space-1: 0.25rem;

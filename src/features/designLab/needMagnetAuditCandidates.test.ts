@@ -22,7 +22,7 @@ describe('need magnet audit candidates', () => {
   });
 
   it('keeps every full-face proposal tied to a contrast-bearing Customizer role', () => {
-    const contrastRole = /var\(--(?:plum|ink|outline)\)/;
+    const contrastRole = /var\(--(?:primary|text|outline)\)/;
     needMagnetAuditCandidates
       .filter((candidate) => candidate.artMaskPath)
       .forEach((candidate) => {

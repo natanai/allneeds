@@ -14,7 +14,7 @@ export type NeedMagnetAuditCandidate = Readonly<{
 }>;
 
 const gradientIcon = 'linear-gradient(135deg, var(--audit-art-a), var(--audit-art-b))';
-const refrigeratorSafe = (color: string) => `color-mix(in srgb, ${color} 72%, var(--plum) 28%)`;
+const refrigeratorSafe = (color: string) => `color-mix(in srgb, ${color} 72%, var(--primary) 28%)`;
 
 export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
   {
@@ -24,10 +24,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     title: 'Current control',
     description: 'Current production Need treatment, kept beside every proposal as the baseline.',
     iconPath: 'icons/needs/connection.svg',
-    faceBackground: 'var(--sky)',
+    faceBackground: 'var(--selection)',
     iconFill: '#000000',
-    artA: 'var(--sky)',
-    artB: 'var(--sky)',
+    artA: 'var(--selection)',
+    artB: 'var(--selection)',
   },
   {
     id: 'connection-weave',
@@ -37,10 +37,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     description: 'Crossing full-face bands that make relation and reciprocity visible across the entire magnet.',
     iconPath: 'icons/needs/connection.svg',
     artMaskPath: 'design-lab/need-magnets/connection-weave.svg',
-    faceBackground: 'color-mix(in srgb, var(--sky) 82%, var(--lavender) 18%)',
+    faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--quiet) 18%)',
     iconFill: gradientIcon,
-    artA: refrigeratorSafe('var(--rose)'),
-    artB: refrigeratorSafe('var(--mint)'),
+    artA: refrigeratorSafe('var(--action)'),
+    artB: refrigeratorSafe('var(--positive)'),
     artOpacity: 0.9,
   },
   {
@@ -51,10 +51,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     description: 'Two sides visibly joined through a central span, retaining the linking metaphor without relying only on the icon.',
     iconPath: 'icons/needs/connection.svg',
     artMaskPath: 'design-lab/need-magnets/connection-bridge.svg',
-    faceBackground: 'color-mix(in srgb, var(--sky) 82%, var(--gold) 18%)',
+    faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--attention) 18%)',
     iconFill: gradientIcon,
-    artA: 'var(--plum)',
-    artB: 'var(--mint)',
+    artA: 'var(--primary)',
+    artB: 'var(--positive)',
     artOpacity: 0.88,
   },
   {
@@ -65,10 +65,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     description: 'Networked points and a connecting route across the face for a more playful, recognizable pattern.',
     iconPath: 'icons/needs/connection.svg',
     artMaskPath: 'design-lab/need-magnets/connection-constellation.svg',
-    faceBackground: 'color-mix(in srgb, var(--sky) 84%, var(--lavender) 16%)',
+    faceBackground: 'color-mix(in srgb, var(--selection) 84%, var(--quiet) 16%)',
     iconFill: gradientIcon,
-    artA: 'var(--mint)',
-    artB: 'var(--plum)',
+    artA: 'var(--positive)',
+    artB: 'var(--primary)',
     artOpacity: 0.9,
   },
   {
@@ -78,10 +78,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     title: 'Current control',
     description: 'Current production Need treatment, kept beside every proposal as the baseline.',
     iconPath: 'icons/needs/support.svg',
-    faceBackground: 'var(--sky)',
+    faceBackground: 'var(--selection)',
     iconFill: '#000000',
-    artA: 'var(--sky)',
-    artB: 'var(--sky)',
+    artA: 'var(--selection)',
+    artB: 'var(--selection)',
   },
   {
     id: 'support-cradle',
@@ -91,10 +91,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     description: 'A visible base and lifting curves make the whole face feel held, carried, and reinforced.',
     iconPath: 'icons/needs/support.svg',
     artMaskPath: 'design-lab/need-magnets/support-cradle.svg',
-    faceBackground: 'color-mix(in srgb, var(--sky) 82%, var(--mint) 18%)',
+    faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--positive) 18%)',
     iconFill: gradientIcon,
-    artA: refrigeratorSafe('var(--gold)'),
-    artB: refrigeratorSafe('var(--mint)'),
+    artA: refrigeratorSafe('var(--attention)'),
+    artB: refrigeratorSafe('var(--positive)'),
     artOpacity: 0.9,
   },
   {
@@ -105,10 +105,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     description: 'A sheltering outer arc and inner support form make protection and assistance readable across the face.',
     iconPath: 'icons/needs/support.svg',
     artMaskPath: 'design-lab/need-magnets/support-protective-arc.svg',
-    faceBackground: 'color-mix(in srgb, var(--sky) 84%, var(--lavender) 16%)',
+    faceBackground: 'color-mix(in srgb, var(--selection) 84%, var(--quiet) 16%)',
     iconFill: gradientIcon,
-    artA: 'var(--mint)',
-    artB: 'var(--plum)',
+    artA: 'var(--positive)',
+    artB: 'var(--primary)',
     artOpacity: 0.88,
   },
   {
@@ -119,10 +119,10 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     description: 'Foundation, supports, and a beam create a literal load-bearing interpretation of Support.',
     iconPath: 'icons/needs/support.svg',
     artMaskPath: 'design-lab/need-magnets/support-structure.svg',
-    faceBackground: 'color-mix(in srgb, var(--sky) 82%, var(--gold) 18%)',
+    faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--attention) 18%)',
     iconFill: gradientIcon,
-    artA: 'var(--rose)',
-    artB: 'var(--plum)',
+    artA: 'var(--action)',
+    artB: 'var(--primary)',
     artOpacity: 0.88,
   },
 ];

@@ -24,7 +24,7 @@ export function NeedsPage() {
     label: need.title,
     to: `/needs/${need.slug}`,
     kind: 'need',
-    tone: 'sky',
+    tone: 'selection',
     iconUrl: assetPath(`icons/needs/${need.slug}.svg`),
   })), [visibleNeeds]);
 

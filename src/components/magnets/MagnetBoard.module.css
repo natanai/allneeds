@@ -25,7 +25,7 @@
 }
 
 .playMode {
-  background: color-mix(in srgb, var(--sky) 9%, var(--surface-raised) 91%);
+  background: color-mix(in srgb, var(--selection) 9%, var(--surface-raised) 91%);
 }
 
 .board[data-dragging='true'] {
@@ -51,8 +51,8 @@
   overflow: hidden;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 16% 22%, color-mix(in srgb, var(--sky) 22%, transparent) 0 1px, transparent 34%),
-    radial-gradient(circle at 78% 70%, color-mix(in srgb, var(--lavender) 19%, transparent) 0 1px, transparent 38%);
+    radial-gradient(circle at 16% 22%, color-mix(in srgb, var(--selection) 22%, transparent) 0 1px, transparent 34%),
+    radial-gradient(circle at 78% 70%, color-mix(in srgb, var(--quiet) 19%, transparent) 0 1px, transparent 38%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 240ms ease;
@@ -72,7 +72,7 @@
   border: 1px solid color-mix(in srgb, var(--outline) 34%, transparent);
   border-radius: 50%;
   box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--sky) 10%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--selection) 10%, transparent),
     inset 0 0 0 4px color-mix(in srgb, var(--surface-raised) 18%, transparent);
   opacity: var(--ripple-opacity);
   transform: translate(-50%, -50%) scale(0.12);
@@ -101,7 +101,7 @@
   border: 3px solid var(--outline);
   border-radius: var(--radius-pill);
   box-shadow: 0 10px 0 var(--shadow);
-  color: var(--ink);
+  color: var(--text);
   font: inherit;
   font-size: 0.9rem;
   font-weight: 700;
@@ -188,19 +188,18 @@
   to { filter: saturate(1.08); }
 }
 
-.rose { background: var(--rose); }
-.mint { background: var(--mint); }
-.gold { background: var(--gold); }
-.sky { background: var(--sky); }
-.lavender { background: color-mix(in srgb, var(--lavender) 65%, var(--surface-raised) 35%); }
-.peach { background: var(--peach); }
+.action { background: var(--action); }
+.positive { background: var(--positive); }
+.attention { background: var(--attention); }
+.selection { background: var(--selection); }
+.quiet { background: color-mix(in srgb, var(--quiet) 65%, var(--surface-raised) 35%); }
 
 .feeling {
   isolation: isolate;
   overflow: hidden;
   min-width: 0;
   padding-inline: 0.65rem;
-  background: var(--sky);
+  background: var(--selection);
 }
 
 .feeling::after {
@@ -220,7 +219,7 @@
 .need {
   max-width: calc(100% - 24px);
   padding-inline: 0.9rem;
-  background: var(--sky);
+  background: var(--selection);
 }
 
 .need .label {
@@ -246,7 +245,7 @@
     calc(var(--corner-scale) * 8vw),
     calc(var(--corner-scale) * 3.75rem)
   );
-  background: color-mix(in srgb, var(--lavender) 65%, var(--surface-raised) 35%);
+  background: color-mix(in srgb, var(--quiet) 65%, var(--surface-raised) 35%);
   box-shadow: none;
   filter: drop-shadow(0 12px 0 var(--shadow));
   font-family: var(--font-display);
@@ -256,22 +255,22 @@
   text-transform: uppercase;
 }
 
-.nav .rose { background: color-mix(in srgb, var(--rose) 78%, var(--surface-raised) 22%); }
-.nav .peach { background: color-mix(in srgb, var(--peach) 78%, var(--surface-raised) 22%); }
-.nav .mint { background: color-mix(in srgb, var(--mint) 78%, var(--surface-raised) 22%); }
-.nav .gold { background: color-mix(in srgb, var(--gold) 72%, var(--surface-raised) 28%); }
+.nav .action { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
+.nav .action { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
+.nav .positive { background: color-mix(in srgb, var(--positive) 78%, var(--surface-raised) 22%); }
+.nav .attention { background: color-mix(in srgb, var(--attention) 72%, var(--surface-raised) 28%); }
 
 /* Current-route emphasis uses a stronger Customizer-owned face and one physical
    extrusion. It intentionally replaces the resting nav drop-shadow on mobile so
    active state never reads as several stacked plates. */
 .nav .active {
-  background: color-mix(in srgb, var(--sky) 60%, var(--plum) 40%);
+  background: color-mix(in srgb, var(--selection) 60%, var(--primary) 40%);
   filter: none;
-  box-shadow: 0 9px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);
+  box-shadow: 0 9px 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);
 }
 
 .nav .active[data-picked-up='true'] {
-  box-shadow: 0 12px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);
+  box-shadow: 0 12px 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);
 }
 
 .nav [data-magnet-id='nav-menu'],
@@ -321,7 +320,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-pill);
-  background: var(--ink);
+  background: var(--text);
   color: #fff;
   font-size: 0.7rem;
 }
@@ -349,12 +348,12 @@
   }
 
   .nav .magnet.active {
-    box-shadow: 0 9px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);
+    box-shadow: 0 9px 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);
   }
 
   .nav .magnet.active:hover,
   .nav .magnet.active:focus-visible {
-    box-shadow: 0 10px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);
+    box-shadow: 0 10px 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);
   }
 
   .nav .magnet[data-picked-up='true'] {
@@ -365,9 +364,8 @@
   }
 
   .nav .magnet.active[data-picked-up='true'] {
-    box-shadow: 0 10px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);
+    box-shadow: 0 10px 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);
   }
-
 
   .nav .magnet[data-dragging='true'] {
     left: 0;

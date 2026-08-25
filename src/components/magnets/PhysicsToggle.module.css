@@ -58,7 +58,7 @@
 }
 
 .input:checked + .track {
-  background: color-mix(in srgb, var(--mint) 55%, transparent);
+  background: color-mix(in srgb, var(--positive) 55%, transparent);
   opacity: 1;
 }
 
@@ -67,5 +67,5 @@
 }
 
 .input:focus-visible + .track {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mint) 45%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--positive) 45%, transparent);
 }

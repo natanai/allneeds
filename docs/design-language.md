@@ -21,6 +21,17 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Avoid oversized decorative buttons for routine utility actions.
 - Use Customizer-owned theme tokens and derived `color-mix()` values rather than introducing independent hard-coded theme colors.
 
+## Functional theme roles
+
+**Accepted 2026-08-25.** The Customizer palette is defined by what each color does, not by the hue shipped in the default preset.
+
+- The canonical editable roles are `Primary`, `Quiet`, `Text`, `Secondary`, `Action`, `Positive`, `Attention`, `Selection`, and `Outline`. Runtime code uses the corresponding `--primary`, `--quiet`, `--text`, `--secondary`, `--action`, `--positive`, `--attention`, `--selection`, and `--outline` custom properties.
+- Default colors are only defaults. A role must keep the same semantic job when a preset or user customization changes its hue completely.
+- Do not introduce hue-named runtime aliases for these roles. Older saved themes may still contain the former hue-keyed fields, but those names belong only in the persisted-theme migration/read boundary and must never be emitted by new saves.
+- Presets, Customizer state, magnet tone props/classes, feature CSS, startup prepaint, and regression tests all use the functional role vocabulary.
+- The Design Lab main and actual-size previews inherit the live Customizer palette and roundness from the page. The lab must not maintain duplicate live palette or roundness controls. Fixed preset-comparison swatches may render independent preset snapshots because their purpose is explicit side-by-side comparison.
+- The semantic-vocabulary regression test is permanent and should fail if a removed hue-named CSS token or magnet tone is reintroduced into runtime source.
+
 ## Magnet physics
 
 **Accepted 2026-08-25; superseded and expanded 2026-08-25.** A magnet being actively held behaves like a pressure source above the shared magnet surface. Think of lifting it as pushing air down into the board: nearby resting magnets are forced radially away, then their own motion, coupling, and collisions carry that disturbance outward through the packed container.
@@ -188,6 +199,7 @@ Rules:
 
 ### 2026-08-25
 
+- Theme internals now use functional Customizer roles site-wide instead of hue-named runtime tokens. Legacy hue-keyed saved themes are migrated only at the read/prepaint boundary, and the Design Lab inherits the live Customizer palette and roundness rather than maintaining duplicate controls.
 - Held magnets now act as pressure sources above a single shared physics surface: local force pushes nearby magnets outward, resting-resting coupling and collisions remain active so the disturbance can ripple through a packed board, and the former lifted-neighbor speed cap/suppression code is removed. Pointer pickup continues to suppress pointer-created focus at the interaction source rather than hiding a held focus ring.
 
 ### 2026-08-24

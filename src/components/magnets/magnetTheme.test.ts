@@ -22,12 +22,12 @@ function ruleBody(selector: string) {
 }
 
 describe('magnet theme styling', () => {
-  it('keeps navigation surfaces and corners connected to Customizer tokens', () => {
+  it('keeps navigation surfaces and corners connected to Customizer roles', () => {
     expect(ruleBody('.nav')).toContain('var(--corner-scale)');
     expect(ruleBody('.nav .magnet')).toContain('var(--corner-scale)');
     expect(ruleBody('.nav .magnet')).toContain('var(--surface-raised)');
-    expect(ruleBody('.nav .peach')).toContain('var(--peach)');
-    expect(ruleBody('.nav .peach')).toContain('var(--surface-raised)');
+    expect(ruleBody('.nav .action')).toContain('var(--action)');
+    expect(ruleBody('.nav .action')).toContain('var(--surface-raised)');
   });
 
   it('makes the current route obvious with one Customizer-owned extrusion and no geometry changes', () => {
@@ -57,9 +57,9 @@ describe('magnet theme styling', () => {
       expect(desktopActiveRule).not.toContain(`${property}:`);
     });
 
-    expect(activeRule).toContain('background: color-mix(in srgb, var(--sky) 60%, var(--plum) 40%);');
+    expect(activeRule).toContain('background: color-mix(in srgb, var(--selection) 60%, var(--primary) 40%);');
     expect(activeRule).toContain('filter: none;');
-    expect(activeRule).toContain('box-shadow: 0 9px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);');
+    expect(activeRule).toContain('box-shadow: 0 9px 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);');
     expect(activeRule.match(/box-shadow:/g)).toHaveLength(1);
     expect(activeRule).not.toContain('background-image:');
     expect(activeRule).not.toContain('inset');

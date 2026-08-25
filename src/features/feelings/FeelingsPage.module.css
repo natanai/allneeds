@@ -41,8 +41,8 @@
   justify-content: center;
   border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, #ffffff 95%, var(--sky) 5%);
-  color: color-mix(in srgb, var(--outline) 75%, var(--ink-soft) 25%);
+  background: color-mix(in srgb, #ffffff 95%, var(--selection) 5%);
+  color: color-mix(in srgb, var(--outline) 75%, var(--secondary) 25%);
   font-family: var(--font-display);
   font-size: 0.8rem;
   font-weight: 600;
@@ -87,7 +87,7 @@
   justify-content: center;
   border: 2px solid color-mix(in srgb, var(--outline) 40%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--lavender) 22%, #ffffff);
+  background: color-mix(in srgb, var(--quiet) 22%, #ffffff);
   box-shadow: 0 4px 0 color-mix(in srgb, var(--outline) 28%, transparent);
 }
 
@@ -122,7 +122,7 @@
 .altLink:hover,
 .altLink:focus-visible {
   transform: translateY(-1px);
-  background: color-mix(in srgb, #ffffff 88%, var(--ink-soft) 12%);
+  background: color-mix(in srgb, #ffffff 88%, var(--secondary) 12%);
 }
 
 .toolbar {
