@@ -60,3 +60,5 @@ jobs:
           git rm .github/workflows/temp-held-pressure-ripple.yml scripts/temp-held-pressure-ripple.py
           git commit -m 'Propagate held magnet pressure through the board'
           git push origin HEAD:physics/held-pressure-ripple
+
+# single-use branch validation; removed by the job after success
