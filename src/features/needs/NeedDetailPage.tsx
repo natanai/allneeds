@@ -27,9 +27,9 @@ import styles from './NeedDetailPage.module.css';
 
 type Feedback = { kind: 'success' | 'warning' | 'error'; message: string } | null;
 
-const DECK_HORIZONTAL_LOCK_DISTANCE = 7;
-const DECK_VERTICAL_LOCK_DISTANCE = 10;
-const DECK_SWIPE_DISTANCE = 30;
+const DECK_HORIZONTAL_LOCK_DISTANCE = 4;
+const DECK_VERTICAL_LOCK_DISTANCE = 14;
+const DECK_SWIPE_DISTANCE = 24;
 
 function shuffled<T>(values: T[]) {
   const copy = [...values];
@@ -38,6 +38,17 @@ function shuffled<T>(values: T[]) {
     [copy[index], copy[other]] = [copy[other]!, copy[index]!];
   }
   return copy;
+}
+
+function strategyDeckPriority(strategy: Strategy) {
+  const hasNamedContributor = strategy.provenance === 'user' && Boolean(strategy.contributor?.name?.trim());
+  if (hasNamedContributor) return 0;
+  if (strategy.provenance === 'user') return 1;
+  return 2;
+}
+
+function prioritizeStrategiesForDeck(strategies: Strategy[]) {
+  return [...strategies].sort((left, right) => strategyDeckPriority(left) - strategyDeckPriority(right));
 }
 
 function contributorLabel(strategy: Strategy) {
@@ -59,9 +70,11 @@ export function NeedDetailPage() {
   const { slug = '' } = useParams();
   const need = needsBySlug.get(slug);
   const canonicalStrategies = useMemo(
-    () => need?.strategies
-      .map((reference) => strategiesBySlug.get(reference.slug))
-      .filter((strategy): strategy is Strategy => Boolean(strategy)) ?? [],
+    () => prioritizeStrategiesForDeck(
+      need?.strategies
+        .map((reference) => strategiesBySlug.get(reference.slug))
+        .filter((strategy): strategy is Strategy => Boolean(strategy)) ?? [],
+    ),
     [need],
   );
   const [strategyOrder, setStrategyOrder] = useState<string[]>(() => canonicalStrategies.map((item) => item.slug));
@@ -241,14 +254,14 @@ export function NeedDetailPage() {
 
     if (!gesture.horizontal) {
       const clearlyVertical = verticalDistance >= DECK_VERTICAL_LOCK_DISTANCE
-        && verticalDistance > horizontalDistance * 1.25;
+        && verticalDistance > horizontalDistance * 1.65;
       if (clearlyVertical) {
         resetDeckGesture(event);
         return;
       }
 
       const horizontalIntent = horizontalDistance >= DECK_HORIZONTAL_LOCK_DISTANCE
-        && horizontalDistance >= verticalDistance * 0.9;
+        && horizontalDistance >= verticalDistance * 0.6;
       if (!horizontalIntent) return;
 
       gesture.horizontal = true;
