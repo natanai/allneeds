@@ -15,8 +15,13 @@
       (function preapplySavedTheme() {
         var key = 'nvcApp.theme';
         var variables = {
-          plum: '--plum', lavender: '--lavender', ink: '--ink', inkSoft: '--ink-soft',
-          rose: '--rose', mint: '--mint', gold: '--gold', sky: '--sky', outline: '--outline'
+          primary: '--primary', quiet: '--quiet', text: '--text', secondary: '--secondary',
+          action: '--action', positive: '--positive', attention: '--attention', selection: '--selection', outline: '--outline'
+        };
+        /* Accept old saved hue-keyed themes only while migrating persisted user data. */
+        var legacy = {
+          primary: 'plum', quiet: 'lavender', text: 'ink', secondary: 'inkSoft',
+          action: 'rose', positive: 'mint', attention: 'gold', selection: 'sky', outline: 'outline'
         };
         var hexPattern = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
         var root = document.documentElement;
@@ -51,9 +56,11 @@
         if (!theme || !theme.values || typeof theme.values !== 'object') return;
 
         var applied = false;
+        var resolved = {};
         Object.keys(variables).forEach(function (name) {
-          var value = color(theme.values[name]);
+          var value = color(theme.values[name]) || color(theme.values[legacy[name]]);
           if (!value) return;
+          resolved[name] = value;
           root.style.setProperty(variables[name], value);
           applied = true;
         });
@@ -62,18 +69,15 @@
           root.style.setProperty('--corner-scale', String(Math.min(200, Math.max(0, Math.round(roundness))) / 100));
           applied = true;
         }
-        var lavender = color(theme.values.lavender);
-        var rose = color(theme.values.rose);
-        var outline = color(theme.values.outline);
-        var sky = color(theme.values.sky);
-        var surface = lavender ? 'color-mix(in srgb, ' + lavender + ' 12%, #FFFFFF 88%)' : '';
+        var quiet = resolved.quiet;
+        var action = resolved.action;
+        var outline = resolved.outline;
+        var selection = resolved.selection;
+        var surface = quiet ? 'color-mix(in srgb, ' + quiet + ' 12%, #FFFFFF 88%)' : '';
         if (surface) root.style.setProperty('--surface-raised', surface);
-        if (rose) {
-          root.style.setProperty('--btn-bg', rose);
-          root.style.setProperty('--peach', rose);
-        }
+        if (action) root.style.setProperty('--btn-bg', action);
         if (outline) root.style.setProperty('--shadow', 'color-mix(in srgb, ' + outline + ' 55%, transparent)');
-        if (surface && sky) root.style.setProperty('--chip-bg', 'color-mix(in srgb, ' + surface + ' 86%, ' + sky + ' 14%)');
+        if (surface && selection) root.style.setProperty('--chip-bg', 'color-mix(in srgb, ' + surface + ' 86%, ' + selection + ' 14%)');
         if (applied) root.setAttribute('data-theme-preapplied', 'true');
       })();
     </script>
@@ -102,10 +106,10 @@
           ),
           linear-gradient(
             155deg,
-            color-mix(in srgb, var(--lavender, #ede4ff) 88%, #ffffff 12%) 0%,
-            color-mix(in srgb, var(--plum, #74569b) 46%, var(--lavender, #ede4ff) 54%) 100%
+            color-mix(in srgb, var(--quiet, #ede4ff) 88%, #ffffff 12%) 0%,
+            color-mix(in srgb, var(--primary, #74569b) 46%, var(--quiet, #ede4ff) 54%) 100%
           );
-        color: var(--ink, #12081f);
+        color: var(--text, #12081f);
         opacity: 1;
         visibility: visible;
         transition: opacity 180ms ease, visibility 0s linear 180ms;
@@ -121,7 +125,7 @@
         padding: 1.55rem 1.45rem 1.4rem;
         border: 3px solid var(--outline, #12081f);
         border-radius: calc(1.65rem * var(--corner-scale, 1));
-        background: color-mix(in srgb, var(--lavender, #ede4ff) 18%, var(--surface-raised, #ffffff) 82%);
+        background: color-mix(in srgb, var(--quiet, #ede4ff) 18%, var(--surface-raised, #ffffff) 82%);
         box-shadow: 0 12px 0 color-mix(in srgb, var(--outline, #12081f) 25%, transparent);
         text-align: center;
       }
@@ -137,19 +141,19 @@
         overflow: hidden;
         border: 2px solid var(--outline, #12081f);
         border-radius: 999px;
-        background: color-mix(in srgb, var(--lavender, #ece4ff) 76%, #ffffff 24%);
+        background: color-mix(in srgb, var(--quiet, #ece4ff) 76%, #ffffff 24%);
       }
       .app-boot__bar {
         width: 38%;
         height: 100%;
         border-radius: inherit;
-        background: color-mix(in srgb, var(--plum, #74569b) 78%, var(--surface-raised, #ffffff) 22%);
+        background: color-mix(in srgb, var(--primary, #74569b) 78%, var(--surface-raised, #ffffff) 22%);
         animation: app-boot-progress 1.05s ease-in-out infinite alternate;
       }
       .app-boot__label {
         display: block;
         margin-top: 0.9rem;
-        color: var(--ink-soft, #51445f);
+        color: var(--secondary, #51445f);
         font: 600 0.9rem/1.35 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
       }
       @keyframes app-boot-progress {
