@@ -1,8 +1,16 @@
+.sharingRow {
+  min-width: 0;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .34rem;
+}
+
 .privacyRow {
   min-width: 0;
   min-height: 48px;
   padding: .32rem .46rem;
-  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 1.85rem minmax(0, 1fr) auto;
   align-items: center;
@@ -48,4 +56,101 @@
 .privacyRow select:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--plum) 52%, transparent);
   outline-offset: 2px;
+}
+
+.actionMenu {
+  position: relative;
+  align-self: stretch;
+  display: grid;
+  align-items: center;
+}
+
+.actionMenu > summary {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--ink-soft);
+  font: 800 .92rem/1 var(--font-body);
+  letter-spacing: .08em;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.actionMenu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.actionMenu > summary:hover,
+.actionMenu > summary:focus-visible,
+.actionMenu[open] > summary {
+  background: color-mix(in srgb, var(--sky) 20%, transparent);
+  color: var(--ink);
+  outline: none;
+}
+
+.actionMenuPanel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + .25rem);
+  z-index: 40;
+  width: max-content;
+  min-width: 14.5rem;
+  max-width: min(19rem, calc(100vw - 2rem));
+  padding: .3rem;
+  display: grid;
+  gap: .08rem;
+  border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-raised) 95%, var(--lavender) 5%);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--outline) 18%, transparent);
+}
+
+.actionMenuPanel button,
+.actionMenuPanel a {
+  width: 100%;
+  min-height: 40px;
+  padding: .48rem .58rem;
+  display: flex;
+  align-items: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: 680 .78rem/1.25 var(--font-body);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.actionMenuPanel button:hover,
+.actionMenuPanel button:focus-visible,
+.actionMenuPanel a:hover,
+.actionMenuPanel a:focus-visible {
+  background: color-mix(in srgb, var(--sky) 18%, transparent);
+  outline: none;
+}
+
+@media (max-width: 390px) {
+  .sharingRow {
+    gap: .18rem;
+  }
+
+  .privacyRow {
+    padding-inline: .38rem;
+    grid-template-columns: 1.65rem minmax(0, 1fr) auto;
+    gap: .34rem;
+  }
+
+  .icon {
+    width: 1.65rem;
+    height: 1.65rem;
+  }
+
+  .privacyRow select {
+    min-width: 6.5rem;
+  }
 }
