@@ -402,10 +402,6 @@ export function NeedDetailPage() {
         <h2 id="suggestion-heading" className={styles.sectionTitle}>Add a strategy</h2>
         <div className={styles.formCard}>
           <form id="suggestion-form" className={styles.form} onSubmit={handlePersonalStrategy}>
-            <div className={styles.formIntro}>
-              <strong>What helps?</strong>
-              <span>Save it privately by default, then choose separately whether it can be shared.</span>
-            </div>
             <label className={styles.formField}>
               <span>Strategy name</span>
               <span className={styles.inputCard}><input name="title" type="text" value={formDraft.title} onChange={(event) => setFormDraft({ ...formDraft, title: event.target.value })} required /></span>
