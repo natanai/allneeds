@@ -18,7 +18,7 @@ export function buildPersonalStrategiesExport(
   return {
     version: 1,
     exportedAt,
-    personalStrategies: inventory.filter((strategy) => strategy.personal && strategy.shareWithNat),
+    personalStrategies: inventory.filter((strategy) => strategy.personal && strategy.visibility === 'public'),
   };
 }
 
@@ -29,7 +29,7 @@ export function buildSingleStrategyExport(
   return {
     version: 1,
     exportedAt,
-    personalStrategies: strategy.personal ? [{ ...strategy, shareWithNat: true }] : [],
+    personalStrategies: strategy.personal ? [strategy] : [],
   };
 }
 
