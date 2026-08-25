@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 64" preserveAspectRatio="none" fill="none">
-  <path d="M0 64V54l22-15 19 10 18-12 21 13 24-18 25 16 22-12 22 13 25-15 22 15v15H0Z" fill="#fff" fill-opacity=".22"/>
-  <path d="M0 64V51l31-25 24 19 21-16 24 19 26-25 26 24 24-17 44 24v10H0Z" fill="#fff" fill-opacity=".48"/>
-  <path d="M0 64V55L35 17l26 31 20-14 24 20 30-23 26 22 24-14 35 19v6H0Z" fill="#fff" fill-opacity=".78"/>
-</svg>
