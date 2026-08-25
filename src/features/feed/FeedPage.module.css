@@ -21,7 +21,7 @@
   padding: .52rem;
   border: 1px solid color-mix(in srgb, var(--outline) 23%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, #fff 76%, var(--lavender) 24%);
+  background: color-mix(in srgb, #fff 76%, var(--quiet) 24%);
 }
 
 .controlRow {
@@ -39,7 +39,7 @@
 
 .controlRow label span {
   padding-inline: .08rem;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .58rem;
   font-weight: 800;
   letter-spacing: .045em;
@@ -54,8 +54,8 @@
   padding: .32rem 1.55rem .32rem .48rem;
   border: 1px solid color-mix(in srgb, var(--outline) 42%, transparent);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, #fff 94%, var(--lavender) 6%);
-  color: var(--ink);
+  background: color-mix(in srgb, #fff 94%, var(--quiet) 6%);
+  color: var(--text);
   font: inherit;
   font-size: .72rem;
   font-weight: 650;
@@ -65,7 +65,7 @@
 .status,
 .authHint {
   margin: .32rem .08rem 0;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .61rem;
   line-height: 1.3;
 }
@@ -86,7 +86,7 @@
   padding: .68rem .72rem;
   border: 1.5px solid color-mix(in srgb, var(--outline) 88%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, #fff 96%, var(--lavender) 4%);
+  background: color-mix(in srgb, #fff 96%, var(--quiet) 4%);
   box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 12%, transparent);
 }
 
@@ -104,14 +104,14 @@
 
 .card header p {
   margin: 0;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .63rem;
   line-height: 1.25;
 }
 
 .body {
   margin-top: .46rem;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .8rem;
   line-height: 1.38;
 }
@@ -138,15 +138,15 @@
   gap: .28rem;
   border: 1px solid color-mix(in srgb, var(--outline) 42%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, #fff 94%, var(--lavender) 6%);
-  color: var(--ink);
+  background: color-mix(in srgb, #fff 94%, var(--quiet) 6%);
+  color: var(--text);
   font-size: .65rem;
   font-weight: 720;
   line-height: 1;
 }
 
 .card footer > span {
-  background: color-mix(in srgb, var(--mint) 44%, #fff 56%);
+  background: color-mix(in srgb, var(--positive) 44%, #fff 56%);
 }
 
 .card details {
@@ -161,7 +161,7 @@
 .card details summary::after {
   content: '⌄';
   margin-left: .05rem;
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .82em;
   line-height: 1;
 }
@@ -186,14 +186,14 @@
   border-radius: var(--radius-md);
   background: #fff;
   box-shadow: 0 7px 18px color-mix(in srgb, var(--outline) 16%, transparent);
-  color: var(--ink-soft);
+  color: var(--secondary);
   font-size: .68rem;
   line-height: 1.35;
 }
 
 .card button {
   margin-left: auto;
-  background: color-mix(in srgb, var(--rose) 62%, #fff 38%);
+  background: color-mix(in srgb, var(--action) 62%, #fff 38%);
   cursor: pointer;
 }
 
@@ -205,13 +205,60 @@
 }
 
 .card button:disabled {
-  background: color-mix(in srgb, var(--mint) 42%, #fff 58%);
+  background: color-mix(in srgb, var(--positive) 42%, #fff 58%);
   opacity: .68;
   cursor: default;
 }
 
 .card button:disabled::before {
   content: '✓';
+}
+
+.card .adminMenu {
+  margin-left: auto;
+}
+
+.card .adminMenu summary {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, #fff 92%, var(--attention) 8%);
+  font-size: 1.05rem;
+  letter-spacing: .08em;
+}
+
+.card .adminMenu summary::after,
+.card .adminMenu[open] summary::after {
+  content: none;
+}
+
+.adminMenuPopover {
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  top: calc(100% + .25rem);
+  min-width: 12rem;
+  padding: .3rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 24%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--outline) 16%, transparent);
+}
+
+.card .adminMenuPopover button {
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  justify-content: flex-start;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--attention) 14%, var(--surface-raised) 86%);
+}
+
+.card .adminMenuPopover button::before {
+  content: none;
 }
 
 @media (max-width: 640px) {
@@ -257,5 +304,9 @@
 
   .card button {
     margin-left: 0;
+  }
+
+  .card .adminMenu {
+    margin-left: auto;
   }
 }
