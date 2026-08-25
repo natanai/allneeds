@@ -130,7 +130,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 
 ### Personal strategy composer and sharing
 
-**Accepted 2026-08-24; refined 2026-08-24.** Personal strategy privacy has two independent dimensions and the UI must not collapse them into one ambiguous “visibility” choice.
+**Accepted 2026-08-24; refined 2026-08-24.** Strategy privacy and one-off sharing are distinct interactions, but privacy itself should read like a familiar social/native-app audience control rather than as several explanatory settings.
 
 Canonical references:
 - `src/features/inventory/InventoryPage.tsx`
@@ -139,16 +139,16 @@ Canonical references:
 - `src/features/needs/NeedDetailPage.tsx`
 
 Rules:
-- **Share with Nat** is explicit consent for a personal strategy to be included in the user-initiated Nat export. It does not automatically send, upload, publish, or sync anything.
-- **Bluesky visibility** remains a separate profile/feed choice (`Private`, `Followers`, `Public`) and must not imply consent to include a strategy in Nat exports.
-- New personal strategies and older entries that predate this setting default to private from Nat exports until the user explicitly opts in.
-- The Add Strategy composer must not permanently expose sharing/privacy settings. Keep them behind a roughly 44px ellipsis disclosure so the ordinary composer stays focused on writing the strategy.
-- When the composer ellipsis is opened, show Share with Nat and Bluesky visibility as short compact rows with trailing controls. Do not put paragraph-length helper copy inside these routine settings.
+- The Add Strategy composer exposes one compact **Privacy** selector using the familiar audience states `Private`, `Followers`, and `Public`; pair it with a small lock/people/globe-style icon rather than paragraph-length helper copy.
+- `Private` is the default. `Followers` is available when Bluesky sharing is available. `Public` is the canonical signal that a personal strategy is eligible for the bulk **Share your strategies with Nat…** export.
+- Do not maintain a separate visible `Share with Nat` eligibility switch beside Privacy. Bulk Nat sharing follows the saved Public/Private state.
 - Keep the existing strategy name, description, Needs picker, optional contributor fields, and device/profile save targets.
-- Personal strategy cards show a quiet `Private` / `Shareable with Nat` status; sharing state should be legible without becoming the visual focus of the card.
-- Secondary and maintenance actions belong behind a roughly 44px ellipsis control on personal strategy cards. This includes one-strategy Nat sharing, Nat-export eligibility changes, Edit, and Remove.
-- **Share with Nat…** from a card exports only that personal strategy, marks it shareable for future Nat exports, and then offers the same pre-addressed email follow-up as the bulk export.
-- Bulk Nat export includes only personal strategies explicitly marked `Share with Nat`.
+- Personal strategy cards show a quiet `Private`, `Followers`, or `Public` status; privacy state should be legible without becoming the visual focus of the card.
+- Secondary and maintenance actions belong behind a roughly 44px ellipsis control on personal strategy cards.
+- The card ellipsis includes **Share this strategy with Nat…** as an immediate one-off action. It downloads a file containing only that strategy and offers the pre-addressed email follow-up.
+- A one-off Nat share is an explicit action, not a privacy mutation: sharing a Private strategy once must not silently make it Public or include it in later bulk exports.
+- Edit and Remove remain secondary actions in the card ellipsis. Do not add a second Nat-export eligibility toggle there; eligibility is controlled by Privacy.
+- Bulk Nat export includes only personal strategies whose saved Privacy is `Public`.
 
 ### Shared strategy feed
 
@@ -174,4 +174,4 @@ Rules:
 - Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
 - Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
 - Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
-- Personal strategy sharing separates Nat-export consent from Bluesky visibility; personal-card maintenance/share controls and composer sharing settings use ellipsis disclosure rather than permanent explanatory UI.
+- Personal strategy privacy now uses one compact Private/Followers/Public audience selector; one-off Nat sharing stays in the saved-card ellipsis and never changes privacy.
