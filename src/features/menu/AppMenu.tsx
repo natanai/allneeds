@@ -140,7 +140,7 @@ export function AppMenu({
     const result = downloadPersonalStrategiesExport(readInventory());
     if (!result.downloaded) {
       setShareEmailReady(false);
-      setStatus('No personal strategies found yet. Add one before exporting.');
+      setStatus('No personal strategies are marked “Share with Nat” yet. Turn that on when adding a strategy or from its ••• menu.');
       return;
     }
     setShareEmailReady(true);
