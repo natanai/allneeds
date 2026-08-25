@@ -75,7 +75,7 @@
 .savedCard form { display: grid; gap: .65rem; }
 .savedCard form label { display: grid; gap: .25rem; }
 .savedCard form input, .savedCard form textarea { width: 100%; padding: .55rem; border: 2px solid var(--outline); border-radius: var(--radius-md); font: inherit; }
-.savedCard form > div { display: flex; justify-content: flex-end; gap: .4rem; }
+.savedCard .editActions { display: flex; justify-content: flex-end; gap: .4rem; }
 .savedCard form button { min-height: 40px; padding: .35rem .65rem; border: 1.5px solid var(--outline); border-radius: var(--radius-md); background: #fff; color: var(--text); cursor: pointer; }
 
 .feedback { margin: 0; padding: .65rem .8rem; border: 2px solid var(--outline); border-radius: var(--radius-md); font-weight: 700; }

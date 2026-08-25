@@ -10,6 +10,9 @@ import styles from './StrategySharingFields.module.css';
 
 type StrategySharingFieldsProps = {
   signedIn: boolean;
+  initialVisibility?: InventoryVisibility;
+  showUtilityActions?: boolean;
+  onVisibilityChange?: (visibility: InventoryVisibility) => void;
 };
 
 function PrivacyIcon({ visibility }: { visibility: InventoryVisibility }) {
@@ -40,14 +43,19 @@ function PrivacyIcon({ visibility }: { visibility: InventoryVisibility }) {
   );
 }
 
-export function StrategySharingFields({ signedIn }: StrategySharingFieldsProps) {
-  const [visibility, setVisibility] = useState<InventoryVisibility>('private');
+export function StrategySharingFields({
+  signedIn,
+  initialVisibility = 'private',
+  showUtilityActions = true,
+  onVisibilityChange,
+}: StrategySharingFieldsProps) {
+  const [visibility, setVisibility] = useState<InventoryVisibility>(initialVisibility);
   const [emailReady, setEmailReady] = useState(false);
   const formAnchorRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!signedIn && visibility === 'followers') setVisibility('private');
-  }, [signedIn, visibility]);
+    setVisibility(initialVisibility);
+  }, [initialVisibility]);
 
   useEffect(() => {
     const form = formAnchorRef.current?.form;
@@ -65,6 +73,7 @@ export function StrategySharingFields({ signedIn }: StrategySharingFieldsProps) 
   const updateVisibility = (nextVisibility: InventoryVisibility) => {
     setEmailReady(false);
     setVisibility(nextVisibility);
+    onVisibilityChange?.(nextVisibility);
   };
 
   const shareCurrentStrategyWithNat = () => {
@@ -97,26 +106,29 @@ export function StrategySharingFields({ signedIn }: StrategySharingFieldsProps) 
       <input ref={formAnchorRef} type="hidden" name="strategy-visibility" value={visibility} />
       <input type="hidden" name="share-with-nat" value="yes" disabled={visibility !== 'public'} />
 
-      {signedIn ? (
+      {signedIn || !showUtilityActions ? (
         <label className={styles.profileSharing}>
           <span className={styles.icon}><PrivacyIcon visibility={visibility} /></span>
           <span className={styles.sharingCopy}>
-            <strong>Bluesky sharing</strong>
-            <small>Audience after profile sync</small>
+            <strong>{signedIn ? 'Bluesky sharing' : 'Sharing audience'}</strong>
+            <small>{signedIn ? 'Audience after profile sync' : 'Export visibility'}</small>
           </span>
           <select
             value={visibility}
-            aria-label="Bluesky sharing audience"
+            aria-label={signedIn ? 'Bluesky sharing audience' : 'Strategy sharing audience'}
             onChange={(event) => updateVisibility(event.target.value as InventoryVisibility)}
           >
             <option value="private">Private</option>
-            <option value="followers">Followers</option>
+            {signedIn ? <option value="followers">Followers</option> : null}
+            {!signedIn && visibility === 'followers' ? (
+              <option value="followers" disabled>Followers (sign in to change)</option>
+            ) : null}
             <option value="public">Public</option>
           </select>
         </label>
       ) : null}
 
-      <div className={styles.utilityRow}>
+      {showUtilityActions ? <div className={styles.utilityRow}>
         <span className={styles.localStatus}>{localStatus}</span>
         <details className={styles.actionMenu}>
           <summary aria-label="More strategy actions" title="More strategy actions">
@@ -143,7 +155,7 @@ export function StrategySharingFields({ signedIn }: StrategySharingFieldsProps) 
             {emailReady ? <a href={personalStrategiesEmailHref()}>Start email to Nat</a> : null}
           </div>
         </details>
-      </div>
+      </div> : null}
     </div>
   );
 }

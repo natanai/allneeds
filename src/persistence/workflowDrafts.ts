@@ -45,6 +45,10 @@ export type InventoryDraft = {
     id: string;
     title: string;
     description: string;
+    selectedNeeds: string[];
+    firstName: string;
+    location: string;
+    visibility: 'private' | 'followers' | 'public';
   } | null;
 };
 
@@ -121,7 +125,13 @@ function isInventoryDraft(value: unknown): value is InventoryDraft {
   const editValid = value.edit === null || (isRecord(value.edit)
     && typeof value.edit.id === 'string'
     && typeof value.edit.title === 'string'
-    && typeof value.edit.description === 'string');
+    && typeof value.edit.description === 'string'
+    && isStringList(value.edit.selectedNeeds)
+    && typeof value.edit.firstName === 'string'
+    && typeof value.edit.location === 'string'
+    && (value.edit.visibility === 'private'
+      || value.edit.visibility === 'followers'
+      || value.edit.visibility === 'public'));
   return (value.coverageFilter === 'all'
       || value.coverageFilter === 'missing'
       || value.coverageFilter === 'covered'
@@ -193,7 +203,7 @@ function bodyCuesStore(storage: StorageDriver | null) {
 function inventoryDraftStore(storage: StorageDriver | null) {
   return new VersionedStore<InventoryDraft>({
     key: INVENTORY_DRAFT_STORAGE_KEY,
-    schemaVersion: 1,
+    schemaVersion: 2,
     storage,
     validate: isInventoryDraft,
   });
@@ -317,7 +327,10 @@ export function writeInventoryDraft(
       ...draft.add,
       selectedNeeds: [...new Set(draft.add.selectedNeeds.filter(Boolean))],
     },
-    edit: draft.edit?.id ? draft.edit : null,
+    edit: draft.edit?.id ? {
+      ...draft.edit,
+      selectedNeeds: [...new Set(draft.edit.selectedNeeds.filter(Boolean))],
+    } : null,
   };
   const hasAddContent = Boolean(
     normalized.add.title.trim()

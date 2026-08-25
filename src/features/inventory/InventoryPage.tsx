@@ -12,6 +12,7 @@ import {
   createPersonalInventoryEntry,
   isDuplicateStrategy,
   readInventory,
+  updateInventoryEntry,
   writeInventory,
 } from './inventoryRepository';
 import type { InventoryStrategy } from './inventoryRepository';
@@ -193,8 +194,26 @@ export function InventoryPage() {
     event.preventDefault();
     const title = editDraft?.id === entry.id ? editDraft.title.trim() : '';
     const description = editDraft?.id === entry.id ? editDraft.description.trim() : '';
-    if (!title) return;
-    const updated = inventory.map((item) => item.id === entry.id ? { ...item, title, description } : item);
+    const needSlugs = editDraft?.id === entry.id ? editDraft.selectedNeeds.filter(Boolean) : [];
+    if (!title || !description || !needSlugs.length) {
+      setFeedback({ kind: 'error', message: 'Add a strategy name, description, and at least one need.' });
+      return;
+    }
+    if (isDuplicateStrategy(inventory.filter((item) => item.id !== entry.id), title, needSlugs)
+      && !window.confirm('You already saved a strategy with this title for one of the selected needs. Save these changes anyway?')) {
+      setFeedback({ kind: 'warning', message: 'Skipped saving duplicate strategy changes.' });
+      return;
+    }
+    const primaryNeed = needsBySlug.get(needSlugs[0] ?? '');
+    const updated = inventory.map((item) => item.id === entry.id ? updateInventoryEntry(item, {
+      title,
+      description,
+      needSlugs,
+      needTitle: primaryNeed?.title ?? item.need,
+      firstName: editDraft?.firstName,
+      location: editDraft?.location,
+      visibility: item.personal ? editDraft?.visibility ?? item.visibility : item.visibility,
+    }) : item);
     commit(updated, `Updated “${title}”.`);
     workflowDraftRef.current = { ...workflowDraftRef.current, edit: null };
     setEditDraft(null);
@@ -403,10 +422,28 @@ export function InventoryPage() {
               {visibleStrategies.map((entry) => (
                 <article key={entry.id} id={`inventory-strategy-${entry.id}`} tabIndex={-1} className={`${styles.savedCard} ${popoverStyles.savedCard}`}>
                   {editDraft?.id === entry.id ? (
-                    <form onSubmit={(event) => void updateEntry(event, entry)}>
-                      <label>Strategy name<input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></label>
-                      <label>Description<textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} /></label>
-                      <div><button type="submit">Save changes</button><button type="button" onClick={() => setEditDraft(null)}>Cancel</button></div>
+                    <form className={styles.editForm} onSubmit={(event) => void updateEntry(event, entry)}>
+                      <label className={styles.formField}>Strategy name<span className={styles.inputCard}><input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></span></label>
+                      <label className={styles.formField}>Description<span className={styles.inputCard}><textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} required /></span></label>
+                      <div className={`${styles.formField} ${styles.needsFormField}`}>
+                        <span id={`inventory-edit-needs-${entry.id}`}>Needs</span>
+                        <span className={styles.inputCard}>
+                          <NeedCatalogPicker labelId={`inventory-edit-needs-${entry.id}`} selectedNeeds={editDraft.selectedNeeds} onChange={(selectedNeeds) => setEditDraft({ ...editDraft, selectedNeeds })} />
+                        </span>
+                      </div>
+                      <div className={styles.formRow}>
+                        <label className={styles.formField}>First name (optional)<span className={styles.inputCard}><input value={editDraft.firstName} onChange={(event) => setEditDraft({ ...editDraft, firstName: event.target.value })} /></span></label>
+                        <label className={styles.formField}>Location (optional)<span className={styles.inputCard}><input value={editDraft.location} onChange={(event) => setEditDraft({ ...editDraft, location: event.target.value })} /></span></label>
+                      </div>
+                      {entry.personal ? (
+                        <StrategySharingFields
+                          signedIn={Boolean(session)}
+                          initialVisibility={editDraft.visibility}
+                          showUtilityActions={false}
+                          onVisibilityChange={(visibility) => setEditDraft({ ...editDraft, visibility })}
+                        />
+                      ) : null}
+                      <div className={styles.editActions}><button type="submit">Save changes</button><button type="button" onClick={() => setEditDraft(null)}>Cancel</button></div>
                     </form>
                   ) : (
                     <>
@@ -421,7 +458,15 @@ export function InventoryPage() {
                                 {shareEmailReadyFor === entry.id ? <a href={personalStrategiesEmailHref()}>Start email to Nat</a> : null}
                               </>
                             ) : null}
-                            <button type="button" onClick={() => setEditDraft({ id: entry.id, title: entry.title, description: entry.description })}>Edit</button>
+                            <button type="button" onClick={() => setEditDraft({
+                              id: entry.id,
+                              title: entry.title,
+                              description: entry.description,
+                              selectedNeeds: entry.needSlugs,
+                              firstName: entry.firstName ?? entry.contributor?.name ?? '',
+                              location: entry.location ?? entry.contributor?.location ?? '',
+                              visibility: entry.visibility,
+                            })}>Edit</button>
                             <button type="button" className={styles.destructiveMenuItem} onClick={() => void removeEntry(entry)}>Remove</button>
                           </div>
                         </details>

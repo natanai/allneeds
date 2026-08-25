@@ -231,6 +231,44 @@ export type PersonalStrategyInput = {
   shareWithNat?: boolean;
 };
 
+export type InventoryStrategyUpdateInput = {
+  title: string;
+  description: string;
+  needSlugs: string[];
+  needTitle: string;
+  firstName?: string;
+  location?: string;
+  visibility: InventoryVisibility;
+};
+
+export function updateInventoryEntry(
+  entry: InventoryStrategy,
+  input: InventoryStrategyUpdateInput,
+): InventoryStrategy {
+  const needSlugs = strings(input.needSlugs);
+  const firstName = input.firstName?.trim() ?? '';
+  const location = input.location?.trim() ?? '';
+  const contributor = firstName || location
+    ? { ...(firstName ? { name: firstName } : {}), ...(location ? { location } : {}) }
+    : undefined;
+  const nextVisibility = visibility(input.visibility);
+
+  return {
+    ...entry,
+    title: input.title.trim(),
+    description: input.description.trim(),
+    need: input.needTitle,
+    needSlug: needSlugs[0] ?? '',
+    needSlugs,
+    tags: needSlugs,
+    visibility: nextVisibility,
+    shareWithNat: nextVisibility === 'public',
+    contributor,
+    firstName: firstName || undefined,
+    location: location || undefined,
+  };
+}
+
 export function createPersonalInventoryEntry(input: PersonalStrategyInput): InventoryStrategy {
   const needSlugs = strings(input.needSlugs);
   const firstName = input.firstName?.trim() ?? '';
