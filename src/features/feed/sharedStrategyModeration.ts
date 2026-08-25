@@ -1,0 +1,23 @@
+const BACKEND_API_URL = 'https://backend.allneeds.app/api';
+
+async function moderate(strategyId: string | number, action: 'hide' | 'restore') {
+  const response = await fetch(
+    `${BACKEND_API_URL}/admin/strategies/${encodeURIComponent(String(strategyId))}/${action}`,
+    { method: 'POST', credentials: 'include', cache: 'no-store' },
+  );
+  const data: unknown = await response.json().catch(() => null);
+  if (!response.ok || !data || typeof data !== 'object' || (data as { status?: string }).status !== 'ok') {
+    throw new Error(action === 'hide'
+      ? 'Unable to hide this strategy from the community.'
+      : 'Unable to restore this strategy to the community.');
+  }
+  return data;
+}
+
+export function hideSharedStrategy(strategyId: string | number) {
+  return moderate(strategyId, 'hide');
+}
+
+export function restoreSharedStrategy(strategyId: string | number) {
+  return moderate(strategyId, 'restore');
+}
