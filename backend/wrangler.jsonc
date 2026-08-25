@@ -8,7 +8,7 @@
   "preview_urls": false,
   "keep_vars": true,
   "vars": {
-    "ALLOW_LEGACY_AUTH": "1",
+    "ALLOW_LEGACY_AUTH": "0",
     "ADMIN_DIDS": "did:plc:w23qsgdsux3neuguxfy7kvt5"
   },
   "routes": [
