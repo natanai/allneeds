@@ -27,6 +27,10 @@ import styles from './NeedDetailPage.module.css';
 
 type Feedback = { kind: 'success' | 'warning' | 'error'; message: string } | null;
 
+const DECK_HORIZONTAL_LOCK_DISTANCE = 7;
+const DECK_VERTICAL_LOCK_DISTANCE = 10;
+const DECK_SWIPE_DISTANCE = 30;
+
 function shuffled<T>(values: T[]) {
   const copy = [...values];
   for (let index = copy.length - 1; index > 0; index -= 1) {
@@ -224,12 +228,6 @@ export function NeedDetailPage() {
       startY: event.clientY,
       horizontal: false,
     };
-
-    try {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } catch {
-      // Pointer capture can fail if the pointer has already ended; the gesture simply stays inert.
-    }
   };
 
   const handleDeckPointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -242,14 +240,23 @@ export function NeedDetailPage() {
     const verticalDistance = Math.abs(dy);
 
     if (!gesture.horizontal) {
-      if (verticalDistance > horizontalDistance + 6 && verticalDistance > 12) {
+      const clearlyVertical = verticalDistance >= DECK_VERTICAL_LOCK_DISTANCE
+        && verticalDistance > horizontalDistance * 1.25;
+      if (clearlyVertical) {
         resetDeckGesture(event);
         return;
       }
-      if (horizontalDistance <= verticalDistance + 6 || horizontalDistance <= 12) {
-        return;
-      }
+
+      const horizontalIntent = horizontalDistance >= DECK_HORIZONTAL_LOCK_DISTANCE
+        && horizontalDistance >= verticalDistance * 0.9;
+      if (!horizontalIntent) return;
+
       gesture.horizontal = true;
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Pointer capture is only an enhancement once horizontal intent is known.
+      }
     }
 
     event.preventDefault();
@@ -260,7 +267,7 @@ export function NeedDetailPage() {
     if (!gesture || gesture.pointerId !== event.pointerId) return;
 
     const dx = event.clientX - gesture.startX;
-    if (gesture.horizontal && Math.abs(dx) > 40) {
+    if (gesture.horizontal && Math.abs(dx) >= DECK_SWIPE_DISTANCE) {
       move(dx > 0 ? -1 : 1);
       event.preventDefault();
     }
@@ -389,8 +396,11 @@ export function NeedDetailPage() {
                               target="_blank"
                               rel="noreferrer noopener"
                               title={strategy.evidence.description}
+                              aria-label={strategy.evidence.description
+                                ? `Supporting source: ${strategy.evidence.description}`
+                                : 'Supporting source'}
                             >
-                              {strategy.evidence.description || 'Source'}
+                              Supporting source ↗
                             </a>
                           </span>
                         </div>
@@ -413,7 +423,7 @@ export function NeedDetailPage() {
               </div>
               <div className={styles.deckControls}>
                 <button type="button" onClick={() => move(-1)} aria-label="Previous strategy">←</button>
-                <span>{activeIndex + 1} of {orderedStrategies.length}</span>
+                <span data-strategy-counter>{activeIndex + 1} of {orderedStrategies.length}</span>
                 <button type="button" onClick={() => move(1)} aria-label="Next strategy">→</button>
               </div>
             </div>

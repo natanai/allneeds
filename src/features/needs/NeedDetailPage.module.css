@@ -336,7 +336,8 @@
   margin: 0 auto .55rem;
   display: grid;
   gap: .46rem;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior-x: contain;
 }
 
 .stack {
@@ -363,9 +364,10 @@
 
 .stack > .strategyCard {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  max-width: 100%;
+  inset-block: 0;
+  inset-inline: .45rem;
+  width: auto;
+  max-width: none;
   margin-inline: auto;
   opacity: 0;
   pointer-events: none;
@@ -384,13 +386,13 @@
 .stack > .strategyCard[data-position='next'] {
   z-index: 2;
   opacity: 1;
-  transform: translate3d(0, 14px, 0) scaleX(0.985);
+  transform: translate3d(.4rem, 14px, 0) rotate(.8deg) scaleX(.975);
 }
 
 .stack > .strategyCard[data-position='prev'] {
   z-index: 1;
   opacity: 1;
-  transform: translate3d(0, 26px, 0) scaleX(0.97);
+  transform: translate3d(-.45rem, 27px, 0) rotate(-1.05deg) scaleX(.955);
 }
 
 .strategyCard h3 {
@@ -424,6 +426,33 @@
   align-items: center;
   justify-content: flex-end;
   gap: .32rem;
+}
+
+.cardActions[aria-label='Strategy citation'] {
+  margin-top: .18rem;
+  justify-content: flex-start;
+}
+
+.cardActions[aria-label='Strategy citation'] .meta {
+  margin-top: 0 !important;
+  color: color-mix(in srgb, var(--ink-soft) 72%, transparent);
+  font-size: .72rem;
+  font-weight: 520;
+  line-height: 1.25;
+}
+
+.cardActions[aria-label='Strategy citation'] .meta a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 58%, transparent);
+  text-underline-offset: .18em;
+}
+
+.cardActions[aria-label='Strategy citation'] .meta a:hover,
+.cardActions[aria-label='Strategy citation'] .meta a:focus-visible {
+  color: var(--ink);
+  text-decoration-color: currentColor;
 }
 
 .appAction {
@@ -914,6 +943,12 @@
   .meta {
     margin-top: .38rem !important;
     font-size: .72rem !important;
+  }
+
+  .cardActions[aria-label='Strategy citation'] .meta {
+    margin-top: 0 !important;
+    font-size: .64rem !important;
+    line-height: 1.22;
   }
 
   .cardActions {
