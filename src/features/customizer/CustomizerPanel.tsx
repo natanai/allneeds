@@ -7,6 +7,7 @@ import {
   NAV_SETTINGS_CHANGED_EVENT,
   readNavSettings,
   readTheme,
+  themeRoleMetadata,
   writeTheme,
   writeNavSettings,
   type NavItemId,
@@ -15,30 +16,6 @@ import {
 import { colorFromDrag, hexToHsl, normalizeHex, type HslColor } from './colorDrag';
 import { resolveThemePresetName, themePresets } from './themePresets';
 import styles from './CustomizerPanel.module.css';
-
-const labels: Record<keyof ThemeValues, string> = {
-  plum: 'Primary',
-  lavender: 'Quiet',
-  ink: 'Text',
-  inkSoft: 'Secondary',
-  rose: 'Action',
-  mint: 'Positive',
-  gold: 'Attention',
-  sky: 'Selection',
-  outline: 'Outline',
-};
-
-const colorAriaLabels: Record<keyof ThemeValues, string> = {
-  plum: 'Primary emphasis',
-  lavender: 'Quiet emphasis',
-  ink: 'Primary foreground',
-  inkSoft: 'Secondary foreground',
-  rose: 'Action emphasis',
-  mint: 'Positive emphasis',
-  gold: 'Attention emphasis',
-  sky: 'Selection emphasis',
-  outline: 'Structural contrast',
-};
 
 const navLabels: Array<[NavItemId, string]> = [
   ['home', 'Home'], ['customizer', 'Customizer'],
@@ -417,12 +394,12 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
           <div className={styles.colors}>
             {(Object.keys(values) as Array<keyof ThemeValues>).map((key) => (
               <div key={key} className={styles.colorField}>
-                <span className={styles.colorLabel}>{labels[key]}</span>
+                <span className={styles.colorLabel}>{themeRoleMetadata[key].label}</span>
                 <input
                   className={styles.swatch}
                   type="color"
                   value={values[key]}
-                  aria-label={`Adjust ${colorAriaLabels[key]} color. Drag to change it, or tap to open the color picker.`}
+                  aria-label={`Adjust ${themeRoleMetadata[key].ariaLabel} color. Drag to change it, or tap to open the color picker.`}
                   onPointerDown={(event) => beginSwatchDrag(event, key)}
                   onPointerMove={moveSwatch}
                   onPointerUp={(event) => finishSwatchDrag(event, true)}
@@ -437,7 +414,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
                     setPreset('');
                   }}
                 />
-                <input className={styles.hexInput} key={values[key]} type="text" defaultValue={values[key]} aria-label={colorAriaLabels[key]} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} />
+                <input className={styles.hexInput} key={values[key]} type="text" defaultValue={values[key]} aria-label={themeRoleMetadata[key].ariaLabel} maxLength={7} pattern="^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" title="Use a hex color like #A1B2C3" onBlur={(event) => updateHex(key, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} />
               </div>
             ))}
           </div>
