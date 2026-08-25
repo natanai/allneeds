@@ -5,10 +5,10 @@ import { needMagnetAuditCandidates } from './needMagnetAuditCandidates';
 describe('need magnet audit candidates', () => {
   it('contains only the unresolved Safety visual review', () => {
     expect(needMagnetAuditCandidates.map(({ id, needSlug, title }) => ({ id, needSlug, title }))).toEqual([
-      { id: 'safety-signal', needSlug: 'safety', title: 'S1 · Safety Signal' },
-      { id: 'safety-shelter', needSlug: 'safety', title: 'S2 · Shelter' },
-      { id: 'safety-boundary-map', needSlug: 'safety', title: 'S3 · Boundary Map' },
-      { id: 'safety-safe-passage', needSlug: 'safety', title: 'S4 · Safe Passage' },
+      { id: 'safety-fortress', needSlug: 'safety', title: 'S1 · Fortress' },
+      { id: 'safety-sheltered-home', needSlug: 'safety', title: 'S2 · Sheltered Home' },
+      { id: 'safety-protective-canopy', needSlug: 'safety', title: 'S3 · Protective Canopy' },
+      { id: 'safety-safe-nest', needSlug: 'safety', title: 'S4 · Safe Nest' },
     ]);
   });
 
