@@ -5,7 +5,31 @@
   "compatibility_date": "2026-08-25",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "preview_urls": false,
   "keep_vars": true,
+  "vars": {
+    "ALLOW_LEGACY_AUTH": "1"
+  },
+  "routes": [
+    {
+      "pattern": "allneeds.app/auth/*",
+      "zone_name": "allneeds.app"
+    },
+    {
+      "pattern": "allneeds.app/api/*",
+      "zone_name": "allneeds.app"
+    },
+    {
+      "pattern": "backend.allneeds.app",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true
+    }
+  },
   "d1_databases": [
     {
       "binding": "DB",
