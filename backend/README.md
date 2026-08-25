@@ -38,6 +38,18 @@ Both migrations were then applied successfully to a local D1 fixture with that e
 
 Migration `0001_strategy_ownership.sql` contains one-time `ALTER TABLE` statements and must not be applied twice. Check Cloudflare's D1 migration history/current schema before any retry after a partial or uncertain production run.
 
+## Production migration status
+
+Both migrations were applied to the existing production `allneeds-db` on 2026-08-25 after capturing a Time Travel bookmark and a full SQL export. Do **not** apply either migration again.
+
+- pre-migration Time Travel bookmark: `000000c1-00000000-000050d2-78ef86bd72b3d2a7832060349c18998f`
+- post-migration Time Travel bookmark: `000000c1-0000000e-000050d2-99b5a69ac695458c579d17c3d391ff88`
+- local, gitignored export: `backend/.wrangler/backups/allneeds-db-before-ownership-2026-08-25.sql`
+- final verification: 4 existing strategies preserved, 22 normalized Need links, empty OAuth tables, clean foreign-key check, and `PRAGMA quick_check = ok`
+- legacy Worker verification after migration: `/api/health` and the existing public strategy feed both returned HTTP 200
+
+Only the D1 schema was changed. The replacement Worker and React frontend have not been deployed.
+
 The Worker supports these Cloudflare environment variables:
 
 - `ADMIN_DIDS`: comma-separated allowlist of **verified** Bluesky DIDs that may hide/restore community strategies. Do not populate it with a handle or a guessed DID. Add an admin DID only after the backend OAuth flow has authenticated that profile and `/api/me` reports `verified: true`.
@@ -48,6 +60,8 @@ The Worker supports these Cloudflare environment variables:
 ## Deployment order
 
 The backend and frontend auth cutover must not be deployed in the wrong order.
+
+Steps 1-4 were completed on 2026-08-25. Resume at step 5 only when a controlled backend deployment is authorized.
 
 1. Capture the current `allneeds-db` Time Travel bookmark and export the remote database before changing its schema.
 2. Apply `migrations/0001_strategy_ownership.sql`.
