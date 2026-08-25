@@ -120,11 +120,13 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Keep strategy cards themselves tactile and prominent.
 - Strategy browsing controls should be lighter than the cards.
 - Device/Profile save actions use compact icon + text controls; do not let routine save controls dominate the card.
+- Strategy-specific supporting evidence is a reference link, not a second paragraph of card content. Present it as a small, subdued, recognizably underlined external-link treatment for people who want the source; keep the full source description available through accessible labeling/title metadata.
 - Previous/next deck navigation uses compact circular arrow controls with the position count between them.
 - In one-at-a-time mode, horizontal swipes on the card deck move to the previous/next strategy while vertical gestures remain normal page scrolling; interactive controls inside a card do not initiate deck swipes.
+- Horizontal intent should be forgiving on touchscreens: a modest diagonal left/right gesture should lock to deck navigation before Safari turns it into vertical scrolling. Clearly vertical intent should abandon the deck gesture immediately. Do not require a nearly perfect horizontal line.
 - The focused deck also supports Left/Right Arrow navigation as a non-pointer alternative.
 - Mobile deck height should use stable viewport sizing rather than dynamic viewport height, so Safari browser chrome does not visibly squash or stretch the card while scrolling. Give the deck generous vertical space before its card body becomes internally scrollable.
-- In one-at-a-time mode, keep the deck metaphor visibly legible: when enough cards exist, two rear cards should visibly peek beneath the active card. Rear layers must stay horizontally contained inside the deck; use inward scaling and vertical offsets rather than viewport-expanding side offsets.
+- In one-at-a-time mode, keep the deck metaphor visibly legible and legacy-inspired: when enough cards exist, the two rear cards should peek beneath **and slightly to opposite sides** of the active card with small opposing rotations. Create the side peeks inside an inset deck gutter and horizontally clip the stack so the transforms can never widen the page or create horizontal scrolling.
 - Shuffle uses the canonical Shuffle control above.
 - View-all/view-one icons follow the destination-arrangement rule above.
 - All existing save, profile, shuffle, view-mode, previous/next, swipe, and keyboard functionality must remain present during visual cleanup.
@@ -178,9 +180,10 @@ Rules:
 - Shared strategy feed and Need-detail strategy controls moved toward denser app-like presentation without behavior changes.
 - Shuffle standardized on the existing crossed-arrows icon-only browser control.
 - Strategy view-mode icons standardized to depict the destination card arrangement.
-- Need-detail one-at-a-time strategy decks restored horizontal swipe navigation with vertical-scroll gesture discrimination and Left/Right Arrow support.
+- Need-detail one-at-a-time strategy decks use forgiving diagonal-aware horizontal swipe intent while preserving clearly vertical page scrolling and Left/Right Arrow support.
 - Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
 - Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
 - Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
 - Personal strategy composers are now local/private first: Bluesky sharing appears only for active sessions, signed-out public-export status moves to advanced overflow, disabled profile-save ghosts disappear, and the composer ellipsis lives at the bottom right.
-- Need-detail one-at-a-time strategy decks keep two visible rear-card layers when available, using vertically offset inward layers that preserve the no-horizontal-overflow invariant.
+- Need-detail one-at-a-time strategy decks use legacy-inspired opposing side peeks/rotation inside a clipped inset gutter so the deck feels playful without reintroducing horizontal page overflow.
+- Strategy-card evidence links were demoted to compact underlined `Supporting source ↗` references so evidence does not compete with the strategy itself.
