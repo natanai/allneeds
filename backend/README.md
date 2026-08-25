@@ -48,7 +48,9 @@ Both migrations were applied to the existing production `allneeds-db` on 2026-08
 - final verification: 4 existing strategies preserved, 22 normalized Need links, empty OAuth tables, clean foreign-key check, and `PRAGMA quick_check = ok`
 - legacy Worker verification after migration: `/api/health` and the existing public strategy feed both returned HTTP 200
 
-Only the D1 schema was changed. The replacement Worker and React frontend have not been deployed.
+The replacement Worker was deployed to production on 2026-08-25 as version `e0990d3f-3f8d-49e7-b0aa-fbe5c2e19f1a`. The rollback version is `1eb3fa0a-d5d1-4eac-b08e-23f0ea3fd59b`. The React frontend has not been deployed.
+
+The production Worker configuration is now repository-owned as well: `allneeds.app/auth/*`, `allneeds.app/api/*`, the `backend.allneeds.app` custom domain, observability, disabled preview URLs, `DB`, and the temporary legacy-auth value are all explicit in `wrangler.jsonc`. Post-deployment checks passed for all three Worker routes, CORS, OAuth client metadata, signed-out `/api/me`, the public strategy feed, legacy-session compatibility, and the signed-out live site.
 
 The Worker supports these Cloudflare environment variables:
 
@@ -57,13 +59,13 @@ The Worker supports these Cloudflare environment variables:
 
 `ALLOW_LEGACY_AUTH=1` deliberately preserves the previous security boundary for a short staging window; it is not the intended steady state.
 
-`wrangler.jsonc` sets `keep_vars: true` so repository deployments do not erase dashboard-managed values such as `ALLOW_LEGACY_AUTH` or the future verified `ADMIN_DIDS` allowlist. Those values must still be reviewed in Cloudflare before each deployment.
+`ALLOW_LEGACY_AUTH=1` is explicit in `wrangler.jsonc` for this staging deployment. It must be removed from the repository config during the frontend cutover. `keep_vars: true` prevents a future repository deployment from erasing dashboard-managed values such as the verified `ADMIN_DIDS` allowlist; those values must still be reviewed in Cloudflare before each deployment.
 
 ## Deployment order
 
 The backend and frontend auth cutover must not be deployed in the wrong order.
 
-Steps 1-4 were completed on 2026-08-25. Resume at step 5 only when a controlled backend deployment is authorized.
+Steps 1-8 were completed on 2026-08-25. Resume at step 9 with a verified Bluesky login.
 
 1. Capture the current `allneeds-db` Time Travel bookmark and export the remote database before changing its schema.
 2. Apply `migrations/0001_strategy_ownership.sql`.
