@@ -17,7 +17,7 @@ class MemoryStorage implements StorageDriver {
 }
 
 describe('inventoryRepository', () => {
-  it('imports the legacy flat inventory once into the versioned V2 store and keeps old entries private from Nat exports', () => {
+  it('imports the legacy flat inventory once into the versioned V2 store and keeps old entries Private', () => {
     const storage = new MemoryStorage();
     storage.setItem('nvcApp.inventory', JSON.stringify([{
       id: 'legacy-1',
@@ -33,6 +33,7 @@ describe('inventoryRepository', () => {
 
     expect(readInventory(storage)[0]).toMatchObject({
       title: 'Call a friend',
+      visibility: 'private',
       shareWithNat: false,
     });
     expect(JSON.parse(storage.getItem(INVENTORY_STORAGE_KEY) ?? '{}')).toMatchObject({
@@ -41,7 +42,7 @@ describe('inventoryRepository', () => {
     });
   });
 
-  it('round-trips a personal strategy, defaults Nat sharing off, and detects title/need duplicates', () => {
+  it('round-trips a personal strategy, defaults privacy to Private, and detects title/need duplicates', () => {
     const storage = new MemoryStorage();
     const entry = createPersonalInventoryEntry({
       title: '  Take a walk  ',
@@ -54,6 +55,7 @@ describe('inventoryRepository', () => {
     expect(readInventory(storage)[0]).toMatchObject({
       title: 'Take a walk',
       personal: true,
+      visibility: 'private',
       shareWithNat: false,
       needSlugs: ['rest', 'space'],
     });
@@ -61,15 +63,28 @@ describe('inventoryRepository', () => {
     expect(isDuplicateStrategy([entry], 'Take a walk', ['connection'])).toBe(false);
   });
 
-  it('stores explicit consent to include a personal strategy in Nat exports independently of Bluesky visibility', () => {
+  it('uses Public privacy as the canonical bulk Nat-export signal', () => {
     const entry = createPersonalInventoryEntry({
       title: 'Tea on the porch',
       description: 'Make tea and sit outside.',
       needSlugs: ['rest'],
       needTitle: 'Rest',
-      shareWithNat: true,
+      visibility: 'public',
+    });
+    expect(entry).toMatchObject({ shareWithNat: true, visibility: 'public' });
+  });
+
+  it('does not let the legacy share flag silently change a saved Private strategy', () => {
+    const privateEntry = createPersonalInventoryEntry({
+      title: 'Take a quiet walk',
+      description: 'Step outside for ten minutes.',
+      needSlugs: ['rest'],
+      needTitle: 'Rest',
       visibility: 'private',
     });
-    expect(entry).toMatchObject({ shareWithNat: true, visibility: 'private' });
+
+    const [normalized] = writeInventory([{ ...privateEntry, shareWithNat: true }], null);
+
+    expect(normalized).toMatchObject({ visibility: 'private', shareWithNat: false });
   });
 });

@@ -1,153 +1,51 @@
-.menu {
+.privacyRow {
   min-width: 0;
+  min-height: 48px;
+  padding: .32rem .46rem;
   grid-column: 1 / -1;
   display: grid;
-  justify-items: end;
+  grid-template-columns: 1.85rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .48rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 }
 
-.menu > summary {
-  width: 44px;
-  height: 44px;
+.icon {
+  width: 1.85rem;
+  height: 1.85rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
-  color: var(--ink-soft);
-  font: 800 .92rem/1 var(--font-body);
-  letter-spacing: .08em;
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
-}
-
-.menu > summary::-webkit-details-marker {
-  display: none;
-}
-
-.menu > summary:hover,
-.menu > summary:focus-visible,
-.menu[open] > summary {
-  background: color-mix(in srgb, var(--sky) 18%, transparent);
+  border-radius: calc(var(--radius-md) * .78);
+  background: color-mix(in srgb, var(--sky) 52%, var(--surface-raised) 48%);
   color: var(--ink);
-  outline: none;
 }
 
-.panel {
-  width: 100%;
+.icon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.label {
   min-width: 0;
-  margin: .08rem 0 .18rem;
-  padding: 0;
-  display: grid;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--outline) 24%, transparent);
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-raised) 92%, var(--lavender) 8%);
-}
-
-.panel legend {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.settingRow {
-  min-width: 0;
-  min-height: 48px;
-  padding: .28rem .5rem .28rem .62rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: .55rem;
   color: var(--ink);
-  font: 740 .76rem/1.2 var(--font-body);
+  font: 750 .76rem/1.2 var(--font-body);
 }
 
-.settingRow + .settingRow {
-  border-top: 1px solid color-mix(in srgb, var(--outline) 15%, transparent);
-}
-
-.settingRow select {
-  min-width: 6.8rem;
-  min-height: 34px;
-  padding: .25rem 1.5rem .25rem .48rem;
+.privacyRow select {
+  min-width: 7.15rem;
+  min-height: 36px;
+  padding: .28rem 1.55rem .28rem .5rem;
   border: 1px solid color-mix(in srgb, var(--outline) 34%, transparent);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
   color: var(--ink);
-  font: 650 .7rem/1 var(--font-body);
+  font: 680 .72rem/1 var(--font-body);
 }
 
-.settingRow select:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--plum) 52%, transparent);
-  outline-offset: 2px;
-}
-
-.unavailable {
-  color: var(--ink-soft);
-}
-
-.unavailable select {
-  opacity: .5;
-}
-
-.switch {
-  position: relative;
-  width: 46px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.switch input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.track {
-  width: 38px;
-  height: 23px;
-  padding: 2px;
-  display: flex;
-  align-items: center;
-  border: 1.5px solid color-mix(in srgb, var(--outline) 38%, transparent);
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--ink-soft) 18%, var(--surface-raised) 82%);
-  transition: background .14s ease, border-color .14s ease;
-  pointer-events: none;
-}
-
-.track span {
-  width: 17px;
-  height: 17px;
-  display: block;
-  border-radius: 50%;
-  background: var(--surface-raised);
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--outline) 24%, transparent);
-  transition: transform .14s ease;
-}
-
-.switch input:checked + .track {
-  border-color: color-mix(in srgb, var(--outline) 62%, transparent);
-  background: color-mix(in srgb, var(--mint) 72%, var(--sky) 28%);
-}
-
-.switch input:checked + .track span {
-  transform: translateX(15px);
-}
-
-.switch input:focus-visible + .track {
+.privacyRow select:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--plum) 52%, transparent);
   outline-offset: 2px;
 }

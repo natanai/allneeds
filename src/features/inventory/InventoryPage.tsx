@@ -161,7 +161,7 @@ export function InventoryPage() {
     const primaryNeed = needsBySlug.get(needSlugs[0] ?? '');
     const formData = new FormData(event.currentTarget);
     const requestedVisibility = formData.get('strategy-visibility');
-    const visibility = session && (requestedVisibility === 'followers' || requestedVisibility === 'public')
+    const visibility = requestedVisibility === 'followers' || requestedVisibility === 'public'
       ? requestedVisibility
       : 'private';
     const entry = createPersonalInventoryEntry({
@@ -172,7 +172,6 @@ export function InventoryPage() {
       firstName: addDraft.firstName,
       location: addDraft.location,
       visibility,
-      shareWithNat: formData.get('share-with-nat') === 'yes',
     });
     commit([...inventory, entry], `Saved “${title}” to this device${saveToProfile ? ' and preparing profile sync' : ''}.`);
     if (saveToProfile) {
@@ -200,22 +199,9 @@ export function InventoryPage() {
     setEditDraft(null);
   };
 
-  const setNatSharing = (entry: InventoryStrategy, shareWithNat: boolean) => {
-    commit(
-      inventory.map((item) => item.id === entry.id ? { ...item, shareWithNat } : item),
-      shareWithNat
-        ? `“${entry.title}” will be included when you export strategies to Nat.`
-        : `“${entry.title}” is private from Nat exports.`,
-    );
-    if (!shareWithNat) setShareEmailReadyFor((current) => current === entry.id ? null : current);
-  };
-
   const shareOneWithNat = (entry: InventoryStrategy) => {
     if (!entry.personal) return;
-    const shareableEntry = { ...entry, shareWithNat: true };
-    const next = writeInventory(inventory.map((item) => item.id === entry.id ? shareableEntry : item));
-    setInventory(next);
-    const result = downloadStrategyForNat(shareableEntry);
+    const result = downloadStrategyForNat(entry);
     if (!result.downloaded) {
       setFeedback({ kind: 'error', message: 'That strategy could not be exported.' });
       return;
@@ -410,10 +396,7 @@ export function InventoryPage() {
                           <div className={styles.cardMenuPanel}>
                             {entry.personal ? (
                               <>
-                                <button type="button" onClick={() => shareOneWithNat(entry)}>Share with Nat…</button>
-                                <button type="button" onClick={() => setNatSharing(entry, !entry.shareWithNat)}>
-                                  {entry.shareWithNat ? 'Keep private from Nat exports' : 'Include in Nat exports'}
-                                </button>
+                                <button type="button" onClick={() => shareOneWithNat(entry)}>Share this strategy with Nat…</button>
                                 {shareEmailReadyFor === entry.id ? <a href={personalStrategiesEmailHref()}>Start email to Nat</a> : null}
                               </>
                             ) : null}
@@ -427,8 +410,8 @@ export function InventoryPage() {
                       <div className={styles.cardMeta}>
                         <small>{entry.personal ? 'Personal strategy' : 'Saved strategy'} · Stored on this device</small>
                         {entry.personal ? (
-                          <span className={styles.shareStatus} data-shareable={entry.shareWithNat || undefined}>
-                            {entry.shareWithNat ? 'Shareable with Nat' : 'Private'}
+                          <span className={styles.shareStatus} data-shareable={entry.visibility === 'public' || undefined}>
+                            {entry.visibility === 'public' ? 'Public' : entry.visibility === 'followers' ? 'Followers' : 'Private'}
                           </span>
                         ) : null}
                       </div>
@@ -445,10 +428,6 @@ export function InventoryPage() {
         <summary><span>Add a personal strategy</span><span aria-hidden="true">+</span></summary>
         <div className={styles.formBody}>
           <form id="inventory-form" className={styles.formCard} onSubmit={handleAdd}>
-            <div className={styles.formIntro}>
-              <strong>What helps?</strong>
-              <span>Save it privately by default, then choose separately whether it can be shared.</span>
-            </div>
             <label className={styles.formField}>
               <span>Strategy name</span>
               <span className={styles.inputCard}><input id="inventory-title" name="title" type="text" value={addDraft.title} onChange={(event) => setAddDraft({ ...addDraft, title: event.target.value })} required /></span>

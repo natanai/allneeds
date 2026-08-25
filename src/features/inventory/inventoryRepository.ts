@@ -18,6 +18,7 @@ export interface InventoryStrategy {
   needSlugs: string[];
   tags: string[];
   personal: boolean;
+  /** @deprecated Compatibility mirror. Public visibility is the canonical Nat-export signal. */
   shareWithNat: boolean;
   sourceNeedPage: string;
   strategySlug: string;
@@ -70,6 +71,7 @@ function normalizeEntry(value: unknown): InventoryStrategy | null {
   const contributor = firstName || location
     ? { ...(firstName ? { name: firstName } : {}), ...(location ? { location } : {}) }
     : undefined;
+  const normalizedVisibility = visibility(value.visibility);
 
   return {
     id: typeof value.id === 'string' && value.id ? value.id : createId(),
@@ -80,7 +82,7 @@ function normalizeEntry(value: unknown): InventoryStrategy | null {
     needSlugs,
     tags,
     personal: value.personal === true,
-    shareWithNat: value.shareWithNat === true,
+    shareWithNat: normalizedVisibility === 'public',
     sourceNeedPage,
     strategySlug: typeof value.strategySlug === 'string'
       ? value.strategySlug.trim().toLocaleLowerCase()
@@ -88,7 +90,7 @@ function normalizeEntry(value: unknown): InventoryStrategy | null {
     createdAt: typeof value.createdAt === 'string' && value.createdAt
       ? value.createdAt
       : new Date().toISOString(),
-    visibility: visibility(value.visibility),
+    visibility: normalizedVisibility,
     ...(contributor ? { contributor } : {}),
     ...(firstName ? { firstName } : {}),
     ...(location ? { location } : {}),
@@ -161,10 +163,13 @@ export function writeInventory(
   items: InventoryStrategy[],
   storage: StorageDriver | null = getBrowserStorage(),
 ) {
-  if (!storage) return items;
-  createStore(storage).write({ items });
-  emitInventoryChanged(items.length);
-  return items;
+  const normalizedItems = items
+    .map(normalizeEntry)
+    .filter((entry): entry is InventoryStrategy => entry !== null);
+  if (!storage) return normalizedItems;
+  createStore(storage).write({ items: normalizedItems });
+  emitInventoryChanged(normalizedItems.length);
+  return normalizedItems;
 }
 
 export function isDuplicateStrategy(items: InventoryStrategy[], title: string, needSlugs: string[]) {
@@ -222,6 +227,7 @@ export type PersonalStrategyInput = {
   firstName?: string;
   location?: string;
   visibility?: InventoryVisibility;
+  /** @deprecated Use visibility='public'. Retained for old callers during migration. */
   shareWithNat?: boolean;
 };
 
@@ -232,6 +238,10 @@ export function createPersonalInventoryEntry(input: PersonalStrategyInput): Inve
   const contributor = firstName || location
     ? { ...(firstName ? { name: firstName } : {}), ...(location ? { location } : {}) }
     : undefined;
+  const requestedVisibility = visibility(input.visibility);
+  const resolvedVisibility: InventoryVisibility = input.shareWithNat === true
+    ? 'public'
+    : requestedVisibility;
   return {
     id: createId(),
     title: input.title.trim(),
@@ -241,11 +251,11 @@ export function createPersonalInventoryEntry(input: PersonalStrategyInput): Inve
     needSlugs,
     tags: needSlugs,
     personal: true,
-    shareWithNat: input.shareWithNat === true,
+    shareWithNat: resolvedVisibility === 'public',
     sourceNeedPage: '',
     strategySlug: '',
     createdAt: new Date().toISOString(),
-    visibility: input.visibility ?? 'private',
+    visibility: resolvedVisibility,
     ...(contributor ? { contributor } : {}),
     ...(firstName ? { firstName } : {}),
     ...(location ? { location } : {}),

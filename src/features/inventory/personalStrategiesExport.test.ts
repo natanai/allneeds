@@ -23,35 +23,36 @@ function strategy(overrides: Partial<InventoryStrategy> = {}): InventoryStrategy
     sourceNeedPage: '',
     strategySlug: '',
     createdAt: '2026-08-24T12:00:00.000Z',
-    visibility: 'private',
+    visibility: 'public',
     ...overrides,
   };
 }
 
 describe('personal strategy export', () => {
-  it('bulk exports only personal strategies explicitly marked shareable with Nat', () => {
+  it('bulk exports only personal strategies marked Public', () => {
     const exportedAt = '2026-08-25T00:00:00.000Z';
-    const shareable = strategy();
+    const publicStrategy = strategy();
     const payload = buildPersonalStrategiesExport([
-      shareable,
-      strategy({ id: 'private-1', title: 'Private strategy', shareWithNat: false }),
+      publicStrategy,
+      strategy({ id: 'private-1', title: 'Private strategy', visibility: 'private', shareWithNat: true }),
+      strategy({ id: 'followers-1', title: 'Followers strategy', visibility: 'followers', shareWithNat: false }),
       strategy({ id: 'catalog-1', title: 'Catalog strategy', personal: false }),
     ], exportedAt);
 
     expect(payload).toEqual({
       version: 1,
       exportedAt,
-      personalStrategies: [shareable],
+      personalStrategies: [publicStrategy],
     });
   });
 
-  it('can explicitly export one personal strategy and records that explicit share in the file', () => {
+  it('can explicitly export one private personal strategy without changing its privacy', () => {
     const exportedAt = '2026-08-25T00:00:00.000Z';
-    const privateStrategy = strategy({ shareWithNat: false });
+    const privateStrategy = strategy({ visibility: 'private', shareWithNat: false });
     expect(buildSingleStrategyExport(privateStrategy, exportedAt)).toEqual({
       version: 1,
       exportedAt,
-      personalStrategies: [{ ...privateStrategy, shareWithNat: true }],
+      personalStrategies: [privateStrategy],
     });
   });
 
