@@ -33,7 +33,7 @@
         { "title": "Call a friend", "slug": "call-a-friend" },
         { "title": "Play a social video game", "slug": "play-a-social-video-game" },
         { "title": "Read a character driven novel", "slug": "read-a-character-driven-novel" },
-        { "title": "Write a letter", "slug": "write-a-letter" },
+        { "title": "Write a letter", "slug": "write-a-letter-for-connection" },
         { "title": "Remember a connected moment", "slug": "remember-a-connected-moment" },
         { "title": "Map your connection options", "slug": "map-your-connection-options" },
         { "title": "Notice where you are", "slug": "notice-where-you-are" }
@@ -43,7 +43,7 @@
   "strategies": [
     {
       "title": "Write a letter",
-      "slug": "write-a-letter",
+      "slug": "write-a-letter-for-connection",
       "summary": "Set a five-minute timer. Choose someone you trust, miss, or would like to feel closer to. Write what has been happening in your life and one thing you wish they knew. Sending it is optional.",
       "needs": [{ "title": "Connection", "slug": "connection" }],
       "provenance": "system",
