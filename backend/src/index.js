@@ -54,6 +54,16 @@ function legacyAuthAllowed(env) {
   return String(env.ALLOW_LEGACY_AUTH || '') === '1';
 }
 
+function safeJsonArray(value) {
+  if (typeof value !== 'string' || !value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 async function readSession(env, request) {
   const sessionId = parseCookies(request).allneeds_session;
   if (!sessionId) return null;
@@ -82,6 +92,18 @@ async function readSession(env, request) {
   };
 }
 
+async function requireAdmin(env, request) {
+  const session = await readSession(env, request);
+  if (!session) return { rejection: json(request, { status: 'error', message: 'not signed in' }, 401) };
+  if (!session.verified) {
+    return { rejection: json(request, { status: 'error', message: 'verified sign-in required' }, 403) };
+  }
+  if (!adminDidSet(env).has(session.did)) {
+    return { rejection: json(request, { status: 'error', message: 'admin access required' }, 403) };
+  }
+  return { session };
+}
+
 async function handleMe(request, env) {
   const session = await readSession(env, request);
   if (!session) {
@@ -96,6 +118,62 @@ async function handleMe(request, env) {
     handle: session.handle,
     verified: session.verified,
     admin: session.verified && adminDidSet(env).has(session.did),
+  });
+}
+
+async function handleAdminStrategies(request, env) {
+  const authorization = await requireAdmin(env, request);
+  if (authorization.rejection) return authorization.rejection;
+  const url = new URL(request.url);
+  const moderation = url.searchParams.get('moderation') === 'visible' ? 'visible' : 'hidden';
+  const result = await env.DB.prepare(
+    `SELECT
+       s.id,
+       s.client_key,
+       s.author_did,
+       s.title,
+       s.body,
+       s.need_ids,
+       s.created_at,
+       s.updated_at,
+       s.visibility,
+       s.moderation_status,
+       s.add_count,
+       u.handle,
+       u.display_name,
+       u.avatar_url
+     FROM strategies s
+     LEFT JOIN users u ON u.did = s.author_did
+     WHERE s.moderation_status = ?
+     ORDER BY s.updated_at DESC, s.id DESC
+     LIMIT 250;`,
+  ).bind(moderation).all();
+
+  const strategies = (result.results || []).map((row) => ({
+    id: row.id,
+    clientKey: row.client_key || null,
+    authorDid: row.author_did,
+    title: row.title,
+    body: row.body ?? null,
+    needIds: safeJsonArray(row.need_ids),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at || row.created_at,
+    visibility: row.visibility === 'public' || row.visibility === 'followers' ? row.visibility : 'private',
+    moderationStatus: row.moderation_status === 'hidden' ? 'hidden' : 'visible',
+    addCount: typeof row.add_count === 'number' ? row.add_count : Number(row.add_count) || 0,
+    author: row.author_did ? {
+      did: row.author_did,
+      handle: row.handle || null,
+      displayName: row.display_name || null,
+      avatarUrl: row.avatar_url || null,
+      avatar: row.avatar_url || null,
+    } : null,
+  }));
+  return json(request, {
+    status: 'ok',
+    moderation,
+    moderatorDid: authorization.session.did,
+    strategies,
   });
 }
 
@@ -168,6 +246,10 @@ export default {
 
       if (request.method === 'GET' && pathname === '/api/me') {
         return handleMe(request, env);
+      }
+
+      if (request.method === 'GET' && pathname === '/api/admin/strategies') {
+        return handleAdminStrategies(request, env);
       }
 
       const cutoverRejection = await enforceVerifiedApiCutover(request, env, pathname);
