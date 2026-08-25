@@ -375,20 +375,26 @@ export function NeedDetailPage() {
                       <h3>{strategy.title}</h3>
                       <div className={styles.cardBody}>
                         <p>{strategy.summary}</p>
-                        {strategy.provenance === 'user' && contributor ? <p className={styles.meta}>{contributor}</p> : null}
-                        {strategy.provenance === 'system' && strategy.evidence ? (
-                          <p className={`${styles.meta} ${styles.evidenceMeta}`}>
+                      </div>
+                      {strategy.provenance === 'user' && contributor ? (
+                        <div className={styles.cardActions} aria-label="Strategy contributor">
+                          <span className={styles.meta}>{contributor}</span>
+                        </div>
+                      ) : null}
+                      {strategy.provenance === 'system' && strategy.evidence ? (
+                        <div className={styles.cardActions} aria-label="Strategy citation">
+                          <span className={styles.meta}>
                             <a
                               href={strategy.evidence.url}
                               target="_blank"
                               rel="noreferrer noopener"
                               title={strategy.evidence.description}
                             >
-                              Evidence
+                              {strategy.evidence.description || 'Source'}
                             </a>
-                          </p>
-                        ) : null}
-                      </div>
+                          </span>
+                        </div>
+                      ) : null}
                       <div className={styles.cardActions}>
                         <button
                           type="button"

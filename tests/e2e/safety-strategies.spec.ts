@@ -21,13 +21,17 @@ test('Safety shows only protected human strategies and two cited system strategi
   }
 
   const groundingCard = deck.locator('article').filter({ has: page.getByRole('heading', { name: '5-4-3-2-1 check' }) });
-  await expect(groundingCard.getByRole('link', { name: 'Evidence' })).toHaveAttribute(
+  await expect(groundingCard.getByRole('link', {
+    name: 'Ground yourself: Using five senses technique to cope with test anxiety among nursing students',
+  })).toHaveAttribute(
     'href',
     'https://www.sciencedirect.com/science/article/pii/S1557308725002999',
   );
 
   const breathingCard = deck.locator('article').filter({ has: page.getByRole('heading', { name: 'Slow breathing' }) });
-  await expect(breathingCard.getByRole('link', { name: 'Evidence' })).toHaveAttribute(
+  await expect(breathingCard.getByRole('link', {
+    name: 'Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature',
+  })).toHaveAttribute(
     'href',
     'https://pubmed.ncbi.nlm.nih.gov/38137060/',
   );
