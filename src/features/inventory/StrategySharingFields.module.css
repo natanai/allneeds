@@ -1,68 +1,94 @@
-.sharingRow {
-  min-width: 0;
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: .34rem;
+.sharingArea {
+  display: contents;
 }
 
-.privacyRow {
+.profileSharing {
   min-width: 0;
   min-height: 48px;
-  padding: .32rem .46rem;
+  padding: .34rem .44rem;
+  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1.85rem minmax(0, 1fr) auto;
+  grid-template-columns: 1.9rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: .48rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent);
+  gap: .46rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--sky) 8%);
 }
 
 .icon {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 1.9rem;
+  height: 1.9rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: calc(var(--radius-md) * .78);
-  background: color-mix(in srgb, var(--sky) 52%, var(--surface-raised) 48%);
+  background: color-mix(in srgb, var(--sky) 48%, var(--surface-raised) 52%);
   color: var(--ink);
 }
 
 .icon svg {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.02rem;
+  height: 1.02rem;
 }
 
-.label {
+.sharingCopy {
   min-width: 0;
-  color: var(--ink);
-  font: 750 .76rem/1.2 var(--font-body);
+  display: grid;
+  gap: .04rem;
 }
 
-.privacyRow select {
-  min-width: 7.15rem;
+.sharingCopy strong {
+  color: var(--ink);
+  font: 760 .73rem/1.15 var(--font-body);
+}
+
+.sharingCopy small {
+  color: var(--ink-soft);
+  font: 520 .61rem/1.2 var(--font-body);
+}
+
+.profileSharing select,
+.exportVisibility select {
+  min-width: 6.8rem;
   min-height: 36px;
-  padding: .28rem 1.55rem .28rem .5rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 34%, transparent);
+  padding: .28rem 1.45rem .28rem .48rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
   color: var(--ink);
-  font: 680 .72rem/1 var(--font-body);
+  font: 680 .7rem/1 var(--font-body);
 }
 
-.privacyRow select:focus-visible {
+.profileSharing select:focus-visible,
+.exportVisibility select:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--plum) 52%, transparent);
   outline-offset: 2px;
 }
 
+.utilityRow {
+  order: 90;
+  min-width: 0;
+  min-height: 44px;
+  grid-column: 1 / -1;
+  padding: .12rem 0 .02rem .12rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 12%, transparent);
+}
+
+.localStatus {
+  min-width: 0;
+  color: color-mix(in srgb, var(--ink-soft) 78%, transparent);
+  font: 610 .64rem/1.25 var(--font-body);
+}
+
 .actionMenu {
   position: relative;
-  align-self: stretch;
-  display: grid;
-  align-items: center;
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .actionMenu > summary {
@@ -96,17 +122,17 @@
   position: absolute;
   right: 0;
   bottom: calc(100% + .25rem);
-  z-index: 40;
+  z-index: 45;
   width: max-content;
   min-width: 14.5rem;
   max-width: min(19rem, calc(100vw - 2rem));
   padding: .3rem;
   display: grid;
   gap: .08rem;
-  border: 1.5px solid color-mix(in srgb, var(--outline) 34%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-raised) 95%, var(--lavender) 5%);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--outline) 18%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 96%, var(--lavender) 4%);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--outline) 16%, transparent);
 }
 
 .actionMenuPanel button,
@@ -120,7 +146,7 @@
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--ink);
-  font: 680 .78rem/1.25 var(--font-body);
+  font: 680 .76rem/1.25 var(--font-body);
   text-align: left;
   text-decoration: none;
   cursor: pointer;
@@ -134,40 +160,147 @@
   outline: none;
 }
 
-:global(#inventory-form-shell) {
-  position: relative;
+.exportVisibility {
+  min-height: 46px;
+  padding: .38rem .42rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .6rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 12%, transparent);
 }
 
-:global(#inventory-form-shell) .actionMenu {
-  position: absolute;
-  top: .2rem;
-  right: 3.15rem;
-  z-index: 45;
-  align-self: auto;
+.exportVisibility > span {
+  min-width: 0;
+  display: grid;
+  gap: .03rem;
 }
 
-:global(#inventory-form-shell) .actionMenuPanel {
-  top: calc(100% + .2rem);
-  bottom: auto;
+.exportVisibility strong {
+  color: var(--ink);
+  font: 720 .7rem/1.2 var(--font-body);
 }
 
-@media (max-width: 390px) {
-  .sharingRow {
-    gap: .18rem;
+.exportVisibility small {
+  color: var(--ink-soft);
+  font: 500 .6rem/1.2 var(--font-body);
+}
+
+.exportVisibility select {
+  min-width: 5.7rem;
+}
+
+/*
+ * Shared Add Strategy chrome. Both canonical composers contain
+ * StrategySharingFields, so these selectors keep their field and action
+ * treatment aligned without runtime CSS or page-specific style injection.
+ */
+:global(#inventory-form),
+:global(#suggestion-form) {
+  padding: clamp(.52rem, 1.4vw, .68rem);
+  gap: .42rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface-raised) 96%, var(--mint) 4%);
+  box-shadow: none;
+}
+
+:global(#inventory-form) > label > span:first-child,
+:global(#suggestion-form) > label > span:first-child {
+  color: var(--ink-soft);
+  font-size: .72rem;
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+:global(#inventory-form) input[type='text'],
+:global(#suggestion-form) input[type='text'],
+:global(#inventory-form) textarea,
+:global(#suggestion-form) textarea {
+  min-height: 44px;
+  padding: .5rem .58rem;
+  color: var(--ink);
+  font-size: .84rem;
+  line-height: 1.35;
+}
+
+:global(#inventory-form) textarea,
+:global(#suggestion-form) textarea {
+  min-height: 5.75rem;
+}
+
+:global(#inventory-form) > div:has(> label input[name='name']),
+:global(#suggestion-form) > div:has(> label input[name='name']) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .34rem;
+}
+
+:global(#inventory-form) > div:has(> button[name='save-target']),
+:global(#suggestion-form) > div:has(> button[name='save-target']) {
+  grid-template-columns: 1fr;
+  gap: .34rem;
+}
+
+:global(#inventory-form) > div:has(> button[name='save-target'][value='profile']:not(:disabled)),
+:global(#suggestion-form) > div:has(> button[name='save-target'][value='profile']:not(:disabled)) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+:global(#inventory-form) button[name='save-target'],
+:global(#suggestion-form) button[name='save-target'] {
+  min-height: 44px;
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  font-size: .76rem;
+  font-weight: 720;
+}
+
+:global(#inventory-form) button[name='save-target'][value='profile']:disabled,
+:global(#suggestion-form) button[name='save-target'][value='profile']:disabled {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  :global(#inventory-form),
+  :global(#suggestion-form) {
+    padding: .48rem;
+    gap: .36rem;
+    border-radius: var(--radius-lg);
   }
 
-  .privacyRow {
+  :global(#inventory-form) textarea,
+  :global(#suggestion-form) textarea {
+    min-height: 5.25rem;
+  }
+
+  .profileSharing {
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    gap: .36rem;
     padding-inline: .38rem;
-    grid-template-columns: 1.65rem minmax(0, 1fr) auto;
-    gap: .34rem;
   }
 
   .icon {
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 1.75rem;
+    height: 1.75rem;
   }
 
-  .privacyRow select {
-    min-width: 6.5rem;
+  .profileSharing select {
+    min-width: 6.2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  :global(#inventory-form) > div:has(> label input[name='name']),
+  :global(#suggestion-form) > div:has(> label input[name='name']) {
+    grid-template-columns: 1fr;
+  }
+
+  .profileSharing {
+    grid-template-columns: 1.7rem minmax(0, 1fr);
+  }
+
+  .profileSharing select {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }
