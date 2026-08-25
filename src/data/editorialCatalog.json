@@ -38,6 +38,52 @@
         { "title": "Map your connection options", "slug": "map-your-connection-options" },
         { "title": "Notice where you are", "slug": "notice-where-you-are" }
       ]
+    },
+    "support": {
+      "summary": "Across human evolutionary history, survival often depended on sharing food, care, information, labor, and risk rather than meeting every demand alone. This need may draw us to seek help, make our needs visible, notice when others need assistance, and offer or accept emotional, informational, or practical support. Tending to support can distribute burdens, preserve capacity during hardship, and make difficult circumstances more manageable than they would be alone.",
+      "narrative": "Evolutionary anthropology gives human support-seeking and support-giving a deep historical context. Jaeggi and Gurven describe food sharing as having a “central role in shaping evolved human life history, social organization, and cooperative psychology.” They argue that humans expanded patterns of sharing in part to buffer risk in a demanding and uncertain foraging niche. Kaplan and colleagues likewise call exchange among non-kin a “hallmark of human sociality” and report experimental evidence consistent with risk reduction helping motivate reciprocal exchange under variable resource availability. These sources do not establish that every modern desire for help is an adaptation to a particular ancestral problem, but they place dependence on shared resources firmly within the natural history of our species. [1][2]\n\nModern social-support research shows that what people provide one another can take importantly different forms. Thoits distinguishes two broad categories, “emotional sustenance” and “active coping assistance.” Support can therefore involve empathy and reassurance, but it can also involve information, practical help, problem-solving, material resources, or other assistance that changes what a person has to carry alone. [3]\n\nThe usefulness of support also depends on how well it corresponds to the situation. Cohen and Wills reviewed evidence for both general benefits associated with social integration and a stress-buffering process. Their buffering account emphasizes support resources that are responsive to demands produced by a stressful event. Having people nearby, receiving some form of help, and receiving the kind of help that is actually useful are therefore not interchangeable ideas. [4]\n\nResearch also distinguishes believing that support is available from actually receiving supportive behavior. Uchino argues that perceived and received support have distinct antecedents and may operate through different pathways. Haber and colleagues' meta-analysis of 23 studies found that the two were related, but only moderately, with an average correlation of r = .35. A person can therefore receive assistance without experiencing themselves as well supported, or experience a dependable source of support even when they are not currently receiving help. [5][6]\n\nSupport is not limited to surviving emergencies. Feeney and Collins propose that supportive relationships can matter both while coping with adversity and while pursuing opportunities for exploration and growth. A large systematic review and meta-analysis by Yeo, Lansford, and Rudolph synthesized 604 studies and 1,014 effect sizes and found that perceived emotional, informational, instrumental, and combined support were associated with outcomes across mental health, physical health, education, work, and risk-taking. These associations do not mean that any particular supportive act will necessarily produce a particular outcome. [7][8]\n\nTaken together, these literatures make human reliance on support less mysterious. Sharing burdens, resources, information, protection, and care has repeatedly been part of how humans manage demands that exceed what one individual can reliably handle. From this perspective, impulses to seek support or respond to another person's need for it need not be interpreted simply as failures of self-sufficiency. They are intelligible parts of a deeply cooperative human repertoire. What constitutes useful support still depends on the person, the circumstances, and the kind of assistance that is actually needed.",
+      "sources": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23943272/",
+          "description": "Jaeggi, A. V., & Gurven, M. (2013). Natural cooperators: food sharing in humans and other primates. Evolutionary Anthropology, 22(4), 186–195."
+        },
+        {
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3385467/",
+          "description": "Kaplan, H. S., Schniter, E., Smith, V. L., & Wilson, B. J. (2012). Risk and the evolution of human exchange. Proceedings of the Royal Society B, 279(1740), 2930–2935."
+        },
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/21673143/",
+          "description": "Thoits, P. A. (2011). Mechanisms linking social ties and support to physical and mental health. Journal of Health and Social Behavior, 52(2), 145–161."
+        },
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/3901065/",
+          "description": "Cohen, S., & Wills, T. A. (1985). Stress, social support, and the buffering hypothesis. Psychological Bulletin, 98(2), 310–357."
+        },
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/26158961/",
+          "description": "Uchino, B. N. (2009). Understanding the Links Between Social Support and Physical Health: A Life-Span Perspective With Emphasis on the Separability of Perceived and Received Support. Perspectives on Psychological Science, 4(3), 236–255."
+        },
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17308966/",
+          "description": "Haber, M. G., Cohen, J. L., Lucas, T., & Baltes, B. B. (2007). The relationship between self-reported received and perceived social support: a meta-analytic review. American Journal of Community Psychology, 39(1–2), 133–144."
+        },
+        {
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5480897/",
+          "description": "Feeney, B. C., & Collins, N. L. (2015). A New Look at Social Support: A Theoretical Perspective on Thriving through Relationships. Personality and Social Psychology Review, 19(2), 113–147."
+        },
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41100292/",
+          "description": "Yeo, G., Lansford, J. E., & Rudolph, K. D. (2025). How does perceived social support relate to human thriving? A systematic review with meta-analyses. Psychological Bulletin, 151(9), 1089–1124."
+        }
+      ],
+      "strategies": [
+        { "title": "Call a friend", "slug": "call-a-friend" },
+        { "title": "Call a parent", "slug": "call-a-parent" },
+        { "title": "Map your support", "slug": "map-your-support" },
+        { "title": "Prepare one request for help", "slug": "prepare-one-request-for-help" },
+        { "title": "Call or text 988", "slug": "call-or-text-988" },
+        { "title": "Call 116 123", "slug": "call-116-123" }
+      ]
     }
   },
   "strategies": [
@@ -49,7 +95,8 @@
       "provenance": "system",
       "evidence": {
         "url": "https://pubmed.ncbi.nlm.nih.gov/40643373/",
-        "description": "Communicating messages of care and positivity to peers with SCI/D improves loneliness in volunteer letter writers"
+        "description": "Communicating messages of care and positivity to peers with SCI/D improves loneliness in volunteer letter writers",
+        "kind": "scholarly"
       }
     },
     {
@@ -60,7 +107,8 @@
       "provenance": "system",
       "evidence": {
         "url": "https://pubmed.ncbi.nlm.nih.gov/26751632/",
-        "description": "Nostalgia fosters self-continuity: Uncovering the mechanism (social connectedness) and consequence (eudaimonic well-being)"
+        "description": "Nostalgia fosters self-continuity: Uncovering the mechanism (social connectedness) and consequence (eudaimonic well-being)",
+        "kind": "scholarly"
       }
     },
     {
@@ -71,7 +119,8 @@
       "provenance": "system",
       "evidence": {
         "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535",
-        "description": "The Community Navigator Study: Results from a feasibility randomised controlled trial of a programme to reduce loneliness for people with complex anxiety or depression"
+        "description": "The Community Navigator Study: Results from a feasibility randomised controlled trial of a programme to reduce loneliness for people with complex anxiety or depression",
+        "kind": "scholarly"
       }
     },
     {
@@ -82,7 +131,8 @@
       "provenance": "system",
       "evidence": {
         "url": "https://www.sciencedirect.com/science/article/pii/S0272494409000620",
-        "description": "Defining place attachment: A tripartite organizing framework"
+        "description": "Defining place attachment: A tripartite organizing framework",
+        "kind": "scholarly"
       }
     },
     {
@@ -96,7 +146,8 @@
       "provenance": "system",
       "evidence": {
         "url": "https://www.sciencedirect.com/science/article/pii/S1557308725002999",
-        "description": "Ground yourself: Using five senses technique to cope with test anxiety among nursing students"
+        "description": "Ground yourself: Using five senses technique to cope with test anxiety among nursing students",
+        "kind": "scholarly"
       }
     },
     {
@@ -107,12 +158,68 @@
       "provenance": "system",
       "evidence": {
         "url": "https://pubmed.ncbi.nlm.nih.gov/38137060/",
-        "description": "Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature"
+        "description": "Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature",
+        "kind": "scholarly"
+      }
+    },
+    {
+      "title": "Map your support",
+      "slug": "map-your-support",
+      "summary": "Set a five-minute timer. Write down any people, groups, services, places, or resources you could turn to. Next to each, write what kind of help it could realistically offer: listening, information, practical help, company, or something else. Leave anything blank if no option comes to mind.",
+      "needs": [{ "title": "Support", "slug": "support" }],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535",
+        "description": "The Community Navigator Study: Results from a feasibility randomised controlled trial of a programme to reduce loneliness for people with complex anxiety or depression",
+        "kind": "scholarly"
+      }
+    },
+    {
+      "title": "Prepare one request for help",
+      "slug": "prepare-one-request-for-help",
+      "summary": "Choose one thing that would be easier with help. Write the smallest concrete request that would make a difference. Add a person, group, or service you could ask if one comes to mind. You do not have to send it.",
+      "needs": [{ "title": "Support", "slug": "support" }],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36067802/",
+        "description": "Surprisingly Happy to Have Helped: Underestimating Prosociality Creates a Misplaced Barrier to Asking for Help",
+        "kind": "scholarly"
+      }
+    },
+    {
+      "title": "Call or text 988",
+      "slug": "call-or-text-988",
+      "summary": "If you are in the United States and are experiencing suicidal crisis or emotional distress of any kind, the 988 Suicide & Crisis Lifeline can connect you with a crisis counselor. Call or text 988.",
+      "needs": [
+        { "title": "Support", "slug": "support" },
+        { "title": "Safety", "slug": "safety" }
+      ],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://988lifeline.org/",
+        "description": "988 Suicide & Crisis Lifeline",
+        "kind": "official-resource"
+      }
+    },
+    {
+      "title": "Call 116 123",
+      "slug": "call-116-123",
+      "summary": "If you are in the European Union, try 116 123 for an emotional support helpline. It is a free European helpline number used in most EU countries, although coverage is not yet EU-wide. Where available, the service offers non-judgmental listening for loneliness, psychological crisis, or suicidal thoughts.",
+      "needs": [
+        { "title": "Support", "slug": "support" },
+        { "title": "Safety", "slug": "safety" }
+      ],
+      "provenance": "system",
+      "evidence": {
+        "url": "https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm",
+        "description": "116 123 — Emotional support helplines",
+        "kind": "official-resource"
       }
     }
   ],
   "strategyProvenance": {
     "call-a-friend": "user",
+    "call-a-parent": "user",
     "play-a-social-video-game": "user",
     "read-a-character-driven-novel": "user"
   },
@@ -125,11 +232,13 @@
     "back-to-wall-lean": ["safety"],
     "butterfly-taps": ["safety"],
     "hand-on-heart-breaths": ["safety"],
-    "floor-starfish": ["safety"],
+    "floor-starfish": ["safety", "support"],
     "feel-your-feet": ["safety"],
     "wrap-in-a-blanket": ["safety"],
-    "name-support-options": ["safety"],
+    "name-support-options": ["safety", "support"],
     "exit-count": ["safety"],
-    "seat-press": ["safety"]
+    "seat-press": ["safety"],
+    "pillow-nest": ["support"],
+    "name-one-help-to-ask": ["support"]
   }
 }

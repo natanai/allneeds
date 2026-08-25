@@ -1,5 +1,6 @@
 export type NeedSatisfaction = 'met' | 'unmet' | 'both';
 export type StrategyProvenance = 'system' | 'user';
+export type SupportingSourceKind = 'scholarly' | 'official-resource';
 
 export interface EntityRef {
   slug: string;
@@ -9,6 +10,7 @@ export interface EntityRef {
 export interface EvidenceSource {
   url: string;
   description?: string;
+  kind?: SupportingSourceKind;
 }
 
 export interface Feeling {
