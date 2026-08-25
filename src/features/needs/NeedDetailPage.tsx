@@ -22,6 +22,7 @@ import {
   writeInventory,
 } from '../inventory/inventoryRepository';
 import type { InventoryStrategy } from '../inventory/inventoryRepository';
+import { StrategySharingFields } from '../inventory/StrategySharingFields';
 import styles from './NeedDetailPage.module.css';
 
 type Feedback = { kind: 'success' | 'warning' | 'error'; message: string } | null;
@@ -155,7 +156,8 @@ export function NeedDetailPage() {
       return;
     }
     const primaryNeed = needsBySlug.get(selectedNeedSlugs[0] ?? '') ?? need;
-    const requestedVisibility = new FormData(event.currentTarget).get('strategy-visibility');
+    const formData = new FormData(event.currentTarget);
+    const requestedVisibility = formData.get('strategy-visibility');
     const visibility = session && (requestedVisibility === 'followers' || requestedVisibility === 'public')
       ? requestedVisibility
       : 'private';
@@ -167,6 +169,7 @@ export function NeedDetailPage() {
       firstName: formDraft.firstName,
       location: formDraft.location,
       visibility,
+      shareWithNat: formData.get('share-with-nat') === 'yes',
     });
     if (isDuplicateStrategy(inventory, entry.title, entry.needSlugs)
       && !window.confirm('You already saved a strategy with this title for one of the selected needs. Save another copy?')) {
@@ -399,6 +402,10 @@ export function NeedDetailPage() {
         <h2 id="suggestion-heading" className={styles.sectionTitle}>Add a strategy</h2>
         <div className={styles.formCard}>
           <form id="suggestion-form" className={styles.form} onSubmit={handlePersonalStrategy}>
+            <div className={styles.formIntro}>
+              <strong>What helps?</strong>
+              <span>Save it privately by default, then choose separately whether it can be shared.</span>
+            </div>
             <label className={styles.formField}>
               <span>Strategy name</span>
               <span className={styles.inputCard}><input name="title" type="text" value={formDraft.title} onChange={(event) => setFormDraft({ ...formDraft, title: event.target.value })} required /></span>
@@ -427,20 +434,10 @@ export function NeedDetailPage() {
                 <span className={styles.inputCard}><input name="location" type="text" value={formDraft.location} onChange={(event) => setFormDraft({ ...formDraft, location: event.target.value })} /></span>
               </label>
             </div>
-            <label className={styles.formField}>
-              <span>Visibility</span>
-              <span className={styles.visibilityHint}>Choose who can see this strategy when you export or share it. {session ? 'Followers/Public can be shared when you save to your profile.' : 'Sign in with Bluesky to enable Followers/Public. While signed out, strategies stay only on this browser.'}</span>
-              <span className={styles.inputCard}>
-                <select name="strategy-visibility" defaultValue="private">
-                  <option value="private">Private (only on this browser)</option>
-                  <option value="followers" disabled={!session}>Followers (Bluesky followers when synced)</option>
-                  <option value="public" disabled={!session}>Public</option>
-                </select>
-              </span>
-            </label>
+            <StrategySharingFields signedIn={Boolean(session)} />
             <div className={styles.formActions}>
-              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Device</button>
-              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Profile</button>
+              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Save to device</button>
+              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Save to profile</button>
             </div>
           </form>
         </div>
