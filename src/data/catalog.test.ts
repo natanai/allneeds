@@ -11,6 +11,7 @@ import {
   strategies,
   strategiesBySlug,
 } from './catalog';
+import userStrategies from './userStrategies.json';
 
 function expectUniqueSlugs(entries: Array<{ slug: string }>) {
   expect(new Set(entries.map((entry) => entry.slug)).size).toBe(entries.length);
@@ -21,11 +22,11 @@ describe('production catalog snapshot', () => {
     expect(catalogProvenance.commit).toBe('7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3');
   });
 
-  it('contains every canonical production record with stable unique slugs', () => {
+  it('contains every canonical production record plus curated user strategies with stable unique slugs', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    expect(strategies).toHaveLength(137);
+    expect(strategies).toHaveLength(136 + userStrategies.length);
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
   });
 
