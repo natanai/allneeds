@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
 import { readJournal } from '../journal/journalRepository';
+import { profilePublishableStrategies } from './profileStrategySync';
 
 const OAUTH_CLIENT_MODULE_URL = 'https://esm.sh/@atproto/oauth-client-browser@0.3.36';
 const CLIENT_METADATA_URL = 'https://allneeds.app/oauth-client-metadata.json';
@@ -252,9 +253,7 @@ export async function saveCurrentBrowserToProfile() {
     throw new Error('Unable to save this browser to your profile.');
   }
 
-  const strategies = snapshot.inventory
-    .filter((entry) => entry.visibility === 'public' || entry.visibility === 'followers')
-    .map((entry) => ({ title: entry.title, body: entry.description, needIds: entry.needSlugs, visibility: entry.visibility }));
+  const strategies = profilePublishableStrategies(snapshot.inventory);
   const syncResponse = await fetch(`${BACKEND_API_URL}/strategies/sync`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
