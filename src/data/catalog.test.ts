@@ -26,7 +26,7 @@ describe('production catalog snapshot', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    expect(strategies).toHaveLength(136 - 2 + 5 + userStrategies.length);
+    expect(strategies).toHaveLength(136 - 2 + 9 + userStrategies.length);
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
   });
 
@@ -90,7 +90,56 @@ describe('production catalog snapshot', () => {
     });
   });
 
-  it('keeps Safety to human submissions plus two evidence-backed system strategies', () => {
+  it('ships the approved Support copy, citations, strategies, provenance, and removals', () => {
+    const support = needsBySlug.get('support');
+    expect(support?.summary).toBe(
+      'Across human evolutionary history, survival often depended on sharing food, care, information, labor, and risk rather than meeting every demand alone. This need may draw us to seek help, make our needs visible, notice when others need assistance, and offer or accept emotional, informational, or practical support. Tending to support can distribute burdens, preserve capacity during hardship, and make difficult circumstances more manageable than they would be alone.',
+    );
+    expect(support?.evidence?.sources).toHaveLength(8);
+    expect(support?.strategies).toEqual([
+      { title: 'Call a friend', slug: 'call-a-friend' },
+      { title: 'Call a parent', slug: 'call-a-parent' },
+      { title: 'Map your support', slug: 'map-your-support' },
+      { title: 'Prepare one request for help', slug: 'prepare-one-request-for-help' },
+      { title: 'Call or text 988', slug: 'call-or-text-988' },
+      { title: 'Call 116 123', slug: 'call-116-123' },
+    ]);
+
+    expect(strategiesBySlug.get('call-a-friend')?.provenance).toBe('user');
+    expect(strategiesBySlug.get('call-a-parent')?.provenance).toBe('user');
+
+    expect(strategiesBySlug.get('map-your-support')).toMatchObject({
+      provenance: 'system',
+      evidence: {
+        url: 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535',
+        kind: 'scholarly',
+      },
+    });
+    expect(strategiesBySlug.get('prepare-one-request-for-help')).toMatchObject({
+      provenance: 'system',
+      evidence: {
+        url: 'https://pubmed.ncbi.nlm.nih.gov/36067802/',
+        kind: 'scholarly',
+      },
+    });
+
+    for (const slug of ['call-or-text-988', 'call-116-123']) {
+      expect(strategiesBySlug.get(slug)).toMatchObject({
+        provenance: 'system',
+        evidence: { kind: 'official-resource' },
+        supportedNeeds: expect.arrayContaining([
+          { title: 'Support', slug: 'support' },
+          { title: 'Safety', slug: 'safety' },
+        ]),
+      });
+    }
+
+    for (const slug of ['floor-starfish', 'pillow-nest', 'name-support-options', 'name-one-help-to-ask']) {
+      expect(strategiesBySlug.get(slug)?.supportedNeeds).not.toContainEqual({ title: 'Support', slug: 'support' });
+    }
+  });
+
+  it('keeps Safety to human submissions, two evidence-backed system strategies, and approved support-line resources', () => {
     const safety = needsBySlug.get('safety');
     expect(safety?.strategies).toEqual([
       { title: 'Crunch the numbers', slug: 'crunch-the-numbers' },
@@ -101,6 +150,8 @@ describe('production catalog snapshot', () => {
       { title: 'Watch a comfort show', slug: 'watch-a-comfort-show' },
       { title: '5-4-3-2-1 check', slug: '5-4-3-2-1-check' },
       { title: 'Slow breathing', slug: 'slow-breathing-safety' },
+      { title: 'Call or text 988', slug: 'call-or-text-988' },
+      { title: 'Call 116 123', slug: 'call-116-123' },
       { title: 'Comfy gaming', slug: 'comfy-gaming' },
     ]);
 
