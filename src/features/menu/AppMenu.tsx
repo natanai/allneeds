@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
@@ -12,6 +12,12 @@ import {
 } from '../account/blueskyAccount';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
+import {
+  downloadPersonalStrategiesExport,
+  personalStrategiesEmailHref,
+  PERSONAL_STRATEGIES_EMAIL_ADDRESS,
+  PERSONAL_STRATEGIES_EMAIL_SUBJECT,
+} from '../inventory/personalStrategiesExport';
 import styles from './AppMenu.module.css';
 
 type MenuView = 'root' | 'account-data';
@@ -92,6 +98,7 @@ export function AppMenu({
   const navigate = useNavigate();
   const [view, setView] = useState<MenuView>('root');
   const [status, setStatus] = useState('');
+  const [shareEmailReady, setShareEmailReady] = useState(false);
   const [handle, setHandle] = useState('');
   const [accountBusy, setAccountBusy] = useState(false);
   const session = useBlueskySession();
@@ -102,6 +109,7 @@ export function AppMenu({
     if (!open) {
       setView('root');
       setStatus('');
+      setShareEmailReady(false);
     }
   }, [open]);
 
@@ -125,6 +133,18 @@ export function AppMenu({
   const exportAll = () => {
     downloadBackup();
     setStatus('Backup downloaded.');
+  };
+
+  const shareStrategiesWithNat = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const result = downloadPersonalStrategiesExport(readInventory());
+    if (!result.downloaded) {
+      setShareEmailReady(false);
+      setStatus('No personal strategies found yet. Add one before exporting.');
+      return;
+    }
+    setShareEmailReady(true);
+    setStatus(`Personal strategies exported! Email the downloaded file to ${PERSONAL_STRATEGIES_EMAIL_ADDRESS} with the subject “${PERSONAL_STRATEGIES_EMAIL_SUBJECT}”.`);
   };
 
   const toggleBluesky = async () => {
@@ -262,7 +282,9 @@ export function AppMenu({
                 <h3 id="menu-from-nat">From Nat</h3>
                 <div className={styles.personalCard}>
                   <p>If something you saved feels worth sharing, I’d genuinely love to see it.</p>
-                  <Link to="/inventory#account" onClick={onClose}>Share your strategies with Nat…</Link>
+                  <a href="/inventory" onClick={shareStrategiesWithNat}>Share your strategies with Nat…</a>
+                  {status ? <p className={styles.status} role="status">{status}</p> : null}
+                  {shareEmailReady ? <a href={personalStrategiesEmailHref()}>Start an email for me</a> : null}
                 </div>
               </section>
             </nav>
@@ -270,7 +292,7 @@ export function AppMenu({
         ) : (
           <div className={styles.view}>
             <header className={`${styles.header} ${styles.subheader}`}>
-              <button type="button" className={styles.back} onClick={() => { setView('root'); setStatus(''); }} aria-label="Back to Menu"><span aria-hidden="true">‹</span> Menu</button>
+              <button type="button" className={styles.back} onClick={() => { setView('root'); setStatus(''); setShareEmailReady(false); }} aria-label="Back to Menu"><span aria-hidden="true">‹</span> Menu</button>
               <button type="button" className={styles.close} onClick={onClose} aria-label="Close menu">×</button>
             </header>
 
