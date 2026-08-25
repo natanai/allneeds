@@ -13,6 +13,10 @@ import {
   writeInventory,
   type InventoryVisibility,
 } from '../inventory/inventoryRepository';
+import {
+  normalizeSharedStrategyNeeds,
+  sharedStrategyAuthorName,
+} from './sharedStrategyModel';
 import styles from './FeedPage.module.css';
 
 function formatDate(value?: string) {
@@ -21,20 +25,6 @@ function formatDate(value?: string) {
   return Number.isNaN(date.getTime())
     ? ''
     : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
-}
-
-function normalizeNeeds(strategy: SharedFeedStrategy) {
-  const raw = Array.isArray(strategy.needIds) ? strategy.needIds
-    : Array.isArray(strategy.supportsNeeds) ? strategy.supportsNeeds
-      : Array.isArray(strategy.needs) ? strategy.needs : [];
-  return [...new Set(raw.map((item) => {
-    if (typeof item === 'string') return item.trim();
-    if (item && typeof item === 'object') {
-      const record = item as Record<string, unknown>;
-      return typeof record.title === 'string' ? record.title : typeof record.slug === 'string' ? record.slug : '';
-    }
-    return '';
-  }).filter(Boolean))];
 }
 
 function visibility(value?: InventoryVisibility) {
@@ -88,18 +78,19 @@ export function FeedPage() {
       setStatusOverride('This shared strategy is already saved in your inventory.');
       return;
     }
-    const authorName = strategy.author?.displayName || strategy.author?.handle || strategy.author?.did || '';
+    const authorName = sharedStrategyAuthorName(strategy);
     const entry = createSharedInventoryEntry({
       id: strategyId,
       title: strategy.title || 'Untitled strategy',
       description: strategy.body || '',
-      needSlugs: normalizeNeeds(strategy),
+      needSlugs: normalizeSharedStrategyNeeds(strategy),
       visibility: strategy.visibility,
       contributor: authorName ? { name: authorName } : undefined,
     });
     writeInventory([...current, entry]);
     setSavedIds((values) => new Set(values).add(strategyId.toLocaleLowerCase()));
     setStatusOverride('Saved to your inventory.');
+    if (!session) return;
     try { await notifySharedStrategyAdded(strategyId); }
     catch { setStatusOverride('Saved to your inventory. Shared add count could not be updated.'); }
   }
@@ -123,14 +114,14 @@ export function FeedPage() {
       <section className={styles.feed} aria-label="Shared strategies">
         {feed.strategies.map((strategy) => {
           const author = strategy.author ?? {};
-          const authorLabel = author.displayName || author.handle || author.did || 'Unknown author';
+          const authorLabel = sharedStrategyAuthorName(strategy) || 'Unknown author';
           const handle = author.handle ? `@${author.handle}` : '';
           const timestamp = formatDate(strategy.createdAt);
-          const strategyNeeds = normalizeNeeds(strategy);
+          const strategyNeeds = normalizeSharedStrategyNeeds(strategy);
           const isSaved = savedIds.has(String(strategy.id).toLocaleLowerCase());
           return (
             <article className={styles.card} key={strategy.id}>
-              <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${authorLabel}${handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
+              <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${authorLabel}${handle && authorLabel !== author.handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
               <div className={styles.body}><p>{strategy.body || ''}</p></div>
               <footer><span>{visibility(strategy.visibility)}</span>{strategyNeeds.length ? <details><summary>Needs supported</summary><ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul></details> : null}<button type="button" disabled={isSaved} onClick={() => save(strategy)}>{isSaved ? 'Saved to inventory' : 'Save to inventory'}</button></footer>
             </article>
