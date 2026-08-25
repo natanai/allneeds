@@ -280,6 +280,6 @@ export function createSharedInventoryEntry(input: {
     visibility: visibility(input.visibility),
     ...(contributor ? { contributor } : {}),
     ...(contributor?.name ? { firstName: contributor.name } : {}),
-    ...(contributor?.location ? { location } : {}),
+    ...(contributor?.location ? { location: contributor.location } : {}),
   };
 }
