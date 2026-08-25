@@ -21,6 +21,15 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Avoid oversized decorative buttons for routine utility actions.
 - Use Customizer-owned theme tokens and derived `color-mix()` values rather than introducing independent hard-coded theme colors.
 
+## Magnet physics
+
+**Accepted 2026-08-25.** A magnet being actively held should make nearby resting magnets visibly yield and dodge away as it passes over them, creating a restrained "scurry out from under it" response.
+
+- This is an enhancement to the existing physics, not a replacement: preserve pickup alignment, direct drag tracking, fling/release behavior, collisions, wobble, empty-space pushing, persistence, and Play/rest semantics.
+- Avoidance should begin slightly before hard overlap and become more responsive when the held magnet is moving toward another magnet.
+- Keep the response controlled rather than explosive: nearby magnets may scurry aside, but the held magnet remains attached to the pointer and avoidance must not cascade into a large chain reaction across the board.
+- Resting magnets remain speed-limited while another magnet is lifted so the board still feels viscous and deliberate rather than chaotic.
+
 ## Touch and control sizing
 
 - Important direct touch controls should retain an approximately 44px touch target even when their visible treatment is compact.
@@ -174,6 +183,10 @@ Rules:
 - Feed scope, sort, Bluesky state, Needs-supported details, and save behavior must not be lost during visual cleanup.
 
 ## Decision log
+
+### 2026-08-25
+
+- Held/dragged magnets now make nearby resting magnets visibly dodge away before overlap, with extra responsiveness when the held magnet is moving toward them, while preserving the existing viscous speed cap and all prior magnet interactions.
 
 ### 2026-08-24
 
