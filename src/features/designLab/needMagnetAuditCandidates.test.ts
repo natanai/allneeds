@@ -3,13 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { needMagnetAuditCandidates } from './needMagnetAuditCandidates';
 
 describe('need magnet audit candidates', () => {
-  it('contains only the focused Safety canopy review', () => {
+  it('contains only the focused Safety umbrella review', () => {
     expect(needMagnetAuditCandidates.map(({ id, needSlug, title }) => ({ id, needSlug, title }))).toEqual([
       { id: 'safety-protective-canopy', needSlug: 'safety', title: 'S3a · Protective Canopy' },
-      { id: 'safety-shelter-arc', needSlug: 'safety', title: 'S3b · Shelter Arc' },
+      { id: 'safety-wide-parasol', needSlug: 'safety', title: 'S3b · Wide Parasol' },
       { id: 'safety-layered-cover', needSlug: 'safety', title: 'S3c · Layered Cover' },
-      { id: 'safety-quiet-understory', needSlug: 'safety', title: 'S3d · Quiet Understory' },
-      { id: 'safety-enfolding-field', needSlug: 'safety', title: 'S3e · Enfolding Field' },
+      { id: 'safety-deep-bell', needSlug: 'safety', title: 'S3d · Deep Bell' },
+      { id: 'safety-windward-umbrella', needSlug: 'safety', title: 'S3e · Windward Umbrella' },
+      { id: 'safety-twin-canopy', needSlug: 'safety', title: 'S3f · Twin Canopy' },
     ]);
   });
 
