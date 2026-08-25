@@ -122,8 +122,10 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Device/Profile save actions use compact icon + text controls; do not let routine save controls dominate the card.
 - Strategy-specific supporting evidence is a reference link, not a second paragraph of card content. Present it as a small, subdued, recognizably underlined external-link treatment for people who want the source; keep the full source description available through accessible labeling/title metadata.
 - Previous/next deck navigation uses compact circular arrow controls with the position count between them.
-- In one-at-a-time mode, horizontal swipes on the card deck move to the previous/next strategy while vertical gestures remain normal page scrolling; interactive controls inside a card do not initiate deck swipes.
-- Horizontal intent should be **thumb-forgiving** on touchscreens: lock to deck navigation from a small horizontal signal even when the thumb also travels noticeably up/down. A diagonal gesture with meaningful left/right movement should succeed; only clearly vertical intent should be released to page scrolling. Do not require a near-horizontal line.
+- **Superseded 2026-08-24:** do not arbitrate active-card touches between horizontal deck swiping and vertical page scrolling. In one-at-a-time mode, a single-finger touch that begins on the non-interactive face of the active strategy card belongs to the card for the duration of that gesture; normal vertical page scrolling starts outside the card or in View All.
+- Direct manipulation is the canonical one-at-a-time gesture: the active card must track the pointer horizontally while held, with a small restrained rotation/vertical follow so it feels physically attached to the thumb. Releasing beyond the distance/velocity threshold carries that card off-screen and advances in the drag direction; an incomplete drag springs the same card back into place.
+- Left drag reveals and advances to the **next** strategy. Right drag reveals and returns to the **previous** strategy. The rear-card stacking order must switch with drag direction so the card being revealed is the card the gesture will actually select.
+- Interactive controls inside a strategy card (links, buttons, inputs) remain normal controls and do not initiate card dragging.
 - The focused deck also supports Left/Right Arrow navigation as a non-pointer alternative.
 - Mobile deck height should use stable viewport sizing rather than dynamic viewport height, so Safari browser chrome does not visibly squash or stretch the card while scrolling. Give the deck generous vertical space before its card body becomes internally scrollable.
 - In one-at-a-time mode, keep the deck metaphor visibly legible and legacy-inspired: when enough cards exist, the two rear cards should peek beneath **and slightly to opposite sides** of the active card with small opposing rotations. Create the side peeks inside an inset deck gutter and horizontally clip the stack so the transforms can never widen the page or create horizontal scrolling.
@@ -182,7 +184,7 @@ Rules:
 - Shared strategy feed and Need-detail strategy controls moved toward denser app-like presentation without behavior changes.
 - Shuffle standardized on the existing crossed-arrows icon-only browser control.
 - Strategy view-mode icons standardized to depict the destination card arrangement.
-- Need-detail one-at-a-time strategy decks use thumb-forgiving diagonal-aware horizontal swipe intent while preserving clearly vertical page scrolling and Left/Right Arrow support.
+- Need-detail one-at-a-time strategy decks now use direct manipulation: the active card owns its touch gesture, follows the thumb, springs back when incomplete, and exits to select the next/previous card when completed. Vertical page scrolling is intentionally suppressed for touches that start on the active card face.
 - Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
 - Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
 - Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
