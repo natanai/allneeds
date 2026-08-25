@@ -57,6 +57,8 @@ The Worker supports these Cloudflare environment variables:
 
 `ALLOW_LEGACY_AUTH=1` deliberately preserves the previous security boundary for a short staging window; it is not the intended steady state.
 
+`wrangler.jsonc` sets `keep_vars: true` so repository deployments do not erase dashboard-managed values such as `ALLOW_LEGACY_AUTH` or the future verified `ADMIN_DIDS` allowlist. Those values must still be reviewed in Cloudflare before each deployment.
+
 ## Deployment order
 
 The backend and frontend auth cutover must not be deployed in the wrong order.
