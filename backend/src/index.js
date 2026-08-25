@@ -7,6 +7,22 @@ import {
 
 const APP_ORIGIN = 'https://allneeds.app';
 
+function errorDetails(error) {
+  if (!error || typeof error !== 'object') return { message: String(error) };
+  const cause = error.cause && typeof error.cause === 'object'
+    ? {
+      name: typeof error.cause.name === 'string' ? error.cause.name : undefined,
+      message: typeof error.cause.message === 'string' ? error.cause.message : undefined,
+    }
+    : undefined;
+  return {
+    name: typeof error.name === 'string' ? error.name : undefined,
+    message: typeof error.message === 'string' ? error.message : String(error),
+    stack: typeof error.stack === 'string' ? error.stack : undefined,
+    cause,
+  };
+}
+
 function corsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
   return {
@@ -258,8 +274,9 @@ export default {
       return strategyWorker.fetch(request, env, ctx);
     } catch (error) {
       const errorId = crypto.randomUUID();
-      console.error('verified OAuth route failed', { errorId, error });
+      console.error('verified OAuth route failed', { errorId, error: errorDetails(error) });
       return json(request, { status: 'error', message: 'authentication_failed', errorId }, 500);
     }
   },
 };
+
