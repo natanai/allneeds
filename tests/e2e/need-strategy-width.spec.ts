@@ -12,17 +12,71 @@ async function expectNoHorizontalOverflow(page: Page, context: string) {
   );
 }
 
-test.describe('need strategy deck mobile width containment', () => {
+async function expectVisibleContainedStack(page: Page, context: string) {
+  const geometry = await page.locator('[data-strategy-deck]').evaluate((deck) => {
+    const active = deck.querySelector<HTMLElement>('[data-position="active"]');
+    const next = deck.querySelector<HTMLElement>('[data-position="next"]');
+    const previous = deck.querySelector<HTMLElement>('[data-position="prev"]');
+    const stack = active?.parentElement;
+
+    if (!active || !next || !previous || !stack) return null;
+
+    const rect = (element: Element) => {
+      const bounds = element.getBoundingClientRect();
+      return {
+        top: bounds.top,
+        bottom: bounds.bottom,
+        left: bounds.left,
+        right: bounds.right,
+      };
+    };
+
+    return {
+      active: rect(active),
+      next: rect(next),
+      previous: rect(previous),
+      stack: rect(stack),
+    };
+  });
+
+  expect(geometry, `${context}: three-card stack geometry should exist`).not.toBeNull();
+  if (!geometry) return;
+
+  expect(geometry.next.top, `${context}: second card should visibly sit behind the active card`).toBeGreaterThan(
+    geometry.active.top + 8,
+  );
+  expect(geometry.previous.top, `${context}: third card should be deeper in the stack`).toBeGreaterThan(
+    geometry.next.top + 8,
+  );
+  expect(geometry.next.bottom, `${context}: second card should peek below the active card`).toBeGreaterThan(
+    geometry.active.bottom + 8,
+  );
+  expect(geometry.previous.bottom, `${context}: third card should peek below the second card`).toBeGreaterThan(
+    geometry.next.bottom + 8,
+  );
+
+  for (const [label, card] of [['next', geometry.next], ['previous', geometry.previous]] as const) {
+    expect(card.left, `${context}: ${label} card should stay inside the stack left edge`).toBeGreaterThanOrEqual(
+      geometry.stack.left - 1,
+    );
+    expect(card.right, `${context}: ${label} card should stay inside the stack right edge`).toBeLessThanOrEqual(
+      geometry.stack.right + 1,
+    );
+  }
+}
+
+test.describe('need strategy deck mobile containment and stack cue', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
   });
 
-  test('Safety stays contained while every strategy card becomes active', async ({ page }) => {
+  test('Safety stays contained and visibly stacked while every strategy card becomes active', async ({ page }) => {
     await page.goto('/needs/safety');
 
     const deck = page.locator('[data-strategy-deck]');
     await expect(deck).toBeVisible();
     await expectNoHorizontalOverflow(page, 'Safety initial deck');
+    await expectVisibleContainedStack(page, 'Safety initial deck');
 
     const strategyCount = await deck.locator('article').count();
     const nextButton = page.getByRole('button', { name: 'Next strategy' });
@@ -30,6 +84,7 @@ test.describe('need strategy deck mobile width containment', () => {
     for (let index = 0; index < strategyCount; index += 1) {
       await nextButton.click();
       await expectNoHorizontalOverflow(page, `Safety strategy ${index + 1}`);
+      await expectVisibleContainedStack(page, `Safety strategy ${index + 1}`);
     }
 
     await page.getByRole('button', { name: 'View all' }).click();
