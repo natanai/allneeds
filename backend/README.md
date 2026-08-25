@@ -25,6 +25,19 @@ d199693f-1549-4265-a298-b62ee68a0e3b
 
 Before the first deployment, confirm that this still matches the database ID shown for `allneeds-db` in Cloudflare D1. Do not create a second database.
 
+## Confirmed production-schema preflight
+
+The existing production schema was inspected read-only on 2026-08-25. It matches the migration's legacy assumptions:
+
+- `strategies` has `visibility`, `add_count`, `need_ids`, and `created_at`, but not `client_key`, `updated_at`, or `moderation_status`;
+- `sessions` has the legacy token/session fields, but not `verified_at`;
+- `strategy_needs`, `oauth_states`, and `oauth_sessions` do not exist yet;
+- none of the new index names conflict with an existing production index.
+
+Both migrations were then applied successfully to a local D1 fixture with that exact table/index shape. Existing strategy/session rows were preserved, `updated_at` was backfilled from `created_at`, Need IDs were normalized into `strategy_needs`, malformed legacy Need JSON was skipped safely, and `PRAGMA quick_check` returned `ok`.
+
+Migration `0001_strategy_ownership.sql` contains one-time `ALTER TABLE` statements and must not be applied twice. Check Cloudflare's D1 migration history/current schema before any retry after a partial or uncertain production run.
+
 The Worker supports these Cloudflare environment variables:
 
 - `ADMIN_DIDS`: comma-separated allowlist of **verified** Bluesky DIDs that may hide/restore community strategies. Do not populate it with a handle or a guessed DID. Add an admin DID only after the backend OAuth flow has authenticated that profile and `/api/me` reports `verified: true`.
@@ -36,7 +49,7 @@ The Worker supports these Cloudflare environment variables:
 
 The backend and frontend auth cutover must not be deployed in the wrong order.
 
-1. Back up/inspect the existing `allneeds-db` schema.
+1. Capture the current `allneeds-db` Time Travel bookmark and export the remote database before changing its schema.
 2. Apply `migrations/0001_strategy_ownership.sql`.
 3. Apply `migrations/0002_backend_oauth.sql`.
 4. Verify that the configured D1 database ID still matches the existing `allneeds-db` database.
@@ -95,4 +108,5 @@ New/privileged endpoints include:
 ## Free-tier discipline
 
 The Worker is only the dynamic API layer. Static application assets, bundled system strategies, icons, CSS, and JavaScript remain on GitHub Pages. The frontend warms one public community-strategy snapshot during its existing boot overlay and reuses it in memory; it must still open normally if the Worker is slow or unavailable.
+
 
