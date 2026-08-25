@@ -343,6 +343,7 @@
   position: relative;
   min-width: 0;
   height: clamp(22rem, 70svh, 27rem);
+  margin-bottom: 1.35rem;
   overflow-x: clip;
   overflow-y: visible;
 }
@@ -369,6 +370,7 @@
   opacity: 0;
   pointer-events: none;
   transform: translateX(0) scale(0.97);
+  transform-origin: center top;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
@@ -376,19 +378,19 @@
   z-index: 3;
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(0) rotate(0) scale(1);
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 .stack > .strategyCard[data-position='next'] {
   z-index: 2;
   opacity: 1;
-  transform: translateX(14px) rotate(2deg) scale(0.98);
+  transform: translate3d(0, 14px, 0) scaleX(0.985);
 }
 
 .stack > .strategyCard[data-position='prev'] {
-  z-index: 2;
+  z-index: 1;
   opacity: 1;
-  transform: translateX(-14px) rotate(-2deg) scale(0.98);
+  transform: translate3d(0, 26px, 0) scaleX(0.97);
 }
 
 .strategyCard h3 {
@@ -549,6 +551,7 @@
 .list .stack {
   position: static;
   height: auto;
+  margin-bottom: 0;
   display: grid;
   gap: 0.75rem;
   overflow-x: visible;

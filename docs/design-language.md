@@ -124,6 +124,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - In one-at-a-time mode, horizontal swipes on the card deck move to the previous/next strategy while vertical gestures remain normal page scrolling; interactive controls inside a card do not initiate deck swipes.
 - The focused deck also supports Left/Right Arrow navigation as a non-pointer alternative.
 - Mobile deck height should use stable viewport sizing rather than dynamic viewport height, so Safari browser chrome does not visibly squash or stretch the card while scrolling. Give the deck generous vertical space before its card body becomes internally scrollable.
+- In one-at-a-time mode, keep the deck metaphor visibly legible: when enough cards exist, two rear cards should visibly peek beneath the active card. Rear layers must stay horizontally contained inside the deck; use inward scaling and vertical offsets rather than viewport-expanding side offsets.
 - Shuffle uses the canonical Shuffle control above.
 - View-all/view-one icons follow the destination-arrangement rule above.
 - All existing save, profile, shuffle, view-mode, previous/next, swipe, and keyboard functionality must remain present during visual cleanup.
@@ -182,3 +183,4 @@ Rules:
 - Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
 - Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
 - Personal strategy composers are now local/private first: Bluesky sharing appears only for active sessions, signed-out public-export status moves to advanced overflow, disabled profile-save ghosts disappear, and the composer ellipsis lives at the bottom right.
+- Need-detail one-at-a-time strategy decks keep two visible rear-card layers when available, using vertically offset inward layers that preserve the no-horizontal-overflow invariant.
