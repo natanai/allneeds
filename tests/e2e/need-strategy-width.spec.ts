@@ -83,6 +83,7 @@ test.describe('need strategy deck mobile containment and stack cue', () => {
 
     for (let index = 0; index < strategyCount; index += 1) {
       await nextButton.click();
+      await page.waitForTimeout(220);
       await expectNoHorizontalOverflow(page, `Safety strategy ${index + 1}`);
       await expectVisibleContainedStack(page, `Safety strategy ${index + 1}`);
     }

@@ -156,6 +156,7 @@
 }
 
 .card footer > span,
+.card .editLink,
 .card details summary,
 .card button {
   min-height: 32px;
@@ -169,6 +170,17 @@
   color: var(--text);
   font-size: .65rem;
   font-weight: 720;
+  line-height: 1;
+}
+
+.card .editLink {
+  min-height: 32px;
+  text-decoration: none;
+}
+
+.card .editLink::before {
+  content: '✎';
+  font-size: .82rem;
   line-height: 1;
 }
 

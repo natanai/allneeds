@@ -17,6 +17,7 @@ export type ObservationAppResources = {
 export type SharedFeedStrategy = {
   id: string | number;
   authorDid?: string;
+  clientKey?: string | null;
   title?: string;
   body?: string;
   createdAt?: string;

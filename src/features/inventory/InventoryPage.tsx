@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
 import { needs, needsBySlug } from '../../data/catalog';
@@ -44,8 +44,22 @@ function emptyInventoryDraft(): InventoryDraft {
   };
 }
 
+function editDraftForEntry(entry: InventoryStrategy): NonNullable<InventoryDraft['edit']> {
+  return {
+    id: entry.id,
+    title: entry.title,
+    description: entry.description,
+    selectedNeeds: entry.needSlugs,
+    firstName: entry.firstName ?? entry.contributor?.name ?? '',
+    location: entry.location ?? entry.contributor?.location ?? '',
+    visibility: entry.visibility,
+  };
+}
+
 export function InventoryPage() {
   const session = useBlueskySession();
+  const [searchParams] = useSearchParams();
+  const requestedEditId = searchParams.get('edit')?.trim() ?? '';
   const [initialDraft] = useState(() => readInventoryDraft() ?? emptyInventoryDraft());
   const [inventory, setInventory] = useState<InventoryStrategy[]>(readInventory);
   const [view, setView] = useState<InventoryView>('needs');
@@ -61,6 +75,7 @@ export function InventoryPage() {
   const [shareEmailReadyFor, setShareEmailReadyFor] = useState<string | null>(null);
   const addFormShellRef = useRef<HTMLDetailsElement>(null);
   const openNeedRef = useRef<HTMLElement | null>(null);
+  const handledEditIdRef = useRef('');
   const workflowDraft = useMemo<InventoryDraft>(() => ({
     coverageFilter, expandedNeed, add: addDraft, edit: editDraft,
   }), [addDraft, coverageFilter, editDraft, expandedNeed]);
@@ -113,6 +128,29 @@ export function InventoryPage() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [expandedNeed]);
+
+  useEffect(() => {
+    if (!requestedEditId || handledEditIdRef.current === requestedEditId) return;
+    handledEditIdRef.current = requestedEditId;
+    const entry = inventory.find((candidate) => candidate.id === requestedEditId);
+    if (!entry) {
+      setFeedback({
+        kind: 'warning',
+        message: 'That strategy belongs to your profile but is not on this device yet. Load your profile from Menu → Account & data, then try Edit again.',
+      });
+      return;
+    }
+    setStrategyNeedFilter(null);
+    setStrategySearch('');
+    setExpandedNeed(null);
+    setView('strategies');
+    setEditDraft(editDraftForEntry(entry));
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(`inventory-strategy-${entry.id}`);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
+    });
+  }, [inventory, requestedEditId]);
 
   const commit = (items: InventoryStrategy[], message: string) => {
     setInventory(writeInventory(items));
@@ -458,15 +496,7 @@ export function InventoryPage() {
                                 {shareEmailReadyFor === entry.id ? <a href={personalStrategiesEmailHref()}>Start email to Nat</a> : null}
                               </>
                             ) : null}
-                            <button type="button" onClick={() => setEditDraft({
-                              id: entry.id,
-                              title: entry.title,
-                              description: entry.description,
-                              selectedNeeds: entry.needSlugs,
-                              firstName: entry.firstName ?? entry.contributor?.name ?? '',
-                              location: entry.location ?? entry.contributor?.location ?? '',
-                              visibility: entry.visibility,
-                            })}>Edit</button>
+                            <button type="button" onClick={() => setEditDraft(editDraftForEntry(entry))}>Edit</button>
                             <button type="button" className={styles.destructiveMenuItem} onClick={() => void removeEntry(entry)}>Remove</button>
                           </div>
                         </details>

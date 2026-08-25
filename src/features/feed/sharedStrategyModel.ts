@@ -43,6 +43,10 @@ export function sharedStrategyOwnerDid(strategy: SharedFeedStrategy) {
   return topLevel || nested;
 }
 
+export function sharedStrategyClientKey(strategy: SharedFeedStrategy) {
+  return typeof strategy.clientKey === 'string' ? strategy.clientKey.trim() : '';
+}
+
 export function sharedStrategyAuthorName(strategy: SharedFeedStrategy) {
   return strategy.author?.displayName?.trim()
     || strategy.author?.handle?.trim()

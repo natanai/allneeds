@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 
 import {
   loadSharedFeedResources,
@@ -21,6 +22,8 @@ import {
 import {
   normalizeSharedStrategyNeeds,
   sharedStrategyAuthorName,
+  sharedStrategyClientKey,
+  sharedStrategyOwnerDid,
 } from './sharedStrategyModel';
 import styles from './FeedPage.module.css';
 
@@ -53,7 +56,10 @@ export function FeedPage() {
   const [feed, setFeed] = useState(() => initialFeed('public', 'recent'));
   const [loading, setLoading] = useState(() => !readSharedFeedResources('public', 'recent'));
   const [statusOverride, setStatusOverride] = useState('');
-  const [savedIds, setSavedIds] = useState(() => new Set(readInventory().map((item) => item.strategySlug).filter(Boolean)));
+  const [savedIds, setSavedIds] = useState(() => new Set(readInventory().flatMap((item) => [
+    item.strategySlug,
+    item.personal ? item.id : '',
+  ]).filter(Boolean).map((value) => value.toLocaleLowerCase())));
 
   useEffect(() => {
     let cancelled = false;
@@ -100,8 +106,15 @@ export function FeedPage() {
   async function save(strategy: SharedFeedStrategy) {
     const strategyId = String(strategy.id);
     const current = readInventory();
-    if (inventoryHasStrategy(current, strategyId)) {
+    const clientKey = sharedStrategyClientKey(strategy);
+    const isOwned = Boolean(session && clientKey && sharedStrategyOwnerDid(strategy) === session.did);
+    const hasOwnedEntry = isOwned && current.some((entry) => entry.personal && entry.id === clientKey);
+    if (inventoryHasStrategy(current, strategyId) || hasOwnedEntry) {
       setStatusOverride('This shared strategy is already saved in your inventory.');
+      return;
+    }
+    if (isOwned) {
+      setStatusOverride('This strategy belongs to your profile. Load your profile from Menu → Account & data before editing it.');
       return;
     }
     const authorName = sharedStrategyAuthorName(strategy);
@@ -181,7 +194,10 @@ export function FeedPage() {
           const handle = author.handle ? `@${author.handle}` : '';
           const timestamp = formatDate(strategy.createdAt);
           const strategyNeeds = normalizeSharedStrategyNeeds(strategy);
-          const isSaved = savedIds.has(String(strategy.id).toLocaleLowerCase());
+          const clientKey = sharedStrategyClientKey(strategy);
+          const isOwner = Boolean(session && clientKey && sharedStrategyOwnerDid(strategy) === session.did);
+          const isSaved = savedIds.has(String(strategy.id).toLocaleLowerCase())
+            || Boolean(isOwner && savedIds.has(clientKey.toLocaleLowerCase()));
           return (
             <article className={styles.card} key={strategy.id}>
               <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${authorLabel}${handle && authorLabel !== author.handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
@@ -189,6 +205,11 @@ export function FeedPage() {
               <footer>
                 <span>{reviewHidden ? 'Hidden' : visibility(strategy.visibility)}</span>
                 {strategyNeeds.length ? <details><summary>Needs supported</summary><ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul></details> : null}
+                {isOwner ? (
+                  <Link className={styles.editLink} to={`/inventory?edit=${encodeURIComponent(clientKey)}`}>
+                    Edit
+                  </Link>
+                ) : null}
                 {session?.admin ? (
                   <details className={styles.adminMenu}>
                     <summary aria-label={`Admin actions for ${strategy.title || 'strategy'}`}>⋯</summary>

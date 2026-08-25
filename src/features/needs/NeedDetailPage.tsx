@@ -24,6 +24,7 @@ import {
 } from '../account/blueskyAccount';
 import {
   normalizeSharedStrategyNeeds,
+  sharedStrategyClientKey,
   sharedStrategyContentKey,
   sharedStrategyDeckSlug,
   sharedStrategyOwnerDid,
@@ -272,7 +273,10 @@ export function NeedDetailPage() {
     saveToProfile = false,
   ) => {
     const strategyId = String(shared.id);
-    if (inventoryHasStrategy(inventory, strategyId)) {
+    const clientKey = sharedStrategyClientKey(shared);
+    const isOwned = Boolean(session && clientKey && sharedStrategyOwnerDid(shared) === session.did);
+    const hasOwnedEntry = isOwned && inventory.some((entry) => entry.personal && entry.id === clientKey);
+    if (inventoryHasStrategy(inventory, strategyId) || hasOwnedEntry) {
       setFeedback({ kind: 'success', message: `“${strategy.title}” is already saved on this device.` });
       if (saveToProfile && session) {
         try {
@@ -282,6 +286,13 @@ export function NeedDetailPage() {
           setFeedback({ kind: 'warning', message: `“${strategy.title}” is on this device, but profile sync did not finish.` });
         }
       }
+      return;
+    }
+    if (isOwned) {
+      setFeedback({
+        kind: 'warning',
+        message: `“${strategy.title}” belongs to your profile. Load your profile from Menu → Account & data before editing or saving it here.`,
+      });
       return;
     }
     const entry = createSharedInventoryEntry({
@@ -624,9 +635,11 @@ export function NeedDetailPage() {
                     : index === nextIndex ? 'next'
                       : index === previousIndex ? 'prev' : 'hidden';
                   const shared = sharedByDeckSlug.get(strategy.slug);
-                  const saved = inventoryHasStrategy(inventory, shared ? String(shared.id) : strategy.slug);
                   const contributor = contributorLabel(strategy);
                   const isOwner = Boolean(shared && session && sharedStrategyOwnerDid(shared) === session.did);
+                  const clientKey = shared ? sharedStrategyClientKey(shared) : '';
+                  const saved = inventoryHasStrategy(inventory, shared ? String(shared.id) : strategy.slug)
+                    || Boolean(isOwner && clientKey && inventory.some((entry) => entry.personal && entry.id === clientKey));
                   const cardStyle: CSSProperties | undefined = position === 'active' && !showAll
                     ? { touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }
                     : undefined;
@@ -647,11 +660,6 @@ export function NeedDetailPage() {
                           <span className={styles.meta}>{contributor}</span>
                         </div>
                       ) : null}
-                      {isOwner ? (
-                        <div className={styles.cardActions} aria-label="Strategy ownership">
-                          <Link className={styles.meta} to="/inventory">Edit your strategy in My strategies</Link>
-                        </div>
-                      ) : null}
                       {strategy.provenance === 'system' && strategy.evidence ? (
                         <div className={styles.cardActions} aria-label="Strategy citation">
                           <span className={styles.meta}>
@@ -670,6 +678,13 @@ export function NeedDetailPage() {
                         </div>
                       ) : null}
                       <div className={styles.cardActions}>
+                        {isOwner && clientKey ? (
+                          <Link
+                            className={`${styles.appAction} ${styles.editAction}`}
+                            to={`/inventory?edit=${encodeURIComponent(clientKey)}`}
+                            aria-label={`Edit ${strategy.title}`}
+                          >Edit</Link>
+                        ) : null}
                         <button
                           type="button"
                           className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction} ${saved ? styles.saved : ''}`}

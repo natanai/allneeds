@@ -4,6 +4,7 @@ import type { SharedFeedStrategy } from '../../app/appResources';
 import {
   normalizeSharedStrategyNeeds,
   sharedStrategyAuthorName,
+  sharedStrategyClientKey,
   sharedStrategyDeckSlug,
   sharedStrategyOwnerDid,
   sharedStrategySupportsNeed,
@@ -25,12 +26,14 @@ describe('shared strategy model', () => {
     const strategy: SharedFeedStrategy = {
       id: '99',
       authorDid: 'did:plc:owner',
+      clientKey: 'inv-owned-strategy',
       author: { displayName: 'Person', handle: 'person.example', did: 'did:plc:nested' },
       title: 'Try the familiar thing',
       body: 'Use something familiar when that helps.',
       needIds: ['safety'],
     };
     expect(sharedStrategyOwnerDid(strategy)).toBe('did:plc:owner');
+    expect(sharedStrategyClientKey(strategy)).toBe('inv-owned-strategy');
     expect(sharedStrategyAuthorName(strategy)).toBe('Person');
     expect(sharedStrategyDeckSlug(strategy)).toBe('community-99');
     expect(sharedStrategyToNeedStrategy(strategy)).toMatchObject({

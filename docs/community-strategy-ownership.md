@@ -78,17 +78,13 @@ This gives account owners an editable workflow without treating downloaded commu
 
 ## Identity verification prerequisite
 
-Server-side ownership and moderation are only as trustworthy as the backend session that establishes the DID. The current production backend accepts the DID presented to `/auth/session` and does not yet validate that the presented OAuth credential belongs to that DID before creating the allneeds session.
-
-Before using DID identity for a one-time ownership transfer, privileged moderation, or any other action that cannot be safely reproduced by an ordinary user, the backend must verify the Bluesky OAuth credential against the claimed DID. A React-only DID check, handle check, hidden menu, or hard-coded client value is not an authorization boundary.
-
-Ordinary optional profile sync can continue using the existing contract while this backend hardening is completed, but do not build irreversible ownership migration or admin powers on top of the current session assertion.
+Production now establishes ownership through the backend AT Protocol OAuth flow. The Worker obtains the DID from the verified OAuth result, creates its own verified HttpOnly session, and removes the temporary Bluesky credential. The former `/auth/session` compatibility path is disabled with `ALLOW_LEGACY_AUTH=0`. A React-only DID check, handle check, hidden menu, or hard-coded client value remains insufficient as an authorization boundary.
 
 ## Legacy Nat migration
 
-The legacy production strategy source contains 40 strategies attributed to `Nat, Missouri`. Those are the strategies that should ultimately move from contributor-attributed static catalog records to Nat's account-owned allneeds profile.
+The legacy production strategy source contained 40 strategies attributed to `Nat, Missouri`. On 2026-08-25, those strategies moved to the verified account-owned profile for `did:plc:w23qsgdsux3neuguxfy7kvt5`.
 
-Do not automatically award those strategies to whichever Bluesky user happens to be signed in. The safe migration sequence is:
+The completed safe migration sequence was:
 
 1. add verified backend identity and stable strategy ownership;
 2. identify Nat's profile through that verified server-side identity;
@@ -97,7 +93,7 @@ Do not automatically award those strategies to whichever Bluesky user happens to
 5. only then remove the corresponding static legacy copies so there is one source of truth;
 6. retain a migration mapping/stable remote ID so later title/body edits cannot resurrect the old static card as a duplicate.
 
-This work is tracked in issue #65. The account-free `userStrategies.json` lane is separate and must remain intact; Autumn's contribution, for example, should stay unclaimed unless a verified claim process is deliberately introduced later.
+The stable slug/client-key mapping is retained in `src/data/natProfileStrategyMigration.json`, and the guarded preparation/rehearsal script is `scripts/prepare-nat-profile-migration.mjs`. The repository catalog now excludes those 40 static copies, so profile edits cannot reveal an older variant. The account-free `userStrategies.json` lane remains separate; Autumn's contribution, for example, stays unclaimed unless a verified claim process is deliberately introduced later.
 
 ## Moderation boundary
 
