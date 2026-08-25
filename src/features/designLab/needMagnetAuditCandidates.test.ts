@@ -6,11 +6,11 @@ describe('need magnet audit candidates', () => {
   it('contains only the focused Safety umbrella review', () => {
     expect(needMagnetAuditCandidates.map(({ id, needSlug, title }) => ({ id, needSlug, title }))).toEqual([
       { id: 'safety-protective-canopy', needSlug: 'safety', title: 'S3a · Protective Canopy' },
-      { id: 'safety-wide-parasol', needSlug: 'safety', title: 'S3b · Wide Parasol' },
+      { id: 'safety-diagonal-guardian', needSlug: 'safety', title: 'S3b · Diagonal Guardian' },
       { id: 'safety-layered-cover', needSlug: 'safety', title: 'S3c · Layered Cover' },
-      { id: 'safety-deep-bell', needSlug: 'safety', title: 'S3d · Deep Bell' },
-      { id: 'safety-windward-umbrella', needSlug: 'safety', title: 'S3e · Windward Umbrella' },
-      { id: 'safety-twin-canopy', needSlug: 'safety', title: 'S3f · Twin Canopy' },
+      { id: 'safety-cropped-sweep', needSlug: 'safety', title: 'S3d · Cropped Sweep' },
+      { id: 'safety-side-shield', needSlug: 'safety', title: 'S3e · Side Shield' },
+      { id: 'safety-echo-canopy', needSlug: 'safety', title: 'S3f · Echo Canopy' },
     ]);
   });
 
