@@ -5,10 +5,97 @@ const APP_ORIGIN = 'https://allneeds.app';
 const OAUTH_STATE_TTL_SECONDS = 15 * 60;
 const ALLNEEDS_SESSION_TTL_DAYS = 30;
 
+export async function cloudflareCompatibleFetch(input, init = undefined) {
+  const inputRedirect = input && typeof input === 'object'
+    && typeof input.redirect === 'string'
+    ? input.redirect
+    : undefined;
+  const requestedRedirect = init?.redirect
+    ?? inputRedirect;
+  if (requestedRedirect !== 'error') return fetch(input, init);
+
+  const request = input && typeof input === 'object' && typeof input.url === 'string'
+    ? new Request(input.url, {
+      method: init?.method ?? input.method,
+      headers: init?.headers ?? input.headers,
+      signal: init?.signal ?? input.signal,
+      cache: init?.cache ?? input.cache,
+      redirect: 'manual',
+    })
+    : new Request(input, { ...init, redirect: 'manual' });
+  const response = await fetch(request);
+  if (response.status >= 300 && response.status < 400) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new TypeError('Unexpected redirect while resolving OAuth metadata');
+  }
+  return response;
+}
+
+function didDocumentUrl(did) {
+  if (did.startsWith('did:plc:')) {
+    return new URL(`/${encodeURIComponent(did)}`, 'https://plc.directory');
+  }
+  if (!did.startsWith('did:web:')) throw new Error('Unsupported AT Protocol DID method');
+
+  const segments = did.slice('did:web:'.length).split(':').map((segment) => decodeURIComponent(segment));
+  const hostname = segments.shift()?.toLowerCase() || '';
+  if (!hostname.includes('.')
+    || hostname === 'localhost'
+    || hostname.endsWith('.local')
+    || /^\d+(?:\.\d+){3}$/.test(hostname)
+    || hostname.includes(':')) {
+    throw new Error('Unsafe did:web hostname');
+  }
+  const url = new URL(`https://${hostname}`);
+  url.pathname = segments.length
+    ? `/${segments.map((segment) => encodeURIComponent(segment)).join('/')}/did.json`
+    : '/.well-known/did.json';
+  return url;
+}
+
+export async function resolveBlueskyIdentity(identifier, { signal } = {}) {
+  const handle = normalizeHandle(identifier);
+  if (!handle || !handle.includes('.') || !/^[a-z0-9.-]+$/.test(handle)) {
+    throw new Error('Valid Bluesky handle is required');
+  }
+
+  const resolveUrl = new URL('https://bsky.social/xrpc/com.atproto.identity.resolveHandle');
+  resolveUrl.searchParams.set('handle', handle);
+  const handleResponse = await cloudflareCompatibleFetch(resolveUrl, {
+    headers: { Accept: 'application/json' },
+    redirect: 'manual',
+    signal,
+  });
+  if (!handleResponse.ok) throw new Error('Bluesky handle could not be resolved');
+  const handlePayload = await handleResponse.json();
+  const did = typeof handlePayload?.did === 'string' ? handlePayload.did : '';
+  if (!did.startsWith('did:plc:') && !did.startsWith('did:web:')) {
+    throw new Error('Bluesky returned an invalid DID');
+  }
+
+  const documentResponse = await cloudflareCompatibleFetch(didDocumentUrl(did), {
+    headers: { Accept: 'application/did+ld+json, application/json' },
+    redirect: 'manual',
+    signal,
+  });
+  if (!documentResponse.ok) throw new Error('Bluesky DID document could not be resolved');
+  const didDoc = await documentResponse.json();
+  if (!didDoc || typeof didDoc !== 'object' || didDoc.id !== did) {
+    throw new Error('Bluesky DID document does not match the resolved DID');
+  }
+  const aliases = Array.isArray(didDoc.alsoKnownAs) ? didDoc.alsoKnownAs : [];
+  if (!aliases.some((value) => typeof value === 'string'
+    && value.toLowerCase() === `at://${handle}`)) {
+    throw new Error('Bluesky DID document does not confirm the requested handle');
+  }
+
+  return { did, didDoc, handle };
+}
+
 export const OAUTH_CLIENT_METADATA = {
   client_id: `${BACKEND_ORIGIN}/oauth-client-metadata.json`,
   client_name: 'allneeds.app',
-  client_uri: APP_ORIGIN,
+  client_uri: BACKEND_ORIGIN,
   redirect_uris: [`${BACKEND_ORIGIN}/auth/callback`],
   grant_types: ['authorization_code', 'refresh_token'],
   scope: 'atproto',
@@ -66,9 +153,13 @@ function d1JsonStore(env, table, keyColumn, { expires = false } = {}) {
 function createOAuthClient(env) {
   return new NodeOAuthClient({
     clientMetadata: OAUTH_CLIENT_METADATA,
+    fetch: cloudflareCompatibleFetch,
+    identityResolver: { resolve: resolveBlueskyIdentity },
+    // Supplying this prevents the Node client from eagerly constructing its
+    // unused Node-only DNS/SSRF resolver before honoring identityResolver.
+    handleResolver: 'https://bsky.social',
     stateStore: d1JsonStore(env, 'oauth_states', 'key', { expires: true }),
     sessionStore: d1JsonStore(env, 'oauth_sessions', 'did'),
-    handleResolver: 'https://bsky.social',
   });
 }
 
@@ -159,3 +250,4 @@ export async function finishVerifiedLogin(request, env) {
     profile,
   };
 }
+
