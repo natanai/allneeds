@@ -247,7 +247,7 @@ export default defineConfig({
   test: {
     exclude: [
       'tests/e2e/**',
-      'node_modules/**',
+      '**/node_modules/**',
       'dist/**',
       'legacy-nvc-app/**',
       '.nvc-current-*/**',
@@ -255,3 +255,4 @@ export default defineConfig({
     ],
   },
 });
+

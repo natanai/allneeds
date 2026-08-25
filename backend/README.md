@@ -17,13 +17,13 @@ The frontend continues to deploy independently through `.github/workflows/pages.
 
 ## One-time Cloudflare values
 
-`wrangler.jsonc` intentionally contains:
+`wrangler.jsonc` is configured with the existing `allneeds-db` database ID:
 
 ```text
-REPLACE_WITH_ALLNEEDS_DB_ID
+d199693f-1549-4265-a298-b62ee68a0e3b
 ```
 
-Before the first deployment, replace that placeholder with the database ID shown for `allneeds-db` in Cloudflare D1. Do not create a second database.
+Before the first deployment, confirm that this still matches the database ID shown for `allneeds-db` in Cloudflare D1. Do not create a second database.
 
 The Worker supports these Cloudflare environment variables:
 
@@ -39,10 +39,10 @@ The backend and frontend auth cutover must not be deployed in the wrong order.
 1. Back up/inspect the existing `allneeds-db` schema.
 2. Apply `migrations/0001_strategy_ownership.sql`.
 3. Apply `migrations/0002_backend_oauth.sql`.
-4. Replace the D1 database-id placeholder in `wrangler.jsonc`.
+4. Verify that the configured D1 database ID still matches the existing `allneeds-db` database.
 5. During the backend-first staging window only, set `ALLOW_LEGACY_AUTH=1` so the currently live GitHub Pages frontend keeps working while the replacement login is tested.
-6. Install dependencies from this directory.
-7. Run the Worker dry-run check.
+6. From the repository root, run `pnpm install --frozen-lockfile`.
+7. Run `pnpm --dir backend check` and confirm the dry-run reports `env.DB (allneeds-db)`.
 8. Deploy `allneeds-backend` and verify:
    - `/api/health`
    - `/oauth-client-metadata.json`
@@ -95,3 +95,4 @@ New/privileged endpoints include:
 ## Free-tier discipline
 
 The Worker is only the dynamic API layer. Static application assets, bundled system strategies, icons, CSS, and JavaScript remain on GitHub Pages. The frontend warms one public community-strategy snapshot during its existing boot overlay and reuses it in memory; it must still open normally if the Worker is slow or unavailable.
+
