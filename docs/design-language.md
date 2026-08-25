@@ -142,6 +142,9 @@ Rules:
 - The Add Strategy composer exposes one compact **Privacy** selector using the familiar audience states `Private`, `Followers`, and `Public`; pair it with a small lock/people/globe-style icon rather than paragraph-length helper copy.
 - `Private` is the default. `Followers` is available when Bluesky sharing is available. `Public` is the canonical signal that a personal strategy is eligible for the bulk **Share your strategies with Nat…** export.
 - Do not maintain a separate visible `Share with Nat` eligibility switch beside Privacy. Bulk Nat sharing follows the saved Public/Private state.
+- Keep a roughly 44px **ellipsis action menu** alongside the composer Privacy control. It is an action menu, not another privacy selector.
+- The composer ellipsis includes **Share this strategy with Nat…**. It must use the composer's normal device-save path first so required fields, duplicate handling, persistence, and the selected Privacy state remain canonical; only a strategy that was actually saved may then be exported.
+- Composer one-off sharing downloads a file containing only the newly saved strategy and exposes the pre-addressed email follow-up. It must not change the selected or saved Privacy state.
 - Keep the existing strategy name, description, Needs picker, optional contributor fields, and device/profile save targets.
 - Personal strategy cards show a quiet `Private`, `Followers`, or `Public` status; privacy state should be legible without becoming the visual focus of the card.
 - Secondary and maintenance actions belong behind a roughly 44px ellipsis control on personal strategy cards.
@@ -174,4 +177,4 @@ Rules:
 - Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
 - Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
 - Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
-- Personal strategy privacy now uses one compact Private/Followers/Public audience selector; one-off Nat sharing stays in the saved-card ellipsis and never changes privacy.
+- Personal strategy privacy uses one compact Private/Followers/Public audience selector; both composer and saved-card ellipsis menus provide one-off Nat sharing without mutating privacy.
