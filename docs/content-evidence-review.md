@@ -67,6 +67,20 @@ Strategies are reviewed alongside each need, but they are a distinct evidence la
 - **Do not restrict Connection strategies to interpersonal contact.** Depending on the need, useful routes may involve another person, oneself, memory, writing, environment, place, activity, ritual, or other forms of contact and orientation.
 - No system-strategy addition, removal, rewrite, rename, or need-association change enters production until the user approves the exact strategy package and its evidence.
 
+### Strategy card provenance and citation display
+
+Strategy cards should make the source of their authority legible without treating lived experience and scholarly evidence as the same thing.
+
+- **Never ask users to provide citations when they submit a strategy.** User-submitted strategies are personal or experiential contributions. The submission flow should not contain a citation field, research requirement, or suggestion that a user's contribution needs academic validation.
+- **A user-submitted card should use its human contributor as its provenance.** Preserve the contributor name/location presentation when the contributor chose to provide it.
+- **A system-authored strategy should, by default, have exactly one scholarly citation.** Choose the single source that most directly supports the core behavioral or therapeutic mechanism. The card should not become a miniature bibliography.
+- The system citation must use a **human-clickable, human-verifiable scholarly URL** under the same standards used elsewhere in this document.
+- The preferred card presentation is parallel rather than additive: where a human-authored card shows its contributor, a system-authored card should usually show a concise clickable research attribution such as `Evidence: Author et al., year` or equivalent. Do not present the paper's authors as though they authored the strategy itself.
+- One citation is intended to make the strategy auditable and answer “why is this here?” It does not imply that the exact wording of the card was directly tested or that the action guarantees an outcome. The source may support the underlying mechanism or an evidence-informed clinical translation.
+- If no defensible single scholarly source can be identified, reconsider whether the system strategy has earned its place. A review or meta-analysis may be the best single source when the strategy is based on a broader intervention principle. Uncited system strategies should be rare and explicitly justified during review.
+- Provenance should ultimately be explicit in the data model rather than inferred only from whether `contributor` happens to be blank. This prevents future imported, migrated, or incomplete records from being misclassified.
+- **Current implementation gap:** the React `Strategy` model currently has an optional `contributor` but no strategy-level evidence/source field, and the need-page strategy card renders only contributor metadata. Do not change that production model or UI until the relevant content package and implementation scope are explicitly approved.
+
 ## Therapeutic strategy design method
 
 When auditing or proposing system-authored strategies, imagine a therapeutic situation. A client and psychologist have identified a need as currently important. Ask: **what small, concrete experiment might a thoughtful clinician reasonably propose next?** The strategy card should be able to stand on its own as that experiment.
@@ -231,6 +245,7 @@ The following evidence was discussed for the four preferred Connection strategy 
 | 2026-08-24 | Connection citations | Six working sources have user-verified URLs | **No** | Citation set remains provisional until complete-package approval. |
 | 2026-08-24 | Strategy review | Provenance and evidence audit added | **No** | User-submitted strategies immutable; system strategies must earn their place. |
 | 2026-08-24 | Therapeutic strategy method | Strategy-generation method clarified and Connection candidate directions accepted | **No** | Future agents should propose small, specific therapeutic experiments, avoid prerequisites and dependence on others, and deliberately consider multiple pathways including self/environment. Connection strategy evidence still requires manual URL verification. |
+| 2026-08-24 | Strategy citation provenance | System strategy citation display direction established | **No** | User strategies must never require citations. System-authored cards should usually carry exactly one human-clickable scholarly citation in the provenance area where a human contributor would otherwise appear. Current React strategy model/UI does not yet support this and must not be changed before package approval. |
 
 ## Handoff for the next agent
 
@@ -242,16 +257,16 @@ The following evidence was discussed for the four preferred Connection strategy 
 6. Avoid em dashes in proposed site copy.
 7. Prefer concise, exact quotations from authoritative sources when they strengthen transparency and reader confidence.
 8. Integrate citations into the Details narrative so their relevance is self-evident.
-9. Audit strategy provenance first. Never alter user-submitted strategies.
+9. Audit strategy provenance first. Never alter user-submitted strategies and never ask users to supply citations.
 10. For system strategies, use the therapeutic strategy design method above. Favor concrete, low-friction experiments with clear steps, few assumptions, minimal dependence on others, and distinct pathways to the need.
-11. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`.
-12. After the user approves the final citation set, all human-reachable URLs, short copy, expanded Details, exact strategy package, and implementation scope, make the production change through the repository's normal branch/PR workflow and append an approval ledger entry here.
+11. For each system-authored strategy, normally select one best human-verifiable scholarly source supporting its core mechanism and plan to surface it as clickable evidence/provenance rather than as a human author.
+12. Before any production content edit, identify the canonical authoring source that generates `src/data/generated/legacyData.json`.
+13. After the user approves the final citation set, all human-reachable URLs, short copy, expanded Details, exact strategy package, strategy evidence, citation display implementation scope, and other implementation scope, make the production change through the repository's normal branch/PR workflow and append an approval ledger entry here.
 
 ## Open questions
 
 - What file/process is the canonical authoring source for the generated legacy catalog?
-- What citation presentation should users see in the UI versus what should remain structured metadata?
-- How should evidence metadata for system-authored strategies be stored and surfaced without implying guaranteed outcomes?
+- What exact field names and rendering component should implement the one-source system-strategy provenance model once production changes are approved?
 - Which strategy evidence URLs for the current Connection candidates will the user manually verify and approve?
 
 Keep this document cumulative but concise enough that a future agent can recover the editorial state without needing the original conversation.
