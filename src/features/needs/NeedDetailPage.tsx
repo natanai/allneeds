@@ -251,8 +251,9 @@ export function NeedDetailPage() {
     const gesture = deckGestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId) return;
 
-    releaseDeckCapture(event, gesture.pointerId);
     deckGestureRef.current = null;
+    deckSettlingRef.current = true;
+    releaseDeckCapture(event, gesture.pointerId);
     gesture.previousCard?.style.removeProperty('z-index');
     gesture.nextCard?.style.removeProperty('z-index');
     gesture.card.removeAttribute('data-dragging');
@@ -263,6 +264,7 @@ export function NeedDetailPage() {
 
     deckTimerRef.current = window.setTimeout(() => {
       clearDeckCardMotion(gesture);
+      deckSettlingRef.current = false;
       deckTimerRef.current = null;
     }, DECK_SPRING_MS + 24);
   };
@@ -358,9 +360,9 @@ export function NeedDetailPage() {
     const exitDistance = Math.max(event.currentTarget.clientWidth, width) * 1.12 * exitDirection;
     const verticalFollow = Math.max(-22, Math.min(22, dy * 0.16));
 
-    releaseDeckCapture(event, gesture.pointerId);
     deckGestureRef.current = null;
     deckSettlingRef.current = true;
+    releaseDeckCapture(event, gesture.pointerId);
     gesture.card.removeAttribute('data-dragging');
     gesture.card.setAttribute('data-settling', 'true');
     gesture.card.style.transition = `transform ${DECK_EXIT_MS}ms cubic-bezier(.2,.72,.22,1), opacity ${DECK_EXIT_MS}ms ease`;
