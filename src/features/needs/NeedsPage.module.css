@@ -88,6 +88,31 @@
   position: relative;
 }
 
+/* Approved Need identity: Connection · Constellation.
+   This is presentation-only and leaves the shared magnet geometry/physics untouched. */
+.boardWrapper :global([data-magnet-id='needs-connection']) {
+  background: color-mix(in srgb, var(--selection) 84%, var(--quiet) 16%);
+}
+
+.boardWrapper :global([data-magnet-id='needs-connection'])::before {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(135deg, var(--positive), var(--primary));
+}
+
+.boardWrapper :global([data-magnet-id='needs-connection'])::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, var(--positive), var(--primary));
+  opacity: 0.9;
+  mask: url('/icons/needs/art/connection-constellation.svg') left center / 100% 100% no-repeat;
+  -webkit-mask: url('/icons/needs/art/connection-constellation.svg') left center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
 .empty {
   margin: 0;
   padding: 1rem;

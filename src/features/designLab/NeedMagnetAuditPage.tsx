@@ -77,10 +77,9 @@ function CandidateCard({ candidate }: { candidate: NeedMagnetAuditCandidate }) {
 }
 
 export function NeedMagnetAuditPage() {
-  const groups = [
-    ['connection', 'Connection'],
-    ['support', 'Support'],
-  ] as const;
+  const groups = [...new Map(
+    needMagnetAuditCandidates.map((candidate) => [candidate.needSlug, candidate.needTitle] as const),
+  )];
 
   return (
     <section className={styles.page} aria-labelledby="need-magnet-audit-title">
@@ -88,9 +87,9 @@ export function NeedMagnetAuditPage() {
         <p className={styles.eyebrow}>Design Lab</p>
         <h1 id="need-magnet-audit-title">Need magnet audit</h1>
         <p>
-          The enlarged and actual-size previews inherit the real site Customizer directly.
-          Open the Customizer to change palette roles or corner roundness. Preset rows remain
-          fixed comparisons. Nothing here changes the public Needs board until separately approved.
+          Active candidates inherit the real site Customizer directly. Open the Customizer to test
+          palette roles and corner roundness; preset rows remain fixed comparisons. Approved designs
+          are promoted out of this lab instead of remaining as review clutter.
         </p>
       </header>
 
