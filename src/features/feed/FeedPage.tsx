@@ -13,7 +13,11 @@ import {
   writeInventory,
   type InventoryVisibility,
 } from '../inventory/inventoryRepository';
-import { hideSharedStrategy } from './sharedStrategyModeration';
+import {
+  hideSharedStrategy,
+  loadHiddenSharedStrategies,
+  restoreSharedStrategy,
+} from './sharedStrategyModeration';
 import {
   normalizeSharedStrategyNeeds,
   sharedStrategyAuthorName,
@@ -45,6 +49,7 @@ export function FeedPage() {
   const session = useBlueskySession();
   const [scope, setScope] = useState('public');
   const [sort, setSort] = useState('recent');
+  const [reviewHidden, setReviewHidden] = useState(false);
   const [feed, setFeed] = useState(() => initialFeed('public', 'recent'));
   const [loading, setLoading] = useState(() => !readSharedFeedResources('public', 'recent'));
   const [statusOverride, setStatusOverride] = useState('');
@@ -52,6 +57,26 @@ export function FeedPage() {
 
   useEffect(() => {
     let cancelled = false;
+    setStatusOverride('');
+
+    if (reviewHidden) {
+      if (!session?.admin) {
+        setReviewHidden(false);
+        return () => { cancelled = true; };
+      }
+      setLoading(true);
+      void loadHiddenSharedStrategies().then((strategies) => {
+        if (cancelled) return;
+        setFeed({ strategies, error: '' });
+        setLoading(false);
+      }).catch((error: unknown) => {
+        if (cancelled) return;
+        setFeed({ strategies: [], error: error instanceof Error ? error.message : 'Unable to load hidden community strategies.' });
+        setLoading(false);
+      });
+      return () => { cancelled = true; };
+    }
+
     const cached = readSharedFeedResources(scope, sort);
     if (cached) {
       setFeed(cached);
@@ -59,18 +84,18 @@ export function FeedPage() {
     } else {
       setLoading(true);
     }
-    setStatusOverride('');
     void loadSharedFeedResources(scope, sort).then((next) => {
       if (cancelled) return;
       setFeed(next);
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [scope, sort]);
+  }, [reviewHidden, scope, session?.admin, sort]);
 
   useEffect(() => {
     if (!session && scope === 'follows') setScope('public');
-  }, [scope, session]);
+    if (!session?.admin && reviewHidden) setReviewHidden(false);
+  }, [reviewHidden, scope, session]);
 
   async function save(strategy: SharedFeedStrategy) {
     const strategyId = String(strategy.id);
@@ -110,23 +135,46 @@ export function FeedPage() {
     }
   }
 
+  async function restore(strategy: SharedFeedStrategy) {
+    const title = strategy.title || 'this strategy';
+    setStatusOverride(`Restoring “${title}”…`);
+    try {
+      await restoreSharedStrategy(strategy.id);
+      const strategies = await loadHiddenSharedStrategies();
+      setFeed({ strategies, error: '' });
+      setStatusOverride(`“${title}” is available to the community again according to its sharing setting.`);
+    } catch (error) {
+      setStatusOverride(error instanceof Error ? error.message : 'Unable to restore this strategy to the community.');
+    }
+  }
+
+  const emptyMessage = reviewHidden
+    ? 'No strategies are currently hidden by moderation.'
+    : 'No shared strategies found for this view yet.';
   const status = statusOverride
-    || (loading ? 'Loading…' : feed.error || (!feed.strategies.length ? 'No shared strategies found for this view yet.' : ''));
+    || (loading ? 'Loading…' : feed.error || (!feed.strategies.length ? emptyMessage : ''));
 
   return (
     <div className={styles.page}>
       <header className={styles.header}><h1>Shared strategies</h1></header>
 
       <section className={styles.controls} aria-label="Shared strategy filters">
-        <div className={styles.controlRow}>
-          <label><span>Show</span><select value={scope} onChange={(event) => setScope(event.target.value)}><option value="follows" disabled={!session}>From people you follow</option><option value="public">All public strategies</option></select></label>
-          <label><span>Sort by</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recent">Most recent</option><option value="popular">Most added</option></select></label>
-        </div>
+        {!reviewHidden ? (
+          <div className={styles.controlRow}>
+            <label><span>Show</span><select value={scope} onChange={(event) => setScope(event.target.value)}><option value="follows" disabled={!session}>From people you follow</option><option value="public">All public strategies</option></select></label>
+            <label><span>Sort by</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recent">Most recent</option><option value="popular">Most added</option></select></label>
+          </div>
+        ) : <p className={styles.adminReviewLabel}>Admin review · hidden from community</p>}
+        {session?.admin ? (
+          <button className={styles.adminReviewButton} type="button" onClick={() => setReviewHidden((current) => !current)}>
+            {reviewHidden ? 'Back to community feed' : 'Review hidden strategies'}
+          </button>
+        ) : null}
         {status ? <p className={styles.status} role="status">{status}</p> : null}
-        <p className={styles.authHint}>{session ? `Following feed available${session.handle ? ` for @${session.handle.replace(/^@/, '')}` : ''}.` : 'Following requires Bluesky sign-in in Menu → Account & data.'}</p>
+        {!reviewHidden ? <p className={styles.authHint}>{session ? `Following feed available${session.handle ? ` for @${session.handle.replace(/^@/, '')}` : ''}.` : 'Following requires Bluesky sign-in in Menu → Account & data.'}</p> : null}
       </section>
 
-      <section className={styles.feed} aria-label="Shared strategies">
+      <section className={styles.feed} aria-label={reviewHidden ? 'Hidden community strategies' : 'Shared strategies'}>
         {feed.strategies.map((strategy) => {
           const author = strategy.author ?? {};
           const authorLabel = sharedStrategyAuthorName(strategy) || 'Unknown author';
@@ -139,17 +187,19 @@ export function FeedPage() {
               <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${authorLabel}${handle && authorLabel !== author.handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
               <div className={styles.body}><p>{strategy.body || ''}</p></div>
               <footer>
-                <span>{visibility(strategy.visibility)}</span>
+                <span>{reviewHidden ? 'Hidden' : visibility(strategy.visibility)}</span>
                 {strategyNeeds.length ? <details><summary>Needs supported</summary><ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul></details> : null}
                 {session?.admin ? (
                   <details className={styles.adminMenu}>
                     <summary aria-label={`Admin actions for ${strategy.title || 'strategy'}`}>⋯</summary>
                     <div className={styles.adminMenuPopover}>
-                      <button type="button" onClick={() => void hide(strategy)}>Hide from community</button>
+                      <button type="button" onClick={() => void (reviewHidden ? restore(strategy) : hide(strategy))}>
+                        {reviewHidden ? 'Restore to community' : 'Hide from community'}
+                      </button>
                     </div>
                   </details>
                 ) : null}
-                <button type="button" disabled={isSaved} onClick={() => save(strategy)}>{isSaved ? 'Saved to inventory' : 'Save to inventory'}</button>
+                {!reviewHidden ? <button type="button" disabled={isSaved} onClick={() => save(strategy)}>{isSaved ? 'Saved to inventory' : 'Save to inventory'}</button> : null}
               </footer>
             </article>
           );
