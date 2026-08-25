@@ -21,6 +21,7 @@ A central editorial goal is to help readers understand why a need-related motiva
 7. Do not change production research-facing content until the user explicitly approves the complete package.
 8. After approval, update this review record, implement through the normal branch/PR workflow, and verify repository checks/deployment.
 9. After a need's content package is approved, separately reconsider that need magnet's visual identity. Content approval does not authorize visual changes.
+10. A need is only marked **fully audited** once both the approved content package and an approved redesigned production magnet are live. The redesigned magnet is the site's visual cue that the need has completed the audit process.
 
 ### Complete-package approval gate
 
@@ -50,9 +51,7 @@ Evolutionary framing is part of the reasoning process, not a decorative paragrap
 7. **Use restrained evolutionary language.** Prefer phrases such as “Across human evolutionary history…”, “Evolutionary accounts propose…”, “Anthropological evidence suggests…”, or “One hypothesis is…”. Avoid “hard-wired,” “innate,” “universal,” or “evolved for” without unusually strong evidence.
 8. **Let the scholarship carry the reassurance.** Do not write “you should not suppress this need.” Show why the motivation is intelligible and potentially functional.
 
-Support is the current clearest model for this sequence: human interdependence and risk/resource sharing first, then modern evidence on types of support, stress buffering, perceived versus received support, and outcomes.
-
-Safety should use the same logic in its later full audit: threat detection, avoidance, protection, and survival consequences first, then modern threat-response and safety scholarship.
+Support and Safety are the current clearest models for this sequence. Support begins with human interdependence and risk/resource sharing, then moves into modern social-support research. Safety begins with the recurrent survival problem of danger, then moves into threat imminence, learned safety, fear generalization, and the distinction between defensive systems and conscious fear.
 
 ## Editorial style rules
 
@@ -79,8 +78,10 @@ The public citation area should be simple and human-verifiable.
 ## Strategy audit rules
 
 - Establish provenance before changing any strategy.
-- Never rewrite, rename, delete, remap, or “clean up” a genuine user-submitted strategy.
+- Never rewrite, rename, delete, or “clean up” a genuine user-submitted strategy.
+- A user's wording and authorship are protected. Need associations may be reconsidered during an audit only when the user authorizes that review.
 - User strategies do not need academic citations.
+- If a contributor selected only one need for a submission, preserve that association unless the contributor or user explicitly approves changing it. This rule preserved Autumn's `comfy-gaming` association with Safety.
 - System strategies must earn their place. Do not retain filler merely to create a larger deck.
 - Prefer concrete, low-friction actions that can be attempted in ordinary life.
 - A system strategy should have a direct, intelligible pathway to the need being audited.
@@ -112,7 +113,9 @@ An official support resource can itself be a useful saveable strategy when the i
 
 ## Need magnet visual review after content approval
 
-Each completed need audit should be followed by a separate visual review of that need's magnet.
+Each approved content audit must be followed by a visual review of that need's magnet. The redesigned production magnet is the visible cue that the Need has completed its full audit.
+
+Use `/design-lab/need-magnets` as the review surface. Future agents should put previews into the live Design Lab rather than handing the user standalone HTML when repository access is available.
 
 The problem: need magnets can become a visually same-y flood of words even when each has a small icon. Future reviews should ask whether the concept suggests a more meaningful visual identity while preserving the shared magnet language and Customizer behavior.
 
@@ -120,11 +123,12 @@ Directions worth considering:
 
 - transparent SVG artwork analogous to Feeling magnets;
 - more thoughtful need-specific iconography;
-- restrained coloration/internal design variation driven by Customizer variables rather than hard-coded per-need colors;
+- full-face artwork that can visually grow from or replace the left icon while preserving production spacing when useful;
+- restrained coloration/internal design variation driven by functional Customizer roles rather than hard-coded per-need colors;
 - visual motifs that improve recognition without turning every need into a wholly different component;
-- preserved text legibility, accessibility, responsive sizing, play-state physics, and Customizer presets.
+- preserved text legibility, accessibility, responsive sizing, play-state physics, square-corner behavior, and every Customizer preset.
 
-Do not generate or ship need-magnet art during the content audit itself. The next planned visual review is **Connection and Support**.
+Do not ship need-magnet art as part of content approval. Content must be implemented first, then visual candidates are reviewed separately. Safety is the next planned magnet review.
 
 ## Evidence standard
 
@@ -151,7 +155,7 @@ Remember:
 
 ## Connection
 
-**Status:** approved and implemented 2026-08-24. Do not revise without a new review cycle.
+**Status:** fully audited. Content implemented 2026-08-24; approved Constellation magnet promoted in the later visual pass. Do not revise without a new review cycle.
 
 Approved short copy:
 
@@ -172,7 +176,7 @@ Approved strategies: three protected human submissions (`call-a-friend`, `play-a
 
 ## Support
 
-**Status:** explicitly approved by the user on 2026-08-25 and authorized for production implementation.
+**Status:** fully audited. Content approved and implemented 2026-08-25; approved `S1B2 · Soft Terraces` magnet promoted to production 2026-08-25.
 
 Approved short copy:
 
@@ -225,9 +229,69 @@ Remove the Support association only from `floor-starfish`, `pillow-nest`, `name-
 
 ## Safety
 
-**Status:** strategy pruning is interim; full short/long description and need-level citation audit remain unfinished.
+**Status:** complete content package explicitly approved 2026-08-25 and authorized for production implementation. Magnet visual review remains pending, so Safety is not yet marked fully audited.
 
-Current curated Safety strategy direction includes protected human submissions, `5-4-3-2-1-check`, `slow-breathing-safety`, and the approved 988/116 123 official-resource cards. Do not treat Safety copy as finalized until its full evolutionary/therapeutic audit is approved.
+Approved short copy:
+
+> Across evolutionary history, detecting and responding to danger had direct consequences for survival. Humans retain flexible defensive systems that shift behavior as threats become more likely or immediate. This need may draw us to create distance from danger, seek shelter or trustworthy people, set boundaries, reduce exposure to harm, and look for cues that tell us when it is safe enough to stand down. Tending to safety can help us protect ourselves and others when danger is present while making room for rest, exploration, connection, and other goals when it is not.
+
+Approved expanded copy:
+
+> Evolutionary accounts place protection from danger among the oldest problems living systems have had to solve. LeDoux argues that what humans share with other animals is not necessarily one inherited conscious “fear system,” but ancient defensive survival functions that detect threats and organize protective behavior. Mobbs and colleagues similarly propose that human defense includes prediction, prevention, threat assessment, searching for safety, and rapid responses when danger becomes imminent. These frameworks help explain why protective motivation can carry such urgency. They do not establish that every modern feeling of unsafety accurately identifies a present danger. [1][2]
+>
+> Defense is also not one fixed reaction. In a human experiment using an approaching virtual predator, Mobbs and colleagues found that patterns of neural activity shifted as the threat became more imminent. Threat-imminence accounts likewise distinguish responses to uncertain or potential danger from responses when a threat has been detected or is approaching contact. From this perspective, scanning, pausing, withdrawing, escaping, seeking protection, or rapidly reacting can all be intelligible parts of a system attempting to match behavior to perceived circumstances. This does not mean that every defensive impulse is accurate or that any particular reaction is necessarily the safest action to take. [3][6]
+>
+> Safety can be learned too. Christianson and colleagues describe safety signals as cues that “predict the nonoccurrence of an aversive event” and review evidence from rodents, nonhuman primates, and humans showing that learned safety cues can inhibit fear and stress responses. This matters because tending to Safety is not only about getting away from danger. It can also involve taking in credible information that danger has ended, is farther away, or is not present in the current situation. [4]
+>
+> Protective learning can also generalize beyond the circumstances in which danger was originally encountered. Cooper and colleagues' meta-analysis of 16 studies found greater conditioned fear generalization in people with anxiety-related disorders than in comparison groups. The authors emphasize that generalization can be adaptive when similar situations really do share danger, but costly when defensive responding spreads too broadly to innocuous cues. An alarm therefore deserves attention without having to be treated as proof. A therapeutic approach can make room for protective motivation while remaining curious about what the present environment says about both threat and safety. [5]
+>
+> LeDoux also cautions against treating the mechanisms that detect and respond to threats as identical to the conscious feeling of fear. This distinction keeps Safety from collapsing into Calm. A person can feel activated while taking sensible protective action, and feeling calm does not by itself establish that a situation is safe. Taken together, these literatures support a balanced picture: protective motivation is deeply tied to survival, effective defense changes with context, and recognizing genuine safety is part of the protective system rather than its opposite. Tending to Safety therefore need not mean suppressing alarm or obeying it automatically. It can mean making room for protective signals, reducing actual danger where possible, and updating as circumstances provide new information. [1][4][5]
+
+Approved need-level sources:
+
+1. _As soon as there was life, there was danger: the deep history of survival behaviours and the shallower history of consciousness._ https://pubmed.ncbi.nlm.nih.gov/34957848/
+2. _The ecology of human fear: survival optimization and the nervous system._ https://pubmed.ncbi.nlm.nih.gov/25852451/
+3. _When fear is near: threat imminence elicits prefrontal-periaqueductal gray shifts in humans._ https://pubmed.ncbi.nlm.nih.gov/17717184/
+4. _Inhibition of Fear by Learned Safety Signals: A Mini-Symposium Review._ https://pubmed.ncbi.nlm.nih.gov/23055481/
+5. _A meta-analysis of conditioned fear generalization in anxiety-related disorders._ https://pubmed.ncbi.nlm.nih.gov/35501429/
+6. _Negative valence systems: sustained threat and the predatory imminence continuum._ https://pubmed.ncbi.nlm.nih.gov/36286244/
+
+Internal source-role notes for future reviewers:
+
+- [1] LeDoux: strongest evolutionary framing. Ancient defensive survival functions are not equivalent to a single inherited conscious fear system. This is an evolutionary/theoretical synthesis, not proof that the site's Safety construct is one discrete adaptation.
+- [2] Mobbs et al.: functional sequence including prediction, prevention, assessment, searching for safety, escape, and rapid defense. Treat the proposed Survival Optimization System as a theoretical synthesis rather than settled neural fact.
+- [3] Mobbs et al. 2007: human experimental evidence that defensive neural processing changes with threat imminence. Laboratory threat paradigms should not be generalized into a claim that every ordinary-life danger response follows the exact same sequence.
+- [4] Christianson et al.: key evidence that cues predicting nonoccurrence of harm can inhibit defensive responding. Experimental safety learning is narrower than every subjective experience of feeling safe.
+- [5] Cooper et al.: meta-analytic evidence that conditioned fear can generalize more broadly in anxiety-related disorders. This supports curiosity and discrimination, not dismissing an individual's current alarm as inaccurate.
+- [6] Fanselow: modern predatory-imminence review distinguishing potential from acute threat. Much of the framework builds on nonhuman defensive-behavior research, so public copy stays at the level of context-sensitive defensive function.
+
+Approved Safety strategy set:
+
+1. `stare-off` — protected Nat submission, unchanged; Safety retained.
+2. `self-holding` — protected Nat submission, unchanged; Safety retained.
+3. `snuggle-a-pet` — protected Nat submission, unchanged; Safety retained.
+4. `watch-a-comfort-show` — protected Nat submission, unchanged; Safety retained.
+5. `comfy-gaming` — protected Autumn submission, unchanged. Safety retained because it is the only need Autumn selected for the submission.
+6. `5-4-3-2-1-check` — system. Supporting source: https://www.sciencedirect.com/science/article/pii/S1557308725002999
+7. `slow-breathing-safety` — system. Supporting source: https://pubmed.ncbi.nlm.nih.gov/38137060/
+8. `call-or-text-988` — system official resource. Support + Safety. Supporting source: https://988lifeline.org/
+9. `call-116-123` — system official resource. Support + Safety. Supporting source: https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm
+
+Approved Safety association removals only:
+
+- `crunch-the-numbers`: remove Safety only; preserve strategy wording/authorship and its other need associations.
+- `road-trip`: remove Safety only; preserve strategy wording/authorship and its other need associations.
+- Existing interim Safety removals remain in force: `back-to-wall-lean`, `butterfly-taps`, `hand-on-heart-breaths`, `floor-starfish`, `feel-your-feet`, `wrap-in-a-blanket`, `name-support-options`, `exit-count`, and `seat-press`.
+
+No new Safety strategy is added merely to enlarge the deck.
+
+Editorial distinctions used in this audit:
+
+- **Safety:** danger, harm, protection, defensive responding, and credible cues that danger is absent or has ended.
+- **Security:** longer-term stability, resources, continuity, dependable protection, and reduced vulnerability to future disruption.
+- **Calm / Peace:** experiential or arousal states. Someone can be safe without feeling calm, or calm without objectively being safe.
+- **Trust:** expectations about the reliability or intentions of people and relationships.
+- **Control:** capacity to influence circumstances or outcomes.
 
 # Approval ledger
 
@@ -236,11 +300,11 @@ Current curated Safety strategy direction includes protected human submissions, 
 | 2026-08-24 | Connection | Complete content/evidence/strategy package approved | Implemented |
 | 2026-08-24 | Strategy discard semantics | Global discard means deletion; need-specific rejection means association removal | Implemented |
 | 2026-08-25 | Authoring method | Evolutionary function first, therapeutic meaning second | Standing rule |
-| 2026-08-25 | Need magnet review | Reconsider magnet identity after each content audit; Connection and Support next | Pending visual review |
+| 2026-08-25 | Need magnet review | A need is only fully audited after approved content and approved production magnet; magnet is the visual completion cue | Standing rule |
 | 2026-08-25 | Citation display | Public need citations show citation/title + raw URL only; internal role/limitations stay in audit docs | Standing rule |
 | 2026-08-25 | Strategy source display | System cards visibly use `Supporting source ↗`; user cards show human provenance | Implemented UI rule |
-| 2026-08-25 | Support | Complete short/long copy, eight citations, six strategies, source provenance, removals, and Support/Safety hotline mappings explicitly approved | Authorized for implementation |
-| 2026-08-25 | Safety | Interim strategy curation only | Full audit pending |
+| 2026-08-25 | Support | Complete content/evidence/strategy package and S1B2 Soft Terraces magnet approved | Fully audited and implemented |
+| 2026-08-25 | Safety | Complete short/long copy, six citations, exact nine-card deck, source provenance, and association removals approved | Authorized for content implementation; magnet pending |
 
 ## Implementation notes / handoff
 
@@ -250,4 +314,4 @@ Current curated Safety strategy direction includes protected human submissions, 
 - Need strategy cards visibly use `Supporting source ↗` for system sources and human contributor metadata for user strategies.
 - `src/data/generated/legacyData.json` remains the historical imported snapshot. Approved global discards are barred from the live catalog even if an old raw row still exists until that snapshot can be safely rematerialized.
 - Do not revise an approved need package without a new explicit review/approval cycle.
-- Connection and Support magnet design review is the next planned design phase after Support deployment.
+- The next Safety step after content deployment is its live Design Lab magnet review. Do not mark Safety fully audited until that approved magnet is promoted.
