@@ -88,5 +88,36 @@ describe('resolveBlueskyIdentity', () => {
 
     await expect(resolveBlueskyIdentity('person.example')).rejects.toThrow('does not confirm');
   });
+
+  it('verifies a callback DID against the handle in its DID document', async () => {
+    const did = 'did:plc:example123';
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: did,
+        alsoKnownAs: ['at://person.example'],
+        service: [],
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ did }), { status: 200 })));
+
+    await expect(resolveBlueskyIdentity(did)).resolves.toMatchObject({
+      did,
+      handle: 'person.example',
+    });
+  });
+
+  it('rejects a callback DID when its handle resolves to another DID', async () => {
+    const did = 'did:plc:example123';
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: did,
+        alsoKnownAs: ['at://person.example'],
+        service: [],
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        did: 'did:plc:someone-else',
+      }), { status: 200 })));
+
+    await expect(resolveBlueskyIdentity(did)).rejects.toThrow('does not resolve back');
+  });
 });
 

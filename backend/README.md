@@ -48,9 +48,9 @@ Both migrations were applied to the existing production `allneeds-db` on 2026-08
 - final verification: 4 existing strategies preserved, 22 normalized Need links, empty OAuth tables, clean foreign-key check, and `PRAGMA quick_check = ok`
 - legacy Worker verification after migration: `/api/health` and the existing public strategy feed both returned HTTP 200
 
-The replacement Worker was deployed to production on 2026-08-25. The current verified-login fix is version `61f16ab7-5434-4332-b8e3-d365a12af3a4`; the pre-cutover rollback version is `1eb3fa0a-d5d1-4eac-b08e-23f0ea3fd59b`. The React frontend has not been deployed.
+The replacement Worker was deployed to production on 2026-08-25. The current verified-login/admin version is `f8b9de46-d79f-4305-a404-09949fc700e2`; the pre-cutover rollback version is `1eb3fa0a-d5d1-4eac-b08e-23f0ea3fd59b`. The React frontend has not been deployed.
 
-The production Worker configuration is now repository-owned as well: `allneeds.app/auth/*`, `allneeds.app/api/*`, the `backend.allneeds.app` custom domain, observability, disabled preview URLs, `DB`, and the temporary legacy-auth value are all explicit in `wrangler.jsonc`. Post-deployment checks passed for all three Worker routes, CORS, OAuth client metadata, signed-out `/api/me`, the public strategy feed, legacy-session compatibility, the signed-out live site, and a production `/auth/login` start that redirects to Bluesky OAuth.
+The production Worker configuration is now repository-owned as well: `allneeds.app/auth/*`, `allneeds.app/api/*`, the `backend.allneeds.app` custom domain, observability, disabled preview URLs, `DB`, the temporary legacy-auth value, and the verified admin DID are all explicit in `wrangler.jsonc`. Post-deployment checks passed for all three Worker routes, CORS, OAuth client metadata, signed-out `/api/me`, the public strategy feed, legacy-session compatibility, the signed-out live site, and the complete `/auth/login` → `/auth/callback` flow. That flow created a 30-day verified allneeds session for `nathanael.ink` / `did:plc:w23qsgdsux3neuguxfy7kvt5` and immediately removed the temporary Bluesky OAuth credential.
 
 The Worker supports these Cloudflare environment variables:
 
@@ -59,13 +59,13 @@ The Worker supports these Cloudflare environment variables:
 
 `ALLOW_LEGACY_AUTH=1` deliberately preserves the previous security boundary for a short staging window; it is not the intended steady state.
 
-`ALLOW_LEGACY_AUTH=1` is explicit in `wrangler.jsonc` for this staging deployment. It must be removed from the repository config during the frontend cutover. `keep_vars: true` prevents a future repository deployment from erasing dashboard-managed values such as the verified `ADMIN_DIDS` allowlist; those values must still be reviewed in Cloudflare before each deployment.
+`ALLOW_LEGACY_AUTH=1` is explicit in `wrangler.jsonc` for this staging deployment. It must be removed from the repository config during the frontend cutover. The verified `ADMIN_DIDS` value is explicit as well, so future repository deployments preserve the production moderation allowlist.
 
 ## Deployment order
 
 The backend and frontend auth cutover must not be deployed in the wrong order.
 
-Steps 1-8 were completed on 2026-08-25. Resume at step 9 with a verified Bluesky login.
+Steps 1-10 were completed on 2026-08-25. Resume at step 11 with the React frontend cutover.
 
 1. Capture the current `allneeds-db` Time Travel bookmark and export the remote database before changing its schema.
 2. Apply `migrations/0001_strategy_ownership.sql`.

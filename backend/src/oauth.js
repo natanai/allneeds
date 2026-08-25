@@ -53,12 +53,7 @@ function didDocumentUrl(did) {
   return url;
 }
 
-export async function resolveBlueskyIdentity(identifier, { signal } = {}) {
-  const handle = normalizeHandle(identifier);
-  if (!handle || !handle.includes('.') || !/^[a-z0-9.-]+$/.test(handle)) {
-    throw new Error('Valid Bluesky handle is required');
-  }
-
+async function resolveHandleToDid(handle, signal) {
   const resolveUrl = new URL('https://bsky.social/xrpc/com.atproto.identity.resolveHandle');
   resolveUrl.searchParams.set('handle', handle);
   const handleResponse = await cloudflareCompatibleFetch(resolveUrl, {
@@ -73,6 +68,10 @@ export async function resolveBlueskyIdentity(identifier, { signal } = {}) {
     throw new Error('Bluesky returned an invalid DID');
   }
 
+  return did;
+}
+
+async function fetchDidDocument(did, signal) {
   const documentResponse = await cloudflareCompatibleFetch(didDocumentUrl(did), {
     headers: { Accept: 'application/did+ld+json, application/json' },
     redirect: 'manual',
@@ -83,9 +82,45 @@ export async function resolveBlueskyIdentity(identifier, { signal } = {}) {
   if (!didDoc || typeof didDoc !== 'object' || didDoc.id !== did) {
     throw new Error('Bluesky DID document does not match the resolved DID');
   }
+
+  return didDoc;
+}
+
+function confirmedHandle(didDoc) {
   const aliases = Array.isArray(didDoc.alsoKnownAs) ? didDoc.alsoKnownAs : [];
-  if (!aliases.some((value) => typeof value === 'string'
-    && value.toLowerCase() === `at://${handle}`)) {
+  for (const value of aliases) {
+    if (typeof value !== 'string' || !value.toLowerCase().startsWith('at://')) continue;
+    const handle = normalizeHandle(value.slice('at://'.length));
+    if (handle.includes('.') && /^[a-z0-9.-]+$/.test(handle)
+      && value.toLowerCase() === `at://${handle}`) return handle;
+  }
+  return '';
+}
+
+export async function resolveBlueskyIdentity(identifier, { signal } = {}) {
+  const rawIdentifier = typeof identifier === 'string' ? identifier.trim() : '';
+  if (rawIdentifier.startsWith('did:')) {
+    if (!rawIdentifier.startsWith('did:plc:') && !rawIdentifier.startsWith('did:web:')) {
+      throw new Error('Unsupported AT Protocol DID method');
+    }
+    const didDoc = await fetchDidDocument(rawIdentifier, signal);
+    const handle = confirmedHandle(didDoc);
+    if (!handle) throw new Error('Bluesky DID document does not confirm a valid handle');
+    const resolvedDid = await resolveHandleToDid(handle, signal);
+    if (resolvedDid !== rawIdentifier) {
+      throw new Error('Bluesky handle does not resolve back to the requested DID');
+    }
+    return { did: rawIdentifier, didDoc, handle };
+  }
+
+  const handle = normalizeHandle(rawIdentifier);
+  if (!handle || !handle.includes('.') || !/^[a-z0-9.-]+$/.test(handle)) {
+    throw new Error('Valid Bluesky handle is required');
+  }
+
+  const did = await resolveHandleToDid(handle, signal);
+  const didDoc = await fetchDidDocument(did, signal);
+  if (confirmedHandle(didDoc) !== handle) {
     throw new Error('Bluesky DID document does not confirm the requested handle');
   }
 
