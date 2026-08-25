@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { InventoryVisibility } from './inventoryRepository';
+import { readInventory } from './inventoryRepository';
+import {
+  downloadStrategyForNat,
+  personalStrategiesEmailHref,
+} from './personalStrategiesExport';
 import styles from './StrategySharingFields.module.css';
 
 type StrategySharingFieldsProps = {
@@ -37,6 +42,7 @@ function PrivacyIcon({ visibility }: { visibility: InventoryVisibility }) {
 
 export function StrategySharingFields({ signedIn }: StrategySharingFieldsProps) {
   const [visibility, setVisibility] = useState<InventoryVisibility>('private');
+  const [emailReady, setEmailReady] = useState(false);
   const visibilityRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
@@ -56,22 +62,56 @@ export function StrategySharingFields({ signedIn }: StrategySharingFieldsProps) 
     return () => form.removeEventListener('formdata', handleFormData);
   }, []);
 
+  const shareCurrentStrategyWithNat = () => {
+    const form = visibilityRef.current?.form;
+    const saveButton = form?.querySelector<HTMLButtonElement>('button[name="save-target"][value="device"]');
+    if (!form || !saveButton) return;
+
+    setEmailReady(false);
+    const existingIds = new Set(readInventory().map((strategy) => strategy.id));
+
+    // Use the composer's real save path so required fields, duplicate handling,
+    // persistence, and the selected Privacy state all remain canonical.
+    saveButton.click();
+
+    const savedStrategy = readInventory().find((strategy) => strategy.personal && !existingIds.has(strategy.id));
+    if (!savedStrategy) return;
+
+    const result = downloadStrategyForNat(savedStrategy);
+    if (result.downloaded) setEmailReady(true);
+  };
+
   return (
-    <label className={styles.privacyRow}>
-      <span className={styles.icon}><PrivacyIcon visibility={visibility} /></span>
-      <span className={styles.label}>Privacy</span>
-      <select
-        ref={visibilityRef}
-        name="strategy-visibility"
-        value={visibility}
-        aria-label="Strategy privacy"
-        onChange={(event) => setVisibility(event.target.value as InventoryVisibility)}
-      >
-        <option value="private">Private</option>
-        <option value="followers" disabled={!signedIn}>Followers</option>
-        <option value="public">Public</option>
-      </select>
-      <input type="hidden" name="share-with-nat" value="yes" disabled={visibility !== 'public'} />
-    </label>
+    <div className={styles.sharingRow}>
+      <label className={styles.privacyRow}>
+        <span className={styles.icon}><PrivacyIcon visibility={visibility} /></span>
+        <span className={styles.label}>Privacy</span>
+        <select
+          ref={visibilityRef}
+          name="strategy-visibility"
+          value={visibility}
+          aria-label="Strategy privacy"
+          onChange={(event) => {
+            setEmailReady(false);
+            setVisibility(event.target.value as InventoryVisibility);
+          }}
+        >
+          <option value="private">Private</option>
+          <option value="followers" disabled={!signedIn}>Followers</option>
+          <option value="public">Public</option>
+        </select>
+        <input type="hidden" name="share-with-nat" value="yes" disabled={visibility !== 'public'} />
+      </label>
+
+      <details className={styles.actionMenu}>
+        <summary aria-label="More strategy actions" title="More strategy actions">
+          <span aria-hidden="true">•••</span>
+        </summary>
+        <div className={styles.actionMenuPanel}>
+          <button type="button" onClick={shareCurrentStrategyWithNat}>Share this strategy with Nat…</button>
+          {emailReady ? <a href={personalStrategiesEmailHref()}>Start email to Nat</a> : null}
+        </div>
+      </details>
+    </div>
   );
 }
