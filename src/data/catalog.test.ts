@@ -54,7 +54,7 @@ describe('production catalog snapshot', () => {
       { title: 'Call a friend', slug: 'call-a-friend' },
       { title: 'Play a social video game', slug: 'play-a-social-video-game' },
       { title: 'Read a character driven novel', slug: 'read-a-character-driven-novel' },
-      { title: 'Write a letter', slug: 'write-a-letter' },
+      { title: 'Write a letter', slug: 'write-a-letter-for-connection' },
       { title: 'Remember a connected moment', slug: 'remember-a-connected-moment' },
       { title: 'Map your connection options', slug: 'map-your-connection-options' },
       { title: 'Notice where you are', slug: 'notice-where-you-are' },
@@ -64,11 +64,22 @@ describe('production catalog snapshot', () => {
       expect(strategiesBySlug.get(slug)?.provenance).toBe('user');
     });
 
-    ['write-a-letter', 'remember-a-connected-moment', 'map-your-connection-options', 'notice-where-you-are'].forEach((slug) => {
+    ['write-a-letter-for-connection', 'remember-a-connected-moment', 'map-your-connection-options', 'notice-where-you-are'].forEach((slug) => {
       const strategy = strategiesBySlug.get(slug);
       expect(strategy?.provenance).toBe('system');
       expect(strategy?.evidence?.url).toMatch(/^https:\/\//);
       expect(strategy?.supportedNeeds).toContainEqual({ title: 'Connection', slug: 'connection' });
+    });
+
+    expect(strategiesBySlug.get('write-a-letter')).toMatchObject({
+      title: 'Write a letter',
+      summary: 'To a friend or a senator. Advocate for yourself or others.',
+      provenance: 'user',
+      contributor: { name: 'Nat', location: 'Missouri' },
+    });
+    expect(strategiesBySlug.get('write-a-letter')?.supportedNeeds).not.toContainEqual({
+      title: 'Connection',
+      slug: 'connection',
     });
 
     expect(strategiesBySlug.has('one-kind-text')).toBe(false);
