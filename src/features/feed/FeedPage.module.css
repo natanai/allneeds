@@ -62,6 +62,33 @@
   line-height: 1.15;
 }
 
+.adminReviewLabel {
+  margin: 0 .08rem;
+  color: var(--secondary);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.adminReviewButton {
+  min-height: 38px;
+  margin-top: .38rem;
+  padding: .32rem .58rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 42%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--attention) 14%, var(--surface-raised) 86%);
+  color: var(--text);
+  font: 720 .68rem/1.1 var(--font-body);
+  cursor: pointer;
+}
+
+.adminReviewButton:hover,
+.adminReviewButton:focus-visible {
+  border-color: var(--outline);
+  background: color-mix(in srgb, var(--attention) 22%, var(--surface-raised) 78%);
+}
+
 .status,
 .authHint {
   margin: .32rem .08rem 0;
