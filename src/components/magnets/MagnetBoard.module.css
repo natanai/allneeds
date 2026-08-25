@@ -368,9 +368,6 @@
     box-shadow: 0 10px 0 color-mix(in srgb, var(--plum) 64%, var(--outline) 36%);
   }
 
-  .nav .magnet[data-picked-up='true']:focus-visible {
-    outline: none;
-  }
 
   .nav .magnet[data-dragging='true'] {
     left: 0;

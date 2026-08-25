@@ -277,7 +277,102 @@ test('a dragged magnet makes a nearby resting magnet dodge out of its path', asy
   const escapeDistance = neighborDelta.x * escapeX + neighborDelta.y * escapeY;
 
   expect(distance(draggedDuring, draggedBefore)).toBeGreaterThan(30);
-  expect(escapeDistance).toBeGreaterThan(4);
-  expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(4);
+  expect(escapeDistance).toBeGreaterThan(14);
+  expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(14);
   await page.mouse.up();
+});
+
+test('pointer pickup clears keyboard focus instead of covering its focus ring', async ({ page }) => {
+  const { magnet } = await showOnlyAcceptance(page);
+  await magnet.focus();
+  await expect(magnet).toBeFocused();
+
+  const box = await magnet.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+  await expect(magnet).not.toBeFocused();
+  expect(await magnet.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe('none');
+  await page.mouse.up();
+});
+
+test.describe('mobile packed magnet scurry', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('a touch-dragged magnet visibly clears a tightly packed neighbor', async ({ page }) => {
+    await page.goto('/needs');
+    const board = page.getByLabel('Needs magnet board');
+    await expect(board).toHaveAttribute('data-ready', 'true');
+    await ensurePhysicsOn(board);
+
+    const dragged = board.getByRole('link', { name: 'Control', exact: true });
+    const neighbor = board.getByRole('link', { name: 'Predictability', exact: true });
+    await dragged.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(420);
+
+    const draggedBefore = await magnetPosition(board, dragged);
+    const neighborBefore = await magnetPosition(board, neighbor);
+    const draggedBox = await dragged.boundingBox();
+    const neighborBox = await neighbor.boundingBox();
+    expect(draggedBox).not.toBeNull();
+    expect(neighborBox).not.toBeNull();
+
+    const draggedCenter = {
+      x: draggedBox!.x + draggedBox!.width / 2,
+      y: draggedBox!.y + draggedBox!.height / 2,
+    };
+    const neighborCenter = {
+      x: neighborBox!.x + neighborBox!.width / 2,
+      y: neighborBox!.y + neighborBox!.height / 2,
+    };
+    const separationX = neighborCenter.x - draggedCenter.x;
+    const separationY = neighborCenter.y - draggedCenter.y;
+    const separationLength = Math.max(Math.hypot(separationX, separationY), 1);
+    const escapeX = separationX / separationLength;
+    const escapeY = separationY / separationLength;
+    const target = {
+      x: neighborCenter.x - escapeX * 6,
+      y: neighborCenter.y - escapeY * 6,
+    };
+
+    const session = await page.context().newCDPSession(page);
+    try {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: draggedCenter.x, y: draggedCenter.y, id: 1 }],
+      });
+      for (let step = 1; step <= 14; step += 1) {
+        const progress = step / 14;
+        await session.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [{
+            x: draggedCenter.x + (target.x - draggedCenter.x) * progress,
+            y: draggedCenter.y + (target.y - draggedCenter.y) * progress,
+            id: 1,
+          }],
+        });
+        await page.waitForTimeout(18);
+      }
+      await page.waitForTimeout(320);
+
+      const draggedDuring = await magnetPosition(board, dragged);
+      const neighborDuring = await magnetPosition(board, neighbor);
+      const neighborDelta = {
+        x: neighborDuring.x - neighborBefore.x,
+        y: neighborDuring.y - neighborBefore.y,
+      };
+      const escapeDistance = neighborDelta.x * escapeX + neighborDelta.y * escapeY;
+
+      expect(distance(draggedDuring, draggedBefore)).toBeGreaterThan(30);
+      expect(escapeDistance).toBeGreaterThan(12);
+      expect(distance(neighborDuring, neighborBefore)).toBeGreaterThan(12);
+    } finally {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: [],
+      }).catch(() => undefined);
+      await session.detach();
+    }
+  });
 });

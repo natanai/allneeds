@@ -27,8 +27,10 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 
 - This is an enhancement to the existing physics, not a replacement: preserve pickup alignment, direct drag tracking, fling/release behavior, collisions, wobble, empty-space pushing, persistence, and Play/rest semantics.
 - Avoidance should begin slightly before hard overlap and become more responsive when the held magnet is moving toward another magnet.
+- The dodge must remain plainly visible in the ordinary default packed layout on both desktop and touch devices. It must establish its own outward escape motion rather than depending on the resting collision/repulsion forces to create visible separation.
 - Keep the response controlled rather than explosive: nearby magnets may scurry aside, but the held magnet remains attached to the pointer and avoidance must not cascade into a large chain reaction across the board.
-- Resting magnets remain speed-limited while another magnet is lifted so the board still feels viscous and deliberate rather than chaotic.
+- Resting magnets remain speed-limited while another magnet is lifted, but the lifted-state cap must be high enough for a nearby magnet to visibly clear the held magnet's path.
+- Pointer pickup is direct manipulation, not a focus treatment. A pointer-held magnet must not acquire an extra focus/selection ring; keyboard focus remains visibly indicated when navigating without pointer pickup. Do not implement this by hiding a held-state focus ring in CSS—prevent pointer pickup from creating/retaining that focus state at the interaction source.
 
 ## Touch and control sizing
 
@@ -186,7 +188,7 @@ Rules:
 
 ### 2026-08-25
 
-- Held/dragged magnets now make nearby resting magnets visibly dodge away before overlap, with extra responsiveness when the held magnet is moving toward them, while preserving the existing viscous speed cap and all prior magnet interactions.
+- Held/dragged magnets now establish a visibly stronger outward escape target for nearby magnets so the scurry reads clearly even in the default tightly packed layout on touch and desktop; pointer pickup also clears/suppresses pointer focus at the interaction source so no held-state focus-ring hiding workaround is needed.
 
 ### 2026-08-24
 
