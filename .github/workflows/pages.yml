@@ -3,6 +3,8 @@ name: Build and deploy V2
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'data/user-strategy-uploads/**'
   workflow_dispatch:
 
 permissions:
