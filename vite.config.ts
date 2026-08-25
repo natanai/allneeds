@@ -47,12 +47,45 @@ type LegacyCatalog = {
   }>;
 };
 
+type SubmittedCatalog = {
+  version: 1;
+  strategies: Array<{
+    title: string;
+    slug: string;
+    summary: string;
+    needSlugs: string[];
+    submittedAt: string;
+    contributor?: { name?: string; location?: string };
+  }>;
+};
+
 const runtimeCatalogId = 'virtual:allneeds-runtime-catalog';
 const resolvedRuntimeCatalogId = `\0${runtimeCatalogId}`;
 const legacyCatalogPath = resolve('src/data/generated/legacyData.json');
+const submittedCatalogPath = resolve('data/user-submitted-strategies.json');
 
 function runtimeCatalogSource() {
   const legacy = JSON.parse(readFileSync(legacyCatalogPath, 'utf8')) as LegacyCatalog;
+  const submitted = JSON.parse(readFileSync(submittedCatalogPath, 'utf8')) as SubmittedCatalog;
+  if (submitted.version !== 1 || !Array.isArray(submitted.strategies)) {
+    throw new Error('Unsupported user-submitted strategy catalog.');
+  }
+
+  const needTitles = new Map(legacy.needs.map((need) => [need.slug, need.title]));
+  const legacyStrategySlugs = new Set(legacy.strategies.map((strategy) => strategy.slug));
+  const submittedStrategySlugs = new Set<string>();
+  submitted.strategies.forEach((strategy) => {
+    if (!strategy.slug || legacyStrategySlugs.has(strategy.slug) || submittedStrategySlugs.has(strategy.slug)) {
+      throw new Error(`Duplicate or missing user-submitted strategy slug: ${strategy.slug || '(empty)'}`);
+    }
+    strategy.needSlugs.forEach((needSlug) => {
+      if (!needTitles.has(needSlug)) {
+        throw new Error(`User-submitted strategy “${strategy.title}” references unknown need: ${needSlug}`);
+      }
+    });
+    submittedStrategySlugs.add(strategy.slug);
+  });
+
   const feelings = legacy.feelings.map((feeling) => ({
     slug: feeling.slug,
     title: feeling.title,
@@ -72,7 +105,12 @@ function runtimeCatalogSource() {
     summary: need.description || need.originalClaim || '',
     feelings: need.feelings ?? [],
     fauxFeelings: need.fauxFeelings ?? [],
-    strategies: need.strategies ?? [],
+    strategies: [
+      ...(need.strategies ?? []),
+      ...submitted.strategies
+        .filter((strategy) => strategy.needSlugs.includes(need.slug))
+        .map((strategy) => ({ slug: strategy.slug, title: strategy.title })),
+    ],
     evidence: {
       claimSummary: need.originalClaim,
       narrative: need.rewrittenClaim,
@@ -85,13 +123,25 @@ function runtimeCatalogSource() {
     feelings: feeling.feelings ?? [],
     needs: feeling.needs ?? [],
   }));
-  const strategies = legacy.strategies.map((strategy) => ({
-    slug: strategy.slug,
-    title: strategy.title,
-    summary: strategy.summary || strategy.description || '',
-    supportedNeeds: strategy.needs ?? [],
-    contributor: strategy.contributor,
-  }));
+  const strategies = [
+    ...legacy.strategies.map((strategy) => ({
+      slug: strategy.slug,
+      title: strategy.title,
+      summary: strategy.summary || strategy.description || '',
+      supportedNeeds: strategy.needs ?? [],
+      contributor: strategy.contributor,
+    })),
+    ...submitted.strategies.map((strategy) => ({
+      slug: strategy.slug,
+      title: strategy.title,
+      summary: strategy.summary,
+      supportedNeeds: strategy.needSlugs.map((needSlug) => ({
+        slug: needSlug,
+        title: needTitles.get(needSlug)!,
+      })),
+      contributor: strategy.contributor,
+    })),
+  ];
 
   return [
     `export const feelings = ${JSON.stringify(feelings)};`,
@@ -110,6 +160,7 @@ function runtimeCatalogPlugin(): Plugin {
     load(id) {
       if (id !== resolvedRuntimeCatalogId) return null;
       this.addWatchFile(legacyCatalogPath);
+      this.addWatchFile(submittedCatalogPath);
       return runtimeCatalogSource();
     },
   };
