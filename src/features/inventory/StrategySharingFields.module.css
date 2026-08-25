@@ -3,6 +3,7 @@
   margin: .12rem 0 0;
   padding: 0;
   display: grid;
+  grid-column: 1 / -1;
   gap: .36rem;
   border: 0;
 }
