@@ -26,10 +26,22 @@ import { StrategySharingFields } from '../inventory/StrategySharingFields';
 import styles from './NeedDetailPage.module.css';
 
 type Feedback = { kind: 'success' | 'warning' | 'error'; message: string } | null;
+type DeckGesture = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  lastX: number;
+  lastTime: number;
+  velocityX: number;
+  card: HTMLElement;
+  previousCard: HTMLElement | null;
+  nextCard: HTMLElement | null;
+};
 
-const DECK_HORIZONTAL_LOCK_DISTANCE = 4;
-const DECK_VERTICAL_LOCK_DISTANCE = 14;
-const DECK_SWIPE_DISTANCE = 24;
+const DECK_EXIT_MS = 155;
+const DECK_SPRING_MS = 190;
+const DECK_FLICK_DISTANCE = 18;
+const DECK_FLICK_VELOCITY = 0.32;
 
 function shuffled<T>(values: T[]) {
   const copy = [...values];
@@ -65,6 +77,17 @@ function emptyNeedStrategyDraft(needSlug: string): NeedStrategyDraft {
   };
 }
 
+function clearDeckCardMotion(gesture: DeckGesture) {
+  gesture.card.removeAttribute('data-dragging');
+  gesture.card.removeAttribute('data-settling');
+  gesture.card.style.removeProperty('transform');
+  gesture.card.style.removeProperty('transform-origin');
+  gesture.card.style.removeProperty('transition');
+  gesture.card.style.removeProperty('opacity');
+  gesture.previousCard?.style.removeProperty('z-index');
+  gesture.nextCard?.style.removeProperty('z-index');
+}
+
 export function NeedDetailPage() {
   const session = useBlueskySession();
   const { slug = '' } = useParams();
@@ -80,12 +103,9 @@ export function NeedDetailPage() {
   const [strategyOrder, setStrategyOrder] = useState<string[]>(() => canonicalStrategies.map((item) => item.slug));
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAll, setShowAll] = useState(false);
-  const deckGestureRef = useRef<{
-    pointerId: number;
-    startX: number;
-    startY: number;
-    horizontal: boolean;
-  } | null>(null);
+  const deckGestureRef = useRef<DeckGesture | null>(null);
+  const deckSettlingRef = useRef(false);
+  const deckTimerRef = useRef<number | null>(null);
   const [inventory, setInventory] = useState<InventoryStrategy[]>(readInventory);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [formFeedback, setFormFeedback] = useState<Feedback>(null);
@@ -111,6 +131,10 @@ export function NeedDetailPage() {
     formDraftRef.current = restored;
     setFormDraft(restored);
   }, [formDraftRef, slug]);
+
+  useEffect(() => () => {
+    if (deckTimerRef.current !== null) window.clearTimeout(deckTimerRef.current);
+  }, []);
 
   if (!need) {
     return (
@@ -217,30 +241,72 @@ export function NeedDetailPage() {
     setActiveIndex((current) => (current + offset + orderedStrategies.length) % orderedStrategies.length);
   };
 
-  const resetDeckGesture = (event?: PointerEvent<HTMLDivElement>) => {
-    const gesture = deckGestureRef.current;
-    if (gesture && event?.currentTarget.hasPointerCapture(gesture.pointerId)) {
-      event.currentTarget.releasePointerCapture(gesture.pointerId);
+  const releaseDeckCapture = (event: PointerEvent<HTMLDivElement>, pointerId: number) => {
+    if (event.currentTarget.hasPointerCapture(pointerId)) {
+      event.currentTarget.releasePointerCapture(pointerId);
     }
+  };
+
+  const springDeckCardBack = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = deckGestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+    releaseDeckCapture(event, gesture.pointerId);
     deckGestureRef.current = null;
+    gesture.previousCard?.style.removeProperty('z-index');
+    gesture.nextCard?.style.removeProperty('z-index');
+    gesture.card.removeAttribute('data-dragging');
+    gesture.card.setAttribute('data-settling', 'true');
+    gesture.card.style.transition = `transform ${DECK_SPRING_MS}ms cubic-bezier(.22,.78,.2,1), opacity ${DECK_SPRING_MS}ms ease`;
+    gesture.card.style.removeProperty('transform');
+    gesture.card.style.removeProperty('opacity');
+
+    deckTimerRef.current = window.setTimeout(() => {
+      clearDeckCardMotion(gesture);
+      deckTimerRef.current = null;
+    }, DECK_SPRING_MS + 24);
   };
 
   const handleDeckPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (showAll || orderedStrategies.length < 2 || (event.pointerType === 'mouse' && event.button !== 0)) {
+    if (showAll || orderedStrategies.length < 2 || deckSettlingRef.current
+      || (event.pointerType === 'mouse' && event.button !== 0)) {
       return;
     }
 
     const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest('button, a, input, textarea, select, label')) {
-      return;
-    }
+    if (target?.closest('button, a, input, textarea, select, label')) return;
+
+    const activeCard = target?.closest<HTMLElement>('[data-position="active"]') ?? null;
+    if (!activeCard || !event.currentTarget.contains(activeCard)) return;
+
+    const stack = activeCard.parentElement;
+    const previousCard = stack?.querySelector<HTMLElement>('[data-position="prev"]') ?? null;
+    const nextCard = stack?.querySelector<HTMLElement>('[data-position="next"]') ?? null;
+    const now = event.timeStamp || performance.now();
 
     deckGestureRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      horizontal: false,
+      lastX: event.clientX,
+      lastTime: now,
+      velocityX: 0,
+      card: activeCard,
+      previousCard,
+      nextCard,
     };
+
+    activeCard.setAttribute('data-dragging', 'true');
+    activeCard.style.transition = 'none';
+    activeCard.style.transformOrigin = '50% 82%';
+
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Direct manipulation still works while the pointer remains over the deck.
+    }
+
+    event.preventDefault();
   };
 
   const handleDeckPointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -249,27 +315,23 @@ export function NeedDetailPage() {
 
     const dx = event.clientX - gesture.startX;
     const dy = event.clientY - gesture.startY;
-    const horizontalDistance = Math.abs(dx);
-    const verticalDistance = Math.abs(dy);
+    const now = event.timeStamp || performance.now();
+    const elapsed = Math.max(1, now - gesture.lastTime);
+    gesture.velocityX = (event.clientX - gesture.lastX) / elapsed;
+    gesture.lastX = event.clientX;
+    gesture.lastTime = now;
 
-    if (!gesture.horizontal) {
-      const clearlyVertical = verticalDistance >= DECK_VERTICAL_LOCK_DISTANCE
-        && verticalDistance > horizontalDistance * 1.65;
-      if (clearlyVertical) {
-        resetDeckGesture(event);
-        return;
-      }
+    const width = Math.max(1, gesture.card.getBoundingClientRect().width);
+    const rotation = Math.max(-5, Math.min(5, (dx / width) * 7));
+    const verticalFollow = Math.max(-18, Math.min(18, dy * 0.16));
+    gesture.card.style.transform = `translate3d(${dx}px, ${verticalFollow}px, 0) rotate(${rotation}deg) scale(1)`;
 
-      const horizontalIntent = horizontalDistance >= DECK_HORIZONTAL_LOCK_DISTANCE
-        && horizontalDistance >= verticalDistance * 0.6;
-      if (!horizontalIntent) return;
-
-      gesture.horizontal = true;
-      try {
-        event.currentTarget.setPointerCapture(event.pointerId);
-      } catch {
-        // Pointer capture is only an enhancement once horizontal intent is known.
-      }
+    if (dx >= 0) {
+      if (gesture.previousCard) gesture.previousCard.style.zIndex = '2';
+      if (gesture.nextCard) gesture.nextCard.style.zIndex = '1';
+    } else {
+      if (gesture.previousCard) gesture.previousCard.style.zIndex = '1';
+      if (gesture.nextCard) gesture.nextCard.style.zIndex = '2';
     }
 
     event.preventDefault();
@@ -280,11 +342,52 @@ export function NeedDetailPage() {
     if (!gesture || gesture.pointerId !== event.pointerId) return;
 
     const dx = event.clientX - gesture.startX;
-    if (gesture.horizontal && Math.abs(dx) >= DECK_SWIPE_DISTANCE) {
-      move(dx > 0 ? -1 : 1);
-      event.preventDefault();
+    const dy = event.clientY - gesture.startY;
+    const width = Math.max(1, gesture.card.getBoundingClientRect().width);
+    const distanceThreshold = Math.min(64, Math.max(46, width * 0.17));
+    const fastFlick = Math.abs(dx) >= DECK_FLICK_DISTANCE && Math.abs(gesture.velocityX) >= DECK_FLICK_VELOCITY;
+    const shouldAdvance = Math.abs(dx) >= distanceThreshold || fastFlick;
+
+    if (!shouldAdvance) {
+      springDeckCardBack(event);
+      return;
     }
-    resetDeckGesture(event);
+
+    const offset = dx > 0 ? -1 : 1;
+    const exitDirection = dx > 0 ? 1 : -1;
+    const exitDistance = Math.max(event.currentTarget.clientWidth, width) * 1.12 * exitDirection;
+    const verticalFollow = Math.max(-22, Math.min(22, dy * 0.16));
+
+    releaseDeckCapture(event, gesture.pointerId);
+    deckGestureRef.current = null;
+    deckSettlingRef.current = true;
+    gesture.card.removeAttribute('data-dragging');
+    gesture.card.setAttribute('data-settling', 'true');
+    gesture.card.style.transition = `transform ${DECK_EXIT_MS}ms cubic-bezier(.2,.72,.22,1), opacity ${DECK_EXIT_MS}ms ease`;
+    gesture.card.style.transform = `translate3d(${exitDistance}px, ${verticalFollow}px, 0) rotate(${exitDirection * 5.5}deg) scale(.985)`;
+    gesture.card.style.opacity = '0.18';
+
+    deckTimerRef.current = window.setTimeout(() => {
+      move(offset);
+      window.requestAnimationFrame(() => {
+        clearDeckCardMotion(gesture);
+        deckSettlingRef.current = false;
+        deckTimerRef.current = null;
+      });
+    }, DECK_EXIT_MS);
+
+    event.preventDefault();
+  };
+
+  const handleDeckPointerCancel = (event: PointerEvent<HTMLDivElement>) => {
+    if (!deckGestureRef.current) return;
+    springDeckCardBack(event);
+  };
+
+  const handleDeckLostPointerCapture = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = deckGestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId || deckSettlingRef.current) return;
+    springDeckCardBack(event);
   };
 
   const handleDeckKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -379,7 +482,8 @@ export function NeedDetailPage() {
               onPointerDown={handleDeckPointerDown}
               onPointerMove={handleDeckPointerMove}
               onPointerUp={handleDeckPointerUp}
-              onPointerCancel={resetDeckGesture}
+              onPointerCancel={handleDeckPointerCancel}
+              onLostPointerCapture={handleDeckLostPointerCapture}
             >
               <div className={styles.stack}>
                 {orderedStrategies.map((strategy, index) => {
@@ -390,8 +494,17 @@ export function NeedDetailPage() {
                       : index === previousIndex ? 'prev' : 'hidden';
                   const saved = inventoryHasStrategy(inventory, strategy.slug);
                   const contributor = contributorLabel(strategy);
+                  const cardStyle: CSSProperties | undefined = position === 'active' && !showAll
+                    ? { touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }
+                    : undefined;
                   return (
-                    <article key={strategy.slug} className={styles.strategyCard} data-position={position}>
+                    <article
+                      key={strategy.slug}
+                      className={styles.strategyCard}
+                      data-position={position}
+                      data-strategy-slug={strategy.slug}
+                      style={cardStyle}
+                    >
                       <h3>{strategy.title}</h3>
                       <div className={styles.cardBody}>
                         <p>{strategy.summary}</p>
