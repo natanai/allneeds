@@ -38,10 +38,11 @@ The first branded loading surface is a real application readiness boundary, not 
 
 ## Network boundary
 
-- Basic app startup must not depend on Cloudflare/backend, Bluesky, third-party modules, analytics, or other remote services.
-- Do not speculatively fetch the shared strategy feed during boot.
+- Basic app startup must not **depend** on Cloudflare/backend, Bluesky, third-party modules, analytics, or other remote services. The documented maximum boot fallback deadline must still release a fully usable local app when remote services are slow or unavailable.
+- During the branded boot preload, start one best-effort request for the recent public shared-strategy snapshot so Need pages can be warm before first navigation. Reuse the shared feed cache and in-flight promise rather than fetching once per Need page.
+- A failed public-feed request must not be stored as the successful feed cache. Later Need-page opens or explicit refreshes must be able to retry. If the boot request is still pending when the interface opens, feature consumers should join that same in-flight request rather than duplicate it.
 - Bluesky/OAuth network work is allowed only when required by an explicit sign-in/OAuth return, an explicitly requested profile action, or a genuinely remembered active account/session that must be restored.
-- Shared/public strategy network requests should start when the user opens or refreshes that feature, not to make the local shell "ready."
+- Shared/public strategy data may be opportunistically warmed during boot, but it must remain an optional enhancement: local/system strategies and basic navigation must work without Cloudflare.
 - Local assets/data fetched from the app origin are part of the eager local-runtime preload contract and are distinct from remote account/feed work.
 
 ## CSS and runtime behavior

@@ -189,14 +189,25 @@ export function InventoryPage() {
     setView('strategies');
   };
 
-  const updateEntry = (event: FormEvent<HTMLFormElement>, entry: InventoryStrategy) => {
+  const updateEntry = async (event: FormEvent<HTMLFormElement>, entry: InventoryStrategy) => {
     event.preventDefault();
     const title = editDraft?.id === entry.id ? editDraft.title.trim() : '';
     const description = editDraft?.id === entry.id ? editDraft.description.trim() : '';
     if (!title) return;
-    commit(inventory.map((item) => item.id === entry.id ? { ...item, title, description } : item), `Updated “${title}”.`);
+    const updated = inventory.map((item) => item.id === entry.id ? { ...item, title, description } : item);
+    commit(updated, `Updated “${title}”.`);
     workflowDraftRef.current = { ...workflowDraftRef.current, edit: null };
     setEditDraft(null);
+    if (!session || !entry.personal) return;
+    try {
+      const result = await saveCurrentBrowserToProfile();
+      setFeedback({
+        kind: 'success',
+        message: `Updated “${title}” on this device and your profile.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}`,
+      });
+    } catch {
+      setFeedback({ kind: 'warning', message: `Updated “${title}” on this device, but profile sync did not finish.` });
+    }
   };
 
   const shareOneWithNat = (entry: InventoryStrategy) => {
@@ -213,7 +224,7 @@ export function InventoryPage() {
     });
   };
 
-  const removeEntry = (entry: InventoryStrategy) => {
+  const removeEntry = async (entry: InventoryStrategy) => {
     if (!window.confirm(`Remove “${entry.title}” from this device?`)) return;
     commit(inventory.filter((item) => item.id !== entry.id), `Removed “${entry.title}”.`);
     if (editDraft?.id === entry.id) {
@@ -221,6 +232,16 @@ export function InventoryPage() {
       setEditDraft(null);
     }
     setShareEmailReadyFor((current) => current === entry.id ? null : current);
+    if (!session || !entry.personal) return;
+    try {
+      const result = await saveCurrentBrowserToProfile();
+      setFeedback({
+        kind: 'success',
+        message: `Removed “${entry.title}” from this device and your profile.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}`,
+      });
+    } catch {
+      setFeedback({ kind: 'warning', message: `Removed “${entry.title}” from this device, but profile sync did not finish.` });
+    }
   };
 
   return (
@@ -382,7 +403,7 @@ export function InventoryPage() {
               {visibleStrategies.map((entry) => (
                 <article key={entry.id} id={`inventory-strategy-${entry.id}`} tabIndex={-1} className={`${styles.savedCard} ${popoverStyles.savedCard}`}>
                   {editDraft?.id === entry.id ? (
-                    <form onSubmit={(event) => updateEntry(event, entry)}>
+                    <form onSubmit={(event) => void updateEntry(event, entry)}>
                       <label>Strategy name<input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></label>
                       <label>Description<textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} /></label>
                       <div><button type="submit">Save changes</button><button type="button" onClick={() => setEditDraft(null)}>Cancel</button></div>
@@ -401,7 +422,7 @@ export function InventoryPage() {
                               </>
                             ) : null}
                             <button type="button" onClick={() => setEditDraft({ id: entry.id, title: entry.title, description: entry.description })}>Edit</button>
-                            <button type="button" className={styles.destructiveMenuItem} onClick={() => removeEntry(entry)}>Remove</button>
+                            <button type="button" className={styles.destructiveMenuItem} onClick={() => void removeEntry(entry)}>Remove</button>
                           </div>
                         </details>
                       </div>

@@ -2,6 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent } from 'react';
 import { Link, useParams } from 'react-router';
 
+import {
+  loadSharedFeedResources,
+  readSharedFeedResources,
+} from '../../app/appResources';
+import type { SharedFeedResources, SharedFeedStrategy } from '../../app/appResources';
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
 import { assetPath, needsBySlug, strategiesBySlug } from '../../data/catalog';
 import type { Strategy } from '../../domain/models';
@@ -12,10 +17,23 @@ import {
 } from '../../persistence/workflowDrafts';
 import type { NeedStrategyDraft } from '../../persistence/workflowDrafts';
 import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
-import { saveCurrentBrowserToProfile, useBlueskySession } from '../account/blueskyAccount';
+import {
+  notifySharedStrategyAdded,
+  saveCurrentBrowserToProfile,
+  useBlueskySession,
+} from '../account/blueskyAccount';
+import {
+  normalizeSharedStrategyNeeds,
+  sharedStrategyContentKey,
+  sharedStrategyDeckSlug,
+  sharedStrategyOwnerDid,
+  sharedStrategySupportsNeed,
+  sharedStrategyToNeedStrategy,
+} from '../feed/sharedStrategyModel';
 import {
   createCatalogInventoryEntry,
   createPersonalInventoryEntry,
+  createSharedInventoryEntry,
   inventoryHasStrategy,
   isDuplicateStrategy,
   readInventory,
@@ -42,6 +60,7 @@ const DECK_EXIT_MS = 155;
 const DECK_SPRING_MS = 190;
 const DECK_FLICK_DISTANCE = 18;
 const DECK_FLICK_VELOCITY = 0.32;
+const EMPTY_SHARED_FEED: SharedFeedResources = { strategies: [], error: '' };
 
 function shuffled<T>(values: T[]) {
   const copy = [...values];
@@ -88,21 +107,57 @@ function clearDeckCardMotion(gesture: DeckGesture) {
   gesture.nextCard?.style.removeProperty('z-index');
 }
 
+function sameOrder(left: string[], right: string[]) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
 export function NeedDetailPage() {
   const session = useBlueskySession();
   const { slug = '' } = useParams();
   const need = needsBySlug.get(slug);
+  const [publicFeed, setPublicFeed] = useState<SharedFeedResources>(
+    () => readSharedFeedResources('public', 'recent') ?? EMPTY_SHARED_FEED,
+  );
   const canonicalStrategies = useMemo(
-    () => prioritizeStrategiesForDeck(
-      need?.strategies
-        .map((reference) => strategiesBySlug.get(reference.slug))
-        .filter((strategy): strategy is Strategy => Boolean(strategy)) ?? [],
-    ),
+    () => need?.strategies
+      .map((reference) => strategiesBySlug.get(reference.slug))
+      .filter((strategy): strategy is Strategy => Boolean(strategy)) ?? [],
     [need],
   );
-  const [strategyOrder, setStrategyOrder] = useState<string[]>(() => canonicalStrategies.map((item) => item.slug));
+  const sharedStrategiesForNeed = useMemo(
+    () => publicFeed.strategies
+      .filter((strategy) => strategy.visibility === undefined || strategy.visibility === 'public')
+      .filter((strategy) => sharedStrategySupportsNeed(strategy, slug)),
+    [publicFeed.strategies, slug],
+  );
+  const sharedStrategyCards = useMemo(
+    () => sharedStrategiesForNeed.map(sharedStrategyToNeedStrategy),
+    [sharedStrategiesForNeed],
+  );
+  const availableStrategies = useMemo(() => {
+    const liveContent = new Set(sharedStrategyCards.map(sharedStrategyContentKey));
+    const canonicalWithoutLiveDuplicates = canonicalStrategies.filter(
+      (strategy) => strategy.provenance === 'system' || !liveContent.has(sharedStrategyContentKey(strategy)),
+    );
+    return prioritizeStrategiesForDeck([...sharedStrategyCards, ...canonicalWithoutLiveDuplicates]);
+  }, [canonicalStrategies, sharedStrategyCards]);
+  const strategyMap = useMemo(
+    () => new Map(availableStrategies.map((strategy) => [strategy.slug, strategy])),
+    [availableStrategies],
+  );
+  const sharedByDeckSlug = useMemo(
+    () => new Map(sharedStrategiesForNeed.map((strategy) => [sharedStrategyDeckSlug(strategy), strategy])),
+    [sharedStrategiesForNeed],
+  );
+  const defaultStrategyOrder = useMemo(
+    () => availableStrategies.map((strategy) => strategy.slug),
+    [availableStrategies],
+  );
+  const defaultOrderSignature = defaultStrategyOrder.join('\u0000');
+  const [strategyOrder, setStrategyOrder] = useState<string[]>(() => defaultStrategyOrder);
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAll, setShowAll] = useState(false);
+  const shuffledRef = useRef(false);
   const deckGestureRef = useRef<DeckGesture | null>(null);
   const deckSettlingRef = useRef(false);
   const deckTimerRef = useRef<number | null>(null);
@@ -119,12 +174,41 @@ export function NeedDetailPage() {
   const formDraftRef = useWorkflowDraftPersistence(formDraft, writeCurrentDraft);
 
   useEffect(() => {
-    setStrategyOrder(canonicalStrategies.map((strategy) => strategy.slug));
+    let cancelled = false;
+    const cached = readSharedFeedResources('public', 'recent');
+    if (cached) setPublicFeed(cached);
+    void loadSharedFeedResources('public', 'recent').then((next) => {
+      if (!cancelled) setPublicFeed(next);
+    });
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    shuffledRef.current = false;
     setActiveIndex(0);
     setShowAll(false);
     setFeedback(null);
     setFormFeedback(null);
-  }, [canonicalStrategies]);
+  }, [slug]);
+
+  useEffect(() => {
+    const activeSlug = strategyOrder[activeIndex] ?? '';
+    const existing = strategyOrder.filter((strategySlug) => strategyMap.has(strategySlug));
+    const next = shuffledRef.current
+      ? [...existing, ...defaultStrategyOrder.filter((strategySlug) => !existing.includes(strategySlug))]
+      : defaultStrategyOrder;
+    if (!sameOrder(strategyOrder, next)) setStrategyOrder(next);
+    if (activeSlug) {
+      const preservedIndex = next.indexOf(activeSlug);
+      if (preservedIndex >= 0 && preservedIndex !== activeIndex) setActiveIndex(preservedIndex);
+      else if (preservedIndex < 0) setActiveIndex(0);
+    } else if (activeIndex !== 0) {
+      setActiveIndex(0);
+    }
+    // Reconcile only when the available deck changes. Including the deck state here
+    // would turn this reconciliation into a second ordering authority after Shuffle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultOrderSignature]);
 
   useEffect(() => {
     const restored = readNeedStrategyDraft(slug) ?? emptyNeedStrategyDraft(slug);
@@ -147,7 +231,7 @@ export function NeedDetailPage() {
   }
 
   const orderedStrategies = strategyOrder
-    .map((strategySlug) => strategiesBySlug.get(strategySlug))
+    .map((strategySlug) => strategyMap.get(strategySlug))
     .filter((strategy): strategy is Strategy => Boolean(strategy));
 
   const persistEntry = (entry: InventoryStrategy, duplicateMessage: string, successMessage: string) => {
@@ -174,6 +258,50 @@ export function NeedDetailPage() {
       `Saved “${strategy.title}” to your device for ${need.title}${saveToProfile ? ' and preparing profile sync' : ''}.`,
     );
     if (!saved || !saveToProfile) return;
+    try {
+      const result = await saveCurrentBrowserToProfile();
+      setFeedback({ kind: 'success', message: `Saved “${strategy.title}” to your profile and device.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}` });
+    } catch {
+      setFeedback({ kind: 'warning', message: `Saved “${strategy.title}” to this device, but profile sync did not finish.` });
+    }
+  };
+
+  const saveSharedStrategy = async (
+    strategy: Strategy,
+    shared: SharedFeedStrategy,
+    saveToProfile = false,
+  ) => {
+    const strategyId = String(shared.id);
+    if (inventoryHasStrategy(inventory, strategyId)) {
+      setFeedback({ kind: 'success', message: `“${strategy.title}” is already saved on this device.` });
+      if (saveToProfile && session) {
+        try {
+          const result = await saveCurrentBrowserToProfile();
+          setFeedback({ kind: 'success', message: `“${strategy.title}” is saved to your profile and device.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}` });
+        } catch {
+          setFeedback({ kind: 'warning', message: `“${strategy.title}” is on this device, but profile sync did not finish.` });
+        }
+      }
+      return;
+    }
+    const entry = createSharedInventoryEntry({
+      id: strategyId,
+      title: strategy.title,
+      description: strategy.summary,
+      needSlugs: normalizeSharedStrategyNeeds(shared),
+      visibility: shared.visibility,
+      contributor: strategy.contributor,
+    });
+    const saved = persistEntry(
+      entry,
+      'You already saved a strategy with this title for this need. Save another copy?',
+      `Saved “${strategy.title}” to your device${saveToProfile ? ' and preparing profile sync' : ''}.`,
+    );
+    if (!saved) return;
+    if (session) {
+      void notifySharedStrategyAdded(strategyId).catch(() => undefined);
+    }
+    if (!saveToProfile) return;
     try {
       const result = await saveCurrentBrowserToProfile();
       setFeedback({ kind: 'success', message: `Saved “${strategy.title}” to your profile and device.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}` });
@@ -463,6 +591,7 @@ export function NeedDetailPage() {
           {orderedStrategies.length ? (
             <div className={styles.deckHeader} aria-label="Strategy browsing controls">
               <button type="button" aria-label="Shuffle strategy cards" onClick={() => {
+                shuffledRef.current = true;
                 setStrategyOrder((current) => shuffled(current));
                 setActiveIndex(0);
               }}>Shuffle</button>
@@ -494,8 +623,10 @@ export function NeedDetailPage() {
                   const position = index === activeIndex ? 'active'
                     : index === nextIndex ? 'next'
                       : index === previousIndex ? 'prev' : 'hidden';
-                  const saved = inventoryHasStrategy(inventory, strategy.slug);
+                  const shared = sharedByDeckSlug.get(strategy.slug);
+                  const saved = inventoryHasStrategy(inventory, shared ? String(shared.id) : strategy.slug);
                   const contributor = contributorLabel(strategy);
+                  const isOwner = Boolean(shared && session && sharedStrategyOwnerDid(shared) === session.did);
                   const cardStyle: CSSProperties | undefined = position === 'active' && !showAll
                     ? { touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }
                     : undefined;
@@ -514,6 +645,11 @@ export function NeedDetailPage() {
                       {strategy.provenance === 'user' && contributor ? (
                         <div className={styles.cardActions} aria-label="Strategy contributor">
                           <span className={styles.meta}>{contributor}</span>
+                        </div>
+                      ) : null}
+                      {isOwner ? (
+                        <div className={styles.cardActions} aria-label="Strategy ownership">
+                          <Link className={styles.meta} to="/inventory">Edit your strategy in My strategies</Link>
                         </div>
                       ) : null}
                       {strategy.provenance === 'system' && strategy.evidence ? (
@@ -539,11 +675,21 @@ export function NeedDetailPage() {
                           className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction} ${saved ? styles.saved : ''}`}
                           aria-pressed={saved}
                           aria-label={saved ? 'Saved to device' : 'Save to device'}
-                          onClick={() => void saveCatalogStrategy(strategy)}
+                          onClick={() => void (shared
+                            ? saveSharedStrategy(strategy, shared)
+                            : saveCatalogStrategy(strategy))}
                         >
                           Device
                         </button>
-                        <button type="button" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} aria-label="Save to profile" disabled={!session} onClick={() => void saveCatalogStrategy(strategy, true)}>Profile</button>
+                        <button
+                          type="button"
+                          className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`}
+                          aria-label="Save to profile"
+                          disabled={!session}
+                          onClick={() => void (shared
+                            ? saveSharedStrategy(strategy, shared, true)
+                            : saveCatalogStrategy(strategy, true))}
+                        >Profile</button>
                       </div>
                     </article>
                   );

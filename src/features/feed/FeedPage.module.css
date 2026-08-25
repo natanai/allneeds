@@ -214,6 +214,53 @@
   content: '✓';
 }
 
+.card .adminMenu {
+  margin-left: auto;
+}
+
+.card .adminMenu summary {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, #fff 92%, var(--attention) 8%);
+  font-size: 1.05rem;
+  letter-spacing: .08em;
+}
+
+.card .adminMenu summary::after,
+.card .adminMenu[open] summary::after {
+  content: none;
+}
+
+.adminMenuPopover {
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  top: calc(100% + .25rem);
+  min-width: 12rem;
+  padding: .3rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 24%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--outline) 16%, transparent);
+}
+
+.card .adminMenuPopover button {
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  justify-content: flex-start;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--attention) 14%, var(--surface-raised) 86%);
+}
+
+.card .adminMenuPopover button::before {
+  content: none;
+}
+
 @media (max-width: 640px) {
   .page {
     width: calc(100% + 2rem);
@@ -257,5 +304,9 @@
 
   .card button {
     margin-left: 0;
+  }
+
+  .card .adminMenu {
+    margin-left: auto;
   }
 }

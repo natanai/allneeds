@@ -16,10 +16,12 @@ export type ObservationAppResources = {
 
 export type SharedFeedStrategy = {
   id: string | number;
+  authorDid?: string;
   title?: string;
   body?: string;
   createdAt?: string;
   visibility?: 'private' | 'followers' | 'public';
+  addCount?: number;
   needIds?: unknown[];
   supportsNeeds?: unknown[];
   needs?: unknown[];
@@ -119,7 +121,7 @@ export function loadSharedFeedResources(scope: string, sort: string, refresh = f
   if (!refresh && feedResources.has(key)) return Promise.resolve(feedResources.get(key)!);
   if (!refresh && feedPromises.has(key)) return feedPromises.get(key)!;
   const base = import.meta.env.DEV ? '/allneeds-api' : 'https://backend.allneeds.app/api';
-  const promise = fetch(`${base}/strategies/feed?scope=${encodeURIComponent(scope)}&sort=${encodeURIComponent(sort)}`, {
+  const promise = fetch(`${base}/strategies/feed?scope=${encodeURIComponent(scope)}&sort=${encodeURIComponent(sort)}&limit=100`, {
     credentials: 'include',
     cache: 'no-cache',
   }).then(async (response) => {
@@ -134,9 +136,11 @@ export function loadSharedFeedResources(scope: string, sort: string, refresh = f
     feedResources.set(key, result);
     return result;
   }).catch(() => {
-    const result = { strategies: [], error: 'Unable to load shared strategies right now.' };
-    feedResources.set(key, result);
-    return result;
+    const cached = feedResources.get(key);
+    return {
+      strategies: cached?.strategies ?? [],
+      error: 'Unable to load shared strategies right now.',
+    };
   }).finally(() => {
     feedPromises.delete(key);
   });
@@ -148,5 +152,6 @@ export async function warmAppResources() {
   await Promise.all([
     loadBodyCueResources(),
     loadObservationResources(),
+    loadSharedFeedResources('public', 'recent'),
   ]);
 }
