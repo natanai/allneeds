@@ -134,6 +134,23 @@
   outline: none;
 }
 
+:global(#inventory-form-shell) {
+  position: relative;
+}
+
+:global(#inventory-form-shell) .actionMenu {
+  position: absolute;
+  top: .2rem;
+  right: 3.15rem;
+  z-index: 45;
+  align-self: auto;
+}
+
+:global(#inventory-form-shell) .actionMenuPanel {
+  top: calc(100% + .2rem);
+  bottom: auto;
+}
+
 @media (max-width: 390px) {
   .sharingRow {
     gap: .18rem;
