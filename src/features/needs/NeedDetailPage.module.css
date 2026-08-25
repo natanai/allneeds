@@ -358,7 +358,7 @@
   border: 3px solid var(--outline);
   border-radius: var(--radius-3xl);
   background: var(--mint);
-  box-shadow: 0 20px 0 var(--shadow);
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--outline) 16%, transparent);
   overflow-wrap: anywhere;
 }
 
@@ -374,6 +374,7 @@
   transform: translateX(0) scale(0.97);
   transform-origin: center top;
   transition: transform 0.25s ease, opacity 0.25s ease;
+  box-shadow: none;
 }
 
 .stack > .strategyCard[data-position='active'] {
@@ -592,6 +593,7 @@
   opacity: 1;
   pointer-events: auto;
   transform: none;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--outline) 14%, transparent);
 }
 
 .list .cardBody {
@@ -926,7 +928,11 @@
     gap: .4rem;
     border-width: 2px;
     border-radius: var(--radius-2xl);
-    box-shadow: 0 10px 0 var(--shadow);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 14%, transparent);
+  }
+
+  .stack > .strategyCard {
+    box-shadow: none;
   }
 
   .strategyCard h3 {
@@ -975,6 +981,10 @@
 
   .list .stack {
     gap: .52rem;
+  }
+
+  .list .stack > .strategyCard {
+    box-shadow: 0 2px 0 color-mix(in srgb, var(--outline) 12%, transparent);
   }
 
   .formCard {
