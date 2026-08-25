@@ -25,11 +25,14 @@ test.describe('Connection reviewed content', () => {
     await expect(deck.locator('article')).toHaveCount(7);
 
     const userCard = deck.locator('article').filter({ has: page.getByRole('heading', { name: 'Call a friend' }) });
-    await expect(userCard).toContainText('Nat');
-    await expect(userCard.getByRole('link', { name: 'Evidence' })).toHaveCount(0);
+    const contributor = userCard.locator('[aria-label="Strategy contributor"]');
+    await expect(contributor).toHaveText('Nat • Missouri');
+    await expect(userCard.locator('[aria-label="Strategy citation"]')).toHaveCount(0);
 
     const systemCard = deck.locator('article').filter({ has: page.getByRole('heading', { name: 'Write a letter' }) });
-    await expect(systemCard.getByRole('link', { name: 'Evidence' })).toHaveAttribute('href', 'https://pubmed.ncbi.nlm.nih.gov/40643373/');
+    const paperTitle = 'Communicating messages of care and positivity to peers with SCI/D improves loneliness in volunteer letter writers';
+    await expect(systemCard.locator('[aria-label="Strategy citation"]')).toBeVisible();
+    await expect(systemCard.getByRole('link', { name: paperTitle })).toHaveAttribute('href', 'https://pubmed.ncbi.nlm.nih.gov/40643373/');
 
     await expect(deck.getByRole('heading', { name: 'One kind text' })).toHaveCount(0);
     await expect(deck.getByRole('heading', { name: 'Specific thank-you' })).toHaveCount(0);
