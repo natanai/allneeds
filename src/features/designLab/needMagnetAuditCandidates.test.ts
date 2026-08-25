@@ -3,12 +3,19 @@ import { describe, expect, it } from 'vitest';
 import { needMagnetAuditCandidates } from './needMagnetAuditCandidates';
 
 describe('need magnet audit candidates', () => {
-  it('keeps one production control and review candidates for each audited need', () => {
+  it('keeps one production control and one selected proposal for each audited need', () => {
+    expect(needMagnetAuditCandidates.map((candidate) => candidate.id)).toEqual([
+      'connection-current',
+      'connection-constellation',
+      'support-current',
+      'support-mountain-range',
+    ]);
+
     for (const slug of ['connection', 'support'] as const) {
       const group = needMagnetAuditCandidates.filter((candidate) => candidate.needSlug === slug);
-      expect(group.length).toBeGreaterThanOrEqual(4);
+      expect(group).toHaveLength(2);
       expect(group.filter((candidate) => candidate.id.endsWith('-current'))).toHaveLength(1);
-      expect(group.filter((candidate) => candidate.artMaskPath)).not.toHaveLength(0);
+      expect(group.filter((candidate) => candidate.artMaskPath)).toHaveLength(1);
     }
   });
 
@@ -28,5 +35,11 @@ describe('need magnet audit candidates', () => {
       .forEach((candidate) => {
         expect(`${candidate.artA} ${candidate.artB}`).toMatch(contrastRole);
       });
+  });
+
+  it('keeps Support icon spacing while hiding the icon for the mountain-range proposal', () => {
+    const support = needMagnetAuditCandidates.find((candidate) => candidate.id === 'support-mountain-range');
+    expect(support?.hideIcon).toBe(true);
+    expect(support?.artMaskPath).toBe('design-lab/need-magnets/support-mountain-range.svg');
   });
 });

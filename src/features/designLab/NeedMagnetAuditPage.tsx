@@ -21,6 +21,7 @@ function candidateStyle(candidate: NeedMagnetAuditCandidate): CustomProperties {
     '--magnet-icon': `url("${assetPath(candidate.iconPath)}")`,
     '--audit-face': candidate.faceBackground,
     '--audit-icon-fill': candidate.iconFill,
+    '--audit-icon-opacity': candidate.hideIcon ? 0 : 1,
     '--audit-art-a': candidate.artA,
     '--audit-art-b': candidate.artB,
     '--audit-art-opacity': String(candidate.artOpacity ?? 0),

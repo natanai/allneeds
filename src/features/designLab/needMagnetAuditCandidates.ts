@@ -5,6 +5,7 @@ export type NeedMagnetAuditCandidate = Readonly<{
   title: string;
   description: string;
   iconPath: string;
+  hideIcon?: boolean;
   artMaskPath?: string;
   faceBackground: string;
   iconFill: string;
@@ -14,7 +15,6 @@ export type NeedMagnetAuditCandidate = Readonly<{
 }>;
 
 const gradientIcon = 'linear-gradient(135deg, var(--audit-art-a), var(--audit-art-b))';
-const refrigeratorSafe = (color: string) => `color-mix(in srgb, ${color} 72%, var(--primary) 28%)`;
 
 export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
   {
@@ -22,7 +22,7 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     needSlug: 'connection',
     needTitle: 'Connection',
     title: 'Current control',
-    description: 'Current production Need treatment, kept beside every proposal as the baseline.',
+    description: 'Current production Need treatment, kept beside the selected proposal as the baseline.',
     iconPath: 'icons/needs/connection.svg',
     faceBackground: 'var(--selection)',
     iconFill: '#000000',
@@ -30,39 +30,11 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     artB: 'var(--selection)',
   },
   {
-    id: 'connection-weave',
-    needSlug: 'connection',
-    needTitle: 'Connection',
-    title: 'C1 · Weave',
-    description: 'Crossing full-face bands that make relation and reciprocity visible across the entire magnet.',
-    iconPath: 'icons/needs/connection.svg',
-    artMaskPath: 'design-lab/need-magnets/connection-weave.svg',
-    faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--quiet) 18%)',
-    iconFill: gradientIcon,
-    artA: refrigeratorSafe('var(--action)'),
-    artB: refrigeratorSafe('var(--positive)'),
-    artOpacity: 0.9,
-  },
-  {
-    id: 'connection-bridge',
-    needSlug: 'connection',
-    needTitle: 'Connection',
-    title: 'C2 · Bridge',
-    description: 'Two sides visibly joined through a central span, retaining the linking metaphor without relying only on the icon.',
-    iconPath: 'icons/needs/connection.svg',
-    artMaskPath: 'design-lab/need-magnets/connection-bridge.svg',
-    faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--attention) 18%)',
-    iconFill: gradientIcon,
-    artA: 'var(--primary)',
-    artB: 'var(--positive)',
-    artOpacity: 0.88,
-  },
-  {
     id: 'connection-constellation',
     needSlug: 'connection',
     needTitle: 'Connection',
     title: 'C3 · Constellation',
-    description: 'Networked points and a connecting route across the face for a more playful, recognizable pattern.',
+    description: 'Networked points and a connecting route across the face for a playful, recognizable sense of relation.',
     iconPath: 'icons/needs/connection.svg',
     artMaskPath: 'design-lab/need-magnets/connection-constellation.svg',
     faceBackground: 'color-mix(in srgb, var(--selection) 84%, var(--quiet) 16%)',
@@ -76,7 +48,7 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     needSlug: 'support',
     needTitle: 'Support',
     title: 'Current control',
-    description: 'Current production Need treatment, kept beside every proposal as the baseline.',
+    description: 'Current production Need treatment, kept beside the selected proposal as the baseline.',
     iconPath: 'icons/needs/support.svg',
     faceBackground: 'var(--selection)',
     iconFill: '#000000',
@@ -84,45 +56,18 @@ export const needMagnetAuditCandidates: readonly NeedMagnetAuditCandidate[] = [
     artB: 'var(--selection)',
   },
   {
-    id: 'support-cradle',
+    id: 'support-mountain-range',
     needSlug: 'support',
     needTitle: 'Support',
-    title: 'S1 · Cradle',
-    description: 'A visible base and lifting curves make the whole face feel held, carried, and reinforced.',
+    title: 'S1 · Mountain Range',
+    description: 'A tall peak begins in the reserved icon space and the range continues behind the word, suggesting the support that helps us climb difficult mountains.',
     iconPath: 'icons/needs/support.svg',
-    artMaskPath: 'design-lab/need-magnets/support-cradle.svg',
+    hideIcon: true,
+    artMaskPath: 'design-lab/need-magnets/support-mountain-range.svg',
     faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--positive) 18%)',
     iconFill: gradientIcon,
-    artA: refrigeratorSafe('var(--attention)'),
-    artB: refrigeratorSafe('var(--positive)'),
-    artOpacity: 0.9,
-  },
-  {
-    id: 'support-protective-arc',
-    needSlug: 'support',
-    needTitle: 'Support',
-    title: 'S2 · Protective Arc',
-    description: 'A sheltering outer arc and inner support form make protection and assistance readable across the face.',
-    iconPath: 'icons/needs/support.svg',
-    artMaskPath: 'design-lab/need-magnets/support-protective-arc.svg',
-    faceBackground: 'color-mix(in srgb, var(--selection) 84%, var(--quiet) 16%)',
-    iconFill: gradientIcon,
-    artA: 'var(--positive)',
-    artB: 'var(--primary)',
-    artOpacity: 0.88,
-  },
-  {
-    id: 'support-structure',
-    needSlug: 'support',
-    needTitle: 'Support',
-    title: 'S3 · Structure',
-    description: 'Foundation, supports, and a beam create a literal load-bearing interpretation of Support.',
-    iconPath: 'icons/needs/support.svg',
-    artMaskPath: 'design-lab/need-magnets/support-structure.svg',
-    faceBackground: 'color-mix(in srgb, var(--selection) 82%, var(--attention) 18%)',
-    iconFill: gradientIcon,
-    artA: 'var(--action)',
-    artB: 'var(--primary)',
-    artOpacity: 0.88,
+    artA: 'color-mix(in srgb, var(--attention) 68%, var(--primary) 32%)',
+    artB: 'color-mix(in srgb, var(--positive) 62%, var(--primary) 38%)',
+    artOpacity: 0.94,
   },
 ];

@@ -209,6 +209,7 @@
   position: relative;
   z-index: 2;
   background: var(--audit-icon-fill, #000000);
+  opacity: var(--audit-icon-opacity, 1);
 }
 
 .art {
