@@ -101,7 +101,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - `Details` and `Citations` are secondary disclosure controls. Their visible treatment should be small and quiet while retaining an approximately 44px touch target and the existing expand/collapse behavior.
 - Supporting-source labels and numbered source links may share one row on ordinary phone widths; narrow screens fall back to a single-column flow rather than clipping content.
 - Expanded citation rows use compact numbering and typography but must retain the full description and external link.
-- Strategy cards remain tactile/prominent, but mobile card padding, border weight, and shadow should be more restrained than desktop chrome.
+- Strategy cards remain tactile/prominent, but mobile card padding and border weight should be restrained. In stacked mode, do not fake depth with repeated heavy drop shadows; the visible rear cards themselves provide the depth cue. View-all cards may retain only a subtle lift.
 - Do not shrink or reintroduce instability into the stable-viewport one-at-a-time strategy deck merely to save space; density improvements should come from surrounding chrome and card padding first.
 - Add-a-strategy forms keep every existing field and save capability. Related short fields such as optional name/location may share a row on normal phone widths, with a one-column fallback on very narrow screens.
 
@@ -123,10 +123,12 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Strategy-specific supporting evidence is a reference link, not a second paragraph of card content. Present it as a small, subdued, recognizably underlined external-link treatment for people who want the source; keep the full source description available through accessible labeling/title metadata.
 - Previous/next deck navigation uses compact circular arrow controls with the position count between them.
 - In one-at-a-time mode, horizontal swipes on the card deck move to the previous/next strategy while vertical gestures remain normal page scrolling; interactive controls inside a card do not initiate deck swipes.
-- Horizontal intent should be forgiving on touchscreens: a modest diagonal left/right gesture should lock to deck navigation before Safari turns it into vertical scrolling. Clearly vertical intent should abandon the deck gesture immediately. Do not require a nearly perfect horizontal line.
+- Horizontal intent should be **thumb-forgiving** on touchscreens: lock to deck navigation from a small horizontal signal even when the thumb also travels noticeably up/down. A diagonal gesture with meaningful left/right movement should succeed; only clearly vertical intent should be released to page scrolling. Do not require a near-horizontal line.
 - The focused deck also supports Left/Right Arrow navigation as a non-pointer alternative.
 - Mobile deck height should use stable viewport sizing rather than dynamic viewport height, so Safari browser chrome does not visibly squash or stretch the card while scrolling. Give the deck generous vertical space before its card body becomes internally scrollable.
 - In one-at-a-time mode, keep the deck metaphor visibly legible and legacy-inspired: when enough cards exist, the two rear cards should peek beneath **and slightly to opposite sides** of the active card with small opposing rotations. Create the side peeks inside an inset deck gutter and horizontally clip the stack so the transforms can never widen the page or create horizontal scrolling.
+- Stacked cards should not each cast a large downward shadow. Use borders, offsets, and the physical rear-card layers for depth; repeated shadow bands make the stack look artificially thick.
+- Before Shuffle, default strategy order favors human contributions over system-generated strategies. Named user contributors come first, then other user-made strategies, then system strategies, while preserving the source order within each tier. Once the user presses Shuffle, keep the shuffled order until the deck is reinitialized; do not silently re-prioritize it.
 - Shuffle uses the canonical Shuffle control above.
 - View-all/view-one icons follow the destination-arrangement rule above.
 - All existing save, profile, shuffle, view-mode, previous/next, swipe, and keyboard functionality must remain present during visual cleanup.
@@ -180,10 +182,12 @@ Rules:
 - Shared strategy feed and Need-detail strategy controls moved toward denser app-like presentation without behavior changes.
 - Shuffle standardized on the existing crossed-arrows icon-only browser control.
 - Strategy view-mode icons standardized to depict the destination card arrangement.
-- Need-detail one-at-a-time strategy decks use forgiving diagonal-aware horizontal swipe intent while preserving clearly vertical page scrolling and Left/Right Arrow support.
+- Need-detail one-at-a-time strategy decks use thumb-forgiving diagonal-aware horizontal swipe intent while preserving clearly vertical page scrolling and Left/Right Arrow support.
 - Need-detail mobile strategy cards use stable viewport sizing and more available screen height so iOS browser chrome does not resize them during page scrolling.
 - Need-detail mobile title/evidence/sources/form chrome was compacted so supporting information consumes less screen before Strategies without hiding any content or controls.
 - Needs index mobile search/title spacing was tightened while retaining the canonical Shuffle control and full magnet behavior.
 - Personal strategy composers are now local/private first: Bluesky sharing appears only for active sessions, signed-out public-export status moves to advanced overflow, disabled profile-save ghosts disappear, and the composer ellipsis lives at the bottom right.
 - Need-detail one-at-a-time strategy decks use legacy-inspired opposing side peeks/rotation inside a clipped inset gutter so the deck feels playful without reintroducing horizontal page overflow.
 - Strategy-card evidence links were demoted to compact underlined `Supporting source ↗` references so evidence does not compete with the strategy itself.
+- Stacked strategy decks use the rear cards themselves for depth rather than repeated heavy drop shadows; View All retains only a subtle card lift.
+- Fresh strategy decks prioritize named human submissions, then other user-made strategies, then system strategies; explicit Shuffle temporarily overrides that ordering.
