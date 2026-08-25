@@ -1,4 +1,5 @@
 export type NeedSatisfaction = 'met' | 'unmet' | 'both';
+export type StrategyProvenance = 'system' | 'user';
 
 export interface EntityRef {
   slug: string;
@@ -51,10 +52,12 @@ export interface Strategy {
   title: string;
   summary: string;
   supportedNeeds: EntityRef[];
+  provenance: StrategyProvenance;
   contributor?: {
     name?: string;
     location?: string;
   };
+  evidence?: EvidenceSource;
 }
 
 export interface BodyCueOption {

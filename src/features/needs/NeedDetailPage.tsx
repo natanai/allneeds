@@ -295,8 +295,12 @@ export function NeedDetailPage() {
           {need.evidence.claimSummary ? <p className={styles.claim}>{need.evidence.claimSummary}</p> : null}
           {need.evidence.narrative ? (
             <details className={styles.details}>
-              <summary className={styles.detailsToggle}>Details<span className="visually-hidden"> about the rewritten claim</span></summary>
-              <div className={styles.rewrite}><p>{need.evidence.narrative}</p></div>
+              <summary className={styles.detailsToggle}>Details<span className="visually-hidden"> about the evidence</span></summary>
+              <div className={styles.rewrite}>
+                {need.evidence.narrative.split(/\n{2,}/).map((paragraph, index) => (
+                  <p key={`${need.slug}-evidence-${index}`}>{paragraph}</p>
+                ))}
+              </div>
             </details>
           ) : null}
           {need.evidence.sources.length ? (
@@ -363,12 +367,25 @@ export function NeedDetailPage() {
                     : index === nextIndex ? 'next'
                       : index === previousIndex ? 'prev' : 'hidden';
                   const saved = inventoryHasStrategy(inventory, strategy.slug);
+                  const contributor = contributorLabel(strategy);
                   return (
                     <article key={strategy.slug} className={styles.strategyCard} data-position={position}>
                       <h3>{strategy.title}</h3>
                       <div className={styles.cardBody}>
                         <p>{strategy.summary}</p>
-                        {contributorLabel(strategy) ? <p className={styles.meta}>{contributorLabel(strategy)}</p> : null}
+                        {strategy.provenance === 'user' && contributor ? <p className={styles.meta}>{contributor}</p> : null}
+                        {strategy.provenance === 'system' && strategy.evidence ? (
+                          <p className={`${styles.meta} ${styles.evidenceMeta}`}>
+                            <a
+                              href={strategy.evidence.url}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              title={strategy.evidence.description}
+                            >
+                              Evidence
+                            </a>
+                          </p>
+                        ) : null}
                       </div>
                       <div className={styles.cardActions}>
                         <button

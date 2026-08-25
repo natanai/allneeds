@@ -7,6 +7,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 
 type EntityRef = { slug: string; title: string };
+type EvidenceSource = { url: string; description?: string };
+type StrategyProvenance = 'system' | 'user';
 type CatalogStrategySource = {
   title: string;
   slug: string;
@@ -14,6 +16,10 @@ type CatalogStrategySource = {
   description?: string;
   needs?: EntityRef[];
   contributor?: { name?: string; location?: string };
+  contributorName?: string;
+  contributorLocation?: string;
+  provenance?: StrategyProvenance;
+  evidence?: EvidenceSource;
 };
 type LegacyCatalog = {
   feelings: Array<{
@@ -34,7 +40,7 @@ type LegacyCatalog = {
     description?: string;
     originalClaim?: string;
     rewrittenClaim?: string;
-    supportingSources?: Array<{ url: string; description?: string }>;
+    supportingSources?: EvidenceSource[];
     feelings?: EntityRef[];
     fauxFeelings?: EntityRef[];
     strategies?: EntityRef[];
@@ -47,27 +53,67 @@ type LegacyCatalog = {
   }>;
   strategies: CatalogStrategySource[];
 };
+type EditorialNeed = {
+  summary: string;
+  narrative: string;
+  sources: EvidenceSource[];
+  strategies: EntityRef[];
+};
+type EditorialCatalog = {
+  needs: Record<string, EditorialNeed>;
+  strategies: CatalogStrategySource[];
+  strategyProvenance?: Record<string, StrategyProvenance>;
+  discardedStrategySlugs?: string[];
+  strategyNeedRemovals?: Record<string, string[]>;
+};
 
 const runtimeCatalogId = 'virtual:allneeds-runtime-catalog';
 const resolvedRuntimeCatalogId = `\0${runtimeCatalogId}`;
 const legacyCatalogPath = resolve('src/data/generated/legacyData.json');
+const editorialCatalogPath = resolve('src/data/editorialCatalog.json');
 const userStrategiesPath = resolve('src/data/userStrategies.json');
 
-function runtimeCatalogSource() {
-  const legacy = JSON.parse(readFileSync(legacyCatalogPath, 'utf8')) as LegacyCatalog;
-  const userStrategies = JSON.parse(readFileSync(userStrategiesPath, 'utf8')) as CatalogStrategySource[];
-  const userStrategyRefsByNeed = new Map<string, EntityRef[]>();
+function normalizedContributor(strategy: CatalogStrategySource) {
+  const name = strategy.contributor?.name?.trim() || strategy.contributorName?.trim() || undefined;
+  const location = strategy.contributor?.location?.trim() || strategy.contributorLocation?.trim() || undefined;
+  return name || location ? { name, location } : undefined;
+}
 
-  userStrategies.forEach((strategy) => {
+function addStrategyReferences(
+  strategies: CatalogStrategySource[],
+  referencesByNeed: Map<string, EntityRef[]>,
+) {
+  strategies.forEach((strategy) => {
     const reference = { slug: strategy.slug, title: strategy.title };
     (strategy.needs ?? []).forEach((need) => {
-      const references = userStrategyRefsByNeed.get(need.slug) ?? [];
+      const references = referencesByNeed.get(need.slug) ?? [];
       if (!references.some((candidate) => candidate.slug === reference.slug)) {
         references.push(reference);
       }
-      userStrategyRefsByNeed.set(need.slug, references);
+      referencesByNeed.set(need.slug, references);
     });
   });
+}
+
+function runtimeCatalogSource() {
+  const legacy = JSON.parse(readFileSync(legacyCatalogPath, 'utf8')) as LegacyCatalog;
+  const editorial = JSON.parse(readFileSync(editorialCatalogPath, 'utf8')) as EditorialCatalog;
+  const userStrategies = JSON.parse(readFileSync(userStrategiesPath, 'utf8')) as CatalogStrategySource[];
+  const discardedStrategySlugs = new Set(editorial.discardedStrategySlugs ?? []);
+  const removedNeedsByStrategy = new Map(
+    Object.entries(editorial.strategyNeedRemovals ?? {}).map(([strategySlug, needSlugs]) => [
+      strategySlug,
+      new Set(needSlugs),
+    ]),
+  );
+  const strategyAllowedForNeed = (strategySlug: string, needSlug: string) => (
+    !discardedStrategySlugs.has(strategySlug)
+    && !removedNeedsByStrategy.get(strategySlug)?.has(needSlug)
+  );
+
+  const addedStrategyRefsByNeed = new Map<string, EntityRef[]>();
+  addStrategyReferences(editorial.strategies, addedStrategyRefsByNeed);
+  addStrategyReferences(userStrategies, addedStrategyRefsByNeed);
 
   const feelings = legacy.feelings.map((feeling) => ({
     slug: feeling.slug,
@@ -81,10 +127,14 @@ function runtimeCatalogSource() {
       ? { poem: { quotation: feeling.poemQuote, ...(feeling.poemUrl ? { url: feeling.poemUrl } : {}) } }
       : {}),
   }));
+
   const needs = legacy.needs.map((need) => {
-    const strategies = [...(need.strategies ?? [])];
-    (userStrategyRefsByNeed.get(need.slug) ?? []).forEach((reference) => {
-      if (!strategies.some((candidate) => candidate.slug === reference.slug)) {
+    const override = editorial.needs[need.slug];
+    const strategies = [...(override?.strategies ?? need.strategies ?? [])]
+      .filter((reference) => strategyAllowedForNeed(reference.slug, need.slug));
+    (addedStrategyRefsByNeed.get(need.slug) ?? []).forEach((reference) => {
+      if (strategyAllowedForNeed(reference.slug, need.slug)
+        && !strategies.some((candidate) => candidate.slug === reference.slug)) {
         strategies.push(reference);
       }
     });
@@ -93,30 +143,57 @@ function runtimeCatalogSource() {
       slug: need.slug,
       title: need.title,
       category: need.category,
-      summary: need.description || need.originalClaim || '',
+      summary: override?.summary ?? need.description ?? need.originalClaim ?? '',
       feelings: need.feelings ?? [],
       fauxFeelings: need.fauxFeelings ?? [],
       strategies,
       evidence: {
-        claimSummary: need.originalClaim,
-        narrative: need.rewrittenClaim,
-        sources: need.supportingSources ?? [],
+        claimSummary: override?.summary ?? need.originalClaim,
+        narrative: override?.narrative ?? need.rewrittenClaim,
+        sources: override?.sources ?? need.supportingSources ?? [],
       },
     };
   });
+
   const fauxFeelings = legacy.fauxFeelings.map((feeling) => ({
     slug: feeling.slug,
     title: feeling.title,
     feelings: feeling.feelings ?? [],
     needs: feeling.needs ?? [],
   }));
-  const strategies = [...legacy.strategies, ...userStrategies].map((strategy) => ({
-    slug: strategy.slug,
-    title: strategy.title,
-    summary: strategy.summary || strategy.description || '',
-    supportedNeeds: strategy.needs ?? [],
-    contributor: strategy.contributor,
-  }));
+
+  const userStrategySlugs = new Set(userStrategies.map((strategy) => strategy.slug));
+  const strategySources = new Map<string, CatalogStrategySource>();
+  legacy.strategies.forEach((strategy) => {
+    if (!discardedStrategySlugs.has(strategy.slug)) strategySources.set(strategy.slug, strategy);
+  });
+  editorial.strategies.forEach((strategy) => {
+    if (!discardedStrategySlugs.has(strategy.slug)) strategySources.set(strategy.slug, strategy);
+  });
+  userStrategies.forEach((strategy) => {
+    if (!discardedStrategySlugs.has(strategy.slug)) strategySources.set(strategy.slug, strategy);
+  });
+
+  const strategies = [...strategySources.values()].map((strategy) => {
+    const contributor = normalizedContributor(strategy);
+    const provenance = userStrategySlugs.has(strategy.slug)
+      ? 'user'
+      : strategy.provenance
+        ?? editorial.strategyProvenance?.[strategy.slug]
+        ?? (contributor ? 'user' : 'system');
+    const supportedNeeds = (strategy.needs ?? [])
+      .filter((need) => strategyAllowedForNeed(strategy.slug, need.slug));
+
+    return {
+      slug: strategy.slug,
+      title: strategy.title,
+      summary: strategy.summary || strategy.description || '',
+      supportedNeeds,
+      provenance,
+      ...(contributor ? { contributor } : {}),
+      ...(strategy.evidence ? { evidence: strategy.evidence } : {}),
+    };
+  });
 
   return [
     `export const feelings = ${JSON.stringify(feelings)};`,
@@ -135,6 +212,7 @@ function runtimeCatalogPlugin(): Plugin {
     load(id) {
       if (id !== resolvedRuntimeCatalogId) return null;
       this.addWatchFile(legacyCatalogPath);
+      this.addWatchFile(editorialCatalogPath);
       this.addWatchFile(userStrategiesPath);
       return runtimeCatalogSource();
     },
