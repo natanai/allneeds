@@ -3,6 +3,7 @@
   "name": "allneeds-backend",
   "main": "src/worker.js",
   "compatibility_date": "2026-08-25",
+  "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "d1_databases": [
     {
