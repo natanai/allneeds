@@ -74,6 +74,29 @@ The current backend exposes strategy create/list/feed/sync behavior but does not
 
 This gives account owners an editable workflow without treating downloaded community strategies as their authored work. A future backend contract should preserve stable remote IDs across edits.
 
+## Identity verification prerequisite
+
+Server-side ownership and moderation are only as trustworthy as the backend session that establishes the DID. The current production backend accepts the DID presented to `/auth/session` and does not yet validate that the presented OAuth credential belongs to that DID before creating the allneeds session.
+
+Before using DID identity for a one-time ownership transfer, privileged moderation, or any other action that cannot be safely reproduced by an ordinary user, the backend must verify the Bluesky OAuth credential against the claimed DID. A React-only DID check, handle check, hidden menu, or hard-coded client value is not an authorization boundary.
+
+Ordinary optional profile sync can continue using the existing contract while this backend hardening is completed, but do not build irreversible ownership migration or admin powers on top of the current session assertion.
+
+## Legacy Nat migration
+
+The legacy production strategy source contains 40 strategies attributed to `Nat, Missouri`. Those are the strategies that should ultimately move from contributor-attributed static catalog records to Nat's account-owned allneeds profile.
+
+Do not automatically award those strategies to whichever Bluesky user happens to be signed in. The safe migration sequence is:
+
+1. add verified backend identity and stable strategy ownership;
+2. identify Nat's profile through that verified server-side identity;
+3. create account-owned records for the 40 legacy strategies while preserving title/body/need associations;
+4. verify those records appear on the correct Need pages and can be edited by the owner;
+5. only then remove the corresponding static legacy copies so there is one source of truth;
+6. retain a migration mapping/stable remote ID so later title/body edits cannot resurrect the old static card as a duplicate.
+
+This work is tracked in issue #65. The account-free `userStrategies.json` lane is separate and must remain intact; Autumn's contribution, for example, should stay unclaimed unless a verified claim process is deliberately introduced later.
+
 ## Moderation boundary
 
 Global community moderation must be authorized by the backend. A React-only admin check is not sufficient.
@@ -98,7 +121,7 @@ Recommended moderation semantics:
 - **Hide from community** removes the strategy from public/follower discovery.
 - Hiding does not delete the author's record and does not rewrite the author's chosen visibility.
 - **Restore to community** reverses the moderation state.
-- Admin authorization is based on the authenticated DID on the server, not a client-visible flag alone.
+- Admin authorization is based on the verified authenticated DID on the server, not a client-visible flag alone.
 
 Once the backend exposes an authenticated moderation capability, public community cards can add the ellipsis moderation actions without changing the ownership model above.
 
