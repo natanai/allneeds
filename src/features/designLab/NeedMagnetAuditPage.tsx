@@ -1,14 +1,9 @@
-import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import magnetStyles from '../../components/magnets/MagnetBoard.module.css';
 import { assetPath } from '../../data/catalog';
-import {
-  readTheme,
-  themeCssValues,
-  type ThemeState,
-} from '../customizer/customizerSettings';
-import { resolveThemePresetName, themePresets } from '../customizer/themePresets';
+import { themeCssValues, type ThemeState } from '../customizer/customizerSettings';
+import { themePresets } from '../customizer/themePresets';
 import {
   needMagnetAuditCandidates,
   type NeedMagnetAuditCandidate,
@@ -16,11 +11,6 @@ import {
 import styles from './NeedMagnetAuditPage.module.css';
 
 type CustomProperties = CSSProperties & Record<`--${string}`, string | number>;
-type ThemeChoice = Readonly<{
-  id: string;
-  label: string;
-  theme: Pick<ThemeState, 'values' | 'roundness'>;
-}>;
 
 function themeStyle(theme: Pick<ThemeState, 'values' | 'roundness'>): CSSProperties {
   return themeCssValues(theme) as CSSProperties;
@@ -43,7 +33,7 @@ function candidateStyle(candidate: NeedMagnetAuditCandidate): CustomProperties {
 function AuditMagnet({ candidate }: { candidate: NeedMagnetAuditCandidate }) {
   return (
     <span
-      className={`${magnetStyles.magnet} ${magnetStyles.sky} ${magnetStyles.need} ${styles.previewMagnet}`}
+      className={`${magnetStyles.magnet} ${magnetStyles.selection} ${magnetStyles.need} ${styles.previewMagnet}`}
       style={candidateStyle(candidate)}
       aria-label={`${candidate.needTitle} magnet preview: ${candidate.title}`}
     >
@@ -53,22 +43,16 @@ function AuditMagnet({ candidate }: { candidate: NeedMagnetAuditCandidate }) {
   );
 }
 
-function CandidateCard({
-  candidate,
-  selectedTheme,
-}: {
-  candidate: NeedMagnetAuditCandidate;
-  selectedTheme: Pick<ThemeState, 'values' | 'roundness'>;
-}) {
+function CandidateCard({ candidate }: { candidate: NeedMagnetAuditCandidate }) {
   return (
     <article className={styles.card}>
-      <div className={styles.heroStage} style={themeStyle(selectedTheme)}>
+      <div className={styles.heroStage}>
         <span className={styles.heroScale}>
           <AuditMagnet candidate={candidate} />
         </span>
       </div>
 
-      <div className={styles.actualRow} style={themeStyle(selectedTheme)}>
+      <div className={styles.actualRow}>
         <span className={styles.actualLabel}>actual size</span>
         <AuditMagnet candidate={candidate} />
       </div>
@@ -92,36 +76,6 @@ function CandidateCard({
 }
 
 export function NeedMagnetAuditPage() {
-  const currentTheme = useMemo(() => readTheme(), []);
-  const currentPreset = resolveThemePresetName(currentTheme);
-  const choices = useMemo<readonly ThemeChoice[]>(() => [
-    {
-      id: 'current',
-      label: currentPreset ? `Current Customizer · ${currentPreset}` : 'Current Customizer',
-      theme: currentTheme,
-    },
-    ...themePresets.map((preset) => ({
-      id: `preset:${preset.name}`,
-      label: preset.name,
-      theme: preset,
-    })),
-  ], [currentPreset, currentTheme]);
-
-  const [choiceId, setChoiceId] = useState('current');
-  const initial = choices[0] ?? { id: 'current', label: 'Current Customizer', theme: currentTheme };
-  const [roundness, setRoundness] = useState(initial.theme.roundness);
-  const selectedChoice = choices.find((choice) => choice.id === choiceId) ?? initial;
-  const selectedTheme = {
-    values: selectedChoice.theme.values,
-    roundness,
-  };
-
-  const chooseTheme = (id: string) => {
-    const next = choices.find((choice) => choice.id === id) ?? initial;
-    setChoiceId(next.id);
-    setRoundness(next.theme.roundness);
-  };
-
   const groups = [
     ['connection', 'Connection'],
     ['support', 'Support'],
@@ -133,32 +87,11 @@ export function NeedMagnetAuditPage() {
         <p className={styles.eyebrow}>Design Lab</p>
         <h1 id="need-magnet-audit-title">Need magnet audit</h1>
         <p>
-          Review-only mockups rendered with the production Need magnet CSS, production icons,
-          and live Customizer presets. Nothing shown here changes the public Needs board until a
-          design is separately approved and implemented.
+          The enlarged and actual-size previews inherit the real site Customizer directly.
+          Open the Customizer to change palette roles or corner roundness. Preset rows remain
+          fixed comparisons. Nothing here changes the public Needs board until separately approved.
         </p>
       </header>
-
-      <section className={styles.controls} aria-label="Preview controls">
-        <label>
-          <span>Preview palette</span>
-          <select value={choiceId} onChange={(event) => chooseTheme(event.target.value)}>
-            {choices.map((choice) => (
-              <option key={choice.id} value={choice.id}>{choice.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className={styles.roundnessControl}>
-          <span>Corner roundness · {roundness}%</span>
-          <input
-            type="range"
-            min="0"
-            max="200"
-            value={roundness}
-            onChange={(event) => setRoundness(Number(event.target.value))}
-          />
-        </label>
-      </section>
 
       {groups.map(([slug, title]) => {
         const candidates = needMagnetAuditCandidates.filter((candidate) => candidate.needSlug === slug);
@@ -167,11 +100,7 @@ export function NeedMagnetAuditPage() {
             <h2 id={`audit-${slug}`}>{title}</h2>
             <div className={styles.grid}>
               {candidates.map((candidate) => (
-                <CandidateCard
-                  key={candidate.id}
-                  candidate={candidate}
-                  selectedTheme={selectedTheme}
-                />
+                <CandidateCard key={candidate.id} candidate={candidate} />
               ))}
             </div>
           </section>
