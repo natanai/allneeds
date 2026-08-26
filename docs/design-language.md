@@ -127,14 +127,16 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Distinguish an unresolvable username from a temporary Bluesky/network failure; do not tell someone their username is wrong when availability is the actual problem.
 - Error notices use the existing functional theme roles and an accessible alert announcement rather than a browser/Worker JSON error surface.
 
-## Profile sync and installed-app refresh
+## Profile sync and shared-strategy refresh
 
-**Accepted 2026-08-25.** Account and update actions should expose their real stages instead of collapsing several network operations into one indefinite busy state.
+**Accepted 2026-08-26.** Account and update actions should expose their real stages instead of collapsing several network operations into one indefinite busy state.
 
 - `Save this browser` first saves the browser snapshot, then reconciles Public/Followers strategies. Once the snapshot succeeds, report its exact local save time while strategy sync continues; completion reports its own exact time and the number of browser strategies reconciled.
 - Do not describe the whole operation as merely “Saving…” after the profile snapshot is already durable. A later strategy-sync failure must preserve and report the successful snapshot-save fact.
-- Account & data includes a signed-in-or-signed-out **Refresh allneeds** action under This device. It checks for a newer installed app shell, then reloads so an iOS Add to Home Screen installation has an obvious refresh path and the boot flow requests the newest shared strategies.
-- The refresh control uses the existing compact settings-card language and a normal text label; it is a utility action, not a new navigation destination or dominant call to action.
+- Profile save uses one streamed Worker request. The browser sends a complete authoritative strategy snapshot, while the Worker compares it with one owner read and writes only changed/new strategies, changed Need relationships, and strategies that must be unpublished. Do not rely on a browser-only change log for profile correctness across restores or multiple devices.
+- The branded first load owns one eager Public/Most recent shared-strategy request. Need pages and the Shared Strategies screen reuse that cache and its in-flight promise instead of opening additional requests.
+- Shared Strategies includes a visible **Refresh shared strategies** action for installed iOS use. It performs one explicit refresh of the current scope and reports the exact local completion time without reloading the app shell.
+- Sort the already-fetched snapshot in the browser. Changing sort must not make another Worker request; selecting the signed-in Following scope may request its distinct snapshot.
 
 ## App identity and social sharing imagery
 
@@ -237,9 +239,12 @@ Rules:
 
 ## Decision log
 
+### 2026-08-26
+
+- Profile snapshot save and shared-strategy reconciliation now share one streamed request, report separate stages and exact local times, and write only server-side strategy deltas. Shared Strategies provides the explicit installed-iOS refresh action while sort and page navigation reuse the eager startup snapshot.
+
 ### 2026-08-25
 
-- Profile snapshot save and shared-strategy reconciliation now report separate stages and exact local times; Account & data also provides a manual Refresh allneeds action for installed iOS use.
 - Bluesky sign-in now verifies the entered username before leaving allneeds, reports typos inline beside the control, and distinguishes username mistakes from temporary lookup failures.
 - The legacy three-door app identity is explicitly restored across Safari/iOS favorites, Apple touch icons, favicon fallbacks, pinned tabs, Android/maskable icons, Windows tiles, and Open Graph/Twitter sharing cards.
 - Safety's Layered Cover treatment became an approved production Need-magnet identity: the generic shield is replaced with an umbrella icon, the face uses overlapping protective layers, and the palette remains entirely derived from functional Customizer roles without changing the shared magnet shell or physics.

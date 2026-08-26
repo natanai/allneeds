@@ -23,6 +23,17 @@ function jsonResponse(request, data, status = 200, extraHeaders = {}) {
   });
 }
 
+function ndjsonResponse(request, stream, status = 200) {
+  return new Response(stream, {
+    status,
+    headers: {
+      'Content-Type': 'application/x-ndjson; charset=utf-8',
+      'Cache-Control': 'no-store',
+      ...corsHeaders(request),
+    },
+  });
+}
+
 function errorResponse(request, message, status = 400, extra = {}) {
   return jsonResponse(request, { status: 'error', message, ...extra }, status);
 }
@@ -522,24 +533,29 @@ async function handleLegacySyncStrategies(request, env) {
   return jsonResponse(request, { status: 'ok', did: session.did, deleted: idsToDelete.length, inserted });
 }
 
-async function handleStableSyncStrategies(request, env) {
-  const session = await requireVerifiedSession(env, request);
-  const body = await request.json().catch(() => null);
-  const incoming = Array.isArray(body?.strategies) ? body.strategies : null;
-  if (!incoming) return errorResponse(request, 'strategies array is required', 400);
-
+async function reconcileStableStrategies(env, session, incoming) {
   const desiredByClientKey = new Map();
   for (const entry of incoming) {
     const clientKey = normalizeClientKey(entry?.clientKey);
     const title = typeof entry?.title === 'string' ? entry.title.trim() : '';
     const visibility = normalizeVisibility(entry?.visibility);
     if (!clientKey || !title || (visibility !== 'public' && visibility !== 'followers')) continue;
-    desiredByClientKey.set(clientKey, { ...entry, clientKey, title, visibility });
+    const needIds = normalizeNeedIds(entry?.needIds);
+    desiredByClientKey.set(clientKey, {
+      clientKey,
+      title,
+      body: entry?.body == null ? null : String(entry.body),
+      needIds,
+      needIdsJson: needIds.length ? JSON.stringify(needIds) : null,
+      contributorName: normalizeContributorField(entry?.firstName) || null,
+      contributorLocation: normalizeContributorField(entry?.location) || null,
+      visibility,
+    });
   }
 
-  // Read the owner's strategy set once. The previous implementation repeated a SELECT,
-  // UPDATE, Need-link rebuild, and final SELECT for every strategy, making a 40-strategy
-  // profile sync wait on hundreds of sequential D1 operations.
+  // The complete browser snapshot remains authoritative, but this single read lets the
+  // Worker write only the actual delta. A 40-strategy no-op save therefore performs no
+  // strategy or relationship writes at all.
   const existing = await env.DB.prepare(
     `${STRATEGY_SELECT} WHERE s.author_did = ? ORDER BY s.id LIMIT 500;`,
   ).bind(session.did).all();
@@ -563,6 +579,9 @@ async function handleStableSyncStrategies(request, env) {
   }
 
   const strategyWrites = [];
+  const relationshipChanges = [];
+  let changedCount = 0;
+  let unchangedCount = 0;
   for (const [clientKey, entry] of desiredByClientKey) {
     let current = existingByClientKey.get(clientKey) || null;
     if (!current) {
@@ -572,28 +591,39 @@ async function handleStableSyncStrategies(request, env) {
       current = matches.shift() || null;
     }
 
-    const strategyBody = entry.body == null ? null : String(entry.body);
-    const needIds = normalizeNeedIds(entry.needIds);
-    const contributorName = normalizeContributorField(entry.firstName) || null;
-    const contributorLocation = normalizeContributorField(entry.location) || null;
-
     if (current) {
-      strategyWrites.push(env.DB.prepare(
-        `UPDATE strategies
-            SET client_key = ?, title = ?, body = ?, need_ids = ?, contributor_name = ?, contributor_location = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
-          WHERE id = ? AND author_did = ?;`,
-      ).bind(
-        clientKey,
-        entry.title,
-        strategyBody,
-        needIds.length ? JSON.stringify(needIds) : null,
-        contributorName,
-        contributorLocation,
-        entry.visibility,
-        current.id,
-        session.did,
-      ));
+      const currentNeedIds = normalizeNeedIds(safeJsonParseArray(current.need_ids));
+      const needsChanged = JSON.stringify(currentNeedIds) !== JSON.stringify(entry.needIds);
+      const strategyChanged = current.client_key !== clientKey
+        || current.title !== entry.title
+        || (current.body == null ? null : String(current.body)) !== entry.body
+        || current.contributor_name !== entry.contributorName
+        || current.contributor_location !== entry.contributorLocation
+        || normalizeVisibility(current.visibility) !== entry.visibility
+        || needsChanged;
+      if (strategyChanged) {
+        changedCount += 1;
+        strategyWrites.push(env.DB.prepare(
+          `UPDATE strategies
+              SET client_key = ?, title = ?, body = ?, need_ids = ?, contributor_name = ?, contributor_location = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND author_did = ?;`,
+        ).bind(
+          clientKey,
+          entry.title,
+          entry.body,
+          entry.needIdsJson,
+          entry.contributorName,
+          entry.contributorLocation,
+          entry.visibility,
+          current.id,
+          session.did,
+        ));
+        if (needsChanged) relationshipChanges.push({ clientKey, needIds: entry.needIds, replace: true });
+      } else {
+        unchangedCount += 1;
+      }
     } else {
+      changedCount += 1;
       strategyWrites.push(env.DB.prepare(
         `INSERT INTO strategies
            (author_did, client_key, title, body, need_ids, contributor_name, contributor_location, visibility, moderation_status, created_at, updated_at)
@@ -602,36 +632,34 @@ async function handleStableSyncStrategies(request, env) {
         session.did,
         clientKey,
         entry.title,
-        strategyBody,
-        needIds.length ? JSON.stringify(needIds) : null,
-        contributorName,
-        contributorLocation,
+        entry.body,
+        entry.needIdsJson,
+        entry.contributorName,
+        entry.contributorLocation,
         entry.visibility,
       ));
+      if (entry.needIds.length) relationshipChanges.push({ clientKey, needIds: entry.needIds, replace: false });
     }
   }
   await runStatementBatches(env, strategyWrites);
 
-  const owned = await env.DB.prepare(
-    `${STRATEGY_SELECT} WHERE s.author_did = ? AND s.client_key IS NOT NULL ORDER BY s.id LIMIT 500;`,
-  ).bind(session.did).all();
-  const ownedByClientKey = new Map((owned.results || []).map((row) => [row.client_key, row]));
   const relationshipWrites = [];
-
-  for (const [clientKey, entry] of desiredByClientKey) {
-    const row = ownedByClientKey.get(clientKey);
-    if (!row) throw new Error(`strategy sync could not resolve client key ${clientKey}`);
-    relationshipWrites.push(
-      env.DB.prepare('DELETE FROM strategy_needs WHERE strategy_id = ?').bind(row.id),
-    );
-    for (const needId of normalizeNeedIds(entry.needIds)) {
+  for (const change of relationshipChanges) {
+    if (change.replace) {
       relationshipWrites.push(env.DB.prepare(
-        'INSERT OR IGNORE INTO strategy_needs (strategy_id, need_id) VALUES (?, ?);',
-      ).bind(row.id, needId));
+        `DELETE FROM strategy_needs
+          WHERE strategy_id = (SELECT id FROM strategies WHERE author_did = ? AND client_key = ?);`,
+      ).bind(session.did, change.clientKey));
+    }
+    for (const needId of change.needIds) {
+      relationshipWrites.push(env.DB.prepare(
+        `INSERT OR IGNORE INTO strategy_needs (strategy_id, need_id)
+         SELECT id, ? FROM strategies WHERE author_did = ? AND client_key = ?;`,
+      ).bind(needId, session.did, change.clientKey));
     }
   }
 
-  const rowsToUnpublish = (owned.results || []).filter((row) => (
+  const rowsToUnpublish = [...existingByClientKey.values()].filter((row) => (
     !desiredByClientKey.has(row.client_key) && normalizeVisibility(row.visibility) !== 'private'
   ));
   for (const row of rowsToUnpublish) {
@@ -643,17 +671,23 @@ async function handleStableSyncStrategies(request, env) {
   }
   await runStatementBatches(env, relationshipWrites);
 
-  const synced = [...desiredByClientKey.keys()]
-    .map((clientKey) => mapStrategyRow(ownedByClientKey.get(clientKey)))
-    .filter(Boolean);
-  return jsonResponse(request, {
-    status: 'ok',
+  return {
     did: session.did,
-    synced,
-    syncedCount: synced.length,
+    syncedCount: desiredByClientKey.size,
+    changedCount,
+    unchangedCount,
     unpublished: rowsToUnpublish.length,
     syncedAt: new Date().toISOString(),
-  });
+  };
+}
+
+async function handleStableSyncStrategies(request, env) {
+  const session = await requireVerifiedSession(env, request);
+  const body = await request.json().catch(() => null);
+  const incoming = Array.isArray(body?.strategies) ? body.strategies : null;
+  if (!incoming) return errorResponse(request, 'strategies array is required', 400);
+  const result = await reconcileStableStrategies(env, session, incoming);
+  return jsonResponse(request, { status: 'ok', ...result });
 }
 
 async function handleModeration(request, env, id, nextStatus) {
@@ -710,19 +744,64 @@ async function handleGetUserSettings(request, env) {
   return jsonResponse(request, { status: 'ok', did: session.did, settings: result.results || [] });
 }
 
-async function handlePostUserSettings(request, env) {
-  const session = await requireSession(env, request);
-  const body = await request.json().catch(() => null);
-  if (!body?.key || body.value === undefined) return errorResponse(request, 'key and value are required', 400);
+async function writeUserSetting(env, session, key, value) {
   const savedAt = new Date().toISOString();
   await env.DB.prepare(
     `INSERT INTO user_settings (did, key, value, updated_at)
      VALUES (?, ?, ?, ?)
      ON CONFLICT(did, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at;`,
-  ).bind(session.did, String(body.key), String(body.value), savedAt).run();
+  ).bind(session.did, String(key), String(value), savedAt).run();
+  return savedAt;
+}
+
+async function handlePostUserSettings(request, env) {
+  const session = await requireSession(env, request);
+  const body = await request.json().catch(() => null);
+  if (!body?.key || body.value === undefined) return errorResponse(request, 'key and value are required', 400);
+  const savedAt = await writeUserSetting(env, session, body.key, body.value);
   return jsonResponse(request, {
     status: 'ok', did: session.did, key: String(body.key), value: String(body.value), savedAt,
   });
+}
+
+async function handleSaveProfile(request, env) {
+  const session = await requireVerifiedSession(env, request);
+  const body = await request.json().catch(() => null);
+  if (!body?.key || body.value === undefined) return errorResponse(request, 'key and value are required', 400);
+  if (!Array.isArray(body.strategies)) return errorResponse(request, 'strategies array is required', 400);
+
+  // Keep the snapshot durable before strategy work begins. The streamed first event lets
+  // the browser report that exact fact while the same Worker request reconciles the delta.
+  const savedAt = await writeUserSetting(env, session, body.key, body.value);
+  const encoder = new TextEncoder();
+  const encodeEvent = (event) => encoder.encode(`${JSON.stringify(event)}\n`);
+  const stream = new ReadableStream({
+    async start(controller) {
+      controller.enqueue(encodeEvent({
+        stage: 'profile-saved',
+        status: 'ok',
+        savedAt,
+        strategyCount: body.strategies.length,
+      }));
+      try {
+        const result = await reconcileStableStrategies(env, session, body.strategies);
+        controller.enqueue(encodeEvent({ stage: 'complete', status: 'ok', savedAt, ...result }));
+      } catch (error) {
+        const errorId = crypto.randomUUID();
+        console.error('allneeds profile strategy sync error', { errorId, error });
+        controller.enqueue(encodeEvent({
+          stage: 'complete',
+          status: 'partial',
+          savedAt,
+          syncedCount: body.strategies.length,
+          errorId,
+        }));
+      } finally {
+        controller.close();
+      }
+    },
+  });
+  return ndjsonResponse(request, stream);
 }
 
 async function handleGetJournals(request, env) {
@@ -765,6 +844,7 @@ async function route(request, env) {
   if (method === 'POST' && pathname === '/api/strategies/sync-owned') return handleStableSyncStrategies(request, env);
   if (method === 'GET' && pathname === '/api/user-settings') return handleGetUserSettings(request, env);
   if (method === 'POST' && pathname === '/api/user-settings') return handlePostUserSettings(request, env);
+  if (method === 'POST' && pathname === '/api/profile/save') return handleSaveProfile(request, env);
   if (method === 'GET' && pathname === '/api/journals') return handleGetJournals(request, env);
   if (method === 'POST' && pathname === '/api/journals') return handlePostJournals(request, env);
 

@@ -57,7 +57,7 @@ function strategyRow({ id, clientKey, title, visibility = 'public' }) {
   };
 }
 
-function createSyncDatabase(initialRows, syncedRows) {
+function createSyncDatabase(initialRows) {
   const reads = [];
   const prepare = vi.fn((sql) => ({
     bind(...values) {
@@ -77,7 +77,7 @@ function createSyncDatabase(initialRows, syncedRows) {
         },
         async all() {
           reads.push(sql);
-          return { results: sql.includes('s.client_key IS NOT NULL') ? syncedRows : initialRows };
+          return { results: initialRows };
         },
         async run() { return { meta: { changes: 1 } }; },
       };
@@ -133,18 +133,13 @@ describe('profile persistence', () => {
     expect(savedValues[0]?.[3]).toBe(data.savedAt);
   });
 
-  it('reconciles a multi-strategy profile through bounded batches instead of per-strategy round trips', async () => {
+  it('writes only changed and unpublished strategies from a complete profile snapshot', async () => {
     const initialRows = [
       strategyRow({ id: 1, clientKey: 'one', title: 'One' }),
       strategyRow({ id: 2, clientKey: 'two', title: 'Two' }),
       strategyRow({ id: 3, clientKey: 'old', title: 'Old' }),
     ];
-    const syncedRows = [
-      strategyRow({ id: 1, clientKey: 'one', title: 'One updated' }),
-      strategyRow({ id: 2, clientKey: 'two', title: 'Two updated' }),
-      strategyRow({ id: 3, clientKey: 'old', title: 'Old' }),
-    ];
-    const database = createSyncDatabase(initialRows, syncedRows);
+    const database = createSyncDatabase(initialRows);
     const response = await worker.fetch(new Request(
       'https://backend.allneeds.app/api/strategies/sync-owned',
       {
@@ -152,7 +147,7 @@ describe('profile persistence', () => {
         headers: { Cookie: 'allneeds_session=session-1', 'Content-Type': 'application/json' },
         body: JSON.stringify({
           strategies: [
-            { clientKey: 'one', title: 'One updated', body: 'One updated body', needIds: ['safety'], visibility: 'public' },
+            { clientKey: 'one', title: 'One', body: 'One body', needIds: ['safety'], visibility: 'public' },
             { clientKey: 'two', title: 'Two updated', body: 'Two updated body', needIds: ['safety'], visibility: 'followers' },
           ],
         }),
@@ -161,11 +156,103 @@ describe('profile persistence', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data).toMatchObject({ status: 'ok', syncedCount: 2, unpublished: 1 });
+    expect(data).toMatchObject({
+      status: 'ok',
+      syncedCount: 2,
+      changedCount: 1,
+      unchangedCount: 1,
+      unpublished: 1,
+    });
     expect(Number.isNaN(Date.parse(data.syncedAt))).toBe(false);
-    expect(database.reads).toHaveLength(2);
+    expect(database.reads).toHaveLength(1);
     expect(database.DB.batch).toHaveBeenCalledTimes(2);
-    expect(database.DB.batch.mock.calls[0][0]).toHaveLength(2);
-    expect(database.DB.batch.mock.calls[1][0]).toHaveLength(5);
+    expect(database.DB.batch.mock.calls[0][0]).toHaveLength(1);
+    expect(database.DB.batch.mock.calls[1][0]).toHaveLength(1);
+  });
+
+  it('performs no strategy writes when all 40 browser strategies are already current', async () => {
+    const rows = Array.from({ length: 40 }, (_, index) => strategyRow({
+      id: index + 1,
+      clientKey: `strategy-${index + 1}`,
+      title: `Strategy ${index + 1}`,
+    }));
+    const database = createSyncDatabase(rows);
+    const response = await worker.fetch(new Request(
+      'https://backend.allneeds.app/api/strategies/sync-owned',
+      {
+        method: 'POST',
+        headers: { Cookie: 'allneeds_session=session-1', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          strategies: rows.map((row) => ({
+            clientKey: row.client_key,
+            title: row.title,
+            body: row.body,
+            needIds: ['safety'],
+            visibility: row.visibility,
+          })),
+        }),
+      },
+    ), { DB: database.DB }, {});
+    const data = await response.json();
+
+    expect(data).toMatchObject({
+      status: 'ok',
+      syncedCount: 40,
+      changedCount: 0,
+      unchangedCount: 40,
+      unpublished: 0,
+    });
+    expect(database.reads).toHaveLength(1);
+    expect(database.DB.batch).not.toHaveBeenCalled();
+  });
+
+  it('rebuilds Need relationships only when a strategy Need set changes', async () => {
+    const database = createSyncDatabase([
+      strategyRow({ id: 1, clientKey: 'one', title: 'One' }),
+    ]);
+    const response = await worker.fetch(new Request(
+      'https://backend.allneeds.app/api/strategies/sync-owned',
+      {
+        method: 'POST',
+        headers: { Cookie: 'allneeds_session=session-1', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          strategies: [
+            { clientKey: 'one', title: 'One', body: 'One body', needIds: ['safety', 'connection'], visibility: 'public' },
+          ],
+        }),
+      },
+    ), { DB: database.DB }, {});
+    const data = await response.json();
+
+    expect(data).toMatchObject({ changedCount: 1, unchangedCount: 0 });
+    expect(database.DB.batch).toHaveBeenCalledTimes(2);
+    expect(database.DB.batch.mock.calls[0][0]).toHaveLength(1);
+    expect(database.DB.batch.mock.calls[1][0]).toHaveLength(3);
+  });
+
+  it('streams snapshot confirmation and strategy reconciliation through one profile request', async () => {
+    const database = createSyncDatabase([]);
+    const response = await worker.fetch(new Request(
+      'https://backend.allneeds.app/api/profile/save',
+      {
+        method: 'POST',
+        headers: { Cookie: 'allneeds_session=session-1', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'allneeds_export_v1', value: '{}', strategies: [] }),
+      },
+    ), { DB: database.DB }, {});
+    const events = (await response.text()).trim().split('\n').map((line) => JSON.parse(line));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toContain('application/x-ndjson');
+    expect(events[0]).toMatchObject({ stage: 'profile-saved', status: 'ok', strategyCount: 0 });
+    expect(events[1]).toMatchObject({
+      stage: 'complete',
+      status: 'ok',
+      syncedCount: 0,
+      changedCount: 0,
+      unchangedCount: 0,
+    });
+    expect(events[0].savedAt).toBe(events[1].savedAt);
+    expect(database.reads).toHaveLength(1);
   });
 });

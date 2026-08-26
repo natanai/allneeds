@@ -34,15 +34,15 @@ type ResolveHandleResponse = {
   message?: string;
 };
 
-type SaveSettingResponse = {
+type ProfileSaveEvent = {
+  stage?: 'profile-saved' | 'complete';
   status?: string;
   savedAt?: string;
-};
-
-type StrategySyncResponse = {
-  status?: string;
   syncedAt?: string;
   syncedCount?: number;
+  changedCount?: number;
+  unchangedCount?: number;
+  unpublished?: number;
 };
 
 export type ProfileSaveProgress = {
@@ -56,6 +56,9 @@ export type ProfileSaveResult = {
   strategiesSynced: boolean;
   strategiesSyncedAt: string | null;
   strategyCount: number;
+  changedStrategyCount: number | null;
+  unchangedStrategyCount: number | null;
+  unpublishedStrategyCount: number | null;
 };
 
 let currentSession: BlueskySession | null = null;
@@ -257,47 +260,85 @@ async function requireBackendSession() {
 export async function saveCurrentBrowserToProfile(
   onProgress?: (progress: ProfileSaveProgress) => void,
 ): Promise<ProfileSaveResult> {
-  const session = await requireBackendSession();
+  await requireBackendSession();
   const snapshot = await buildCurrentBrowserBackup();
-  const response = await fetch(`${BACKEND_API_URL}/user-settings`, {
+  const strategies = profilePublishableStrategies(snapshot.inventory);
+  const response = await fetch(`${BACKEND_API_URL}/profile/save`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ key: BACKEND_SNAPSHOT_KEY, value: JSON.stringify(snapshot) }),
+    body: JSON.stringify({
+      key: BACKEND_SNAPSHOT_KEY,
+      value: JSON.stringify(snapshot),
+      strategies,
+    }),
   });
-  const data = await response.json().catch(() => null) as SaveSettingResponse | null;
-  if (!response.ok || data?.status !== 'ok') {
+  if (!response.ok) {
     throw new Error('Unable to save this browser to your profile.');
   }
 
-  const strategies = profilePublishableStrategies(snapshot.inventory);
-  const profileSavedAt = typeof data.savedAt === 'string' && !Number.isNaN(Date.parse(data.savedAt))
-    ? data.savedAt
-    : new Date().toISOString();
-  onProgress?.({
-    stage: 'syncing-strategies',
-    profileSavedAt,
-    strategyCount: strategies.length,
-  });
-  const syncPath = session.verified ? '/strategies/sync-owned' : '/strategies/sync';
-  const syncResponse = await fetch(`${BACKEND_API_URL}${syncPath}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ strategies }),
-  }).catch(() => null);
-  const syncData = await syncResponse?.json().catch(() => null) as StrategySyncResponse | null | undefined;
-  const strategiesSynced = Boolean(syncResponse?.ok && syncData?.status === 'ok');
+  const decoder = new TextDecoder();
+  const reader = response.body?.getReader();
+  let buffer = '';
+  const saveState: { profileSavedAt: string; syncData: ProfileSaveEvent | null } = {
+    profileSavedAt: '',
+    syncData: null,
+  };
+  const acceptEvent = (line: string) => {
+    if (!line.trim()) return;
+    let event: ProfileSaveEvent;
+    try { event = JSON.parse(line) as ProfileSaveEvent; } catch { return; }
+    if (event.stage === 'profile-saved' && typeof event.savedAt === 'string' && !Number.isNaN(Date.parse(event.savedAt))) {
+      saveState.profileSavedAt = event.savedAt;
+      onProgress?.({
+        stage: 'syncing-strategies',
+        profileSavedAt: saveState.profileSavedAt,
+        strategyCount: strategies.length,
+      });
+    }
+    if (event.stage === 'complete') saveState.syncData = event;
+  };
+  if (reader) {
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        lines.forEach(acceptEvent);
+        if (done) break;
+      }
+      acceptEvent(buffer);
+    } catch (error) {
+      // Once the first streamed event arrives, the snapshot is durable even if the
+      // connection drops before strategy reconciliation can report completion.
+      if (!saveState.profileSavedAt) throw error;
+    }
+  } else {
+    buffer = await response.text();
+    buffer.split('\n').forEach(acceptEvent);
+  }
+
+  if (!saveState.profileSavedAt && typeof saveState.syncData?.savedAt === 'string' && !Number.isNaN(Date.parse(saveState.syncData.savedAt))) {
+    saveState.profileSavedAt = saveState.syncData.savedAt;
+  }
+  if (!saveState.profileSavedAt) throw new Error('Unable to confirm when this browser was saved to your profile.');
+
+  const strategiesSynced = saveState.syncData?.status === 'ok';
   const strategiesSyncedAt = strategiesSynced
-    ? (typeof syncData?.syncedAt === 'string' && !Number.isNaN(Date.parse(syncData.syncedAt))
-        ? syncData.syncedAt
+    ? (typeof saveState.syncData?.syncedAt === 'string' && !Number.isNaN(Date.parse(saveState.syncData.syncedAt))
+        ? saveState.syncData.syncedAt
         : new Date().toISOString())
     : null;
+  const strategyCount = typeof saveState.syncData?.syncedCount === 'number' ? saveState.syncData.syncedCount : strategies.length;
   return {
-    profileSavedAt,
+    profileSavedAt: saveState.profileSavedAt,
     strategiesSynced,
     strategiesSyncedAt,
-    strategyCount: typeof syncData?.syncedCount === 'number' ? syncData.syncedCount : strategies.length,
+    strategyCount,
+    changedStrategyCount: typeof saveState.syncData?.changedCount === 'number' ? saveState.syncData.changedCount : null,
+    unchangedStrategyCount: typeof saveState.syncData?.unchangedCount === 'number' ? saveState.syncData.unchangedCount : null,
+    unpublishedStrategyCount: typeof saveState.syncData?.unpublished === 'number' ? saveState.syncData.unpublished : null,
   };
 }
 

@@ -21,6 +21,7 @@ export type SharedFeedStrategy = {
   title?: string;
   body?: string;
   createdAt?: string;
+  updatedAt?: string;
   visibility?: 'private' | 'followers' | 'public';
   addCount?: number;
   needIds?: unknown[];
@@ -121,7 +122,7 @@ export function readSharedFeedResources(scope: string, sort: string) {
 export function loadSharedFeedResources(scope: string, sort: string, refresh = false) {
   const key = feedKey(scope, sort);
   if (!refresh && feedResources.has(key)) return Promise.resolve(feedResources.get(key)!);
-  if (!refresh && feedPromises.has(key)) return feedPromises.get(key)!;
+  if (feedPromises.has(key)) return feedPromises.get(key)!;
   const base = import.meta.env.DEV ? '/allneeds-api' : 'https://backend.allneeds.app/api';
   const promise = fetch(`${base}/strategies/feed?scope=${encodeURIComponent(scope)}&sort=${encodeURIComponent(sort)}&limit=100`, {
     credentials: 'include',

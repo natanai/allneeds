@@ -142,4 +142,6 @@ New/privileged endpoints include:
 
 The Worker is only the dynamic API layer. Static application assets, bundled system strategies, icons, CSS, and JavaScript remain on GitHub Pages. The frontend warms one public community-strategy snapshot during its existing boot overlay and reuses it in memory; it must still open normally if the Worker is slow or unavailable.
 
+`POST /api/profile/save` combines the profile snapshot and owned-strategy reconciliation into one streamed Worker request. The complete browser strategy set remains authoritative, but the Worker reads the owner's server set once and writes only changed/new rows, changed Need relationships, and removed sharing. An unchanged 40-strategy profile performs no strategy or relationship writes. The first stream event confirms the durable snapshot time; the final event reports changed, unchanged, and unpublished counts.
+
 

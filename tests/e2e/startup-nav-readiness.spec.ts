@@ -50,7 +50,7 @@ test('mounts the app beneath an opaque full-screen splash while local resources 
   await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveAttribute('data-ready', 'true');
 });
 
-test('fresh startup warms only the local runtime and keeps Play on by default', async ({ page }) => {
+test('fresh startup warms one public shared-strategy snapshot and keeps Play on by default', async ({ page }) => {
   const remoteRequests: string[] = [];
   page.on('request', (request) => {
     const url = new URL(request.url());
@@ -61,7 +61,15 @@ test('fresh startup warms only the local runtime and keeps Play on by default', 
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appState)).toBe('ready');
 
   await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveAttribute('data-active', 'true');
-  expect(remoteRequests).toEqual([]);
+  expect(remoteRequests).toHaveLength(1);
+  const feedRequest = new URL(remoteRequests[0]);
+  expect(feedRequest.hostname).toBe('backend.allneeds.app');
+  expect(feedRequest.pathname).toBe('/api/strategies/feed');
+  expect(Object.fromEntries(feedRequest.searchParams)).toEqual({
+    scope: 'public',
+    sort: 'recent',
+    limit: '100',
+  });
 });
 
 test('route and menu presentation state do not re-pack persistent nav geometry', async ({ page }) => {

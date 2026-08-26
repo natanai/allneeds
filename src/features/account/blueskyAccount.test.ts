@@ -87,30 +87,54 @@ describe('Bluesky account compatibility', () => {
         admin: false,
       },
     });
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({
-        status: 'ok',
-        savedAt: '2026-08-25T20:01:02.345Z',
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({
-        status: 'ok',
-        syncedAt: '2026-08-25T20:01:04.567Z',
-        syncedCount: 0,
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    const encoder = new TextEncoder();
+    const streamState: { controller?: ReadableStreamDefaultController<Uint8Array> } = {};
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        streamState.controller = controller;
+        controller.enqueue(encoder.encode(`${JSON.stringify({
+          stage: 'profile-saved',
+          status: 'ok',
+          savedAt: '2026-08-25T20:01:02.345Z',
+          strategyCount: 0,
+        })}\n`));
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(new Response(stream, {
+      status: 200,
+      headers: { 'Content-Type': 'application/x-ndjson' },
+    }));
     vi.stubGlobal('fetch', fetchMock);
     const progress = vi.fn();
 
-    await expect(saveCurrentBrowserToProfile(progress)).resolves.toEqual({
+    const saving = saveCurrentBrowserToProfile(progress);
+    await vi.waitFor(() => expect(progress).toHaveBeenCalledWith({
+      stage: 'syncing-strategies',
+      profileSavedAt: '2026-08-25T20:01:02.345Z',
+      strategyCount: 0,
+    }));
+    streamState.controller?.enqueue(encoder.encode(`${JSON.stringify({
+      stage: 'complete',
+      status: 'ok',
+      savedAt: '2026-08-25T20:01:02.345Z',
+      syncedAt: '2026-08-25T20:01:04.567Z',
+      syncedCount: 0,
+      changedCount: 0,
+      unchangedCount: 0,
+      unpublished: 0,
+    })}\n`));
+    streamState.controller?.close();
+
+    await expect(saving).resolves.toEqual({
       profileSavedAt: '2026-08-25T20:01:02.345Z',
       strategiesSynced: true,
       strategiesSyncedAt: '2026-08-25T20:01:04.567Z',
       strategyCount: 0,
+      changedStrategyCount: 0,
+      unchangedStrategyCount: 0,
+      unpublishedStrategyCount: 0,
     });
-    expect(progress).toHaveBeenCalledWith({
-      stage: 'syncing-strategies',
-      profileSavedAt: '2026-08-25T20:01:02.345Z',
-      strategyCount: 0,
-    });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/api/profile/save');
   });
 });

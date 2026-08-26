@@ -50,4 +50,24 @@ describe('shared strategy resources', () => {
     expect(first).toBe(second);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('joins an in-flight startup request even when Refresh is pressed before it finishes', async () => {
+    const pending: { resolve?: (value: { ok: boolean; json: () => Promise<unknown> }) => void } = {};
+    const fetchMock = vi.fn(() => new Promise<{ ok: boolean; json: () => Promise<unknown> }>((resolve) => {
+      pending.resolve = resolve;
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const resources = await import('./appResources');
+    const startup = resources.loadSharedFeedResources('public', 'recent');
+    const refresh = resources.loadSharedFeedResources('public', 'recent', true);
+    expect(startup).toBe(refresh);
+    expect(fetchMock).toHaveBeenCalledOnce();
+
+    pending.resolve?.({
+      ok: true,
+      json: async () => ({ status: 'ok', strategies: [] }),
+    });
+    await expect(refresh).resolves.toEqual({ strategies: [], error: '' });
+  });
 });
