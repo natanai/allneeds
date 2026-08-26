@@ -16,7 +16,7 @@
     "test:e2e:playwright": "playwright test",
     "test:e2e:outage": "node scripts/verify-offline-reconnect.mjs",
     "test:e2e:headed": "playwright test --headed",
-    "build": "tsc -b && vite build && node scripts/copy-spa-fallback.mjs && node scripts/generate-service-worker.mjs && node scripts/verify-production-build.mjs",
+    "build": "tsc -b && vite build && node scripts/copy-spa-fallback.mjs && node scripts/emit-observation-compat.mjs && node scripts/generate-service-worker.mjs && node scripts/verify-production-build.mjs",
     "preview": "vite preview",
     "check": "pnpm typecheck && pnpm test && pnpm build",
     "check:browser": "pnpm build && pnpm test:e2e",
