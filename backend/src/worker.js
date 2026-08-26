@@ -407,9 +407,11 @@ async function handleDeleteStrategy(request, env, id) {
 }
 
 async function handleStrategyFeed(request, env) {
-  const session = await getSession(env, request);
   const url = new URL(request.url);
   const scope = url.searchParams.get('scope') === 'follows' ? 'follows' : 'public';
+  // Public discovery is identical for signed-in and signed-out visitors. Avoid spending
+  // a session-row read on every public startup request; personalized scope still verifies.
+  const session = scope === 'follows' ? await getSession(env, request) : null;
   const sort = url.searchParams.get('sort') === 'popular' ? 'popular' : 'recent';
   const need = normalizeNeedId(url.searchParams.get('need'));
   const limitRaw = Number.parseInt(url.searchParams.get('limit') || '50', 10);
@@ -461,6 +463,10 @@ async function handleStrategyFeed(request, env) {
     need: need || null,
     viewerDid: session?.did || null,
     strategies: (result.results || []).map(mapStrategyRow),
+  }, 200, {
+    // This is a browser-private fallback cache. The application also owns a timestamped
+    // persistent snapshot so reload loops can avoid an inbound Worker request entirely.
+    'Cache-Control': scope === 'public' ? 'private, max-age=3600' : 'private, no-store',
   });
 }
 

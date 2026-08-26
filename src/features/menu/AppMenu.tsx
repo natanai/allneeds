@@ -3,6 +3,7 @@ import type { ChangeEvent, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
+import { isTransientLocalStorageKey } from '../../persistence/transientStorage';
 import {
   loadProfileIntoCurrentBrowser,
   saveCurrentBrowserToProfile,
@@ -89,11 +90,13 @@ function localTime(isoTime: string) {
   }).format(date);
 }
 
-function captureLocalStorage() {
+function captureLocalStorage(includeTransient = false) {
   const snapshot: Record<string, string> = {};
   for (let index = 0; index < window.localStorage.length; index += 1) {
     const key = window.localStorage.key(index);
-    if (key) snapshot[key] = window.localStorage.getItem(key) ?? '';
+    if (key && (includeTransient || !isTransientLocalStorageKey(key))) {
+      snapshot[key] = window.localStorage.getItem(key) ?? '';
+    }
   }
   return snapshot;
 }
@@ -277,12 +280,16 @@ export function AppMenu({
         setStatus({ target: 'device', message: 'Restore canceled. No changes were made.' });
         return;
       }
-      const previous = captureLocalStorage();
+      const previous = captureLocalStorage(true);
+      const transient = Object.fromEntries(Object.entries(previous).filter(([key]) => isTransientLocalStorageKey(key)));
       try {
         window.localStorage.clear();
         Object.entries(snapshot).forEach(([key, value]) => {
-          window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+          if (!isTransientLocalStorageKey(key)) {
+            window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+          }
         });
+        Object.entries(transient).forEach(([key, value]) => window.localStorage.setItem(key, value));
         synchronizeCustomizerMirrors(snapshot as Record<string, unknown>);
       } catch (error) {
         window.localStorage.clear();
