@@ -118,6 +118,23 @@ Rules:
 
 The visible swatch itself is the native `input[type=color]`; do not replace it with a button that programmatically clicks a hidden color input on iOS Safari.
 
+## Account sign-in recovery
+
+**Accepted 2026-08-25.** Bluesky username mistakes should be recoverable inside the Account & data panel.
+
+- Check that a syntactically valid Bluesky username resolves before navigating away to Bluesky authorization.
+- Keep a missing/invalid username in the panel and show a concise inline message directly beneath the Sign in control so the person can correct it immediately.
+- Distinguish an unresolvable username from a temporary Bluesky/network failure; do not tell someone their username is wrong when availability is the actual problem.
+- Error notices use the existing functional theme roles and an accessible alert announcement rather than a browser/Worker JSON error surface.
+
+## App identity and social sharing imagery
+
+**Accepted 2026-08-25.** The legacy three-door mark remains the canonical app/favorite/share identity.
+
+- Preserve the complete legacy favicon, Apple touch icon, Android/maskable icon, Safari pinned-tab, Windows tile, web-manifest, and social-card asset set.
+- The document head must advertise format fallbacks and platform-specific icons explicitly; do not rely on a browser inventing a letter tile from the page title.
+- Open Graph and Twitter sharing metadata use the legacy three-door social cards and accessible image text.
+
 ## Destructive / advanced actions
 
 **Accepted 2026-08-24.** Rare destructive maintenance actions should not compete visually with normal tasks.
@@ -213,6 +230,8 @@ Rules:
 
 ### 2026-08-25
 
+- Bluesky sign-in now verifies the entered username before leaving allneeds, reports typos inline beside the control, and distinguishes username mistakes from temporary lookup failures.
+- The legacy three-door app identity is explicitly restored across Safari/iOS favorites, Apple touch icons, favicon fallbacks, pinned tabs, Android/maskable icons, Windows tiles, and Open Graph/Twitter sharing cards.
 - Safety's Layered Cover treatment became an approved production Need-magnet identity: the generic shield is replaced with an umbrella icon, the face uses overlapping protective layers, and the palette remains entirely derived from functional Customizer roles without changing the shared magnet shell or physics.
 - Connection's Constellation treatment became the first approved production Need-magnet identity: full-face node/path artwork with the existing link icon, all derived from functional Customizer roles without changing the shared magnet shell or physics.
 - Need-magnet concept work now belongs in the deployed Design Lab rather than standalone preview HTML by default; controls are removed when no longer useful, and approved designs leave the active review set after promotion.

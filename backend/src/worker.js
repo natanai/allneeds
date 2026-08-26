@@ -607,7 +607,12 @@ async function handleResolveHandle(request, env) {
   const profileUrl = new URL('https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile');
   profileUrl.searchParams.set('actor', handle);
   const response = await fetch(profileUrl);
-  if (!response.ok) return errorResponse(request, `Bluesky API returned ${response.status}`, 502);
+  if (!response.ok) {
+    if (response.status === 400 || response.status === 404) {
+      return errorResponse(request, 'Bluesky profile not found', 404);
+    }
+    return errorResponse(request, 'Bluesky username check unavailable', 502);
+  }
   const profile = await response.json();
   if (!profile?.did || !profile?.handle) return errorResponse(request, 'profile response missing identity', 502);
   await upsertUserProfile(env, profile.did, profile.handle);

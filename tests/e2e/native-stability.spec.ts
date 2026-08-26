@@ -190,6 +190,13 @@ test('Journal History keeps long entries compact and puts feeling ratings first'
 
 test('Bluesky account and profile paths are actionable instead of placeholder controls', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
+  await page.route('https://backend.allneeds.app/api/resolve-handle**', async (route) => {
+    await route.fulfill({
+      status: 404,
+      contentType: 'application/json',
+      body: JSON.stringify({ status: 'error', message: 'Bluesky profile not found' }),
+    });
+  });
   await page.goto('/');
   await page.getByRole('button', { name: 'Open menu' }).click();
   const menu = page.getByRole('dialog', { name: 'allneeds.app menu' });
@@ -202,19 +209,28 @@ test('Bluesky account and profile paths are actionable instead of placeholder co
   expect(accountHeadingBox).not.toBeNull();
   expect(accountHeadingBox!.y).toBeGreaterThanOrEqual(menuBox!.y);
   expect(accountHeadingBox!.y + accountHeadingBox!.height).toBeLessThanOrEqual(menuBox!.y + menuBox!.height);
-  const handle = menu.getByLabel('Bluesky handle');
+  const handle = menu.getByLabel('Bluesky username');
   const signIn = menu.getByRole('button', { name: 'Sign in', exact: true });
   await expect(handle).toBeEnabled();
   await expect(signIn).toBeDisabled();
   await handle.fill('name');
   await expect(signIn).toBeEnabled();
   await signIn.click();
-  await expect(menu.getByRole('status')).toHaveText('Bluesky handles must include a domain (for example: yourname.bsky.social).');
+  await expect(menu.getByRole('alert')).toHaveText('Bluesky handles must include a domain (for example: yourname.bsky.social).');
+
+  const pageBeforeMissingUsernameCheck = page.url();
+  await handle.fill('not-a-real-person.bsky.social');
+  await signIn.click();
+  await expect(menu.getByRole('alert')).toHaveText('We could not find that Bluesky username. Check the spelling and try again.');
+  expect(page.url()).toBe(pageBeforeMissingUsernameCheck);
+
   await handle.fill('nathanael.ink');
   await expect(signIn).toBeEnabled();
   await expect(menu.getByRole('button', { name: 'Save this browser' })).toBeDisabled();
   await expect(menu.getByRole('button', { name: 'Load saved profile' })).toBeDisabled();
-  expect(runtimeProblems).toEqual([]);
+  expect(runtimeProblems.filter((problem) => (
+    !problem.includes('Failed to load resource: the server responded with a status of 404')
+  ))).toEqual([]);
 });
 
 test('a restored Bluesky session unlocks profile visibility and follower feeds', async ({ page }) => {

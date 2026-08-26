@@ -308,7 +308,17 @@
 
 .status {
   font-size: 0.7rem;
+  line-height: 1.42;
   color: var(--secondary);
+}
+
+.statusError {
+  padding: 0.48rem 0.56rem;
+  border-left: 3px solid var(--attention);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--attention) 18%, #fff 82%);
+  color: var(--text);
+  font-weight: 650;
 }
 
 @media (max-width: 640px) {

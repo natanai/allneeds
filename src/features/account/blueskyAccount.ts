@@ -28,6 +28,12 @@ type BackendSessionResponse = {
   admin?: boolean;
 };
 
+type ResolveHandleResponse = {
+  status?: string;
+  handle?: string;
+  message?: string;
+};
+
 let currentSession: BlueskySession | null = null;
 let initializePromise: Promise<BlueskySession | null> | null = null;
 
@@ -132,8 +138,40 @@ export function normalizeBlueskyHandle(input: string) {
   return handle;
 }
 
-export async function signInWithBluesky(input: string) {
+export async function resolveBlueskyHandle(input: string) {
   const handle = normalizeBlueskyHandle(input);
+  const url = new URL(`${BACKEND_API_URL}/resolve-handle`);
+  url.searchParams.set('handle', handle);
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      credentials: 'include',
+      cache: 'no-store',
+    });
+  } catch {
+    throw new Error('We could not check that Bluesky username right now. Please try again.');
+  }
+
+  const data = await response.json().catch(() => null) as ResolveHandleResponse | null;
+  if (!response.ok) {
+    const message = typeof data?.message === 'string' ? data.message : '';
+    const usernameWasNotFound = response.status === 404
+      || /returned (?:400|404)|not found|could not be resolved/i.test(message);
+    if (usernameWasNotFound) {
+      throw new Error('We could not find that Bluesky username. Check the spelling and try again.');
+    }
+    throw new Error('Bluesky could not verify that username right now. Please try again.');
+  }
+
+  if (data?.status !== 'ok' || typeof data.handle !== 'string' || !data.handle.trim()) {
+    throw new Error('Bluesky returned an incomplete username check. Please try again.');
+  }
+  return normalizeBlueskyHandle(data.handle);
+}
+
+export async function signInWithBluesky(input: string) {
+  const handle = await resolveBlueskyHandle(input);
   safeStorage('sessionStorage')?.setItem(LOGIN_INTENT_STORAGE_KEY, '1');
   const returnTo = typeof window === 'undefined'
     ? '/inventory/'
