@@ -178,6 +178,53 @@
   pointer-events: none;
 }
 
+/* Approved Need identity: Understanding · Converging Map (U4D).
+   The route-map and perspective-pair directly echo the two approved Understanding
+   lenses while the converging full-face field ties them into one canonical Need. */
+.boardWrapper :global([data-magnet-id='needs-understanding']) {
+  --magnet-icon: url('/icons/needs/understanding.svg');
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--quiet) 62%, var(--selection) 38%),
+    color-mix(in srgb, var(--selection) 66%, var(--action) 34%)
+  );
+}
+
+.boardWrapper :global([data-magnet-id='needs-understanding'])::before {
+  position: relative;
+  z-index: 2;
+  background: var(--primary);
+}
+
+.boardWrapper :global([data-magnet-id='needs-understanding']) :global(.label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.boardWrapper :global([data-magnet-id='needs-understanding']) :global(.label)::after {
+  content: '';
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  background: var(--secondary);
+  mask: url('/icons/needs/understanding-perspective.svg') center / contain no-repeat;
+  -webkit-mask: url('/icons/needs/understanding-perspective.svg') center / contain no-repeat;
+}
+
+.boardWrapper :global([data-magnet-id='needs-understanding'])::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, var(--primary), var(--action));
+  opacity: 0.3;
+  mask: url('/icons/needs/art/understanding-converging-map.svg') left center / 100% 100% no-repeat;
+  -webkit-mask: url('/icons/needs/art/understanding-converging-map.svg') left center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
 .empty {
   margin: 0;
   padding: 1rem;
