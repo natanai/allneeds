@@ -13,6 +13,15 @@ export interface EvidenceSource {
   kind?: SupportingSourceKind;
 }
 
+export interface NeedEvidenceLens {
+  id: string;
+  title: string;
+  recognitionCue?: string;
+  summary: string;
+  narrative?: string;
+  sources: EvidenceSource[];
+}
+
 export interface Feeling {
   slug: string;
   title: string;
@@ -39,6 +48,7 @@ export interface Need {
     claimSummary?: string;
     narrative?: string;
     sources: EvidenceSource[];
+    lenses?: NeedEvidenceLens[];
   };
 }
 
