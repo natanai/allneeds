@@ -232,22 +232,22 @@ Rules:
 
 ### Shared strategy feed
 
-**Accepted 2026-08-26.** Shared Strategy cards belong to the same visual family as strategy cards on Need pages; the feed adds browsing controls, not a competing social-network card language.
+**Accepted 2026-08-26.** Shared Strategies should feel like the same strategy-card system used on Need pages, adapted into a scrolling community feed rather than a separate social-network card style.
 
-- Use the Need-page strategy-card hierarchy as the canonical visual reference: `Positive` strategy surface, strong `Outline`, rounded tactile card geometry, title/body first, compact utility actions, and restrained lift rather than generic white social-post cards.
-- Feed cards are content-sized rather than fixed-height decks, but their title, body, save-action, and utility-control treatment should remain recognizably related to Need-page strategy cards.
-- Place contributor attribution at the **bottom-right** of the card as quiet metadata rather than leading the card with an avatar/profile header.
-- Public feed attribution is contributor-controlled. Show only the explicit contributor **name** and **location** supplied with the strategy. Do not expose or synthesize a visible identity from Bluesky display name, handle, DID, or other account metadata when those contributor fields were not provided.
-- A timestamp may follow the contributor line as quiet feed metadata; it should not outweigh the strategy content.
-- Filters stay easy to scan but should use restrained labels, borders, and vertical space. Explicit Refresh is a compact utility control with its accessible name preserved.
-- Visibility and supported-needs metadata may use compact chips/popovers. `Save`/saved state remains clearly actionable but secondary to the strategy content.
-- Feed scope, sort, Bluesky sign-in gating for Following, refresh/cache behavior, Needs-supported details, owner Edit, moderation controls, and inventory-save behavior must not be lost during visual cleanup.
+- Reuse the Need-page strategy-card family: `Positive` card surface, strong `Outline`, rounded tactile geometry, title/body hierarchy, and compact app-style utility controls.
+- Feed-specific controls such as Show, Sort, Refresh, visibility state, Needs disclosure, Edit, and Save stay secondary to the strategy content.
+- The feed toolbar is compact app UI, not a three-column web form. Refresh is a 44px icon control with the exact accessible label `Refresh shared strategies`.
+- Card attribution lives quietly at the bottom-right. Show only contributor-controlled `contributor.name` and `contributor.location` values (plus quiet date metadata); never manufacture visible attribution from Bluesky display names, handles, or DIDs.
+- Saving a shared strategy into Inventory carries only the explicit contributor name/location fields rather than account-derived identity fallbacks.
+- Visible feed colors must come from Customizer-owned functional roles and existing derived surface tokens. Do not introduce literal visible hex colors for feed cards, toolbar controls, badges, or action states; derive variants with `color-mix()` from `Primary`, `Quiet`, `Text`, `Secondary`, `Action`, `Positive`, `Attention`, `Selection`, `Outline`, and existing surface tokens.
+- Keep approximately 44px touch targets for interactive controls even when their visible treatment is compact.
+- Feed scope, sort, Bluesky Following availability, explicit refresh behavior, Needs-supported details, owner Edit, moderation controls, and save behavior must not be lost during visual cleanup.
 
 ## Decision log
 
 ### 2026-08-26
 
-- Shared Strategies now reuse the Need-page strategy-card language instead of a separate social-post card treatment; contributor name/location sit quietly at bottom-right and visible feed attribution never falls back to Bluesky handles/display names/DIDs.
+- Shared Strategies now reuse the Need-page strategy-card language instead of a separate social-post card treatment; contributor name/location sit quietly at bottom-right, visible feed attribution never falls back to Bluesky handles/display names/DIDs, and all visible feed color treatment derives from Customizer roles/surface tokens rather than literal colors.
 - Profile snapshot save and shared-strategy reconciliation now share one streamed request, report separate stages and exact local times, and write only server-side strategy deltas. Shared Strategies provides the explicit installed-iOS refresh action while sort and page navigation reuse the eager startup snapshot.
 - Repeated reloads now reuse a one-hour public-feed snapshot and session-scoped account verification instead of repeatedly invoking the Worker; public-feed misses also skip the irrelevant signed-in session query.
 
