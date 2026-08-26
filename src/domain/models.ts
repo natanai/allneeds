@@ -1,6 +1,6 @@
 export type NeedSatisfaction = 'met' | 'unmet' | 'both';
 export type StrategyProvenance = 'system' | 'user';
-export type SupportingSourceKind = 'scholarly' | 'official-resource';
+export type SupportingSourceKind = 'scholarly' | 'clinical-guidance' | 'official-resource';
 
 export interface EntityRef {
   slug: string;
