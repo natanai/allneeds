@@ -134,9 +134,11 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - `Save this browser` first saves the browser snapshot, then reconciles Public/Followers strategies. Once the snapshot succeeds, report its exact local save time while strategy sync continues; completion reports its own exact time and the number of browser strategies reconciled.
 - Do not describe the whole operation as merely “Saving…” after the profile snapshot is already durable. A later strategy-sync failure must preserve and report the successful snapshot-save fact.
 - Profile save uses one streamed Worker request. The browser sends a complete authoritative strategy snapshot, while the Worker compares it with one owner read and writes only changed/new strategies, changed Need relationships, and strategies that must be unpublished. Do not rely on a browser-only change log for profile correctness across restores or multiple devices.
-- The branded first load owns one eager Public/Most recent shared-strategy request. Need pages and the Shared Strategies screen reuse that cache and its in-flight promise instead of opening additional requests.
+- The branded first load owns resolution of the Public/Most recent shared-strategy snapshot: it reuses a recently checked persistent snapshot when available and otherwise owns one eager request. Need pages and the Shared Strategies screen reuse that cache and its in-flight promise instead of opening additional requests.
 - Shared Strategies includes a visible **Refresh shared strategies** action for installed iOS use. It performs one explicit refresh of the current scope and reports the exact local completion time without reloading the app shell.
 - Sort the already-fetched snapshot in the browser. Changing sort must not make another Worker request; selecting the signed-in Following scope may request its distinct snapshot.
+- Persist the successfully checked Public/Most recent snapshot for one hour. A full reload may satisfy the branded preload from that complete browser snapshot with no Worker request, while the page reports when it was last refreshed. This is a bounded freshness claim, not proof that the server has not changed; manual Refresh always bypasses it.
+- A recently verified account may be reused from session-scoped browser storage for the same one-hour window so repeated reloads do not call `/api/me`. Private/profile operations remain server-enforced, and a new browser-app session validates normally.
 
 ## App identity and social sharing imagery
 
@@ -242,6 +244,7 @@ Rules:
 ### 2026-08-26
 
 - Profile snapshot save and shared-strategy reconciliation now share one streamed request, report separate stages and exact local times, and write only server-side strategy deltas. Shared Strategies provides the explicit installed-iOS refresh action while sort and page navigation reuse the eager startup snapshot.
+- Repeated reloads now reuse a one-hour public-feed snapshot and session-scoped account verification instead of repeatedly invoking the Worker; public-feed misses also skip the irrelevant signed-in session query.
 
 ### 2026-08-25
 

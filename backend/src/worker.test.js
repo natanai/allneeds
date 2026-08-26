@@ -256,3 +256,34 @@ describe('profile persistence', () => {
     expect(database.reads).toHaveLength(1);
   });
 });
+
+describe('public feed efficiency', () => {
+  it('does not read a signed-in session for the identical public feed and allows browser caching', async () => {
+    const statements = [];
+    const env = {
+      DB: {
+        prepare: vi.fn((sql) => {
+          statements.push(sql);
+          return {
+            bind() {
+              return {
+                async all() { return { results: [] }; },
+                async first() { return null; },
+              };
+            },
+          };
+        }),
+      },
+    };
+    const response = await worker.fetch(new Request(
+      'https://backend.allneeds.app/api/strategies/feed?scope=public&sort=recent&limit=100',
+      { headers: { Cookie: 'allneeds_session=session-1' } },
+    ), env, {});
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toMatchObject({ status: 'ok', scope: 'public', viewerDid: null, strategies: [] });
+    expect(statements.some((sql) => sql.includes('FROM sessions'))).toBe(false);
+    expect(response.headers.get('Cache-Control')).toBe('private, max-age=3600');
+  });
+});

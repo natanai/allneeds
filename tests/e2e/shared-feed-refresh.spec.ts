@@ -32,4 +32,9 @@ test('reuses the startup strategy snapshot until Refresh is explicitly pressed',
   await expect(page.getByText('Explicitly refreshed strategy', { exact: true })).toBeVisible();
   await expect(page.getByRole('status')).toContainText('Shared strategies refreshed at');
   expect(feedRequests).toBe(2);
+
+  await page.reload();
+  await expect(page.getByText('Explicitly refreshed strategy', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('Last refreshed at');
+  expect(feedRequests).toBe(2);
 });

@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import {
   loadSharedFeedResources,
   readSharedFeedResources,
+  readSharedFeedUpdatedAt,
 } from '../../app/appResources';
 import type { SharedFeedStrategy } from '../../app/appResources';
 import { notifySharedStrategyAdded, useBlueskySession } from '../account/blueskyAccount';
@@ -65,6 +66,7 @@ export function FeedPage() {
   const [reviewHidden, setReviewHidden] = useState(false);
   const [feed, setFeed] = useState(() => initialFeed('public', 'recent'));
   const [loading, setLoading] = useState(() => !readSharedFeedResources('public', 'recent'));
+  const [feedUpdatedAt, setFeedUpdatedAt] = useState(() => readSharedFeedUpdatedAt('public', 'recent'));
   const [statusOverride, setStatusOverride] = useState('');
   const [savedIds, setSavedIds] = useState(() => new Set(readInventory().flatMap((item) => [
     item.strategySlug,
@@ -103,6 +105,7 @@ export function FeedPage() {
     void loadSharedFeedResources(scope, 'recent').then((next) => {
       if (cancelled) return;
       setFeed(next);
+      setFeedUpdatedAt(readSharedFeedUpdatedAt(scope, 'recent'));
       setLoading(false);
     });
     return () => { cancelled = true; };
@@ -176,6 +179,7 @@ export function FeedPage() {
     setStatusOverride('Refreshing shared strategies…');
     const next = await loadSharedFeedResources(scope, 'recent', true);
     setFeed(next);
+    setFeedUpdatedAt(readSharedFeedUpdatedAt(scope, 'recent'));
     setLoading(false);
     setStatusOverride(next.error || `Shared strategies refreshed at ${formatTime(new Date().toISOString())}.`);
   }
@@ -196,7 +200,11 @@ export function FeedPage() {
     ? 'No strategies are currently hidden by moderation.'
     : 'No shared strategies found for this view yet.';
   const status = statusOverride
-    || (loading ? 'Loading…' : feed.error || (!feed.strategies.length ? emptyMessage : ''));
+    || (loading
+      ? 'Loading…'
+      : feed.error || (!feed.strategies.length
+        ? emptyMessage
+        : !reviewHidden && feedUpdatedAt ? `Last refreshed at ${formatTime(feedUpdatedAt)}.` : ''));
 
   return (
     <div className={styles.page}>

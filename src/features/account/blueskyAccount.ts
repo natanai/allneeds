@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { isTransientLocalStorageKey } from '../../persistence/transientStorage';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
 import { readJournal } from '../journal/journalRepository';
@@ -10,6 +11,8 @@ const BACKEND_API_URL = `${BACKEND_BASE_URL}/api`;
 const BACKEND_SNAPSHOT_KEY = 'allneeds_export_v1';
 const LOGIN_INTENT_STORAGE_KEY = 'allneeds:bsky-login-intent';
 const SESSION_HINT_STORAGE_KEY = 'allneeds:bsky-session-hint';
+const SESSION_CACHE_STORAGE_KEY = 'allneeds:bsky-session-cache-v1';
+const SESSION_CACHE_FRESH_MS = 60 * 60 * 1_000;
 export const BLUESKY_SESSION_CHANGED_EVENT = 'allneeds:bsky-login-changed';
 
 export type BlueskySession = {
@@ -61,8 +64,38 @@ export type ProfileSaveResult = {
   unpublishedStrategyCount: number | null;
 };
 
-let currentSession: BlueskySession | null = null;
+function readCachedSession() {
+  try {
+    const parsed: unknown = JSON.parse(safeStorage('sessionStorage')?.getItem(SESSION_CACHE_STORAGE_KEY) ?? 'null');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    const cached = parsed as { version?: unknown; checkedAt?: unknown; session?: unknown };
+    if (cached.version !== 1 || typeof cached.checkedAt !== 'number' || !cached.session
+      || typeof cached.session !== 'object' || Array.isArray(cached.session)) return null;
+    const age = Date.now() - cached.checkedAt;
+    if (age < 0 || age > SESSION_CACHE_FRESH_MS) return null;
+    const session = cached.session as Partial<BlueskySession>;
+    if (typeof session.did !== 'string' || !session.did.startsWith('did:')) return null;
+    return {
+      checkedAt: cached.checkedAt,
+      session: {
+        did: session.did,
+        handle: typeof session.handle === 'string' ? session.handle : null,
+        verified: session.verified === true,
+        admin: session.admin === true && session.verified === true,
+      } satisfies BlueskySession,
+    };
+  } catch { return null; }
+}
+
+const restoredSession = readCachedSession();
+let currentSession: BlueskySession | null = restoredSession?.session ?? null;
+let currentSessionCheckedAt = restoredSession?.checkedAt ?? 0;
 let initializePromise: Promise<BlueskySession | null> | null = null;
+
+if (typeof window !== 'undefined' && currentSession) {
+  window.allneedsSession = currentSession;
+  writeSessionHint(true);
+}
 
 function safeStorage(name: 'localStorage' | 'sessionStorage') {
   if (typeof window === 'undefined') return null;
@@ -88,7 +121,20 @@ function consumeLoginIntent() {
 
 function publishSession(session: BlueskySession | null, reason: string) {
   currentSession = session;
+  currentSessionCheckedAt = session ? Date.now() : 0;
   writeSessionHint(Boolean(session));
+  try {
+    const storage = safeStorage('sessionStorage');
+    if (session) {
+      storage?.setItem(SESSION_CACHE_STORAGE_KEY, JSON.stringify({
+        version: 1,
+        checkedAt: currentSessionCheckedAt,
+        session,
+      }));
+    } else {
+      storage?.removeItem(SESSION_CACHE_STORAGE_KEY);
+    }
+  } catch { /* Session restoration remains optional. */ }
   if (typeof window === 'undefined') return;
   window.allneedsSession = session;
   window.dispatchEvent(new CustomEvent(BLUESKY_SESSION_CHANGED_EVENT, {
@@ -222,13 +268,15 @@ export async function signOutFromBluesky() {
   }
 }
 
-function captureLocalStorage() {
+function captureLocalStorage(includeTransient = false) {
   const snapshot: Record<string, string> = {};
   const storage = safeStorage('localStorage');
   if (!storage) return snapshot;
   for (let index = 0; index < storage.length; index += 1) {
     const key = storage.key(index);
-    if (key) snapshot[key] = storage.getItem(key) ?? '';
+    if (key && (includeTransient || !isTransientLocalStorageKey(key))) {
+      snapshot[key] = storage.getItem(key) ?? '';
+    }
   }
   return snapshot;
 }
@@ -365,12 +413,16 @@ export async function loadProfileIntoCurrentBrowser() {
   if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new Error('The saved profile does not contain browser data.');
   if (!window.confirm('Replace this browser’s allneeds data with your saved profile?')) return 'canceled' as const;
 
-  const previous = captureLocalStorage();
+  const previous = captureLocalStorage(true);
+  const transient = Object.fromEntries(Object.entries(previous).filter(([key]) => isTransientLocalStorageKey(key)));
   try {
     window.localStorage.clear();
     Object.entries(snapshot as Record<string, unknown>).forEach(([key, value]) => {
-      window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+      if (!isTransientLocalStorageKey(key)) {
+        window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+      }
     });
+    Object.entries(transient).forEach(([key, value]) => window.localStorage.setItem(key, value));
     synchronizeCustomizerMirrors(snapshot as Record<string, unknown>);
   } catch (error) {
     window.localStorage.clear();
@@ -406,6 +458,10 @@ export function initializeBlueskyForCurrentPage() {
   const returningFromLogin = isVerifiedAuthReturn() || hasLoginIntent();
   const mustInitialize = returningFromLogin || hint === 'active';
   if (!mustInitialize) return;
+  if (!returningFromLogin && currentSession && Date.now() - currentSessionCheckedAt <= SESSION_CACHE_FRESH_MS) {
+    window.allneedsSession = currentSession;
+    return;
+  }
 
   void initializeBlueskyOAuth().then(async (session) => {
     if (!session) return;

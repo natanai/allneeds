@@ -9,9 +9,53 @@ import {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.resetModules();
 });
 
 describe('Bluesky account compatibility', () => {
+  it('restores a recently verified session without another backend call on page reload', async () => {
+    vi.resetModules();
+    const local = new Map<string, string>([['allneeds:bsky-session-hint', 'active']]);
+    const session = new Map<string, string>([[
+      'allneeds:bsky-session-cache-v1',
+      JSON.stringify({
+        version: 1,
+        checkedAt: Date.now(),
+        session: {
+          did: 'did:plc:cached-session',
+          handle: 'cached.example',
+          verified: true,
+          admin: false,
+        },
+      }),
+    ]]);
+    const storage = (values: Map<string, string>) => ({
+      get length() { return values.size; },
+      key: (index: number) => [...values.keys()][index] ?? null,
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value); },
+      removeItem: (key: string) => { values.delete(key); },
+      clear: () => values.clear(),
+    });
+    vi.stubGlobal('window', {
+      localStorage: storage(local),
+      sessionStorage: storage(session),
+      location: { href: 'https://allneeds.app/' },
+      history: { state: null, replaceState: vi.fn() },
+    });
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const account = await import('./blueskyAccount');
+    account.initializeBlueskyForCurrentPage();
+
+    expect(account.getBlueskySession()).toMatchObject({
+      did: 'did:plc:cached-session',
+      verified: true,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('normalizes the same handles accepted by the legacy sign-in form', () => {
     expect(normalizeBlueskyHandle(' @NatHanael.Ink ')).toBe('NatHanael.Ink');
     expect(() => normalizeBlueskyHandle('name')).toThrow(/include a domain/);
@@ -69,6 +113,9 @@ describe('Bluesky account compatibility', () => {
 
   it('reports the durable snapshot time before strategy reconciliation finishes', async () => {
     const values = new Map<string, string>();
+    values.set('kept-profile-setting', 'kept');
+    values.set('allneeds:bsky-session-hint', 'active');
+    values.set('allneeds:shared-feed:public-recent:v1', '{"transient":true}');
     const storage = {
       get length() { return values.size; },
       key: (index: number) => [...values.keys()][index] ?? null,
@@ -136,5 +183,9 @@ describe('Bluesky account compatibility', () => {
     });
     expect(fetchMock).toHaveBeenCalledOnce();
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/api/profile/save');
+    const request = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const requestBody = JSON.parse(String(request.body)) as { value: string };
+    const profileSnapshot = JSON.parse(requestBody.value) as { localStorage: Record<string, string> };
+    expect(profileSnapshot.localStorage).toEqual({ 'kept-profile-setting': 'kept' });
   });
 });

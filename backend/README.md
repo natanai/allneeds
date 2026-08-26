@@ -140,7 +140,9 @@ New/privileged endpoints include:
 
 ## Free-tier discipline
 
-The Worker is only the dynamic API layer. Static application assets, bundled system strategies, icons, CSS, and JavaScript remain on GitHub Pages. The frontend warms one public community-strategy snapshot during its existing boot overlay and reuses it in memory; it must still open normally if the Worker is slow or unavailable.
+The Worker is only the dynamic API layer. Static application assets, bundled system strategies, icons, CSS, and JavaScript remain on GitHub Pages. The frontend resolves one public community-strategy snapshot during its existing boot overlay and reuses it in browser persistence and memory; it must still open normally if the Worker is slow or unavailable.
+
+The browser persists a successfully checked Public/Most recent snapshot for one hour, while an explicit Shared Strategies refresh bypasses that freshness window. Public feed requests do not resolve the signed-in session because their result is identical for every viewer, avoiding an unnecessary D1 session-row read on cache misses. The public response also carries a one-hour browser-private cache header as a fallback when application storage is unavailable.
 
 `POST /api/profile/save` combines the profile snapshot and owned-strategy reconciliation into one streamed Worker request. The complete browser strategy set remains authoritative, but the Worker reads the owner's server set once and writes only changed/new rows, changed Need relationships, and removed sharing. An unchanged 40-strategy profile performs no strategy or relationship writes. The first stream event confirms the durable snapshot time; the final event reports changed, unchanged, and unpublished counts.
 
