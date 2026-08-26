@@ -117,6 +117,7 @@ Rules:
 - tap the native color-input swatch to open the platform picker.
 
 The visible swatch itself is the native `input[type=color]`; do not replace it with a button that programmatically clicks a hidden color input on iOS Safari.
+
 ## Account sign-in recovery
 
 **Accepted 2026-08-25.** Bluesky username mistakes should be recoverable inside the Account & data panel.
