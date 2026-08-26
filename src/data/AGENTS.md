@@ -2,6 +2,10 @@
 
 This file supplements the root `AGENTS.md` for work under `src/data/`.
 
+## Current Safety record
+
+For Safety data, strategy, citation, or copy work, read `docs/safety-content-audit.md` before editing. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`.
+
 ## Research-backed system strategies
 
 Before adding, retaining, rewriting, renaming, or changing Need associations for a system-authored strategy, read and follow `docs/system-strategy-evidence-standard.md` and `docs/content-evidence-review.md`.
