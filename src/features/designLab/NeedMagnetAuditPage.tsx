@@ -22,9 +22,13 @@ function candidateStyle(candidate: NeedMagnetAuditCandidate): CustomProperties {
     '--audit-face': candidate.faceBackground,
     '--audit-icon-fill': candidate.iconFill,
     '--audit-icon-opacity': candidate.hideIcon ? 0 : 1,
+    '--audit-secondary-icon-fill': candidate.secondaryIconFill ?? candidate.iconFill,
     '--audit-art-a': candidate.artA,
     '--audit-art-b': candidate.artB,
     '--audit-art-opacity': String(candidate.artOpacity ?? 0),
+    ...(candidate.secondaryIconPath
+      ? { '--audit-secondary-icon': `url("${assetPath(candidate.secondaryIconPath)}")` }
+      : {}),
     ...(candidate.artMaskPath
       ? { '--audit-art-mask': `url("${assetPath(candidate.artMaskPath)}")` }
       : {}),
@@ -40,6 +44,7 @@ function AuditMagnet({ candidate }: { candidate: NeedMagnetAuditCandidate }) {
     >
       {candidate.artMaskPath ? <span className={styles.art} aria-hidden="true" /> : null}
       <span className={magnetStyles.label}>{candidate.needTitle}</span>
+      {candidate.secondaryIconPath ? <span className={styles.secondaryIcon} aria-hidden="true" /> : null}
     </span>
   );
 }
