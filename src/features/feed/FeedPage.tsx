@@ -22,7 +22,6 @@ import {
 } from './sharedStrategyModeration';
 import {
   normalizeSharedStrategyNeeds,
-  sharedStrategyAuthorName,
   sharedStrategyClientKey,
   sharedStrategyContributorLocation,
   sharedStrategyOwnerDid,
@@ -130,7 +129,7 @@ export function FeedPage() {
       setStatusOverride('This strategy belongs to your profile. Load your profile from Menu → Account & data before editing it.');
       return;
     }
-    const authorName = sharedStrategyAuthorName(strategy);
+    const contributorName = strategy.contributor?.name?.trim() || '';
     const contributorLocation = sharedStrategyContributorLocation(strategy);
     const entry = createSharedInventoryEntry({
       id: strategyId,
@@ -138,8 +137,8 @@ export function FeedPage() {
       description: strategy.body || '',
       needSlugs: normalizeSharedStrategyNeeds(strategy),
       visibility: strategy.visibility,
-      contributor: authorName || contributorLocation ? {
-        ...(authorName ? { name: authorName } : {}),
+      contributor: contributorName || contributorLocation ? {
+        ...(contributorName ? { name: contributorName } : {}),
         ...(contributorLocation ? { location: contributorLocation } : {}),
       } : undefined,
     });
