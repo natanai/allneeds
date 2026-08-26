@@ -1,3 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" width="64" height="64">
-  <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3 5.2 8.2 3l7.5 2.8L21 3.7v15l-5.3 2.1-7.5-2.8L3 20.2Z"/>
+  <path d="M8.2 3v15M15.7 5.8v15"/>
+  <path d="M5 15.5c1.8-3.8 4-5.4 6.5-4.8 2.4.6 4-.7 5.7-3.6"/>
+  <circle cx="5" cy="15.5" r="1" fill="black" stroke="none"/>
+  <circle cx="17.2" cy="7.1" r="1" fill="black" stroke="none"/>
 </svg>
