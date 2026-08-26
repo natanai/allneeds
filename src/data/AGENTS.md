@@ -6,6 +6,14 @@ This file supplements the root `AGENTS.md` for work under `src/data/`.
 
 For Safety data, strategy, citation, or copy work, read `docs/safety-content-audit.md` before editing. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`.
 
+## Need function lenses
+
+Before proposing or implementing multiple functions, facets, pathways, or sub-meanings within one Need, read `docs/need-function-lenses.md` and follow its qualification, editorial, rendering, and approval rules.
+
+Function lenses are optional and must earn their place through three requirements: a meaningfully distinct lived function, distinct evidence that benefits from separate source-to-claim treatment, and practical recognition value for the reader. Do not subdivide Needs merely because an academic taxonomy is possible.
+
+When lenses are approved, they remain part of one canonical Need. Their content must be owned by canonical editorial data and rendered generically through the deterministic catalog pipeline. Do not create slug-specific page conditionals or runtime repair layers for a lensed Need.
+
 ## Protected user strategy registry
 
 `src/data/userStrategies.json` is the canonical registry for repository-resident user-submitted strategies, including strategies published by `.github/workflows/upload-user-submitted-strategies.yml`. Treat **every entry in this file as protected user-authored content**, regardless of contributor name, location, age of submission, or how many contributors are present.
