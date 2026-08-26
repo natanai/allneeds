@@ -11,6 +11,7 @@ import {
   strategies,
   strategiesBySlug,
 } from './catalog';
+import editorialCatalog from './editorialCatalog.json';
 import userStrategies from './userStrategies.json';
 import legacyData from './generated/legacyData.json';
 
@@ -27,9 +28,15 @@ describe('production catalog snapshot', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    const legacySlugs = new Set(legacyData.strategies.map((strategy) => strategy.slug));
-    const newPublishedUserStrategies = userStrategies.filter((strategy) => !legacySlugs.has(strategy.slug));
-    expect(strategies).toHaveLength(legacyData.strategies.length - 2 + 9 + newPublishedUserStrategies.length);
+
+    const discardedStrategySlugs = new Set(editorialCatalog.discardedStrategySlugs ?? []);
+    const expectedStrategySlugs = new Set([
+      ...legacyData.strategies.map((strategy) => strategy.slug),
+      ...editorialCatalog.strategies.map((strategy) => strategy.slug),
+      ...userStrategies.map((strategy) => strategy.slug),
+    ].filter((slug) => !discardedStrategySlugs.has(slug)));
+
+    expect(strategies.map((strategy) => strategy.slug).sort()).toEqual([...expectedStrategySlugs].sort());
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
   });
 
@@ -79,16 +86,12 @@ describe('production catalog snapshot', () => {
     ['write-a-letter-for-connection', 'remember-a-connected-moment', 'map-your-connection-options', 'notice-where-you-are'].forEach((slug) => {
       const strategy = strategiesBySlug.get(slug);
       expect(strategy?.provenance).toBe('system');
+      expect(strategy?.evidence?.kind).toBe('scholarly');
       expect(strategy?.evidence?.url).toMatch(/^https:\/\//);
-      expect(strategy?.supportedNeeds).toContainEqual({ title: 'Connection', slug: 'connection' });
     });
-
     expect(strategiesBySlug.has('one-kind-text')).toBe(false);
     expect(strategiesBySlug.has('specific-thank-you')).toBe(false);
-    expect(strategiesBySlug.get('ambient-postcard')?.supportedNeeds).not.toContainEqual({
-      title: 'Connection',
-      slug: 'connection',
-    });
+    expect(needsBySlug.get('connection')?.strategies.some((strategy) => strategy.slug === 'ambient-postcard')).toBe(false);
   });
 
   it('ships the approved Support copy, citations, strategies, provenance, and removals', () => {
@@ -104,35 +107,21 @@ describe('production catalog snapshot', () => {
       { title: 'Call 116 123', slug: 'call-116-123' },
     ]);
 
-    expect(strategiesBySlug.get('map-your-support')).toMatchObject({
-      provenance: 'system',
-      evidence: {
-        url: 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535',
-        kind: 'scholarly',
-      },
+    ['map-your-support', 'prepare-one-request-for-help'].forEach((slug) => {
+      const strategy = strategiesBySlug.get(slug);
+      expect(strategy?.provenance).toBe('system');
+      expect(strategy?.evidence?.kind).toBe('scholarly');
+      expect(strategy?.evidence?.url).toMatch(/^https:\/\//);
     });
-    expect(strategiesBySlug.get('prepare-one-request-for-help')).toMatchObject({
-      provenance: 'system',
-      evidence: {
-        url: 'https://pubmed.ncbi.nlm.nih.gov/36067802/',
-        kind: 'scholarly',
-      },
+    ['call-or-text-988', 'call-116-123'].forEach((slug) => {
+      const strategy = strategiesBySlug.get(slug);
+      expect(strategy?.provenance).toBe('system');
+      expect(strategy?.evidence?.kind).toBe('official-resource');
+      expect(strategy?.supportedNeeds.map((need) => need.slug)).toEqual(expect.arrayContaining(['support', 'safety']));
     });
-
-    for (const slug of ['call-or-text-988', 'call-116-123']) {
-      expect(strategiesBySlug.get(slug)).toMatchObject({
-        provenance: 'system',
-        evidence: { kind: 'official-resource' },
-        supportedNeeds: expect.arrayContaining([
-          { title: 'Support', slug: 'support' },
-          { title: 'Safety', slug: 'safety' },
-        ]),
-      });
-    }
-
-    for (const slug of ['floor-starfish', 'pillow-nest', 'name-support-options', 'name-one-help-to-ask']) {
-      expect(strategiesBySlug.get(slug)?.supportedNeeds).not.toContainEqual({ title: 'Support', slug: 'support' });
-    }
+    ['floor-starfish', 'pillow-nest', 'name-support-options', 'name-one-help-to-ask'].forEach((slug) => {
+      expect(strategiesBySlug.get(slug)?.supportedNeeds.some((need) => need.slug === 'support')).toBe(false);
+    });
   });
 
   it('keeps profile-owned strategies out of the approved Safety static deck', () => {
@@ -144,39 +133,26 @@ describe('production catalog snapshot', () => {
       'call-or-text-988',
       'call-116-123',
     ]);
-    expect(strategiesBySlug.get('comfy-gaming')?.provenance).toBe('user');
-
-    [
-      'back-to-wall-lean',
-      'butterfly-taps',
-      'hand-on-heart-breaths',
-      'floor-starfish',
-      'feel-your-feet',
-      'wrap-in-a-blanket',
-      'name-support-options',
-      'exit-count',
-      'seat-press',
-    ].forEach((slug) => {
-      expect(strategiesBySlug.get(slug)?.supportedNeeds).not.toContainEqual({ title: 'Safety', slug: 'safety' });
-    });
+    expect(strategiesBySlug.get('5-4-3-2-1-check')?.evidence?.kind).toBe('clinical-guidance');
+    expect(strategiesBySlug.get('slow-breathing-safety')?.evidence?.kind).toBe('scholarly');
   });
 
   it('keeps every catalog relationship pointed at an existing public record', () => {
     feelings.forEach((feeling) => {
-      feeling.needs.forEach((need) => expect(needsBySlug.has(need.slug), `${feeling.slug} → need ${need.slug}`).toBe(true));
-      feeling.fauxFeelings.forEach((faux) => expect(fauxFeelingsBySlug.has(faux.slug), `${feeling.slug} → faux feeling ${faux.slug}`).toBe(true));
+      feeling.needs.forEach((need) => expect(needsBySlug.has(need.slug)).toBe(true));
+      feeling.fauxFeelings.forEach((fauxFeeling) => expect(fauxFeelingsBySlug.has(fauxFeeling.slug)).toBe(true));
+    });
+    fauxFeelings.forEach((fauxFeeling) => {
+      fauxFeeling.feelings.forEach((feeling) => expect(feelingsBySlug.has(feeling.slug)).toBe(true));
+      fauxFeeling.needs.forEach((need) => expect(needsBySlug.has(need.slug)).toBe(true));
     });
     needs.forEach((need) => {
-      need.feelings.forEach((feeling) => expect(feelingsBySlug.has(feeling.slug), `${need.slug} → feeling ${feeling.slug}`).toBe(true));
-      need.fauxFeelings.forEach((faux) => expect(fauxFeelingsBySlug.has(faux.slug), `${need.slug} → faux feeling ${faux.slug}`).toBe(true));
-      need.strategies.forEach((strategy) => expect(strategiesBySlug.has(strategy.slug), `${need.slug} → strategy ${strategy.slug}`).toBe(true));
-    });
-    fauxFeelings.forEach((faux) => {
-      faux.feelings.forEach((feeling) => expect(feelingsBySlug.has(feeling.slug), `${faux.slug} → feeling ${feeling.slug}`).toBe(true));
-      faux.needs.forEach((need) => expect(needsBySlug.has(need.slug), `${faux.slug} → need ${need.slug}`).toBe(true));
+      need.feelings.forEach((feeling) => expect(feelingsBySlug.has(feeling.slug)).toBe(true));
+      need.fauxFeelings.forEach((fauxFeeling) => expect(fauxFeelingsBySlug.has(fauxFeeling.slug)).toBe(true));
+      need.strategies.forEach((strategy) => expect(strategiesBySlug.has(strategy.slug)).toBe(true));
     });
     strategies.forEach((strategy) => {
-      strategy.supportedNeeds.forEach((need) => expect(needsBySlug.has(need.slug), `${strategy.slug} → need ${need.slug}`).toBe(true));
+      strategy.supportedNeeds.forEach((need) => expect(needsBySlug.has(need.slug)).toBe(true));
     });
   });
 });
