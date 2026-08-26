@@ -282,6 +282,14 @@ export function FeedPage() {
           const isSaved = savedIds.has(String(strategy.id).toLocaleLowerCase())
             || Boolean(isOwner && savedIds.has(clientKey.toLocaleLowerCase()));
           const strategyTitle = strategy.title || 'Untitled strategy';
+          const visibilityLabel = reviewHidden ? 'Hidden' : visibility(strategy.visibility);
+          const visibilityClass = reviewHidden
+            ? styles.hiddenBadge
+            : strategy.visibility === 'public'
+              ? styles.publicBadge
+              : strategy.visibility === 'followers'
+                ? styles.followersBadge
+                : styles.privateBadge;
           return (
             <article
               className={styles.card}
@@ -296,23 +304,33 @@ export function FeedPage() {
 
               <footer className={styles.cardFooter}>
                 <div className={styles.postActions}>
-                  <span className={`${styles.visibilityBadge} ${reviewHidden ? styles.hiddenBadge : ''}`}>
-                    {reviewHidden ? 'Hidden' : visibility(strategy.visibility)}
+                  <span
+                    className={`${styles.visibilityBadge} ${visibilityClass}`}
+                    aria-label={`${visibilityLabel} strategy`}
+                    title={visibilityLabel}
+                  >
+                    <span className={styles.visibilityIcon} aria-hidden="true" />
+                    <span className={styles.srOnly}>{visibilityLabel}</span>
                   </span>
                   {strategyNeeds.length ? (
                     <details className={styles.needsMenu}>
-                      <summary aria-label={`Needs supported by ${strategyTitle}`}>Needs supported</summary>
+                      <summary aria-label={`Needs supported by ${strategyTitle}`}>Needs</summary>
                       <ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul>
                     </details>
                   ) : null}
                   {isOwner ? (
-                    <Link className={styles.editLink} to={`/inventory?edit=${encodeURIComponent(clientKey)}`}>
-                      Edit
+                    <Link
+                      className={styles.editLink}
+                      to={`/inventory?edit=${encodeURIComponent(clientKey)}`}
+                      aria-label={`Edit ${strategyTitle}`}
+                      title="Edit strategy"
+                    >
+                      <span className={styles.srOnly}>Edit</span>
                     </Link>
                   ) : null}
                   {session?.admin ? (
                     <details className={styles.adminMenu}>
-                      <summary aria-label={`Admin actions for ${strategyTitle}`}>⋯</summary>
+                      <summary aria-label={`Admin actions for ${strategyTitle}`} title="Admin actions">⋯</summary>
                       <div className={styles.adminMenuPopover}>
                         <button type="button" onClick={() => void (reviewHidden ? restore(strategy) : hide(strategy))}>
                           {reviewHidden ? 'Restore to community' : 'Hide from community'}
@@ -326,9 +344,10 @@ export function FeedPage() {
                       type="button"
                       disabled={isSaved}
                       aria-label={isSaved ? `${strategyTitle} is saved to inventory` : `Save ${strategyTitle} to inventory`}
+                      title={isSaved ? 'Saved to inventory' : 'Save to inventory'}
                       onClick={() => save(strategy)}
                     >
-                      {isSaved ? 'Saved' : 'Save'}
+                      {isSaved ? <span className={styles.srOnly}>Saved</span> : 'Save'}
                     </button>
                   ) : null}
                 </div>
