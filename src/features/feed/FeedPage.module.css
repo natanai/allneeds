@@ -266,7 +266,7 @@
 }
 
 .needsMenu summary {
-  background: color-mix(in srgb, #fff 88%, var(--quiet) 12%);
+  background: color-mix(in srgb, var(--surface-raised) 88%, var(--quiet) 12%);
 }
 
 .needsMenu summary::before {
@@ -306,7 +306,7 @@
 }
 
 .editLink {
-  background: color-mix(in srgb, #fff 88%, var(--quiet) 12%);
+  background: color-mix(in srgb, var(--surface-raised) 88%, var(--quiet) 12%);
 }
 
 .editLink::before {
@@ -320,7 +320,7 @@
 
 .saveButton {
   margin-left: auto;
-  background: color-mix(in srgb, var(--action) 76%, #fff 24%);
+  background: color-mix(in srgb, var(--action) 76%, var(--surface-raised) 24%);
   cursor: pointer;
 }
 
@@ -334,7 +334,7 @@
 }
 
 .saveButton:disabled {
-  background: color-mix(in srgb, var(--positive) 72%, #fff 28%);
+  background: color-mix(in srgb, var(--positive) 72%, var(--surface-raised) 28%);
   opacity: .62;
   cursor: default;
 }
@@ -362,7 +362,7 @@
   min-width: 44px;
   min-height: 44px;
   padding: 0;
-  background: color-mix(in srgb, #fff 88%, var(--quiet) 12%);
+  background: color-mix(in srgb, var(--surface-raised) 88%, var(--quiet) 12%);
   font-size: 1rem;
   letter-spacing: .08em;
 }
