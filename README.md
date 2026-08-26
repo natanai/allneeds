@@ -1,13 +1,13 @@
-# allneeds.app V2
+# allneeds.app
 
-A local, parallel React rebuild of [allneeds.app](https://allneeds.app), preserving the production visual language and complete public feature set on a cleaner, mobile-first foundation.
+The production React application for [allneeds.app](https://allneeds.app), with a local-first personal inventory and optional Bluesky-backed profile ownership and community sharing.
 
 ## Repository boundary
 
-- `natanai/nvc-app` is the production reference implementation. It is **read-only** for V2 work.
-- This checkout at `C:\allneedsV2` is the V2 comparison workspace. It intentionally has no Git metadata and is not connected to a remote repository.
-
-Production and the online `natanai/allneeds` work can continue changing independently. This local checkout remains the comparison and test source; publishing happens only when explicitly requested.
+- This repository is the current source of truth for the frontend, production catalog, tests, and Cloudflare Worker source.
+- The React site is built from `src/` and `public/` and deployed through GitHub Pages.
+- The API is maintained under `backend/` and deployed independently to the `allneeds-backend` Cloudflare Worker.
+- Personal strategies owned by a Bluesky profile live in D1/profile storage, not as duplicate static catalog records.
 
 ## Stack
 

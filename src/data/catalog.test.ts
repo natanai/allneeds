@@ -12,7 +12,7 @@ import {
   strategiesBySlug,
 } from './catalog';
 import userStrategies from './userStrategies.json';
-import natProfileStrategyMigration from './natProfileStrategyMigration.json';
+import legacyData from './generated/legacyData.json';
 
 function expectUniqueSlugs(entries: Array<{ slug: string }>) {
   expect(new Set(entries.map((entry) => entry.slug)).size).toBe(entries.length);
@@ -27,11 +27,24 @@ describe('production catalog snapshot', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    expect(strategies).toHaveLength(136 - 2 + 9 + userStrategies.length - natProfileStrategyMigration.strategies.length);
+    expect(strategies).toHaveLength(legacyData.strategies.length - 2 + 9 + userStrategies.length);
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
-    natProfileStrategyMigration.strategies.forEach(({ slug }) => {
-      expect(strategiesBySlug.has(slug)).toBe(false);
+  });
+
+  it('keeps profile-owned Nat strategies out of repository catalog data', () => {
+    const repositoryProfileStrategies = legacyData.strategies.filter((strategy: unknown) => {
+      const candidate = strategy as {
+        contributorName?: string;
+        contributorLocation?: string;
+        contributor?: { name?: string; location?: string };
+      };
+      const name = candidate.contributor?.name ?? candidate.contributorName;
+      const location = candidate.contributor?.location ?? candidate.contributorLocation;
+      return name?.trim().toLowerCase() === 'nat'
+        && location?.trim().toLowerCase() === 'missouri';
     });
+
+    expect(repositoryProfileStrategies).toEqual([]);
   });
 
   it('includes curated user-contributed strategies in their supported needs', () => {

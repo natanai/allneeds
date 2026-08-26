@@ -72,28 +72,17 @@ This boundary is security- and attribution-sensitive. Keep regression coverage a
 
 ## Editing in the current frontend/backend contract
 
-The current backend exposes strategy create/list/feed/sync behavior but does not expose a stable-ID PATCH/DELETE API. For now, editing a signed-in user's personal inventory strategy updates the local copy and then runs profile sync. The backend reconciles the changed published set.
-
-This gives account owners an editable workflow without treating downloaded community strategies as their authored work. A future backend contract should preserve stable remote IDs across edits.
+Account owners edit their personal inventory source, and profile sync reconciles that state using stable per-profile strategy identifiers. The backend also exposes owner-authorized update and delete operations. Downloaded community strategies remain non-personal copies and are never republished under the current person's DID.
 
 ## Identity verification prerequisite
 
 Production now establishes ownership through the backend AT Protocol OAuth flow. The Worker obtains the DID from the verified OAuth result, creates its own verified HttpOnly session, and removes the temporary Bluesky credential. The former `/auth/session` compatibility path is disabled with `ALLOW_LEGACY_AUTH=0`. A React-only DID check, handle check, hidden menu, or hard-coded client value remains insufficient as an authorization boundary.
 
-## Legacy Nat migration
+## Profile-only Nat strategies
 
-The legacy production strategy source contained 40 strategies attributed to `Nat, Missouri`. On 2026-08-25, those strategies moved to the verified account-owned profile for `did:plc:w23qsgdsux3neuguxfy7kvt5`.
+The 40 strategies formerly attributed to `Nat, Missouri` in the static catalog were migrated on 2026-08-25 to the verified account-owned profile for `did:plc:w23qsgdsux3neuguxfy7kvt5`. After migration and live verification, their repository records and Need references were physically deleted along with the one-time mapping and preparation tools.
 
-The completed safe migration sequence was:
-
-1. add verified backend identity and stable strategy ownership;
-2. identify Nat's profile through that verified server-side identity;
-3. create account-owned records for the 40 legacy strategies while preserving title/body/need associations;
-4. verify those records appear on the correct Need pages and can be edited by the owner;
-5. only then remove the corresponding static legacy copies so there is one source of truth;
-6. retain a migration mapping/stable remote ID so later title/body edits cannot resurrect the old static card as a duplicate.
-
-The stable slug/client-key mapping is retained in `src/data/natProfileStrategyMigration.json`, and the guarded preparation/rehearsal script is `scripts/prepare-nat-profile-migration.mjs`. The repository catalog now excludes those 40 static copies, so profile edits cannot reveal an older variant. The account-free `userStrategies.json` lane remains separate; Autumn's contribution, for example, stays unclaimed unless a verified claim process is deliberately introduced later.
+D1 profile storage is their only current source. They must not be restored to the static catalog, fixtures, or import data. Repository catalog coverage enforces that no `Nat, Missouri` strategy is bundled as static data.
 
 ## Moderation boundary
 
