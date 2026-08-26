@@ -273,7 +273,9 @@ export function FeedPage() {
           const contributorName = strategy.contributor?.name?.trim() || '';
           const contributorLocation = sharedStrategyContributorLocation(strategy);
           const timestamp = formatDate(strategy.createdAt);
-          const contributorLabel = [contributorName, contributorLocation].filter(Boolean).join(' • ');
+          const contributorLabel = contributorName
+            ? `by ${contributorName}${contributorLocation ? ` • ${contributorLocation}` : ''}`
+            : contributorLocation;
           const strategyNeeds = normalizeSharedStrategyNeeds(strategy);
           const clientKey = sharedStrategyClientKey(strategy);
           const isOwner = Boolean(session && clientKey && sharedStrategyOwnerDid(strategy) === session.did);
@@ -332,7 +334,7 @@ export function FeedPage() {
                 </div>
                 {contributorLabel || timestamp ? (
                   <p className={styles.authorMeta}>
-                    {contributorLabel ? `by ${contributorLabel}` : ''}
+                    {contributorLabel}
                     {contributorLabel && timestamp ? ' · ' : ''}
                     {timestamp}
                   </p>
