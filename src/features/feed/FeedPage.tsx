@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import {
@@ -34,6 +34,15 @@ function formatDate(value?: string) {
   return Number.isNaN(date.getTime())
     ? ''
     : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+}
+
+function formatTime(value: string) {
+  const date = new Date(value);
+  return new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(date);
 }
 
 function visibility(value?: InventoryVisibility) {
@@ -84,20 +93,20 @@ export function FeedPage() {
       return () => { cancelled = true; };
     }
 
-    const cached = readSharedFeedResources(scope, sort);
+    const cached = readSharedFeedResources(scope, 'recent');
     if (cached) {
       setFeed(cached);
       setLoading(false);
     } else {
       setLoading(true);
     }
-    void loadSharedFeedResources(scope, sort).then((next) => {
+    void loadSharedFeedResources(scope, 'recent').then((next) => {
       if (cancelled) return;
       setFeed(next);
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [reviewHidden, scope, session?.admin, sort]);
+  }, [reviewHidden, scope, session?.admin]);
 
   useEffect(() => {
     if (!session && scope === 'follows') setScope('public');
@@ -141,7 +150,7 @@ export function FeedPage() {
     setStatusOverride(`Hiding “${title}”…`);
     try {
       await hideSharedStrategy(strategy.id);
-      const next = await loadSharedFeedResources(scope, sort, true);
+      const next = await loadSharedFeedResources(scope, 'recent', true);
       setFeed(next);
       setStatusOverride(`“${title}” is hidden from community discovery.`);
     } catch (error) {
@@ -162,6 +171,27 @@ export function FeedPage() {
     }
   }
 
+  async function refreshFeed() {
+    setLoading(true);
+    setStatusOverride('Refreshing shared strategies…');
+    const next = await loadSharedFeedResources(scope, 'recent', true);
+    setFeed(next);
+    setLoading(false);
+    setStatusOverride(next.error || `Shared strategies refreshed at ${formatTime(new Date().toISOString())}.`);
+  }
+
+  const displayedStrategies = useMemo(() => {
+    if (sort !== 'popular') return feed.strategies;
+    return [...feed.strategies].sort((left, right) => {
+      const popularity = (right.addCount ?? 0) - (left.addCount ?? 0);
+      if (popularity) return popularity;
+      const recency = Date.parse(right.updatedAt ?? right.createdAt ?? '')
+        - Date.parse(left.updatedAt ?? left.createdAt ?? '');
+      if (Number.isFinite(recency) && recency) return recency;
+      return String(right.id).localeCompare(String(left.id));
+    });
+  }, [feed.strategies, sort]);
+
   const emptyMessage = reviewHidden
     ? 'No strategies are currently hidden by moderation.'
     : 'No shared strategies found for this view yet.';
@@ -177,6 +207,7 @@ export function FeedPage() {
           <div className={styles.controlRow}>
             <label><span>Show</span><select value={scope} onChange={(event) => setScope(event.target.value)}><option value="follows" disabled={!session}>From people you follow</option><option value="public">All public strategies</option></select></label>
             <label><span>Sort by</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recent">Most recent</option><option value="popular">Most added</option></select></label>
+            <button className={styles.refreshButton} type="button" disabled={loading} onClick={() => void refreshFeed()}>Refresh shared strategies</button>
           </div>
         ) : <p className={styles.adminReviewLabel}>Admin review · hidden from community</p>}
         {session?.admin ? (
@@ -189,7 +220,7 @@ export function FeedPage() {
       </section>
 
       <section className={styles.feed} aria-label={reviewHidden ? 'Hidden community strategies' : 'Shared strategies'}>
-        {feed.strategies.map((strategy) => {
+        {displayedStrategies.map((strategy) => {
           const author = strategy.author ?? {};
           const authorLabel = sharedStrategyAuthorName(strategy) || 'Unknown author';
           const contributorLocation = sharedStrategyContributorLocation(strategy);

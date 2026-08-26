@@ -26,9 +26,31 @@
 
 .controlRow {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
   gap: .38rem;
   align-items: end;
+}
+
+.refreshButton {
+  min-height: 44px;
+  padding: .36rem .62rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 42%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--purpose) 12%, var(--surface-raised) 88%);
+  color: var(--text);
+  font: 720 .68rem/1.1 var(--font-body);
+  cursor: pointer;
+}
+
+.refreshButton:hover,
+.refreshButton:focus-visible {
+  border-color: var(--outline);
+  background: color-mix(in srgb, var(--purpose) 20%, var(--surface-raised) 80%);
+}
+
+.refreshButton:disabled {
+  cursor: wait;
+  opacity: .62;
 }
 
 .controlRow label {

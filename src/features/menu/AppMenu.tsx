@@ -79,6 +79,16 @@ function StatusNotice({ status, target }: { status: MenuStatus | null; target: M
   );
 }
 
+function localTime(isoTime: string) {
+  const date = new Date(isoTime);
+  if (Number.isNaN(date.getTime())) return 'just now';
+  return new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(date);
+}
+
 function captureLocalStorage() {
   const snapshot: Record<string, string> = {};
   for (let index = 0; index < window.localStorage.length; index += 1) {
@@ -197,10 +207,36 @@ export function AppMenu({
     setAccountBusy(true);
     setStatus({ target: 'profile', message: 'Saving this browser to your profile…' });
     try {
-      const result = await saveCurrentBrowserToProfile();
+      const result = await saveCurrentBrowserToProfile((progress) => {
+        setStatus({
+          target: 'profile',
+          message: progress.strategyCount > 0
+            ? `Profile saved at ${localTime(progress.profileSavedAt)}. Checking ${progress.strategyCount} shared ${progress.strategyCount === 1 ? 'strategy' : 'strategies'} for changes…`
+            : `Profile saved at ${localTime(progress.profileSavedAt)}. Checking shared strategy changes…`,
+        });
+      });
+      const strategySyncTime = result.strategiesSyncedAt
+        ? localTime(result.strategiesSyncedAt)
+        : 'just now';
+      let message: string;
+      if (!result.strategiesSynced) {
+        message = `Profile saved at ${localTime(result.profileSavedAt)}. Shared strategy sync did not finish; you can try Save this browser again.`;
+      } else if (result.strategyCount === 0 && !result.unpublishedStrategyCount) {
+        message = `Profile saved at ${localTime(result.profileSavedAt)}. Shared strategies checked at ${strategySyncTime}; there were no shared strategies to sync.`;
+      } else if (result.changedStrategyCount === 0 && !result.unpublishedStrategyCount) {
+        message = `Profile saved at ${localTime(result.profileSavedAt)}. All ${result.strategyCount} shared ${result.strategyCount === 1 ? 'strategy was' : 'strategies were'} already up to date when checked at ${strategySyncTime}.`;
+      } else {
+        const changes = result.changedStrategyCount ?? result.strategyCount;
+        const parts = [
+          changes ? `${changes} changed shared ${changes === 1 ? 'strategy' : 'strategies'} updated` : '',
+          result.unchangedStrategyCount ? `${result.unchangedStrategyCount} already up to date` : '',
+          result.unpublishedStrategyCount ? `${result.unpublishedStrategyCount} removed from sharing` : '',
+        ].filter(Boolean);
+        message = `Profile saved at ${localTime(result.profileSavedAt)}. Checked at ${strategySyncTime}: ${parts.join(', ')}.`;
+      }
       setStatus({
         target: 'profile',
-        message: `Profile saved.${result.strategiesSynced ? ' Shared strategies synced.' : ' Shared strategies could not be synced.'}`,
+        message,
       });
     } catch (error) {
       setStatus({
