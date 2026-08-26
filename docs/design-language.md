@@ -55,7 +55,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Pressure reach scales from the physical sizes of the interacting magnets instead of using a separate displacement target. The held interaction applies acceleration/force; normal damping, mass, edge restitution, and collision response dissipate the energy.
 - Do not impose a special held-state speed cap on neighboring magnets. The board is one physics system: while one magnet is held, all resting magnets must continue their ordinary surface coupling and hard-contact response so motion can propagate beyond the first neighbor as a visible ripple through tightly packed magnets.
 - The response should be clearly perceptible on both desktop and touch without becoming an unbounded explosion; tune force, damping, mass, and restitution rather than stopping propagation with an artificial per-neighbor cap or by disabling resting-resting collisions.
-- Pointer pickup is direct manipulation, not a focus treatment. A pointer-held magnet must not acquire an extra focus/selection ring; keyboard focus remains visibly indicated when navigating without pointer pickup. Do not implement this by hiding a held focus ring in CSS—prevent pointer pickup from creating/retaining that focus state at the interaction source.
+- Pointer pickup is direct manipulation, not a focus treatment. A pointer-held magnet must not acquire an extra focus/selection ring; keyboard focus remains visibly indicated when navigating without pointer pickup. Do not implement this by hiding an extra held-state focus ring in CSS—prevent pointer pickup from creating/retaining that focus state at the interaction source.
 
 ## Touch and control sizing
 
