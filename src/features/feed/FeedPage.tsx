@@ -232,7 +232,7 @@ export function FeedPage() {
               </select>
             </label>
             <label>
-              <span>Sort</span>
+              <span>Sort by</span>
               <select value={sort} onChange={(event) => setSort(event.target.value)}>
                 <option value="recent">Recent</option>
                 <option value="popular">Most saved</option>
