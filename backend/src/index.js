@@ -4,6 +4,7 @@ import {
   beginVerifiedLogin,
   finishVerifiedLogin,
 } from './oauth.js';
+import { sessionCookie } from './session.js';
 
 const APP_ORIGIN = 'https://allneeds.app';
 
@@ -44,10 +45,6 @@ function json(request, data, status = 200, extraHeaders = {}) {
       ...extraHeaders,
     },
   });
-}
-
-function sessionCookie(id) {
-  return `allneeds_session=${encodeURIComponent(id)}; HttpOnly; Secure; SameSite=Lax; Path=/`;
 }
 
 function parseCookies(request) {

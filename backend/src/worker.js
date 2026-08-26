@@ -1,3 +1,9 @@
+import {
+  ALLNEEDS_SESSION_TTL_DAYS,
+  expiredSessionCookie,
+  sessionCookie,
+} from './session.js';
+
 const APP_ORIGIN = 'https://allneeds.app';
 
 function corsHeaders(request) {
@@ -51,14 +57,6 @@ function parseCookies(request) {
     const [key, ...value] = part.trim().split('=');
     return [decodeURIComponent(key), decodeURIComponent(value.join('='))];
   }));
-}
-
-function sessionCookie(id) {
-  return `allneeds_session=${encodeURIComponent(id)}; HttpOnly; Secure; SameSite=Lax; Path=/`;
-}
-
-function expiredSessionCookie() {
-  return 'allneeds_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0';
 }
 
 function normalizeVisibility(value) {
@@ -335,9 +333,9 @@ async function handleLegacyAuthSession(request, env) {
   await upsertUserProfile(env, did, handle);
   const id = crypto.randomUUID();
   await env.DB.prepare(
-    `INSERT INTO sessions (id, did, access_token, created_at, verified_at)
-     VALUES (?, ?, ?, CURRENT_TIMESTAMP, NULL);`,
-  ).bind(id, did, accessToken).run();
+    `INSERT INTO sessions (id, did, access_token, created_at, expires_at, verified_at)
+     VALUES (?, ?, ?, CURRENT_TIMESTAMP, datetime('now', ?), NULL);`,
+  ).bind(id, did, accessToken, `+${ALLNEEDS_SESSION_TTL_DAYS} days`).run();
   return jsonResponse(request, { status: 'ok', verified: false }, 200, {
     'Set-Cookie': sessionCookie(id),
   });

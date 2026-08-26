@@ -113,7 +113,7 @@ The replacement flow uses the official AT Protocol OAuth client in the Worker:
 
 - `/auth/login` starts PKCE + DPoP OAuth and stores short-lived authorization state in D1;
 - `/auth/callback` completes the OAuth exchange and obtains the DID from the verified OAuth result;
-- the Worker creates its own HttpOnly `allneeds_session` with `verified_at` set;
+- the Worker creates its own secure HttpOnly `allneeds_session` with `verified_at` set; the browser cookie and D1 row share one canonical 30-day lifetime so closing Safari or an installed iOS web app does not itself sign the user out;
 - the temporary Bluesky OAuth credential is immediately revoked/deleted because allneeds only needs the verified identity for its own data.
 
 Privileged ownership and moderation always require a verified allneeds session. With the cutover switch off, ordinary private profile APIs require that verified session as well.
