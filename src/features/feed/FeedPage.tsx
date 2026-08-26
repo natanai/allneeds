@@ -131,13 +131,17 @@ export function FeedPage() {
       return;
     }
     const authorName = sharedStrategyAuthorName(strategy);
+    const contributorLocation = sharedStrategyContributorLocation(strategy);
     const entry = createSharedInventoryEntry({
       id: strategyId,
       title: strategy.title || 'Untitled strategy',
       description: strategy.body || '',
       needSlugs: normalizeSharedStrategyNeeds(strategy),
       visibility: strategy.visibility,
-      contributor: authorName ? { name: authorName } : undefined,
+      contributor: authorName || contributorLocation ? {
+        ...(authorName ? { name: authorName } : {}),
+        ...(contributorLocation ? { location: contributorLocation } : {}),
+      } : undefined,
     });
     writeInventory([...current, entry]);
     setSavedIds((values) => new Set(values).add(strategyId.toLocaleLowerCase()));
