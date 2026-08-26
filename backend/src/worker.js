@@ -83,6 +83,11 @@ function normalizeClientKey(value) {
   return value.trim().slice(0, 200);
 }
 
+function normalizeContributorField(value) {
+  if (typeof value !== 'string') return '';
+  return value.trim().slice(0, 120);
+}
+
 function adminDidSet(env) {
   return new Set(String(env.ADMIN_DIDS || '')
     .split(',')
@@ -149,6 +154,10 @@ function mapStrategyRow(row) {
     visibility: normalizeVisibility(row.visibility),
     moderationStatus: normalizeModerationStatus(row.moderation_status),
     addCount: typeof row.add_count === 'number' ? row.add_count : Number(row.add_count) || 0,
+    contributor: row.contributor_name || row.contributor_location ? {
+      name: row.contributor_name || null,
+      location: row.contributor_location || null,
+    } : null,
     author: row.author_did ? {
       did: row.author_did,
       handle: row.handle || null,
@@ -167,6 +176,8 @@ const STRATEGY_SELECT = `
     s.title,
     s.body,
     s.need_ids,
+    s.contributor_name,
+    s.contributor_location,
     s.created_at,
     s.updated_at,
     s.visibility,
@@ -204,16 +215,20 @@ async function createStrategy(env, session, payload, { verifiedOnly = false } = 
   const needIds = normalizeNeedIds(payload?.needIds);
   const visibility = normalizeVisibility(payload?.visibility);
   const clientKey = normalizeClientKey(payload?.clientKey) || null;
+  const contributorName = normalizeContributorField(payload?.firstName) || null;
+  const contributorLocation = normalizeContributorField(payload?.location) || null;
   const result = await env.DB.prepare(
     `INSERT INTO strategies
-       (author_did, client_key, title, body, need_ids, visibility, moderation_status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, 'visible', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`,
+       (author_did, client_key, title, body, need_ids, contributor_name, contributor_location, visibility, moderation_status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'visible', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`,
   ).bind(
     session.did,
     clientKey,
     title,
     body,
     needIds.length ? JSON.stringify(needIds) : null,
+    contributorName,
+    contributorLocation,
     visibility,
   ).run();
   const id = result.meta?.last_row_id;
@@ -239,15 +254,23 @@ async function updateOwnedStrategy(env, session, id, payload) {
     : normalizeNeedIds(payload.needIds);
   const clientKeyInput = payload?.clientKey === undefined ? current.client_key : normalizeClientKey(payload.clientKey);
   const clientKey = clientKeyInput || null;
+  const contributorName = payload?.firstName === undefined
+    ? current.contributor_name
+    : normalizeContributorField(payload.firstName) || null;
+  const contributorLocation = payload?.location === undefined
+    ? current.contributor_location
+    : normalizeContributorField(payload.location) || null;
   await env.DB.prepare(
     `UPDATE strategies
-        SET client_key = ?, title = ?, body = ?, need_ids = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
+        SET client_key = ?, title = ?, body = ?, need_ids = ?, contributor_name = ?, contributor_location = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND author_did = ?;`,
   ).bind(
     clientKey,
     title,
     body,
     needIds.length ? JSON.stringify(normalizeNeedIds(needIds)) : null,
+    contributorName,
+    contributorLocation,
     visibility,
     id,
     session.did,

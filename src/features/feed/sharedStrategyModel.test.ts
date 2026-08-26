@@ -27,6 +27,7 @@ describe('shared strategy model', () => {
       id: '99',
       authorDid: 'did:plc:owner',
       clientKey: 'inv-owned-strategy',
+      contributor: { name: 'Nat', location: 'Missouri' },
       author: { displayName: 'Person', handle: 'person.example', did: 'did:plc:nested' },
       title: 'Try the familiar thing',
       body: 'Use something familiar when that helps.',
@@ -34,12 +35,12 @@ describe('shared strategy model', () => {
     };
     expect(sharedStrategyOwnerDid(strategy)).toBe('did:plc:owner');
     expect(sharedStrategyClientKey(strategy)).toBe('inv-owned-strategy');
-    expect(sharedStrategyAuthorName(strategy)).toBe('Person');
+    expect(sharedStrategyAuthorName(strategy)).toBe('Nat');
     expect(sharedStrategyDeckSlug(strategy)).toBe('community-99');
     expect(sharedStrategyToNeedStrategy(strategy)).toMatchObject({
       slug: 'community-99',
       provenance: 'user',
-      contributor: { name: 'Person' },
+      contributor: { name: 'Nat', location: 'Missouri' },
       supportedNeeds: [{ slug: 'safety', title: 'Safety' }],
     });
   });

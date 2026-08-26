@@ -141,7 +141,7 @@ export function InventoryPage() {
       return;
     }
     setStrategyNeedFilter(null);
-    setStrategySearch('');
+    setStrategySearch(entry.title);
     setExpandedNeed(null);
     setView('strategies');
     setEditDraft(editDraftForEntry(entry));
@@ -438,7 +438,13 @@ export function InventoryPage() {
             </header>
             <label className={styles.search}>
               <span aria-hidden="true">⌕</span><span className="visually-hidden">Search saved strategies</span>
-              <input type="search" placeholder="Search your strategies" autoComplete="off" value={strategySearch} onChange={(event) => setStrategySearch(event.target.value)} />
+              <input
+                type="search"
+                placeholder="Search your strategies"
+                autoComplete="off"
+                value={strategySearch}
+                onChange={(event) => setStrategySearch(event.target.value)}
+              />
             </label>
             {selectedStrategyNeed ? (
               <div className={popoverStyles.strategyContext}>
@@ -458,11 +464,17 @@ export function InventoryPage() {
                 </p>
               ) : null}
               {visibleStrategies.map((entry) => (
-                <article key={entry.id} id={`inventory-strategy-${entry.id}`} tabIndex={-1} className={`${styles.savedCard} ${popoverStyles.savedCard}`}>
+                <article
+                  key={entry.id}
+                  id={`inventory-strategy-${entry.id}`}
+                  tabIndex={-1}
+                  className={`${styles.savedCard} ${popoverStyles.savedCard}`}
+                  data-editing={editDraft?.id === entry.id || undefined}
+                >
                   {editDraft?.id === entry.id ? (
                     <form className={styles.editForm} onSubmit={(event) => void updateEntry(event, entry)}>
-                      <label className={styles.formField}>Strategy name<span className={styles.inputCard}><input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></span></label>
-                      <label className={styles.formField}>Description<span className={styles.inputCard}><textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} required /></span></label>
+                      <label className={styles.formField}><span>Strategy name</span><span className={styles.inputCard}><input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></span></label>
+                      <label className={styles.formField}><span>Description</span><span className={styles.inputCard}><textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} required /></span></label>
                       <div className={`${styles.formField} ${styles.needsFormField}`}>
                         <span id={`inventory-edit-needs-${entry.id}`}>Needs</span>
                         <span className={styles.inputCard}>
@@ -470,8 +482,8 @@ export function InventoryPage() {
                         </span>
                       </div>
                       <div className={styles.formRow}>
-                        <label className={styles.formField}>First name (optional)<span className={styles.inputCard}><input value={editDraft.firstName} onChange={(event) => setEditDraft({ ...editDraft, firstName: event.target.value })} /></span></label>
-                        <label className={styles.formField}>Location (optional)<span className={styles.inputCard}><input value={editDraft.location} onChange={(event) => setEditDraft({ ...editDraft, location: event.target.value })} /></span></label>
+                        <label className={styles.formField}><span>First name (optional)</span><span className={styles.inputCard}><input value={editDraft.firstName} onChange={(event) => setEditDraft({ ...editDraft, firstName: event.target.value })} /></span></label>
+                        <label className={styles.formField}><span>Location (optional)</span><span className={styles.inputCard}><input value={editDraft.location} onChange={(event) => setEditDraft({ ...editDraft, location: event.target.value })} /></span></label>
                       </div>
                       {entry.personal ? (
                         <StrategySharingFields

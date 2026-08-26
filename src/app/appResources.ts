@@ -26,6 +26,7 @@ export type SharedFeedStrategy = {
   needIds?: unknown[];
   supportsNeeds?: unknown[];
   needs?: unknown[];
+  contributor?: { name?: string | null; location?: string | null } | null;
   author?: { displayName?: string; handle?: string; did?: string };
 };
 

@@ -150,6 +150,8 @@ async function handleAdminStrategies(request, env) {
        s.title,
        s.body,
        s.need_ids,
+       s.contributor_name,
+       s.contributor_location,
        s.created_at,
        s.updated_at,
        s.visibility,
@@ -177,6 +179,10 @@ async function handleAdminStrategies(request, env) {
     visibility: row.visibility === 'public' || row.visibility === 'followers' ? row.visibility : 'private',
     moderationStatus: row.moderation_status === 'hidden' ? 'hidden' : 'visible',
     addCount: typeof row.add_count === 'number' ? row.add_count : Number(row.add_count) || 0,
+    contributor: row.contributor_name || row.contributor_location ? {
+      name: row.contributor_name || null,
+      location: row.contributor_location || null,
+    } : null,
     author: row.author_did ? {
       did: row.author_did,
       handle: row.handle || null,

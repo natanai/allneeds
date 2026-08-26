@@ -679,6 +679,7 @@
 
 .inputCard textarea {
   min-height: 4.75rem;
+  display: block;
   resize: vertical;
 }
 

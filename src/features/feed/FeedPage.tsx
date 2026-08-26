@@ -23,6 +23,7 @@ import {
   normalizeSharedStrategyNeeds,
   sharedStrategyAuthorName,
   sharedStrategyClientKey,
+  sharedStrategyContributorLocation,
   sharedStrategyOwnerDid,
 } from './sharedStrategyModel';
 import styles from './FeedPage.module.css';
@@ -191,6 +192,8 @@ export function FeedPage() {
         {feed.strategies.map((strategy) => {
           const author = strategy.author ?? {};
           const authorLabel = sharedStrategyAuthorName(strategy) || 'Unknown author';
+          const contributorLocation = sharedStrategyContributorLocation(strategy);
+          const contributorLabel = [authorLabel, contributorLocation].filter(Boolean).join(' • ');
           const handle = author.handle ? `@${author.handle}` : '';
           const timestamp = formatDate(strategy.createdAt);
           const strategyNeeds = normalizeSharedStrategyNeeds(strategy);
@@ -200,7 +203,7 @@ export function FeedPage() {
             || Boolean(isOwner && savedIds.has(clientKey.toLocaleLowerCase()));
           return (
             <article className={styles.card} key={strategy.id}>
-              <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${authorLabel}${handle && authorLabel !== author.handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
+              <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${contributorLabel}${handle && authorLabel !== author.handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
               <div className={styles.body}><p>{strategy.body || ''}</p></div>
               <footer>
                 <span>{reviewHidden ? 'Hidden' : visibility(strategy.visibility)}</span>

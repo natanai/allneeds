@@ -25,8 +25,14 @@ function strategy(overrides: Partial<InventoryStrategy>): InventoryStrategy {
 describe('profile strategy publishing', () => {
   it('publishes only signed-in users own public or followers strategies with stable local keys', () => {
     const result = profilePublishableStrategies([
-      strategy({ id: 'mine-public', title: 'Mine public', personal: true, visibility: 'public' }),
-      strategy({ id: 'mine-followers', title: 'Mine followers', personal: true, visibility: 'followers' }),
+      strategy({
+        id: 'mine-public', title: 'Mine public', personal: true, visibility: 'public',
+        firstName: 'Nat', location: 'Missouri',
+      }),
+      strategy({
+        id: 'mine-followers', title: 'Mine followers', personal: true, visibility: 'followers',
+        contributor: { name: 'Profile name', location: 'Profile place' },
+      }),
       strategy({ id: 'mine-private', title: 'Mine private', personal: true, visibility: 'private' }),
       strategy({
         id: 'someone-else',
@@ -43,6 +49,8 @@ describe('profile strategy publishing', () => {
         title: 'Mine public',
         body: 'Example description',
         needIds: ['safety'],
+        firstName: 'Nat',
+        location: 'Missouri',
         visibility: 'public',
       },
       {
@@ -50,6 +58,8 @@ describe('profile strategy publishing', () => {
         title: 'Mine followers',
         body: 'Example description',
         needIds: ['safety'],
+        firstName: 'Profile name',
+        location: 'Profile place',
         visibility: 'followers',
       },
     ]);

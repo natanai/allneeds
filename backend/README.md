@@ -40,7 +40,7 @@ Migration `0001_strategy_ownership.sql` contains one-time `ALTER TABLE` statemen
 
 ## Production migration status
 
-Both migrations were applied to the existing production `allneeds-db` on 2026-08-25 after capturing a Time Travel bookmark and a full SQL export. Do **not** apply either migration again.
+The first two migrations were applied to the existing production `allneeds-db` on 2026-08-25 after capturing a Time Travel bookmark and a full SQL export. Do **not** apply either migration again.
 
 - pre-migration Time Travel bookmark: `000000c1-00000000-000050d2-78ef86bd72b3d2a7832060349c18998f`
 - post-migration Time Travel bookmark: `000000c1-0000000e-000050d2-99b5a69ac695458c579d17c3d391ff88`
@@ -64,6 +64,15 @@ The 40 legacy repository strategies attributed to `Nat, Missouri` were migrated 
 - integrity verification: empty foreign-key check and `PRAGMA quick_check = ok`
 
 Do not rerun the generated production SQL against the migrated database. Restore from the pre-migration bookmark/export if rollback is ever required. After this migration, a browser that still has the older six-item snapshot must load the profile before saving it, so it does not overwrite the merged snapshot with stale device data.
+
+### Strategy-contributor migration status
+
+Migration `0003_strategy_contributors.sql` was applied once to production on 2026-08-25. It adds optional strategy-level contributor name/location fields, separate from the owning Bluesky identity, and backfills `Nat` / `Missouri` on the 40 migrated catalog strategies. Do **not** apply it again.
+
+- pre-migration Time Travel bookmark: `000000e2-00000000-000050d3-70dfc94356a041f7b33fa69e34f9c9a5`
+- post-migration Time Travel bookmark: `000000e2-00000006-000050d3-05d74d277993ad44e0c3d420303ac6ee`
+- local, gitignored full export: `backend/.wrangler/backups/allneeds-db-before-strategy-contributors-2026-08-25.sql`
+- final verification: both `TEXT` columns present, all 40 migrated rows attributed to `Nat` / `Missouri`, empty foreign-key check, and `PRAGMA quick_check = ok`
 
 The Worker supports these Cloudflare environment variables:
 

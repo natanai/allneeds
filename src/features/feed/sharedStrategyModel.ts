@@ -48,10 +48,15 @@ export function sharedStrategyClientKey(strategy: SharedFeedStrategy) {
 }
 
 export function sharedStrategyAuthorName(strategy: SharedFeedStrategy) {
-  return strategy.author?.displayName?.trim()
+  return strategy.contributor?.name?.trim()
+    || strategy.author?.displayName?.trim()
     || strategy.author?.handle?.trim()
     || sharedStrategyOwnerDid(strategy)
     || '';
+}
+
+export function sharedStrategyContributorLocation(strategy: SharedFeedStrategy) {
+  return strategy.contributor?.location?.trim() || '';
 }
 
 export function sharedStrategyDeckSlug(strategy: SharedFeedStrategy) {
@@ -64,13 +69,19 @@ export function sharedStrategyToNeedStrategy(strategy: SharedFeedStrategy): Stra
     return { slug, title: need?.title ?? slug };
   });
   const contributorName = sharedStrategyAuthorName(strategy);
+  const contributorLocation = sharedStrategyContributorLocation(strategy);
   return {
     slug: sharedStrategyDeckSlug(strategy),
     title: strategy.title?.trim() || 'Untitled strategy',
     summary: strategy.body || '',
     supportedNeeds,
     provenance: 'user',
-    ...(contributorName ? { contributor: { name: contributorName } } : {}),
+    ...(contributorName || contributorLocation ? {
+      contributor: {
+        ...(contributorName ? { name: contributorName } : {}),
+        ...(contributorLocation ? { location: contributorLocation } : {}),
+      },
+    } : {}),
   };
 }
 
