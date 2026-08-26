@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 64" preserveAspectRatio="none" aria-hidden="true">
-  <g transform="translate(-34 -16) scale(1.22) rotate(-36 66 28)">
-    <path d="M8 31C18 11 40 2 66 2C92 2 114 11 124 31C116 28 108 29 101 33C95 36 90 40 86 44C81 39 74 36 66 36C58 36 51 39 46 44C42 40 37 36 31 33C24 29 16 28 8 31Z" fill="black" fill-opacity="0.92"/>
-    <path d="M66 4C55 13 49 25 46 43M66 4V36M66 4C77 13 83 25 86 43" fill="none" stroke="black" stroke-width="3" stroke-linecap="round" stroke-opacity="0.48"/>
-    <path d="M66 7V61C66 72 75 78 85 76C95 74 101 67 102 59" fill="none" stroke="black" stroke-width="7" stroke-linecap="round" stroke-opacity="0.96"/>
-  </g>
-</svg>

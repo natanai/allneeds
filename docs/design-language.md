@@ -44,6 +44,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - If a concept intentionally removes the visible icon while keeping its label offset, preserve the real icon slot and hide only the glyph rather than faking the spacing with audit-only padding.
 - Artwork intended to meet a magnet edge must reach the true SVG/view-box edge, especially at 0% roundness where accidental gaps become obvious.
 - **Connection · Constellation is the first approved Need identity.** It retains the existing Connection link icon, uses a networked path-and-node mask across the full face, and derives its icon/art fade from `Positive` to `Primary` over a `Selection`/`Quiet` face. Canonical production references are `src/features/needs/NeedsPage.module.css` and `public/icons/needs/art/connection-constellation.svg`.
+- **Safety · Layered Cover is approved.** It replaces the generic shield with an umbrella icon and uses three overlapping full-face cover layers to communicate buffered protection rather than security-software branding. Its face mixes `Quiet` with `Selection`; the umbrella fades from `Primary` toward `Positive`; and the layered artwork blends `Primary`/`Positive` into `Action`/`Primary`. Canonical production references are `src/features/needs/NeedsPage.module.css`, `public/icons/needs/safety.svg`, and `public/icons/needs/art/safety-layered-cover.svg`.
 
 ## Magnet physics
 
@@ -54,7 +55,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Pressure reach scales from the physical sizes of the interacting magnets instead of using a separate displacement target. The held interaction applies acceleration/force; normal damping, mass, edge restitution, and collision response dissipate the energy.
 - Do not impose a special held-state speed cap on neighboring magnets. The board is one physics system: while one magnet is held, all resting magnets must continue their ordinary surface coupling and hard-contact response so motion can propagate beyond the first neighbor as a visible ripple through tightly packed magnets.
 - The response should be clearly perceptible on both desktop and touch without becoming an unbounded explosion; tune force, damping, mass, and restitution rather than stopping propagation with an artificial per-neighbor cap or by disabling resting-resting collisions.
-- Pointer pickup is direct manipulation, not a focus treatment. A pointer-held magnet must not acquire an extra focus/selection ring; keyboard focus remains visibly indicated when navigating without pointer pickup. Do not implement this by hiding a held-state focus ring in CSS—prevent pointer pickup from creating/retaining that focus state at the interaction source.
+- Pointer pickup is direct manipulation, not a focus treatment. A pointer-held magnet must not acquire an extra focus/selection ring; keyboard focus remains visibly indicated when navigating without pointer pickup. Do not implement this by hiding a held focus ring in CSS—prevent pointer pickup from creating/retaining that focus state at the interaction source.
 
 ## Touch and control sizing
 
@@ -212,6 +213,7 @@ Rules:
 
 ### 2026-08-25
 
+- Safety's Layered Cover treatment became an approved production Need-magnet identity: the generic shield is replaced with an umbrella icon, the face uses overlapping protective layers, and the palette remains entirely derived from functional Customizer roles without changing the shared magnet shell or physics.
 - Connection's Constellation treatment became the first approved production Need-magnet identity: full-face node/path artwork with the existing link icon, all derived from functional Customizer roles without changing the shared magnet shell or physics.
 - Need-magnet concept work now belongs in the deployed Design Lab rather than standalone preview HTML by default; controls are removed when no longer useful, and approved designs leave the active review set after promotion.
 - Theme internals now use functional Customizer roles site-wide instead of hue-named runtime tokens. Legacy hue-keyed saved themes are migrated only at the read/prepaint boundary, and the Design Lab inherits the live Customizer palette and roundness rather than maintaining duplicate controls.
