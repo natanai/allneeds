@@ -34,9 +34,9 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 
 ## Need magnet identities
 
-**Accepted 2026-08-25.** Need magnets may develop distinct full-face identities while preserving the shared physical magnet shell.
+**Accepted 2026-08-25; refined 2026-08-26.** Need magnets may develop distinct full-face identities while preserving the shared physical magnet shell.
 
-- Identity art must not change magnet geometry, physics, tactile outline/shadow, label behavior, or Customizer roundness. Visual identity belongs inside the existing shell.
+- Identity work must not change shared shell padding, border/shadow semantics, physics, pickup behavior, or Customizer roundness. Visual identity belongs inside the existing shell. Explicitly approved icon content may change a particular magnet's measured intrinsic width, as with a two-sided icon treatment, but the shared board must measure that real geometry normally rather than patching or faking dimensions.
 - Full-face art should use Customizer-owned functional roles and remain legible across every real preset, including near-monochrome Refrigerator. Do not hard-code rescue colors for one design.
 - The live Design Lab at `/design-lab/need-magnets` is the canonical approval surface. Main/actual-size candidates inherit the real page Customizer, fixed rows show every preset, and candidates should be judged through the full 0–200% roundness range.
 - Standalone mockup HTML is not the normal audit path. Put previews into the live lab unless the user explicitly asks for an offline artifact.
@@ -45,6 +45,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Artwork intended to meet a magnet edge must reach the true SVG/view-box edge, especially at 0% roundness where accidental gaps become obvious.
 - **Connection · Constellation is the first approved Need identity.** It retains the existing Connection link icon, uses a networked path-and-node mask across the full face, and derives its icon/art fade from `Positive` to `Primary` over a `Selection`/`Quiet` face. Canonical production references are `src/features/needs/NeedsPage.module.css` and `public/icons/needs/art/connection-constellation.svg`.
 - **Safety · Layered Cover is approved.** It replaces the generic shield with an umbrella icon and uses three overlapping full-face cover layers to communicate buffered protection rather than security-software branding. Its face mixes `Quiet` with `Selection`; the umbrella fades from `Primary` toward `Positive`; and the layered artwork blends `Primary`/`Positive` into `Action`/`Primary`. Canonical production references are `src/features/needs/NeedsPage.module.css`, `public/icons/needs/safety.svg`, and `public/icons/needs/art/safety-layered-cover.svg`.
+- **Understanding · Converging Map (U4D) is approved.** It pairs a route-map icon on the left with a perspective-pair icon on the right so the magnet gestures toward the approved `Making sense` and `Understanding between people` lenses without splitting the Need. Two full-face fields converge toward the center to communicate one workable picture built from distinct orientations. The face blends `Quiet`/`Selection` into `Selection`/`Action`; the route-map uses `Primary`, the perspective-pair uses `Secondary`, and the converging art fades from `Primary` to `Action` at restrained opacity. Canonical production references are `src/features/needs/NeedsPage.module.css`, `public/icons/needs/understanding.svg`, `public/icons/needs/understanding-perspective.svg`, and `public/icons/needs/art/understanding-converging-map.svg`.
 
 ## Magnet physics
 
@@ -262,6 +263,7 @@ Rules:
 
 ### 2026-08-26
 
+- Understanding's **Converging Map (U4D)** became the approved production Need-magnet identity: route-map for `Making sense`, perspective-pair for `Understanding between people`, and two full-face fields converging toward one center. The treatment remains Customizer-owned and preserves the shared physical magnet shell and physics while allowing the explicitly approved second icon to participate in normal measured width.
 - Need function lenses became an accepted optional Need-page pattern: approved lenses remain visible together under `This need can involve`, own their local Details/citations, stack on narrow screens, and use generic Customizer-owned chrome rather than tabs or Need-specific rendering. Understanding is the first approved use.
 - Signed-in Shared Strategy card chrome was compacted by meaning: visibility, owner Edit, and already-Saved states use familiar icon-only treatments with accessible names, while Needs and unsaved Save retain short text where the action would otherwise be ambiguous.
 - Shared Strategies now reuse the Need-page strategy-card language instead of a separate social-post card treatment; contributor name/location sit quietly at bottom-right and visible feed attribution never falls back to Bluesky handles/display names/DIDs.
