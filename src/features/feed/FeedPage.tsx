@@ -254,7 +254,7 @@ export function FeedPage() {
           {!reviewHidden ? (
             <p className={styles.authHint}>
               {session
-                ? `Following is available${session.handle ? ` for @${session.handle.replace(/^@/, '')}` : ''}.`
+                ? 'Following is available while you are signed in.'
                 : 'Sign in to Bluesky in Menu → Account & data to use Following.'}
             </p>
           ) : null}
@@ -267,14 +267,10 @@ export function FeedPage() {
         role="feed"
       >
         {displayedStrategies.map((strategy, index) => {
-          const author = strategy.author ?? {};
-          const authorLabel = sharedStrategyAuthorName(strategy) || 'Unknown author';
+          const contributorName = strategy.contributor?.name?.trim() || '';
           const contributorLocation = sharedStrategyContributorLocation(strategy);
-          const handle = author.handle ? `@${author.handle}` : '';
-          const displayHandle = handle && authorLabel !== author.handle ? handle : '';
           const timestamp = formatDate(strategy.createdAt);
-          const contributorLabel = [authorLabel, contributorLocation].filter(Boolean).join(' • ');
-          const authorMeta = `${contributorLabel}${displayHandle ? ` (${displayHandle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`;
+          const contributorLabel = [contributorName, contributorLocation].filter(Boolean).join(' • ');
           const strategyNeeds = normalizeSharedStrategyNeeds(strategy);
           const clientKey = sharedStrategyClientKey(strategy);
           const isOwner = Boolean(session && clientKey && sharedStrategyOwnerDid(strategy) === session.did);
@@ -331,7 +327,13 @@ export function FeedPage() {
                     </button>
                   ) : null}
                 </div>
-                <p className={styles.authorMeta}>by {authorMeta}</p>
+                {contributorLabel || timestamp ? (
+                  <p className={styles.authorMeta}>
+                    {contributorLabel ? `by ${contributorLabel}` : ''}
+                    {contributorLabel && timestamp ? ' · ' : ''}
+                    {timestamp}
+                  </p>
+                ) : null}
               </footer>
             </article>
           );
