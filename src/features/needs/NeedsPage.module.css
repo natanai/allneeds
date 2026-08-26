@@ -143,6 +143,41 @@
   pointer-events: none;
 }
 
+/* Approved Need identity: Safety · Layered Cover.
+   The umbrella replaces the generic shield icon while the layered full-face
+   artwork carries the approved buffered/protected-space identity. */
+.boardWrapper :global([data-magnet-id='needs-safety']) {
+  --magnet-icon: url('/icons/needs/safety.svg');
+  background: color-mix(in srgb, var(--quiet) 58%, var(--selection) 42%);
+}
+
+.boardWrapper :global([data-magnet-id='needs-safety'])::before {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    color-mix(in srgb, var(--positive) 28%, var(--primary) 72%)
+  );
+}
+
+.boardWrapper :global([data-magnet-id='needs-safety'])::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--primary) 68%, var(--positive) 32%),
+    color-mix(in srgb, var(--action) 30%, var(--primary) 70%)
+  );
+  opacity: 0.6;
+  mask: url('/icons/needs/art/safety-layered-cover.svg') left center / 100% 100% no-repeat;
+  -webkit-mask: url('/icons/needs/art/safety-layered-cover.svg') left center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
 .empty {
   margin: 0;
   padding: 1rem;
