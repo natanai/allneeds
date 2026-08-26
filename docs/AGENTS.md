@@ -2,6 +2,10 @@
 
 This file supplements the root `AGENTS.md` for work under `docs/`.
 
+## Current Safety record
+
+For Safety content or strategy work, read `docs/safety-content-audit.md` first. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`. Do not resurrect superseded Safety copy, citations, strategy titles, wording, or static Nat strategy references from the historical section.
+
 ## System strategy evidence
 
 Before documenting, approving, or revising any system-authored strategy in a content audit, read and follow `docs/system-strategy-evidence-standard.md`.
