@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
 import { needs, needsBySlug } from '../../data/catalog';
@@ -12,6 +12,7 @@ import {
   createPersonalInventoryEntry,
   isDuplicateStrategy,
   readInventory,
+  updateInventoryEntry,
   writeInventory,
 } from './inventoryRepository';
 import type { InventoryStrategy } from './inventoryRepository';
@@ -43,8 +44,22 @@ function emptyInventoryDraft(): InventoryDraft {
   };
 }
 
+function editDraftForEntry(entry: InventoryStrategy): NonNullable<InventoryDraft['edit']> {
+  return {
+    id: entry.id,
+    title: entry.title,
+    description: entry.description,
+    selectedNeeds: entry.needSlugs,
+    firstName: entry.firstName ?? entry.contributor?.name ?? '',
+    location: entry.location ?? entry.contributor?.location ?? '',
+    visibility: entry.visibility,
+  };
+}
+
 export function InventoryPage() {
   const session = useBlueskySession();
+  const [searchParams] = useSearchParams();
+  const requestedEditId = searchParams.get('edit')?.trim() ?? '';
   const [initialDraft] = useState(() => readInventoryDraft() ?? emptyInventoryDraft());
   const [inventory, setInventory] = useState<InventoryStrategy[]>(readInventory);
   const [view, setView] = useState<InventoryView>('needs');
@@ -60,6 +75,7 @@ export function InventoryPage() {
   const [shareEmailReadyFor, setShareEmailReadyFor] = useState<string | null>(null);
   const addFormShellRef = useRef<HTMLDetailsElement>(null);
   const openNeedRef = useRef<HTMLElement | null>(null);
+  const handledEditIdRef = useRef('');
   const workflowDraft = useMemo<InventoryDraft>(() => ({
     coverageFilter, expandedNeed, add: addDraft, edit: editDraft,
   }), [addDraft, coverageFilter, editDraft, expandedNeed]);
@@ -112,6 +128,29 @@ export function InventoryPage() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [expandedNeed]);
+
+  useEffect(() => {
+    if (!requestedEditId || handledEditIdRef.current === requestedEditId) return;
+    handledEditIdRef.current = requestedEditId;
+    const entry = inventory.find((candidate) => candidate.id === requestedEditId);
+    if (!entry) {
+      setFeedback({
+        kind: 'warning',
+        message: 'That strategy belongs to your profile but is not on this device yet. Load your profile from Menu → Account & data, then try Edit again.',
+      });
+      return;
+    }
+    setStrategyNeedFilter(null);
+    setStrategySearch(entry.title);
+    setExpandedNeed(null);
+    setView('strategies');
+    setEditDraft(editDraftForEntry(entry));
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(`inventory-strategy-${entry.id}`);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
+    });
+  }, [inventory, requestedEditId]);
 
   const commit = (items: InventoryStrategy[], message: string) => {
     setInventory(writeInventory(items));
@@ -189,14 +228,43 @@ export function InventoryPage() {
     setView('strategies');
   };
 
-  const updateEntry = (event: FormEvent<HTMLFormElement>, entry: InventoryStrategy) => {
+  const updateEntry = async (event: FormEvent<HTMLFormElement>, entry: InventoryStrategy) => {
     event.preventDefault();
     const title = editDraft?.id === entry.id ? editDraft.title.trim() : '';
     const description = editDraft?.id === entry.id ? editDraft.description.trim() : '';
-    if (!title) return;
-    commit(inventory.map((item) => item.id === entry.id ? { ...item, title, description } : item), `Updated “${title}”.`);
+    const needSlugs = editDraft?.id === entry.id ? editDraft.selectedNeeds.filter(Boolean) : [];
+    if (!title || !description || !needSlugs.length) {
+      setFeedback({ kind: 'error', message: 'Add a strategy name, description, and at least one need.' });
+      return;
+    }
+    if (isDuplicateStrategy(inventory.filter((item) => item.id !== entry.id), title, needSlugs)
+      && !window.confirm('You already saved a strategy with this title for one of the selected needs. Save these changes anyway?')) {
+      setFeedback({ kind: 'warning', message: 'Skipped saving duplicate strategy changes.' });
+      return;
+    }
+    const primaryNeed = needsBySlug.get(needSlugs[0] ?? '');
+    const updated = inventory.map((item) => item.id === entry.id ? updateInventoryEntry(item, {
+      title,
+      description,
+      needSlugs,
+      needTitle: primaryNeed?.title ?? item.need,
+      firstName: editDraft?.firstName,
+      location: editDraft?.location,
+      visibility: item.personal ? editDraft?.visibility ?? item.visibility : item.visibility,
+    }) : item);
+    commit(updated, `Updated “${title}”.`);
     workflowDraftRef.current = { ...workflowDraftRef.current, edit: null };
     setEditDraft(null);
+    if (!session || !entry.personal) return;
+    try {
+      const result = await saveCurrentBrowserToProfile();
+      setFeedback({
+        kind: 'success',
+        message: `Updated “${title}” on this device and your profile.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}`,
+      });
+    } catch {
+      setFeedback({ kind: 'warning', message: `Updated “${title}” on this device, but profile sync did not finish.` });
+    }
   };
 
   const shareOneWithNat = (entry: InventoryStrategy) => {
@@ -213,7 +281,7 @@ export function InventoryPage() {
     });
   };
 
-  const removeEntry = (entry: InventoryStrategy) => {
+  const removeEntry = async (entry: InventoryStrategy) => {
     if (!window.confirm(`Remove “${entry.title}” from this device?`)) return;
     commit(inventory.filter((item) => item.id !== entry.id), `Removed “${entry.title}”.`);
     if (editDraft?.id === entry.id) {
@@ -221,6 +289,16 @@ export function InventoryPage() {
       setEditDraft(null);
     }
     setShareEmailReadyFor((current) => current === entry.id ? null : current);
+    if (!session || !entry.personal) return;
+    try {
+      const result = await saveCurrentBrowserToProfile();
+      setFeedback({
+        kind: 'success',
+        message: `Removed “${entry.title}” from this device and your profile.${result.strategiesSynced ? '' : ' Shared strategy sync needs another try.'}`,
+      });
+    } catch {
+      setFeedback({ kind: 'warning', message: `Removed “${entry.title}” from this device, but profile sync did not finish.` });
+    }
   };
 
   return (
@@ -360,7 +438,13 @@ export function InventoryPage() {
             </header>
             <label className={styles.search}>
               <span aria-hidden="true">⌕</span><span className="visually-hidden">Search saved strategies</span>
-              <input type="search" placeholder="Search your strategies" autoComplete="off" value={strategySearch} onChange={(event) => setStrategySearch(event.target.value)} />
+              <input
+                type="search"
+                placeholder="Search your strategies"
+                autoComplete="off"
+                value={strategySearch}
+                onChange={(event) => setStrategySearch(event.target.value)}
+              />
             </label>
             {selectedStrategyNeed ? (
               <div className={popoverStyles.strategyContext}>
@@ -380,12 +464,36 @@ export function InventoryPage() {
                 </p>
               ) : null}
               {visibleStrategies.map((entry) => (
-                <article key={entry.id} id={`inventory-strategy-${entry.id}`} tabIndex={-1} className={`${styles.savedCard} ${popoverStyles.savedCard}`}>
+                <article
+                  key={entry.id}
+                  id={`inventory-strategy-${entry.id}`}
+                  tabIndex={-1}
+                  className={`${styles.savedCard} ${popoverStyles.savedCard}`}
+                  data-editing={editDraft?.id === entry.id || undefined}
+                >
                   {editDraft?.id === entry.id ? (
-                    <form onSubmit={(event) => updateEntry(event, entry)}>
-                      <label>Strategy name<input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></label>
-                      <label>Description<textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} /></label>
-                      <div><button type="submit">Save changes</button><button type="button" onClick={() => setEditDraft(null)}>Cancel</button></div>
+                    <form className={styles.editForm} onSubmit={(event) => void updateEntry(event, entry)}>
+                      <label className={styles.formField}><span>Strategy name</span><span className={styles.inputCard}><input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></span></label>
+                      <label className={styles.formField}><span>Description</span><span className={styles.inputCard}><textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} required /></span></label>
+                      <div className={`${styles.formField} ${styles.needsFormField}`}>
+                        <span id={`inventory-edit-needs-${entry.id}`}>Needs</span>
+                        <span className={styles.inputCard}>
+                          <NeedCatalogPicker labelId={`inventory-edit-needs-${entry.id}`} selectedNeeds={editDraft.selectedNeeds} onChange={(selectedNeeds) => setEditDraft({ ...editDraft, selectedNeeds })} />
+                        </span>
+                      </div>
+                      <div className={styles.formRow}>
+                        <label className={styles.formField}><span>First name (optional)</span><span className={styles.inputCard}><input value={editDraft.firstName} onChange={(event) => setEditDraft({ ...editDraft, firstName: event.target.value })} /></span></label>
+                        <label className={styles.formField}><span>Location (optional)</span><span className={styles.inputCard}><input value={editDraft.location} onChange={(event) => setEditDraft({ ...editDraft, location: event.target.value })} /></span></label>
+                      </div>
+                      {entry.personal ? (
+                        <StrategySharingFields
+                          signedIn={Boolean(session)}
+                          initialVisibility={editDraft.visibility}
+                          showUtilityActions={false}
+                          onVisibilityChange={(visibility) => setEditDraft({ ...editDraft, visibility })}
+                        />
+                      ) : null}
+                      <div className={styles.editActions}><button type="submit">Save changes</button><button type="button" onClick={() => setEditDraft(null)}>Cancel</button></div>
                     </form>
                   ) : (
                     <>
@@ -400,8 +508,8 @@ export function InventoryPage() {
                                 {shareEmailReadyFor === entry.id ? <a href={personalStrategiesEmailHref()}>Start email to Nat</a> : null}
                               </>
                             ) : null}
-                            <button type="button" onClick={() => setEditDraft({ id: entry.id, title: entry.title, description: entry.description })}>Edit</button>
-                            <button type="button" className={styles.destructiveMenuItem} onClick={() => removeEntry(entry)}>Remove</button>
+                            <button type="button" onClick={() => setEditDraft(editDraftForEntry(entry))}>Edit</button>
+                            <button type="button" className={styles.destructiveMenuItem} onClick={() => void removeEntry(entry)}>Remove</button>
                           </div>
                         </details>
                       </div>

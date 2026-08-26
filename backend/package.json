@@ -1,0 +1,17 @@
+{
+  "name": "allneeds-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "wrangler deploy --dry-run --outdir .wrangler-dry-run"
+  },
+  "dependencies": {
+    "@atproto/oauth-client-node": "0.5.3"
+  },
+  "devDependencies": {
+    "wrangler": "^4.32.0"
+  }
+}

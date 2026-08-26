@@ -1,2 +1,8 @@
+packages:
+  - backend
+
 allowBuilds:
+  core-js: false
   esbuild: true
+  workerd: true
+

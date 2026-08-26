@@ -512,6 +512,15 @@
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z'/%3E%3C/svg%3E");
 }
 
+.editAction {
+  text-decoration: none;
+}
+
+.editAction::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='m4 17.25-.75 3.5 3.5-.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 6.04a1 1 0 0 0 0-1.42l-1.33-1.33a1 1 0 0 0-1.42 0l-1.41 1.42 2.75 2.75 1.41-1.42Z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='m4 17.25-.75 3.5 3.5-.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 6.04a1 1 0 0 0 0-1.42l-1.33-1.33a1 1 0 0 0-1.42 0l-1.41 1.42 2.75 2.75 1.41-1.42Z'/%3E%3C/svg%3E");
+}
+
 .primaryAction {
   background: color-mix(in srgb, var(--action) 76%, #fff 24%);
 }
@@ -670,6 +679,7 @@
 
 .inputCard textarea {
   min-height: 4.75rem;
+  display: block;
   resize: vertical;
 }
 

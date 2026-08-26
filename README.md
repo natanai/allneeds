@@ -22,6 +22,37 @@ Production and the online `natanai/allneeds` work can continue changing independ
 
 Personal reflection data stays in the browser. The optional shared strategy feed reads the allneeds backend; saving a feed item always writes to local browser storage and then best-effort updates its shared add count. Bluesky profile sync is opt-in and performs no account work until sign-in or a previously active production session requires it.
 
+## Community strategies and submissions
+
+People do **not** need a Bluesky account to contribute a strategy to allneeds. There are two supported contribution paths, and both are treated as user-made/community strategies on the site.
+
+### Account-free contribution: export and email
+
+1. On allneeds.app, create or open a personal strategy.
+2. Use **Share this strategy with Nat…**. The site downloads a small `.json` export and prepares an email to Nat.
+3. Attach the downloaded `.json` file to that email and send it.
+4. A maintainer reviews the submission before it is published.
+
+To publish an approved emailed submission from this repository:
+
+1. Put the submitted `.json` file in [`data/user-strategy-uploads/`](data/user-strategy-uploads/).
+2. Commit that upload to `main`.
+3. In GitHub Actions, run **Upload user submitted strategies**.
+4. The workflow validates the entire batch before publishing anything. Valid strategies are added to [`src/data/userStrategies.json`](src/data/userStrategies.json), exact duplicates are skipped, and successfully processed upload files are removed from the inbox.
+5. If any upload is invalid, the workflow fails before publishing or deleting the batch so the file can be corrected safely.
+
+Do not hand-convert an unauthenticated contributor into a fake account or Bluesky identity. Repository-imported submissions are intentionally allowed to remain attributed community contributions without an account owner.
+
+### Optional account-owned contribution
+
+Signing in with Bluesky is optional. It gives allneeds a stable DID to associate with strategies a person chooses to save/share through their profile. Account-owned public strategies can appear in the shared feed and on the relevant need pages, while the author retains an editable personal copy in their Strategy inventory.
+
+Bluesky is used for authentication/identity; the strategy itself is stored by allneeds. Browsing public strategies, using need pages, saving to the device, and contributing through the export/email workflow do not require Bluesky sign-in.
+
+On need pages, user-made strategies are preferred in the default deck order: named community contributions first, then other user-made strategies, then system/editorial strategies. Pressing **Shuffle** intentionally replaces that provenance-based ordering with a shuffled deck.
+
+The importer and **Upload user submitted strategies** workflow are a supported production path, not a legacy fallback. Changes to community strategy architecture must preserve that workflow unless the repository contract is deliberately revised.
+
 ## Customizer color contract
 
 The Customizer is the source of truth for the site's intentional UI color roles. A feature must not introduce a standalone surface, accent, text, outline, or other themed UI color that a user cannot change through the Customizer.

@@ -32,7 +32,7 @@ export const themeRoleMetadata: Record<keyof ThemeValues, Readonly<{
   text: { label: 'Text', ariaLabel: 'Primary foreground', cssVariable: '--text' },
   secondary: { label: 'Secondary', ariaLabel: 'Secondary foreground', cssVariable: '--secondary' },
   action: { label: 'Action', ariaLabel: 'Action emphasis', cssVariable: '--action' },
-  positive: { label: 'Positive', ariaLabel: 'Positive emphasis', cssVariable: '--positive' },
+  positive: { label: 'Strategies', ariaLabel: 'Strategy cards and strategy editing', cssVariable: '--positive' },
   attention: { label: 'Attention', ariaLabel: 'Attention emphasis', cssVariable: '--attention' },
   selection: { label: 'Selection', ariaLabel: 'Selection emphasis', cssVariable: '--selection' },
   outline: { label: 'Outline', ariaLabel: 'Structural contrast', cssVariable: '--outline' },

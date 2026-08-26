@@ -105,7 +105,15 @@ describe('workflow drafts', () => {
         firstName: 'Nat',
         location: '',
       },
-      edit: { id: 'strategy-1', title: 'Updated title', description: 'Updated description' },
+      edit: {
+        id: 'strategy-1',
+        title: 'Updated title',
+        description: 'Updated description',
+        selectedNeeds: ['rest', 'rest', 'space'],
+        firstName: 'Nat',
+        location: 'Missouri',
+        visibility: 'followers',
+      },
     }, storage);
     expect(readInventoryDraft(storage)).toEqual({
       coverageFilter: 'missing',
@@ -117,7 +125,15 @@ describe('workflow drafts', () => {
         firstName: 'Nat',
         location: '',
       },
-      edit: { id: 'strategy-1', title: 'Updated title', description: 'Updated description' },
+      edit: {
+        id: 'strategy-1',
+        title: 'Updated title',
+        description: 'Updated description',
+        selectedNeeds: ['rest', 'space'],
+        firstName: 'Nat',
+        location: 'Missouri',
+        visibility: 'followers',
+      },
     });
     clearInventoryDraft(storage);
     expect(storage.getItem(INVENTORY_DRAFT_STORAGE_KEY)).toBeNull();

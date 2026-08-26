@@ -1,16 +1,12 @@
 import { expect, test } from './fixtures';
 
-test('Safety shows the approved human, scholarly, and official-resource strategy set', async ({ page }) => {
+test('Safety excludes migrated profile strategies while retaining the curated community card, cited system strategies, and support lines', async ({ page }) => {
   await page.goto('/needs/safety');
 
   const deck = page.locator('[data-strategy-deck]');
-  await expect(deck.locator('article')).toHaveCount(9);
+  await expect(deck.locator('article')).toHaveCount(5);
 
   for (const title of [
-    'Stare off',
-    'Self holding',
-    'Snuggle a pet',
-    'Watch a comfort show',
     'Comfy gaming',
     '5-4-3-2-1 check',
     'Slow breathing',
@@ -49,7 +45,11 @@ test('Safety shows the approved human, scholarly, and official-resource strategy
 
   for (const title of [
     'Crunch the numbers',
+    'Stare off',
+    'Self holding',
+    'Snuggle a pet',
     'Road trip',
+    'Watch a comfort show',
     'Back to wall lean',
     'Butterfly taps',
     'Hand on heart breaths',

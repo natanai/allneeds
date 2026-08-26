@@ -67,12 +67,16 @@ type EditorialCatalog = {
   discardedStrategySlugs?: string[];
   strategyNeedRemovals?: Record<string, string[]>;
 };
+type ProfileStrategyMigration = {
+  strategies: Array<{ slug: string; clientKey: string }>;
+};
 
 const runtimeCatalogId = 'virtual:allneeds-runtime-catalog';
 const resolvedRuntimeCatalogId = `\0${runtimeCatalogId}`;
 const legacyCatalogPath = resolve('src/data/generated/legacyData.json');
 const editorialCatalogPath = resolve('src/data/editorialCatalog.json');
 const userStrategiesPath = resolve('src/data/userStrategies.json');
+const natProfileStrategyMigrationPath = resolve('src/data/natProfileStrategyMigration.json');
 
 function normalizedContributor(strategy: CatalogStrategySource) {
   const name = strategy.contributor?.name?.trim() || strategy.contributorName?.trim() || undefined;
@@ -100,7 +104,13 @@ function runtimeCatalogSource() {
   const legacy = JSON.parse(readFileSync(legacyCatalogPath, 'utf8')) as LegacyCatalog;
   const editorial = JSON.parse(readFileSync(editorialCatalogPath, 'utf8')) as EditorialCatalog;
   const userStrategies = JSON.parse(readFileSync(userStrategiesPath, 'utf8')) as CatalogStrategySource[];
-  const discardedStrategySlugs = new Set(editorial.discardedStrategySlugs ?? []);
+  const natProfileStrategyMigration = JSON.parse(
+    readFileSync(natProfileStrategyMigrationPath, 'utf8'),
+  ) as ProfileStrategyMigration;
+  const discardedStrategySlugs = new Set([
+    ...(editorial.discardedStrategySlugs ?? []),
+    ...natProfileStrategyMigration.strategies.map((strategy) => strategy.slug),
+  ]);
   const removedNeedsByStrategy = new Map(
     Object.entries(editorial.strategyNeedRemovals ?? {}).map(([strategySlug, needSlugs]) => [
       strategySlug,
@@ -215,6 +225,7 @@ function runtimeCatalogPlugin(): Plugin {
       this.addWatchFile(legacyCatalogPath);
       this.addWatchFile(editorialCatalogPath);
       this.addWatchFile(userStrategiesPath);
+      this.addWatchFile(natProfileStrategyMigrationPath);
       return runtimeCatalogSource();
     },
   };
@@ -247,7 +258,7 @@ export default defineConfig({
   test: {
     exclude: [
       'tests/e2e/**',
-      'node_modules/**',
+      '**/node_modules/**',
       'dist/**',
       'legacy-nvc-app/**',
       '.nvc-current-*/**',
@@ -255,3 +266,4 @@ export default defineConfig({
     ],
   },
 });
+

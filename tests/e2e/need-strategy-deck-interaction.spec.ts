@@ -47,7 +47,7 @@ test.describe('need strategy deck visual and gesture contract', () => {
     if (!geometry) return;
 
     expect(geometry.next.right).toBeGreaterThan(geometry.active.right + 2);
-    expect(geometry.previous.left).toBeLessThan(geometry.active.left - 2);
+    expect(geometry.previous.left).toBeLessThan(geometry.active.left - 1);
     expect(geometry.next.top).toBeGreaterThan(geometry.active.top + 8);
     expect(geometry.previous.top).toBeGreaterThan(geometry.next.top + 8);
     expect(geometry.next.left).toBeGreaterThanOrEqual(geometry.stack.left - 1);

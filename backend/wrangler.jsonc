@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "allneeds-backend",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "keep_vars": true,
+  "vars": {
+    "ALLOW_LEGACY_AUTH": "0",
+    "ADMIN_DIDS": "did:plc:w23qsgdsux3neuguxfy7kvt5"
+  },
+  "routes": [
+    {
+      "pattern": "allneeds.app/auth/*",
+      "zone_name": "allneeds.app"
+    },
+    {
+      "pattern": "allneeds.app/api/*",
+      "zone_name": "allneeds.app"
+    },
+    {
+      "pattern": "backend.allneeds.app",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true
+    }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "allneeds-db",
+      "database_id": "d199693f-1549-4265-a298-b62ee68a0e3b"
+    }
+  ]
+}
+

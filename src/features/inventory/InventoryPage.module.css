@@ -53,6 +53,7 @@
 .savedList { display: grid; gap: .65rem; }
 .empty { margin: 0; padding: 1rem; border: 1.5px dashed color-mix(in srgb, var(--outline) 40%, transparent); border-radius: var(--radius-lg); background: rgba(255,255,255,.72); color: var(--secondary); }
 .savedCard { position: relative; padding: .8rem; display: grid; gap: .55rem; border: 1.5px solid color-mix(in srgb, var(--outline) 38%, transparent); border-radius: var(--radius-lg); background: #fff; box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 11%, transparent); }
+.savedCard[data-editing='true'] { background: var(--positive); }
 .savedCard h3, .savedCard p { margin: 0; }
 .savedCard p { color: var(--secondary); }
 .cardHeading { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: .5rem; }
@@ -74,8 +75,7 @@
 .cardMenuPanel .destructiveMenuItem:hover, .cardMenuPanel .destructiveMenuItem:focus-visible { background: color-mix(in srgb, var(--action) 38%, #fff 62%); }
 .savedCard form { display: grid; gap: .65rem; }
 .savedCard form label { display: grid; gap: .25rem; }
-.savedCard form input, .savedCard form textarea { width: 100%; padding: .55rem; border: 2px solid var(--outline); border-radius: var(--radius-md); font: inherit; }
-.savedCard form > div { display: flex; justify-content: flex-end; gap: .4rem; }
+.savedCard .editActions { display: flex; justify-content: flex-end; gap: .4rem; }
 .savedCard form button { min-height: 40px; padding: .35rem .65rem; border: 1.5px solid var(--outline); border-radius: var(--radius-md); background: #fff; color: var(--text); cursor: pointer; }
 
 .feedback { margin: 0; padding: .65rem .8rem; border: 2px solid var(--outline); border-radius: var(--radius-md); font-weight: 700; }
@@ -98,7 +98,7 @@
 .inputCard:focus-within { outline: 2px solid color-mix(in srgb, var(--primary) 52%, transparent); outline-offset: 1px; }
 .needsFormField .inputCard { overflow: visible; }
 .inputCard input, .inputCard textarea, .inputCard select { width: 100%; min-height: 44px; padding: .42rem .58rem; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; }
-.inputCard textarea { min-height: 4.75rem; resize: vertical; }
+.inputCard textarea { min-height: 4.75rem; display: block; resize: vertical; }
 .inputCard select { appearance: none; }
 .formRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .42rem; }
 .formActions { width: 100%; margin-top: .08rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }

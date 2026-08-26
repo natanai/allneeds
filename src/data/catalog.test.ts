@@ -12,6 +12,7 @@ import {
   strategiesBySlug,
 } from './catalog';
 import userStrategies from './userStrategies.json';
+import natProfileStrategyMigration from './natProfileStrategyMigration.json';
 
 function expectUniqueSlugs(entries: Array<{ slug: string }>) {
   expect(new Set(entries.map((entry) => entry.slug)).size).toBe(entries.length);
@@ -26,8 +27,11 @@ describe('production catalog snapshot', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    expect(strategies).toHaveLength(136 - 2 + 9 + userStrategies.length);
+    expect(strategies).toHaveLength(136 - 2 + 9 + userStrategies.length - natProfileStrategyMigration.strategies.length);
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
+    natProfileStrategyMigration.strategies.forEach(({ slug }) => {
+      expect(strategiesBySlug.has(slug)).toBe(false);
+    });
   });
 
   it('includes curated user-contributed strategies in their supported needs', () => {
@@ -51,35 +55,17 @@ describe('production catalog snapshot', () => {
     );
     expect(connection?.evidence?.sources).toHaveLength(6);
     expect(connection?.strategies).toEqual([
-      { title: 'Call a friend', slug: 'call-a-friend' },
-      { title: 'Play a social video game', slug: 'play-a-social-video-game' },
-      { title: 'Read a character driven novel', slug: 'read-a-character-driven-novel' },
       { title: 'Write a letter', slug: 'write-a-letter-for-connection' },
       { title: 'Remember a connected moment', slug: 'remember-a-connected-moment' },
       { title: 'Map your connection options', slug: 'map-your-connection-options' },
       { title: 'Notice where you are', slug: 'notice-where-you-are' },
     ]);
 
-    ['call-a-friend', 'play-a-social-video-game', 'read-a-character-driven-novel'].forEach((slug) => {
-      expect(strategiesBySlug.get(slug)?.provenance).toBe('user');
-    });
-
     ['write-a-letter-for-connection', 'remember-a-connected-moment', 'map-your-connection-options', 'notice-where-you-are'].forEach((slug) => {
       const strategy = strategiesBySlug.get(slug);
       expect(strategy?.provenance).toBe('system');
       expect(strategy?.evidence?.url).toMatch(/^https:\/\//);
       expect(strategy?.supportedNeeds).toContainEqual({ title: 'Connection', slug: 'connection' });
-    });
-
-    expect(strategiesBySlug.get('write-a-letter')).toMatchObject({
-      title: 'Write a letter',
-      summary: 'To a friend or a senator. Advocate for yourself or others.',
-      provenance: 'user',
-      contributor: { name: 'Nat', location: 'Missouri' },
-    });
-    expect(strategiesBySlug.get('write-a-letter')?.supportedNeeds).not.toContainEqual({
-      title: 'Connection',
-      slug: 'connection',
     });
 
     expect(strategiesBySlug.has('one-kind-text')).toBe(false);
@@ -97,16 +83,11 @@ describe('production catalog snapshot', () => {
     );
     expect(support?.evidence?.sources).toHaveLength(8);
     expect(support?.strategies).toEqual([
-      { title: 'Call a friend', slug: 'call-a-friend' },
-      { title: 'Call a parent', slug: 'call-a-parent' },
       { title: 'Map your support', slug: 'map-your-support' },
       { title: 'Prepare one request for help', slug: 'prepare-one-request-for-help' },
       { title: 'Call or text 988', slug: 'call-or-text-988' },
       { title: 'Call 116 123', slug: 'call-116-123' },
     ]);
-
-    expect(strategiesBySlug.get('call-a-friend')?.provenance).toBe('user');
-    expect(strategiesBySlug.get('call-a-parent')?.provenance).toBe('user');
 
     expect(strategiesBySlug.get('map-your-support')).toMatchObject({
       provenance: 'system',
@@ -139,7 +120,7 @@ describe('production catalog snapshot', () => {
     }
   });
 
-  it('ships the approved Safety copy, citations, exact deck, provenance, and removals', () => {
+  it('ships the approved Safety copy and citations while profile-owned strategies stay out of the static deck', () => {
     const safety = needsBySlug.get('safety');
     expect(safety?.summary).toBe(
       'Across evolutionary history, detecting and responding to danger had direct consequences for survival. Humans retain flexible defensive systems that shift behavior as threats become more likely or immediate. This need may draw us to create distance from danger, seek shelter or trustworthy people, set boundaries, reduce exposure to harm, and look for cues that tell us when it is safe enough to stand down. Tending to safety can help us protect ourselves and others when danger is present while making room for rest, exploration, connection, and other goals when it is not.',
@@ -171,10 +152,6 @@ describe('production catalog snapshot', () => {
       },
     ]);
     expect(safety?.strategies).toEqual([
-      { title: 'Stare off', slug: 'stare-off' },
-      { title: 'Self holding', slug: 'self-holding' },
-      { title: 'Snuggle a pet', slug: 'snuggle-a-pet' },
-      { title: 'Watch a comfort show', slug: 'watch-a-comfort-show' },
       { title: 'Comfy gaming', slug: 'comfy-gaming' },
       { title: '5-4-3-2-1 check', slug: '5-4-3-2-1-check' },
       { title: 'Slow breathing', slug: 'slow-breathing-safety' },
@@ -182,9 +159,7 @@ describe('production catalog snapshot', () => {
       { title: 'Call 116 123', slug: 'call-116-123' },
     ]);
 
-    ['stare-off', 'self-holding', 'snuggle-a-pet', 'watch-a-comfort-show', 'comfy-gaming'].forEach((slug) => {
-      expect(strategiesBySlug.get(slug)?.provenance).toBe('user');
-    });
+    expect(strategiesBySlug.get('comfy-gaming')?.provenance).toBe('user');
 
     expect(strategiesBySlug.get('5-4-3-2-1-check')).toMatchObject({
       provenance: 'system',
@@ -200,8 +175,6 @@ describe('production catalog snapshot', () => {
     });
 
     [
-      'crunch-the-numbers',
-      'road-trip',
       'back-to-wall-lean',
       'butterfly-taps',
       'hand-on-heart-breaths',
@@ -215,8 +188,6 @@ describe('production catalog snapshot', () => {
       expect(strategiesBySlug.get(slug)?.supportedNeeds).not.toContainEqual({ title: 'Safety', slug: 'safety' });
     });
 
-    expect(strategiesBySlug.get('crunch-the-numbers')?.provenance).toBe('user');
-    expect(strategiesBySlug.get('road-trip')?.provenance).toBe('user');
   });
 
   it('keeps every catalog relationship pointed at an existing public record', () => {

@@ -6,6 +6,7 @@ import {
   createPersonalInventoryEntry,
   isDuplicateStrategy,
   readInventory,
+  updateInventoryEntry,
   writeInventory,
 } from './inventoryRepository';
 
@@ -86,5 +87,58 @@ describe('inventoryRepository', () => {
     const [normalized] = writeInventory([{ ...privateEntry, shareWithNat: true }], null);
 
     expect(normalized).toMatchObject({ visibility: 'private', shareWithNat: false });
+  });
+
+  it('updates every editable field without changing the stable local identity', () => {
+    const entry = createPersonalInventoryEntry({
+      title: 'Tea on the porch',
+      description: 'Sit outside.',
+      needSlugs: ['rest'],
+      needTitle: 'Rest',
+      firstName: 'Old name',
+      location: 'Old place',
+      visibility: 'private',
+    });
+
+    const updated = updateInventoryEntry(entry, {
+      title: '  Tea with a friend  ',
+      description: '  Invite someone to sit outside.  ',
+      needSlugs: ['connection', 'rest', 'connection'],
+      needTitle: 'Connection',
+      firstName: 'Nat',
+      location: 'Missouri',
+      visibility: 'followers',
+    });
+
+    expect(updated).toMatchObject({
+      id: entry.id,
+      createdAt: entry.createdAt,
+      title: 'Tea with a friend',
+      description: 'Invite someone to sit outside.',
+      need: 'Connection',
+      needSlug: 'connection',
+      needSlugs: ['connection', 'rest'],
+      tags: ['connection', 'rest'],
+      visibility: 'followers',
+      shareWithNat: false,
+      contributor: { name: 'Nat', location: 'Missouri' },
+      firstName: 'Nat',
+      location: 'Missouri',
+    });
+
+    expect(updateInventoryEntry(updated, {
+      ...updated,
+      needTitle: 'Connection',
+      firstName: '',
+      location: '',
+      visibility: 'public',
+    })).toMatchObject({
+      id: entry.id,
+      visibility: 'public',
+      shareWithNat: true,
+      contributor: undefined,
+      firstName: undefined,
+      location: undefined,
+    });
   });
 });

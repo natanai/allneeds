@@ -90,3 +90,58 @@ test('need rows open a compact floating strategy popover without stretching the 
   await expect(strategyCard).toBeFocused();
   await expect(strategyCard.getByRole('heading', { level: 3, name: 'Play a video game' })).toBeVisible();
 });
+
+test('direct Edit links prefill the exact strategy search and use the strategy palette cleanly', async ({ page }) => {
+  await page.addInitScript(({ timestamp }) => {
+    window.localStorage.setItem('allneeds.v2.inventory', JSON.stringify({
+      schemaVersion: 1,
+      savedAt: timestamp,
+      data: {
+        items: [{
+          id: 'call-parent',
+          title: 'Call a parent',
+          description: 'Call someone who helps you feel connected.',
+          need: 'Connection',
+          needSlug: 'connection',
+          needSlugs: ['connection'],
+          tags: ['connection'],
+          personal: true,
+          firstName: 'Nat',
+          location: 'Missouri',
+          sourceNeedPage: 'connection',
+          strategySlug: '',
+          createdAt: timestamp,
+          visibility: 'public',
+        }],
+      },
+    }));
+  }, { timestamp: savedAt });
+
+  await page.goto('/inventory?edit=call-parent');
+
+  await expect(page.getByRole('tab', { name: /Strategies/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('searchbox', { name: 'Search saved strategies' })).toHaveValue('Call a parent');
+  await expect(page.locator('#strategies-list > article')).toHaveCount(1);
+
+  const card = page.locator('#inventory-strategy-call-parent');
+  const description = card.getByRole('textbox', { name: 'Description' });
+  await expect(description).toHaveValue('Call someone who helps you feel connected.');
+  const styles = await description.evaluate((element) => {
+    const wrapper = element.parentElement!;
+    const cardElement = element.closest('article')!;
+    const textareaRect = element.getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
+    return {
+      bottomGap: Math.round(wrapperRect.bottom - textareaRect.bottom),
+      cardBackground: getComputedStyle(cardElement).backgroundColor,
+      strategyColor: getComputedStyle(document.documentElement).getPropertyValue('--positive').trim(),
+      textareaBorder: getComputedStyle(element).borderWidth,
+      textareaDisplay: getComputedStyle(element).display,
+    };
+  });
+  expect(styles.bottomGap).toBeLessThanOrEqual(1);
+  expect(styles.cardBackground).toBe('rgb(150, 251, 199)');
+  expect(styles.strategyColor).toBe('#96FBC7');
+  expect(styles.textareaBorder).toBe('0px');
+  expect(styles.textareaDisplay).toBe('block');
+});
