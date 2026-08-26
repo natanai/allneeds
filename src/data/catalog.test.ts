@@ -23,11 +23,13 @@ describe('production catalog snapshot', () => {
     expect(catalogProvenance.commit).toBe('7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3');
   });
 
-  it('contains the imported catalog plus reviewed editorial changes and curated user strategies', () => {
+  it('contains the imported catalog plus reviewed editorial changes and protected user strategies', () => {
     expect(feelings).toHaveLength(48);
     expect(needs).toHaveLength(67);
     expect(fauxFeelings).toHaveLength(56);
-    expect(strategies).toHaveLength(legacyData.strategies.length - 2 + 9 + userStrategies.length);
+    const legacySlugs = new Set(legacyData.strategies.map((strategy) => strategy.slug));
+    const newPublishedUserStrategies = userStrategies.filter((strategy) => !legacySlugs.has(strategy.slug));
+    expect(strategies).toHaveLength(legacyData.strategies.length - 2 + 9 + newPublishedUserStrategies.length);
     [feelings, needs, fauxFeelings, strategies].forEach(expectUniqueSlugs);
   });
 
