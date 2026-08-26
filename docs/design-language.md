@@ -171,6 +171,20 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Do not shrink or reintroduce instability into the stable-viewport one-at-a-time strategy deck merely to save space; density improvements should come from surrounding chrome and card padding first.
 - Add-a-strategy forms keep every existing field and save capability. Related short fields such as optional name/location may share a row on normal phone widths, with a one-column fallback on very narrow screens.
 
+### Function lenses within a Need
+
+**Accepted 2026-08-26.** When a Need has approved function lenses under `docs/need-function-lenses.md`, the page should teach the distinction without turning one Need into competing mini-pages.
+
+- Keep the canonical Need title and umbrella claim above the lenses.
+- Introduce the group with the compact heading **This need can involve** or an approved equivalent.
+- Keep all lenses readily visible at the same time. Do not use tabs or another default interaction that hides one function behind another.
+- Each lens uses a restrained reading card with a plain-language title, optional first-person recognition cue, short explanation, quiet `Details` disclosure, and its own source/citation disclosures.
+- Citation numbering restarts within each lens because the evidence sets are locally owned by that lens.
+- Stack lenses on narrow screens. Wider screens may place them side by side when the text remains comfortably readable.
+- Lens surfaces and borders derive only from functional Customizer roles. Do not assign fixed semantic colors to individual lenses or create Need-specific lens chrome.
+- The component is generic and data-driven. A Need with no lenses retains the existing Need-page presentation unchanged.
+- Canonical production references are `src/features/needs/NeedFunctionLenses.tsx` and `src/features/needs/NeedFunctionLenses.module.css`.
+
 ### Needs index mobile hierarchy
 
 - Keep Search + the canonical Shuffle control in one compact toolbar.
@@ -248,6 +262,7 @@ Rules:
 
 ### 2026-08-26
 
+- Need function lenses became an accepted optional Need-page pattern: approved lenses remain visible together under `This need can involve`, own their local Details/citations, stack on narrow screens, and use generic Customizer-owned chrome rather than tabs or Need-specific rendering. Understanding is the first approved use.
 - Signed-in Shared Strategy card chrome was compacted by meaning: visibility, owner Edit, and already-Saved states use familiar icon-only treatments with accessible names, while Needs and unsaved Save retain short text where the action would otherwise be ambiguous.
 - Shared Strategies now reuse the Need-page strategy-card language instead of a separate social-post card treatment; contributor name/location sit quietly at bottom-right and visible feed attribution never falls back to Bluesky handles/display names/DIDs.
 - Profile snapshot save and shared-strategy reconciliation now share one streamed request, report separate stages and exact local times, and write only server-side strategy deltas. Shared Strategies provides the explicit installed-iOS refresh action while sort and page navigation reuse the eager startup snapshot.
