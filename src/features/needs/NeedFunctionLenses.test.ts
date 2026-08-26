@@ -22,4 +22,29 @@ describe('Need function lens rendering contract', () => {
     expect(lensComponent).not.toMatch(/role=["']tab/);
     expect(lensComponent).not.toMatch(/aria-selected/);
   });
+
+  it('reuses canonical Need-page evidence chrome instead of defining a second disclosure language', () => {
+    const lensComponent = readFileSync(resolve('src/features/needs/NeedFunctionLenses.tsx'), 'utf8');
+    const lensStyles = readFileSync(resolve('src/features/needs/NeedFunctionLenses.module.css'), 'utf8');
+
+    expect(lensComponent).toContain("import evidenceStyles from './NeedDetailPage.module.css'");
+    for (const className of [
+      'sectionTitle',
+      'details',
+      'detailsToggle',
+      'rewrite',
+      'sources',
+      'citationRow',
+      'citationList',
+      'citationNumber',
+      'citationBody',
+    ]) {
+      expect(lensComponent).toContain(`evidenceStyles.${className}`);
+    }
+
+    expect(lensStyles).not.toMatch(/\.toggle\s*\{/);
+    expect(lensStyles).not.toMatch(/\.citationRow\s*\{/);
+    expect(lensStyles).not.toMatch(/\.citationNumber\s*\{/);
+    expect(lensStyles).not.toMatch(/\.citationBody\s*\{/);
+  });
 });
