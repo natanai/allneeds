@@ -12,5 +12,35 @@
     "contributor": {
       "name": "Autumn"
     }
+  },
+  {
+    "title": "Dance",
+    "slug": "dance",
+    "summary": "have a dance party!",
+    "needs": [
+      {
+        "title": "Physical Fitness",
+        "slug": "physical-fitness"
+      }
+    ],
+    "contributor": {
+      "name": "Paige",
+      "location": "USA"
+    }
+  },
+  {
+    "title": "Yoga",
+    "slug": "yoga",
+    "summary": "Do some yoga",
+    "needs": [
+      {
+        "title": "Physical Fitness",
+        "slug": "physical-fitness"
+      }
+    ],
+    "contributor": {
+      "name": "Paige",
+      "location": "USA"
+    }
   }
 ]

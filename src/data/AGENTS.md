@@ -6,6 +6,16 @@ This file supplements the root `AGENTS.md` for work under `src/data/`.
 
 For Safety data, strategy, citation, or copy work, read `docs/safety-content-audit.md` before editing. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`.
 
+## Protected user strategy registry
+
+`src/data/userStrategies.json` is the canonical registry for repository-resident user-submitted strategies, including strategies published by `.github/workflows/upload-user-submitted-strategies.yml`. Treat **every entry in this file as protected user-authored content**, regardless of contributor name, location, age of submission, or how many contributors are present.
+
+Do not rewrite, rename, delete, reattribute, add system evidence to, or change Need associations for a published user strategy unless the user explicitly authorizes that specific change. The upload workflow is expected to add more protected entries over time, so tests and runtime code must not hard-code a fixed contributor count or assume Autumn is the only repository-resident contributor.
+
+Older user submissions may also exist in `generated/legacyData.json`. When a legacy submission is represented in `userStrategies.json`, the user-strategy registry is authoritative and its exact wording/provenance must win. A contributor field in the legacy snapshot by itself is not sufficient authority to create a new current static user submission. Nat's profile-owned strategies remain separate in profile/D1 storage and must not be reconstructed from legacy data.
+
+Regression coverage should enforce the boundary generically: the runtime set of static `user` strategies must match the published user-strategy registry, and each published strategy must retain its title, wording, Need associations, and contributor metadata.
+
 ## Research-backed system strategies
 
 Before adding, retaining, rewriting, renaming, or changing Need associations for a system-authored strategy, read and follow `docs/system-strategy-evidence-standard.md` and `docs/content-evidence-review.md`.

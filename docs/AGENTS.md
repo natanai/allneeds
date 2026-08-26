@@ -6,6 +6,14 @@ This file supplements the root `AGENTS.md` for work under `docs/`.
 
 For Safety content or strategy work, read `docs/safety-content-audit.md` first. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`. Do not resurrect superseded Safety copy, citations, strategy titles, wording, or static Nat strategy references from the historical section.
 
+## Protected user submissions
+
+`src/data/userStrategies.json` is the canonical registry for repository-resident user-submitted strategies, including strategies published by the `Upload user submitted strategies` GitHub Action. **Every entry in that file is protected user-authored content.** Do not rewrite, rename, delete, reattribute, add academic citations to, or change Need associations for those entries unless the user explicitly authorizes that specific change.
+
+Do not hard-code an assumption that Autumn is the only repository-resident user contributor. New protected submissions are expected to be added over time through the upload workflow. Historical legacy copies may exist for older submissions, but current static user provenance must be derived from the published user-strategy registry rather than from incidental contributor fields in the legacy snapshot. Nat's profile-owned strategies remain separate and must not be restored to this registry from historical repository data.
+
+This rule supersedes older audit wording that describes a fixed number of repository-resident user submissions.
+
 ## System strategy evidence
 
 Before documenting, approving, or revising any system-authored strategy in a content audit, read and follow `docs/system-strategy-evidence-standard.md`.
