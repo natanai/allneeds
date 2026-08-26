@@ -26,6 +26,17 @@ describe('approved Need magnet identities', () => {
     expect(supportArt).toContain('viewBox="0 0 220 64"');
   });
 
+  it('ships Understanding with the approved U4D two-lens identity', () => {
+    expect(needsCss).toContain("[data-magnet-id='needs-understanding']");
+    expect(needsCss).toContain("url('/icons/needs/understanding.svg')");
+    expect(needsCss).toContain("url('/icons/needs/understanding-perspective.svg')");
+    expect(needsCss).toContain("url('/icons/needs/art/understanding-converging-map.svg')");
+    expect(needsCss).toContain('color-mix(in srgb, var(--quiet) 62%, var(--selection) 38%)');
+    expect(needsCss).toContain('color-mix(in srgb, var(--selection) 66%, var(--action) 34%)');
+    expect(needsCss).toContain('background: linear-gradient(110deg, var(--primary), var(--action));');
+    expect(needsCss).toContain('opacity: 0.3;');
+  });
+
   it('uses only functional Customizer roles in approved Need identity CSS', () => {
     expect(needsCss).not.toMatch(/var\(--(?:plum|lavender|ink|rose|mint|gold|sky|peach)\)/);
   });
