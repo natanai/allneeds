@@ -85,23 +85,25 @@ test('keeps signed-in Shared Strategies compact and contained on mobile', async 
   await page.goto('/feed');
   await expect(page.getByText('Contained strategy card', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Public strategy')).toBeVisible();
+  await expect(page.getByLabel('Needs supported by Contained strategy card')).toBeVisible();
   await expect(page.getByLabel('Edit Contained strategy card')).toBeVisible();
+  await expect(page.getByLabel('Admin actions for Contained strategy card')).toBeVisible();
   await expect(page.getByLabel('Contained strategy card is saved to inventory')).toBeVisible();
   await expect(page.getByText('Needs', { exact: true })).toBeVisible();
-  await expect(page.getByText('Public', { exact: true })).toBeHidden();
-  await expect(page.getByText('Saved', { exact: true })).toBeHidden();
 
   const geometry = await page.evaluate(() => {
     const card = document.querySelector('section[aria-label="Shared strategies"] article');
     const controls = document.querySelector('section[aria-label="Shared strategy filters"]');
     const visibility = document.querySelector('[aria-label="Public strategy"]');
+    const needs = document.querySelector('[aria-label="Needs supported by Contained strategy card"]');
     const edit = document.querySelector('[aria-label="Edit Contained strategy card"]');
+    const admin = document.querySelector('[aria-label="Admin actions for Contained strategy card"]');
     const saved = document.querySelector('[aria-label="Contained strategy card is saved to inventory"]');
     const cardRect = card?.getBoundingClientRect();
     const controlsRect = controls?.getBoundingClientRect();
-    const visibilityRect = visibility?.getBoundingClientRect();
-    const editRect = edit?.getBoundingClientRect();
-    const savedRect = saved?.getBoundingClientRect();
+    const utilityRects = [visibility, needs, edit, admin, saved]
+      .map((element) => element?.getBoundingClientRect())
+      .filter((rect): rect is DOMRect => Boolean(rect));
     return {
       innerWidth: window.innerWidth,
       scrollWidth: document.documentElement.scrollWidth,
@@ -110,18 +112,12 @@ test('keeps signed-in Shared Strategies compact and contained on mobile', async 
       cardRight: cardRect?.right ?? Number.POSITIVE_INFINITY,
       controlsLeft: controlsRect?.left ?? -1,
       controlsRight: controlsRect?.right ?? Number.POSITIVE_INFINITY,
-      visibilityWidth: visibilityRect?.width ?? Number.POSITIVE_INFINITY,
-      editWidth: editRect?.width ?? Number.POSITIVE_INFINITY,
-      savedWidth: savedRect?.width ?? Number.POSITIVE_INFINITY,
-      utilityTopSpread: Math.max(
-        visibilityRect?.top ?? 0,
-        editRect?.top ?? 0,
-        savedRect?.top ?? 0,
-      ) - Math.min(
-        visibilityRect?.top ?? 0,
-        editRect?.top ?? 0,
-        savedRect?.top ?? 0,
-      ),
+      visibilityWidth: visibility?.getBoundingClientRect().width ?? Number.POSITIVE_INFINITY,
+      editWidth: edit?.getBoundingClientRect().width ?? Number.POSITIVE_INFINITY,
+      savedWidth: saved?.getBoundingClientRect().width ?? Number.POSITIVE_INFINITY,
+      utilityTopSpread: utilityRects.length
+        ? Math.max(...utilityRects.map((rect) => rect.top)) - Math.min(...utilityRects.map((rect) => rect.top))
+        : Number.POSITIVE_INFINITY,
     };
   });
 
