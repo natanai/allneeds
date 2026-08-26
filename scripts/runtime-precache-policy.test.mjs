@@ -16,7 +16,7 @@ describe('runtime precache policy', () => {
     expect(isRuntimePrecachePath('./site.webmanifest')).toBe(true);
   });
 
-  it('does not first-install deployment-only or compatibility artifacts', () => {
+  it('does not first-install non-runtime research or compatibility paths', () => {
     expect(isRuntimePrecachePath('./404.html')).toBe(false);
     expect(isRuntimePrecachePath('./docs/body-scan-sourcing-review.md')).toBe(false);
     expect(isRuntimePrecachePath('./lib/observationFormula.js')).toBe(false);

@@ -52,18 +52,11 @@ The replacement Worker was deployed to production on 2026-08-25. The current con
 
 The production Worker configuration is now repository-owned as well: `allneeds.app/auth/*`, `allneeds.app/api/*`, the `backend.allneeds.app` custom domain, observability, disabled preview URLs, `DB`, the explicit legacy-auth off value, and the verified admin DID are all explicit in `wrangler.jsonc`. Post-deployment checks passed for all three Worker routes, CORS, OAuth client metadata, signed-out `/api/me`, the public strategy feed, the signed-out live site, and the complete `/auth/login` → `/auth/callback` flow. That flow created a 30-day verified allneeds session for `nathanael.ink` / `did:plc:w23qsgdsux3neuguxfy7kvt5` and immediately removed the temporary Bluesky OAuth credential. The standard live-site login then reported `verified: true` and `admin: true`.
 
-### Nat profile-strategy migration status
+### Profile-owned Nat strategy status
 
-The 40 legacy repository strategies attributed to `Nat, Missouri` were migrated on 2026-08-25 to the verified profile `did:plc:w23qsgdsux3neuguxfy7kvt5`. The guarded migration promoted two matching inventory entries in place, added the remaining 38, and preserved unrelated profile data. The checked-in mapping is `src/data/natProfileStrategyMigration.json`; the preparation/rehearsal command is `scripts/prepare-nat-profile-migration.mjs`.
+The 40 former static strategies attributed to `Nat, Missouri` were migrated on 2026-08-25 to the verified profile `did:plc:w23qsgdsux3neuguxfy7kvt5`. Production verification confirmed 40 migrated records and clean database integrity. Their static catalog records, Need references, mapping manifest, and one-time preparation helper were subsequently removed from the repository; D1 profile storage is now their only current source.
 
-- pre-migration Time Travel bookmark: `000000d7-00000000-000050d2-8dd9dc0a7157b89b5dad34bdb3cbe3be`
-- post-migration Time Travel bookmark: `000000da-00000000-000050d2-234bccd8bb9d845f22e8d2fa8174458a`
-- local, gitignored full export: `backend/.wrangler/backups/allneeds-db-before-nat-profile-migration-2026-08-25.sql`
-- migrated profile inventory: 44 entries total, including all 40 mapped Nat strategies
-- final D1 verification: 45 strategies, 44 stable owned records, 40 migrated records, 42 public records, and 202 normalized Need links
-- integrity verification: empty foreign-key check and `PRAGMA quick_check = ok`
-
-Do not rerun the generated production SQL against the migrated database. Restore from the pre-migration bookmark/export if rollback is ever required. After this migration, a browser that still has the older six-item snapshot must load the profile before saving it, so it does not overwrite the merged snapshot with stale device data.
+Do not recreate repository copies of those profile-owned strategies. Migration `0003_strategy_contributors.sql` remains required schema history for reconstructing the production database and contains identifiers/attribution only, not strategy text.
 
 ### Strategy-contributor migration status
 

@@ -174,14 +174,6 @@ if (!dialogFocusSource.includes("event.key === 'Escape'")
 }
 
 const cueCompilerPath = resolve(root, 'src/legacy/observations/observationCueData.js');
-const publicCueCompilerPath = resolve(root, 'public/lib/observationCueData.js');
-const [cueCompilerSource, publicCueCompilerSource] = await Promise.all([
-  readFile(cueCompilerPath, 'utf8'),
-  readFile(publicCueCompilerPath, 'utf8'),
-]);
-if (cueCompilerSource !== publicCueCompilerSource) {
-  fail('the bundled and public Observation cue compilers have drifted apart.');
-}
 const cueCompiler = await import(pathToFileURL(cueCompilerPath).href);
 const [observationCueCsv, observationModuleJson] = await Promise.all([
   readFile(resolve(root, 'public/data/observation_cues.csv'), 'utf8'),
