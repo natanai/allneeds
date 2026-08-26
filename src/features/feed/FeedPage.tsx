@@ -22,7 +22,6 @@ import {
 } from './sharedStrategyModeration';
 import {
   normalizeSharedStrategyNeeds,
-  sharedStrategyAuthorName,
   sharedStrategyClientKey,
   sharedStrategyContributorLocation,
   sharedStrategyOwnerDid,
@@ -48,7 +47,7 @@ function formatTime(value: string) {
 
 function visibility(value?: InventoryVisibility) {
   if (value === 'public') return 'Public';
-  if (value === 'followers') return 'Followers only';
+  if (value === 'followers') return 'Followers';
   return 'Private';
 }
 
@@ -130,14 +129,18 @@ export function FeedPage() {
       setStatusOverride('This strategy belongs to your profile. Load your profile from Menu → Account & data before editing it.');
       return;
     }
-    const authorName = sharedStrategyAuthorName(strategy);
+    const contributorName = strategy.contributor?.name?.trim() || '';
+    const contributorLocation = sharedStrategyContributorLocation(strategy);
     const entry = createSharedInventoryEntry({
       id: strategyId,
       title: strategy.title || 'Untitled strategy',
       description: strategy.body || '',
       needSlugs: normalizeSharedStrategyNeeds(strategy),
       visibility: strategy.visibility,
-      contributor: authorName ? { name: authorName } : undefined,
+      contributor: contributorName || contributorLocation ? {
+        ...(contributorName ? { name: contributorName } : {}),
+        ...(contributorLocation ? { location: contributorLocation } : {}),
+      } : undefined,
     });
     writeInventory([...current, entry]);
     setSavedIds((values) => new Set(values).add(strategyId.toLocaleLowerCase()));
@@ -208,14 +211,40 @@ export function FeedPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}><h1>Shared strategies</h1></header>
+      <header className={styles.header}>
+        <div>
+          <h1>Shared strategies</h1>
+          <p>{reviewHidden ? 'Hidden community strategies' : 'Strategies shared by the community'}</p>
+        </div>
+      </header>
 
       <section className={styles.controls} aria-label="Shared strategy filters">
         {!reviewHidden ? (
           <div className={styles.controlRow}>
-            <label><span>Show</span><select value={scope} onChange={(event) => setScope(event.target.value)}><option value="follows" disabled={!session}>From people you follow</option><option value="public">All public strategies</option></select></label>
-            <label><span>Sort by</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recent">Most recent</option><option value="popular">Most added</option></select></label>
-            <button className={styles.refreshButton} type="button" disabled={loading} onClick={() => void refreshFeed()}>Refresh shared strategies</button>
+            <label>
+              <span>Show</span>
+              <select value={scope} onChange={(event) => setScope(event.target.value)}>
+                <option value="follows" disabled={!session}>Following</option>
+                <option value="public">Everyone</option>
+              </select>
+            </label>
+            <label>
+              <span>Sort by</span>
+              <select value={sort} onChange={(event) => setSort(event.target.value)}>
+                <option value="recent">Recent</option>
+                <option value="popular">Most saved</option>
+              </select>
+            </label>
+            <button
+              className={styles.refreshButton}
+              type="button"
+              disabled={loading}
+              onClick={() => void refreshFeed()}
+              aria-label="Refresh shared strategies"
+              title="Refresh shared strategies"
+            >
+              <span className={styles.refreshIcon} aria-hidden="true" />
+            </button>
           </div>
         ) : <p className={styles.adminReviewLabel}>Admin review · hidden from community</p>}
         {session?.admin ? (
@@ -223,46 +252,93 @@ export function FeedPage() {
             {reviewHidden ? 'Back to community feed' : 'Review hidden strategies'}
           </button>
         ) : null}
-        {status ? <p className={styles.status} role="status">{status}</p> : null}
-        {!reviewHidden ? <p className={styles.authHint}>{session ? `Following feed available${session.handle ? ` for @${session.handle.replace(/^@/, '')}` : ''}.` : 'Following requires Bluesky sign-in in Menu → Account & data.'}</p> : null}
+        <div className={styles.controlMeta}>
+          {status ? <p className={styles.status} role="status">{status}</p> : null}
+          {!reviewHidden ? (
+            <p className={styles.authHint}>
+              {session
+                ? 'Following is available while you are signed in.'
+                : 'Sign in to Bluesky in Menu → Account & data to use Following.'}
+            </p>
+          ) : null}
+        </div>
       </section>
 
-      <section className={styles.feed} aria-label={reviewHidden ? 'Hidden community strategies' : 'Shared strategies'}>
-        {displayedStrategies.map((strategy) => {
-          const author = strategy.author ?? {};
-          const authorLabel = sharedStrategyAuthorName(strategy) || 'Unknown author';
+      <section
+        className={styles.feed}
+        aria-label={reviewHidden ? 'Hidden community strategies' : 'Shared strategies'}
+        role="feed"
+      >
+        {displayedStrategies.map((strategy, index) => {
+          const contributorName = strategy.contributor?.name?.trim() || '';
           const contributorLocation = sharedStrategyContributorLocation(strategy);
-          const contributorLabel = [authorLabel, contributorLocation].filter(Boolean).join(' • ');
-          const handle = author.handle ? `@${author.handle}` : '';
           const timestamp = formatDate(strategy.createdAt);
+          const contributorLabel = contributorName
+            ? `by ${contributorName}${contributorLocation ? ` • ${contributorLocation}` : ''}`
+            : contributorLocation;
           const strategyNeeds = normalizeSharedStrategyNeeds(strategy);
           const clientKey = sharedStrategyClientKey(strategy);
           const isOwner = Boolean(session && clientKey && sharedStrategyOwnerDid(strategy) === session.did);
           const isSaved = savedIds.has(String(strategy.id).toLocaleLowerCase())
             || Boolean(isOwner && savedIds.has(clientKey.toLocaleLowerCase()));
+          const strategyTitle = strategy.title || 'Untitled strategy';
           return (
-            <article className={styles.card} key={strategy.id}>
-              <header><h3>{strategy.title || 'Untitled strategy'}</h3><p>{`by ${contributorLabel}${handle && authorLabel !== author.handle ? ` (${handle})` : ''}${timestamp ? ` · ${timestamp}` : ''}`}</p></header>
-              <div className={styles.body}><p>{strategy.body || ''}</p></div>
-              <footer>
-                <span>{reviewHidden ? 'Hidden' : visibility(strategy.visibility)}</span>
-                {strategyNeeds.length ? <details><summary>Needs supported</summary><ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul></details> : null}
-                {isOwner ? (
-                  <Link className={styles.editLink} to={`/inventory?edit=${encodeURIComponent(clientKey)}`}>
-                    Edit
-                  </Link>
+            <article
+              className={styles.card}
+              key={strategy.id}
+              aria-posinset={index + 1}
+              aria-setsize={displayedStrategies.length}
+            >
+              <div className={styles.content}>
+                <h3>{strategyTitle}</h3>
+                <div className={styles.body}><p>{strategy.body || ''}</p></div>
+              </div>
+
+              <footer className={styles.cardFooter}>
+                <div className={styles.postActions}>
+                  <span className={`${styles.visibilityBadge} ${reviewHidden ? styles.hiddenBadge : ''}`}>
+                    {reviewHidden ? 'Hidden' : visibility(strategy.visibility)}
+                  </span>
+                  {strategyNeeds.length ? (
+                    <details className={styles.needsMenu}>
+                      <summary aria-label={`Needs supported by ${strategyTitle}`}>Needs supported</summary>
+                      <ul>{strategyNeeds.map((need) => <li key={need}>{need}</li>)}</ul>
+                    </details>
+                  ) : null}
+                  {isOwner ? (
+                    <Link className={styles.editLink} to={`/inventory?edit=${encodeURIComponent(clientKey)}`}>
+                      Edit
+                    </Link>
+                  ) : null}
+                  {session?.admin ? (
+                    <details className={styles.adminMenu}>
+                      <summary aria-label={`Admin actions for ${strategyTitle}`}>⋯</summary>
+                      <div className={styles.adminMenuPopover}>
+                        <button type="button" onClick={() => void (reviewHidden ? restore(strategy) : hide(strategy))}>
+                          {reviewHidden ? 'Restore to community' : 'Hide from community'}
+                        </button>
+                      </div>
+                    </details>
+                  ) : null}
+                  {!reviewHidden ? (
+                    <button
+                      className={styles.saveButton}
+                      type="button"
+                      disabled={isSaved}
+                      aria-label={isSaved ? `${strategyTitle} is saved to inventory` : `Save ${strategyTitle} to inventory`}
+                      onClick={() => save(strategy)}
+                    >
+                      {isSaved ? 'Saved' : 'Save'}
+                    </button>
+                  ) : null}
+                </div>
+                {contributorLabel || timestamp ? (
+                  <p className={styles.authorMeta}>
+                    {contributorLabel}
+                    {contributorLabel && timestamp ? ' · ' : ''}
+                    {timestamp}
+                  </p>
                 ) : null}
-                {session?.admin ? (
-                  <details className={styles.adminMenu}>
-                    <summary aria-label={`Admin actions for ${strategy.title || 'strategy'}`}>⋯</summary>
-                    <div className={styles.adminMenuPopover}>
-                      <button type="button" onClick={() => void (reviewHidden ? restore(strategy) : hide(strategy))}>
-                        {reviewHidden ? 'Restore to community' : 'Hide from community'}
-                      </button>
-                    </div>
-                  </details>
-                ) : null}
-                {!reviewHidden ? <button type="button" disabled={isSaved} onClick={() => save(strategy)}>{isSaved ? 'Saved to inventory' : 'Save to inventory'}</button> : null}
               </footer>
             </article>
           );

@@ -7,7 +7,16 @@ test('reuses the startup strategy snapshot until Refresh is explicitly pressed',
     feedRequests += 1;
     const strategies = feedRequests === 1
       ? [
-          { id: 1, title: 'Newest first', body: 'Initial snapshot', visibility: 'public', addCount: 1, createdAt: '2026-08-25T12:00:00.000Z' },
+          {
+            id: 1,
+            title: 'Newest first',
+            body: 'Initial snapshot',
+            visibility: 'public',
+            addCount: 1,
+            createdAt: '2026-08-25T12:00:00.000Z',
+            contributor: { name: 'Nat', location: 'Missouri' },
+            author: { handle: 'nathanael.ink', displayName: 'Account display name' },
+          },
           { id: 2, title: 'Most added first', body: 'Same snapshot', visibility: 'public', addCount: 12, createdAt: '2026-08-24T12:00:00.000Z' },
         ]
       : [
@@ -22,6 +31,9 @@ test('reuses the startup strategy snapshot until Refresh is explicitly pressed',
 
   await page.goto('/feed');
   await expect(page.getByText('Newest first', { exact: true })).toBeVisible();
+  await expect(page.getByText(/by Nat • Missouri/)).toBeVisible();
+  await expect(page.getByText('@nathanael.ink', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Account display name', { exact: true })).toHaveCount(0);
   expect(feedRequests).toBe(1);
 
   await page.getByLabel('Sort by').selectOption('popular');
