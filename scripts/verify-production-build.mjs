@@ -2,6 +2,7 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import { OBSERVATION_COMPAT_MODULES } from './observation-compat-policy.mjs';
 import {
   REQUIRED_RUNTIME_PRECACHE_PATHS,
   selectRuntimePrecachePaths,
@@ -173,15 +174,17 @@ if (!dialogFocusSource.includes("event.key === 'Escape'")
   fail('shared modal keyboard, scroll-lock, or focus-restoration behavior is incomplete.');
 }
 
-const cueCompilerPath = resolve(root, 'src/legacy/observations/observationCueData.js');
-const publicCueCompilerPath = resolve(root, 'public/lib/observationCueData.js');
-const [cueCompilerSource, publicCueCompilerSource] = await Promise.all([
-  readFile(cueCompilerPath, 'utf8'),
-  readFile(publicCueCompilerPath, 'utf8'),
-]);
-if (cueCompilerSource !== publicCueCompilerSource) {
-  fail('the bundled and public Observation cue compilers have drifted apart.');
+for (const moduleName of OBSERVATION_COMPAT_MODULES) {
+  const [bundledSource, compatibilitySource] = await Promise.all([
+    readFile(resolve(root, 'src/legacy/observations', moduleName), 'utf8'),
+    readFile(resolve(dist, 'lib', moduleName), 'utf8'),
+  ]);
+  if (bundledSource !== compatibilitySource) {
+    fail(`emitted Observation compatibility module ${moduleName} drifted from its canonical bundled source.`);
+  }
 }
+
+const cueCompilerPath = resolve(root, 'src/legacy/observations/observationCueData.js');
 const cueCompiler = await import(pathToFileURL(cueCompilerPath).href);
 const [observationCueCsv, observationModuleJson] = await Promise.all([
   readFile(resolve(root, 'public/data/observation_cues.csv'), 'utf8'),
