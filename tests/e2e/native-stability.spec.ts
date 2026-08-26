@@ -228,6 +228,7 @@ test('Bluesky account and profile paths are actionable instead of placeholder co
   await expect(signIn).toBeEnabled();
   await expect(menu.getByRole('button', { name: 'Save this browser' })).toBeDisabled();
   await expect(menu.getByRole('button', { name: 'Load saved profile' })).toBeDisabled();
+  await expect(menu.getByRole('button', { name: 'Refresh allneeds', exact: true })).toBeEnabled();
   expect(runtimeProblems.filter((problem) => (
     !problem.includes('Failed to load resource: the server responded with a status of 404')
   ))).toEqual([]);
@@ -253,6 +254,20 @@ test('a restored Bluesky session unlocks profile visibility and follower feeds',
   await expect(page.getByRole('option', { name: 'From people you follow' })).toBeEnabled();
   await expect(page.getByText('Following feed available for @nathanael.ink.', { exact: true })).toBeVisible();
   expect(runtimeProblems).toEqual([]);
+});
+
+test('Account & data can explicitly refresh an installed-style app session', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const menu = page.getByRole('dialog', { name: 'allneeds.app menu' });
+  await menu.getByRole('button', { name: /Account & data/ }).click();
+
+  const reloaded = page.waitForEvent('load');
+  await menu.getByRole('button', { name: 'Refresh allneeds', exact: true }).click();
+  await reloaded;
+
+  await expect(page.getByRole('button', { name: 'Open menu' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-offline-cache', /ready|error/);
 });
 
 test('first paint never exposes an upper-left magnet pile', async ({ page }) => {

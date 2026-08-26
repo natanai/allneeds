@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
+import { requestServiceWorkerUpdate } from '../../app/registerServiceWorker';
 import { useDialogFocus } from '../../app/useDialogFocus';
 import {
   loadProfileIntoCurrentBrowser,
@@ -21,7 +22,7 @@ import {
 import styles from './AppMenu.module.css';
 
 type MenuView = 'root' | 'account-data';
-type MenuStatusTarget = 'share' | 'account' | 'profile' | 'device';
+type MenuStatusTarget = 'share' | 'account' | 'profile' | 'device' | 'refresh';
 type MenuStatus = {
   target: MenuStatusTarget;
   message: string;
@@ -79,6 +80,16 @@ function StatusNotice({ status, target }: { status: MenuStatus | null; target: M
   );
 }
 
+function localTime(isoTime: string) {
+  const date = new Date(isoTime);
+  if (Number.isNaN(date.getTime())) return 'just now';
+  return new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(date);
+}
+
 function captureLocalStorage() {
   const snapshot: Record<string, string> = {};
   for (let index = 0; index < window.localStorage.length; index += 1) {
@@ -119,6 +130,7 @@ export function AppMenu({
   const [shareEmailReady, setShareEmailReady] = useState(false);
   const [handle, setHandle] = useState('');
   const [accountBusy, setAccountBusy] = useState(false);
+  const [refreshBusy, setRefreshBusy] = useState(false);
   const session = useBlueskySession();
   const importRef = useRef<HTMLInputElement>(null);
   const dialogRef = useDialogFocus<HTMLElement>({ open, onClose });
@@ -197,10 +209,24 @@ export function AppMenu({
     setAccountBusy(true);
     setStatus({ target: 'profile', message: 'Saving this browser to your profile…' });
     try {
-      const result = await saveCurrentBrowserToProfile();
+      const result = await saveCurrentBrowserToProfile((progress) => {
+        setStatus({
+          target: 'profile',
+          message: progress.strategyCount > 0
+            ? `Profile saved at ${localTime(progress.profileSavedAt)}. Syncing ${progress.strategyCount} shared ${progress.strategyCount === 1 ? 'strategy' : 'strategies'}…`
+            : `Profile saved at ${localTime(progress.profileSavedAt)}. Checking shared strategy changes…`,
+        });
+      });
+      const strategySyncTime = result.strategiesSyncedAt
+        ? localTime(result.strategiesSyncedAt)
+        : 'just now';
       setStatus({
         target: 'profile',
-        message: `Profile saved.${result.strategiesSynced ? ' Shared strategies synced.' : ' Shared strategies could not be synced.'}`,
+        message: result.strategiesSynced
+          ? result.strategyCount > 0
+            ? `Profile saved at ${localTime(result.profileSavedAt)}. ${result.strategyCount} shared ${result.strategyCount === 1 ? 'strategy' : 'strategies'} synced at ${strategySyncTime}.`
+            : `Profile saved at ${localTime(result.profileSavedAt)}. Shared strategies checked at ${strategySyncTime}; there were no shared strategies to sync.`
+          : `Profile saved at ${localTime(result.profileSavedAt)}. Shared strategy sync did not finish; you can try Save this browser again.`,
       });
     } catch (error) {
       setStatus({
@@ -209,6 +235,14 @@ export function AppMenu({
         tone: 'error',
       });
     } finally { setAccountBusy(false); }
+  };
+
+  const refreshApp = async () => {
+    setRefreshBusy(true);
+    setStatus({ target: 'refresh', message: 'Checking for an allneeds update…' });
+    await requestServiceWorkerUpdate();
+    setStatus({ target: 'refresh', message: 'Reloading allneeds with the newest shared strategies…' });
+    window.setTimeout(() => window.location.reload(), 180);
   };
 
   const loadProfile = async () => {
@@ -376,6 +410,12 @@ export function AppMenu({
                 </div>
                 <small>Restoring replaces this browser’s current allneeds data.</small>
                 <StatusNotice status={status} target="device" />
+              </div>
+              <div className={styles.systemCard}>
+                <h4>Refresh allneeds</h4>
+                <p>Check for an app update, reload this screen, and get the newest shared strategies.</p>
+                <button type="button" disabled={refreshBusy} onClick={() => void refreshApp()}>{refreshBusy ? 'Refreshing…' : 'Refresh allneeds'}</button>
+                <StatusNotice status={status} target="refresh" />
               </div>
             </section>
           </div>

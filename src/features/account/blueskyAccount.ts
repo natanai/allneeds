@@ -34,6 +34,30 @@ type ResolveHandleResponse = {
   message?: string;
 };
 
+type SaveSettingResponse = {
+  status?: string;
+  savedAt?: string;
+};
+
+type StrategySyncResponse = {
+  status?: string;
+  syncedAt?: string;
+  syncedCount?: number;
+};
+
+export type ProfileSaveProgress = {
+  stage: 'syncing-strategies';
+  profileSavedAt: string;
+  strategyCount: number;
+};
+
+export type ProfileSaveResult = {
+  profileSavedAt: string;
+  strategiesSynced: boolean;
+  strategiesSyncedAt: string | null;
+  strategyCount: number;
+};
+
 let currentSession: BlueskySession | null = null;
 let initializePromise: Promise<BlueskySession | null> | null = null;
 
@@ -230,7 +254,9 @@ async function requireBackendSession() {
   return session;
 }
 
-export async function saveCurrentBrowserToProfile() {
+export async function saveCurrentBrowserToProfile(
+  onProgress?: (progress: ProfileSaveProgress) => void,
+): Promise<ProfileSaveResult> {
   const session = await requireBackendSession();
   const snapshot = await buildCurrentBrowserBackup();
   const response = await fetch(`${BACKEND_API_URL}/user-settings`, {
@@ -239,12 +265,20 @@ export async function saveCurrentBrowserToProfile() {
     credentials: 'include',
     body: JSON.stringify({ key: BACKEND_SNAPSHOT_KEY, value: JSON.stringify(snapshot) }),
   });
-  const data: unknown = await response.json().catch(() => null);
-  if (!response.ok || !data || typeof data !== 'object' || (data as { status?: string }).status !== 'ok') {
+  const data = await response.json().catch(() => null) as SaveSettingResponse | null;
+  if (!response.ok || data?.status !== 'ok') {
     throw new Error('Unable to save this browser to your profile.');
   }
 
   const strategies = profilePublishableStrategies(snapshot.inventory);
+  const profileSavedAt = typeof data.savedAt === 'string' && !Number.isNaN(Date.parse(data.savedAt))
+    ? data.savedAt
+    : new Date().toISOString();
+  onProgress?.({
+    stage: 'syncing-strategies',
+    profileSavedAt,
+    strategyCount: strategies.length,
+  });
   const syncPath = session.verified ? '/strategies/sync-owned' : '/strategies/sync';
   const syncResponse = await fetch(`${BACKEND_API_URL}${syncPath}`, {
     method: 'POST',
@@ -252,7 +286,19 @@ export async function saveCurrentBrowserToProfile() {
     credentials: 'include',
     body: JSON.stringify({ strategies }),
   }).catch(() => null);
-  return { strategiesSynced: Boolean(syncResponse?.ok) };
+  const syncData = await syncResponse?.json().catch(() => null) as StrategySyncResponse | null | undefined;
+  const strategiesSynced = Boolean(syncResponse?.ok && syncData?.status === 'ok');
+  const strategiesSyncedAt = strategiesSynced
+    ? (typeof syncData?.syncedAt === 'string' && !Number.isNaN(Date.parse(syncData.syncedAt))
+        ? syncData.syncedAt
+        : new Date().toISOString())
+    : null;
+  return {
+    profileSavedAt,
+    strategiesSynced,
+    strategiesSyncedAt,
+    strategyCount: typeof syncData?.syncedCount === 'number' ? syncData.syncedCount : strategies.length,
+  };
 }
 
 export function extractProfileSnapshot(data: unknown) {

@@ -1,5 +1,29 @@
 export const OFFLINE_CACHE_EVENT = 'allneeds:offline-cache';
 export type OfflineCacheState = 'development' | 'unsupported' | 'registering' | 'ready' | 'error';
+export type AppUpdateCheck = 'checked' | 'unavailable' | 'timed-out';
+
+function serviceWorkerBase() {
+  return import.meta.env.BASE_URL.endsWith('/')
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+}
+
+function waitForActivation(worker: ServiceWorker, timeoutMs: number): Promise<AppUpdateCheck> {
+  if (worker.state === 'activated') return Promise.resolve('checked');
+  return new Promise((resolve) => {
+    const finish = (result: AppUpdateCheck) => {
+      window.clearTimeout(timeoutId);
+      worker.removeEventListener('statechange', stateChanged);
+      resolve(result);
+    };
+    const stateChanged = () => {
+      if (worker.state === 'activated') finish('checked');
+      else if (worker.state === 'redundant') finish('unavailable');
+    };
+    const timeoutId = window.setTimeout(() => finish('timed-out'), Math.max(0, timeoutMs));
+    worker.addEventListener('statechange', stateChanged);
+  });
+}
 
 function publish(state: OfflineCacheState) {
   document.documentElement.dataset.offlineCache = state;
@@ -11,6 +35,33 @@ export function readOfflineCacheState(): OfflineCacheState {
   if (value === 'development' || value === 'unsupported' || value === 'registering'
     || value === 'ready' || value === 'error') return value;
   return import.meta.env.DEV ? 'development' : 'registering';
+}
+
+export async function requestServiceWorkerUpdate(): Promise<AppUpdateCheck> {
+  if (import.meta.env.DEV || !('serviceWorker' in navigator)) return 'unavailable';
+  const registration = await navigator.serviceWorker.getRegistration(serviceWorkerBase()).catch(() => null);
+  if (!registration) return 'unavailable';
+
+  const startedAt = Date.now();
+  let timeoutId = 0;
+  const timedOut = new Promise<'timed-out'>((resolve) => {
+    timeoutId = window.setTimeout(() => resolve('timed-out'), 8_000);
+  });
+  let checked: Promise<'checked' | 'unavailable'>;
+  try {
+    checked = registration.update()
+      .then(() => 'checked' as const)
+      .catch(() => 'unavailable' as const);
+  } catch {
+    window.clearTimeout(timeoutId);
+    return 'unavailable';
+  }
+  const result = await Promise.race([checked, timedOut]);
+  window.clearTimeout(timeoutId);
+  if (result !== 'checked') return result;
+  const replacement = registration.installing ?? registration.waiting;
+  if (!replacement) return 'checked';
+  return waitForActivation(replacement, 8_000 - (Date.now() - startedAt));
 }
 
 export function registerServiceWorker() {
@@ -25,9 +76,7 @@ export function registerServiceWorker() {
 
   publish('registering');
 
-  const base = import.meta.env.BASE_URL.endsWith('/')
-    ? import.meta.env.BASE_URL
-    : `${import.meta.env.BASE_URL}/`;
+  const base = serviceWorkerBase();
   void navigator.serviceWorker.register(`${base}service-worker.js`, {
       scope: base,
       updateViaCache: 'none',

@@ -88,6 +88,14 @@ function normalizeContributorField(value) {
   return value.trim().slice(0, 120);
 }
 
+const D1_BATCH_SIZE = 75;
+
+async function runStatementBatches(env, statements) {
+  for (let index = 0; index < statements.length; index += D1_BATCH_SIZE) {
+    await env.DB.batch(statements.slice(index, index + D1_BATCH_SIZE));
+  }
+}
+
 function adminDidSet(env) {
   return new Set(String(env.ADMIN_DIDS || '')
     .split(',')
@@ -520,60 +528,132 @@ async function handleStableSyncStrategies(request, env) {
   const incoming = Array.isArray(body?.strategies) ? body.strategies : null;
   if (!incoming) return errorResponse(request, 'strategies array is required', 400);
 
-  const desiredKeys = new Set();
-  const synced = [];
+  const desiredByClientKey = new Map();
   for (const entry of incoming) {
     const clientKey = normalizeClientKey(entry?.clientKey);
     const title = typeof entry?.title === 'string' ? entry.title.trim() : '';
     const visibility = normalizeVisibility(entry?.visibility);
     if (!clientKey || !title || (visibility !== 'public' && visibility !== 'followers')) continue;
-    desiredKeys.add(clientKey);
-    let row = await env.DB.prepare(
-      `${STRATEGY_SELECT} WHERE s.author_did = ? AND s.client_key = ? LIMIT 1;`,
-    ).bind(session.did, clientKey).first();
-
-    if (!row) {
-      // One-time adoption path for an exact legacy row owned by the same DID. This preserves
-      // its numeric remote id instead of deleting/recreating it when stable keys are introduced.
-      const signature = strategySignature(entry);
-      const legacyRows = await env.DB.prepare(
-        `${STRATEGY_SELECT} WHERE s.author_did = ? AND s.client_key IS NULL LIMIT 250;`,
-      ).bind(session.did).all();
-      const match = (legacyRows.results || []).find((candidate) => strategySignature({
-        title: candidate.title,
-        body: candidate.body,
-        needIds: safeJsonParseArray(candidate.need_ids),
-        visibility: candidate.visibility,
-      }) === signature);
-      if (match) {
-        await env.DB.prepare(
-          'UPDATE strategies SET client_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND author_did = ?;',
-        ).bind(clientKey, match.id, session.did).run();
-        row = await updateOwnedStrategy(env, session, match.id, entry);
-      } else {
-        row = await createStrategy(env, session, { ...entry, clientKey }, { verifiedOnly: true });
-      }
-    } else {
-      row = await updateOwnedStrategy(env, session, row.id, entry);
-    }
-    synced.push(mapStrategyRow(row));
+    desiredByClientKey.set(clientKey, { ...entry, clientKey, title, visibility });
   }
 
-  const owned = await env.DB.prepare(
-    'SELECT id, client_key FROM strategies WHERE author_did = ? AND client_key IS NOT NULL;',
+  // Read the owner's strategy set once. The previous implementation repeated a SELECT,
+  // UPDATE, Need-link rebuild, and final SELECT for every strategy, making a 40-strategy
+  // profile sync wait on hundreds of sequential D1 operations.
+  const existing = await env.DB.prepare(
+    `${STRATEGY_SELECT} WHERE s.author_did = ? ORDER BY s.id LIMIT 500;`,
   ).bind(session.did).all();
-  let unpublished = 0;
-  for (const row of owned.results || []) {
-    if (desiredKeys.has(row.client_key)) continue;
-    const result = await env.DB.prepare(
+
+  const existingByClientKey = new Map();
+  const legacyBySignature = new Map();
+  for (const row of existing.results || []) {
+    if (row.client_key) {
+      existingByClientKey.set(row.client_key, row);
+      continue;
+    }
+    const signature = strategySignature({
+      title: row.title,
+      body: row.body,
+      needIds: safeJsonParseArray(row.need_ids),
+      visibility: row.visibility,
+    });
+    const matches = legacyBySignature.get(signature) || [];
+    matches.push(row);
+    legacyBySignature.set(signature, matches);
+  }
+
+  const strategyWrites = [];
+  for (const [clientKey, entry] of desiredByClientKey) {
+    let current = existingByClientKey.get(clientKey) || null;
+    if (!current) {
+      // One-time adoption path for an exact legacy row owned by the same DID. This preserves
+      // its numeric remote id instead of deleting/recreating it when stable keys are introduced.
+      const matches = legacyBySignature.get(strategySignature(entry)) || [];
+      current = matches.shift() || null;
+    }
+
+    const strategyBody = entry.body == null ? null : String(entry.body);
+    const needIds = normalizeNeedIds(entry.needIds);
+    const contributorName = normalizeContributorField(entry.firstName) || null;
+    const contributorLocation = normalizeContributorField(entry.location) || null;
+
+    if (current) {
+      strategyWrites.push(env.DB.prepare(
+        `UPDATE strategies
+            SET client_key = ?, title = ?, body = ?, need_ids = ?, contributor_name = ?, contributor_location = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
+          WHERE id = ? AND author_did = ?;`,
+      ).bind(
+        clientKey,
+        entry.title,
+        strategyBody,
+        needIds.length ? JSON.stringify(needIds) : null,
+        contributorName,
+        contributorLocation,
+        entry.visibility,
+        current.id,
+        session.did,
+      ));
+    } else {
+      strategyWrites.push(env.DB.prepare(
+        `INSERT INTO strategies
+           (author_did, client_key, title, body, need_ids, contributor_name, contributor_location, visibility, moderation_status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'visible', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`,
+      ).bind(
+        session.did,
+        clientKey,
+        entry.title,
+        strategyBody,
+        needIds.length ? JSON.stringify(needIds) : null,
+        contributorName,
+        contributorLocation,
+        entry.visibility,
+      ));
+    }
+  }
+  await runStatementBatches(env, strategyWrites);
+
+  const owned = await env.DB.prepare(
+    `${STRATEGY_SELECT} WHERE s.author_did = ? AND s.client_key IS NOT NULL ORDER BY s.id LIMIT 500;`,
+  ).bind(session.did).all();
+  const ownedByClientKey = new Map((owned.results || []).map((row) => [row.client_key, row]));
+  const relationshipWrites = [];
+
+  for (const [clientKey, entry] of desiredByClientKey) {
+    const row = ownedByClientKey.get(clientKey);
+    if (!row) throw new Error(`strategy sync could not resolve client key ${clientKey}`);
+    relationshipWrites.push(
+      env.DB.prepare('DELETE FROM strategy_needs WHERE strategy_id = ?').bind(row.id),
+    );
+    for (const needId of normalizeNeedIds(entry.needIds)) {
+      relationshipWrites.push(env.DB.prepare(
+        'INSERT OR IGNORE INTO strategy_needs (strategy_id, need_id) VALUES (?, ?);',
+      ).bind(row.id, needId));
+    }
+  }
+
+  const rowsToUnpublish = (owned.results || []).filter((row) => (
+    !desiredByClientKey.has(row.client_key) && normalizeVisibility(row.visibility) !== 'private'
+  ));
+  for (const row of rowsToUnpublish) {
+    relationshipWrites.push(env.DB.prepare(
       `UPDATE strategies
           SET visibility = 'private', updated_at = CURRENT_TIMESTAMP
         WHERE id = ? AND author_did = ? AND visibility <> 'private';`,
-    ).bind(row.id, session.did).run();
-    unpublished += Number(result.meta?.changes || 0);
+    ).bind(row.id, session.did));
   }
+  await runStatementBatches(env, relationshipWrites);
 
-  return jsonResponse(request, { status: 'ok', did: session.did, synced, unpublished });
+  const synced = [...desiredByClientKey.keys()]
+    .map((clientKey) => mapStrategyRow(ownedByClientKey.get(clientKey)))
+    .filter(Boolean);
+  return jsonResponse(request, {
+    status: 'ok',
+    did: session.did,
+    synced,
+    syncedCount: synced.length,
+    unpublished: rowsToUnpublish.length,
+    syncedAt: new Date().toISOString(),
+  });
 }
 
 async function handleModeration(request, env, id, nextStatus) {
@@ -634,12 +714,15 @@ async function handlePostUserSettings(request, env) {
   const session = await requireSession(env, request);
   const body = await request.json().catch(() => null);
   if (!body?.key || body.value === undefined) return errorResponse(request, 'key and value are required', 400);
+  const savedAt = new Date().toISOString();
   await env.DB.prepare(
     `INSERT INTO user_settings (did, key, value, updated_at)
-     VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-     ON CONFLICT(did, key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP;`,
-  ).bind(session.did, String(body.key), String(body.value)).run();
-  return jsonResponse(request, { status: 'ok', did: session.did, key: String(body.key), value: String(body.value) });
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(did, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at;`,
+  ).bind(session.did, String(body.key), String(body.value), savedAt).run();
+  return jsonResponse(request, {
+    status: 'ok', did: session.did, key: String(body.key), value: String(body.value), savedAt,
+  });
 }
 
 async function handleGetJournals(request, env) {
