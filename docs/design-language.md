@@ -240,13 +240,15 @@ Rules:
 - Public feed attribution is contributor-controlled. Show only the explicit contributor **name** and **location** supplied with the strategy. Do not expose or synthesize a visible identity from Bluesky display name, handle, DID, or other account metadata when those contributor fields were not provided.
 - A timestamp may follow the contributor line as quiet feed metadata; it should not outweigh the strategy content.
 - Filters stay easy to scan but should use restrained labels, borders, and vertical space. Explicit Refresh is a compact utility control with its accessible name preserved.
-- Visibility and supported-needs metadata may use compact chips/popovers. `Save`/saved state remains clearly actionable but secondary to the strategy content.
+- Signed-in card utilities should compress according to meaning rather than expanding every state into a text pill: visibility is an icon-only status (`Public` globe, `Followers` people, `Private` lock, moderation-hidden eye-slash) with an accessible label/title; owner Edit is icon-only; an already-saved strategy is a check-only status; the Needs disclosure keeps the short visible label `Needs`; an unsaved `Save` keeps text because it is an important action rather than passive state.
+- On ordinary phone widths, the signed-in utility row should remain on one line when those compact controls fit. Do not widen the document or introduce horizontal scrolling to force the row; very narrow screens may wrap as a fallback.
 - Feed scope, sort, Bluesky sign-in gating for Following, refresh/cache behavior, Needs-supported details, owner Edit, moderation controls, and inventory-save behavior must not be lost during visual cleanup.
 
 ## Decision log
 
 ### 2026-08-26
 
+- Signed-in Shared Strategy card chrome was compacted by meaning: visibility, owner Edit, and already-Saved states use familiar icon-only treatments with accessible names, while Needs and unsaved Save retain short text where the action would otherwise be ambiguous.
 - Shared Strategies now reuse the Need-page strategy-card language instead of a separate social-post card treatment; contributor name/location sit quietly at bottom-right and visible feed attribution never falls back to Bluesky handles/display names/DIDs.
 - Profile snapshot save and shared-strategy reconciliation now share one streamed request, report separate stages and exact local times, and write only server-side strategy deltas. Shared Strategies provides the explicit installed-iOS refresh action while sort and page navigation reuse the eager startup snapshot.
 - Repeated reloads now reuse a one-hour public-feed snapshot and session-scoped account verification instead of repeatedly invoking the Worker; public-feed misses also skip the irrelevant signed-in session query.
@@ -256,7 +258,7 @@ Rules:
 - Bluesky sign-in now verifies the entered username before leaving allneeds, reports typos inline beside the control, and distinguishes username mistakes from temporary lookup failures.
 - The legacy three-door app identity is explicitly restored across Safari/iOS favorites, Apple touch icons, favicon fallbacks, pinned tabs, Android/maskable icons, Windows tiles, and Open Graph/Twitter sharing cards.
 - Safety's Layered Cover treatment became an approved production Need-magnet identity: the generic shield is replaced with an umbrella icon, the face uses overlapping protective layers, and the palette remains entirely derived from functional Customizer roles without changing the shared magnet shell or physics.
-- Connection's Constellation treatment became the first approved production Need-magnet identity: full-face node/path artwork with the existing link icon, all derived from functional Customizer roles without changing the shared magnet shell or physics.
+- Connection's Constellation treatment became the first approved Need-magnet identity: full-face node/path artwork with the existing link icon, all derived from functional Customizer roles without changing the shared magnet shell or physics.
 - Need-magnet concept work now belongs in the deployed Design Lab rather than standalone preview HTML by default; controls are removed when no longer useful, and approved designs leave the active review set after promotion.
 - Theme internals now use functional Customizer roles site-wide instead of hue-named runtime tokens. Legacy hue-keyed saved themes are migrated only at the read/prepaint boundary, and the Design Lab inherits the live Customizer palette and roundness rather than maintaining duplicate controls.
 - Held magnets now act as pressure sources above a single shared physics surface: local force pushes nearby magnets outward, resting-resting coupling and collisions remain active so the disturbance can ripple through a packed board, and the former lifted-neighbor speed cap/suppression code is removed. Pointer pickup continues to suppress pointer-created focus at the interaction source rather than hiding a held focus ring.
