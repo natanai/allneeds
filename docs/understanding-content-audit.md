@@ -1,8 +1,8 @@
 # Understanding Content Audit
 
-> Status: approved and authorized for production implementation on 2026-08-26. This file is the authoritative current Understanding content record.
+> Status: content package is live. Understanding · Converging Map (U4D) was separately approved for production on 2026-08-26 and is being promoted by the same governed visual-audit process.
 >
-> Understanding is not fully audited until an approved production magnet is also live.
+> Understanding becomes fully audited when the approved production magnet is successfully deployed live.
 
 ## Approved page structure
 
@@ -151,10 +151,22 @@ Strategies remain associated with the canonical Need, not with lens IDs.
 
 ## Implementation boundary
 
-Approval covers the umbrella Understanding copy, the two approved lenses, their separate nine-source evidence sets, the three-card static system strategy deck, the two legacy Understanding association removals, the generic function-lens schema/compiler/UI capability, corresponding regression coverage, and this audit record.
+The approved content package covers the umbrella Understanding copy, the two approved lenses, their separate nine-source evidence sets, the three-card static system strategy deck, the two legacy Understanding association removals, the generic function-lens schema/compiler/UI capability, corresponding regression coverage, and this audit record.
 
-It does not authorize changes to other Need content, protected user strategies, profile/community strategies, or the Understanding magnet artwork.
+A separate visual approval on 2026-08-26 authorizes only the Understanding · Converging Map (U4D) production magnet described below. It does not authorize changes to other Need content, protected user strategies, profile/community strategies, or other Need magnet identities.
 
-## Remaining visual step
+## Approved production magnet
 
-After this content package and function-lens feature are live, Understanding still requires a separate Need-magnet review in `/design-lab/need-magnets`. Content approval does not select or authorize the production magnet design.
+**Understanding · Converging Map (U4D)** was approved on 2026-08-26 after comparison in the live `/design-lab/need-magnets` surface.
+
+- **Making sense cue:** a route-map icon on the left, promoted to `public/icons/needs/understanding.svg`.
+- **Understanding between people cue:** a perspective-pair icon on the right, promoted to `public/icons/needs/understanding-perspective.svg`.
+- **Unifying artwork:** two fields converge toward the center, promoted to `public/icons/needs/art/understanding-converging-map.svg`.
+- **Face recipe:** `Quiet`/`Selection` on the left blending to `Selection`/`Action` on the right.
+- **Icon roles:** left route-map uses `Primary`; right perspective-pair uses `Secondary`.
+- **Artwork roles:** `Primary` to `Action` at `0.3` opacity.
+- **Shell/physics:** unchanged. The approved second icon participates in the magnet's normal measured intrinsic width rather than using fake geometry or a runtime patch.
+- **Production owner:** `src/features/needs/NeedsPage.module.css`.
+- **Lab lifecycle:** the approved candidate and superseded Understanding review assets leave the active Design Lab after promotion; Git history remains the archive.
+
+Once this approved production identity is successfully deployed live, Understanding satisfies both the content and visual requirements of the Need audit protocol and is fully audited.
