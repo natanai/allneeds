@@ -406,8 +406,9 @@
 
 @media (max-width: 640px) {
   .page {
-    width: calc(100% + 2rem);
-    margin-inline: -1rem;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
     padding-top: .52rem;
     gap: .48rem;
   }
