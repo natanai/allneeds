@@ -6,6 +6,10 @@ This file supplements the root `AGENTS.md` for work under `src/data/`.
 
 For Safety data, strategy, citation, or copy work, read `docs/safety-content-audit.md` before editing. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`.
 
+## Current Understanding record
+
+For Understanding data, function-lens structure, strategy, citation, or copy work, read `docs/understanding-content-audit.md` before editing. It is the authoritative current Understanding audit. Understanding is the first approved production use of the function-lens model.
+
 ## Need function lenses
 
 Before proposing or implementing multiple functions, facets, pathways, or sub-meanings within one Need, read `docs/need-function-lenses.md` and follow its qualification, editorial, rendering, and approval rules.

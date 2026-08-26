@@ -2,7 +2,7 @@
 
 > Status: living document. Start here before changing explanatory, psychological, behavioral, health, strategy, or research-facing copy in allneeds.
 >
-> Last updated: 2026-08-25.
+> Last updated: 2026-08-26.
 
 ## Purpose
 
@@ -53,6 +53,16 @@ Evolutionary framing is part of the reasoning process, not a decorative paragrap
 
 Support and Safety are the current clearest models for this sequence. Support begins with human interdependence and risk/resource sharing, then moves into modern social-support research. Safety begins with the recurrent survival problem of danger, then moves into threat imminence, learned safety, fear generalization, and the distinction between defensive systems and conscious fear.
 
+## Optional Need function lenses
+
+When one everyday Need label contains distinguishable functions that meet the qualification rule in `docs/need-function-lenses.md`, the approved package may use function lenses rather than forcing all evidence into one undifferentiated narrative.
+
+- Lenses must satisfy distinct lived function, distinct evidence, and practical recognition value.
+- They remain parts of one canonical Need and are not formal scientific definitions.
+- Each lens may own its own expanded copy and citation set so source-to-claim fit stays precise.
+- Do not retrofit lenses merely because a concept can be subdivided academically.
+- Understanding is the first approved production use; its authoritative package is `docs/understanding-content-audit.md`.
+
 ## Editorial style rules
 
 - Do not use em dashes in proposed or production site copy.
@@ -82,7 +92,7 @@ The public citation area should be simple and human-verifiable.
 - A user's wording and authorship are protected. Need associations may be reconsidered during an audit only when the user authorizes that review.
 - User strategies do not need academic citations.
 - If a contributor selected only one need for a submission, preserve that association unless the contributor or user explicitly approves changing it. This rule preserved Autumn's `comfy-gaming` association with Safety.
-- **Current static user-submission boundary:** `src/data/userStrategies.json` contains only Autumn's `comfy-gaming`. Nat's former repository strategies were migrated to Nat's verified Bluesky-backed profile and removed from static catalog data, Need references, migration fixtures, and one-time migration files. D1/profile storage is their current source of truth. Do not restore profile-owned Nat strategies to `editorialCatalog.json`, `legacyData.json`, `userStrategies.json`, fixtures, tests, or audit strategy lists as static submissions.
+- **Current static user-submission boundary:** `src/data/userStrategies.json` is the canonical registry for all repository-resident published user strategies. Do not hard-code a fixed contributor count or assume one historical contributor is the only current submission. Nat's former repository strategies were migrated to Nat's verified Bluesky-backed profile and removed from static catalog data, Need references, migration fixtures, and one-time migration files. D1/profile storage is their current source of truth. Do not restore profile-owned Nat strategies to `editorialCatalog.json`, `legacyData.json`, `userStrategies.json`, fixtures, tests, or audit strategy lists as static submissions.
 - Historical audit decisions that mention Nat-authored submissions describe the state at the time of those reviews. They do not authorize reintroducing those strategies into the repository. When documenting the current static package, list only strategies that actually ship from repository catalog data.
 - System strategies must earn their place. Do not retain filler merely to create a larger deck.
 - Prefer concrete, low-friction actions that can be attempted in ordinary life.
@@ -130,7 +140,7 @@ Directions worth considering:
 - visual motifs that improve recognition without turning every need into a wholly different component;
 - preserved text legibility, accessibility, responsive sizing, play-state physics, square-corner behavior, and every Customizer preset.
 
-Do not ship need-magnet art as part of content approval. Content must be implemented first, then visual candidates are reviewed separately. Safety is the next planned magnet review.
+Do not ship need-magnet art as part of content approval. Content must be implemented first, then visual candidates are reviewed separately.
 
 ## Evidence standard
 
@@ -231,13 +241,15 @@ Remove the Support association only from `floor-starfish`, `pillow-nest`, `name-
 
 ## Safety
 
-**Status:** complete content package explicitly approved 2026-08-25 and authorized for production implementation. Magnet visual review remains pending, so Safety is not yet marked fully audited.
+**Status:** a later dedicated record supersedes this historical section. Read `docs/safety-content-audit.md` for the authoritative approved Safety copy, evidence, strategy set, limitations, and current production status.
 
-Approved short copy:
+This retained section documents the earlier review state and should not be used to restore superseded Safety copy or sources.
+
+Approved short copy from the earlier review state:
 
 > Across evolutionary history, detecting and responding to danger had direct consequences for survival. Humans retain flexible defensive systems that shift behavior as threats become more likely or immediate. This need may draw us to create distance from danger, seek shelter or trustworthy people, set boundaries, reduce exposure to harm, and look for cues that tell us when it is safe enough to stand down. Tending to safety can help us protect ourselves and others when danger is present while making room for rest, exploration, connection, and other goals when it is not.
 
-Approved expanded copy:
+Approved expanded copy from the earlier review state:
 
 > Evolutionary accounts place protection from danger among the oldest problems living systems have had to solve. LeDoux argues that what humans share with other animals is not necessarily one inherited conscious “fear system,” but ancient defensive survival functions that detect threats and organize protective behavior. Mobbs and colleagues similarly propose that human defense includes prediction, prevention, threat assessment, searching for safety, and rapid responses when danger becomes imminent. These frameworks help explain why protective motivation can carry such urgency. They do not establish that every modern feeling of unsafety accurately identifies a present danger. [1][2]
 >
@@ -249,7 +261,7 @@ Approved expanded copy:
 >
 > LeDoux also cautions against treating the mechanisms that detect and respond to threats as identical to the conscious feeling of fear. This distinction keeps Safety from collapsing into Calm. A person can feel activated while taking sensible protective action, and feeling calm does not by itself establish that a situation is safe. Taken together, these literatures support a balanced picture: protective motivation is deeply tied to survival, effective defense changes with context, and recognizing genuine safety is part of the protective system rather than its opposite. Tending to Safety therefore need not mean suppressing alarm or obeying it automatically. It can mean making room for protective signals, reducing actual danger where possible, and updating as circumstances provide new information. [1][4][5]
 
-Approved need-level sources:
+Approved need-level sources from the earlier review state:
 
 1. _As soon as there was life, there was danger: the deep history of survival behaviours and the shallower history of consciousness._ https://pubmed.ncbi.nlm.nih.gov/34957848/
 2. _The ecology of human fear: survival optimization and the nervous system._ https://pubmed.ncbi.nlm.nih.gov/25852451/
@@ -258,7 +270,7 @@ Approved need-level sources:
 5. _A meta-analysis of conditioned fear generalization in anxiety-related disorders._ https://pubmed.ncbi.nlm.nih.gov/35501429/
 6. _Negative valence systems: sustained threat and the predatory imminence continuum._ https://pubmed.ncbi.nlm.nih.gov/36286244/
 
-Internal source-role notes for future reviewers:
+Internal source-role notes from the earlier review state:
 
 - [1] LeDoux: strongest evolutionary framing. Ancient defensive survival functions are not equivalent to a single inherited conscious fear system. This is an evolutionary/theoretical synthesis, not proof that the site's Safety construct is one discrete adaptation.
 - [2] Mobbs et al.: functional sequence including prediction, prevention, assessment, searching for safety, escape, and rapid defense. Treat the proposed Survival Optimization System as a theoretical synthesis rather than settled neural fact.
@@ -267,17 +279,17 @@ Internal source-role notes for future reviewers:
 - [5] Cooper et al.: meta-analytic evidence that conditioned fear can generalize more broadly in anxiety-related disorders. This supports curiosity and discrimination, not dismissing an individual's current alarm as inaccurate.
 - [6] Fanselow: modern predatory-imminence review distinguishing potential from acute threat. Much of the framework builds on nonhuman defensive-behavior research, so public copy stays at the level of context-sensitive defensive function.
 
-Current repository-resident Safety strategy set:
+Current repository-resident Safety strategy set from the earlier review state:
 
 1. `comfy-gaming` — protected Autumn submission, unchanged. Safety retained because it is the only need Autumn selected for the submission.
-2. `5-4-3-2-1-check` — system. Supporting source: https://www.sciencedirect.com/science/article/pii/S1557308725002999
+2. `5-4-3-2-1-check` — system.
 3. `slow-breathing-safety` — system. Supporting source: https://pubmed.ncbi.nlm.nih.gov/38137060/
 4. `call-or-text-988` — system official resource. Support + Safety. Supporting source: https://988lifeline.org/
 5. `call-116-123` — system official resource. Support + Safety. Supporting source: https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm
 
-Nat-authored Safety strategies from the earlier audit, including `stare-off`, `self-holding`, `snuggle-a-pet`, and `watch-a-comfort-show`, are now profile-owned. They may appear dynamically through profile/community data, but they are not static repository strategies and must not be restored to the repository catalog or this static strategy set.
+Nat-authored Safety strategies from the earlier audit are profile-owned. They may appear dynamically through profile/community data, but they are not static repository strategies and must not be restored to the repository catalog or this static strategy set.
 
-Approved Safety association removals only:
+Approved Safety association removals from the earlier review state:
 
 - `crunch-the-numbers`: remove Safety only; preserve strategy wording/authorship and its other need associations.
 - `road-trip`: remove Safety only; preserve strategy wording/authorship and its other need associations.
@@ -285,13 +297,23 @@ Approved Safety association removals only:
 
 No new Safety strategy is added merely to enlarge the deck.
 
-Editorial distinctions used in this audit:
+Editorial distinctions used in the earlier Safety review:
 
 - **Safety:** danger, harm, protection, defensive responding, and credible cues that danger is absent or has ended.
 - **Security:** longer-term stability, resources, continuity, dependable protection, and reduced vulnerability to future disruption.
 - **Calm / Peace:** experiential or arousal states. Someone can be safe without feeling calm, or calm without objectively being safe.
 - **Trust:** expectations about the reliability or intentions of people and relationships.
 - **Control:** capacity to influence circumstances or outcomes.
+
+## Understanding
+
+**Status:** complete content/evidence/strategy package explicitly approved 2026-08-26 and authorized for production implementation. Magnet visual review remains pending, so Understanding is not yet fully audited.
+
+Understanding is the first approved production use of optional Need function lenses. The page keeps one umbrella Need description and presents two evidence-separated recognition lenses, **Making sense** and **Understanding between people**, with both visible together rather than hidden behind tabs.
+
+The authoritative complete package, including the final umbrella copy, both lens narratives, nine lens-local citations, internal source roles and limitations, three approved system strategies, two legacy association removals, provenance boundary, and implementation scope, is recorded in `docs/understanding-content-audit.md`.
+
+Do not reconstruct Understanding from the older `generated/legacyData.json` claim or its former citations. In particular, the historical `PMC5789218` citation is not an Understanding source and must not be restored.
 
 # Approval ledger
 
@@ -304,16 +326,19 @@ Editorial distinctions used in this audit:
 | 2026-08-25 | Citation display | Public need citations show citation/title + raw URL only; internal role/limitations stay in audit docs | Standing rule |
 | 2026-08-25 | Strategy source display | System cards visibly use `Supporting source ↗`; user cards show human provenance | Implemented UI rule |
 | 2026-08-25 | Support | Complete content/evidence/strategy package and S1B2 Soft Terraces magnet approved | Fully audited and implemented |
-| 2026-08-25 | Safety | Complete short/long copy, six citations, system/static strategy package, source provenance, and association removals approved | Authorized for content implementation; magnet pending |
-| 2026-08-25 | Profile strategy ownership | Nat's 40 former static strategies were migrated to the verified profile and then removed from repository catalog data and references. Autumn's `comfy-gaming` is the only current repository-resident user submission. | Implemented and regression-guarded |
+| 2026-08-25 | Safety | Complete package approved; authoritative current record moved to `docs/safety-content-audit.md` | Content implemented; Layered Cover magnet approved and live |
+| 2026-08-25 | Profile strategy ownership | Nat's former static strategies were migrated to the verified profile and removed from repository catalog data and references | Implemented and regression-guarded |
+| 2026-08-26 | Need function lenses | Optional lenses require distinct lived function, distinct evidence, and recognition value; remain one canonical Need and render generically | Standing rule; first use is Understanding |
+| 2026-08-26 | Understanding | Umbrella copy, two function lenses, nine lens-local citations, three system strategies, and two legacy association removals approved | Authorized for content implementation; magnet pending |
 
 ## Implementation notes / handoff
 
 - Reviewed V2 content belongs in `src/data/editorialCatalog.json`.
 - `vite.config.ts` merges the reviewed editorial source with the imported snapshot and the curated static `userStrategies.json` lane at build time.
-- `src/data/userStrategies.json` currently contains only Autumn's `comfy-gaming`. Nat's profile-owned strategies live in D1/profile storage and must not be duplicated in repository catalog data, fixtures, migration artifacts, or static audit lists.
-- Strategy provenance is explicit (`system` or `user`). Supporting-source metadata may distinguish `scholarly` from `official-resource`.
+- `src/data/userStrategies.json` is the canonical registry for repository-resident published user strategies. Nat's profile-owned strategies live in D1/profile storage and must not be duplicated in repository catalog data, fixtures, migration artifacts, or static audit lists.
+- Strategy provenance is explicit (`system` or `user`). Supporting-source metadata may distinguish `scholarly`, `clinical-guidance`, and `official-resource`.
 - Need strategy cards visibly use `Supporting source ↗` for system sources and human contributor metadata for user strategies.
 - `src/data/generated/legacyData.json` remains the historical imported snapshot, but profile-owned Nat strategy records have been physically removed from it. Approved global discards remain barred from the live catalog.
+- Function-lens content, when approved, belongs in the same canonical editorial Need record and must pass through the deterministic catalog compiler. Do not create a second runtime repair path.
 - Do not revise an approved need package without a new explicit review/approval cycle.
-- The next Safety step after content deployment is its live Design Lab magnet review. Do not mark Safety fully audited until that approved magnet is promoted.
+- Understanding's next step after content deployment is its live Design Lab magnet review. Do not mark Understanding fully audited until that approved magnet is promoted.

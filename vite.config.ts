@@ -7,8 +7,16 @@ import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 
 type EntityRef = { slug: string; title: string };
-type SupportingSourceKind = 'scholarly' | 'official-resource';
+type SupportingSourceKind = 'scholarly' | 'clinical-guidance' | 'official-resource';
 type EvidenceSource = { url: string; description?: string; kind?: SupportingSourceKind };
+type EvidenceLens = {
+  id: string;
+  title: string;
+  recognitionCue?: string;
+  summary: string;
+  narrative?: string;
+  sources: EvidenceSource[];
+};
 type StrategyProvenance = 'system' | 'user';
 type CatalogStrategySource = {
   title: string;
@@ -59,6 +67,7 @@ type EditorialNeed = {
   narrative: string;
   sources: EvidenceSource[];
   strategies: EntityRef[];
+  lenses?: EvidenceLens[];
 };
 type EditorialCatalog = {
   needs: Record<string, EditorialNeed>;
@@ -152,6 +161,7 @@ function runtimeCatalogSource() {
         claimSummary: override?.summary ?? need.originalClaim,
         narrative: override?.narrative ?? need.rewrittenClaim,
         sources: override?.sources ?? need.supportingSources ?? [],
+        ...(override?.lenses?.length ? { lenses: override.lenses } : {}),
       },
     };
   });
@@ -255,4 +265,3 @@ export default defineConfig({
     ],
   },
 });
-

@@ -42,6 +42,7 @@ import {
 } from '../inventory/inventoryRepository';
 import type { InventoryStrategy } from '../inventory/inventoryRepository';
 import { StrategySharingFields } from '../inventory/StrategySharingFields';
+import { NeedFunctionLenses } from './NeedFunctionLenses';
 import styles from './NeedDetailPage.module.css';
 
 type Feedback = { kind: 'success' | 'warning' | 'error'; message: string } | null;
@@ -595,6 +596,8 @@ export function NeedDetailPage() {
           ) : null}
         </section>
       ) : null}
+
+      <NeedFunctionLenses lenses={need.evidence?.lenses ?? []} />
 
       <section className={styles.strategySection} aria-labelledby="strategy-heading">
         <div className={styles.strategySectionHeader}>

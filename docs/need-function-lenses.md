@@ -85,6 +85,8 @@ Adding, removing, renaming, or materially reframing a lens after approval reopen
 
 Do not retrofit lenses onto Connection, Support, Safety, or another already audited Need solely because the feature exists. Reconsider an existing Need only through a new review cycle when the qualification rule independently warrants it.
 
-## First candidate: Understanding
+## First approved use: Understanding
 
-Understanding is the first candidate identified for this structure. The audit is considering two distinguishable functions: making sense of information, events, causes, or uncertainty; and understanding between people. Recording this candidate does not itself approve the final Understanding wording, citations, strategies, schema implementation, or production UI. Those remain subject to the complete-package approval gate.
+Understanding was approved on 2026-08-26 as the first production use of function lenses. Its two lenses are **Making sense** and **Understanding between people**. The complete approved content, evidence, strategy decisions, limitations, and implementation boundary are recorded in `docs/understanding-content-audit.md`.
+
+Understanding establishes the implementation pattern, not an instruction to retrofit other Needs. Future lenses must independently satisfy the qualification rule and complete-package approval gate.
