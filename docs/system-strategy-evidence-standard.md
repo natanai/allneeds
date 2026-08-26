@@ -4,65 +4,114 @@
 >
 > This standard supplements `docs/content-evidence-review.md` and applies whenever a system-authored strategy is proposed, audited, retained, rewritten, renamed, or newly associated with a Need.
 
-## Core rule
+## Core rule: clinical defensibility, not exact-card RCTs
 
-System strategies should represent the most defensible actions the evidence can actually support. A larger deck is never preferable to a smaller, higher-confidence deck.
+System strategies should meet the level of quality a reputable psychological center could defend in professional practice and an academic reviewer could trace back to credible evidence.
 
-A system strategy must not be included merely because a paper supports a nearby mechanism, a related psychological construct, or a plausible interpretation. The supporting evidence must be strong enough and direct enough to justify the strategy users are actually being asked to try.
+The question is not whether the exact sentence on the card has been tested in a randomized trial. Evidence-based psychological practice integrates the best available research with clinical expertise and the person's characteristics, context, culture, and preferences. See the American Psychological Association policy statement: https://www.apa.org/practice/guidelines/evidence-based-statement.html
 
-## Default evidence threshold
+A system strategy is appropriate when a well-trained psychologist could reasonably recommend the same or a substantially equivalent low-risk supportive action for the problem the card is addressing, and when the card accurately represents what is known and what remains inference. A larger deck is never preferable to a less defensible deck, but lack of an exact micro-intervention trial is not by itself a reason to reject an established clinical practice.
 
-For a research-backed system strategy, prefer one best source that directly evaluates the same action, or a substantially equivalent intervention, for an outcome relevant to the strategy's intended function.
+## Acceptable evidence routes
 
-Normally acceptable primary support includes:
+A strategy may qualify through one or more of these routes. Stronger and more direct evidence should be preferred when available.
 
-1. a high-quality systematic review or meta-analysis of the intervention;
-2. an evidence-based clinical or public-health guideline or consensus recommendation grounded in a substantial evidence base;
-3. a well-designed randomized or otherwise appropriately controlled human study directly testing the intervention;
-4. multiple strong, directly relevant controlled studies when no suitable synthesis exists.
+### 1. Direct intervention evidence
 
-Source reputation alone is not enough. The study design, population, intervention, comparison, outcome, and exact claim must fit the card.
+Examples include:
 
-## Evidence that is not sufficient by itself
+- a high-quality systematic review or meta-analysis of the same or substantially equivalent intervention;
+- an evidence-based clinical or public-health guideline;
+- a well-designed randomized or otherwise appropriately controlled human study;
+- multiple strong, directly relevant controlled studies when no suitable synthesis exists.
 
-Do not use any of the following as the sole justification for a system strategy unless the user explicitly approves a documented exception after seeing the limitation:
+This is the strongest route when the card is presenting a particular technique as producing a particular outcome.
 
-- mechanism-only neuroscience or psychophysiology evidence;
-- theoretical or narrative reviews that do not directly test the strategy;
-- correlational or observational associations;
-- uncontrolled single-group pre/post studies;
-- small feasibility or pilot studies;
-- case reports or case series;
-- studies of a materially different intervention;
-- evidence that only supports a neighboring construct, such as reduced anxiety, when the card makes a stronger claim about Safety, threat discrimination, decision quality, or another outcome;
-- a deduction from Need-level research that has not itself been tested as an intervention.
+### 2. Established evidence-based clinical practice
 
-A plausible mechanism can explain a strongly supported strategy. It cannot substitute for direct intervention evidence.
+A low-risk strategy may also qualify when it is a recognizable component of established psychological care even if the exact card wording has not been separately trialed. Appropriate support can include:
+
+- a reputable clinical practice guideline or treatment manual;
+- guidance from an authoritative health system, academic medical center, government health service, or major professional organization;
+- a strong scholarly review of the broader intervention or therapeutic principle in which the strategy is routinely used;
+- converging evidence showing that the action is consistent with an established evidence-based approach.
+
+This route is especially appropriate for brief coping, grounding, orientation, relaxation, behavioral activation, problem-solving, communication, or self-monitoring practices that clinicians commonly adapt to the individual rather than administer as fixed standalone treatments.
+
+### 3. Clinically grounded translation
+
+Sometimes the exact user-facing action is a simple translation of a well-supported clinical principle. It may still qualify when all of the following are true:
+
+- the action is low risk and does not delay necessary care or increase danger;
+- the clinical rationale is clear and would be professionally recognizable;
+- there is credible research or authoritative clinical guidance supporting the underlying therapeutic principle;
+- the card does not claim the translated exercise itself has been proven when it has not;
+- the wording is modest and stays within the supported function;
+- the internal audit explicitly records that the evidence is indirect or practice-based rather than direct intervention evidence.
+
+A mechanism can contribute to the rationale here, but mechanism evidence alone is not enough to turn a novel exercise into a system strategy.
+
+## What still does not qualify
+
+Do not approve a system strategy when its support is primarily:
+
+- pseudoscientific, discredited, or presented as settled despite substantial scientific controversy;
+- a speculative exercise invented from Need-level theory with no recognizable clinical-practice basis;
+- a single weak or poorly controlled study treated as definitive when stronger evidence is absent;
+- a correlational association used as though it demonstrated treatment benefit;
+- a neuroscience mechanism used as though it proved that a particular self-help instruction works;
+- research on a materially different intervention with no credible clinical bridge;
+- popularity on wellness websites without credible scholarly or professional support;
+- evidence for a neighboring outcome combined with wording that makes a stronger claim.
+
+For example, evidence that a breathing exercise can reduce anxiety or physiological arousal can support a card about regulating high arousal. It does not prove that the exercise determines whether the environment is objectively safe. Narrow the wording rather than stretching the source.
+
+## Clinical-context and safety check
+
+Before approving a card, ask whether the advice would still be responsible in the context in which the Need might arise.
+
+- Do not tell someone to calm down, remain in place, confront a person, or reinterpret alarm when immediate danger may require protective action.
+- Add a brief contextual qualifier when an otherwise useful technique is appropriate only when immediate physical action is not required.
+- Do not present specialized treatment procedures as simple self-help when they normally require assessment, supervision, or individualized clinical planning.
+- A strategy can support one part of a Need without claiming to resolve the whole Need.
 
 ## Wording must stay inside the evidence
 
-The card instructions must not add unsupported precision. Duration, frequency, sequence, breathing ratios, thresholds, or claims about what the strategy will accomplish must be supported by the source or removed.
+Card instructions should be practical, but precision must be earned. Do not invent exact duration, frequency, sequence, breathing ratios, thresholds, or outcome claims unless they come from credible evidence or established clinical guidance.
 
-When a source supports a narrower claim than the proposed card, narrow the card rather than stretching the citation.
+When evidence supports a narrower function than the proposed card, narrow the card. Distinguish what the action is intended to help with from what it cannot establish.
 
-## Official resources
+## Internal evidence classification
 
-An authoritative public service can be a system strategy without a scholarly intervention study when the useful action is accessing that service itself. Use the authoritative service page as the source and mark it `official-resource`. Do not describe an official resource link as scholarly evidence.
+For future audits, record the strategy's evidence basis internally when it is useful for review:
+
+- **Direct evidence:** the same or substantially equivalent intervention is directly evaluated.
+- **Established clinical practice:** reputable evidence-based clinical guidance or treatment literature supports clinicians using the strategy.
+- **Clinically grounded translation:** a low-risk user-facing adaptation of a supported clinical principle; the inferential step is explicitly documented.
+- **Official resource:** the strategy is accessing an authoritative service itself.
+
+These labels are for reviewers. They do not need to appear on the public card.
+
+## Supporting source link
+
+Every approved system strategy must retain the standardized visible **`Supporting source ↗`** link.
+
+Prefer one best human-verifiable source rather than accumulating weak citations. The source may be a scholarly article, evidence-based guideline, or authoritative clinical guidance appropriate to the evidence route. Source metadata and internal notes must accurately describe what kind of evidence it is. An official public service can use its authoritative service page and should be marked `official-resource`.
 
 ## User submissions
 
-This evidence threshold does not apply to genuine user-submitted strategies. Preserve contributor wording and provenance according to the user-strategy rules in `docs/content-evidence-review.md`. Do not retrofit academic citations onto user submissions to make them appear system-authored.
+This standard does not apply to genuine user-submitted strategy wording. Preserve contributor wording and provenance according to the user-strategy rules in `docs/content-evidence-review.md`. Do not retrofit academic citations onto user submissions to make them appear system-authored.
 
 ## Audit behavior
 
 During every Need audit:
 
-- verify the exact strategy against the exact supporting source;
-- record the study design and the main limitation internally when it matters to approval;
-- reject a questionable system strategy rather than keep it for variety or deck size;
-- do not replace a rejected card unless a replacement independently clears this standard;
-- use the standardized visible link **`Supporting source ↗`** for every approved system strategy;
-- normally attach one best scholarly source rather than accumulating weak citations;
-- treat reopening an existing Need audit as an opportunity to reevaluate grandfathered system strategies against this standard.
+- ask whether the strategy would be professionally defensible in a high-quality psychological practice;
+- verify the action and its claimed function against the best available research and reputable clinical guidance;
+- distinguish direct evidence from established practice and clinically grounded translation;
+- record important limitations or inferential steps internally;
+- prefer a smaller defensible deck to filler, while not rejecting established clinical strategies merely because their exact card wording lacks an RCT;
+- use **`Supporting source ↗`** for every approved system strategy;
+- reassess grandfathered system strategies when a Need audit is reopened.
 
-Historical approval does not make weak evidence stronger. At the same time, this rule does not authorize silent production edits: research-facing production changes still require the complete-package approval workflow in `docs/content-evidence-review.md`.
+Historical approval does not make weak evidence stronger. This rule also does not authorize silent production edits: research-facing production changes still require the complete-package approval workflow in `docs/content-evidence-review.md`.
