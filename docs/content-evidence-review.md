@@ -82,6 +82,8 @@ The public citation area should be simple and human-verifiable.
 - A user's wording and authorship are protected. Need associations may be reconsidered during an audit only when the user authorizes that review.
 - User strategies do not need academic citations.
 - If a contributor selected only one need for a submission, preserve that association unless the contributor or user explicitly approves changing it. This rule preserved Autumn's `comfy-gaming` association with Safety.
+- **Current static user-submission boundary:** `src/data/userStrategies.json` contains only Autumn's `comfy-gaming`. Nat's former repository strategies were migrated to Nat's verified Bluesky-backed profile and removed from static catalog data, Need references, migration fixtures, and one-time migration files. D1/profile storage is their current source of truth. Do not restore profile-owned Nat strategies to `editorialCatalog.json`, `legacyData.json`, `userStrategies.json`, fixtures, tests, or audit strategy lists as static submissions.
+- Historical audit decisions that mention Nat-authored submissions describe the state at the time of those reviews. They do not authorize reintroducing those strategies into the repository. When documenting the current static package, list only strategies that actually ship from repository catalog data.
 - System strategies must earn their place. Do not retain filler merely to create a larger deck.
 - Prefer concrete, low-friction actions that can be attempted in ordinary life.
 - A system strategy should have a direct, intelligible pathway to the need being audited.
@@ -170,7 +172,7 @@ Approved need-level sources:
 5. Coan & Sbarra (2015), _Social Baseline Theory: The Social Regulation of Risk and Effort._ https://pmc.ncbi.nlm.nih.gov/articles/PMC4375548/
 6. Holt-Lunstad, Smith, & Layton (2010), _Social relationships and mortality risk: A meta-analytic review._ https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316
 
-Approved strategies: three protected human submissions (`call-a-friend`, `play-a-social-video-game`, `read-a-character-driven-novel`) plus four reviewed system strategies (`write-a-letter-for-connection`, `remember-a-connected-moment`, `map-your-connection-options`, `notice-where-you-are`).
+Current repository-resident Connection strategies are the four reviewed system strategies: `write-a-letter-for-connection`, `remember-a-connected-moment`, `map-your-connection-options`, and `notice-where-you-are`. Nat-authored Connection strategies that were part of the earlier audit were later migrated to profile ownership and are not static repository strategies.
 
 `one-kind-text` and `specific-thank-you` are global discards. `ambient-postcard` lost only its Connection association.
 
@@ -216,14 +218,14 @@ Internal source-role notes for future reviewers:
 - [7]: theoretical model of support in adversity and growth contexts.
 - [8]: large contemporary synthesis of perceived-support associations; not proof that a particular supportive act causes a specific outcome.
 
-Approved Support strategies:
+Current repository-resident Support strategies:
 
-1. `call-a-friend` — protected human submission, unchanged.
-2. `call-a-parent` — protected human submission, unchanged.
-3. `map-your-support` — system. Supporting source: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535
-4. `prepare-one-request-for-help` — system. Supporting source: https://pubmed.ncbi.nlm.nih.gov/36067802/
-5. `call-or-text-988` — system official resource. Support + Safety. Supporting source: https://988lifeline.org/
-6. `call-116-123` — system official resource. Support + Safety. Supporting source: https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm
+1. `map-your-support` — system. Supporting source: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535
+2. `prepare-one-request-for-help` — system. Supporting source: https://pubmed.ncbi.nlm.nih.gov/36067802/
+3. `call-or-text-988` — system official resource. Support + Safety. Supporting source: https://988lifeline.org/
+4. `call-116-123` — system official resource. Support + Safety. Supporting source: https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm
+
+Nat-authored Support strategies from the earlier audit are now profile-owned and are not part of the static repository package.
 
 Remove the Support association only from `floor-starfish`, `pillow-nest`, `name-support-options`, and `name-one-help-to-ask`. Do not globally delete those strategies during the Support audit.
 
@@ -265,17 +267,15 @@ Internal source-role notes for future reviewers:
 - [5] Cooper et al.: meta-analytic evidence that conditioned fear can generalize more broadly in anxiety-related disorders. This supports curiosity and discrimination, not dismissing an individual's current alarm as inaccurate.
 - [6] Fanselow: modern predatory-imminence review distinguishing potential from acute threat. Much of the framework builds on nonhuman defensive-behavior research, so public copy stays at the level of context-sensitive defensive function.
 
-Approved Safety strategy set:
+Current repository-resident Safety strategy set:
 
-1. `stare-off` — protected Nat submission, unchanged; Safety retained.
-2. `self-holding` — protected Nat submission, unchanged; Safety retained.
-3. `snuggle-a-pet` — protected Nat submission, unchanged; Safety retained.
-4. `watch-a-comfort-show` — protected Nat submission, unchanged; Safety retained.
-5. `comfy-gaming` — protected Autumn submission, unchanged. Safety retained because it is the only need Autumn selected for the submission.
-6. `5-4-3-2-1-check` — system. Supporting source: https://www.sciencedirect.com/science/article/pii/S1557308725002999
-7. `slow-breathing-safety` — system. Supporting source: https://pubmed.ncbi.nlm.nih.gov/38137060/
-8. `call-or-text-988` — system official resource. Support + Safety. Supporting source: https://988lifeline.org/
-9. `call-116-123` — system official resource. Support + Safety. Supporting source: https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm
+1. `comfy-gaming` — protected Autumn submission, unchanged. Safety retained because it is the only need Autumn selected for the submission.
+2. `5-4-3-2-1-check` — system. Supporting source: https://www.sciencedirect.com/science/article/pii/S1557308725002999
+3. `slow-breathing-safety` — system. Supporting source: https://pubmed.ncbi.nlm.nih.gov/38137060/
+4. `call-or-text-988` — system official resource. Support + Safety. Supporting source: https://988lifeline.org/
+5. `call-116-123` — system official resource. Support + Safety. Supporting source: https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm
+
+Nat-authored Safety strategies from the earlier audit, including `stare-off`, `self-holding`, `snuggle-a-pet`, and `watch-a-comfort-show`, are now profile-owned. They may appear dynamically through profile/community data, but they are not static repository strategies and must not be restored to the repository catalog or this static strategy set.
 
 Approved Safety association removals only:
 
@@ -304,14 +304,16 @@ Editorial distinctions used in this audit:
 | 2026-08-25 | Citation display | Public need citations show citation/title + raw URL only; internal role/limitations stay in audit docs | Standing rule |
 | 2026-08-25 | Strategy source display | System cards visibly use `Supporting source ↗`; user cards show human provenance | Implemented UI rule |
 | 2026-08-25 | Support | Complete content/evidence/strategy package and S1B2 Soft Terraces magnet approved | Fully audited and implemented |
-| 2026-08-25 | Safety | Complete short/long copy, six citations, exact nine-card deck, source provenance, and association removals approved | Authorized for content implementation; magnet pending |
+| 2026-08-25 | Safety | Complete short/long copy, six citations, system/static strategy package, source provenance, and association removals approved | Authorized for content implementation; magnet pending |
+| 2026-08-25 | Profile strategy ownership | Nat's 40 former static strategies were migrated to the verified profile and then removed from repository catalog data and references. Autumn's `comfy-gaming` is the only current repository-resident user submission. | Implemented and regression-guarded |
 
 ## Implementation notes / handoff
 
 - Reviewed V2 content belongs in `src/data/editorialCatalog.json`.
-- `vite.config.ts` merges the reviewed editorial source with the imported snapshot and user strategies at build time.
+- `vite.config.ts` merges the reviewed editorial source with the imported snapshot and the curated static `userStrategies.json` lane at build time.
+- `src/data/userStrategies.json` currently contains only Autumn's `comfy-gaming`. Nat's profile-owned strategies live in D1/profile storage and must not be duplicated in repository catalog data, fixtures, migration artifacts, or static audit lists.
 - Strategy provenance is explicit (`system` or `user`). Supporting-source metadata may distinguish `scholarly` from `official-resource`.
 - Need strategy cards visibly use `Supporting source ↗` for system sources and human contributor metadata for user strategies.
-- `src/data/generated/legacyData.json` remains the historical imported snapshot. Approved global discards are barred from the live catalog even if an old raw row still exists until that snapshot can be safely rematerialized.
+- `src/data/generated/legacyData.json` remains the historical imported snapshot, but profile-owned Nat strategy records have been physically removed from it. Approved global discards remain barred from the live catalog.
 - Do not revise an approved need package without a new explicit review/approval cycle.
 - The next Safety step after content deployment is its live Design Lab magnet review. Do not mark Safety fully audited until that approved magnet is promoted.
