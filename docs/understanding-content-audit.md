@@ -1,8 +1,6 @@
 # Understanding Content Audit
 
-> Status: content package is live. Understanding · Converging Map (U4D) was separately approved for production on 2026-08-26 and is being promoted by the same governed visual-audit process.
->
-> Understanding becomes fully audited when the approved production magnet is successfully deployed live.
+> Status: fully audited and live as of 2026-08-26. The approved content package, function-lens presentation, strategy deck, and Understanding · Converging Map (U4D) production magnet are all deployed.
 
 ## Approved page structure
 
@@ -169,4 +167,4 @@ A separate visual approval on 2026-08-26 authorizes only the Understanding · Co
 - **Production owner:** `src/features/needs/NeedsPage.module.css`.
 - **Lab lifecycle:** the approved candidate and superseded Understanding review assets leave the active Design Lab after promotion; Git history remains the archive.
 
-Once this approved production identity is successfully deployed live, Understanding satisfies both the content and visual requirements of the Need audit protocol and is fully audited.
+The approved production identity is live. Understanding therefore satisfies both the content and visual requirements of the Need audit protocol and is fully audited.
