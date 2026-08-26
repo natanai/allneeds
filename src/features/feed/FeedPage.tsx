@@ -224,7 +224,7 @@ export function FeedPage() {
             <label>
               <span>Show</span>
               <select value={scope} onChange={(event) => setScope(event.target.value)}>
-                <option value="follows" disabled={!session}>Following</option>
+                <option value="follows" disabled={!session}>From people you follow</option>
                 <option value="public">Everyone</option>
               </select>
             </label>
@@ -258,7 +258,7 @@ export function FeedPage() {
             <p className={styles.authHint}>
               {session
                 ? 'Following is available while you are signed in.'
-                : 'Sign in to Bluesky in Menu → Account & data to use Following.'}
+                : 'Following requires Bluesky sign-in in Menu → Account & data.'}
             </p>
           ) : null}
         </div>
