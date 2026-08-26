@@ -21,6 +21,12 @@ import {
 import styles from './AppMenu.module.css';
 
 type MenuView = 'root' | 'account-data';
+type MenuStatusTarget = 'share' | 'account' | 'profile' | 'device';
+type MenuStatus = {
+  target: MenuStatusTarget;
+  message: string;
+  tone?: 'error';
+};
 
 type AppMenuProps = {
   open: boolean;
@@ -61,6 +67,18 @@ function MenuLink({ to, label, note, count, pathname, onClose }: MenuLinkProps) 
   );
 }
 
+function StatusNotice({ status, target }: { status: MenuStatus | null; target: MenuStatusTarget }) {
+  if (!status || status.target !== target) return null;
+  return (
+    <p
+      className={`${styles.status} ${status.tone === 'error' ? styles.statusError : ''}`}
+      role={status.tone === 'error' ? 'alert' : 'status'}
+    >
+      {status.message}
+    </p>
+  );
+}
+
 function captureLocalStorage() {
   const snapshot: Record<string, string> = {};
   for (let index = 0; index < window.localStorage.length; index += 1) {
@@ -97,7 +115,7 @@ export function AppMenu({
 }: AppMenuProps) {
   const navigate = useNavigate();
   const [view, setView] = useState<MenuView>('root');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState<MenuStatus | null>(null);
   const [shareEmailReady, setShareEmailReady] = useState(false);
   const [handle, setHandle] = useState('');
   const [accountBusy, setAccountBusy] = useState(false);
@@ -108,7 +126,7 @@ export function AppMenu({
   useEffect(() => {
     if (!open) {
       setView('root');
-      setStatus('');
+      setStatus(null);
       setShareEmailReady(false);
     }
   }, [open]);
@@ -132,7 +150,7 @@ export function AppMenu({
 
   const exportAll = () => {
     downloadBackup();
-    setStatus('Backup downloaded.');
+    setStatus({ target: 'device', message: 'Backup downloaded.' });
   };
 
   const shareStrategiesWithNat = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -140,26 +158,36 @@ export function AppMenu({
     const result = downloadPersonalStrategiesExport(readInventory());
     if (!result.downloaded) {
       setShareEmailReady(false);
-      setStatus('No Public personal strategies yet. Set Privacy to Public on any strategy you want included in this export.');
+      setStatus({
+        target: 'share',
+        message: 'No Public personal strategies yet. Set Privacy to Public on any strategy you want included in this export.',
+      });
       return;
     }
     setShareEmailReady(true);
-    setStatus(`Personal strategies exported! Email the downloaded file to ${PERSONAL_STRATEGIES_EMAIL_ADDRESS} with the subject “${PERSONAL_STRATEGIES_EMAIL_SUBJECT}”.`);
+    setStatus({
+      target: 'share',
+      message: `Personal strategies exported! Email the downloaded file to ${PERSONAL_STRATEGIES_EMAIL_ADDRESS} with the subject “${PERSONAL_STRATEGIES_EMAIL_SUBJECT}”.`,
+    });
   };
 
   const toggleBluesky = async () => {
     setAccountBusy(true);
-    setStatus('');
     try {
       if (session) {
+        setStatus({ target: 'account', message: 'Signing out…' });
         await signOutFromBluesky();
-        setStatus('Signed out of Bluesky on this browser.');
+        setStatus({ target: 'account', message: 'Signed out of Bluesky on this browser.' });
       } else {
-        setStatus('Opening Bluesky sign-in…');
+        setStatus({ target: 'account', message: 'Checking that Bluesky username…' });
         await signInWithBluesky(handle);
       }
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Unable to use Bluesky sign-in right now.');
+      setStatus({
+        target: 'account',
+        message: error instanceof Error ? error.message : 'Unable to use Bluesky sign-in right now.',
+        tone: 'error',
+      });
     } finally {
       setAccountBusy(false);
     }
@@ -167,24 +195,35 @@ export function AppMenu({
 
   const saveProfile = async () => {
     setAccountBusy(true);
-    setStatus('Saving this browser to your profile…');
+    setStatus({ target: 'profile', message: 'Saving this browser to your profile…' });
     try {
       const result = await saveCurrentBrowserToProfile();
-      setStatus(`Profile saved.${result.strategiesSynced ? ' Shared strategies synced.' : ' Shared strategies could not be synced.'}`);
+      setStatus({
+        target: 'profile',
+        message: `Profile saved.${result.strategiesSynced ? ' Shared strategies synced.' : ' Shared strategies could not be synced.'}`,
+      });
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Unable to save this browser to your profile.');
+      setStatus({
+        target: 'profile',
+        message: error instanceof Error ? error.message : 'Unable to save this browser to your profile.',
+        tone: 'error',
+      });
     } finally { setAccountBusy(false); }
   };
 
   const loadProfile = async () => {
     setAccountBusy(true);
-    setStatus('Loading your saved profile…');
+    setStatus({ target: 'profile', message: 'Loading your saved profile…' });
     try {
       const result = await loadProfileIntoCurrentBrowser();
-      if (result === 'empty') setStatus('No saved profile snapshot was found.');
-      else if (result === 'canceled') setStatus('Profile load canceled. No changes were made.');
+      if (result === 'empty') setStatus({ target: 'profile', message: 'No saved profile snapshot was found.' });
+      else if (result === 'canceled') setStatus({ target: 'profile', message: 'Profile load canceled. No changes were made.' });
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Unable to load your saved profile.');
+      setStatus({
+        target: 'profile',
+        message: error instanceof Error ? error.message : 'Unable to load your saved profile.',
+        tone: 'error',
+      });
     } finally { setAccountBusy(false); }
   };
 
@@ -199,7 +238,7 @@ export function AppMenu({
         : null;
       if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new Error('Invalid backup');
       if (!window.confirm('Replace this browser’s current allneeds data with the selected backup?')) {
-        setStatus('Restore canceled. No changes were made.');
+        setStatus({ target: 'device', message: 'Restore canceled. No changes were made.' });
         return;
       }
       const previous = captureLocalStorage();
@@ -214,10 +253,14 @@ export function AppMenu({
         Object.entries(previous).forEach(([key, value]) => window.localStorage.setItem(key, value));
         throw error;
       }
-      setStatus('Backup restored. Reloading this local app…');
+      setStatus({ target: 'device', message: 'Backup restored. Reloading this local app…' });
       window.setTimeout(() => window.location.reload(), 120);
     } catch {
-      setStatus('Restore failed. Choose an allneeds.app JSON backup.');
+      setStatus({
+        target: 'device',
+        message: 'Restore failed. Choose an allneeds.app JSON backup.',
+        tone: 'error',
+      });
     }
   };
 
@@ -283,7 +326,7 @@ export function AppMenu({
                 <div className={styles.personalCard}>
                   <p>If something you saved feels worth sharing, I’d genuinely love to see it.</p>
                   <a href="/inventory" onClick={shareStrategiesWithNat}>Share your strategies with Nat…</a>
-                  {status ? <p className={styles.status} role="status">{status}</p> : null}
+                  <StatusNotice status={status} target="share" />
                   {shareEmailReady ? <a href={personalStrategiesEmailHref()}>Start an email for me</a> : null}
                 </div>
               </section>
@@ -292,7 +335,7 @@ export function AppMenu({
         ) : (
           <div className={styles.view}>
             <header className={`${styles.header} ${styles.subheader}`}>
-              <button type="button" className={styles.back} onClick={() => { setView('root'); setStatus(''); setShareEmailReady(false); }} aria-label="Back to Menu"><span aria-hidden="true">‹</span> Menu</button>
+              <button type="button" className={styles.back} onClick={() => { setView('root'); setStatus(null); setShareEmailReady(false); }} aria-label="Back to Menu"><span aria-hidden="true">‹</span> Menu</button>
               <button type="button" className={styles.close} onClick={onClose} aria-label="Close menu">×</button>
             </header>
 
@@ -307,14 +350,16 @@ export function AppMenu({
               <div className={styles.systemCard}>
                 <h4>Bluesky</h4>
                 <p>Optional production sign-in can sync a profile snapshot across browsers and devices.</p>
-                {session ? <p><strong>{session.handle ? `Signed in as @${session.handle.replace(/^@/, '')}` : 'Signed in with Bluesky'}</strong></p> : <label>Bluesky handle<input type="text" value={handle} placeholder="yourname.bsky.social" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={(event) => { setHandle(event.target.value); setStatus(''); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); void toggleBluesky(); } }} /></label>}
-                <button type="button" disabled={accountBusy || (!session && !handle.trim())} onClick={() => void toggleBluesky()}>{accountBusy ? 'Please wait…' : session ? 'Sign out' : 'Sign in'}</button>
+                {session ? <p><strong>{session.handle ? `Signed in as @${session.handle.replace(/^@/, '')}` : 'Signed in with Bluesky'}</strong></p> : <label>Bluesky username<input type="text" value={handle} placeholder="yourname.bsky.social" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={(event) => { setHandle(event.target.value); setStatus(null); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); void toggleBluesky(); } }} /></label>}
+                <button type="button" disabled={accountBusy || (!session && !handle.trim())} onClick={() => void toggleBluesky()}>{accountBusy ? (session ? 'Please wait…' : 'Checking username…') : session ? 'Sign out' : 'Sign in'}</button>
+                <StatusNotice status={status} target="account" />
                 <small>Your allneeds data remains local unless you choose a profile action.</small>
               </div>
               <div className={styles.systemCard}>
                 <h4>Profile snapshot</h4>
                 <p>Save this browser’s allneeds data to your profile or load a saved profile here.</p>
                 <div className={styles.actionPair}><button type="button" disabled={!session || accountBusy} onClick={() => void saveProfile()}>Save this browser</button><button type="button" disabled={!session || accountBusy} onClick={() => void loadProfile()}>Load saved profile</button></div>
+                <StatusNotice status={status} target="profile" />
                 {!session ? <small>Sign in with Bluesky to enable profile sync.</small> : null}
               </div>
             </section>
@@ -330,7 +375,7 @@ export function AppMenu({
                   <input ref={importRef} type="file" accept="application/json,.json" className="visually-hidden" onChange={importAll} />
                 </div>
                 <small>Restoring replaces this browser’s current allneeds data.</small>
-                {status ? <p className={styles.status} role="status">{status}</p> : null}
+                <StatusNotice status={status} target="device" />
               </div>
             </section>
           </div>
