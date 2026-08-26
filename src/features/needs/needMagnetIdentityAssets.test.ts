@@ -17,4 +17,26 @@ describe('approved Need magnet identities', () => {
     expect(icon).toContain('M3 11.5C4.2 7.2 7.4 4.5 12 4.5');
     expect(art).toContain('viewBox="0 0 220 64"');
   });
+
+  it('promotes Understanding · Converging Map with both lens icons and full-face artwork', () => {
+    const css = readFileSync(new URL('./NeedsPage.module.css', import.meta.url), 'utf8');
+    const routeIcon = readFileSync(
+      new URL('../../../public/icons/needs/understanding.svg', import.meta.url),
+      'utf8',
+    );
+    const perspectiveIcon = readFileSync(
+      new URL('../../../public/icons/needs/understanding-perspective.svg', import.meta.url),
+      'utf8',
+    );
+    const art = readFileSync(
+      new URL('../../../public/icons/needs/art/understanding-converging-map.svg', import.meta.url),
+      'utf8',
+    );
+
+    expect(css).toContain("[data-magnet-id='needs-understanding']");
+    expect(routeIcon).toContain('M5 15.5c1.8-3.8 4-5.4 6.5-4.8');
+    expect(perspectiveIcon).toContain('M9.8 12.1 12 14l2.2-1.9');
+    expect(art).toContain('viewBox="0 0 160 48"');
+    expect(art).toContain('<circle cx="80" cy="24" r="5"/>');
+  });
 });
