@@ -1,9 +1,10 @@
 import { NodeOAuthClient } from '@atproto/oauth-client-node';
 
+import { ALLNEEDS_SESSION_TTL_DAYS } from './session.js';
+
 const BACKEND_ORIGIN = 'https://backend.allneeds.app';
 const APP_ORIGIN = 'https://allneeds.app';
 const OAUTH_STATE_TTL_SECONDS = 15 * 60;
-const ALLNEEDS_SESSION_TTL_DAYS = 30;
 
 export async function cloudflareCompatibleFetch(input, init = undefined) {
   const inputRedirect = input && typeof input === 'object'
