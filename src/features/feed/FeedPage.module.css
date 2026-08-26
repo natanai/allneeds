@@ -492,12 +492,13 @@
 }
 
 @media (max-width: 390px) {
-  .visibilityBadge {
-    display: none;
+  .postHeader {
+    gap-inline: .32rem;
   }
 
-  .postHeader {
-    grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  .visibilityBadge {
+    padding-inline: .32rem;
+    font-size: .52rem;
   }
 }
 
