@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { needsBySlug, strategiesBySlug } from './catalog';
 
 describe('approved Clarity audit', () => {
-  it('ships the approved umbrella, lenses, citations, and final two-card deck', () => {
+  it('ships the approved umbrella, lenses, citations, and final three-card deck', () => {
     const clarity = needsBySlug.get('clarity');
 
     expect(clarity?.summary).toBe(
@@ -42,10 +42,19 @@ describe('approved Clarity audit', () => {
     ]);
 
     expect(clarity?.strategies).toEqual([
+      { title: 'Name what you know and what is still uncertain', slug: 'name-what-you-know-and-what-is-still-uncertain' },
       { title: 'Separate what happened from what you think it means', slug: 'separate-event-from-meaning' },
       { title: 'Name what matters here', slug: 'name-what-matters-here' },
     ]);
 
+    expect(strategiesBySlug.get('name-what-you-know-and-what-is-still-uncertain')).toMatchObject({
+      summary: 'Van der Bles and colleagues reviewed ways of making uncertainty explicit without requiring it to be resolved. Choose one situation that feels unclear. Write two headings: “What I know” and “What is still uncertain.” Put each relevant point under the heading that fits best. You do not need to fill the second side with answers. The goal is to make the boundary between what you know and what you do not yet know easier to see.',
+      provenance: 'system',
+      evidence: {
+        kind: 'scholarly',
+        url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6549952/',
+      },
+    });
     expect(strategiesBySlug.get('separate-event-from-meaning')).toMatchObject({
       provenance: 'system',
       evidence: {
