@@ -2,6 +2,12 @@
 
 This file supplements the root `AGENTS.md` for work under `docs/`.
 
+## Full Need audit proposal format
+
+Before presenting an official, full, final, or approval-ready Need content audit proposal, read `docs/need-audit-proposal-format.md` and follow it exactly.
+
+The proposal shown to the user is **site-content only**. Do not wrap it in analysis, rationale, change summaries, removal lists, implementation notes, source-role commentary, approval prompts, or other surrounding description text. Internal audit records may contain those details; the official proposal artifact may not.
+
 ## Current Safety record
 
 For Safety content or strategy work, read `docs/safety-content-audit.md` first. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`. Do not resurrect superseded Safety copy, citations, strategy titles, wording, or static Nat strategy references from the historical section.
