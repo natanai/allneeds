@@ -9,6 +9,14 @@ This file is the root-level implementation contract for automated coding agents 
 - Use a dedicated branch and PR for meaningful changes. Do not patch `main` directly.
 - Preserve user work already present on the branch. Do not overwrite parallel changes merely to simplify your task.
 
+## Psychological content model
+
+- **Before changing or auditing Need, Feeling, Observation, Strategy, or other psychological content, read `docs/psychological-model.md`.** It is the canonical product-model contract, not optional background.
+- allneeds uses an NVC-informed Observation / situation → Feeling → Need / value / motivation → Strategy model. Needs are treated as normal and valid human values or motivations; Feelings can help people explore Needs without deterministically proving one exact Need; Strategies are concrete ways of tending Needs.
+- **Needs themselves do not compete or conflict.** Apparent conflict belongs at the level of Strategies, circumstances, resources, timing, information, support, or currently available solutions. Do not write or design psychological content that frames one Need as the opponent of another.
+- Need pages have a therapeutic/product purpose beyond factual description: help a reader recognize why the motivation can make sense, understand credible evidence for its possible function, reduce shame or self-rejection, separate the Need from one triggering situation or preferred outcome, and move toward practical Strategies for tending the Need.
+- Accurate citations are necessary but not sufficient for approval. A Need audit that violates `docs/psychological-model.md` is not approval-ready even when every individual source is technically correct.
+
 ## Product and visual contract
 
 - V2 is an implementation rewrite, not a redesign. Preserve the existing visual language, wording, proportions, tactile magnet treatment, and information architecture unless the user explicitly requests a design change.
@@ -98,4 +106,4 @@ For behavior-affecting work, add or update regression coverage at the same layer
 
 ## Documentation priority
 
-`AGENTS.md` is the concise implementation contract. `docs/design-language.md` is the living record of accepted visual/interaction decisions and is required reading for UI work. `docs/magnet-behavior.md` is the canonical detailed magnet interaction/physics contract and is mandatory before magnet work. **Before changing explanatory, psychological, behavioral, health, or research-facing copy, read `docs/content-evidence-review.md` and follow its approval ledger.** `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here or in the design-language record, update the older documentation rather than following the stale sentence.
+`AGENTS.md` is the concise implementation contract. `docs/psychological-model.md` is the canonical psychological-content model and is mandatory before Need, Feeling, Observation, or Strategy work. `docs/design-language.md` is the living record of accepted visual/interaction decisions and is required reading for UI work. `docs/magnet-behavior.md` is the canonical detailed magnet interaction/physics contract and is mandatory before magnet work. **Before changing explanatory, psychological, behavioral, health, or research-facing copy, read `docs/content-evidence-review.md` and follow its approval ledger.** `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here or in the design-language record, update the older documentation rather than following the stale sentence.
