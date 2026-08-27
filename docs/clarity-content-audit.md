@@ -111,7 +111,20 @@ A separate Joint Commission handoff statistic was considered but is not used to 
 
 ## Approved system strategies
 
-The final static Clarity deck contains two system strategies.
+The final static Clarity deck contains three system strategies.
+
+### Name what you know and what is still uncertain
+
+Approved wording:
+
+> Van der Bles and colleagues reviewed ways of making uncertainty explicit without requiring it to be resolved. Choose one situation that feels unclear. Write two headings: “What I know” and “What is still uncertain.” Put each relevant point under the heading that fits best. You do not need to fill the second side with answers. The goal is to make the boundary between what you know and what you do not yet know easier to see.
+
+Supporting source: van der Bles et al. (2019).  
+https://pmc.ncbi.nlm.nih.gov/articles/PMC6549952/
+
+Evidence route: the review examines explicit communication of uncertainty. The card translates that narrow principle into a two-heading exercise without claiming that the exercise resolves uncertainty, improves accuracy, or produces a particular outcome.
+
+This card was restored on 2026-08-27 after review of the completed audit showed that the known-versus-uncertain strategy concept had been omitted during final deck narrowing. It was not one of the strategies explicitly rejected during the audit.
 
 ### Separate what happened from what you think it means
 
