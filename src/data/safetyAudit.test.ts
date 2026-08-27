@@ -7,7 +7,7 @@ describe('approved Safety audit package', () => {
     const safety = needsBySlug.get('safety');
 
     expect(safety?.summary).toBe(
-      'Across evolutionary history, avoiding harm depended on detecting danger, taking protective action, and recognizing when conditions were safe enough to return to other activities. We may be drawn to create distance from harm, seek shelter or trustworthy people, set boundaries, reduce exposure, and look for credible signs that danger has passed. Protective responses can change with the situation rather than following one fixed pattern. Tending to Safety can mean responding when danger is present while also noticing when enough safety has returned for rest, exploration, connection, and other goals.',
+      'Across evolutionary history, avoiding harm depended on detecting danger, taking protective action, and recognizing when conditions were safe enough to return to other activities. We may be motivated to create distance from harm, seek shelter or trustworthy people, set boundaries, reduce exposure, and look for credible signs that danger has passed. Protective responses can change with the situation rather than following one fixed pattern. Tending to Safety can mean responding when danger is present while also noticing when enough safety has returned for rest, exploration, connection, and other goals.',
     );
 
     expect(safety?.evidence?.sources.map((source) => source.url)).toEqual([
