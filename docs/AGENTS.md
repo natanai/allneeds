@@ -6,6 +6,8 @@ This file supplements the root `AGENTS.md` for work under `docs/`.
 
 Before presenting an official, full, final, or approval-ready Need content audit proposal, read `docs/need-audit-proposal-format.md` and follow it exactly.
 
+Before presenting that proposal, also read and apply `docs/human-editorial-style.md`. The final site-facing copy must pass that human editorial review before it is shown for approval. Do not treat this as AI-detector evasion or add any runtime/post-processing "humanizer". The canonical proposed wording itself must avoid unnecessary templated AI-style habits while preserving accuracy and accessibility.
+
 The proposal shown to the user is **site-content only**. Do not wrap it in analysis, rationale, change summaries, removal lists, implementation notes, source-role commentary, approval prompts, or other surrounding description text. Internal audit records may contain those details; the official proposal artifact may not.
 
 ## Current Safety record
