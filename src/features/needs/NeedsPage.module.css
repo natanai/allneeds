@@ -225,6 +225,57 @@
   pointer-events: none;
 }
 
+/* Approved Need identity: Clarity · Pulse (C4B).
+   Focus and Compass echo the two approved Clarity lenses while one continuous
+   signal ties external distinction and internal orientation into one Need. */
+.boardWrapper :global([data-magnet-id='needs-clarity']) {
+  --magnet-icon: url('/icons/needs/clarity.svg');
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--quiet) 84%, var(--selection) 16%),
+    color-mix(in srgb, var(--selection) 76%, var(--positive) 24%)
+  );
+}
+
+.boardWrapper :global([data-magnet-id='needs-clarity'])::before {
+  position: relative;
+  z-index: 2;
+  background: color-mix(in srgb, var(--primary) 72%, var(--text) 28%);
+}
+
+.boardWrapper :global([data-magnet-id='needs-clarity']) > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.boardWrapper :global([data-magnet-id='needs-clarity']) > span::after {
+  content: '';
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  background: color-mix(in srgb, var(--positive) 54%, var(--text) 46%);
+  mask: url('/icons/needs/clarity-compass.svg') center / contain no-repeat;
+  -webkit-mask: url('/icons/needs/clarity-compass.svg') center / contain no-repeat;
+}
+
+.boardWrapper :global([data-magnet-id='needs-clarity'])::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    var(--primary),
+    color-mix(in srgb, var(--positive) 62%, var(--text) 38%)
+  );
+  opacity: 0.3;
+  mask: url('/icons/needs/art/clarity-pulse.svg') left center / 100% 100% no-repeat;
+  -webkit-mask: url('/icons/needs/art/clarity-pulse.svg') left center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
 .empty {
   margin: 0;
   padding: 1rem;
