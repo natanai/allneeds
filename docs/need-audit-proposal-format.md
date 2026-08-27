@@ -52,6 +52,19 @@ Do not add an umbrella source section merely for proposal symmetry if the approv
 
 Dynamic community/profile strategies are not part of the canonical static audit proposal because they are loaded from community/profile storage rather than owned by the static Need audit. Repository-resident protected user strategies that are part of the static deck are included because they are part of the final site state.
 
+## Citation traceability: every source starts in the short copy
+
+Every public Need-level or lens-level citation must first have a visible conceptual foothold in the shorter description it supports.
+
+- The short description does not need to summarize the study or name the authors, but it must express the idea, distinction, function, or relationship for which that citation is included.
+- Details may expand, contextualize, or make that idea more precise by explaining the study or review. Details must not introduce an entirely new evidence-backed concept that was absent from the short description.
+- If a source is valuable enough to keep but its contribution is not represented in the short description, revise the short description so the contribution appears there or remove the source from that section.
+- A citation should therefore answer two questions cleanly: `Where does this idea appear in the short copy?` and `How does Details show where that idea came from?`
+- This rule applies independently within each function lens. A source attached to one lens must have its foothold in that lens's short copy, not merely somewhere in the umbrella Need copy or another lens.
+- Do not retain citations only because they are interesting, related to the topic, or useful background. Public citations exist to substantiate content the reader has already encountered in the short description.
+
+The intended flow is **short description introduces the idea → Details explains the evidence behind it → Supporting sources lets the reader inspect the source directly**.
+
 ## Details: source-grounded explanation
 
 The Details area exists for readers who want to understand the evidence underneath the shorter Need copy. Its primary job is to explain, in readable prose, what the cited research actually examined and found so that the shorter description feels traceable to its sources.
