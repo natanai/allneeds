@@ -52,6 +52,23 @@ Do not add an umbrella source section merely for proposal symmetry if the approv
 
 Dynamic community/profile strategies are not part of the canonical static audit proposal because they are loaded from community/profile storage rather than owned by the static Need audit. Repository-resident protected user strategies that are part of the static deck are included because they are part of the final site state.
 
+## Details: source-grounded explanation
+
+The Details area exists for readers who want to understand the evidence underneath the shorter Need copy. Its primary job is to explain, in readable prose, what the cited research actually examined and found so that the shorter description feels traceable to its sources.
+
+Write Details **from the citations outward**, not from a broad claim backward toward a citation.
+
+- Every empirical statement in Details must be completely supported by the citation attached to that passage.
+- Prefer describing the study or review itself: what researchers examined, the population or setting when materially relevant, what they found, and the narrow distinction or function that finding helps illuminate.
+- Let the connection between the cited evidence and the shorter Need description emerge through the explanation. Do not repeatedly announce `this supports our definition` or otherwise turn Details into internal audit commentary.
+- Do not make a stronger or broader claim and then repair it with a sentence beginning `however`, `this does not show`, `this does not establish`, `because the evidence is correlational`, or similar walk-back language. If a qualification would be necessary to make the preceding claim accurate, narrow the preceding claim instead.
+- Scope information may still be stated when it is itself useful for understanding what the citation studied. For example, saying that a meta-analysis concerned workplace role ambiguity or that an intervention study concerned health decisions can help a reader understand the evidence without first overstating it.
+- Do not convert association into causation, a specific experimental result into a universal principle, a clinical construct into a definition of the Need, or processing ease into truth or understanding.
+- Details should not contain uncited synthesis claims that go materially beyond the cited studies. If a synthesis statement is important enough to appear, it must be directly warranted by the cited evidence available in that section.
+- Internal limitations, evidence classifications, reasons for rejecting broader wording, and source-to-claim policing belong in the internal audit record, not in the public Details prose.
+
+A useful paragraph usually has this shape: **study/review context → actual finding → restrained conceptual implication**. The implication must remain inside what the evidence can bear.
+
 ## Final-state semantics
 
 The proposal is a final-state snapshot, not a change log.
