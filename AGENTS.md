@@ -56,6 +56,18 @@ The first branded loading surface is a real application readiness boundary, not 
 - Fix ownership at the component/layout source. If a defect comes from lifecycle or measurement timing, repair the lifecycle rather than hiding the symptom with CSS.
 - Avoid global CSS growth. Global styles are for reset/base/tokens; feature behavior belongs with the owning component.
 
+## Canonical data and legacy retirement
+
+Legacy data is a temporary migration source, not a permanent second source of truth.
+
+- Follow the Bedrock ownership rule: **one canonical source → one deterministic compiler/owner → the final production asset.** Do not keep a legacy record as a shadow fallback once current ownership has moved elsewhere.
+- `src/data/generated/legacyData.json` is an imported historical snapshot. Do not author, rewrite, repair, or improve current production content inside it. Reviewed Need content belongs in the current canonical editorial source and genuine repository-resident user strategies belong in their protected canonical registry.
+- The prohibition on authoring in legacy does **not** prohibit migration cleanup. Once an entity has a complete approved canonical owner outside legacy, and the deterministic compiler no longer requires the legacy copy to construct or identify that entity, delete the superseded legacy record and obsolete legacy references rather than merely hiding them forever.
+- Never delete a legacy record first and rely on a runtime repair layer to recreate it. Move ownership first, make the compiler consume the canonical source directly, add regression coverage for the ownership boundary, then remove the obsolete legacy input.
+- A user-approved global strategy discard is eligible for physical deletion from legacy after confirming no protected user content or surviving canonical association depends on it. A Need-specific strategy rejection removes only that association unless a separate global discard is approved.
+- Protected user-authored content remains protected during legacy retirement. If a legacy user submission is represented in `src/data/userStrategies.json`, that registry is authoritative; if profile-owned content has moved to D1/profile storage, do not reconstruct it from legacy.
+- The intended end state is **no production dependency on legacy content**. As migrations are completed safely, legacy files should shrink toward empty and then be removed when nothing legitimately consumes them.
+
 ## Performance rules
 
 - Optimize unnecessary work, not intentional product behavior.
