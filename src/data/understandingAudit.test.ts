@@ -87,6 +87,6 @@ describe('approved Understanding audit package', () => {
     expect(strategiesBySlug.get('inanimate-interview')?.supportedNeeds.map((need) => need.slug))
       .toEqual(expect.arrayContaining(['self-expression', 'empathy']));
     expect(strategiesBySlug.get('nearest-job')?.supportedNeeds.map((need) => need.slug))
-      .toEqual(expect.arrayContaining(['clarity', 'order']));
+      .toEqual(['order']);
   });
 });
