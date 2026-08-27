@@ -2,6 +2,14 @@
 
 This file supplements the root `AGENTS.md` for work under `docs/`.
 
+## Canonical psychological model
+
+Before auditing, drafting, revising, or approving any Need, Feeling, Observation, or Strategy content, read `docs/psychological-model.md` and treat it as a hard product-model contract.
+
+Need audits must preserve the site's NVC-informed Observation / situation → Feeling → Need / value / motivation → Strategy model. In particular: Needs are normal and valid; Needs themselves do not compete or conflict; apparent conflict belongs at the level of Strategies, circumstances, resources, timing, information, support, or currently available solutions; and a Need page must help a reader understand why the motivation can make sense and then move toward practical ways to tend it.
+
+A proposal is not approval-ready merely because its citations are accurate. It must also pass the model check in `docs/psychological-model.md`, including the reader-experience target and the requirement that system strategies help tend the Need rather than merely extend rumination about the triggering situation.
+
 ## Full Need audit proposal format
 
 Before presenting an official, full, final, or approval-ready Need content audit proposal, read `docs/need-audit-proposal-format.md` and follow it exactly.

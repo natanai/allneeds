@@ -2,6 +2,14 @@
 
 This file supplements the root `AGENTS.md` for work under `src/data/`.
 
+## Canonical psychological model
+
+Before adding, auditing, revising, or implementing Need, Feeling, Observation, or Strategy data, read `docs/psychological-model.md` and treat it as a hard product-model contract.
+
+Need content must preserve the site's NVC-informed Observation / situation → Feeling → Need / value / motivation → Strategy model. Needs are normal and valid; Needs themselves do not compete or conflict; apparent conflict belongs at the level of Strategies, circumstances, resources, timing, information, support, or currently available solutions. Need pages should help a person understand why the motivation can make sense and then move toward practical ways to tend it.
+
+System strategies must support that same arc. They should help the reader tend the Need itself, widen available Strategies, and reduce dependence on solving the triggering situation first whenever a self-contained action is possible. Do not preserve a strategy merely because it is inherited, symmetrical with another deck, or loosely related to the situation that brought up the Need.
+
 ## Full Need audit proposal format
 
 Before presenting an official, full, final, or approval-ready Need content audit proposal, read `docs/need-audit-proposal-format.md` and follow it exactly.
