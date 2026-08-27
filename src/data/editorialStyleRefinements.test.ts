@@ -2,12 +2,20 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
+type NeedEntry = {
+  summary?: string;
+  narrative?: string;
+  lenses?: Array<{ summary?: string; narrative?: string }>;
+};
+
 type EditorialCatalog = {
-  needs: Record<string, {
-    summary?: string;
-    narrative?: string;
-    lenses?: Array<{ summary?: string; narrative?: string }>;
-  }>;
+  needs: {
+    connection: NeedEntry;
+    support: NeedEntry;
+    safety: NeedEntry;
+    understanding: NeedEntry;
+    [slug: string]: NeedEntry;
+  };
   strategies: Array<{ slug: string; summary: string }>;
 };
 
