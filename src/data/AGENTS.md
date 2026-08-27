@@ -16,6 +16,10 @@ For Safety data, strategy, citation, or copy work, read `docs/safety-content-aud
 
 For Understanding data, function-lens structure, strategy, citation, or copy work, read `docs/understanding-content-audit.md` before editing. It is the authoritative current Understanding audit. Understanding is the first approved production use of the function-lens model.
 
+## Current Clarity record
+
+For Clarity data, function-lens structure, strategy, citation, or copy work, read `docs/clarity-content-audit.md` before editing. It is the authoritative current Clarity audit. Do not restore the superseded healthcare error claim, removed legacy strategy associations, or rejected strategy candidates from historical data.
+
 ## Need function lenses
 
 Before proposing or implementing multiple functions, facets, pathways, or sub-meanings within one Need, read `docs/need-function-lenses.md` and follow its qualification, editorial, rendering, and approval rules.
