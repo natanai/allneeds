@@ -19,9 +19,52 @@ function expectUniqueSlugs(entries: Array<{ slug: string }>) {
   expect(new Set(entries.map((entry) => entry.slug)).size).toBe(entries.length);
 }
 
+type LocatedUrl = { path: string; url: string };
+
+function collectUrls(value: unknown, path = 'editorialCatalog'): LocatedUrl[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((entry, index) => collectUrls(entry, `${path}[${index}]`));
+  }
+  if (!value || typeof value !== 'object') return [];
+
+  return Object.entries(value as Record<string, unknown>).flatMap(([key, entry]) => {
+    const entryPath = `${path}.${key}`;
+    if (key === 'url' && typeof entry === 'string') return [{ path: entryPath, url: entry }];
+    return collectUrls(entry, entryPath);
+  });
+}
+
+function expectHumanFacingRawUrl({ path, url }: LocatedUrl) {
+  const parsed = new URL(url);
+  expect(['http:', 'https:'], `${path} must be an HTTP(S) URL`).toContain(parsed.protocol);
+
+  const hostname = parsed.hostname.toLowerCase();
+  expect(hostname, `${path} must not point to a ChatGPT intermediary`).not.toBe('chatgpt.com');
+  expect(hostname, `${path} must not point to a ChatGPT intermediary`).not.toBe('www.chatgpt.com');
+  expect(hostname, `${path} must not point to a legacy ChatGPT intermediary`).not.toBe('chat.openai.com');
+
+  const forbiddenExactParams = new Set(['gclid', 'fbclid', 'mc_cid', 'mc_eid', '_ga']);
+  parsed.searchParams.forEach((value, key) => {
+    const normalizedKey = key.toLowerCase();
+    expect(normalizedKey.startsWith('utm_'), `${path} must not contain tracking parameter ${key}`).toBe(false);
+    expect(forbiddenExactParams.has(normalizedKey), `${path} must not contain tracking parameter ${key}`).toBe(false);
+    expect(
+      normalizedKey === 'origin' && value.toLowerCase() === 'crossref',
+      `${path} must not retain the nonessential origin=crossref referral parameter`,
+    ).toBe(false);
+    expect(value.toLowerCase().includes('chatgpt.com'), `${path} must not route through ChatGPT`).toBe(false);
+  });
+}
+
 describe('production catalog snapshot', () => {
   it('records the exact source commit', () => {
     expect(catalogProvenance.commit).toBe('7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3');
+  });
+
+  it('keeps canonical editorial citation URLs raw and human-facing', () => {
+    const editorialUrls = collectUrls(editorialCatalog);
+    expect(editorialUrls.length).toBeGreaterThan(0);
+    editorialUrls.forEach(expectHumanFacingRawUrl);
   });
 
   it('contains the imported catalog plus reviewed editorial changes and protected user strategies', () => {

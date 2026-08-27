@@ -98,6 +98,17 @@ Every approved system strategy must retain the standardized visible **`Supportin
 
 Prefer one best human-verifiable source rather than accumulating weak citations. The source may be a scholarly article, evidence-based guideline, or authoritative clinical guidance appropriate to the evidence route. Source metadata and internal notes must accurately describe what kind of evidence it is. An official public service can use its authoritative service page and should be marked `official-resource`.
 
+### Citation URL invariant
+
+The stored URL itself is part of the evidence standard. It must point directly to the human-facing source, not merely resolve there through a search result, tracking link, redirect service, crawler endpoint, or AI-generated intermediary.
+
+- Store the raw authoritative destination a person can copy into a normal browser and visit.
+- Strip analytics and referral parameters such as `utm_*`, `gclid`, `fbclid`, `mc_cid`, `mc_eid`, and nonessential values such as `origin=crossref`.
+- Preserve query parameters only when they are required to identify or render the source, such as a publisher's article `?id=...`.
+- Never substitute ChatGPT/OpenAI links, search-result URLs, proxy/crawler URLs, or link shorteners for the publisher, DOI, PubMed/PMC, professional organization, government, health-system, or official-resource destination.
+- Human reachability is authoritative. Automated crawler access is not.
+- Audit records and canonical editorial data must agree on the human-facing URL before approval and merge.
+
 ## User submissions
 
 This standard does not apply to genuine user-submitted strategy wording. Preserve contributor wording and provenance according to the user-strategy rules in `docs/content-evidence-review.md`. Do not retrofit academic citations onto user submissions to make them appear system-authored.
@@ -112,6 +123,7 @@ During every Need audit:
 - record important limitations or inferential steps internally;
 - prefer a smaller defensible deck to filler, while not rejecting established clinical strategies merely because their exact card wording lacks an RCT;
 - use **`Supporting source ↗`** for every approved system strategy;
+- verify every supporting URL against the Citation URL invariant before approval;
 - reassess grandfathered system strategies when a Need audit is reopened.
 
 Historical approval does not make weak evidence stronger. This rule also does not authorize silent production edits: research-facing production changes still require the complete-package approval workflow in `docs/content-evidence-review.md`.

@@ -42,6 +42,17 @@ For audit purposes, distinguish **direct evidence**, **established clinical prac
 
 Every approved system strategy must include one best human-verifiable supporting source and render through the standardized **`Supporting source ↗`** provenance link. Appropriate sources may include scholarly research, evidence-based guidelines, or authoritative clinical guidance. Authoritative public-service cards may use an `official-resource` source.
 
+### Citation URL hard check
+
+Every research-facing URL stored in canonical editorial data must be the **direct raw human-reachable destination** a person is intended to visit in a normal browser.
+
+- Prefer the publisher article page, PubMed/PMC, APA PsycNet, DOI destination, government/health-system page, or other authoritative human-facing landing page.
+- Never store a ChatGPT/OpenAI link, search-results URL, crawler/proxy URL, analytics redirect, link shortener, or another machine/intermediary destination in place of the source.
+- Strip tracking and referral parameters such as `utm_*`, `gclid`, `fbclid`, `mc_cid`, `mc_eid`, and nonessential referral values such as `origin=crossref`.
+- Query parameters that are functionally required to identify the resource, such as a publisher's article `?id=...`, are allowed.
+- Agent or crawler reachability is not a reason to replace a legitimate human-facing source with a proxy.
+- Before an editorial audit is approved or merged, verify citation URLs in both the audit record and canonical production data. Automated hygiene checks are a floor, not a substitute for opening the human-facing destination when practical.
+
 These rules do not apply to genuine user-submitted strategy wording. Preserve user strategy text and provenance according to the repository's protected-user-content rules.
 
 Research-facing production changes still require explicit complete-package approval before implementation.
