@@ -1,6 +1,6 @@
 # Clarity Content Audit
 
-> Status: content approved and implemented in this audit branch on 2026-08-27. Magnet review remains separate and is required before Clarity is marked fully audited.
+> Status: fully audited and implemented on 2026-08-27. Content and the Clarity · Pulse (C4B) magnet identity are approved for production.
 
 ## Canonical production owner
 
@@ -182,12 +182,29 @@ The Clarity category, faux-feeling relationships, and feeling relationships are 
 
 All approved Clarity research-facing URLs are stored as direct human-facing destinations. No ChatGPT/OpenAI intermediary, search-result link, tracking parameter, proxy, or referral wrapper is part of canonical Clarity data.
 
+## Approved magnet identity
+
+Clarity uses **Pulse (C4B)** as its approved production Need-magnet identity.
+
+- Left icon: Focus, representing `Making things explicit`.
+- Right icon: Compass, representing `Getting clear within yourself`.
+- Full-face art: one continuous pulse running across the magnet, linking the two lenses without collapsing them into one function.
+- Palette: entirely derived from Customizer-owned functional roles.
+- Geometry: the second icon participates in normal measured magnet width through the existing two-sided production pattern. Shared shell, roundness, pickup behavior, and physics remain unchanged.
+
+Canonical production references:
+
+- `src/features/needs/NeedsPage.module.css`
+- `public/icons/needs/clarity.svg`
+- `public/icons/needs/clarity-compass.svg`
+- `public/icons/needs/art/clarity-pulse.svg`
+
+The approved candidate is removed from the active Design Lab after promotion. Git history remains the archive of rejected Clarity magnet alternatives.
+
 ## Implementation boundary
 
-The approved package is implemented through the existing deterministic catalog owner:
+The approved content package is implemented through the existing deterministic catalog owner:
 
 `src/data/editorialCatalog.json` -> existing build-time catalog compiler -> production Need and strategy records.
 
-The generated legacy snapshot is not edited. No Clarity-specific component branch, runtime citation repair, post-processing layer, or styling patch is required.
-
-After this content is live, Clarity still requires a separate magnet review in `/design-lab/need-magnets`. Content approval does not authorize a production magnet change.
+The approved magnet identity is presentation-only and lives in the established Need-magnet styling/assets path. The generated legacy snapshot is not edited. No Clarity-specific component branch, runtime citation repair, post-processing layer, physics fork, or runtime styling patch is required.

@@ -34,7 +34,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 
 ## Need magnet identities
 
-**Accepted 2026-08-25; refined 2026-08-26.** Need magnets may develop distinct full-face identities while preserving the shared physical magnet shell.
+**Accepted 2026-08-25; refined 2026-08-27.** Need magnets may develop distinct full-face identities while preserving the shared physical magnet shell.
 
 - Identity work must not change shared shell padding, border/shadow semantics, physics, pickup behavior, or Customizer roundness. Visual identity belongs inside the existing shell. Explicitly approved icon content may change a particular magnet's measured intrinsic width, as with a two-sided icon treatment, but the shared board must measure that real geometry normally rather than patching or faking dimensions.
 - Full-face art should use Customizer-owned functional roles and remain legible across every real preset, including near-monochrome Refrigerator. Do not hard-code rescue colors for one design.
@@ -46,6 +46,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - **Connection · Constellation is the first approved Need identity.** It retains the existing Connection link icon, uses a networked path-and-node mask across the full face, and derives its icon/art fade from `Positive` to `Primary` over a `Selection`/`Quiet` face. Canonical production references are `src/features/needs/NeedsPage.module.css` and `public/icons/needs/art/connection-constellation.svg`.
 - **Safety · Layered Cover is approved.** It replaces the generic shield with an umbrella icon and uses three overlapping full-face cover layers to communicate buffered protection rather than security-software branding. Its face mixes `Quiet` with `Selection`; the umbrella fades from `Primary` toward `Positive`; and the layered artwork blends `Primary`/`Positive` into `Action`/`Primary`. Canonical production references are `src/features/needs/NeedsPage.module.css`, `public/icons/needs/safety.svg`, and `public/icons/needs/art/safety-layered-cover.svg`.
 - **Understanding · Converging Map (U4D) is approved.** It pairs a route-map icon on the left with a perspective-pair icon on the right so the magnet gestures toward the approved `Making sense` and `Understanding between people` lenses without splitting the Need. Two full-face fields converge toward the center to communicate one workable picture built from distinct orientations. The face blends `Quiet`/`Selection` into `Selection`/`Action`; the route-map uses `Primary`, the perspective-pair uses `Secondary`, and the converging art fades from `Primary` to `Action` at restrained opacity. Canonical production references are `src/features/needs/NeedsPage.module.css`, `public/icons/needs/understanding.svg`, `public/icons/needs/understanding-perspective.svg`, and `public/icons/needs/art/understanding-converging-map.svg`.
+- **Clarity · Pulse (C4B) is approved.** It pairs a Focus icon on the left for `Making things explicit` with a Compass icon on the right for `Getting clear within yourself`. A continuous pulse runs across the face to show both lenses as ways of reading or locating relevant distinctions more clearly. The face blends `Quiet`/`Selection` into `Selection`/`Positive`; the Focus icon derives from `Primary`/`Text`, the Compass from `Positive`/`Text`, and the pulse art fades from `Primary` toward `Positive`/`Text`. Canonical production references are `src/features/needs/NeedsPage.module.css`, `public/icons/needs/clarity.svg`, `public/icons/needs/clarity-compass.svg`, and `public/icons/needs/art/clarity-pulse.svg`.
 
 ## Magnet physics
 
@@ -260,6 +261,10 @@ Rules:
 - Feed scope, sort, Bluesky sign-in gating for Following, refresh/cache behavior, Needs-supported details, owner Edit, moderation controls, and inventory-save behavior must not be lost during visual cleanup.
 
 ## Decision log
+
+### 2026-08-27
+
+- Clarity's **Pulse (C4B)** became the approved production Need-magnet identity: Focus for `Making things explicit`, Compass for `Getting clear within yourself`, and one continuous pulse spanning both sides. The treatment remains Customizer-owned, uses the existing shared two-sided magnet pattern, and does not alter shared shell or physics behavior.
 
 ### 2026-08-26
 

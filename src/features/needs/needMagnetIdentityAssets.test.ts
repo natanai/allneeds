@@ -39,4 +39,29 @@ describe('approved Need magnet identities', () => {
     expect(art).toContain('viewBox="0 0 160 48"');
     expect(art).toContain('<circle cx="80" cy="24" r="5"/>');
   });
+
+  it('promotes Clarity · Pulse with Focus and Compass lens icons', () => {
+    const css = readFileSync(new URL('./NeedsPage.module.css', import.meta.url), 'utf8');
+    const focusIcon = readFileSync(
+      new URL('../../../public/icons/needs/clarity.svg', import.meta.url),
+      'utf8',
+    );
+    const compassIcon = readFileSync(
+      new URL('../../../public/icons/needs/clarity-compass.svg', import.meta.url),
+      'utf8',
+    );
+    const art = readFileSync(
+      new URL('../../../public/icons/needs/art/clarity-pulse.svg', import.meta.url),
+      'utf8',
+    );
+
+    expect(css).toContain("[data-magnet-id='needs-clarity']");
+    expect(css).toContain("url('/icons/needs/clarity.svg')");
+    expect(css).toContain("url('/icons/needs/clarity-compass.svg')");
+    expect(css).toContain("url('/icons/needs/art/clarity-pulse.svg')");
+    expect(focusIcon).toContain('M8 4H5a1 1 0 0 0-1 1v3');
+    expect(compassIcon).toContain('M14.9 9.1 13.3 13.3 9.1 14.9');
+    expect(art).toContain('viewBox="0 0 160 48"');
+    expect(art).toContain('<circle cx="80" cy="24" r="3.2" fill="black"/>');
+  });
 });
