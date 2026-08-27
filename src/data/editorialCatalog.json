@@ -113,6 +113,41 @@
         { "title": "Explain it in your own words", "slug": "explain-in-your-own-words" },
         { "title": "Reflect and check", "slug": "reflect-and-check" }
       ]
+    },
+    "clarity": {
+      "summary": "Our value for clarity may motivate us to make something easier to distinguish or work with. This can involve making outside information more explicit or getting clearer about what matters to us. The amount of detail that feels sufficient can differ between people and situations. Clarity can help us see what is being claimed or what remains uncertain without deciding whether a claim is true or an uncertainty is resolved.",
+      "narrative": "",
+      "sources": [],
+      "lenses": [
+        {
+          "id": "making-things-explicit",
+          "title": "Making things explicit",
+          "recognitionCue": "I want this to be clearer.",
+          "summary": "When something feels ambiguous, we may seek clarity by making the relevant information easier to work with. We might bring related material together, state an expectation more precisely, or identify what is still uncertain. Making a statement easier to perceive does not tell us whether it is true. Making uncertainty explicit does not make it disappear.",
+          "narrative": "Chandler and Sweller studied instructional materials in which learners had to combine related information presented in separate places. Across two experiments, learners performed better when the related information was physically integrated. Their findings show that presentation can affect how easily people work with information that belongs together. [1]\n\nTubre and Collins combined 74 correlations from studies of role ambiguity, role conflict, and job performance. Greater role ambiguity was associated with lower job performance. In this research, role ambiguity refers to uncertainty about what a person's role requires, giving one example of how unclear expectations can be studied directly. [2]\n\nReber and Schwarz changed how easy statements were to perceive while keeping their content the same. Statements that were easier to perceive were more likely to be judged true. The experiment separates perceptual clarity from the truth of the statement itself. [3]\n\nVan der Bles and colleagues reviewed research on communicating uncertainty about facts, numbers, and scientific knowledge. The work they examined included ways of communicating probabilities, ranges, and limitations directly. This research shows how uncertainty can be made more explicit without first being resolved. [4]",
+          "sources": [
+            { "url": "https://doi.org/10.1111/j.2044-8279.1992.tb01017.x", "description": "Chandler, P., & Sweller, J. (1992). The split-attention effect as a factor in the design of instruction." },
+            { "url": "https://doi.org/10.1177/014920630002600104", "description": "Tubre, T. C., & Collins, J. M. (2000). Jackson and Schuler (1985) Revisited: A Meta-Analysis of the Relationships Between Role Ambiguity, Role Conflict, and Job Performance." },
+            { "url": "https://pubmed.ncbi.nlm.nih.gov/10487787/", "description": "Reber, R., & Schwarz, N. (1999). Effects of perceptual fluency on judgments of truth." },
+            { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6549952/", "description": "van der Bles, A. M., et al. (2019). Communicating uncertainty about facts, numbers and science." }
+          ]
+        },
+        {
+          "id": "getting-clear-within-yourself",
+          "title": "Getting clear within yourself",
+          "recognitionCue": "I want to get clear on what I think or what matters to me.",
+          "summary": "Sometimes clarity concerns our own beliefs or values rather than outside information. We may want to put what matters into words, notice when important values conflict, or recognize that we have not decided yet.",
+          "narrative": "Campbell and colleagues developed a measure of self-concept clarity. It examines how clearly and confidently people define their beliefs about themselves, along with how consistent and stable those beliefs are. Their work gives one example of psychology studying clarity within a person's own view of themselves. [1]\n\nWitteman and colleagues reviewed 33 articles evaluating 43 explicit values-clarification methods used in health decisions. Across the included studies, these methods modestly reduced decisional conflict and choices that did not align with participants' stated values compared with control conditions or less explicit approaches. The methods used different ways of helping people make what mattered to them more explicit while deciding. [2]",
+          "sources": [
+            { "url": "https://doi.org/10.1037/0022-3514.70.1.141", "description": "Campbell, J. D., et al. (1996). Self-concept clarity: Measurement, personality correlates, and cultural boundaries." },
+            { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8482297/", "description": "Witteman, H. O., et al. (2021). Clarifying Values: An Updated and Expanded Systematic Review and Meta-Analysis." }
+          ]
+        }
+      ],
+      "strategies": [
+        { "title": "Separate what happened from what you think it means", "slug": "separate-event-from-meaning" },
+        { "title": "Name what matters here", "slug": "name-what-matters-here" }
+      ]
     }
   },
   "strategies": [
@@ -219,10 +254,36 @@
       "needs": [{ "title": "Understanding", "slug": "understanding" }],
       "provenance": "system",
       "evidence": { "url": "https://doi.org/10.1080/10904018.2013.813234", "description": "Weger, H., Jr., Castle Bell, G., Minei, E. M., & Robinson, M. C. (2014). The Relative Effectiveness of Active Listening in Initial Interactions. International Journal of Listening, 28(1), 13–31.", "kind": "scholarly" }
+    },
+    {
+      "title": "Separate what happened from what you think it means",
+      "slug": "separate-event-from-meaning",
+      "summary": "One exercise used in cognitive behavioral therapy asks people to describe what happened, then separately write down the thoughts or interpretations that came up about it. You do not need to decide that your interpretation is wrong to make that distinction. Try two lines, mentally or in a note: “What happened:” and “What I think it means:”. Give each its own answer.",
+      "needs": [{ "title": "Clarity", "slug": "clarity" }],
+      "provenance": "system",
+      "evidence": { "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/self-help-cbt-techniques/thought-record/", "description": "NHS Every Mind Matters. Thought record.", "kind": "clinical-guidance" }
+    },
+    {
+      "title": "Name what matters here",
+      "slug": "name-what-matters-here",
+      "summary": "A systematic review and meta-analysis by Witteman and colleagues found that explicit values-clarification methods modestly reduced decisional conflict and choices that did not match participants' stated values in health decisions. Think of a decision or tension that is present for you. Name what matters to you in it. If two things matter, notice whether they point in the same direction or pull against each other.",
+      "needs": [{ "title": "Clarity", "slug": "clarity" }],
+      "provenance": "system",
+      "evidence": { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8482297/", "description": "Witteman, H. O., et al. (2021). Clarifying Values: An Updated and Expanded Systematic Review and Meta-Analysis.", "kind": "scholarly" }
     }
   ],
   "strategyProvenance": {},
-  "discardedStrategySlugs": ["one-kind-text", "specific-thank-you"],
+  "discardedStrategySlugs": [
+    "one-kind-text",
+    "specific-thank-you",
+    "alternate-nostril-breaths",
+    "hold-something-cool",
+    "name-three-sounds",
+    "name-three-needs-alive",
+    "circle-the-priority",
+    "name-need-link",
+    "trace-your-hand"
+  ],
   "strategyNeedRemovals": {
     "ambient-postcard": ["connection"],
     "back-to-wall-lean": ["safety"],
@@ -237,6 +298,17 @@
     "pillow-nest": ["support"],
     "name-one-help-to-ask": ["support"],
     "inanimate-interview": ["understanding"],
-    "nearest-job": ["understanding"]
+    "nearest-job": ["understanding", "clarity"],
+    "5-4-3-2-1-check": ["clarity"],
+    "write-three-sentences": ["clarity"],
+    "observation-only": ["clarity"],
+    "micro-request-to-self": ["clarity"],
+    "ask-for-channel-shift": ["clarity"],
+    "calendar-one-thing": ["clarity"],
+    "self-check-scale": ["clarity"],
+    "name-what-s-within-control": ["clarity"],
+    "value-compass-card": ["clarity"],
+    "name-a-want-a-don-t": ["clarity"],
+    "window-quarter": ["clarity"]
   }
 }
