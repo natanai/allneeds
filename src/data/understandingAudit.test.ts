@@ -7,7 +7,7 @@ describe('approved Understanding audit package', () => {
     const understanding = needsBySlug.get('understanding');
 
     expect(understanding?.summary).toBe(
-      "Humans and other animals actively seek information when uncertainty matters, and human cooperation often involves coordinating attention, intentions, and meanings with other people. This need may draw us to ask questions, seek explanations, check assumptions, make our own thinking easier to grasp, and listen for what we may have missed. Understanding does not require certainty or agreement. Sometimes tending it means building a clearer picture of what is happening; sometimes it means finding where two people's meanings align or differ.",
+      "Humans and other animals actively seek information when uncertainty matters, and human cooperation often involves coordinating attention, intentions, and meanings with other people. This need may motivate us to ask questions, seek explanations, check assumptions, make our own thinking easier to grasp, and listen for what we may have missed. Understanding does not require certainty or agreement. Tending it may mean building a clearer picture of what is happening or finding where two people's meanings align or differ.",
     );
     expect(understanding?.evidence?.narrative).toBe('');
     expect(understanding?.evidence?.sources).toEqual([]);
