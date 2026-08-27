@@ -140,7 +140,7 @@ describe('production catalog snapshot', () => {
   it('ships the approved Support copy, citations, strategies, provenance, and removals', () => {
     const support = needsBySlug.get('support');
     expect(support?.summary).toBe(
-      'Across human evolutionary history, survival often depended on sharing food, care, information, labor, and risk rather than meeting every demand alone. This need may draw us to seek help, make our needs visible, notice when others need assistance, and offer or accept emotional, informational, or practical support. Tending to support can distribute burdens, preserve capacity during hardship, and make difficult circumstances more manageable than they would be alone.',
+      'Across human evolutionary history, survival often depended on sharing food, care, information, labor, and risk rather than meeting every demand alone. This need may motivate us to seek help, make our needs visible, notice when others need assistance, and offer or accept emotional, informational, or practical support. Tending to support can distribute burdens, preserve capacity during hardship, and make difficult circumstances more manageable than they would be alone.',
     );
     expect(support?.evidence?.sources).toHaveLength(8);
     expect(support?.strategies).toEqual([
