@@ -2,6 +2,12 @@
 
 This file supplements the root `AGENTS.md` for work under `src/data/`.
 
+## Full Need audit proposal format
+
+Before presenting an official, full, final, or approval-ready Need content audit proposal, read `docs/need-audit-proposal-format.md` and follow it exactly.
+
+The user-facing proposal is a clean snapshot of the proposed final site content only. Keep source-role notes, limitations, removal/discard rationale, provenance analysis, implementation scope, file paths, and other audit metadata in internal/audit records rather than surrounding the formal proposal.
+
 ## Current Safety record
 
 For Safety data, strategy, citation, or copy work, read `docs/safety-content-audit.md` before editing. It is the authoritative current Safety audit and supersedes the older Safety section in `docs/content-evidence-review.md`.
