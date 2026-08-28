@@ -21,26 +21,23 @@ These are different kinds of information.
 
 A single situation can involve many Feelings and many Needs. A Feeling can be associated with several possible Needs. The site should support exploration rather than pretending that emotional inference is certain or one-to-one.
 
-## Each Need has a working definition
+## Conceptual clarity without formal definitions
 
-Every audited Need must have a concise **working definition** that states what the site means by that Need, value, or motivation.
+Need pages should be conceptually clear without pretending to provide formal definitions.
 
-The definition is part of the site's psychological model and belongs in the short Evidence copy. It should usually take about one sentence or one compact clause. It is not the central thrust of the page. Its purpose is to keep the conceptual object stable as more Needs are audited so readers, editors, researchers, and future agents can tell what the site is and is not referring to by a particular label.
+The site's Need labels are practical human concepts inside an NVC-informed model. Some may overlap with constructs that have established scientific definitions, while others are broader everyday values or motivations. The site should not invent necessary-and-sufficient conditions, fixed essences, or authoritative taxonomies merely to make the labels look scientifically formal.
 
-A good working definition should:
+At the same time, refusing formal definition does not mean leaving the concepts vague. Each audited Need should be described clearly enough that a reader, editor, researcher, or future agent can tell what kind of value or motivation the page is discussing and how it differs from neighboring Needs or from particular Strategies.
 
-- describe the Need in ordinary language rather than as a circular dictionary entry;
-- be broad enough to cover the lived range the site intends to include;
-- be narrow enough to distinguish the Need from neighboring concepts and particular Strategies;
-- describe the value or motivational concern itself, not one preferred way of satisfying it;
-- avoid implying that the site's framework label is a formally established scientific construct unless the evidence actually supports that claim;
-- remain compatible with the strongest evidence used on the page.
+A concise conceptual clarification in the short Evidence copy should usually help establish:
 
-The definition may be an editorial/framework synthesis. It does not need to masquerade as a quotation or a scientific consensus definition. Research should inform and constrain it, and the Details section should make clear what empirical and theoretical evidence lies underneath the broader page.
+- what sort of concern, value, or motivation the label refers to within the site's model;
+- the rough conceptual territory the page intends to include;
+- enough distinction from neighboring Needs and Strategies to keep the concept stable across audits.
 
-The definition should be present early enough in the short Evidence copy that a reader can orient to what the page means, but it should not crowd out the page's larger job of explaining why the motivation can make sense, what function it may serve, and what someone can do with it.
+This is epistemological and ontological orientation, not formal definition. The clarification may be a framework/editorial synthesis constrained by evidence. It should not be presented as a consensus scientific definition unless the literature genuinely supports that status.
 
-This requirement supersedes older guidance that said not to define a Need at all. The prohibition was intended to prevent overclaiming formal scientific definitions, not to leave the site's own concepts undefined.
+Do not turn the short description into a dictionary entry or a taxonomy exercise. Conceptual clarity is one part of the page's job, alongside explaining why the motivation can make sense and what someone can do to tend it.
 
 ## Needs do not compete or conflict
 
@@ -85,7 +82,7 @@ The page should help them move one level deeper than the triggering situation.
 
 A strong Need page should help the reader:
 
-1. **Orient to what the Need means here.** Give the reader a concise working definition so the page's use of the label is clear.
+1. **Orient to the concept.** Make the site's use of the Need label clear enough to distinguish it from neighboring Needs and from particular Strategies, without presenting a formal definition.
 2. **Recognize the motivation.** The page should make the Need recognizable as a real human concern rather than an abstract dictionary term.
 3. **Understand why it can make sense.** Explain credible psychological, developmental, social, evolutionary, anthropological, clinical, or other evidence that helps make the motivation intelligible and potentially functional.
 4. **Reduce shame or self-rejection without sentimental reassurance.** The evidence should make it easier to see the Need as worth listening to rather than something that must be suppressed merely because it is uncomfortable or inconvenient.
@@ -114,9 +111,9 @@ Boundary distinctions can be useful when they prevent a real conceptual error, b
 
 ## The short Evidence copy has a therapeutic job
 
-The short Evidence section is often the first substantial text a reader sees after identifying with a Need. It should include the Need's concise working definition, then quickly move into why the motivation may be present and why its presence can be useful or understandable.
+The short Evidence section is often the first substantial text a reader sees after identifying with a Need. It should give enough conceptual orientation that the reader knows what the site means by the Need, then quickly move into why the motivation may be present and why its presence can be useful or understandable.
 
-The definition is an orientation point, not the thesis of the whole description. Avoid turning the short copy into a dictionary entry followed by caveats. The reader should come away knowing both what the site means by the Need and why that Need may make sense to experience.
+That conceptual orientation is not a formal definition and should not become the thesis of the whole description. Avoid dictionary-style openings, necessary-and-sufficient conditions, and caveat-heavy taxonomy. The reader should come away with both a clearer sense of what the page is talking about and a stronger sense of why the Need may make sense to experience.
 
 The short copy should provide enough scholarly grounding that the reader can feel the page is taking their experience seriously. Important conceptual distinctions belong there only when they are necessary to understand the Need or when a public citation depends on that idea. Details can carry the deeper research explanation.
 
@@ -154,7 +151,7 @@ The deck as a whole should make it easier for someone to move from `I am stuck i
 
 Before presenting any full Need audit proposal, explicitly verify internally that:
 
-1. The short Evidence copy contains a concise working definition that makes clear what the site means by this Need without claiming a stronger scientific definition than the evidence allows.
+1. The short Evidence copy gives enough conceptual clarity to identify the Need within the site's model without presenting a formal definition or stronger scientific taxonomy than the evidence allows.
 2. The page treats the Need as normal and valid rather than as a problem to eliminate.
 3. The opening helps a reader understand why the motivation can make sense and may serve a useful function.
 4. Research grounding is strong enough to support that understanding, with contested theories labeled as theories rather than omitted or overstated.
