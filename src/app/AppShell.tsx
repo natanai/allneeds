@@ -133,7 +133,8 @@ export function AppShell() {
   const fullBleedMobile = pathname === '/observations'
     || pathname === '/inventory'
     || pathname === '/feed'
-    || pathname === '/feelings/body-cues';
+    || pathname === '/feelings/body-cues'
+    || pathname === '/alexithymia-support';
   const journalMobile = pathname === '/inventory/journal';
   const journalComposerActive = pathname === '/inventory/journal'
     && new URLSearchParams(search).get('compose') === 'new';

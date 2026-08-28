@@ -139,49 +139,93 @@ describe('workflow drafts', () => {
     expect(storage.getItem(INVENTORY_DRAFT_STORAGE_KEY)).toBeNull();
   });
 
-  it('clamps a guided alexithymia lane draft and clears a fresh lane', () => {
+  it('normalizes the four-stage alexithymia draft and clears a fresh lane', () => {
     const storage = memoryStorage();
     writeAlexithymiaDraft({
-      phase: 12,
+      stage: 12,
+      observation: '  We stopped talking.',
       openRegion: 'chest',
-      selectedCues: { tight_chest: 13, fluttering: -2 },
-      energy: 2,
-      valence: -2,
-      compassTouched: true,
-      selectedEmotion: 'anxiety',
-      journalOpen: true,
-      reflection: 'I noticed my chest tighten.',
-      journalNeeds: ['safety', 'safety'],
-      intensity: 11,
+      selectedCues: { tight_chest: 113, fluttering: -2 },
+      bodyClear: false,
+      shape: { energy: 2, pleasantness: -2 },
+      decisions: { 'candidate:anxiety': 'fits', 'candidate:fear': 'not-this-time' },
+      termOrder: ['candidate:anxiety', 'candidate:anxiety'],
+      customTerms: ['Mixed up', 'Mixed up'],
+      noWordYet: false,
+      selectedNeeds: ['safety', 'safety'],
+      statement: 'I feel anxious because I need safety.',
+      statementEdited: true,
     }, storage);
     expect(readAlexithymiaDraft(storage)).toEqual({
-      phase: 8,
+      stage: 4,
+      observation: 'We stopped talking.',
       openRegion: 'chest',
-      selectedCues: { tight_chest: 10, fluttering: 0 },
-      energy: 1,
-      valence: -1,
-      compassTouched: true,
-      selectedEmotion: 'anxiety',
-      journalOpen: true,
-      reflection: 'I noticed my chest tighten.',
-      journalNeeds: ['safety'],
-      intensity: 10,
+      selectedCues: { tight_chest: 100 },
+      bodyClear: false,
+      shape: { energy: 1, pleasantness: 0 },
+      decisions: { 'candidate:anxiety': 'fits', 'candidate:fear': 'not-this-time' },
+      termOrder: ['candidate:anxiety'],
+      customTerms: ['Mixed up'],
+      noWordYet: false,
+      selectedNeeds: ['safety'],
+      statement: 'I feel anxious because I need safety.',
+      statementEdited: true,
     });
     writeAlexithymiaDraft({
-      phase: 0,
+      stage: 0,
+      observation: '',
       openRegion: null,
       selectedCues: {},
-      energy: 0,
-      valence: 0,
-      compassTouched: false,
-      selectedEmotion: null,
-      journalOpen: false,
-      reflection: '',
-      journalNeeds: [],
-      intensity: 5,
+      bodyClear: false,
+      shape: {},
+      decisions: {},
+      termOrder: [],
+      customTerms: [],
+      noWordYet: false,
+      selectedNeeds: [],
+      statement: '',
+      statementEdited: false,
     }, storage);
     expect(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY)).toBeNull();
     clearAlexithymiaDraft(storage);
+  });
+
+  it('migrates compatible v1 clues and one recognized word at the persistence boundary', () => {
+    const storage = memoryStorage();
+    storage.setItem(ALEXITHYMIA_DRAFT_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1,
+      savedAt: '2026-08-27T12:00:00.000Z',
+      data: {
+        phase: 6,
+        openRegion: 'throat',
+        selectedCues: { tight_throat: 7 },
+        energy: 0.5,
+        valence: -0.5,
+        compassTouched: true,
+        selectedEmotion: 'anxiety',
+        journalOpen: true,
+        reflection: 'obsolete care-step text',
+        journalNeeds: ['support'],
+        intensity: 8,
+      },
+    }));
+
+    expect(readAlexithymiaDraft(storage)).toEqual({
+      stage: 3,
+      observation: '',
+      openRegion: 'throat',
+      selectedCues: { tight_throat: 70 },
+      bodyClear: false,
+      shape: { pleasantness: 0.25, energy: 0.75 },
+      decisions: { 'candidate:anxiety': 'fits' },
+      termOrder: ['candidate:anxiety'],
+      customTerms: [],
+      noWordYet: false,
+      selectedNeeds: [],
+      statement: '',
+      statementEdited: false,
+    });
+    expect(JSON.parse(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY) ?? '{}').schemaVersion).toBe(2);
   });
 
   it('keeps personal-strategy drafts separate by need and clears a default empty form', () => {

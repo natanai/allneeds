@@ -1,0 +1,717 @@
+{
+  "version": 1,
+  "sources": {
+    "body-profiles": {
+      "title": "allneeds authored body-clue profiles",
+      "url": "/docs/body-scan-sourcing-review.md",
+      "role": "Authored forward associations between selectable body micro-cues and the bounded candidate set."
+    },
+    "coregrid-2026": {
+      "title": "Emotion word meaning and grammatical class: do nouns and adjectives mean the same?",
+      "url": "https://doi.org/10.1016/j.langsci.2026.101807",
+      "role": "Table A2 supplies fixed English noun/adjective factor scores for valence, power, arousal, and novelty.",
+      "license": "CC BY 4.0"
+    },
+    "merriam-webster": {
+      "title": "Merriam-Webster Dictionary",
+      "url": "https://www.merriam-webster.com/",
+      "role": "Plain-language orientation for lane-local working terms; it does not assign those terms to the official allneeds Feeling catalog."
+    }
+  },
+  "shapeNormalization": {
+    "pleasantness": {
+      "sourceDimension": "Valence",
+      "rawMin": -1.37,
+      "rawMax": 1.74,
+      "lowLabel": "Unpleasant",
+      "highLabel": "Pleasant"
+    },
+    "energy": {
+      "sourceDimension": "Arousal",
+      "rawMin": -2.68,
+      "rawMax": 1.79,
+      "lowLabel": "Low",
+      "highLabel": "High"
+    },
+    "power": {
+      "sourceDimension": "Power",
+      "rawMin": -1.66,
+      "rawMax": 2.63,
+      "lowLabel": "Less able to influence this",
+      "highLabel": "More able to influence this"
+    },
+    "expectedness": {
+      "sourceDimension": "Novelty",
+      "rawMin": -2.57,
+      "rawMax": 3.38,
+      "lowLabel": "Expected or familiar",
+      "highLabel": "Sudden or surprising"
+    }
+  },
+  "candidates": [
+    {
+      "key": "anger",
+      "display": "Angry",
+      "role": "feeling",
+      "bodyProfileKey": "anger",
+      "catalogSlug": "angry",
+      "route": "/feelings/angry",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Angry",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": -0.59,
+          "energy": 0.91,
+          "power": 2.36,
+          "expectedness": 0.02
+        },
+        "coordinates": {
+          "pleasantness": 0.250804,
+          "energy": 0.803132,
+          "power": 0.937063,
+          "expectedness": 0.435294
+        }
+      }
+    },
+    {
+      "key": "anxiety",
+      "display": "Anxiety",
+      "role": "feeling",
+      "bodyProfileKey": "anxiety",
+      "catalogSlug": "anxiety",
+      "route": "/feelings/anxiety",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Anxiety",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": -0.75,
+          "energy": 1.03,
+          "power": -0.62,
+          "expectedness": -0.83
+        },
+        "coordinates": {
+          "pleasantness": 0.199357,
+          "energy": 0.829978,
+          "power": 0.242424,
+          "expectedness": 0.292437
+        }
+      }
+    },
+    {
+      "key": "bored",
+      "display": "Bored",
+      "role": "working",
+      "bodyProfileKey": "bored",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for feeling uninterested or under-stimulated.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/bored",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Bored",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": -0.32,
+          "energy": -2.48,
+          "power": 0.82,
+          "expectedness": 0.48
+        },
+        "coordinates": {
+          "pleasantness": 0.337621,
+          "energy": 0.044743,
+          "power": 0.578089,
+          "expectedness": 0.512605
+        }
+      }
+    },
+    {
+      "key": "calm",
+      "display": "Calm",
+      "role": "feeling",
+      "bodyProfileKey": "calm",
+      "catalogSlug": "calm",
+      "route": "/feelings/calm",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": false
+      },
+      "shape": null
+    },
+    {
+      "key": "contented",
+      "display": "Contented",
+      "role": "feeling",
+      "bodyProfileKey": "contented",
+      "catalogSlug": "contented",
+      "route": "/feelings/contented",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": false
+      },
+      "shape": null
+    },
+    {
+      "key": "determined",
+      "display": "Determined",
+      "role": "working",
+      "bodyProfileKey": "determined",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for feeling firmly resolved to keep moving toward something.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/determined",
+      "coverage": {
+        "body": true,
+        "shape": false
+      },
+      "shape": null
+    },
+    {
+      "key": "disgust",
+      "display": "Disgust",
+      "role": "working",
+      "bodyProfileKey": "disgust",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for strong aversion or revulsion.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/disgust",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Disgust",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": -0.63,
+          "energy": -0.3,
+          "power": 1.02,
+          "expectedness": 0.8
+        },
+        "coordinates": {
+          "pleasantness": 0.237942,
+          "energy": 0.532438,
+          "power": 0.624709,
+          "expectedness": 0.566387
+        }
+      }
+    },
+    {
+      "key": "excited",
+      "display": "Excited",
+      "role": "feeling",
+      "bodyProfileKey": "excited",
+      "catalogSlug": "excited",
+      "route": "/feelings/excited",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Excited",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": 1.12,
+          "energy": 1.56,
+          "power": -0.06,
+          "expectedness": -0.66
+        },
+        "coordinates": {
+          "pleasantness": 0.800643,
+          "energy": 0.948546,
+          "power": 0.37296,
+          "expectedness": 0.321008
+        }
+      }
+    },
+    {
+      "key": "fear",
+      "display": "Fear",
+      "role": "feeling",
+      "bodyProfileKey": "fear",
+      "catalogSlug": "fear",
+      "route": "/feelings/fear",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Fear",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": -0.74,
+          "energy": 0.84,
+          "power": -1.44,
+          "expectedness": 0.13
+        },
+        "coordinates": {
+          "pleasantness": 0.202572,
+          "energy": 0.787472,
+          "power": 0.051282,
+          "expectedness": 0.453782
+        }
+      }
+    },
+    {
+      "key": "frustration",
+      "display": "Frustrated",
+      "role": "feeling",
+      "bodyProfileKey": "frustration",
+      "catalogSlug": "frustrated",
+      "route": "/feelings/frustrated",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Frustrated",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": -0.73,
+          "energy": 0.54,
+          "power": 1.61,
+          "expectedness": -0.84
+        },
+        "coordinates": {
+          "pleasantness": 0.205788,
+          "energy": 0.720358,
+          "power": 0.762238,
+          "expectedness": 0.290756
+        }
+      }
+    },
+    {
+      "key": "gratitude",
+      "display": "Gratitude",
+      "role": "working",
+      "bodyProfileKey": "gratitude",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for appreciation of something received or valued.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/gratitude",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Gratitude",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": 1.2,
+          "energy": -0.32,
+          "power": -0.03,
+          "expectedness": 0.62
+        },
+        "coordinates": {
+          "pleasantness": 0.826367,
+          "energy": 0.527964,
+          "power": 0.379953,
+          "expectedness": 0.536134
+        }
+      }
+    },
+    {
+      "key": "grief",
+      "display": "Grief",
+      "role": "working",
+      "bodyProfileKey": "grief",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for sorrow connected with loss.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/grief",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Grief",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": -1.26,
+          "energy": -0.56,
+          "power": -0.66,
+          "expectedness": -0.46
+        },
+        "coordinates": {
+          "pleasantness": 0.03537,
+          "energy": 0.474273,
+          "power": 0.2331,
+          "expectedness": 0.354622
+        }
+      }
+    },
+    {
+      "key": "guilt",
+      "display": "Guilt",
+      "role": "working",
+      "bodyProfileKey": "guilt",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for distress about something a person believes they did or failed to do.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/guilt",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Guilt",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": -0.65,
+          "energy": -0.02,
+          "power": -1.2,
+          "expectedness": -2.08
+        },
+        "coordinates": {
+          "pleasantness": 0.231511,
+          "energy": 0.595078,
+          "power": 0.107226,
+          "expectedness": 0.082353
+        }
+      }
+    },
+    {
+      "key": "hopeful",
+      "display": "Hopeful",
+      "role": "feeling",
+      "bodyProfileKey": "hopeful",
+      "catalogSlug": "hopeful",
+      "route": "/feelings/hopeful",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Hopeful",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": 1.25,
+          "energy": -0.06,
+          "power": 0.27,
+          "expectedness": -0.44
+        },
+        "coordinates": {
+          "pleasantness": 0.842444,
+          "energy": 0.58613,
+          "power": 0.449883,
+          "expectedness": 0.357983
+        }
+      }
+    },
+    {
+      "key": "joyful",
+      "display": "Joyful",
+      "role": "feeling",
+      "bodyProfileKey": "joyful",
+      "catalogSlug": "joyful",
+      "route": "/feelings/joyful",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Joyful",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": 1.56,
+          "energy": 0.07,
+          "power": 0.03,
+          "expectedness": -0.28
+        },
+        "coordinates": {
+          "pleasantness": 0.942122,
+          "energy": 0.615213,
+          "power": 0.393939,
+          "expectedness": 0.384874
+        }
+      }
+    },
+    {
+      "key": "lonely",
+      "display": "Lonely",
+      "role": "feeling",
+      "bodyProfileKey": "lonely",
+      "catalogSlug": "lonely",
+      "route": "/feelings/lonely",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Lonely",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": -0.93,
+          "energy": -1.62,
+          "power": -0.43,
+          "expectedness": -0.57
+        },
+        "coordinates": {
+          "pleasantness": 0.141479,
+          "energy": 0.237136,
+          "power": 0.286713,
+          "expectedness": 0.336134
+        }
+      }
+    },
+    {
+      "key": "numb",
+      "display": "Numb",
+      "role": "working",
+      "bodyProfileKey": "numb",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for feeling emotionally blunted, distant, or hard to reach.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/numb",
+      "coverage": {
+        "body": true,
+        "shape": false
+      },
+      "shape": null
+    },
+    {
+      "key": "overwhelm",
+      "display": "Overwhelmed",
+      "role": "feeling",
+      "bodyProfileKey": "overwhelm",
+      "catalogSlug": "overwhelmed",
+      "route": "/feelings/overwhelmed",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Overwhelmed",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": -0.85,
+          "energy": 1.01,
+          "power": -0.67,
+          "expectedness": -0.66
+        },
+        "coordinates": {
+          "pleasantness": 0.167203,
+          "energy": 0.825503,
+          "power": 0.230769,
+          "expectedness": 0.321008
+        }
+      }
+    },
+    {
+      "key": "pride",
+      "display": "Proud",
+      "role": "feeling",
+      "bodyProfileKey": "pride",
+      "catalogSlug": "proud",
+      "route": "/feelings/proud",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Proud",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": 1.51,
+          "energy": -0.34,
+          "power": 1.07,
+          "expectedness": -0.83
+        },
+        "coordinates": {
+          "pleasantness": 0.926045,
+          "energy": 0.52349,
+          "power": 0.636364,
+          "expectedness": 0.292437
+        }
+      }
+    },
+    {
+      "key": "relief",
+      "display": "Relieved",
+      "role": "feeling",
+      "bodyProfileKey": "relief",
+      "catalogSlug": "relieved",
+      "route": "/feelings/relieved",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Relieved",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": 1.03,
+          "energy": -1.77,
+          "power": -0.64,
+          "expectedness": 0.89
+        },
+        "coordinates": {
+          "pleasantness": 0.771704,
+          "energy": 0.203579,
+          "power": 0.237762,
+          "expectedness": 0.581513
+        }
+      }
+    },
+    {
+      "key": "sadness",
+      "display": "Sad",
+      "role": "feeling",
+      "bodyProfileKey": "sadness",
+      "catalogSlug": "sad",
+      "route": "/feelings/sad",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Sad",
+        "partOfSpeech": "adjective",
+        "raw": {
+          "pleasantness": -1.13,
+          "energy": -1.23,
+          "power": -0.74,
+          "expectedness": -0.35
+        },
+        "coordinates": {
+          "pleasantness": 0.07717,
+          "energy": 0.324385,
+          "power": 0.214452,
+          "expectedness": 0.373109
+        }
+      }
+    },
+    {
+      "key": "shame",
+      "display": "Shame",
+      "role": "working",
+      "bodyProfileKey": "shame",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for painful self-consciousness about oneself.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/shame",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Shame",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": -0.73,
+          "energy": -0.25,
+          "power": -1.27,
+          "expectedness": -1.5
+        },
+        "coordinates": {
+          "pleasantness": 0.205788,
+          "energy": 0.543624,
+          "power": 0.090909,
+          "expectedness": 0.179832
+        }
+      }
+    },
+    {
+      "key": "stress",
+      "display": "Stress",
+      "role": "working",
+      "bodyProfileKey": "stress",
+      "catalogSlug": null,
+      "route": null,
+      "definition": "A working word for feeling taxed or strained by demands.",
+      "definitionSource": "https://www.merriam-webster.com/dictionary/stress",
+      "coverage": {
+        "body": true,
+        "shape": true
+      },
+      "shape": {
+        "source": "coregrid-2026",
+        "termForm": "Stress",
+        "partOfSpeech": "noun",
+        "raw": {
+          "pleasantness": -0.85,
+          "energy": 0.87,
+          "power": -0.11,
+          "expectedness": -1.85
+        },
+        "coordinates": {
+          "pleasantness": 0.167203,
+          "energy": 0.794183,
+          "power": 0.361305,
+          "expectedness": 0.121008
+        }
+      }
+    },
+    {
+      "key": "tired",
+      "display": "Tired",
+      "role": "feeling",
+      "bodyProfileKey": "tired",
+      "catalogSlug": "tired",
+      "route": "/feelings/tired",
+      "definition": null,
+      "definitionSource": "catalog",
+      "coverage": {
+        "body": true,
+        "shape": false
+      },
+      "shape": null
+    }
+  ]
+}

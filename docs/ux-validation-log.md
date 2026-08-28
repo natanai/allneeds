@@ -2,6 +2,14 @@
 
 This log records reproducible local evidence for the stability roadmap. It is not a substitute for production field data at the 75th percentile.
 
+## 2026-08-28 — Alexithymia Support implementation gate
+
+- The deterministic Alexithymia Support compiler validated candidate roles, fixed-catalog routes, body-profile references, source coverage, and Feeling-shape coordinates; the generated runtime asset was fresh.
+- Strict TypeScript validation passed. Vitest passed `198/198` tests across `48/48` files.
+- The production build transformed `191` modules, generated the installed-app service worker with `170` runtime assets, and passed the production artifact verifier.
+- Playwright discovered all `63` production flows, including new Alexithymia checks for combined, body-only, shape-only, Faux Feeling, Working term, multiple-word, `No word yet`, direct Need routing, Journal handoff, Feeling-page boundaries, and mobile overflow contracts.
+- The browser flows could not execute in this workspace because its configured Playwright Chromium binary is unavailable. This entry therefore records no screenshot, live-browser, iOS standalone, large-text, reduced-motion, keyboard, or screen-reader sign-off. Those checks remain required on the normal browser runner and target devices before release approval.
+
 ## 2026-08-23 — current-reference parity refresh
 
 Reference: `natanai/nvc-app`, branch `performance/immediate-response-v1`, commit `7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3`.

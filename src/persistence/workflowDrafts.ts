@@ -1,6 +1,7 @@
 import { getBrowserStorage } from './storage';
 import type { StorageDriver } from './storage';
 import { VersionedStore } from './versionedStore';
+import alexithymiaSupportData from '../data/generated/alexithymiaSupport.json';
 
 export const JOURNAL_DRAFT_STORAGE_KEY = 'allneeds.v2.journal.draft';
 export const OBSERVATION_DRAFT_STORAGE_KEY = 'allneeds.v2.observation.draft';
@@ -17,6 +18,11 @@ export type JournalComposerDraft = {
   selectedNeeds: string[];
   tags: string;
   editingId: string | null;
+  guidedSupport?: {
+    observation: string;
+    terms: Array<{ label: string; role: 'feeling' | 'faux-feeling' | 'working' }>;
+    statement: string;
+  };
 };
 
 export type ObservationDraft = {
@@ -53,6 +59,22 @@ export type InventoryDraft = {
 };
 
 export type AlexithymiaDraft = {
+  stage: number;
+  observation: string;
+  openRegion: string | null;
+  selectedCues: Record<string, number>;
+  bodyClear: boolean;
+  shape: Partial<Record<'pleasantness' | 'energy' | 'power' | 'expectedness', number>>;
+  decisions: Record<string, 'fits' | 'maybe' | 'not-this-time'>;
+  termOrder: string[];
+  customTerms: string[];
+  noWordYet: boolean;
+  selectedNeeds: string[];
+  statement: string;
+  statementEdited: boolean;
+};
+
+type LegacyAlexithymiaDraftV1 = {
   phase: number;
   openRegion: string | null;
   selectedCues: Record<string, number>;
@@ -65,6 +87,10 @@ export type AlexithymiaDraft = {
   journalNeeds: string[];
   intensity: number;
 };
+
+const alexithymiaCandidateKeys = new Set(
+  alexithymiaSupportData.candidates.map((candidate) => candidate.key),
+);
 
 export type NeedStrategyDraft = {
   title: string;
@@ -94,6 +120,16 @@ function isFeelingRatings(value: unknown) {
     && Number.isFinite(item.intensity));
 }
 
+function isGuidedSupportDraft(value: unknown) {
+  return isRecord(value)
+    && typeof value.observation === 'string'
+    && typeof value.statement === 'string'
+    && Array.isArray(value.terms)
+    && value.terms.every((term) => isRecord(term)
+      && typeof term.label === 'string'
+      && (term.role === 'feeling' || term.role === 'faux-feeling' || term.role === 'working'));
+}
+
 function isJournalDraft(value: unknown): value is JournalComposerDraft {
   return isRecord(value)
     && typeof value.notes === 'string'
@@ -103,7 +139,8 @@ function isJournalDraft(value: unknown): value is JournalComposerDraft {
     && (value.feelings === undefined || isFeelingRatings(value.feelings))
     && isStringList(value.selectedNeeds)
     && typeof value.tags === 'string'
-    && (value.editingId === null || typeof value.editingId === 'string');
+    && (value.editingId === null || typeof value.editingId === 'string')
+    && (value.guidedSupport === undefined || isGuidedSupportDraft(value.guidedSupport));
 }
 
 function isObservationDraft(value: unknown): value is ObservationDraft {
@@ -146,6 +183,32 @@ function isInventoryDraft(value: unknown): value is InventoryDraft {
 }
 
 function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
+  return isRecord(value)
+    && typeof value.stage === 'number'
+    && Number.isFinite(value.stage)
+    && typeof value.observation === 'string'
+    && (value.openRegion === null || typeof value.openRegion === 'string')
+    && isNumberRecord(value.selectedCues)
+    && typeof value.bodyClear === 'boolean'
+    && isRecord(value.shape)
+    && Object.entries(value.shape).every(([key, item]) => (
+      (key === 'pleasantness' || key === 'energy' || key === 'power' || key === 'expectedness')
+      && typeof item === 'number'
+      && Number.isFinite(item)
+    ))
+    && isRecord(value.decisions)
+    && Object.values(value.decisions).every((decision) => (
+      decision === 'fits' || decision === 'maybe' || decision === 'not-this-time'
+    ))
+    && isStringList(value.termOrder)
+    && isStringList(value.customTerms)
+    && typeof value.noWordYet === 'boolean'
+    && isStringList(value.selectedNeeds)
+    && typeof value.statement === 'string'
+    && typeof value.statementEdited === 'boolean';
+}
+
+function isLegacyAlexithymiaDraftV1(value: unknown): value is LegacyAlexithymiaDraftV1 {
   return isRecord(value)
     && typeof value.phase === 'number'
     && Number.isFinite(value.phase)
@@ -212,7 +275,7 @@ function inventoryDraftStore(storage: StorageDriver | null) {
 function alexithymiaStore(storage: StorageDriver | null) {
   return new VersionedStore<AlexithymiaDraft>({
     key: ALEXITHYMIA_DRAFT_STORAGE_KEY,
-    schemaVersion: 1,
+    schemaVersion: 2,
     storage,
     validate: isAlexithymiaDraft,
   });
@@ -243,7 +306,10 @@ export function writeJournalDraft(
     || draft.feelings?.some((item) => item.feeling.trim() && item.intensity > 0)
     || draft.selectedNeeds.length
     || draft.tags.trim()
-    || draft.editingId,
+    || draft.editingId
+    || draft.guidedSupport?.observation.trim()
+    || draft.guidedSupport?.terms.length
+    || draft.guidedSupport?.statement.trim(),
   );
   if (!hasContent) {
     store.clear();
@@ -253,11 +319,19 @@ export function writeJournalDraft(
     feeling: item.feeling.trim(),
     intensity: Math.min(10, Math.max(0, Math.round(item.intensity))),
   })).filter((item) => item.feeling && item.intensity > 0);
+  const guidedSupport = draft.guidedSupport ? {
+    observation: draft.guidedSupport.observation.trim(),
+    terms: draft.guidedSupport.terms
+      .map((term) => ({ ...term, label: term.label.trim() }))
+      .filter((term) => term.label),
+    statement: draft.guidedSupport.statement.trim(),
+  } : undefined;
   return store.write({
     ...draft,
     intensity: Math.min(10, Math.max(0, Math.round(draft.intensity))),
     ...(feelings ? { feelings } : {}),
     selectedNeeds: [...new Set(draft.selectedNeeds.filter(Boolean))],
+    ...(guidedSupport ? { guidedSupport } : {}),
   });
 }
 
@@ -353,9 +427,55 @@ export function clearInventoryDraft(storage: StorageDriver | null = getBrowserSt
   inventoryDraftStore(storage).clear();
 }
 
+export function migrateAlexithymiaDraftV1(draft: LegacyAlexithymiaDraftV1): AlexithymiaDraft {
+  const selectedCues = Object.fromEntries(Object.entries(draft.selectedCues)
+    .map(([key, value]) => [key, Math.min(100, Math.max(0, Math.round(value * 10 / 5) * 5))]));
+  const selectedEmotion = draft.selectedEmotion && alexithymiaCandidateKeys.has(draft.selectedEmotion)
+    ? draft.selectedEmotion
+    : null;
+  const hasClues = Object.values(selectedCues).some((value) => value > 0) || draft.compassTouched;
+  const stage = selectedEmotion ? 3 : hasClues ? 2 : draft.phase > 0 ? 1 : 0;
+  return {
+    stage,
+    observation: '',
+    openRegion: draft.openRegion || null,
+    selectedCues,
+    bodyClear: false,
+    shape: draft.compassTouched ? {
+      pleasantness: Math.min(1, Math.max(0, (draft.valence + 1) / 2)),
+      energy: Math.min(1, Math.max(0, (draft.energy + 1) / 2)),
+    } : {},
+    decisions: selectedEmotion ? { [`candidate:${selectedEmotion}`]: 'fits' } : {},
+    termOrder: selectedEmotion ? [`candidate:${selectedEmotion}`] : [],
+    customTerms: [],
+    noWordYet: false,
+    selectedNeeds: [],
+    statement: '',
+    statementEdited: false,
+  };
+}
+
+function readLegacyAlexithymiaDraft(storage: StorageDriver | null) {
+  if (!storage) return null;
+  try {
+    const parsed: unknown = JSON.parse(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY) ?? 'null');
+    if (!isRecord(parsed) || parsed.schemaVersion !== 1 || !isLegacyAlexithymiaDraftV1(parsed.data)) {
+      return null;
+    }
+    return migrateAlexithymiaDraftV1(parsed.data);
+  } catch {
+    return null;
+  }
+}
+
 export function readAlexithymiaDraft(storage: StorageDriver | null = getBrowserStorage()) {
   const result = alexithymiaStore(storage).read();
-  return result.status === 'ready' ? result.value : null;
+  if (result.status === 'ready') return result.value;
+  if (result.status !== 'unsupported' || result.foundVersion !== 1) return null;
+  const migrated = readLegacyAlexithymiaDraft(storage);
+  if (!migrated) return null;
+  alexithymiaStore(storage).write(migrated);
+  return migrated;
 }
 
 export function writeAlexithymiaDraft(
@@ -364,24 +484,45 @@ export function writeAlexithymiaDraft(
 ) {
   const store = alexithymiaStore(storage);
   const selectedCues = Object.fromEntries(Object.entries(draft.selectedCues)
-    .map(([key, value]) => [key, Math.min(10, Math.max(0, Math.round(value)))]));
+    .filter(([, value]) => value > 0)
+    .map(([key, value]) => [key, Math.min(100, Math.max(0, Math.round(value / 5) * 5))]));
+  const shape = Object.fromEntries(Object.entries(draft.shape)
+    .filter(([key, value]) => (
+      (key === 'pleasantness' || key === 'energy' || key === 'power' || key === 'expectedness')
+      && Number.isFinite(value)
+    ))
+    .map(([key, value]) => [key, Math.min(1, Math.max(0, value ?? 0))]));
+  const decisions = Object.fromEntries(Object.entries(draft.decisions)
+    .filter(([key, decision]) => key && (
+      decision === 'fits' || decision === 'maybe' || decision === 'not-this-time'
+    )));
+  const selectedDecisionIds = Object.keys(decisions)
+    .filter((id) => decisions[id] === 'fits' || decisions[id] === 'maybe');
+  const termOrder = [...new Set([
+    ...draft.termOrder.filter((id) => selectedDecisionIds.includes(id)),
+    ...selectedDecisionIds,
+  ])];
   const normalized: AlexithymiaDraft = {
     ...draft,
-    phase: Math.min(8, Math.max(0, Math.round(draft.phase))),
+    stage: Math.min(4, Math.max(0, Math.round(draft.stage))),
+    observation: draft.observation.trimStart(),
     openRegion: draft.openRegion || null,
     selectedCues,
-    energy: Math.min(1, Math.max(-1, draft.energy)),
-    valence: Math.min(1, Math.max(-1, draft.valence)),
-    selectedEmotion: draft.selectedEmotion || null,
-    journalNeeds: [...new Set(draft.journalNeeds.filter(Boolean))],
-    intensity: Math.min(10, Math.max(0, Math.round(draft.intensity))),
+    shape,
+    decisions,
+    termOrder,
+    customTerms: [...new Set(draft.customTerms.map((term) => term.trim()).filter(Boolean))],
+    selectedNeeds: [...new Set(draft.selectedNeeds.filter(Boolean))],
   };
-  const hasProgress = normalized.phase > 0
+  const hasProgress = normalized.stage > 0
+    || Boolean(normalized.observation.trim())
     || Object.keys(normalized.selectedCues).length > 0
-    || normalized.compassTouched
-    || Boolean(normalized.selectedEmotion)
-    || Boolean(normalized.reflection.trim())
-    || normalized.journalNeeds.length > 0;
+    || Object.keys(normalized.shape).length > 0
+    || Object.keys(normalized.decisions).length > 0
+    || normalized.customTerms.length > 0
+    || normalized.noWordYet
+    || normalized.selectedNeeds.length > 0
+    || Boolean(normalized.statement.trim());
   if (!hasProgress) {
     store.clear();
     return null;

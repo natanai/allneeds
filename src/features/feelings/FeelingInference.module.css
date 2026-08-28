@@ -69,16 +69,11 @@
 .intensityMeter { position: relative; height: .5rem; overflow: hidden; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--outline) 24%, transparent); }
 .intensityFill { position: absolute; inset-block: 0; border-radius: inherit; background: color-mix(in srgb, var(--positive) 65%, transparent); }
 
-/* Regulation exercises stay in the dedicated support tools in the current production design. */
-.skillsSection { display: none; }
-.skills { display: grid; gap: 1rem; }
-.skill { padding: .85rem 1rem; display: flex; flex-direction: column; gap: .75rem; border: 1px solid color-mix(in srgb, var(--outline) 40%, transparent); border-radius: calc(14px * var(--corner-scale)); background: color-mix(in srgb, #fff 85%, transparent); }
-.skill button { padding: 0; display: flex; align-items: center; justify-content: space-between; gap: .5rem; border: 0; background: none; color: inherit; cursor: pointer; font: 600 1rem var(--font-body); text-align: left; }
-.skill button span { color: color-mix(in srgb, var(--text) 65%, transparent); font-size: .85rem; font-weight: 500; }
-.skill p { margin: 0; color: color-mix(in srgb, var(--text) 75%, transparent); font-size: .95rem; }
-.actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; }
-.actions button { min-height: 40px; padding: .45rem 1.1rem; border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--chip-bg) 70%, transparent); color: inherit; cursor: pointer; font: 600 1rem var(--font-body); }
+.actions { margin-top: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .65rem; }
+.actions button { min-height: 44px; padding: .45rem 1.1rem; border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--chip-bg) 70%, transparent); color: inherit; cursor: pointer; font: 600 1rem var(--font-body); }
 .actions button:hover, .actions button:focus-visible { outline: none; background: color-mix(in srgb, var(--positive) 55%, transparent); }
+.actions a { min-height: 44px; padding: .45rem 1.1rem; display: inline-flex; align-items: center; border-radius: var(--radius-pill); background: var(--primary); color: var(--primary-ink); font: 650 1rem var(--font-body); text-decoration: none; }
+.actions a:hover, .actions a:focus-visible { outline: 2px solid color-mix(in srgb, var(--primary) 60%, transparent); outline-offset: 2px; }
 
 .popoverBackdrop { position: fixed; inset: 0; z-index: 1200; padding: 1rem; display: grid; place-items: center; overflow: auto; background: color-mix(in srgb, var(--text) 35%, transparent); }
 .popover { width: min(32rem, 100%); max-height: calc(100dvh - 2rem); display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; border-radius: calc(18px * var(--corner-scale)); background: #fff; color: var(--text); box-shadow: 0 18px 40px color-mix(in srgb, var(--text) 18%, transparent); }
@@ -123,6 +118,7 @@
   .intensityFill { background: color-mix(in srgb, var(--positive) 65%, var(--primary) 10%); }
   .actions { margin-top: .15rem; padding: .65rem .2rem .2rem; border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent); }
   .actions button { padding: .35rem .65rem; border-width: 1px; background: color-mix(in srgb, #fff 82%, var(--selection) 18%); font-size: .72rem; }
+  .actions a { min-height: 44px; padding: .35rem .7rem; font-size: .72rem; }
   .popoverBackdrop { padding: .5rem; }
   .popover { max-height: calc(100dvh - 1rem); }
   .popoverHeader { padding: max(.55rem, env(safe-area-inset-top)) .55rem .4rem 1rem; }

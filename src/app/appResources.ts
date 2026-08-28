@@ -1,11 +1,5 @@
 import { assetPath } from '../data/catalog';
 
-export type BodyCueAppResources = {
-  reverseInference: unknown;
-  emotionLibrary: Record<string, { name?: string }>;
-  supportData: Record<string, unknown>;
-};
-
 export type ObservationAppResources = {
   evaluate: (text: string) => unknown;
   suggest: (text: string, library: unknown, maxEach?: number, options?: object) => unknown;
@@ -39,8 +33,6 @@ export type SharedFeedResources = {
 export const SHARED_FEED_FRESH_MS = 60 * 60 * 1_000;
 const PUBLIC_FEED_STORAGE_KEY = 'allneeds:shared-feed:public-recent:v1';
 
-let bodyCueResources: BodyCueAppResources | null = null;
-let bodyCuePromise: Promise<BodyCueAppResources> | null = null;
 let observationResources: ObservationAppResources | null = null;
 let observationPromise: Promise<ObservationAppResources> | null = null;
 const feedResources = new Map<string, SharedFeedResources>();
@@ -52,32 +44,6 @@ async function fetchJson(path: string) {
   const response = await fetch(assetPath(path), { cache: 'force-cache' });
   if (!response.ok) throw new Error(`${path} returned ${response.status}.`);
   return response.json() as Promise<unknown>;
-}
-
-export function readBodyCueResources() {
-  return bodyCueResources;
-}
-
-export function loadBodyCueResources() {
-  if (bodyCueResources) return Promise.resolve(bodyCueResources);
-  if (!bodyCuePromise) {
-    bodyCuePromise = Promise.all([
-      fetchJson('data/reverse-inference.json'),
-      // @ts-expect-error Canonical production data is retained as JavaScript.
-      import('../legacy/alexithymia-support-data.js') as Promise<{ EMOTION_LIBRARY?: BodyCueAppResources['emotionLibrary'] }>,
-    ]).then(([reverseInference, alexithymiaData]) => {
-      bodyCueResources = {
-        reverseInference,
-        emotionLibrary: alexithymiaData.EMOTION_LIBRARY ?? {},
-        supportData: alexithymiaData as unknown as Record<string, unknown>,
-      };
-      return bodyCueResources;
-    }).catch((error: unknown) => {
-      bodyCuePromise = null;
-      throw error;
-    });
-  }
-  return bodyCuePromise;
 }
 
 export function readObservationResources() {
@@ -207,7 +173,6 @@ export function loadSharedFeedResources(scope: string, sort: string, refresh = f
 
 export async function warmAppResources() {
   await Promise.all([
-    loadBodyCueResources(),
     loadObservationResources(),
     loadSharedFeedResources('public', 'recent'),
   ]);

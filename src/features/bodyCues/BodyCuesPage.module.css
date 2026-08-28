@@ -13,8 +13,10 @@
 .match { width: 100%; min-width: 0; min-height: 2.65rem; padding: .58rem .7rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .65rem; border: 2px solid color-mix(in srgb, var(--outline) 68%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, #fff 78%, var(--selection) 22%); color: var(--text); box-shadow: 0 4px 0 color-mix(in srgb, var(--outline) 14%, transparent); text-decoration: none; }
 .match:hover, .match:focus-visible { background: color-mix(in srgb, #fff 62%, var(--selection) 38%); box-shadow: 0 5px 0 color-mix(in srgb, var(--outline) 20%, transparent); }
 .topMatch { border-color: var(--outline); background: color-mix(in srgb, #fff 58%, var(--positive) 42%); }
+.matchIdentity { min-width: 0; display: grid; gap: .08rem; }
 .matchName { min-width: 0; overflow: hidden; font-weight: 700; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
-.matchPercent { min-width: 2.9rem; padding: .16rem .4rem; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--quiet) 68%, #fff 32%); font-family: var(--font-display); font-size: .78rem; font-weight: 700; line-height: 1.25; text-align: center; }
+.matchRole { color: var(--secondary); font-size: .68rem; font-weight: 700; line-height: 1.15; }
+.matchPercent { min-width: 2.9rem; padding: .16rem .4rem; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--quiet) 68%, #fff 32%); font-family: var(--font-display); font-size: .78rem; font-weight: 700; line-height: 1.25; text-align: center; white-space: nowrap; }
 .resultToggle { justify-self: start; min-height: 40px; padding: .42rem .72rem; border: 2px solid color-mix(in srgb, var(--outline) 58%, transparent); border-radius: var(--radius-pill); background: #fff; color: var(--text); font: 700 .82rem/1 var(--font-body); cursor: pointer; }
 .resultActions { display: flex; align-items: center; gap: .35rem; margin-top: .8rem; }
 .pinToggle { display: none; }
@@ -69,6 +71,7 @@
   .match { flex: 0 0 auto; width: auto; min-width: min(9.6rem, 48vw); max-width: 62vw; min-height: 2.45rem; padding: .4rem .5rem; gap: .4rem; border-width: 1.5px; box-shadow: none; scroll-snap-align: start; }
   .resultsPanel[data-pinned='false'] .match { width: 100%; min-width: 0; max-width: none; justify-content: space-between; }
   .matchName { max-width: 38vw; font-size: .78rem; }
+  .matchRole { font-size: .58rem; }
   .resultsPanel[data-pinned='false'] .matchName { max-width: none; }
   .matchPercent { min-width: 2.25rem; padding: .12rem .3rem; font-size: .64rem; }
   .resultToggle { display: none; }
