@@ -2,19 +2,36 @@
 
 > Standing repository rule for the user-facing approval proposal at the end of a full Need content audit. This supplements `docs/content-evidence-review.md` and controls proposal presentation when the two documents address different concerns.
 
+## Mandatory readiness and verification protocol
+
+Every full Need audit is governed by `docs/need-audit-handshake.md`.
+
+Before substantive audit conclusions, the agent must complete and report the H01–H18 readiness handshake. After research and drafting, the approval-ready response must begin with the H01–H18 **Need Audit Verification** matrix required by that document. Any `FAIL` means the draft must be revised before the official proposal is shown.
+
+The verification matrix and the official proposal are two separate artifacts in the same approval-ready response:
+
+1. **Need Audit Verification** is reviewer-facing audit metadata. It demonstrates exactly where the draft passed each repository invariant.
+2. **The official proposal** begins at `# Need for {Need}` and is the clean site-facing artifact being approved.
+
+There should be no conversational preface before the verification matrix, no commentary between the matrix and the official proposal, and no commentary after the proposal.
+
 ## Core distinction
 
-The internal audit and the official proposal are different artifacts.
+The internal audit, the verification matrix, and the official proposal are different artifacts.
 
 The **internal audit** may contain research notes, source-role analysis, limitations, provenance checks, strategy dispositions, rejected alternatives, implementation planning, and other material needed to reach a defensible result.
 
+The **verification matrix** is a compact reviewer-facing proof that the finished draft was checked against the H01–H18 handshake invariants. It maps each invariant to the exact public-content location or audit step where it was verified. It is not site content and does not become canonical page copy.
+
 The **official full Need audit proposal shown to the user for approval** is a clean snapshot of the final site-facing content being proposed. It is not an audit report and must not contain the reasoning that produced it.
 
-## Hard rule: site content only
+## Hard rule: the official proposal artifact is site content only
 
-From the first character of the official proposal through the last, include only content that is proposed to appear on the site, plus the links that content will use.
+From the first character of `# Need for {Need}` through the last line of the official proposal, include only content that is proposed to appear on the site, plus the links that content will use.
 
-Do not add any surrounding description text before, between, or after the proposed site content. In particular, do not include:
+The required H01–H18 verification matrix may appear immediately before this artifact as specified above. No other surrounding commentary is allowed in an approval-ready response.
+
+Inside or after the official proposal artifact, do not add:
 
 - a preface, summary, recommendation, or explanation of the proposal;
 - phrases such as `I recommend`, `here is the proposal`, `why this works`, `what changed`, or `for approval`;
@@ -24,7 +41,7 @@ Do not add any surrounding description text before, between, or after the propos
 - confidence statements, caveats addressed to the user, or an approval question after the content;
 - any prose whose purpose is to explain the proposal rather than be part of the proposed site itself.
 
-A formal proposal therefore begins directly with the Need's site-facing content and ends directly with the last piece of proposed site-facing content.
+The official proposal therefore begins directly with the Need's site-facing content and ends directly with the last piece of proposed site-facing content.
 
 ## What the proposal must show
 
@@ -76,7 +93,7 @@ That paragraph should accomplish all of the short description's jobs at once:
 
 - orient the reader clearly enough to know what Need, value, or motivation is under discussion without offering a formal definition;
 - help the reader understand why experiencing the Need can make sense and what useful human problem or function it may relate to;
-- preserve motivational framing by showing what the Need may draw a person toward noticing, seeking, protecting, expressing, changing, or doing;
+- preserve motivational framing by showing what the Need may move a person toward noticing, seeking, protecting, expressing, changing, or doing;
 - include only the conceptual distinctions necessary to keep the Need clear and distinct from neighboring concepts;
 - introduce, in concise reader-facing language, every idea that earns a public Need-level citation.
 
@@ -190,6 +207,8 @@ The placeholder text above documents structure only. Never include placeholder l
 
 During collaborative drafting, the user may ask questions, compare alternatives, or request rationale. Normal discussion is allowed during that exploratory phase.
 
-Once the assistant presents something as the **official**, **full**, **final**, or **approval-ready** Need audit proposal, this format becomes mandatory. If the user asks for a revised official proposal, return the revised site-content-only proposal again rather than wrapping it in a recap of the revisions.
+Once the assistant presents something as the **official**, **full**, **final**, or **approval-ready** Need audit response, the H01–H18 verification matrix is mandatory immediately before the official proposal. The proposal artifact itself must follow the site-content-only format above.
+
+If the user asks for a revised official proposal, rerun the affected verification checkpoints and return the updated verification matrix followed by the revised site-content-only proposal. Do not wrap the proposal artifact itself in a recap of revisions.
 
 After the user approves it, implementation/reporting messages may return to normal conversational form. The site-content-only restriction applies specifically to the official proposal artifact shown for approval.
