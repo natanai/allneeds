@@ -171,57 +171,74 @@ function runtimeCatalogSource() {
     });
     return strategies;
   };
-
-  const legacyNeeds = legacy.needs
-    .map((need, catalogOrder) => ({ need, catalogOrder }))
-    .filter(({ need }) => !canonicalEditorialNeedSlugs.has(need.slug))
-    .map(({ need, catalogOrder }) => {
-      const override = editorial.needs[need.slug];
-      return {
-        catalogOrder,
-        value: {
-          slug: need.slug,
-          title: need.title,
-          category: need.category,
-          summary: override?.summary ?? need.description ?? need.originalClaim ?? '',
-          feelings: need.feelings ?? [],
-          fauxFeelings: need.fauxFeelings ?? [],
-          strategies: strategyReferencesForNeed(
-            need.slug,
-            override?.strategies ?? need.strategies ?? [],
-          ),
-          evidence: {
-            claimSummary: override?.summary ?? need.originalClaim,
-            narrative: override?.narrative ?? need.rewrittenClaim,
-            sources: override?.sources ?? need.supportingSources ?? [],
-            ...(override?.lenses?.length ? { lenses: override.lenses } : {}),
-          },
-        },
-      };
-    });
-
-  const editorialNeeds = canonicalEditorialNeeds.map(([slug, need]) => ({
-    catalogOrder: need.catalogOrder,
-    value: {
-      slug,
+  const compileLegacyNeed = (need: LegacyCatalog['needs'][number]) => {
+    const override = editorial.needs[need.slug];
+    return {
+      slug: need.slug,
       title: need.title,
       category: need.category,
-      summary: need.summary,
-      feelings: need.feelings,
-      fauxFeelings: need.fauxFeelings,
-      strategies: strategyReferencesForNeed(slug, need.strategies),
+      summary: override?.summary ?? need.description ?? need.originalClaim ?? '',
+      feelings: need.feelings ?? [],
+      fauxFeelings: need.fauxFeelings ?? [],
+      strategies: strategyReferencesForNeed(
+        need.slug,
+        override?.strategies ?? need.strategies ?? [],
+      ),
       evidence: {
-        claimSummary: need.summary,
-        narrative: need.narrative,
-        sources: need.sources,
-        ...(need.lenses?.length ? { lenses: need.lenses } : {}),
+        claimSummary: override?.summary ?? need.originalClaim,
+        narrative: override?.narrative ?? need.rewrittenClaim,
+        sources: override?.sources ?? need.supportingSources ?? [],
+        ...(override?.lenses?.length ? { lenses: override.lenses } : {}),
       },
+    };
+  };
+  const compileEditorialNeed = (slug: string, need: CanonicalEditorialNeed) => ({
+    slug,
+    title: need.title,
+    category: need.category,
+    summary: need.summary,
+    feelings: need.feelings,
+    fauxFeelings: need.fauxFeelings,
+    strategies: strategyReferencesForNeed(slug, need.strategies),
+    evidence: {
+      claimSummary: need.summary,
+      narrative: need.narrative,
+      sources: need.sources,
+      ...(need.lenses?.length ? { lenses: need.lenses } : {}),
     },
-  }));
+  });
 
-  const needs = [...legacyNeeds, ...editorialNeeds]
-    .sort((a, b) => a.catalogOrder - b.catalogOrder)
-    .map(({ value }) => value);
+  const remainingLegacyNeeds = legacy.needs
+    .filter((need) => !canonicalEditorialNeedSlugs.has(need.slug));
+  const totalNeedCount = remainingLegacyNeeds.length + canonicalEditorialNeeds.length;
+  const canonicalNeedByOrder = new Map<number, [string, CanonicalEditorialNeed]>();
+  canonicalEditorialNeeds.forEach(([slug, need]) => {
+    if (!Number.isInteger(need.catalogOrder)
+      || need.catalogOrder < 0
+      || need.catalogOrder >= totalNeedCount) {
+      throw new Error(`Canonical Need ${slug} has invalid catalogOrder ${need.catalogOrder}.`);
+    }
+    if (canonicalNeedByOrder.has(need.catalogOrder)) {
+      throw new Error(`Multiple canonical Needs claim catalogOrder ${need.catalogOrder}.`);
+    }
+    canonicalNeedByOrder.set(need.catalogOrder, [slug, need]);
+  });
+
+  let legacyNeedIndex = 0;
+  const needs = Array.from({ length: totalNeedCount }, (_, catalogOrder) => {
+    const canonical = canonicalNeedByOrder.get(catalogOrder);
+    if (canonical) return compileEditorialNeed(...canonical);
+
+    const legacyNeed = remainingLegacyNeeds[legacyNeedIndex];
+    if (!legacyNeed) {
+      throw new Error(`No legacy Need available for catalogOrder ${catalogOrder}.`);
+    }
+    legacyNeedIndex += 1;
+    return compileLegacyNeed(legacyNeed);
+  });
+  if (legacyNeedIndex !== remainingLegacyNeeds.length) {
+    throw new Error('Not all legacy Needs were placed in the runtime catalog.');
+  }
 
   const fauxFeelings = legacy.fauxFeelings.map((feeling) => ({
     slug: feeling.slug,

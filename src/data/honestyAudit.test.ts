@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import legacyData from './generated/legacyData.json';
-import { needsBySlug, strategiesBySlug } from './catalog';
+import { needs, needsBySlug, strategiesBySlug } from './catalog';
 
 const approvedSourceUrls = [
   'https://onlinelibrary.wiley.com/doi/10.3982/ECTA14673',
@@ -26,6 +26,17 @@ describe('approved Honesty audit package', () => {
       { title: 'Practice saying what you mean', slug: 'practice-saying-what-you-mean' },
       { title: 'Rehearse what you wish you had said', slug: 'rehearse-what-you-wish-you-had-said' },
     ]);
+  });
+
+  it('restores Honesty at its canonical catalog position without shifting later Needs', () => {
+    expect(needs).toHaveLength(legacyData.needs.length + 1);
+    expect(needs[19]?.slug).toBe('honesty');
+    expect(needs.slice(0, 19).map((need) => need.slug)).toEqual(
+      legacyData.needs.slice(0, 19).map((need) => need.slug),
+    );
+    expect(needs.slice(20).map((need) => need.slug)).toEqual(
+      legacyData.needs.slice(19).map((need) => need.slug),
+    );
   });
 
   it('gives each approved system strategy its approved human-facing source', () => {
