@@ -4,7 +4,7 @@
 
 ## Canonical production owner
 
-Reviewed Clarity content is owned by `src/data/editorialCatalog.json` and compiled through the existing deterministic runtime catalog pipeline. `src/data/generated/legacyData.json` remains an imported historical snapshot and is not hand-edited by this audit.
+Reviewed Clarity content is owned by `src/data/editorialCatalog.json` and compiled through the existing deterministic runtime catalog pipeline. Clarity now has complete canonical entity ownership there, and the superseded Clarity Need entity is physically absent from `src/data/generated/legacyData.json`. Reverse Clarity references inside still-legacy-owned Feeling or Faux Feeling entities remain until those entity families receive their own canonical migration.
 
 No Clarity-specific React rendering, runtime CSS, runtime copy repair, or second editorial source is introduced.
 
