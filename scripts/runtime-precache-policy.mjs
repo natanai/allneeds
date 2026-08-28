@@ -1,7 +1,4 @@
 const requiredRuntimeData = new Set([
-  './data/observation-guide.json',
-  './data/observation_cue_modules.json',
-  './data/observation_cues.csv',
   './data/reverse-inference.json',
 ]);
 

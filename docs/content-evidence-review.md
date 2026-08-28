@@ -2,7 +2,7 @@
 
 > Status: living document. Start here before changing explanatory, psychological, behavioral, health, strategy, or research-facing copy in allneeds.
 >
-> Last updated: 2026-08-26.
+> Last updated: 2026-08-28.
 
 ## Purpose
 
@@ -330,6 +330,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-08-25 | Profile strategy ownership | Nat's former static strategies were migrated to the verified profile and removed from repository catalog data and references | Implemented and regression-guarded |
 | 2026-08-26 | Need function lenses | Optional lenses require distinct lived function, distinct evidence, and recognition value; remain one canonical Need and render generically | Standing rule; first use is Understanding |
 | 2026-08-26 | Understanding | Umbrella copy, two function lenses, nine lens-local citations, three system strategies, and two legacy association removals approved | Authorized for content implementation; magnet pending |
+| 2026-08-28 | Observation Inference 2.0 | Local deterministic exploratory-matching contract, non-probabilistic explanation copy, approved fallback safeguards, shared highlight/detector model, legacy retirement, and implementation plan approved | Implemented on review branch; not yet merged |
 
 ## Implementation notes / handoff
 

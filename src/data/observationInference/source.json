@@ -1,0 +1,2395 @@
+{
+  "$schema": "./source.schema.json",
+  "schemaVersion": 1,
+  "modelVersion": "2.0.0",
+  "provenance": {
+    "repository": "natanai/nvc-app",
+    "branch": "performance/immediate-response-v1",
+    "commit": "7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3",
+    "importedAt": "2026-08-28",
+    "cueRows": 219
+  },
+  "slots": [
+    {
+      "id": "time",
+      "label": "When it happened",
+      "noun": "time anchor",
+      "question": "When did it happen?",
+      "summary": "Add a day, date, or timeframe so the moment is anchored in time.",
+      "examples": [
+        "Yesterday at 3 p.m.…",
+        "On Monday around noon…"
+      ],
+      "detectors": [
+        {
+          "id": "relative-day",
+          "pattern": "\\b(?:yesterday|today|tonight|this\\s+morning|this\\s+afternoon|this\\s+evening|earlier\\s+today|earlier\\s+this\\s+week|earlier\\s+tonight|earlier\\s+this\\s+month|earlier\\s+this\\s+morning|earlier\\s+this\\s+afternoon|earlier\\s+this\\s+evening|later\\s+that\\s+day|later\\s+that\\s+night|later\\s+this\\s+week|later\\s+today|later\\s+tonight|last\\s+night|last\\s+week|last\\s+weekend|last\\s+month|last\\s+year|this\\s+week|this\\s+weekend|this\\s+past\\s+weekend|next\\s+week|next\\s+month|next\\s+year|the\\s+day\\s+before|the\\s+night\\s+before|the\\s+morning\\s+before|the\\s+afternoon\\s+before|the\\s+evening\\s+before|over\\s+the\\s+weekend|over\\s+the\\s+holidays|over\\s+spring\\s+break|over\\s+winter\\s+break|that\\s+morning|that\\s+afternoon|that\\s+evening|that\\s+night|that\\s+weekend|first\\s+thing\\s+this\\s+morning)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "seasonal",
+          "pattern": "\\b(?:this\\s+spring|this\\s+summer|this\\s+fall|this\\s+autumn|this\\s+winter|last\\s+spring|last\\s+summer|last\\s+fall|last\\s+autumn|last\\s+winter|next\\s+spring|next\\s+summer|next\\s+fall|next\\s+autumn|next\\s+winter)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "weekday",
+          "pattern": "\\b(?:on\\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "weekday-part",
+          "pattern": "\\b(?:on\\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\s+(?:morning|afternoon|evening|night)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "calendar",
+          "pattern": "\\bon\\s+\\d{1,2}(?:st|nd|rd|th)?\\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:\\s+\\d{2,4})?\\b",
+          "flags": "i"
+        },
+        {
+          "id": "numeric-date",
+          "pattern": "\\bon\\s+(?:\\d{1,2}\\/\\d{1,2}(?:\\/\\d{2,4})?|\\d{4}-\\d{2}-\\d{2})\\b",
+          "flags": "i"
+        },
+        {
+          "id": "clock-time",
+          "pattern": "\\b(?:at|around|by)\\s+(?:\\d{1,2}(?::\\d{2})?\\s?(?:a\\.?m\\.?|p\\.?m\\.?|am|pm)|(?:[01]\\d|2[0-3]):[0-5]\\d(?:\\:[0-5]\\d)?)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "time-range",
+          "pattern": "\\bfrom\\s+\\d{1,2}(?::\\d{2})?\\s?(?:a\\.?m\\.?|p\\.?m\\.?|am|pm)?\\s+(?:to|through|until)\\s+\\d{1,2}(?::\\d{2})?\\s?(?:a\\.?m\\.?|p\\.?m\\.?|am|pm)?\\b",
+          "flags": "i"
+        },
+        {
+          "id": "time-event",
+          "pattern": "\\b(?:before|after|during|by|around|throughout)\\s+(?:our\\s+|my\\s+|their\\s+|the\\s+|this\\s+|that\\s+)?(?:meeting|team\\s+meeting|standup|stand-up|check\\s+in|check-in|checkup|check-up|one\\s+on\\s+one|one-on-one|1:1|call|phone\\s+call|video\\s+call|video\\s+meeting|video\\s+conference|zoom\\s+call|zoom\\s+meeting|teams\\s+call|google\\s+meet|webex|session|appointment|practice|game|shift|class|lesson|interview|presentation|training|workshop|webinar|review|retro|retrospective|demo|ceremony|service)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "time-meal",
+          "pattern": "\\b(?:before|after|around|during|by)\\s+(?:our\\s+|my\\s+|their\\s+|the\\s+|this\\s+|that\\s+)?(?:breakfast|lunch|dinner|brunch|coffee\\s+break|coffee|tea\\s+break|snack|bedtime)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "time-window",
+          "pattern": "\\b(?:earlier|later)\\s+in\\s+(?:the\\s+)?(?:day|week|month|year)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "time-within-range",
+          "pattern": "\\bwithin\\s+(?:the\\s+)?(?:last|next)\\s+\\d+[\\d,]*(?:\\.\\d+)?\\s+(?:seconds?|minutes?|hours?|days?|weeks?|months?|years?)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "time-of-day",
+          "pattern": "\\b(?:at\\s+(?:noon|midnight)|that\\s+morning|that\\s+evening|that\\s+afternoon|sunrise|sunset|dawn|dusk)\\b",
+          "flags": "i"
+        }
+      ]
+    },
+    {
+      "id": "context",
+      "label": "Where and with whom",
+      "noun": "setting or people",
+      "question": "Where did it happen and who was involved?",
+      "summary": "Name the space or people so the scene is easy to picture.",
+      "examples": [
+        "In the conference room with Alex…",
+        "With my kids in the kitchen…"
+      ],
+      "detectors": [
+        {
+          "id": "location-place",
+          "pattern": "\\b(?:at|in|inside|within|outside|near|by|around|throughout|from)\\s+(?:the\\s+|my\\s+|our\\s+|this\\s+|that\\s+|their\\s+)?(?:home|house|apartment|condo|loft|kitchen|living\\s+room|dining\\s+room|bedroom|garage|driveway|yard|garden|porch|patio|balcony|deck|office|home\\s+office|workspace|desk|coworking\\s+space|coworking\\s+office|conference\\s+room|meeting\\s+room|boardroom|auditorium|library|lab|laboratory|clinic|hospital|ward|nurse\\s+station|waiting\\s+room|exam\\s+room|operating\\s+room|therapy\\s+room|studio|sound\\s+stage|rehearsal\\s+space|classroom|lecture\\s+hall|campus|school|gym|fitness\\s+center|locker\\s+room|field|court|track|stadium|arena|pool|restaurant|cafe|coffee\\s+shop|coffeehouse|bar|pub|diner|bakery|store|shop|grocery\\s+store|supermarket|pharmacy|market|warehouse|factory|plant|workshop|construction\\s+site|job\\s+site|site|hallway|corridor|lobby|reception|waiting\\s+area|front\\s+desk|parking\\s+lot|parking\\s+garage|car|truck|van|bus|train|subway|platform|station|airport|terminal|gate|hotel|hotel\\s+lobby|hotel\\s+room|elevator|stairs|break\\s+room|breakroom|kitchenette|porch\\s+swing|playground|park|trail|beach|campground|campsite)(?:\\s+[A-Za-z0-9#-]+)?\\b",
+          "flags": "i"
+        },
+        {
+          "id": "location-room",
+          "pattern": "\\b(?:at|in|inside|outside|near|by)\\s+(?:the\\s+)?(?:room|suite|unit|apartment|apt\\.?|rm\\.?|classroom|office|floor)\\s*(?:[#-]?\\s*\\d+[A-Za-z]?|\\s+[A-Za-z]\\d{0,3})\\b",
+          "flags": "i"
+        },
+        {
+          "id": "location-virtual",
+          "pattern": "\\b(?:on|over|in|via|through)\\s+(?:a\\s+|an\\s+|the\\s+|my\\s+|our\\s+|this\\s+|that\\s+|their\\s+)?(?:zoom|zoom\\s+call|zoom\\s+meeting|video\\s+call|video\\s+meeting|video\\s+conference|phone|phone\\s+call|facetime|whatsapp|signal|discord|discord\\s+channel|discord\\s+server|teams|microsoft\\s+teams|google\\s+meet|meet\\s+call|webex|slack|slack\\s+channel|telegram|telegram\\s+chat|telegram\\s+channel|telegram\\s+group|group\\s+chat|chat\\s+thread|text\\s+thread|text\\s+message|sms|email\\s+thread|email|email\\s+inbox|inbox|voicemail|voice\\s+mail|voicemail\\s+message|letter|mailed\\s+notice|postal\\s+mail|mailbox)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "location-generic",
+          "pattern": "\\b(?:at|in|inside|within|outside|near|by|around|throughout|from|on)\\s+(?:(?:the|a|an|my|our|this|that|their|his|her|its|your|yours|my\\s+own|our\\s+own|your\\s+own)\\s+)?(?:(?!(?:time|times|timing|moment|moments|noon|midnight|sunrise|sunset|dawn|dusk|morning|afternoon|evening|tonight|today|yesterday|tomorrow|am|pm|a.m.|p.m.|a.m|p.m)\\b)(?=[A-Za-z0-9'’&.-]*[A-Za-z])[A-Za-z0-9][\\w'’&.-]*)(?:\\s+(?:(?:of|and|&|the|for|at|on|in|by|de|del|de\\s+la|de\\s+los|de\\s+las|da|do|dos|das|von|van|der|di|du|des|saint|santa|san|st.|jr.|sr.|y)\\s+)?(?:(?!(?:time|times|timing|moment|moments|noon|midnight|sunrise|sunset|dawn|dusk|morning|afternoon|evening|tonight|today|yesterday|tomorrow|am|pm|a.m.|p.m.|a.m|p.m)\\b)(?=[A-Za-z0-9'’&.-]*[A-Za-z])[A-Za-z0-9][\\w'’&.-]*)){0,4}",
+          "flags": "i"
+        },
+        {
+          "id": "participants",
+          "pattern": "\\b(?:with|alongside|next to|together with)\\s+(?:[A-Z][\\w.-]*(?:\\s+[A-Z][\\w.-]*)*|(?:my|our|the|this|that|your|their|a|an)\\s+(?:[A-Za-z0-9&][\\w&'\\-]*(?:\\s+[A-Za-z0-9&][\\w&'\\-]*){0,4}))\\b",
+          "flags": ""
+        },
+        {
+          "id": "participant-group",
+          "pattern": "\\b(?:with|alongside|next to|together with)\\s+(?:\\d+|one|two|three|four|five|six|seven|eight|nine|ten|a\\s+couple(?:\\s+of)?|a\\s+few|several)\\s+(?:coworkers?|colleagues?|teammates?|classmates?|students?|friends?|neighbors?|clients?|customers?|participants?|attendees?|family(?:\\s+members)?|siblings?|brothers?|sisters?|parents?|kids?|children|patients?)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "context-origin",
+          "pattern": "\\b(?:at|from)\\s+(?:my|our|the|this|that|their)?\\s*(?:home|house|apartment|condo|office|desk|workspace)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "message-actor",
+          "pattern": "\\b(?:[A-Z][\\w.-]*(?:\\s+[A-Z][\\w.-]*)*|(?:my|our|the|this|that|your|their|a|an)\\s+(?:[A-Za-z0-9&][\\w&'\\-]*(?:\\s+[A-Za-z0-9&][\\w&'\\-]*){0,4}))\\s+(?:(?:emailed|emailed\\s+me|emailed\\s+us|emailed\\s+back|emailed\\s+saying|emailed\\s+to\\s+say|texted|texted\\s+me|texted\\s+us|texted\\s+saying|texted\\s+to\\s+say|messaged|messaged\\s+me|messaged\\s+us|sent\\s+me\\s+an?\\s+email|sent\\s+us\\s+an?\\s+email|sent\\s+an?\\s+email|sent\\s+me\\s+a\\s+text|sent\\s+us\\s+a\\s+text|sent\\s+a\\s+text|sent\\s+me\\s+a\\s+message|sent\\s+us\\s+a\\s+message|sent\\s+a\\s+message|slacked|slacked\\s+me|slacked\\s+us|pinged|pinged\\s+me|pinged\\s+us|posted|posted\\s+in|posted\\s+that|announced|announced\\s+that|called|called\\s+me|called\\s+us|phoned|phoned\\s+me|phoned\\s+us|mailed|mailed\\s+me|mailed\\s+us|mailed\\s+a\\s+letter|mailed\\s+a\\s+notice)|left\\s+(?:me\\s+|us\\s+)?a\\s+voicemail|left\\s+voicemail)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "message-source",
+          "pattern": "\\b(?:an?\\s+(?:email|message|text|voicemail|letter)\\s+from)\\s+(?:[A-Z][\\w.-]*(?:\\s+[A-Z][\\w.-]*)*|(?:my|our|the|this|that|your|their|a|an)\\s+(?:[A-Za-z0-9&][\\w&'\\-]*(?:\\s+[A-Za-z0-9&][\\w&'\\-]*){0,4}))\\b",
+          "flags": "i"
+        }
+      ]
+    },
+    {
+      "id": "sensory",
+      "label": "What you directly sensed",
+      "noun": "sensory detail",
+      "question": "What did you see or hear?",
+      "summary": "Use sensory verbs and direct quotes so the observation stays factual.",
+      "examples": [
+        "I saw him close the laptop.",
+        "I heard “Please wrap this up.”"
+      ],
+      "detectors": [
+        {
+          "id": "sensory-verb",
+          "pattern": "\\b(?:i|we)\\s+(?:was\\s+|were\\s+|am\\s+|are\\s+)?(?:see|see(?:ing)?|saw|hear|hear(?:ing)?|heard|listen|listened|listening|notice|noticed|noticing|observe|observed|observing|witness|witnessed|witnessing|record|recorded|recording|capture|captured|capturing|measure|measured|measuring|time|timed|timing|count|counted|counting|check|checked|checking|read|reading|watch|watched|watching|spot|spotted|spotting|glimpse|glimpsed|glimpsing|monitor|monitored|monitoring|track|tracked|tracking|document|documented|documenting|log|logged|logging|screenshot|screenshotted|screenshotting|overhear|overheard|overhearing|smell|smelled|smelling|sniff|sniffed|sniffing|taste|tasted|tasting|touch|touched|touching|feel(?!\\s+(?:like|that))|feels(?!\\s+(?:like|that))|felt(?!\\s+(?:like|that))|feeling(?!\\s+(?:like|that)))\\b",
+          "flags": "i"
+        },
+        {
+          "id": "device-sensory",
+          "pattern": "\\b(?:security|surveillance|doorbell|doorbell\\s+cam|camera|footage|monitor|baby\\s+monitor|dashboard|maintenance\\s+dashboard|audit\\s+logs?|system\\s+logs?|logs?|radar|sensor|alarm|assay|control\\s+panel)\\s+(?:shows?|showed|showing|captures?|captured|capturing|records?|recorded|recording|lists?|listed|flagged|flags|flashed|flashes|displayed|displays|detected|detects|reported|reports)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "direct-quote",
+          "pattern": "“[^”]+”|\"[^\"]+\"|‘[^’]+’|'[^']+'",
+          "flags": ""
+        }
+      ]
+    },
+    {
+      "id": "measure",
+      "label": "Counts and quotes",
+      "noun": "measurement",
+      "question": "What can be counted or quoted?",
+      "summary": "Mention quantities or repeat the exact words to make it verifiable.",
+      "examples": [
+        "They called three times.",
+        "She said “I’ll handle it tomorrow.”"
+      ],
+      "detectors": [
+        {
+          "id": "count",
+          "pattern": "\\b(?:once|twice|thrice|(?:a\\s+couple\\s+of|couple\\s+of|a\\s+few|several|dozens\\s+of|hundreds\\s+of|thousands\\s+of|half\\s+(?:a\\s+)?dozen|two\\s+dozen|three\\s+dozen|dozen|(?:\\d+[\\d,]*(?:\\.\\d+)?|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|both))(?:\\s+(?:more|additional|extra))?\\s+(?:times?|seconds?|minutes?|hours?|days?|weeks?|months?|years?|moments?|emails?|messages?|texts?|text\\s+messages?|slack\\s+messages?|pings?|notifications?|calls?|voicemails?|meetings?|sessions?|appointments?|visits?|reminders?|updates?|tickets?|tasks?|items?|deliveries?|orders?|requests?|incidents?|occurrences?|complaints?|reports?|notes?|pages?|slides?|points?|percent(?:age)?s?|%|laps?|rounds?|attempts?|tries|check-?ins?|follow-?ups?|people|teammates?|coworkers?|colleagues?|students?|participants?|attendees?|clients?|customers?|patients?|guests?|visitors?|children|kids?|parents?|siblings?|units?|steps?|miles?|kilometers?|meters?|centimeters?|inches?|feet|yards?))\\b",
+          "flags": "i"
+        },
+        {
+          "id": "body-language-count",
+          "pattern": "\\b(?:both|all\\s+(?:two|three|four|five|six|seven|eight|nine|ten)|the\\s+(?:two|three|four|five|six|seven|eight|nine|ten)|each)\\s+(?:partners?|tenors?|performers?|singers?|musicians?|clients?|family(?:\\s+members)?|families|volunteers?|contractors?|participants?|teammates?|coworkers?|colleagues?|siblings?|brothers?|sisters?|parents?|kids?|children|coordinators?|couples?)\\b",
+          "flags": "i"
+        },
+        {
+          "id": "direct-quote",
+          "pattern": "“[^”]+”|\"[^\"]+\"|‘[^’]+’|'[^']+'",
+          "flags": ""
+        }
+      ]
+    }
+  ],
+  "expressions": [
+    {
+      "id": "comfort-turned-away",
+      "tier": "direct",
+      "pattern": "\\b(?:reached|leaned|offered)\\b[^\\n]{0,80}\\b(?:hug|hand|embrace|touch|hold)\\b[^\\n]{0,80}\\b(?:pulled\\s+away|stepp(?:ed|ing)\\s+back|turned\\s+away|kept\\s+(?:arms|hands)\\s+(?:at\\s+their\\s+sides|still))\\b",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "angry",
+        "frustrated",
+        "scared",
+        "tired",
+        "anxious",
+        "disappointment",
+        "enraged",
+        "resentful",
+        "embarrassed",
+        "jealous",
+        "defiant"
+      ],
+      "needSlugs": [
+        "love-caring",
+        "nurturing",
+        "honor",
+        "reliability",
+        "need-to-matter",
+        "mattering",
+        "closeness"
+      ],
+      "cueIds": [
+        "love-caring-comfort-turned-away",
+        "nurturing-comfort-turned-away",
+        "honor-comfort-turned-away",
+        "reliability-comfort-turned-away",
+        "need-to-matter-comfort-turned-away",
+        "mattering-comfort-turned-away",
+        "closeness-comfort-turned-away"
+      ],
+      "examples": [
+        "At (time detail) I reached to hug (other person) and they stepped back toward the doorway."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "no-check-in",
+      "tier": "direct",
+      "pattern": "\\b(?:no\\s+one|nobody)\\b[^\\n]{0,80}\\b(?:checked|asked|looked\\s+in)\\b[^\\n]{0,80}\\b(?:how|if)\\b[^\\n]{0,80}\\b(?:doing|feeling|holding\\s+up)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "angry",
+        "frustrated",
+        "scared",
+        "tired",
+        "anxious",
+        "disappointment",
+        "enraged",
+        "resentful",
+        "embarrassed",
+        "jealous",
+        "defiant"
+      ],
+      "needSlugs": [
+        "love-caring",
+        "nurturing",
+        "honor",
+        "reliability",
+        "need-to-matter",
+        "mattering",
+        "closeness"
+      ],
+      "cueIds": [
+        "love-caring-no-check-in",
+        "nurturing-no-check-in",
+        "honor-no-check-in",
+        "reliability-no-check-in",
+        "need-to-matter-no-check-in",
+        "mattering-no-check-in",
+        "closeness-no-check-in"
+      ],
+      "examples": [
+        "During (context detail) nobody checked how (other person) was holding up."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "ignored-distress",
+      "tier": "direct",
+      "pattern": "\\b(?:crying|sobbing|shaking|tearing\\s+up|wiping\\s+their\\s+eyes)\\b[^\\n]{0,80}\\b(?:kept|continued|stayed)\\b[^\\n]{0,80}\\b(?:typing|talking|scrolling|working|reviewing)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "angry",
+        "frustrated",
+        "scared",
+        "tired",
+        "anxious",
+        "disappointment",
+        "enraged",
+        "resentful",
+        "embarrassed",
+        "jealous",
+        "defiant"
+      ],
+      "needSlugs": [
+        "love-caring",
+        "nurturing",
+        "honor",
+        "reliability",
+        "need-to-matter",
+        "mattering",
+        "closeness"
+      ],
+      "cueIds": [
+        "love-caring-ignored-distress",
+        "nurturing-ignored-distress",
+        "honor-ignored-distress",
+        "reliability-ignored-distress",
+        "need-to-matter-ignored-distress",
+        "mattering-ignored-distress",
+        "closeness-ignored-distress"
+      ],
+      "examples": [
+        "While (other person) wiped their eyes, the group kept typing on (object detail)."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "meeting-without",
+      "tier": "direct",
+      "pattern": "\\b(?:meeting|call|gathering|hangout)\\b[^\\n]{0,80}\\b(?:started|held|scheduled|happened)\\b[^\\n]{0,80}\\b(?:without|w\\/o|minus|excluding)\\b[^\\n]{0,80}\\b(?:me|us|them)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "upset",
+        "scared",
+        "embarrassed",
+        "anxious",
+        "angry",
+        "powerless",
+        "thwarted",
+        "frustrated",
+        "defiant",
+        "overwhelmed",
+        "afraid",
+        "jealous",
+        "disappointment",
+        "enraged",
+        "confused",
+        "antagonistic",
+        "hostile",
+        "in-pain",
+        "resentful",
+        "irritated",
+        "impotent",
+        "helpless"
+      ],
+      "needSlugs": [
+        "connection",
+        "belonging",
+        "inclusion",
+        "community",
+        "dependability",
+        "accountability",
+        "causality",
+        "fairness",
+        "justice",
+        "friendship",
+        "mutuality"
+      ],
+      "cueIds": [
+        "connection-meeting-without",
+        "belonging-meeting-without",
+        "inclusion-meeting-without",
+        "community-meeting-without",
+        "dependability-meeting-without",
+        "accountability-meeting-without",
+        "causality-meeting-without",
+        "fairness-meeting-without",
+        "justice-meeting-without",
+        "friendship-meeting-without",
+        "mutuality-meeting-without"
+      ],
+      "examples": [
+        "They started a meeting in (context detail) without adding me to the invite."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "door-closed-outside",
+      "tier": "direct",
+      "pattern": "\\bdoor\\b[^\\n]{0,80}\\b(?:closed|shut|locked)\\b[^\\n]{0,80}\\b(?:while|with)\\b[^\\n]{0,80}\\b(?:still\\s+outside|in\\s+the\\s+hall|on\\s+the\\s+stairs)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "upset",
+        "scared",
+        "embarrassed",
+        "anxious",
+        "angry",
+        "powerless",
+        "thwarted",
+        "frustrated",
+        "defiant",
+        "overwhelmed",
+        "afraid",
+        "jealous",
+        "disappointment",
+        "enraged",
+        "confused",
+        "antagonistic",
+        "hostile",
+        "in-pain",
+        "resentful",
+        "irritated",
+        "impotent",
+        "helpless"
+      ],
+      "needSlugs": [
+        "connection",
+        "belonging",
+        "inclusion",
+        "community",
+        "dependability",
+        "accountability",
+        "causality",
+        "fairness",
+        "justice",
+        "friendship",
+        "mutuality"
+      ],
+      "cueIds": [
+        "connection-door-closed-outside",
+        "belonging-door-closed-outside",
+        "inclusion-door-closed-outside",
+        "community-door-closed-outside",
+        "dependability-door-closed-outside",
+        "accountability-door-closed-outside",
+        "causality-door-closed-outside",
+        "fairness-door-closed-outside",
+        "justice-door-closed-outside",
+        "friendship-door-closed-outside",
+        "mutuality-door-closed-outside"
+      ],
+      "examples": [
+        "The door closed while I was still in the hallway."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "thread-without",
+      "tier": "direct",
+      "pattern": "\\b(?:group\\s+chat|thread|channel)\\b[^\\n]{0,80}\\b(?:without|minus|excluding)\\b[^\\n]{0,80}\\b(?:me|them|inviting)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "upset",
+        "scared",
+        "embarrassed",
+        "anxious",
+        "angry",
+        "powerless",
+        "thwarted",
+        "frustrated",
+        "defiant",
+        "overwhelmed",
+        "afraid",
+        "jealous",
+        "disappointment",
+        "enraged",
+        "confused",
+        "antagonistic",
+        "hostile",
+        "in-pain",
+        "resentful",
+        "irritated",
+        "impotent",
+        "helpless"
+      ],
+      "needSlugs": [
+        "connection",
+        "belonging",
+        "inclusion",
+        "community",
+        "dependability",
+        "accountability",
+        "causality",
+        "fairness",
+        "justice",
+        "friendship",
+        "mutuality"
+      ],
+      "cueIds": [
+        "connection-thread-without",
+        "belonging-thread-without",
+        "inclusion-thread-without",
+        "community-thread-without",
+        "dependability-thread-without",
+        "accountability-thread-without",
+        "causality-thread-without",
+        "fairness-thread-without",
+        "justice-thread-without",
+        "friendship-thread-without",
+        "mutuality-thread-without"
+      ],
+      "examples": [
+        "A group chat about (context detail) went on without my name anywhere."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "plan-change-message",
+      "tier": "direct",
+      "pattern": "\\bagreed\\s+to\\b[^\\n]{0,80}\\bat\\s+\\d|\\b(?:text(?:ed)?|messag(?:ed|e)|sent)\\b[^\\n]{0,80}\\bat\\s+\\d[^\\n]{0,80}\\b(?:stay(?:ing)?\\s+late\\s+at\\s+work)|\\b(?:not\\s+home|wasn'?t\\s+home|weren't\\s+home)\\b[^\\n]{0,40}\\b(?:yet|by\\s+\\d)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "upset",
+        "scared",
+        "embarrassed",
+        "anxious",
+        "angry",
+        "powerless",
+        "thwarted",
+        "frustrated",
+        "defiant",
+        "overwhelmed",
+        "afraid",
+        "jealous",
+        "anxiety",
+        "alarmed",
+        "agitated",
+        "helpless",
+        "resentful",
+        "irritated",
+        "disappointment",
+        "enraged",
+        "confused",
+        "antagonistic",
+        "hostile",
+        "in-pain",
+        "impotent",
+        "tense",
+        "distressed"
+      ],
+      "needSlugs": [
+        "connection",
+        "belonging",
+        "inclusion",
+        "community",
+        "safety",
+        "trust",
+        "dependability",
+        "commitment",
+        "accountability",
+        "causality",
+        "fairness",
+        "justice",
+        "friendship",
+        "mutuality",
+        "order",
+        "control",
+        "predictability",
+        "security"
+      ],
+      "cueIds": [
+        "connection-plan-change-message",
+        "belonging-plan-change-message",
+        "inclusion-plan-change-message",
+        "community-plan-change-message",
+        "safety-plan-change-message",
+        "trust-plan-change-message",
+        "dependability-plan-change-message",
+        "commitment-plan-change-message",
+        "accountability-plan-change-message",
+        "causality-plan-change-message",
+        "fairness-plan-change-message",
+        "justice-plan-change-message",
+        "friendship-plan-change-message",
+        "mutuality-plan-change-message",
+        "order-plan-change-message",
+        "control-plan-change-message",
+        "predictability-plan-change-message",
+        "security-plan-change-message"
+      ],
+      "examples": [
+        "We agreed to have dinner at home at 7 p.m. but at 7:20 p.m. they still weren't home and had texted at 6:55 that they were staying late at work."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "no-breaks",
+      "tier": "direct",
+      "pattern": "\\b(?:back-?to-?back|no\\s+breaks?|without\\s+breaks?)\\b[^\\n]{0,80}\\b(?:shift|shifts|meetings?|appointments?|lessons?|cases?)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "angry",
+        "frustrated",
+        "resentful",
+        "tired",
+        "anxious",
+        "overwhelmed",
+        "distressed"
+      ],
+      "needSlugs": [
+        "support",
+        "rest",
+        "relaxation",
+        "physical-fitness"
+      ],
+      "cueIds": [
+        "support-no-breaks",
+        "rest-no-breaks",
+        "relaxation-no-breaks",
+        "physical-fitness-no-breaks"
+      ],
+      "examples": [
+        "After three (context detail) in a row there still was no time for a break."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "skipped-meal",
+      "tier": "direct",
+      "pattern": "\\b(?:skipp(?:ed|ing)|miss(?:ed|ing)|delayed)\\b[^\\n]{0,80}\\b(?:meal|lunch|dinner|breakfast|snack)\\b",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "angry",
+        "frustrated",
+        "resentful",
+        "tired",
+        "anxious",
+        "overwhelmed",
+        "distressed"
+      ],
+      "needSlugs": [
+        "support",
+        "rest",
+        "relaxation",
+        "physical-fitness"
+      ],
+      "cueIds": [
+        "support-skipped-meal",
+        "rest-skipped-meal",
+        "relaxation-skipped-meal",
+        "physical-fitness-skipped-meal"
+      ],
+      "examples": [
+        "We skipped (context detail) to finish (context detail)."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "no-cover",
+      "tier": "direct",
+      "pattern": "\\b(?:asked|request(?:ed)?)\\b[^\\n]{0,80}\\b(?:cover|relief|backup|break)\\b[^\\n]{0,80}\\b(?:no\\s+one|nobody|none)\\b[^\\n]{0,80}\\b(?:available|free|responded|could)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "terrified",
+        "hurt",
+        "bewildered",
+        "sad",
+        "frightened",
+        "lonely",
+        "angry",
+        "frustrated",
+        "resentful",
+        "tired",
+        "anxious",
+        "overwhelmed",
+        "distressed"
+      ],
+      "needSlugs": [
+        "support",
+        "rest",
+        "relaxation",
+        "physical-fitness"
+      ],
+      "cueIds": [
+        "support-no-cover",
+        "rest-no-cover",
+        "relaxation-no-cover",
+        "physical-fitness-no-cover"
+      ],
+      "examples": [
+        "I asked for cover so I could rest and nobody was available."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "interrupted",
+      "tier": "direct",
+      "pattern": "\\b(?:interrupted|cut\\s+me\\s+off|talked\\s+over)\\b[^\\n]{0,80}\\b(?:while|as)\\b[^\\n]{0,80}\\b(?:I\\s+was|we\\s+were)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "frightened",
+        "scared",
+        "overwhelmed",
+        "embarrassed",
+        "resentful",
+        "hurt",
+        "lonely",
+        "tired",
+        "anxious",
+        "hostile",
+        "antagonistic",
+        "disappointment",
+        "sad",
+        "upset",
+        "tense",
+        "distressed",
+        "agitated",
+        "anxiety",
+        "irritated",
+        "defiant",
+        "in-pain",
+        "enraged",
+        "powerless",
+        "thwarted",
+        "impotent",
+        "helpless",
+        "confused",
+        "bewildered"
+      ],
+      "needSlugs": [
+        "consideration",
+        "peer-respect",
+        "respect",
+        "to-be-seen",
+        "acknowledgement",
+        "clarity",
+        "understanding",
+        "recognition",
+        "non-judgmental-communication",
+        "to-be-heard",
+        "equality",
+        "empathy",
+        "acceptance"
+      ],
+      "cueIds": [
+        "consideration-interrupted",
+        "peer-respect-interrupted",
+        "respect-interrupted",
+        "to-be-seen-interrupted",
+        "acknowledgement-interrupted",
+        "clarity-interrupted",
+        "understanding-interrupted",
+        "recognition-interrupted",
+        "non-judgmental-communication-interrupted",
+        "to-be-heard-interrupted",
+        "equality-interrupted",
+        "empathy-interrupted",
+        "acceptance-interrupted"
+      ],
+      "examples": [
+        "While I was finishing a sentence, (other person) started talking about a different topic."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "dismissed-feelings",
+      "tier": "direct",
+      "pattern": "\\b(?:said|told)\\b[^\\n]{0,80}\\b(?:you'?re|I'?m|they're)\\s+(?:overreacting|too\\s+sensitive|fine|dramatic|making\\s+it\\s+up)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "frightened",
+        "scared",
+        "overwhelmed",
+        "embarrassed",
+        "resentful",
+        "hurt",
+        "lonely",
+        "tired",
+        "anxious",
+        "hostile",
+        "antagonistic",
+        "disappointment",
+        "sad",
+        "upset",
+        "tense",
+        "distressed",
+        "agitated",
+        "anxiety",
+        "irritated",
+        "defiant",
+        "in-pain",
+        "enraged",
+        "powerless",
+        "thwarted",
+        "impotent",
+        "helpless",
+        "confused",
+        "bewildered"
+      ],
+      "needSlugs": [
+        "consideration",
+        "peer-respect",
+        "respect",
+        "to-be-seen",
+        "acknowledgement",
+        "clarity",
+        "understanding",
+        "recognition",
+        "non-judgmental-communication",
+        "to-be-heard",
+        "equality",
+        "empathy",
+        "acceptance"
+      ],
+      "cueIds": [
+        "consideration-dismissed-feelings",
+        "peer-respect-dismissed-feelings",
+        "respect-dismissed-feelings",
+        "to-be-seen-dismissed-feelings",
+        "acknowledgement-dismissed-feelings",
+        "clarity-dismissed-feelings",
+        "understanding-dismissed-feelings",
+        "recognition-dismissed-feelings",
+        "non-judgmental-communication-dismissed-feelings",
+        "to-be-heard-dismissed-feelings",
+        "equality-dismissed-feelings",
+        "empathy-dismissed-feelings",
+        "acceptance-dismissed-feelings"
+      ],
+      "examples": [
+        "When I said I was hurt, they replied \"you're overreacting\" without asking more."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "ignored-clarify",
+      "tier": "direct",
+      "pattern": "\\b(?:asked|requested)\\b[^\\n]{0,80}\\b(?:repeat|say\\s+back|clarify|explain)\\b[^\\n]{0,80}\\b(?:they\\s+kept|they\\s+continued|they\\s+didn'?t)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "frightened",
+        "scared",
+        "overwhelmed",
+        "embarrassed",
+        "resentful",
+        "hurt",
+        "lonely",
+        "tired",
+        "anxious",
+        "hostile",
+        "antagonistic",
+        "disappointment",
+        "sad",
+        "upset",
+        "tense",
+        "distressed",
+        "agitated",
+        "anxiety",
+        "irritated",
+        "defiant",
+        "in-pain",
+        "enraged",
+        "powerless",
+        "thwarted",
+        "impotent",
+        "helpless",
+        "confused",
+        "bewildered"
+      ],
+      "needSlugs": [
+        "consideration",
+        "peer-respect",
+        "respect",
+        "to-be-seen",
+        "acknowledgement",
+        "clarity",
+        "understanding",
+        "recognition",
+        "non-judgmental-communication",
+        "to-be-heard",
+        "equality",
+        "empathy",
+        "acceptance"
+      ],
+      "cueIds": [
+        "consideration-ignored-clarify",
+        "peer-respect-ignored-clarify",
+        "respect-ignored-clarify",
+        "to-be-seen-ignored-clarify",
+        "acknowledgement-ignored-clarify",
+        "clarity-ignored-clarify",
+        "understanding-ignored-clarify",
+        "recognition-ignored-clarify",
+        "non-judgmental-communication-ignored-clarify",
+        "to-be-heard-ignored-clarify",
+        "equality-ignored-clarify",
+        "empathy-ignored-clarify",
+        "acceptance-ignored-clarify"
+      ],
+      "examples": [
+        "I asked them to repeat what they heard and they kept reading from their notes."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "credit-omitted",
+      "tier": "direct",
+      "pattern": "\\b(?:report|deck|presentation|announcement|summary)\\b[^\\n]{0,80}\\b(?:left|omitted|without|missing)\\b[^\\n]{0,80}\\b(?:my\\s+name|credit|attribution)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "frightened",
+        "upset",
+        "scared",
+        "lonely",
+        "afraid",
+        "hurt",
+        "sad",
+        "embarrassed",
+        "fear",
+        "desperation",
+        "disappointment",
+        "powerless",
+        "tense",
+        "helpless",
+        "defiant"
+      ],
+      "needSlugs": [
+        "need-for-all-living-things-to-flourish",
+        "contribution",
+        "participation",
+        "self-expression",
+        "accomplishment",
+        "growth"
+      ],
+      "cueIds": [
+        "need-for-all-living-things-to-flourish-credit-omitted",
+        "contribution-credit-omitted",
+        "participation-credit-omitted",
+        "self-expression-credit-omitted",
+        "accomplishment-credit-omitted",
+        "growth-credit-omitted"
+      ],
+      "examples": [
+        "The project announcement went out without my name on the contributors list."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "idea-set-aside",
+      "tier": "direct",
+      "pattern": "\\b(?:idea|proposal|plan|draft|contribution)\\b[^\\n]{0,80}\\b(?:ignored|dismissed|set\\s+aside|shelved)\\b[^\\n]{0,80}\\b(?:without|no)\\b[^\\n]{0,80}\\b(?:discussion|feedback)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "frightened",
+        "upset",
+        "scared",
+        "lonely",
+        "afraid",
+        "hurt",
+        "sad",
+        "embarrassed",
+        "fear",
+        "desperation",
+        "disappointment",
+        "powerless",
+        "tense",
+        "helpless",
+        "defiant"
+      ],
+      "needSlugs": [
+        "need-for-all-living-things-to-flourish",
+        "contribution",
+        "participation",
+        "self-expression",
+        "accomplishment",
+        "growth"
+      ],
+      "cueIds": [
+        "need-for-all-living-things-to-flourish-idea-set-aside",
+        "contribution-idea-set-aside",
+        "participation-idea-set-aside",
+        "self-expression-idea-set-aside",
+        "accomplishment-idea-set-aside",
+        "growth-idea-set-aside"
+      ],
+      "examples": [
+        "They set my proposal aside without any discussion."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "redo-without-why",
+      "tier": "direct",
+      "pattern": "\\b(?:redo|rework|start\\s+over|scrap)\\b[^\\n]{0,80}\\b(?:without|no)\\b[^\\n]{0,80}\\b(?:explanation|reason|context)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "frightened",
+        "upset",
+        "scared",
+        "lonely",
+        "afraid",
+        "hurt",
+        "sad",
+        "embarrassed",
+        "fear",
+        "desperation",
+        "disappointment",
+        "powerless",
+        "tense",
+        "helpless",
+        "defiant"
+      ],
+      "needSlugs": [
+        "need-for-all-living-things-to-flourish",
+        "contribution",
+        "participation",
+        "self-expression",
+        "accomplishment",
+        "growth"
+      ],
+      "cueIds": [
+        "need-for-all-living-things-to-flourish-redo-without-why",
+        "contribution-redo-without-why",
+        "participation-redo-without-why",
+        "self-expression-redo-without-why",
+        "accomplishment-redo-without-why",
+        "growth-redo-without-why"
+      ],
+      "examples": [
+        "We reworked the plan without explaining why the initial work did not."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "door-unsecured",
+      "tier": "direct",
+      "pattern": "\\b(?:door|gate|entrance|exit)\\b[^\\n]{0,80}\\b(?:propped|left|kept)\\b[^\\n]{0,80}\\b(?:open|unlocked|ajar)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "scared",
+        "angry",
+        "anxiety",
+        "frightened",
+        "alarmed",
+        "agitated",
+        "defiant",
+        "helpless",
+        "sad",
+        "hurt",
+        "resentful",
+        "irritated",
+        "anxious",
+        "overwhelmed",
+        "disappointment",
+        "enraged",
+        "frustrated",
+        "powerless",
+        "thwarted",
+        "embarrassed",
+        "tense",
+        "distressed",
+        "lonely"
+      ],
+      "needSlugs": [
+        "safety",
+        "trust",
+        "commitment",
+        "order",
+        "control",
+        "predictability",
+        "security"
+      ],
+      "cueIds": [
+        "safety-door-unsecured",
+        "trust-door-unsecured",
+        "commitment-door-unsecured",
+        "order-door-unsecured",
+        "control-door-unsecured",
+        "predictability-door-unsecured",
+        "security-door-unsecured"
+      ],
+      "examples": [
+        "The security door was propped open all evening."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "alarm-offline",
+      "tier": "direct",
+      "pattern": "\\b(?:alarm|detector|safety\\s+system|sensor)\\b[^\\n]{0,80}\\b(?:fault|offline|not\\s+working|failed|silenced)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "scared",
+        "angry",
+        "anxiety",
+        "frightened",
+        "alarmed",
+        "agitated",
+        "defiant",
+        "helpless",
+        "sad",
+        "hurt",
+        "resentful",
+        "irritated",
+        "anxious",
+        "overwhelmed",
+        "disappointment",
+        "enraged",
+        "frustrated",
+        "powerless",
+        "thwarted",
+        "embarrassed",
+        "tense",
+        "distressed",
+        "lonely"
+      ],
+      "needSlugs": [
+        "safety",
+        "trust",
+        "commitment",
+        "order",
+        "control",
+        "predictability",
+        "security"
+      ],
+      "cueIds": [
+        "safety-alarm-offline",
+        "trust-alarm-offline",
+        "commitment-alarm-offline",
+        "order-alarm-offline",
+        "control-alarm-offline",
+        "predictability-alarm-offline",
+        "security-alarm-offline"
+      ],
+      "examples": [
+        "The alarm panel showed the sensor offline and nobody addressed it."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "protocol-skipped",
+      "tier": "direct",
+      "pattern": "\\b(?:skipped|ignored|bypassed)\\b[^\\n]{0,80}\\b(?:safety|security|checklist|protocol|inspection)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "scared",
+        "angry",
+        "anxiety",
+        "frightened",
+        "alarmed",
+        "agitated",
+        "defiant",
+        "helpless",
+        "sad",
+        "hurt",
+        "resentful",
+        "irritated",
+        "anxious",
+        "overwhelmed",
+        "disappointment",
+        "enraged",
+        "frustrated",
+        "powerless",
+        "thwarted",
+        "embarrassed",
+        "tense",
+        "distressed",
+        "lonely"
+      ],
+      "needSlugs": [
+        "safety",
+        "trust",
+        "commitment",
+        "order",
+        "control",
+        "predictability",
+        "security"
+      ],
+      "cueIds": [
+        "safety-protocol-skipped",
+        "trust-protocol-skipped",
+        "commitment-protocol-skipped",
+        "order-protocol-skipped",
+        "control-protocol-skipped",
+        "predictability-protocol-skipped",
+        "security-protocol-skipped"
+      ],
+      "examples": [
+        "They skipped the safety check before starting (context detail)."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "forced-decision",
+      "tier": "direct",
+      "pattern": "\\b(?:told|forced|required|had\\s+to)\\b[^\\n]{0,80}\\b(?:sign|agree|commit|decide)\\b[^\\n]{0,80}\\b(?:immediately|on\\s+the\\s+spot|right\\s+away|without\\s+review)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "tense",
+        "distressed",
+        "scared",
+        "thwarted",
+        "anxious",
+        "frightened",
+        "irritated",
+        "powerless",
+        "impotent",
+        "helpless",
+        "confused",
+        "fear",
+        "desperation",
+        "alarmed",
+        "agitated",
+        "defiant",
+        "sad",
+        "resentful",
+        "overwhelmed",
+        "anxiety",
+        "disappointment",
+        "embarrassed"
+      ],
+      "needSlugs": [
+        "autonomy",
+        "choice",
+        "freedom",
+        "act-freely",
+        "choose-freely",
+        "space",
+        "do-things-at-my-own-pace-and-in-my-own-way",
+        "empowerment",
+        "consistency",
+        "integrity",
+        "privacy"
+      ],
+      "cueIds": [
+        "autonomy-forced-decision",
+        "choice-forced-decision",
+        "freedom-forced-decision",
+        "act-freely-forced-decision",
+        "choose-freely-forced-decision",
+        "space-forced-decision",
+        "do-things-at-my-own-pace-and-in-my-own-way-forced-decision",
+        "empowerment-forced-decision",
+        "consistency-forced-decision",
+        "integrity-forced-decision",
+        "privacy-forced-decision"
+      ],
+      "examples": [
+        "They asked me to sign immediately without time to review."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "schedule-overwrite",
+      "tier": "direct",
+      "pattern": "\\b(?:calendar|schedule|availability)\\b[^\\n]{0,80}\\b(?:overridden|overrode|replaced|ignored)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "tense",
+        "distressed",
+        "scared",
+        "thwarted",
+        "anxious",
+        "frightened",
+        "irritated",
+        "powerless",
+        "impotent",
+        "helpless",
+        "confused",
+        "fear",
+        "desperation",
+        "alarmed",
+        "agitated",
+        "defiant",
+        "sad",
+        "resentful",
+        "overwhelmed",
+        "anxiety",
+        "disappointment",
+        "embarrassed"
+      ],
+      "needSlugs": [
+        "autonomy",
+        "choice",
+        "freedom",
+        "act-freely",
+        "choose-freely",
+        "space",
+        "do-things-at-my-own-pace-and-in-my-own-way",
+        "empowerment",
+        "consistency",
+        "integrity",
+        "privacy"
+      ],
+      "cueIds": [
+        "autonomy-schedule-overwrite",
+        "choice-schedule-overwrite",
+        "freedom-schedule-overwrite",
+        "act-freely-schedule-overwrite",
+        "choose-freely-schedule-overwrite",
+        "space-schedule-overwrite",
+        "do-things-at-my-own-pace-and-in-my-own-way-schedule-overwrite",
+        "empowerment-schedule-overwrite",
+        "consistency-schedule-overwrite",
+        "integrity-schedule-overwrite",
+        "privacy-schedule-overwrite"
+      ],
+      "examples": [
+        "My calendar block was overwritten with another meeting."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "permission-for-routine",
+      "tier": "direct",
+      "pattern": "\\b(?:had\\s+to|needed\\s+to)\\b[^\\n]{0,80}\\b(?:ask|get)\\b[^\\n]{0,80}\\b(?:permission|approval)\\b[^\\n]{0,80}\\b(?:before|to)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "tense",
+        "distressed",
+        "scared",
+        "thwarted",
+        "anxious",
+        "frightened",
+        "irritated",
+        "powerless",
+        "impotent",
+        "helpless",
+        "confused",
+        "fear",
+        "desperation",
+        "alarmed",
+        "agitated",
+        "defiant",
+        "sad",
+        "resentful",
+        "overwhelmed",
+        "anxiety",
+        "disappointment",
+        "embarrassed"
+      ],
+      "needSlugs": [
+        "autonomy",
+        "choice",
+        "freedom",
+        "act-freely",
+        "choose-freely",
+        "space",
+        "do-things-at-my-own-pace-and-in-my-own-way",
+        "empowerment",
+        "consistency",
+        "integrity",
+        "privacy"
+      ],
+      "cueIds": [
+        "autonomy-permission-for-routine",
+        "choice-permission-for-routine",
+        "freedom-permission-for-routine",
+        "act-freely-permission-for-routine",
+        "choose-freely-permission-for-routine",
+        "space-permission-for-routine",
+        "do-things-at-my-own-pace-and-in-my-own-way-permission-for-routine",
+        "empowerment-permission-for-routine",
+        "consistency-permission-for-routine",
+        "integrity-permission-for-routine",
+        "privacy-permission-for-routine"
+      ],
+      "examples": [
+        "I had to get permission before sending a routine update."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "harsh-lighting",
+      "tier": "direct",
+      "pattern": "\\b(?:fluorescent|harsh|blaring|flickering)\\b[^\\n]{0,80}\\b(?:lights?|lighting)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "tense",
+        "distressed",
+        "sad",
+        "lonely",
+        "hurt",
+        "resentful",
+        "disappointment",
+        "bewildered",
+        "anxious",
+        "frightened",
+        "overwhelmed",
+        "irritated"
+      ],
+      "needSlugs": [
+        "appreciation",
+        "peace",
+        "serenity",
+        "calm",
+        "beauty"
+      ],
+      "cueIds": [
+        "appreciation-harsh-lighting",
+        "peace-harsh-lighting",
+        "serenity-harsh-lighting",
+        "calm-harsh-lighting",
+        "beauty-harsh-lighting"
+      ],
+      "examples": [
+        "The fluorescent lights flickered through the entire evening."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "constant-noise",
+      "tier": "direct",
+      "pattern": "\\b(?:constant|steady|continuous|loud)\\b[^\\n]{0,80}\\b(?:noise|hum|buzz|clatter|din|drone)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "tense",
+        "distressed",
+        "sad",
+        "lonely",
+        "hurt",
+        "resentful",
+        "disappointment",
+        "bewildered",
+        "anxious",
+        "frightened",
+        "overwhelmed",
+        "irritated"
+      ],
+      "needSlugs": [
+        "appreciation",
+        "peace",
+        "serenity",
+        "calm",
+        "beauty"
+      ],
+      "cueIds": [
+        "appreciation-constant-noise",
+        "peace-constant-noise",
+        "serenity-constant-noise",
+        "calm-constant-noise",
+        "beauty-constant-noise"
+      ],
+      "examples": [
+        "There was a steady hum from the generator all night."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "play-canceled",
+      "tier": "direct",
+      "pattern": "\\b(?:canceled|cancelled|cut|stopped|skipped)\\b[^\\n]{0,80}\\b(?:game|practice|music|break|art|recess|play)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "frustrated",
+        "tense",
+        "distressed",
+        "sad",
+        "lonely",
+        "hurt",
+        "resentful",
+        "disappointment",
+        "bewildered",
+        "anxious",
+        "frightened",
+        "overwhelmed",
+        "irritated"
+      ],
+      "needSlugs": [
+        "appreciation",
+        "peace",
+        "serenity",
+        "calm",
+        "beauty"
+      ],
+      "cueIds": [
+        "appreciation-play-canceled",
+        "peace-play-canceled",
+        "serenity-play-canceled",
+        "calm-play-canceled",
+        "beauty-play-canceled"
+      ],
+      "examples": [
+        "Our music break was canceled to squeeze in another briefing."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "tone-it-down",
+      "tier": "direct",
+      "pattern": "\\b(?:asked|told)\\b[^\\n]{0,80}\\b(?:tone\\s+down|hide|mask|pretend|act\\s+like|smile\\s+through)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "hurt",
+        "disappointment",
+        "enraged",
+        "resentful",
+        "sad",
+        "frustrated",
+        "embarrassed",
+        "scared",
+        "powerless",
+        "thwarted",
+        "fear",
+        "desperation"
+      ],
+      "needSlugs": [
+        "honesty",
+        "genuineness",
+        "authenticity"
+      ],
+      "cueIds": [
+        "honesty-tone-it-down",
+        "genuineness-tone-it-down",
+        "authenticity-tone-it-down"
+      ],
+      "examples": [
+        "They asked me to tone down my description before the meeting."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "edited-without-ok",
+      "tier": "direct",
+      "pattern": "\\b(?:edited|rewrote|changed|revised)\\b[^\\n]{0,80}\\b(?:statement|testimony|draft|bio)\\b[^\\n]{0,80}\\b(?:without|before)\\b[^\\n]{0,80}\\b(?:asking|my\\s+ok|my\\s+consent)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "hurt",
+        "disappointment",
+        "enraged",
+        "resentful",
+        "sad",
+        "frustrated",
+        "embarrassed",
+        "scared",
+        "powerless",
+        "thwarted",
+        "fear",
+        "desperation"
+      ],
+      "needSlugs": [
+        "honesty",
+        "genuineness",
+        "authenticity"
+      ],
+      "cueIds": [
+        "honesty-edited-without-ok",
+        "genuineness-edited-without-ok",
+        "authenticity-edited-without-ok"
+      ],
+      "examples": [
+        "My statement was edited without checking with me."
+      ],
+      "provenance": "legacy-observation-cues"
+    },
+    {
+      "id": "blocked-sharing",
+      "tier": "direct",
+      "pattern": "\\b(?:wasn'?t|not)\\b[^\\n]{0,80}\\b(?:allowed|permitted)\\b[^\\n]{0,80}\\b(?:to\\s+share|to\\s+say|to\\s+mention|to\\s+name)",
+      "flags": "iu",
+      "feelingSlugs": [
+        "angry",
+        "hurt",
+        "disappointment",
+        "enraged",
+        "resentful",
+        "sad",
+        "frustrated",
+        "embarrassed",
+        "scared",
+        "powerless",
+        "thwarted",
+        "fear",
+        "desperation"
+      ],
+      "needSlugs": [
+        "honesty",
+        "genuineness",
+        "authenticity"
+      ],
+      "cueIds": [
+        "honesty-blocked-sharing",
+        "genuineness-blocked-sharing",
+        "authenticity-blocked-sharing"
+      ],
+      "examples": [
+        "I was not allowed to mention the actual numbers during the briefing."
+      ],
+      "provenance": "legacy-observation-cues"
+    }
+  ],
+  "lexicalBridges": [
+    {
+      "id": "sad-forms",
+      "entityType": "feeling",
+      "slug": "sad",
+      "terms": [
+        "sadness",
+        "sadly"
+      ],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "calm-forms",
+      "entityType": "feeling",
+      "slug": "calm",
+      "terms": [
+        "calmness",
+        "calmly"
+      ],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "joyful-forms",
+      "entityType": "feeling",
+      "slug": "joyful",
+      "terms": [
+        "joy",
+        "joyfulness",
+        "joyfully"
+      ],
+      "provenance": "legacy-nvc-lint"
+    }
+  ],
+  "surfaceTerms": [
+    {
+      "id": "guilt",
+      "label": "guilty",
+      "terms": [
+        "guilty",
+        "guilt"
+      ]
+    }
+  ],
+  "guidanceRules": [
+    {
+      "id": "trait-labels",
+      "label": "Trait / character labels",
+      "explanation": "Swap labels for the concrete action you saw or heard.",
+      "terms": [
+        "rude",
+        "mean",
+        "cruel",
+        "selfish",
+        "self-centered",
+        "inconsiderate",
+        "disrespectful",
+        "unkind",
+        "toxic",
+        "unprofessional",
+        "inappropriate",
+        "unacceptable",
+        "problematic",
+        "offensive",
+        "hostile",
+        "aggressive",
+        "passive-aggressive",
+        "confrontational",
+        "combative",
+        "controlling",
+        "manipulative",
+        "coercive",
+        "domineering",
+        "bossy",
+        "overbearing",
+        "dismissive",
+        "belittling",
+        "demeaning",
+        "condescending",
+        "patronizing",
+        "arrogant",
+        "entitled",
+        "superior",
+        "judgmental",
+        "hypocritical",
+        "careless",
+        "sloppy",
+        "reckless",
+        "negligent",
+        "thoughtless",
+        "lazy",
+        "apathetic",
+        "indifferent",
+        "unmotivated",
+        "unreliable",
+        "irresponsible",
+        "flaky",
+        "undependable",
+        "incompetent",
+        "clueless",
+        "unqualified",
+        "incapable",
+        "immature",
+        "childish",
+        "dramatic",
+        "attention-seeking",
+        "procrastinate",
+        "procrastinating",
+        "procrastinated",
+        "procrastinator",
+        "procrastinators",
+        "complain",
+        "complained",
+        "complaining",
+        "complains",
+        "complainer",
+        "complainers",
+        "dishonest",
+        "deceitful",
+        "two-faced",
+        "untrustworthy",
+        "liar",
+        "bully",
+        "abusive",
+        "toxic person",
+        "gaslighter",
+        "narcissist",
+        "narcissistic",
+        "egotistical",
+        "stupid",
+        "stupidity",
+        "dumb",
+        "idiot",
+        "idiotic",
+        "fool",
+        "foolish",
+        "moron",
+        "moronic",
+        "evil",
+        "bad",
+        "wrong",
+        "jerk",
+        "hero",
+        "angel",
+        "saint",
+        "savior",
+        "rockstar",
+        "superstar",
+        "drama queen"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "catastrophe-language",
+      "label": "Catastrophic impact language",
+      "explanation": "Describe what happened instead of phrases like “destroyed” or “ruined.”",
+      "terms": [
+        "destroy",
+        "destroyed",
+        "destroying",
+        "destroys",
+        "ruin",
+        "ruined",
+        "ruining",
+        "ruins",
+        "wreck",
+        "wrecked",
+        "wrecking",
+        "wrecks",
+        "devastate",
+        "devastated",
+        "devastating",
+        "devastates",
+        "damage",
+        "damaged",
+        "damaging",
+        "damages",
+        "crush",
+        "crushed",
+        "crushing",
+        "crushes"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "comparison-stories",
+      "label": "Comparison or “as usual” stories",
+      "explanation": "Point to one recent moment instead of comparing to a pattern.",
+      "terms": [
+        "as usual",
+        "same as always",
+        "same old story",
+        "same old pattern",
+        "same old",
+        "once again",
+        "yet again",
+        "every single time",
+        "over and over",
+        "time after time",
+        "each time"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "moralizing-language",
+      "label": "Moralizing language",
+      "explanation": "Skip should/shouldn’t judgments and name what happened instead.",
+      "terms": [
+        "should",
+        "shouldn’t",
+        "shouldn't",
+        "ought",
+        "oughtn’t",
+        "oughtn't",
+        "supposed to",
+        "not supposed to",
+        "must",
+        "have to",
+        "need to",
+        "required to",
+        "the right thing",
+        "the wrong thing",
+        "proper",
+        "improper",
+        "respectful",
+        "disrespectful",
+        "basic decency",
+        "common sense",
+        "out of line",
+        "crossed a line"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "mind-reading-claims",
+      "label": "Mind-reading or motive claims",
+      "explanation": "Describe the observable action and leave motives like “on purpose” for later.",
+      "terms": [
+        "on purpose",
+        "intentionally",
+        "deliberately",
+        "trying to",
+        "meant to",
+        "wanted to",
+        "didn’t care",
+        "didn't care",
+        "don’t care",
+        "don't care",
+        "couldn’t care less",
+        "couldn't care less",
+        "to make me feel",
+        "to get back at me",
+        "to punish me",
+        "to manipulate me",
+        "obviously",
+        "clearly",
+        "because you",
+        "because he",
+        "because she",
+        "because they",
+        "for no reason",
+        "to hurt me",
+        "to hurt us",
+        "to spite me",
+        "to spite us",
+        "to annoy me",
+        "to annoy us",
+        "just to hurt me",
+        "just to spite me",
+        "just to get a rise out of me",
+        "because you don’t care",
+        "because you don't care",
+        "because he doesn’t care",
+        "because he doesn't care",
+        "because she doesn’t care",
+        "because she doesn't care"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "global-language",
+      "label": "Global or absolute language",
+      "explanation": "Anchor the moment in a specific time frame instead of absolutes like “always”.",
+      "terms": [
+        "always",
+        "never",
+        "forever",
+        "constantly",
+        "incessantly",
+        "every time",
+        "all the time",
+        "everyone",
+        "no one",
+        "nobody",
+        "all of you",
+        "none of you",
+        "all",
+        "none",
+        "whenever",
+        "everybody"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "vague-quantifiers",
+      "label": "Vague quantifiers or comparatives",
+      "explanation": "Give a count or timeframe instead of words like “often” or “too much”.",
+      "terms": [
+        "a lot",
+        "lots",
+        "many",
+        "countless",
+        "tons of",
+        "a bunch of",
+        "often",
+        "rarely",
+        "frequently",
+        "sometimes",
+        "usually",
+        "normally",
+        "typically",
+        "seldom",
+        "hardly ever",
+        "mostly",
+        "too much",
+        "too little",
+        "too many",
+        "enough",
+        "not enough",
+        "more",
+        "less",
+        "better",
+        "worse",
+        "very",
+        "really",
+        "extremely",
+        "totally",
+        "completely",
+        "kind of",
+        "sorta",
+        "sort of",
+        "somewhat"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "faux-feeling-story-words",
+      "label": "Faux-feelings or story words",
+      "explanation": "Name the words or actions you witnessed instead of story words like these.",
+      "terms": [
+        "ignored",
+        "dismissed",
+        "minimized",
+        "overlooked",
+        "sidelined",
+        "excluded",
+        "left out",
+        "ostracized",
+        "abandoned",
+        "neglected",
+        "attacked",
+        "targeted",
+        "picked on",
+        "disrespected",
+        "devalued",
+        "belittled",
+        "demeaned",
+        "humiliated",
+        "shamed",
+        "insulted",
+        "betrayed",
+        "backstabbed",
+        "thrown under the bus",
+        "invalidated",
+        "unheard",
+        "unseen",
+        "unappreciated",
+        "unrecognized",
+        "taken for granted",
+        "manipulated",
+        "controlled",
+        "coerced",
+        "used",
+        "exploited",
+        "taken advantage of",
+        "gaslit",
+        "gaslighted",
+        "judged",
+        "blamed",
+        "accused",
+        "criticized",
+        "condemned",
+        "rejected",
+        "unwanted",
+        "unloved",
+        "victimized",
+        "mistreated",
+        "abused",
+        "harassed",
+        "threatened",
+        "unsafe",
+        "pressured",
+        "cornered",
+        "provoked",
+        "lied to",
+        "deceived",
+        "misled",
+        "tricked",
+        "stonewalled",
+        "ghosted",
+        "left on read",
+        "undermined",
+        "sabotaged",
+        "silenced",
+        "talked over",
+        "talked down to"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "idiom-evaluations",
+      "label": "Idioms that conceal evaluations",
+      "explanation": "Translate the idiom into what a camera or microphone would capture.",
+      "terms": [
+        "threw me under the bus",
+        "stabbed me in the back",
+        "pushed my buttons",
+        "talked down to me",
+        "gave me the cold shoulder",
+        "shut me down",
+        "steamrolled me",
+        "blew me off",
+        "strung me along",
+        "led me on",
+        "set me up",
+        "baited me",
+        "overstepped",
+        "crossed a boundary",
+        "out of pocket"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "pathologizing-labels",
+      "label": "Pathologizing labels used as insults",
+      "explanation": "Describe the specific behaviour instead of medical labels.",
+      "terms": [
+        "crazy",
+        "insane",
+        "psycho",
+        "hysterical",
+        "unstable",
+        "borderline",
+        "bipolar",
+        "adhd",
+        "autistic",
+        "ocd",
+        "sociopath",
+        "psychopath",
+        "delusional"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "speculation-language",
+      "label": "Speculation or inference language",
+      "explanation": "Stick with what you directly observed instead of “seems” or “probably”.",
+      "terms": [
+        "probably",
+        "likely",
+        "unlikely",
+        "maybe",
+        "perhaps",
+        "apparently",
+        "presumably",
+        "seems",
+        "seemed",
+        "seeming",
+        "seems like",
+        "seem to",
+        "appears to",
+        "looks like",
+        "sounds like",
+        "felt like",
+        "feel like"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "prediction-language",
+      "label": "Predictions framed as certainty",
+      "explanation": "Focus on what already happened rather than predicting the future.",
+      "terms": [
+        "bound to",
+        "never going to",
+        "always going to",
+        "destined to",
+        "headed toward",
+        "going to end up",
+        "sure to",
+        "guaranteed to",
+        "inevitable",
+        "without fail",
+        "no doubt"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "thinking-language",
+      "label": "Interpretations framed as thoughts",
+      "explanation": "Move “I think…” statements to the interpretation step and keep observations factual.",
+      "terms": [
+        "i think",
+        "i believe",
+        "i assume",
+        "i guess",
+        "i suspect",
+        "i imagine",
+        "i figure",
+        "i bet",
+        "i wonder if"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "blame-language",
+      "label": "Blame or fault language",
+      "explanation": "Drop blame phrases and recount the observable sequence instead.",
+      "terms": [
+        "fault",
+        "faults",
+        "faulted",
+        "blame",
+        "blamed",
+        "blaming",
+        "at fault"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "absence-language",
+      "label": "Abstract lack statements",
+      "explanation": "Swap “lack of…” for a description of what you actually saw or heard.",
+      "terms": [
+        "lack of respect",
+        "lack of consideration",
+        "lack of empathy",
+        "lack of support",
+        "lack of effort",
+        "lack of professionalism",
+        "lack of accountability",
+        "lack of integrity",
+        "lack of follow-through",
+        "lack of transparency",
+        "lack of honesty",
+        "lack of communication",
+        "lack of awareness"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "thoughts-as-feelings",
+      "label": "Thoughts masquerading as feelings",
+      "explanation": "If you want to share feelings, keep them in a separate sentence after the observation.",
+      "terms": [
+        "i feel that",
+        "i feel like",
+        "i feel as if",
+        "i feel as though",
+        "i feel you are",
+        "i feel he is",
+        "i feel she is",
+        "i feel they are",
+        "i feel it’s",
+        "i feel it's",
+        "i feel you should"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "evaluative-language",
+      "label": "Evaluative language",
+      "explanation": "Replace the evaluation with the words, actions, or measurable result you noticed.",
+      "terms": [
+        "always",
+        "never",
+        "must",
+        "right",
+        "wrong",
+        "good",
+        "bad",
+        "better",
+        "worse",
+        "best",
+        "worst",
+        "horrid",
+        "appalling",
+        "terrific",
+        "unacceptable",
+        "ridiculous",
+        "pathetic",
+        "annoying",
+        "annoyed",
+        "annoy",
+        "annoys",
+        "annoyingly",
+        "annoyance",
+        "horrible",
+        "awful",
+        "terrible",
+        "useless",
+        "pointless",
+        "unprofessional",
+        "shameful",
+        "disgusting",
+        "amazing",
+        "awesome",
+        "fantastic",
+        "incredible",
+        "perfect",
+        "unfair",
+        "inexcusable",
+        "disappointing",
+        "procrastinating",
+        "procrastinate"
+      ],
+      "patterns": [],
+      "provenance": "legacy-nvc-lint"
+    },
+    {
+      "id": "agentive-language",
+      "label": "Causal or coercive language",
+      "explanation": "Describe the observable sequence without assigning another person full responsibility for your response.",
+      "terms": [],
+      "patterns": [
+        {
+          "id": "agentive-1",
+          "pattern": "you\\s+made\\s+me",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-2",
+          "pattern": "they\\s+made\\s+me",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-3",
+          "pattern": "because of you",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-4",
+          "pattern": "made\\s+me\\s+feel",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-5",
+          "pattern": "caused\\s+me\\s+to",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-6",
+          "pattern": "forced\\s+me\\s+to",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-7",
+          "pattern": "you\\s+forced\\s+me",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-8",
+          "pattern": "pressured\\s+me\\s+to",
+          "flags": "i"
+        },
+        {
+          "id": "agentive-9",
+          "pattern": "left\\s+me\\s+no\\s+choice",
+          "flags": "i"
+        }
+      ],
+      "provenance": "legacy-nvc-lint"
+    }
+  ],
+  "explorationPools": {
+    "unmetFeelings": [
+      "upset",
+      "anxious",
+      "sad",
+      "frustrated",
+      "confused",
+      "hurt",
+      "lonely",
+      "tired"
+    ],
+    "metFeelings": [
+      "calm",
+      "contented",
+      "hopeful",
+      "relieved",
+      "peaceful",
+      "joyful",
+      "energized",
+      "inspired"
+    ],
+    "needs": [
+      "safety",
+      "connection",
+      "understanding",
+      "autonomy",
+      "support",
+      "rest",
+      "acceptance",
+      "respect"
+    ]
+  }
+}

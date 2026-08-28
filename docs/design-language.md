@@ -268,6 +268,14 @@ Rules:
 
 ## Decision log
 
+### 2026-08-28
+
+- Observation text uses one plain-text editing surface. CSS Custom Highlight ranges paint directly on the same DOM text that receives the caret, selection, wrapping, scrolling, and zoom. Do not restore a mirrored overlay, duplicate text renderer, scroll synchronizer, or pixel-offset positioning.
+- The Observation Quick Check, inline formula/entity/faux/guidance/cue styling, immediate detected-word links, caret explanations, and possible Feeling/Need results all consume the same analysis and exact-range ledger.
+- Formula highlights remain visually distinct from Feeling, Need, Faux Feeling, guidance, and broad cue treatments. Do not use percentages or confidence meters for Observation suggestions.
+- Detected Feeling, Need, and Faux Feeling words remain directly navigable. The page also keeps the recipe, research guide, Clear action, met/unmet choice, and Journal handoff.
+- On narrow screens the editor keeps a stable working height while explanations expand below it, so annotation help never overlaps the following controls.
+
 ### 2026-08-27
 
 - Clarity's **Pulse (C4B)** became the approved production Need-magnet identity: Focus for `Making things explicit`, Compass for `Getting clear within yourself`, and one continuous pulse spanning both sides. The treatment remains Customizer-owned, uses the existing shared two-sided magnet pattern, and does not alter shared shell or physics behavior.

@@ -30,11 +30,11 @@ describe('runtime precache policy', () => {
       './404.html',
       './assets/index-123.js',
       './lib/observationSuggest.js',
-      './data/observation_cues.csv',
+      './data/reverse-inference.json',
     ])).toEqual([
       './index.html',
       './assets/index-123.js',
-      './data/observation_cues.csv',
+      './data/reverse-inference.json',
     ]);
   });
 });

@@ -6,14 +6,6 @@ export type BodyCueAppResources = {
   supportData: Record<string, unknown>;
 };
 
-export type ObservationAppResources = {
-  evaluate: (text: string) => unknown;
-  suggest: (text: string, library: unknown, maxEach?: number, options?: object) => unknown;
-  fallback: (text: string, cues: unknown, options?: object) => unknown;
-  cueLibrary: unknown;
-  guide: unknown;
-};
-
 export type SharedFeedStrategy = {
   id: string | number;
   authorDid?: string;
@@ -41,8 +33,6 @@ const PUBLIC_FEED_STORAGE_KEY = 'allneeds:shared-feed:public-recent:v1';
 
 let bodyCueResources: BodyCueAppResources | null = null;
 let bodyCuePromise: Promise<BodyCueAppResources> | null = null;
-let observationResources: ObservationAppResources | null = null;
-let observationPromise: Promise<ObservationAppResources> | null = null;
 const feedResources = new Map<string, SharedFeedResources>();
 const feedPromises = new Map<string, Promise<SharedFeedResources>>();
 const feedFetchedAt = new Map<string, number>();
@@ -78,42 +68,6 @@ export function loadBodyCueResources() {
     });
   }
   return bodyCuePromise;
-}
-
-export function readObservationResources() {
-  return observationResources;
-}
-
-export function loadObservationResources() {
-  if (observationResources) return Promise.resolve(observationResources);
-  if (!observationPromise) {
-    observationPromise = Promise.all([
-      // @ts-expect-error Canonical production logic is intentionally bundled unchanged.
-      import('../legacy/observations/observationFormula.js'),
-      // @ts-expect-error Canonical production logic is intentionally bundled unchanged.
-      import('../legacy/observations/observationSuggest.js'),
-      // @ts-expect-error Canonical production logic is intentionally bundled unchanged.
-      import('../legacy/observations/observationFallback.js'),
-      fetchJson('data/observation-guide.json'),
-    ]).then(async ([formulaModule, suggestionModule, fallbackModule, guide]) => {
-      const cueLibrary = await suggestionModule.loadCueLibrary(
-        assetPath('data/observation_cues.csv'),
-        assetPath('data/observation_cue_modules.json'),
-      );
-      observationResources = {
-        evaluate: formulaModule.evaluateObservationFormula,
-        suggest: suggestionModule.suggestFromObservation,
-        fallback: fallbackModule.computeFallbackSuggestion,
-        cueLibrary,
-        guide,
-      };
-      return observationResources;
-    }).catch((error: unknown) => {
-      observationPromise = null;
-      throw error;
-    });
-  }
-  return observationPromise;
 }
 
 function feedKey(scope: string, sort: string) {
@@ -208,7 +162,6 @@ export function loadSharedFeedResources(scope: string, sort: string, refresh = f
 export async function warmAppResources() {
   await Promise.all([
     loadBodyCueResources(),
-    loadObservationResources(),
     loadSharedFeedResources('public', 'recent'),
   ]);
 }
