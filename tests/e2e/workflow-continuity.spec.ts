@@ -19,7 +19,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await page.goto('/observations');
   const editor = page.getByLabel('What did you notice?');
   await editor.fill(observation);
-  const loadMatches = page.getByRole('button', { name: 'Load possible feelings and needs matches' });
+  const loadMatches = page.getByRole('button', { name: 'Load possible feelings and needs' });
   await expect(loadMatches).toBeEnabled();
   await loadMatches.click();
   await page.getByRole('radio', { name: 'Met', exact: true }).click();
@@ -27,12 +27,12 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   const nav = page.getByLabel('Primary navigation magnets');
   await nav.getByRole('link', { name: 'Needs', exact: true }).click();
   await nav.getByRole('link', { name: 'Observations', exact: true }).click();
-  await expect(editor).toHaveValue(observation);
+  await expect(editor).toHaveText(observation);
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByRole('heading', { name: 'Possible feelings & needs to explore' })).toBeVisible();
 
   await page.reload();
-  await expect(editor).toHaveValue(observation);
+  await expect(editor).toHaveText(observation);
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Open in Journal', exact: true }).click();
 
@@ -42,7 +42,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await journalDialog.getByRole('button', { name: 'Clear', exact: true }).click();
   await journalDialog.getByRole('button', { name: 'Close full screen journal' }).click();
   await nav.getByRole('link', { name: 'Observations', exact: true }).click();
-  await expect(editor).toHaveValue('');
+  await expect(editor).toHaveText('');
   expect(runtimeProblems).toEqual([]);
 });
 
@@ -204,46 +204,33 @@ test('a downloaded device backup restores removed Inventory data through the vis
   expect(runtimeProblems).toEqual([]);
 });
 
-test('Alexithymia body, compass, and emotion choices restore until Start over', async ({ page }) => {
+test('Alexithymia stage, clues, decisions, and words restore until Start over', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   await page.goto('/alexithymia-support');
-  await page.getByRole('button', { name: 'Begin', exact: true }).click();
-  await page.getByRole('button', { name: 'Skip breathing and continue to the body check-in' }).click();
-  const firstRegion = page.locator('fieldset section').first();
-  await firstRegion.getByRole('button', { name: 'Check in' }).click();
-  await firstRegion.locator('button[aria-pressed]').first().click();
-  const cueIntensity = firstRegion.locator('input[type="range"]');
-  const cueLabel = await cueIntensity.getAttribute('aria-label');
-  expect(cueLabel).toBeTruthy();
-  await cueIntensity.fill('7');
+  await page.getByRole('button', { name: 'Start check-in' }).click();
+  await page.getByLabel('What happened?').fill('We stopped talking after dinner.');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByLabel('Energy', { exact: true }).fill('0.6');
-  await page.getByLabel('Pleasantness', { exact: true }).fill('-0.4');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  const compassChoice = page.locator('#compass-suggestions button[aria-pressed]').first();
-  await expect(compassChoice).toBeVisible();
-  await compassChoice.click();
-  const selectedEmotion = await compassChoice.textContent();
-  expect(selectedEmotion).toBeTruthy();
+  await page.getByRole('button', { name: /Body Choose sensations/ }).click();
+  const bodySheet = page.getByRole('dialog', { name: 'Body clues' });
+  await bodySheet.getByRole('button', { name: /Tight or constricted/ }).click();
+  await bodySheet.getByLabel('Tight or constricted intensity').fill('70');
+  await bodySheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.getByRole('button', { name: 'Compare words' }).click();
+  await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
+  const candidateSheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await candidateSheet.getByRole('button', { name: 'Fits', exact: true }).click();
+  await candidateSheet.getByRole('button', { name: 'Done', exact: true }).click();
   await page.waitForTimeout(250);
 
   await page.reload();
-  await expect(page.locator('#compass-suggestions button[aria-pressed="true"]')).toContainText(selectedEmotion!.trim().split(/\d/)[0]!.trim());
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page.getByLabel('Energy', { exact: true })).toHaveValue('0.6');
-  await expect(page.getByLabel('Pleasantness', { exact: true })).toHaveValue('-0.4');
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page.getByLabel(cueLabel!)).toHaveValue('7');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('button', { name: 'Finish' }).click();
-
+  await page.getByRole('button', { name: 'Continue check-in' }).click();
+  await expect(page.getByRole('heading', { name: 'Possible words' })).toBeVisible();
+  await expect(page.getByText('Anxiety').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Use these words' }).click();
+  page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Start over' }).click();
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Begin', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Step 1: What does your body notice?' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Start check-in' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Possible words' })).toHaveCount(0);
   expect(runtimeProblems).toEqual([]);
 });

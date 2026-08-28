@@ -46,4 +46,33 @@ describe('journalRepository', () => {
       ],
     });
   });
+
+  it('round-trips structured guided-support word roles without promoting them to journal Feelings', () => {
+    const storage = new MemoryStorage();
+    const entry = createJournalRecord({
+      notes: 'I feel anxious and guilt.',
+      feelings: [{ feeling: 'Anxiety', intensity: 5 }],
+      guidedSupport: {
+        observation: 'We stopped talking.',
+        terms: [
+          { label: 'Anxiety', role: 'feeling' },
+          { label: 'Guilt', role: 'working' },
+          { label: 'Blamed', role: 'faux-feeling' },
+        ],
+        statement: 'I feel anxious and guilt.',
+      },
+    });
+    writeJournal([entry], storage);
+    expect(readJournal(storage)[0]).toMatchObject({
+      feelings: [{ feeling: 'Anxiety', intensity: 5 }],
+      guidedSupport: {
+        observation: 'We stopped talking.',
+        terms: [
+          { label: 'Anxiety', role: 'feeling' },
+          { label: 'Guilt', role: 'working' },
+          { label: 'Blamed', role: 'faux-feeling' },
+        ],
+      },
+    });
+  });
 });

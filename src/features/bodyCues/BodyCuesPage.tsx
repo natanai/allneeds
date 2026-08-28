@@ -2,38 +2,20 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
-import { loadBodyCueResources, readBodyCueResources } from '../../app/appResources';
 import bodyRegionsRaw from '../../data/body-regions.json';
-import { feelingsBySlug } from '../../data/catalog';
+import { alexithymiaCandidateByKey, alexithymiaCandidates } from '../alexithymia/alexithymiaData';
 import {
   clearBodyCuesDraft,
   readBodyCuesDraft,
   writeBodyCuesDraft,
 } from '../../persistence/workflowDrafts';
 import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
-import { computeBodyCueMatches, describeCueIntensity, type ReverseInferenceData } from './bodyCueMath';
+import { computeBodyCueMatches, describeCueIntensity } from './bodyCueMath';
 import styles from './BodyCuesPage.module.css';
 
-type BodyOption = { id: string; title: string; note: string };
+type BodyOption = { id: string; title: string; note: string; emotions?: Record<string, number> };
 type BodyRegion = { id: string; label: string; prompt: string; options: BodyOption[] };
-type EmotionLibrary = Record<string, { name?: string }>;
-type ReverseInferenceWithMeta = ReverseInferenceData & {
-  _meta?: { slugMap?: Record<string, string> };
-};
-
-const bodyRegions = bodyRegionsRaw as BodyRegion[];
-
-function fallbackName(key: string) {
-  return key.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
-}
-
-function buildFeelingSlugs(slugMap: Record<string, string>) {
-  const result = new Map<string, string>();
-  Object.entries(slugMap).forEach(([slug, emotionKey]) => {
-    if (!result.has(emotionKey) && feelingsBySlug.has(slug)) result.set(emotionKey, slug);
-  });
-  return result;
-}
+const bodyRegions = bodyRegionsRaw as unknown as BodyRegion[];
 
 function useMobileResultsLayout() {
   const [mobile, setMobile] = useState(() => window.matchMedia('(max-width: 640px)').matches);
@@ -47,45 +29,22 @@ function useMobileResultsLayout() {
 }
 
 export function BodyCuesPage() {
-  const initialResources = readBodyCueResources();
   const [initialDraft] = useState(readBodyCuesDraft);
   const [selected, setSelected] = useState<Record<string, number>>(() => initialDraft?.selected ?? {});
-  const [reverseInference, setReverseInference] = useState<ReverseInferenceWithMeta | null>(
-    () => initialResources?.reverseInference as ReverseInferenceWithMeta | undefined ?? null,
-  );
-  const [emotionLibrary, setEmotionLibrary] = useState<EmotionLibrary>(
-    () => initialResources?.emotionLibrary ?? {},
-  );
   const [showAll, setShowAll] = useState(() => initialDraft?.showAll ?? false);
   const [resultsPinned, setResultsPinned] = useState(true);
-  const [error, setError] = useState('');
   const mobileResults = useMobileResultsLayout();
   const draft = useMemo(() => ({ selected, showAll }), [selected, showAll]);
   const draftRef = useWorkflowDraftPersistence(draft, writeBodyCuesDraft);
 
-  useEffect(() => {
-    let active = true;
-    if (reverseInference) return undefined;
-    void loadBodyCueResources()
-      .then((resources) => {
-        if (!active) return;
-        setReverseInference(resources.reverseInference as ReverseInferenceWithMeta);
-        setEmotionLibrary(resources.emotionLibrary);
-      })
-      .catch((reason: unknown) => {
-        if (active) setError(reason instanceof Error ? reason.message : 'The body-cue data could not be loaded.');
-      });
-    return () => { active = false; };
-  }, [reverseInference]);
-
-  const matches = useMemo(
-    () => (reverseInference ? computeBodyCueMatches(reverseInference, selected) : []),
-    [reverseInference, selected],
-  );
-  const feelingSlugs = useMemo(
-    () => buildFeelingSlugs(reverseInference?._meta?.slugMap ?? {}),
-    [reverseInference],
-  );
+  const scoringSelections = useMemo(() => bodyRegions.flatMap((region) => region.options
+    .map((option) => ({ option, intensity: selected[option.id] ?? 0 }))
+    .filter(({ intensity }) => intensity > 0)), [selected]);
+  const matches = useMemo(() => {
+    const availableCandidates = new Set(alexithymiaCandidates.map((candidate) => candidate.key));
+    return computeBodyCueMatches(scoringSelections, 100)
+      .filter((match) => availableCandidates.has(match.key));
+  }, [scoringSelections]);
   const activeCount = Object.values(selected).filter((value) => value > 0).length;
   const visibleLimit = mobileResults || showAll ? 18 : 5;
   const visibleMatches = matches.slice(0, visibleLimit);
@@ -109,33 +68,37 @@ export function BodyCuesPage() {
         <section
           className={styles.resultsPanel}
           data-pinned={resultsPinned ? 'true' : 'false'}
-          aria-labelledby="possible-feelings-heading"
+          aria-labelledby="possible-words-heading"
         >
           <div className={styles.resultsContent}>
             <header className={styles.resultsHeader}>
-              <h2 id="possible-feelings-heading">Possible feelings</h2>
+              <h2 id="possible-words-heading">Possible words</h2>
               <p aria-live="polite">
                 {matches.length
-                  ? `${shownCount} strongest ${shownCount === 1 ? 'match' : 'matches'} shown`
-                  : 'Adjust a cue below to see possible feelings.'}
+                  ? `${shownCount} strongest clue ${shownCount === 1 ? 'match' : 'matches'} shown`
+                  : 'Adjust a cue below to compare possible words.'}
               </p>
             </header>
 
             <div className={styles.matchShelf} data-empty={visibleMatches.length ? 'false' : 'true'} aria-live="polite">
-              {error ? <p className={styles.empty} role="alert">{error}</p> : null}
-              {!error && !reverseInference ? <p className={styles.empty}>Preparing possible feelings…</p> : null}
-              {reverseInference && !visibleMatches.length ? (
+              {!visibleMatches.length ? (
                 <p className={styles.empty}>
-                  Start with one cue below. As you adjust its intensity, the strongest feeling matches will appear here.
+                  Start with one cue below. As you adjust its intensity, the strongest word matches will appear here.
                 </p>
               ) : null}
               {visibleMatches.map((match, index) => {
-                const name = emotionLibrary[match.key]?.name ?? fallbackName(match.key);
-                const slug = feelingSlugs.get(match.key);
+                const candidate = alexithymiaCandidateByKey.get(match.key);
+                const name = candidate?.display ?? match.key;
+                const slug = candidate?.catalogSlug;
                 const content = (
                   <>
-                    <span className={styles.matchName}>{name}</span>
-                    <span className={styles.matchPercent}>{Math.round(match.percent)}%</span>
+                    <span className={styles.matchIdentity}>
+                      <span className={styles.matchName}>{name}</span>
+                      <span className={styles.matchRole}>
+                        {candidate?.role === 'feeling' ? 'Feeling' : 'Working term'}
+                      </span>
+                    </span>
+                    <span className={styles.matchPercent}>{Math.round(match.percent)}% clue match</span>
                   </>
                 );
                 const className = `${styles.match} ${index === 0 ? styles.topMatch : ''}`;
@@ -157,8 +120,8 @@ export function BodyCuesPage() {
               type="button"
               className={styles.pinToggle}
               aria-pressed={resultsPinned}
-              aria-label={resultsPinned ? 'Unpin possible feelings' : 'Pin possible feelings'}
-              title={resultsPinned ? 'Unpin possible feelings' : 'Pin possible feelings'}
+              aria-label={resultsPinned ? 'Unpin possible words' : 'Pin possible words'}
+              title={resultsPinned ? 'Unpin possible words' : 'Pin possible words'}
               onClick={() => setResultsPinned((value) => !value)}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
