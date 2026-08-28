@@ -349,4 +349,4 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 
 ## Accountability
 
-**Status:** content audited and implemented 2026-08-27; redesigned magnet review pending. The authoritative current content record is `docs/accountability-content-audit.md`.
+**Status:** fully audited. Content implemented 2026-08-27; Responsibility Mosaic (A1) magnet approved and promoted 2026-08-28. The authoritative current record is `docs/accountability-content-audit.md`.

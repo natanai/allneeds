@@ -1,6 +1,6 @@
 # Accountability content audit
 
-> Status: content approved and implemented 2026-08-27. Accountability is not fully audited until its redesigned magnet is separately approved and live.
+> Status: fully audited. Content package approved and implemented 2026-08-27; Responsibility Mosaic (A1) magnet approved for production 2026-08-28.
 
 This document is the authoritative audit record for the approved Accountability Need content package. It supersedes the imported Accountability copy and Need-level citations in the historical legacy snapshot.
 
@@ -94,4 +94,6 @@ The user approved the complete Accountability package on 2026-08-27 after reques
 
 ## Visual audit
 
-Content approval does not approve the Accountability magnet. After the approved content is implemented and verified, Accountability proceeds to separate visual review in `/design-lab/need-magnets`. Accountability becomes fully audited only after an approved redesigned production magnet is live.
+The user approved **A1 · Responsibility Mosaic** on 2026-08-28 in the live `/design-lab/need-magnets` review surface. The approved identity uses one four-piece mosaic icon and a larger full-face field of contributing pieces to represent recognizing one's part without claiming the whole outcome. Production promotion replaces the former clipboard/checkmark icon, keeps the shared magnet shell and physics unchanged, and uses only Customizer-owned functional color roles. The completed Accountability candidate set is removed from the active lab after promotion.
+
+With the approved Responsibility Mosaic identity promoted through the canonical production Need styling path, Accountability is fully audited.
