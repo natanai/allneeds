@@ -33,7 +33,7 @@ Show the complete final static audited state for every site-facing area owned by
 For an ordinary Need without function lenses, the proposal contains:
 
 1. the Need title;
-2. the exact main Evidence copy, including the Need's concise working definition;
+2. the exact main Evidence copy, including enough concise conceptual clarification to make clear what the Need refers to in the site's model;
 3. the exact Details copy, when present;
 4. the exact public Supporting sources and raw human-facing URLs;
 5. the final static Strategies deck in display order;
@@ -52,15 +52,21 @@ Do not add an umbrella source section merely for proposal symmetry if the approv
 
 Dynamic community/profile strategies are not part of the canonical static audit proposal because they are loaded from community/profile storage rather than owned by the static Need audit. Repository-resident protected user strategies that are part of the static deck are included because they are part of the final site state.
 
-## Working definition in the short Evidence copy
+## Conceptual clarity without formal definition
 
-Every audited Need must include a concise working definition in the short Evidence copy, following `docs/psychological-model.md`.
+The short Evidence copy should give the reader enough epistemological and ontological clarity to understand what the site is talking about when it uses the Need label.
 
-The definition should orient the reader to what the site means by the Need, value, or motivation. It should usually be about one sentence or one compact clause. It is not the central thesis of the description and should not turn the page into a dictionary entry.
+This is **not** a requirement to formally define the Need. The standing rule in `docs/content-evidence-review.md` remains in force: do not present necessary-and-sufficient conditions, a scientific essence, or an authoritative taxonomy merely because the site uses a particular everyday label.
 
-The definition may be framework/editorial language rather than a formally established scientific definition. It must remain compatible with the evidence and must not imply that the site's Need label is a recognized scientific construct when the literature does not establish that.
+Instead, the short copy should usually include a concise phrase or sentence that helps establish:
 
-This requirement supersedes older guidance in `docs/content-evidence-review.md` that said not to formally define a Need. The intended rule is now: **define the site's working concept concisely, but do not overclaim a formal scientific definition.**
+- what kind of value, concern, or motivation the label is referring to within the site's psychological model;
+- the rough conceptual territory the page intends to include;
+- enough distinction from neighboring Needs or from particular Strategies that the reader can tell which concept is under discussion.
+
+This clarification is an orientation point, not the central thesis of the description. It may be framework/editorial language constrained by the evidence rather than a quotation or consensus scientific definition. Avoid dictionary-style prose, circular definitions, unnecessary taxonomy, and attempts to eliminate every possible borderline case.
+
+The goal is stable conceptual use across audits. Future readers and editors should be able to tell whether two pages are discussing genuinely different Needs even when neither Need has a formal definition.
 
 ## Citation traceability: every source starts in the short copy
 
@@ -114,7 +120,7 @@ A normal non-lensed proposal should follow this shape:
 # Need for {Need}
 
 ## Evidence
-{exact main copy, including concise working definition}
+{exact main copy, including concise conceptual clarification without formal definition}
 
 ### Details
 {exact expanded copy}
@@ -141,7 +147,7 @@ A lensed proposal should follow this shape where applicable:
 # Need for {Need}
 
 ## Evidence
-{exact umbrella main copy, including the Need's working definition if the site has umbrella copy}
+{exact umbrella main copy, including concise conceptual orientation when the site has umbrella copy}
 
 ## This need can involve
 
