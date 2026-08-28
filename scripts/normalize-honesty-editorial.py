@@ -50,6 +50,35 @@ def object_block(value: object, indent: int = 4) -> str:
     return '\n'.join(prefix + line for line in json.dumps(value, ensure_ascii=False, indent=2).splitlines())
 
 
+def differences(left: object, right: object, path: str = '$') -> list[str]:
+    found: list[str] = []
+    if type(left) is not type(right):
+        return [f'{path}: type {type(left).__name__} != {type(right).__name__}']
+    if isinstance(left, dict):
+        left_keys = set(left)
+        right_keys = set(right)
+        for key in sorted(left_keys - right_keys):
+            found.append(f'{path}.{key}: missing from reconstructed result')
+        for key in sorted(right_keys - left_keys):
+            found.append(f'{path}.{key}: unexpectedly present in reconstructed result')
+        for key in sorted(left_keys & right_keys):
+            found.extend(differences(left[key], right[key], f'{path}.{key}'))
+            if len(found) >= 20:
+                break
+        return found[:20]
+    if isinstance(left, list):
+        if len(left) != len(right):
+            found.append(f'{path}: list length {len(left)} != {len(right)}')
+        for index, (left_item, right_item) in enumerate(zip(left, right)):
+            found.extend(differences(left_item, right_item, f'{path}[{index}]'))
+            if len(found) >= 20:
+                break
+        return found[:20]
+    if left != right:
+        return [f'{path}: {left!r} != {right!r}']
+    return []
+
+
 text = BASE_TEXT
 
 needs_marker = '  "needs": {'
@@ -95,6 +124,8 @@ for slug in [
 
 result = json.loads(text)
 if result != CURRENT:
+    for difference in differences(CURRENT, result):
+        print(difference)
     raise AssertionError('Formatting cleanup changed editorial catalog semantics')
 
 PATH.write_text(text, encoding='utf-8')
