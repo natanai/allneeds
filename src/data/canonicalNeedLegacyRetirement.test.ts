@@ -3,7 +3,14 @@ import { describe, expect, it } from 'vitest';
 import editorialCatalog from './editorialCatalog.json';
 import legacyData from './generated/legacyData.json';
 
-function hasCompleteCanonicalOwnership(need: (typeof editorialCatalog.needs)[string]) {
+type CanonicalNeedCandidate = {
+  title?: unknown;
+  catalogOrder?: unknown;
+  feelings?: unknown;
+  fauxFeelings?: unknown;
+};
+
+function hasCompleteCanonicalOwnership(need: CanonicalNeedCandidate) {
   return typeof need.title === 'string'
     && Number.isInteger(need.catalogOrder)
     && Array.isArray(need.feelings)
