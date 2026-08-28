@@ -14,6 +14,16 @@ Before an approval-ready proposal, reuse the same H01–H18 IDs in the required 
 
 If you inherit or resume a Need audit after losing working context, rerun the handshake. Do not rely on remembered instructions from a previous Need.
 
+## STOP: Need magnet identity work requires the Need Magnet Handshake first
+
+**If the user asks you to mock up, redesign, review, refine, or promote the visual identity of a specific Need magnet, your first Need-magnet action is to read and complete `docs/need-magnet-handshake.md`. Do not skip directly to SVGs, icon selection, image generation, or lab candidates.**
+
+The M01–M18 handshake is a proof-of-comprehension gate. It requires you to load the target Need's approved audited meaning, inspect the complete current Need-icon and approved-identity inventory, understand the shared magnet shell/physics and Customizer constraints, and report what each rule changes about the identity you are about to design.
+
+Before claiming that `/design-lab/need-magnets` is ready for user review, reuse M01–M18 in the required **Need Magnet Verification** matrix and point to the actual lab candidates, preset/roundness checks, inventory comparison, and production boundary where each rule was verified. Any `FAIL` means the set is not review-ready.
+
+If you inherit or resume magnet identity work after losing context, or your working branch predates newer `main` instructions, refresh current instructions and rerun the magnet handshake.
+
 ## Repository boundary
 
 - Work only in `natanai/allneeds` for V2 changes.
@@ -118,4 +128,4 @@ For behavior-affecting work, add or update regression coverage at the same layer
 
 ## Documentation priority
 
-`AGENTS.md` is the concise implementation contract. **`docs/need-audit-handshake.md` is the mandatory entry protocol for every full Need audit and must be completed before substantive audit work.** `docs/psychological-model.md` is the canonical psychological-content model and is mandatory before Need, Feeling, Observation, or Strategy work. `docs/design-language.md` is the living record of accepted visual/interaction decisions and is required reading for UI work. `docs/magnet-behavior.md` is the canonical detailed magnet interaction/physics contract and is mandatory before magnet work. **Before changing explanatory, psychological, behavioral, health, or research-facing copy, read `docs/content-evidence-review.md` and follow its approval ledger.** `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here or in the design-language record, update the older documentation rather than following the stale sentence.
+`AGENTS.md` is the concise implementation contract. **`docs/need-audit-handshake.md` is the mandatory entry protocol for every full Need audit and must be completed before substantive audit work. `docs/need-magnet-handshake.md` is the mandatory entry protocol for every Need magnet identity review and must be completed before creating or promoting candidates.** `docs/psychological-model.md` is the canonical psychological-content model and is mandatory before Need, Feeling, Observation, or Strategy work. `docs/design-language.md` is the living record of accepted visual/interaction decisions and is required reading for UI work. `docs/magnet-behavior.md` is the canonical detailed magnet interaction/physics contract and is mandatory before magnet work. **Before changing explanatory, psychological, behavioral, health, or research-facing copy, read `docs/content-evidence-review.md` and follow its approval ledger.** `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here or in the design-language record, update the older documentation rather than following the stale sentence.
