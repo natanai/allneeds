@@ -57,3 +57,5 @@ jobs:
           git add -A
           git commit -m "content: implement approved Accountability audit"
           git push origin HEAD:audit/accountability-approved
+
+# Retry after making the Honesty migration-order regression future-safe.
