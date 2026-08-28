@@ -2,19 +2,25 @@
 
 This file supplements the root `AGENTS.md` for work under `src/data/`.
 
+## Mandatory Need audit handshake
+
+Before auditing, drafting, revising, or implementing a full Need package, read and complete `docs/need-audit-handshake.md`. The H01–H18 checklist must be demonstrated before substantive audit conclusions, and the same IDs must be used in the pre-proposal verification matrix.
+
+The verification matrix is audit metadata. The official proposal artifact that follows it begins at `# Need for {Need}` and remains site-content only. Research-facing production changes still require explicit complete-package approval before implementation.
+
 ## Canonical psychological model
 
 Before adding, auditing, revising, or implementing Need, Feeling, Observation, or Strategy data, read `docs/psychological-model.md` and treat it as a hard product-model contract.
 
 Need content must preserve the site's NVC-informed Observation / situation → Feeling → Need / value / motivation → Strategy model. Needs are normal and valid; Needs themselves do not compete or conflict; apparent conflict belongs at the level of Strategies, circumstances, resources, timing, information, support, or currently available solutions. Need pages should help a person understand why the motivation can make sense and then move toward practical ways to tend it.
 
-System strategies must support that same arc. They should help the reader tend the Need itself, widen available Strategies, and reduce dependence on solving the triggering situation first whenever a self-contained action is possible. Do not preserve a strategy merely because it is inherited, symmetrical with another deck, or loosely related to the situation that brought up the Need.
+System strategies must support that same arc. They should help the reader tend the Need itself, widen available Strategies, and reduce dependence on solving the triggering situation first whenever a self-contained action is possible. The standing alone-after-activation scenario in `docs/psychological-model.md` must be tested explicitly. Do not preserve a strategy merely because it is inherited, symmetrical with another deck, or loosely related to the situation that brought up the Need.
 
 ## Full Need audit proposal format
 
 Before presenting an official, full, final, or approval-ready Need content audit proposal, read `docs/need-audit-proposal-format.md` and follow it exactly.
 
-The user-facing proposal is a clean snapshot of the proposed final site content only. Keep source-role notes, limitations, removal/discard rationale, provenance analysis, implementation scope, file paths, and other audit metadata in internal/audit records rather than surrounding the formal proposal.
+The approval-ready response contains the mandatory H01–H18 verification matrix followed by the official proposal. The proposal artifact itself is a clean snapshot of proposed final site content only. Keep source-role notes, limitations, removal/discard rationale, provenance analysis, implementation scope, file paths, and other audit metadata in internal/audit records rather than inside or after the formal proposal.
 
 ## Current Safety record
 
