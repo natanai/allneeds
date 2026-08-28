@@ -21,6 +21,24 @@ These are different kinds of information.
 
 A single situation can involve many Feelings and many Needs. A Feeling can be associated with several possible Needs. The site should support exploration rather than pretending that emotional inference is certain or one-to-one.
 
+## Conceptual clarity without formal definitions
+
+Need pages should be conceptually clear without pretending to provide formal definitions.
+
+The site's Need labels are practical human concepts inside an NVC-informed model. Some may overlap with constructs that have established scientific definitions, while others are broader everyday values or motivations. The site should not invent necessary-and-sufficient conditions, fixed essences, or authoritative taxonomies merely to make the labels look scientifically formal.
+
+At the same time, refusing formal definition does not mean leaving the concepts vague. Each audited Need should be described clearly enough that a reader, editor, researcher, or future agent can tell what kind of value or motivation the page is discussing and how it differs from neighboring Needs or from particular Strategies.
+
+A concise conceptual clarification in the short Evidence copy should usually help establish:
+
+- what sort of concern, value, or motivation the label refers to within the site's model;
+- the rough conceptual territory the page intends to include;
+- enough distinction from neighboring Needs and Strategies to keep the concept stable across audits.
+
+This is epistemological and ontological orientation, not formal definition. The clarification may be a framework/editorial synthesis constrained by evidence. It should not be presented as a consensus scientific definition unless the literature genuinely supports that status.
+
+Do not turn the short description into a dictionary entry or a taxonomy exercise. Conceptual clarity is one part of the page's job, alongside explaining why the motivation can make sense and what someone can do to tend it.
+
 ## Needs do not compete or conflict
 
 This is a standing allneeds model commitment.
@@ -64,11 +82,12 @@ The page should help them move one level deeper than the triggering situation.
 
 A strong Need page should help the reader:
 
-1. **Recognize the motivation.** The page should make the Need recognizable as a real human concern rather than an abstract dictionary term.
-2. **Understand why it can make sense.** Explain credible psychological, developmental, social, evolutionary, anthropological, clinical, or other evidence that helps make the motivation intelligible and potentially functional.
-3. **Reduce shame or self-rejection without sentimental reassurance.** The evidence should make it easier to see the Need as worth listening to rather than something that must be suppressed merely because it is uncomfortable or inconvenient.
-4. **Separate the Need from one triggering situation or one preferred solution.** The reader should be able to recognize that the Need can potentially be tended in more than one way, even if the original person or circumstance does not change.
-5. **Restore practical agency.** Strategies should give the reader concrete things they can try so they can shift from repeatedly thinking about the problem toward tending the underlying Need.
+1. **Orient to the concept.** Make the site's use of the Need label clear enough to distinguish it from neighboring Needs and from particular Strategies, without presenting a formal definition.
+2. **Recognize the motivation.** The page should make the Need recognizable as a real human concern rather than an abstract dictionary term.
+3. **Understand why it can make sense.** Explain credible psychological, developmental, social, evolutionary, anthropological, clinical, or other evidence that helps make the motivation intelligible and potentially functional.
+4. **Reduce shame or self-rejection without sentimental reassurance.** The evidence should make it easier to see the Need as worth listening to rather than something that must be suppressed merely because it is uncomfortable or inconvenient.
+5. **Separate the Need from one triggering situation or one preferred solution.** The reader should be able to recognize that the Need can potentially be tended in more than one way, even if the original person or circumstance does not change.
+6. **Restore practical agency.** Strategies should give the reader concrete things they can try so they can shift from repeatedly thinking about the problem toward tending the underlying Need.
 
 Need pages are therefore not neutral encyclopedia entries. They are evidence-grounded psychological resources designed to support recognition, understanding, self-compassion, and movement toward workable action.
 
@@ -92,11 +111,11 @@ Boundary distinctions can be useful when they prevent a real conceptual error, b
 
 ## The short Evidence copy has a therapeutic job
 
-The short Evidence section is often the first substantial text a reader sees after identifying with a Need. It should not read like an abstract definition followed by a list of caveats.
+The short Evidence section is often the first substantial text a reader sees after identifying with a Need. It should give enough conceptual orientation that the reader knows what the site means by the Need, then quickly move into why the motivation may be present and why its presence can be useful or understandable.
 
-Its first job is to help a person recognize why this motivation may be present and why its presence can be useful or understandable. It should provide enough scholarly grounding that the reader can feel the page is taking their experience seriously.
+That conceptual orientation is not a formal definition and should not become the thesis of the whole description. Avoid dictionary-style openings, necessary-and-sufficient conditions, and caveat-heavy taxonomy. The reader should come away with both a clearer sense of what the page is talking about and a stronger sense of why the Need may make sense to experience.
 
-Important conceptual distinctions belong in the short copy only when they are necessary to understand the Need or when a public citation depends on that idea. Details can carry the deeper research explanation.
+The short copy should provide enough scholarly grounding that the reader can feel the page is taking their experience seriously. Important conceptual distinctions belong there only when they are necessary to understand the Need or when a public citation depends on that idea. Details can carry the deeper research explanation.
 
 Do not let source coverage turn the short copy into a compressed literature review.
 
@@ -132,15 +151,16 @@ The deck as a whole should make it easier for someone to move from `I am stuck i
 
 Before presenting any full Need audit proposal, explicitly verify internally that:
 
-1. The page treats the Need as normal and valid rather than as a problem to eliminate.
-2. The opening helps a reader understand why the motivation can make sense and may serve a useful function.
-3. Research grounding is strong enough to support that understanding, with contested theories labeled as theories rather than omitted or overstated.
-4. The page does not frame Needs as competing, conflicting, or requiring one Need to defeat another.
-5. Any boundary distinctions clarify concepts without turning neighboring Needs into adversaries.
-6. The Need remains distinct from particular people, demands, outcomes, or Strategies.
-7. The page gives the reader a path from recognition toward agency.
-8. Every proposed system strategy directly tends the Need, is clinically defensible, and can be tried without first resolving the triggering situation whenever possible.
-9. The strategy deck contains no filler kept merely for symmetry, count, or inherited legacy status.
-10. The final copy still meets the separate evidence, citation, proposal-format, and human-editorial-style rules.
+1. The short Evidence copy gives enough conceptual clarity to identify the Need within the site's model without presenting a formal definition or stronger scientific taxonomy than the evidence allows.
+2. The page treats the Need as normal and valid rather than as a problem to eliminate.
+3. The opening helps a reader understand why the motivation can make sense and may serve a useful function.
+4. Research grounding is strong enough to support that understanding, with contested theories labeled as theories rather than omitted or overstated.
+5. The page does not frame Needs as competing, conflicting, or requiring one Need to defeat another.
+6. Any boundary distinctions clarify concepts without turning neighboring Needs into adversaries.
+7. The Need remains distinct from particular people, demands, outcomes, or Strategies.
+8. The page gives the reader a path from recognition toward agency.
+9. Every proposed system strategy directly tends the Need, is clinically defensible, and can be tried without first resolving the triggering situation whenever possible.
+10. The strategy deck contains no filler kept merely for symmetry, count, or inherited legacy status.
+11. The final copy still meets the separate evidence, citation, proposal-format, and human-editorial-style rules.
 
 If a proposal fails this model check, it is not approval-ready even if its individual citations are technically accurate.
