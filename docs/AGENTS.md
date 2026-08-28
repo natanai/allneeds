@@ -2,13 +2,19 @@
 
 This file supplements the root `AGENTS.md` for work under `docs/`.
 
+## Mandatory Need audit handshake
+
+Before researching, drafting, revising, or presenting a full Need audit, read and complete `docs/need-audit-handshake.md`. The H01–H18 checklist is a proof-of-comprehension gate, not a file-open checklist. The first visible substantive audit response must demonstrate what each rule means and how it constrains the target Need.
+
+Before an approval-ready proposal, rerun those same H01–H18 checkpoints through the required verification matrix. The verification matrix is reviewer-facing metadata and appears immediately before the official proposal. The official proposal artifact itself begins at `# Need for {Need}` and remains site-content only through its final line.
+
 ## Canonical psychological model
 
 Before auditing, drafting, revising, or approving any Need, Feeling, Observation, or Strategy content, read `docs/psychological-model.md` and treat it as a hard product-model contract.
 
 Need audits must preserve the site's NVC-informed Observation / situation → Feeling → Need / value / motivation → Strategy model. In particular: Needs are normal and valid; Needs themselves do not compete or conflict; apparent conflict belongs at the level of Strategies, circumstances, resources, timing, information, support, or currently available solutions; and a Need page must help a reader understand why the motivation can make sense and then move toward practical ways to tend it.
 
-A proposal is not approval-ready merely because its citations are accurate. It must also pass the model check in `docs/psychological-model.md`, including the reader-experience target and the requirement that system strategies help tend the Need rather than merely extend rumination about the triggering situation.
+A proposal is not approval-ready merely because its citations are accurate. It must also pass the model check in `docs/psychological-model.md`, including the reader-experience target, the standing alone-after-activation adversarial scenario, and the requirement that system strategies help tend the Need rather than merely extend rumination about the triggering situation.
 
 ## Full Need audit proposal format
 
@@ -16,7 +22,7 @@ Before presenting an official, full, final, or approval-ready Need content audit
 
 Before presenting that proposal, also read and apply `docs/human-editorial-style.md`. The final site-facing copy must pass that human editorial review before it is shown for approval. Do not treat this as AI-detector evasion or add any runtime/post-processing "humanizer". The canonical proposed wording itself must avoid unnecessary templated AI-style habits while preserving accuracy and accessibility.
 
-The proposal shown to the user is **site-content only**. Do not wrap it in analysis, rationale, change summaries, removal lists, implementation notes, source-role commentary, approval prompts, or other surrounding description text. Internal audit records may contain those details; the official proposal artifact may not.
+The approval-ready response contains the mandatory H01–H18 verification matrix followed by the official proposal artifact. **The official proposal artifact is site-content only.** Do not place analysis, rationale, change summaries, removal lists, implementation notes, source-role commentary, approval prompts, or other surrounding description inside or after that artifact. Internal audit records may contain those details.
 
 ## Current Safety record
 
