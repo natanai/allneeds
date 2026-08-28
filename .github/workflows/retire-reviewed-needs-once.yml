@@ -58,4 +58,4 @@ jobs:
           git commit -m "data: retire reviewed Needs from legacy ownership"
           git push origin HEAD:audit/accountability-approved
 
-# Retry after fixing the generic canonical-retirement test typing.
+# Retry after making both canonical-order regressions migration-count independent.
