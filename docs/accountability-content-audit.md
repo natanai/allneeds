@@ -1,6 +1,6 @@
 # Accountability content audit
 
-> Status: content approved for implementation 2026-08-27. Accountability is not fully audited until its redesigned magnet is separately approved and live.
+> Status: content approved and implemented 2026-08-27. Accountability is not fully audited until its redesigned magnet is separately approved and live.
 
 This document is the authoritative audit record for the approved Accountability Need content package. It supersedes the imported Accountability copy and Need-level citations in the historical legacy snapshot once the canonical migration in this branch is complete.
 
@@ -82,9 +82,9 @@ There is no repository-resident protected user strategy associated with Accounta
 
 ## Canonical ownership and implementation
 
-The approved implementation gives Accountability complete canonical ownership in `src/data/editorialCatalog.json`, including title, category, catalog order, Feeling and Faux Feeling relationships, approved Evidence content, sources, and the two system strategies.
+Accountability now has complete canonical ownership in `src/data/editorialCatalog.json`, including title, category, catalog order, Feeling and Faux Feeling relationships, approved Evidence content, sources, and the two system strategies.
 
-The deterministic runtime catalog compiler must consume that complete canonical record directly. Once canonical ownership is present, the superseded Accountability Need entity in `src/data/generated/legacyData.json` is physically retired. Reverse Accountability references that remain inside still-legacy-owned Feeling or Faux Feeling entities are cross-entity relationships owned by those entity families and remain until those families receive their own canonical migration.
+The deterministic runtime catalog compiler consumes that complete canonical record directly. The superseded Accountability Need entity in `src/data/generated/legacyData.json` is physically retired. Reverse Accountability references that remain inside still-legacy-owned Feeling or Faux Feeling entities are cross-entity relationships owned by those entity families and remain until those families receive their own canonical migration.
 
 No runtime repair layer, post-processor, injected content, or duplicate Accountability source of truth is authorized.
 
