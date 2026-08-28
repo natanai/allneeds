@@ -91,6 +91,16 @@ A strong Need page should help the reader:
 
 Need pages are therefore not neutral encyclopedia entries. They are evidence-grounded psychological resources designed to support recognition, understanding, self-compassion, and movement toward workable action.
 
+### Standing adversarial reader scenario
+
+Use this scenario as a practical test during every Need audit:
+
+> Imagine a person alone in their house or car, looking at their phone, processing a large feeling after leaving the situation that activated the Need. They believe they have identified a real Need underneath what happened. They may not feel safe, ready, or willing to re-enter the situation, contact the other person, disclose more, or ask anyone else to cooperate. The Need page should still help them understand why the motivation may make sense and give them some practical agency for tending it.
+
+This scenario does not mean every strategy must be solitary or immediate. Requests, conversations, relationships, professional support, and environmental changes can all be legitimate Strategies. It does mean the deck should not accidentally define tending the Need as `make the triggering person respond differently` when a useful self-contained pathway exists.
+
+When clinically reasonable, at least part of the system deck should remain usable without reopening the triggering interaction. Preparation, private rehearsal, reflection, mapping options, changing one's own behavior, gathering information, accessing a resource, or another self-contained action may provide that pathway depending on the Need and the evidence. Do not invent one merely to satisfy the scenario. The action must still directly tend the Need and meet the system-strategy evidence standard.
+
 ## Evidence should serve the model without overstating science
 
 Research is not included merely to prove that a Need label has academic prestige. It should help the reader understand the motivation and its possible function.
@@ -162,5 +172,6 @@ Before presenting any full Need audit proposal, explicitly verify internally tha
 9. Every proposed system strategy directly tends the Need, is clinically defensible, and can be tried without first resolving the triggering situation whenever possible.
 10. The strategy deck contains no filler kept merely for symmetry, count, or inherited legacy status.
 11. The final copy still meets the separate evidence, citation, proposal-format, and human-editorial-style rules.
+12. The standing alone-after-activation scenario has been tested explicitly, and the deck does not make another person's cooperation the only route to tending the Need when a clinically defensible self-contained route exists.
 
 If a proposal fails this model check, it is not approval-ready even if its individual citations are technically accurate.
