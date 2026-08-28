@@ -4,30 +4,12 @@
       "summary": "As a highly social species, humans appear to have evolved strong motivations to maintain connection with others. Across human evolutionary history, social bonds supported protection, caregiving, cooperation, and group living, making social connection consequential for survival and reproduction across generations. This need may drive us to seek others, maintain relationships, repair social ruptures, and coordinate with the people around us. Evolutionary accounts propose that even the discomfort of disconnection may help motivate behavior directed toward restoring socially important bonds.",
       "narrative": "Evolutionary accounts offer one way to understand why connection can feel urgent. Cacioppo, Cacioppo, and Boomsma (2014) note that early humans “survived and prospered by banding together” and propose that loneliness may have evolved as an aversive signal related to socially important relationships. Their account examines the possible function of sensitivity to disconnection over evolutionary time without treating every episode of loneliness as adaptive. Chronic loneliness can still be harmful, and loneliness is not identical to Connection. [4]\n\nPsychological motivation research approaches closely related social motivations from another direction. Baumeister and Leary (1995) reviewed evidence around a hypothesized need to form and maintain stable interpersonal bonds, including “frequent, nonaversive interactions within an ongoing relational bond.” Ryan and Deci (2000) place relatedness alongside autonomy and competence within Self-Determination Theory. Vansteenkiste, Ryan, and Soenens (2020) review later Basic Psychological Need Theory research, describe relatedness partly through “warmth, bonding, and care,” and distinguish low satisfaction from active need frustration. Across these theories, stable social bonds and relatedness are treated as persistent human motivations. The site's broader Connection label is not identical to Belonging or to the research term relatedness. [1][2][3]\n\nCoan and Sbarra (2015) propose in Social Baseline Theory that the human brain expects access to social relationships that can “mitigate risk and diminish the level of effort needed.” Their account treats relationships as potential sources of shared effort and resources that can affect experienced risk. [5]\n\nLarge-scale outcome research shows that social relationships are associated with consequential health differences. Holt-Lunstad, Smith, and Layton (2010) combined 148 prospective studies involving 308,849 participants and reported “a 50% increased likelihood of survival for participants with stronger social relationships.” Because most of the evidence was observational, the meta-analysis does not show that increasing connection will necessarily cause a particular individual to live longer. [6]",
       "sources": [
-        {
-          "url": "https://psycnet.apa.org/record/1995-29052-001",
-          "description": "Baumeister, R. F., & Leary, M. R. (1995). The need to belong: Desire for interpersonal attachments as a fundamental human motivation. Psychological Bulletin, 117(3), 497–529."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/11392867/",
-          "description": "Ryan, R. M., & Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. American Psychologist, 55(1), 68–78."
-        },
-        {
-          "url": "https://link.springer.com/article/10.1007/s11031-019-09818-1",
-          "description": "Vansteenkiste, M., Ryan, R. M., & Soenens, B. (2020). Basic psychological need theory: Advancements, critical themes, and future directions. Motivation and Emotion, 44, 1–31."
-        },
-        {
-          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3855545/",
-          "description": "Cacioppo, J. T., Cacioppo, S., & Boomsma, D. I. (2014). Evolutionary mechanisms for loneliness. Cognition & Emotion, 28(1), 3–21."
-        },
-        {
-          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4375548/",
-          "description": "Coan, J. A., & Sbarra, D. A. (2015). Social Baseline Theory: The Social Regulation of Risk and Effort. Current Opinion in Psychology, 1, 87–91."
-        },
-        {
-          "url": "https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316",
-          "description": "Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. PLOS Medicine, 7(7), e1000316."
-        }
+        { "url": "https://psycnet.apa.org/record/1995-29052-001", "description": "Baumeister, R. F., & Leary, M. R. (1995). The need to belong: Desire for interpersonal attachments as a fundamental human motivation. Psychological Bulletin, 117(3), 497–529." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/11392867/", "description": "Ryan, R. M., & Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. American Psychologist, 55(1), 68–78." },
+        { "url": "https://link.springer.com/article/10.1007/s11031-019-09818-1", "description": "Vansteenkiste, M., Ryan, R. M., & Soenens, B. (2020). Basic psychological need theory: Advancements, critical themes, and future directions. Motivation and Emotion, 44, 1–31." },
+        { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3855545/", "description": "Cacioppo, J. T., Cacioppo, S., & Boomsma, D. I. (2014). Evolutionary mechanisms for loneliness. Cognition & Emotion, 28(1), 3–21." },
+        { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4375548/", "description": "Coan, J. A., & Sbarra, D. A. (2015). Social Baseline Theory: The Social Regulation of Risk and Effort. Current Opinion in Psychology, 1, 87–91." },
+        { "url": "https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316", "description": "Holt-Lunstad, J., Smith, T. B., & Layton, T. B. (2010). Social relationships and mortality risk: A meta-analytic review. PLOS Medicine, 7(7), e1000316." }
       ],
       "strategies": [
         { "title": "Write a letter", "slug": "write-a-letter-for-connection" },
@@ -155,109 +137,72 @@
       "category": "Authenticity",
       "catalogOrder": 19,
       "feelings": [
-        {
-          "title": "Angry",
-          "slug": "angry"
-        },
-        {
-          "title": "Hurt",
-          "slug": "hurt"
-        },
-        {
-          "title": "Disappointment",
-          "slug": "disappointment"
-        },
-        {
-          "title": "Enraged",
-          "slug": "enraged"
-        },
-        {
-          "title": "Resentful",
-          "slug": "resentful"
-        },
-        {
-          "title": "Sad",
-          "slug": "sad"
-        },
-        {
-          "title": "Frustrated",
-          "slug": "frustrated"
-        },
-        {
-          "title": "Embarrassed",
-          "slug": "embarrassed"
-        }
+        { "title": "Angry", "slug": "angry" },
+        { "title": "Hurt", "slug": "hurt" },
+        { "title": "Disappointment", "slug": "disappointment" },
+        { "title": "Enraged", "slug": "enraged" },
+        { "title": "Resentful", "slug": "resentful" },
+        { "title": "Sad", "slug": "sad" },
+        { "title": "Frustrated", "slug": "frustrated" },
+        { "title": "Embarrassed", "slug": "embarrassed" }
       ],
       "fauxFeelings": [
-        {
-          "title": "Betrayed",
-          "slug": "betrayed"
-        },
-        {
-          "title": "Cheated",
-          "slug": "cheated"
-        },
-        {
-          "title": "Distrusted",
-          "slug": "distrusted"
-        },
-        {
-          "title": "Tricked",
-          "slug": "tricked"
-        }
+        { "title": "Betrayed", "slug": "betrayed" },
+        { "title": "Cheated", "slug": "cheated" },
+        { "title": "Distrusted", "slug": "distrusted" },
+        { "title": "Tricked", "slug": "tricked" }
       ],
       "summary": "Honesty concerns a motivation to keep what we communicate aligned with what we actually take to be true, while leaving room to say when we are unsure or when our understanding changes. People often act on this concern even when lying could benefit them, and experimental work suggests that both a preference for honesty itself and a preference for being seen as honest can motivate truth-telling. Evolutionary and cultural-evolutionary accounts of human cooperation have examined reputation and reliable information-sharing as part of how cooperation is sustained, and experiments show that honest reputations can shape trust judgments. Research on honest behavior also distinguishes seeking accurate information, expressing what one believes, and helping others form an accurate understanding. Philosophical and experimental work helps clarify why honesty is not identical to factual correctness: sincere statements can be mistaken, while factually true statements can still be used to mislead. When honesty feels especially important, the motivation may be drawing attention to whether the information moving between people is dependable enough to act on and whether what we are expressing still represents what we actually believe.",
       "narrative": "Abeler, Nosenzo, and Raymond combined data from 90 experimental studies in economics, psychology, and sociology in which people could benefit materially by misreporting information only they knew. People lied less than would be expected if material gain were their only concern. The researchers then conducted additional experiments to compare possible explanations. Their results pointed especially to a preference for being honest and a preference for being seen as honest as motivations for truth-telling.\n\nHenrich and Muthukrishna review evolutionary and cultural-evolutionary research on humans' unusually extensive cooperation. Their account includes reputation and signalling among the processes scholars have proposed for sustaining cooperation beyond close family relationships. Számadó and colleagues focus more closely on reputation systems and honest signalling. They describe evidence that sharing information about other people's behavior can promote cooperation, while examining how such information can remain reliable enough to be useful.\n\nBellucci and Park studied how a person's history of honesty affected trust decisions across three experiments. Participants preferred to trust people who had consistently shared truthful information. An established reputation for honesty could continue influencing judgments even after later behavior became less trustworthy.\n\nCooper and colleagues systematically reviewed 169 empirical articles on honest behavior. Their framework covers seeking accurate information, expressing what one believes, and communicating in ways that help other people understand the truth. The review also considers updating beliefs when new information becomes available and forms of communication that can create a misleading understanding without an outright false statement.\n\nDougherty examines the relationship between honesty and factual truth. Someone can sincerely express something they believe and later turn out to be wrong. A person can also make a factually correct statement while intending to deceive. Being mistaken does not by itself make someone dishonest.\n\nRogers and colleagues studied paltering, the use of factually true statements to create a misleading impression. Across two pilot studies and six experiments, people who discovered they had been misled through paltering reacted negatively to it and judged the communicator more harshly. Their experiments show why checking only whether individual statements are factually true does not settle whether a communication is honest.",
       "sources": [
-        {
-          "url": "https://onlinelibrary.wiley.com/doi/10.3982/ECTA14673",
-          "description": "Abeler, J., Nosenzo, D., & Raymond, C. (2019). Preferences for Truth-Telling. Econometrica, 87(4), 1115–1153.",
-          "kind": "scholarly"
-        },
-        {
-          "url": "https://www.annualreviews.org/content/journals/10.1146/annurev-psych-081920-042106",
-          "description": "Henrich, J., & Muthukrishna, M. (2021). The Origins and Psychology of Human Cooperation. Annual Review of Psychology, 72, 207–240.",
-          "kind": "scholarly"
-        },
-        {
-          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8487738/",
-          "description": "Számadó, S., Balliet, D., Giardini, F., Power, E. A., & Takács, K. (2021). The language of cooperation: reputation and honest signalling. Philosophical Transactions of the Royal Society B, 376(1838), 20200286.",
-          "kind": "scholarly"
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/31916837/",
-          "description": "Bellucci, G., & Park, S. Q. (2020). Honesty biases trustworthiness impressions. Journal of Experimental Psychology: General, 149(8), 1567–1586.",
-          "kind": "scholarly"
-        },
-        {
-          "url": "https://journals.aom.org/doi/abs/10.5465/annals.2021.0209",
-          "description": "Cooper, B., Cohen, T. R., Huppert, E., Levine, E. E., & Fleeson, W. (2023). Honest Behavior: Truth-Seeking, Belief-Speaking, and Fostering Understanding of the Truth in Others. Academy of Management Annals, 17(2), 655–683.",
-          "kind": "scholarly"
-        },
-        {
-          "url": "https://link.springer.com/article/10.1007/s10790-024-09990-9",
-          "description": "Dougherty, M. (2024). Honesty and the Truth: Against Subjectivism About Honesty. The Journal of Value Inquiry.",
-          "kind": "scholarly"
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/27936834/",
-          "description": "Rogers, T., Zeckhauser, R., Gino, F., Norton, M. I., & Schweitzer, M. E. (2017). Artful paltering: The risks and rewards of using truthful statements to mislead others. Journal of Personality and Social Psychology, 112(3), 456–473.",
-          "kind": "scholarly"
-        }
+        { "url": "https://onlinelibrary.wiley.com/doi/10.3982/ECTA14673", "description": "Abeler, J., Nosenzo, D., & Raymond, C. (2019). Preferences for Truth-Telling. Econometrica, 87(4), 1115–1153.", "kind": "scholarly" },
+        { "url": "https://www.annualreviews.org/content/journals/10.1146/annurev-psych-081920-042106", "description": "Henrich, J., & Muthukrishna, M. (2021). The Origins and Psychology of Human Cooperation. Annual Review of Psychology, 72, 207–240.", "kind": "scholarly" },
+        { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8487738/", "description": "Számadó, S., Balliet, D., Giardini, F., Power, E. A., & Takács, K. (2021). The language of cooperation: reputation and honest signalling. Philosophical Transactions of the Royal Society B, 376(1838), 20200286.", "kind": "scholarly" },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/31916837/", "description": "Bellucci, G., & Park, S. Q. (2020). Honesty biases trustworthiness impressions. Journal of Experimental Psychology: General, 149(8), 1567–1586.", "kind": "scholarly" },
+        { "url": "https://journals.aom.org/doi/abs/10.5465/annals.2021.0209", "description": "Cooper, B., Cohen, T. R., Huppert, E., Levine, E. E., & Fleeson, W. (2023). Honest Behavior: Truth-Seeking, Belief-Speaking, and Fostering Understanding of the Truth in Others. Academy of Management Annals, 17(2), 655–683.", "kind": "scholarly" },
+        { "url": "https://link.springer.com/article/10.1007/s10790-024-09990-9", "description": "Dougherty, M. (2024). Honesty and the Truth: Against Subjectivism About Honesty. The Journal of Value Inquiry.", "kind": "scholarly" },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/27936834/", "description": "Rogers, T., Zeckhauser, R., Gino, F., Norton, M. I., & Schweitzer, M. E. (2017). Artful paltering: The risks and rewards of using truthful statements to mislead others. Journal of Personality and Social Psychology, 112(3), 456–473.", "kind": "scholarly" }
       ],
       "strategies": [
-        {
-          "title": "Sort what you know",
-          "slug": "sort-what-you-know"
-        },
-        {
-          "title": "Practice saying what you mean",
-          "slug": "practice-saying-what-you-mean"
-        },
-        {
-          "title": "Rehearse what you wish you had said",
-          "slug": "rehearse-what-you-wish-you-had-said"
-        }
+        { "title": "Sort what you know", "slug": "sort-what-you-know" },
+        { "title": "Practice saying what you mean", "slug": "practice-saying-what-you-mean" },
+        { "title": "Rehearse what you wish you had said", "slug": "rehearse-what-you-wish-you-had-said" }
+      ]
+    },
+    "accountability": {
+      "title": "Accountability",
+      "category": "Community/Belonging",
+      "catalogOrder": 23,
+      "feelings": [
+        { "title": "Angry", "slug": "angry" },
+        { "title": "Scared", "slug": "scared" },
+        { "title": "Confused", "slug": "confused" },
+        { "title": "Antagonistic", "slug": "antagonistic" },
+        { "title": "Hostile", "slug": "hostile" },
+        { "title": "Bewildered", "slug": "bewildered" },
+        { "title": "Hurt", "slug": "hurt" },
+        { "title": "In pain", "slug": "in-pain" },
+        { "title": "Anxious", "slug": "anxious" },
+        { "title": "Frustrated", "slug": "frustrated" },
+        { "title": "Embarrassed", "slug": "embarrassed" },
+        { "title": "Sad", "slug": "sad" }
+      ],
+      "fauxFeelings": [
+        { "title": "Blamed", "slug": "blamed" },
+        { "title": "Criticized", "slug": "criticized" },
+        { "title": "Humiliated", "slug": "humiliated" }
+      ],
+      "summary": "Accountability concerns being able to recognize our part in what happens and respond to the effects of our actions. People judge responsibility by considering how a person was connected to an outcome, what expectations applied, and how much control they had, and we create forms of answerability in which choices or judgments can be explained or justified. How that answerability is structured matters; accountability does not have one uniformly helpful effect. Responsibility itself does not require blame or self-punishment. Clinical work describes treating people as responsible agents while blame is deliberately avoided, and research on interpersonal transgressions finds that taking responsibility can coexist with self-acceptance and efforts to repair. When this Need is active, we may be wanting responsibility to be something that can be acknowledged and responded to rather than ignored or disowned.",
+      "narrative": "Schlenker and colleagues studied how people judge responsibility. Their model connects a person to an event and to expectations about conduct. In two studies, responsibility judgments changed with the strength of those connections, especially perceived personal control, and people sought information relevant to them when making responsibility judgments. Causal involvement alone was not the whole judgment; the expectations that applied and the person's relationship to the event also mattered.\n\nLerner and Tetlock reviewed research on accountability arrangements in which people expected to explain or justify judgments and choices. The effects varied with the ground rules and timing. Depending on the conditions, accountability could reduce particular cognitive biases, leave them unchanged, or make them stronger. Their review describes forms of answerability whose effects depend on how they are structured.\n\nPickard examines clinical treatment in which some behaviors can harm the person or other people. She describes encouraging people to recognize their agency and responsibility while clinicians deliberately avoid hostile blame. In this clinical model, recognizing responsibility and using blame are separate responses.\n\nWoodyatt and Wenzel followed people after interpersonal transgressions and distinguished genuine self-forgiveness from self-punishment and from responses that minimized responsibility. Genuine self-forgiveness involved working through the offense, taking responsibility, and accepting oneself while acknowledging failure. In their prospective research, it was associated with greater self-esteem and empathy toward the other person. Taking responsibility did not require remaining in a self-punitive stance.",
+      "sources": [
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/7984709/", "description": "Schlenker, B. R., Britt, T. W., Pennington, J., Murphy, R., & Doherty, K. (1994). The triangle model of responsibility. Psychological Review, 101(4), 632–652.", "kind": "scholarly" },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/10087938/", "description": "Lerner, J. S., & Tetlock, P. E. (1999). Accounting for the effects of accountability. Psychological Bulletin, 125(2), 255–275.", "kind": "scholarly" },
+        { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3272423/", "description": "Pickard, H. (2011). Responsibility Without Blame: Empathy and the Effective Treatment of Personality Disorder. Philosophy, Psychiatry, & Psychology, 18(3), 209–223.", "kind": "scholarly" },
+        { "url": "https://guilfordjournals.com/doi/10.1521/jscp.2013.32.2.225", "description": "Woodyatt, L., & Wenzel, M. (2013). Self-Forgiveness and Restoration of an Offender Following an Interpersonal Transgression. Journal of Social and Clinical Psychology, 32(2), 225–259.", "kind": "scholarly" }
+      ],
+      "strategies": [
+        { "title": "Map the responsibility", "slug": "map-the-responsibility" },
+        { "title": "Draft a repair", "slug": "draft-a-repair" }
       ]
     }
   },
@@ -394,52 +339,41 @@
       "title": "Sort what you know",
       "slug": "sort-what-you-know",
       "description": "Write down what happened. Then write what you think it means. Look at what evidence you actually have for that interpretation and what you still do not know.\n\nFor example: “They ended the conversation when I asked.” “I think they were avoiding the question.” “I don't actually know why they ended it.”\n\nIf you do not know yet, you can leave it at “I don't know yet.”",
-      "needs": [
-        {
-          "title": "Honesty",
-          "slug": "honesty"
-        }
-      ],
+      "needs": [{ "title": "Honesty", "slug": "honesty" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/self-help-cbt-techniques/thought-record/",
-        "description": "NHS Every Mind Matters, Thought record",
-        "kind": "clinical-guidance"
-      }
+      "evidence": { "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/self-help-cbt-techniques/thought-record/", "description": "NHS Every Mind Matters, Thought record", "kind": "clinical-guidance" }
     },
     {
       "title": "Practice saying what you mean",
       "slug": "practice-saying-what-you-mean",
       "description": "Put what you genuinely want to communicate into one clear, direct sentence, then practice saying it privately. You do not have to contact anyone.\n\nFor example: “I said I was fine, but I was actually hurt.” Or: “I don't feel like I know the whole story, and honesty about what happened matters to me.”",
-      "needs": [
-        {
-          "title": "Honesty",
-          "slug": "honesty"
-        }
-      ],
+      "needs": [{ "title": "Honesty", "slug": "honesty" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://onlinelibrary.wiley.com/doi/10.1111/cpsp.12216",
-        "description": "Speed, Goldstein, and Goldfried (2018), Assertiveness Training: A Forgotten Evidence-Based Treatment",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://onlinelibrary.wiley.com/doi/10.1111/cpsp.12216", "description": "Speed, Goldstein, and Goldfried (2018), Assertiveness Training: A Forgotten Evidence-Based Treatment", "kind": "scholarly" }
     },
     {
       "title": "Rehearse what you wish you had said",
       "slug": "rehearse-what-you-wish-you-had-said",
       "description": "Think back to something you said that did not represent what you really meant. Practice a version that does. This is rehearsal, not a commitment to reopen the conversation.\n\nFor example: “I said I didn't care. What I meant was that I cared and didn't feel able to keep talking.” Or: “I said I was sure, but I'm actually uncertain.”",
-      "needs": [
-        {
-          "title": "Honesty",
-          "slug": "honesty"
-        }
-      ],
+      "needs": [{ "title": "Honesty", "slug": "honesty" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://pubmed.ncbi.nlm.nih.gov/512017/",
-        "description": "Zielinski and Williams (1979), Covert modeling vs. Behavior rehearsal in the training and generalization of assertive behaviors: a crossover design",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://pubmed.ncbi.nlm.nih.gov/512017/", "description": "Zielinski and Williams (1979), Covert modeling vs. Behavior rehearsal in the training and generalization of assertive behaviors: a crossover design", "kind": "scholarly" }
+    },
+    {
+      "title": "Map the responsibility",
+      "slug": "map-the-responsibility",
+      "description": "Choose one outcome you want to understand more clearly. List the people and factors that contributed to what happened, including your own actions. Then consider how responsibility is distributed among them. Write the part you believe was yours without taking responsibility for what was outside your control.",
+      "needs": [{ "title": "Accountability", "slug": "accountability" }],
+      "provenance": "system",
+      "evidence": { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7853755/", "description": "Murray, H., & Ehlers, A. (2021). Cognitive therapy for moral injury in post-traumatic stress disorder.", "kind": "scholarly" }
+    },
+    {
+      "title": "Draft a repair",
+      "slug": "draft-a-repair",
+      "description": "If there is something you believe is yours to address, privately write one repair you could choose to make. It could be an apology or another form of amends. You do not have to send it or contact anyone. The first step is only to identify a repair that fits what you believe you are responsible for.",
+      "needs": [{ "title": "Accountability", "slug": "accountability" }],
+      "provenance": "system",
+      "evidence": { "url": "https://www.tandfonline.com/doi/full/10.1080/15298861003669565", "description": "Exline, J. J., Root, B. L., Yadavalli, S., Martin, A. M., & Fisher, M. L. (2011). Reparative Behaviors and Self-forgiveness: Effects of a Laboratory-based Exercise.", "kind": "scholarly" }
     }
   ],
   "strategyProvenance": {},
