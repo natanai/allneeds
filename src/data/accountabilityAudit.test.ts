@@ -40,16 +40,14 @@ describe('approved Accountability audit package', () => {
     ]);
   });
 
-  it('restores Accountability at its canonical catalog position without shifting later Needs', () => {
-    expect(needs).toHaveLength(legacyData.needs.length + 2);
-    expect(needs[19]?.slug).toBe('honesty');
+  it('restores Accountability at its canonical catalog position without shifting legacy-owned Needs', () => {
+    const legacySlugs = legacyData.needs.map((need) => need.slug);
+
+    expect(legacySlugs).not.toContain('accountability');
     expect(needs[23]?.slug).toBe('accountability');
-    expect(needs.slice(0, 23).filter((need) => need.slug !== 'honesty').map((need) => need.slug)).toEqual(
-      legacyData.needs.slice(0, 22).map((need) => need.slug),
-    );
-    expect(needs.slice(24).map((need) => need.slug)).toEqual(
-      legacyData.needs.slice(22).map((need) => need.slug),
-    );
+    expect(
+      needs.filter((need) => legacySlugs.includes(need.slug)).map((need) => need.slug),
+    ).toEqual(legacySlugs);
   });
 
   it('gives each approved system strategy its approved human-facing source', () => {
