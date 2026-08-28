@@ -3,14 +3,35 @@ import { describe, expect, it } from 'vitest';
 import legacyData from './generated/legacyData.json';
 import { needs, needsBySlug, strategiesBySlug } from './catalog';
 
-const approvedSourceUrls = [
-  'https://onlinelibrary.wiley.com/doi/10.3982/ECTA14673',
-  'https://www.annualreviews.org/content/journals/10.1146/annurev-psych-081920-042106',
-  'https://pmc.ncbi.nlm.nih.gov/articles/PMC8487738/',
-  'https://pubmed.ncbi.nlm.nih.gov/31916837/',
-  'https://journals.aom.org/doi/abs/10.5465/annals.2021.0209',
-  'https://link.springer.com/article/10.1007/s10790-024-09990-9',
-  'https://pubmed.ncbi.nlm.nih.gov/27936834/',
+const approvedSources = [
+  {
+    url: 'https://onlinelibrary.wiley.com/doi/10.3982/ECTA14673',
+    description: 'Abeler, J., Nosenzo, D., & Raymond, C. (2019). Preferences for Truth-Telling. Econometrica, 87(4), 1115–1153.',
+  },
+  {
+    url: 'https://www.annualreviews.org/content/journals/10.1146/annurev-psych-081920-042106',
+    description: 'Henrich, J., & Muthukrishna, M. (2021). The Origins and Psychology of Human Cooperation. Annual Review of Psychology, 72, 207–240.',
+  },
+  {
+    url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC8487738/',
+    description: 'Számadó, S., Balliet, D., Giardini, F., Power, E. A., & Takács, K. (2021). The language of cooperation: reputation and honest signalling. Philosophical Transactions of the Royal Society B, 376(1838), 20200286.',
+  },
+  {
+    url: 'https://pubmed.ncbi.nlm.nih.gov/31916837/',
+    description: 'Bellucci, G., & Park, S. Q. (2020). Honesty biases trustworthiness impressions. Journal of Experimental Psychology: General, 149(8), 1567–1586.',
+  },
+  {
+    url: 'https://journals.aom.org/doi/abs/10.5465/annals.2021.0209',
+    description: 'Cooper, B., Cohen, T. R., Huppert, E., Levine, E. E., & Fleeson, W. (2023). Honest Behavior: Truth-Seeking, Belief-Speaking, and Fostering Understanding of the Truth in Others. Academy of Management Annals, 17(2), 655–683.',
+  },
+  {
+    url: 'https://link.springer.com/article/10.1007/s10790-024-09990-9',
+    description: 'Dougherty, M. (2024). Honesty and the Truth: Against Subjectivism About Honesty. The Journal of Value Inquiry.',
+  },
+  {
+    url: 'https://pubmed.ncbi.nlm.nih.gov/27936834/',
+    description: 'Rogers, T., Zeckhauser, R., Gino, F., Norton, M. I., & Schweitzer, M. E. (2017). Artful paltering: The risks and rewards of using truthful statements to mislead others. Journal of Personality and Social Psychology, 112(3), 456–473.',
+  },
 ];
 
 describe('approved Honesty audit package', () => {
@@ -20,7 +41,10 @@ describe('approved Honesty audit package', () => {
     expect(honesty?.summary).toBe(
       'Honesty concerns a motivation to keep what we communicate aligned with what we actually take to be true, while leaving room to say when we are unsure or when our understanding changes. People often act on this concern even when lying could benefit them, and experimental work suggests that both a preference for honesty itself and a preference for being seen as honest can motivate truth-telling. Evolutionary and cultural-evolutionary accounts of human cooperation have examined reputation and reliable information-sharing as part of how cooperation is sustained, and experiments show that honest reputations can shape trust judgments. Research on honest behavior also distinguishes seeking accurate information, expressing what one believes, and helping others form an accurate understanding. Philosophical and experimental work helps clarify why honesty is not identical to factual correctness: sincere statements can be mistaken, while factually true statements can still be used to mislead. When honesty feels especially important, the motivation may be drawing attention to whether the information moving between people is dependable enough to act on and whether what we are expressing still represents what we actually believe.',
     );
-    expect(honesty?.evidence?.sources.map((source) => source.url)).toEqual(approvedSourceUrls);
+    expect(honesty?.evidence?.sources.map((source) => ({
+      url: source.url,
+      description: source.description,
+    }))).toEqual(approvedSources);
     expect(honesty?.strategies).toEqual([
       { title: 'Sort what you know', slug: 'sort-what-you-know' },
       { title: 'Practice saying what you mean', slug: 'practice-saying-what-you-mean' },
