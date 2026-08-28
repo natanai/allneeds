@@ -342,3 +342,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 - Function-lens content, when approved, belongs in the same canonical editorial Need record and must pass through the deterministic catalog compiler. Do not create a second runtime repair path.
 - Do not revise an approved need package without a new explicit review/approval cycle.
 - Understanding's next step after content deployment is its live Design Lab magnet review. Do not mark Understanding fully audited until that approved magnet is promoted.
+
+## Honesty
+
+**Status:** content audited and implemented 2026-08-27; redesigned magnet review pending. The authoritative current content record is `docs/honesty-content-audit.md`.

@@ -5662,94 +5662,6 @@
       ]
     },
     {
-      "title": "Honesty",
-      "slug": "honesty",
-      "category": "Authenticity",
-      "description": "",
-      "strategies": [
-        {
-          "title": "Write three sentences",
-          "slug": "write-three-sentences"
-        },
-        {
-          "title": "Observation only",
-          "slug": "observation-only"
-        },
-        {
-          "title": "Self-check scale",
-          "slug": "self-check-scale"
-        },
-        {
-          "title": "Name a want & a don’t",
-          "slug": "name-a-want-a-don-t"
-        }
-      ],
-      "fauxFeelings": [
-        {
-          "title": "Betrayed",
-          "slug": "betrayed"
-        },
-        {
-          "title": "Cheated",
-          "slug": "cheated"
-        },
-        {
-          "title": "Distrusted",
-          "slug": "distrusted"
-        },
-        {
-          "title": "Tricked",
-          "slug": "tricked"
-        }
-      ],
-      "feelings": [
-        {
-          "title": "Angry",
-          "slug": "angry"
-        },
-        {
-          "title": "Hurt",
-          "slug": "hurt"
-        },
-        {
-          "title": "Disappointment",
-          "slug": "disappointment"
-        },
-        {
-          "title": "Enraged",
-          "slug": "enraged"
-        },
-        {
-          "title": "Resentful",
-          "slug": "resentful"
-        },
-        {
-          "title": "Sad",
-          "slug": "sad"
-        },
-        {
-          "title": "Frustrated",
-          "slug": "frustrated"
-        },
-        {
-          "title": "Embarrassed",
-          "slug": "embarrassed"
-        }
-      ],
-      "originalClaim": "Transparent information can enable accurate coordination and reduce relational risk. This need may motivate factual clarity, timely disclosure, and correction of errors. Honesty is a stable basis for trust.",
-      "rewrittenClaim": "Being honest – sharing truthful, clear information – is crucial for groups to coordinate their actions correctly and for individuals to feel secure with each other. When we have the full, accurate picture, we can make better decisions and avoid the hidden pitfalls that come with deception. The need for honesty may push us to communicate facts plainly, to be forthcoming about important matters in a timely way, and to admit and fix mistakes rather than cover them up. Consistent honesty provides a foundation for trust: studies have shown that we are biased to trust people with a reputation for honesty, and in relationships, open truthful dialogue (even when discussing problems) leads to stronger, healthier outcomes. In essence, honesty creates predictability and safety in interactions – others know they can take one’s words at face value – making it a bedrock for any trusting relationship or cooperative effort.",
-      "supportingSources": [
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/31916837/",
-          "description": "study: people strongly prefer to trust those who show consistent honesty; honest behavior biases others to view one as trustworthy"
-        },
-        {
-          "url": "https://doi.org/10.1037/pspi0000381",
-          "description": "University of Rochester study: greater honesty in expressing needs or issues led to better relationship outcomes"
-        }
-      ]
-    },
-    {
       "title": "Honor",
       "slug": "honor",
       "category": "Love/Caring",
@@ -5882,16 +5794,8 @@
           "slug": "name-three-sounds"
         },
         {
-          "title": "Write three sentences",
-          "slug": "write-three-sentences"
-        },
-        {
           "title": "Name three needs alive",
           "slug": "name-three-needs-alive"
-        },
-        {
-          "title": "Observation only",
-          "slug": "observation-only"
         },
         {
           "title": "Micro-request to self",
@@ -5914,10 +5818,6 @@
           "slug": "calendar-one-thing"
         },
         {
-          "title": "Self-check scale",
-          "slug": "self-check-scale"
-        },
-        {
           "title": "Trace your hand",
           "slug": "trace-your-hand"
         },
@@ -5928,10 +5828,6 @@
         {
           "title": "Value compass card",
           "slug": "value-compass-card"
-        },
-        {
-          "title": "Name a want & a don’t",
-          "slug": "name-a-want-a-don-t"
         },
         {
           "title": "Window Quarter",
@@ -11210,23 +11106,6 @@
       "contributorLocation": ""
     },
     {
-      "title": "Write three sentences",
-      "slug": "write-three-sentences",
-      "summary": "Write three unedited sentences about “right now.”",
-      "needs": [
-        {
-          "title": "Honesty",
-          "slug": "honesty"
-        },
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        }
-      ],
-      "contributorName": "",
-      "contributorLocation": ""
-    },
-    {
       "title": "Haiku in a minute",
       "slug": "haiku-in-a-minute",
       "summary": "Write a 5-7-5 poem about what you notice.",
@@ -11239,23 +11118,6 @@
       "slug": "name-three-needs-alive",
       "summary": "Write down three needs that feel alive for you in this moment.",
       "needs": [
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        }
-      ],
-      "contributorName": "",
-      "contributorLocation": ""
-    },
-    {
-      "title": "Observation only",
-      "slug": "observation-only",
-      "summary": "Write one sentence describing what happened with zero evaluations.",
-      "needs": [
-        {
-          "title": "Honesty",
-          "slug": "honesty"
-        },
         {
           "title": "Clarity",
           "slug": "clarity"
@@ -11752,23 +11614,6 @@
       "contributorLocation": ""
     },
     {
-      "title": "Self-check scale",
-      "slug": "self-check-scale",
-      "summary": "Draw a 0–10 line for energy; mark where you are now.",
-      "needs": [
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        },
-        {
-          "title": "Honesty",
-          "slug": "honesty"
-        }
-      ],
-      "contributorName": "",
-      "contributorLocation": ""
-    },
-    {
       "title": "Body scan (30 sec)",
       "slug": "body-scan-30-sec",
       "summary": "Scan from toes to head naming neutral sensations only.",
@@ -11963,14 +11808,6 @@
       "slug": "name-a-want-a-don-t",
       "summary": "Complete: “I want __ and I don’t want __ because I value __.”",
       "needs": [
-        {
-          "title": "Honesty",
-          "slug": "honesty"
-        },
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        },
         {
           "title": "Autonomy",
           "slug": "autonomy"

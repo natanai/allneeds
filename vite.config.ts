@@ -63,11 +63,22 @@ type LegacyCatalog = {
   strategies: CatalogStrategySource[];
 };
 type EditorialNeed = {
+  title?: string;
+  category?: string;
+  catalogOrder?: number;
+  feelings?: EntityRef[];
+  fauxFeelings?: EntityRef[];
   summary: string;
   narrative: string;
   sources: EvidenceSource[];
   strategies: EntityRef[];
   lenses?: EvidenceLens[];
+};
+type CanonicalEditorialNeed = EditorialNeed & {
+  title: string;
+  catalogOrder: number;
+  feelings: EntityRef[];
+  fauxFeelings: EntityRef[];
 };
 type EditorialCatalog = {
   needs: Record<string, EditorialNeed>;
@@ -105,6 +116,13 @@ function addStrategyReferences(
   });
 }
 
+function editorialNeedOwnsEntity(need: EditorialNeed): need is CanonicalEditorialNeed {
+  return typeof need.title === 'string'
+    && typeof need.catalogOrder === 'number'
+    && Array.isArray(need.feelings)
+    && Array.isArray(need.fauxFeelings);
+}
+
 function runtimeCatalogSource() {
   const legacy = JSON.parse(readFileSync(legacyCatalogPath, 'utf8')) as LegacyCatalog;
   const editorial = JSON.parse(readFileSync(editorialCatalogPath, 'utf8')) as EditorialCatalog;
@@ -138,33 +156,72 @@ function runtimeCatalogSource() {
       : {}),
   }));
 
-  const needs = legacy.needs.map((need) => {
-    const override = editorial.needs[need.slug];
-    const strategies = [...(override?.strategies ?? need.strategies ?? [])]
-      .filter((reference) => strategyAllowedForNeed(reference.slug, need.slug));
-    (addedStrategyRefsByNeed.get(need.slug) ?? []).forEach((reference) => {
-      if (strategyAllowedForNeed(reference.slug, need.slug)
+  const canonicalEditorialNeeds = Object.entries(editorial.needs)
+    .filter(([, need]) => editorialNeedOwnsEntity(need))
+    .map(([slug, need]) => [slug, need] as [string, CanonicalEditorialNeed]);
+  const canonicalEditorialNeedSlugs = new Set(canonicalEditorialNeeds.map(([slug]) => slug));
+  const strategyReferencesForNeed = (needSlug: string, baseReferences: EntityRef[]) => {
+    const strategies = [...baseReferences]
+      .filter((reference) => strategyAllowedForNeed(reference.slug, needSlug));
+    (addedStrategyRefsByNeed.get(needSlug) ?? []).forEach((reference) => {
+      if (strategyAllowedForNeed(reference.slug, needSlug)
         && !strategies.some((candidate) => candidate.slug === reference.slug)) {
         strategies.push(reference);
       }
     });
+    return strategies;
+  };
 
-    return {
-      slug: need.slug,
+  const legacyNeeds = legacy.needs
+    .map((need, catalogOrder) => ({ need, catalogOrder }))
+    .filter(({ need }) => !canonicalEditorialNeedSlugs.has(need.slug))
+    .map(({ need, catalogOrder }) => {
+      const override = editorial.needs[need.slug];
+      return {
+        catalogOrder,
+        value: {
+          slug: need.slug,
+          title: need.title,
+          category: need.category,
+          summary: override?.summary ?? need.description ?? need.originalClaim ?? '',
+          feelings: need.feelings ?? [],
+          fauxFeelings: need.fauxFeelings ?? [],
+          strategies: strategyReferencesForNeed(
+            need.slug,
+            override?.strategies ?? need.strategies ?? [],
+          ),
+          evidence: {
+            claimSummary: override?.summary ?? need.originalClaim,
+            narrative: override?.narrative ?? need.rewrittenClaim,
+            sources: override?.sources ?? need.supportingSources ?? [],
+            ...(override?.lenses?.length ? { lenses: override.lenses } : {}),
+          },
+        },
+      };
+    });
+
+  const editorialNeeds = canonicalEditorialNeeds.map(([slug, need]) => ({
+    catalogOrder: need.catalogOrder,
+    value: {
+      slug,
       title: need.title,
       category: need.category,
-      summary: override?.summary ?? need.description ?? need.originalClaim ?? '',
-      feelings: need.feelings ?? [],
-      fauxFeelings: need.fauxFeelings ?? [],
-      strategies,
+      summary: need.summary,
+      feelings: need.feelings,
+      fauxFeelings: need.fauxFeelings,
+      strategies: strategyReferencesForNeed(slug, need.strategies),
       evidence: {
-        claimSummary: override?.summary ?? need.originalClaim,
-        narrative: override?.narrative ?? need.rewrittenClaim,
-        sources: override?.sources ?? need.supportingSources ?? [],
-        ...(override?.lenses?.length ? { lenses: override.lenses } : {}),
+        claimSummary: need.summary,
+        narrative: need.narrative,
+        sources: need.sources,
+        ...(need.lenses?.length ? { lenses: need.lenses } : {}),
       },
-    };
-  });
+    },
+  }));
+
+  const needs = [...legacyNeeds, ...editorialNeeds]
+    .sort((a, b) => a.catalogOrder - b.catalogOrder)
+    .map(({ value }) => value);
 
   const fauxFeelings = legacy.fauxFeelings.map((feeling) => ({
     slug: feeling.slug,
