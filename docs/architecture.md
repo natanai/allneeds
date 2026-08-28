@@ -22,7 +22,7 @@ The legacy application has a strong visual identity, content/data pipeline, and 
 - Stable slugs and useful public URL families.
 - Evidence and research metadata, including source-link validation.
 - Body-cue source data and reverse-inference behavior.
-- Observation cue/taxonomy data and the domain logic that can be isolated from the current editor.
+- Observation cue/taxonomy provenance, compiled into V2-owned deterministic source and domain logic.
 - Journal normalization and historical migration knowledge.
 - On-device privacy as the default persistence model.
 - **Visual parity by default:** the plum/lavender canvas, current page/card proportions, Atkinson Hyperlegible + Manrope typography, rose/mint/gold/sky/peach accents, dark outlines, rounded forms, tactile shadows, current navigation-magnet appearance, current doorway treatment, and existing information hierarchy.
@@ -114,6 +114,8 @@ The CSV/evidence files in production are editorial source material, not V2's com
 5. have React features consume the typed generated model, not legacy column names.
 
 `data/index.json`, `body-regions.json`, and `reverse-inference.json` are useful reference/build outputs, but their current shapes are not automatically the permanent V2 model. Migration adapters should be allowed to understand old shapes without forcing those shapes through the new UI.
+
+Observation Inference 2.0 is the completed model for retiring one legacy slice. `src/data/observationInference/source.json` is its canonical hand-edited source, `scripts/compile-observation-inference.mjs` is its only compiler, and `src/data/generated/observationInference.ts` is its runtime asset. The React feature consumes the pure TypeScript domain engine in `src/domain/observationInference`; it does not import `src/legacy/observations`, fetch cue CSV/module files, or repair source data at runtime. See `docs/observation-inference-v2.md` for the full contract.
 
 ## State and persistence
 
@@ -215,7 +217,7 @@ draft boundaries, real backup recovery, and stopped-listener/same-port reconnect
 accessibility and canonical visual-diff tooling remain milestone work rather
 than being implied by the current smoke coverage.
 
-The production build also runs `scripts/verify-production-build.mjs`. It fails when the service-worker manifest differs from `dist`, an API/external URL enters the precache, navigations or hashed assets lose their cache-first/`Vary`-safe contract, either local product font disappears, Google Fonts returns as a runtime dependency, lazy/Suspense route-loading UI is introduced, the Observation matcher skips cue/module detectors or its public copy drifts, routed features create nested `main` landmarks, route title/naming behavior disappears, shared modal focus behavior becomes incomplete, or the compact shell regresses its single Customizer entry and primary-work-before-guidance contracts.
+The production build also runs `scripts/verify-production-build.mjs`. It fails when the service-worker manifest differs from `dist`, an API/external URL enters the precache, navigations or hashed assets lose their cache-first/`Vary`-safe contract, either local product font disappears, Google Fonts returns as a runtime dependency, lazy/Suspense route-loading UI is introduced, the canonical Observation compiler/index is incomplete or a retired Observation legacy/public path returns, routed features create nested `main` landmarks, route title/naming behavior disappears, shared modal focus behavior becomes incomplete, or the compact shell regresses its single Customizer entry and primary-work-before-guidance contracts.
 
 ## GitHub Pages
 
@@ -240,7 +242,7 @@ If V2 later moves to a custom domain root, set the build base to `/` instead of 
 6. **Body Cues** — port inference math into pure TypeScript, retain current visual identity, stabilize dynamic results so slider changes do not bounce the page.
 7. **Strategy inventory** — typed personal strategy model, V2 store, legacy `nvcApp.inventory` import/export adapter.
 8. **Journal** — V2 journal repository plus adapters for `journal:v2`, `nvcApp.journal`, and `alexithymiaSupportJournal`.
-9. **Observations** — port the useful cue/taxonomy/matching modules first, then rebuild the existing experience around them with stable responsive behavior.
+9. **Observations (completed in 2.0 branch)** — one canonical V2 source and compiler, a pure synchronous inference domain, shared exact-range annotations, a single-surface editor, guaranteed exploration results, and no Observation legacy runtime or public data assets.
 10. **Alexithymia support** — compose body cues, energy/valence, possible feelings, needs, and journaling through stable progressive disclosure.
 11. **Customizer/personalization parity** — reconnect current theme/navigation options through V2 persistence boundaries.
 12. **Parity and migration hardening** — remaining content, redirects/prerender coverage, visual-regression references, full legacy import checks, performance/a11y regression suite.

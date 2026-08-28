@@ -10,11 +10,22 @@
 .editorCard { border-radius: var(--radius-2xl); background: rgba(255,255,255,.9); box-shadow: 0 18px 36px rgba(31,18,48,.13); overflow: hidden; }
 .editorGrid { padding: clamp(1.15rem, 4vw, 2.2rem); display: grid; grid-template-columns: 1fr; gap: .85rem; }
 .field { min-width: 0; display: grid; gap: .9rem; }
-.field > label { font-family: var(--font-display); font-size: .9rem; letter-spacing: .12em; text-transform: uppercase; }
-.inputWrapper { position: relative; min-height: 12rem; border: 1px solid color-mix(in srgb,var(--outline) 16%,transparent); border-radius: var(--radius-xl); background: #fff; box-shadow: 0 10px 24px rgba(31,18,48,.08); overflow: hidden; }
-.inputWrapper textarea { position: relative; z-index: 1; width: 100%; min-height: 12rem; padding: 1.15rem; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; line-height: 1.55; resize: vertical; }
-.inputWrapper:focus-within { outline: 3px solid color-mix(in srgb,var(--selection) 72%,var(--outline) 28%); outline-offset: 2px; }
-.formula { position: absolute; z-index: 0; inset: 1.1rem; display: grid; align-content: start; gap: .2rem; color: color-mix(in srgb,var(--secondary) 50%,transparent); pointer-events: none; }
+.editorLabel { font-family: var(--font-display); font-size: .9rem; letter-spacing: .12em; text-transform: uppercase; }
+.detectedLanguage {
+  padding: .78rem; display: grid; gap: .72rem;
+  border: 1px solid color-mix(in srgb,var(--outline) 14%,transparent); border-radius: var(--radius-lg);
+  background: color-mix(in srgb,var(--quiet) 10%,#fff);
+}
+.detectedLanguage h2 { margin: 0 0 .5rem; font-family: var(--font-display); font-size: .82rem; letter-spacing: .04em; text-transform: uppercase; }
+.detectedLinks { display: flex; flex-wrap: wrap; gap: .45rem; }
+.detectedLinks a {
+  min-height: 42px; padding: .38rem .65rem; display: grid; align-content: center; gap: .02rem;
+  border: 1px solid color-mix(in srgb,var(--outline) 24%,transparent); border-radius: var(--radius-md);
+  background: #fff; color: var(--text); text-decoration: none;
+}
+.detectedLinks a > span { font-weight: 700; }
+.detectedLinks small { color: var(--secondary); font-size: .68rem; }
+.wording p { margin: 0; color: var(--secondary); font-size: .83rem; }
 .slotHeader { display: flex; align-items: center; gap: .4rem; color: var(--secondary); font-family: var(--font-display); font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; }
 .slots { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
 .slot { min-height: 44px; padding: .55rem .65rem; display: flex; align-items: center; gap: .45rem; border: 1px solid color-mix(in srgb,var(--outline) 14%,transparent); border-radius: var(--radius-lg); background: color-mix(in srgb,#fff 92%,var(--quiet) 8%); color: var(--secondary); font-size: .78rem; }
@@ -30,11 +41,10 @@
 .example div button { width: fit-content; min-height: 44px; padding: .45rem .75rem; border: 1px solid color-mix(in srgb,var(--outline) 20%,transparent); border-radius: var(--radius-md); background: #fff; color: var(--text); font: inherit; cursor: pointer; }
 .example div { padding: .85rem; border-top: 1px solid color-mix(in srgb,var(--outline) 13%,transparent); background: color-mix(in srgb,var(--selection) 9%,#fff); }
 .example p { margin: 0; color: var(--secondary); }
-.matchSummary { padding: .75rem; display: grid; gap: .5rem; border-radius: var(--radius-lg); background: color-mix(in srgb,var(--quiet) 18%,#fff); }
-.matchSummary > div:first-child { display: flex; align-items: center; gap: .4rem; }
-.matchSummary p { margin: 0; flex: 1; color: var(--secondary); font-size: .9rem; }
-.matchSummary > div:last-child { display: flex; gap: .45rem; }
-.matchSummary > div:last-child span { padding: .2rem .55rem; border-radius: var(--radius-pill); background: #fff; font-size: .75rem; }
+.basis { padding-top: .75rem; display: grid; gap: .5rem; }
+.basis > div { display: flex; align-items: center; gap: .4rem; }
+.basis p { margin: 0; color: var(--secondary); font-size: .9rem; }
+.basis > div p { flex: 1; }
 .suggestions { display: grid; gap: 1rem; }
 .suggestions > header { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
 .suggestions[data-mode='editing'] > header { justify-content: flex-end; }
@@ -108,6 +118,11 @@
 .guideSections summary > span { display: grid; gap: .1rem; }
 .guideSections summary span { color: var(--secondary); font-size: .85rem; }
 .guideSections details > div { padding: 0 .9rem .9rem; overflow-wrap: anywhere; }
+.guideSections li + li { margin-top: .42rem; }
+.guideCallout { padding: .72rem; border-inline-start: 4px solid var(--outline); border-radius: var(--radius-md); background: color-mix(in srgb,var(--action) 20%,#fff); }
+.guideExamples { display: grid; gap: .65rem; }
+.guideExamples article { padding: .72rem; border-radius: var(--radius-md); background: color-mix(in srgb,var(--selection) 12%,#fff); }
+.guideExamples p { margin: .35rem 0; }
 .dialogBackdrop { position: fixed; z-index: 40; inset: 0; padding: 1rem; display: grid; place-items: center; background: rgba(18,8,31,.52); }
 .dialog { width: min(34rem,100%); max-height: min(42rem,90dvh); display: grid; grid-template-rows: auto minmax(0,1fr); overflow: hidden; border: 3px solid var(--outline); border-radius: var(--radius-2xl); background: var(--quiet); box-shadow: 0 18px 0 var(--shadow); }
 .dialog header { position: relative; z-index: 1; padding: 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--outline); background: var(--quiet); }
@@ -158,26 +173,14 @@
 
   .field { gap: .68rem; }
 
-  .field > label {
+  .editorLabel {
     font-size: .74rem;
     line-height: 1.2;
     letter-spacing: .065em;
     color: var(--secondary);
   }
 
-  .inputWrapper,
-  .inputWrapper textarea {
-    height: 11.4rem;
-    min-height: 11.4rem;
-  }
-
-  .inputWrapper {
-    border-radius: var(--radius-xl);
-    box-shadow: none;
-  }
-
-  .inputWrapper textarea { padding: .82rem .86rem; }
-  .formula { inset: .82rem .86rem; }
+  .detectedLanguage { padding: .68rem; }
 
   .slotHeader {
     min-height: 44px;

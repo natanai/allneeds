@@ -19,7 +19,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await page.goto('/observations');
   const editor = page.getByLabel('What did you notice?');
   await editor.fill(observation);
-  const loadMatches = page.getByRole('button', { name: 'Load possible feelings and needs matches' });
+  const loadMatches = page.getByRole('button', { name: 'Load possible feelings and needs' });
   await expect(loadMatches).toBeEnabled();
   await loadMatches.click();
   await page.getByRole('radio', { name: 'Met', exact: true }).click();
@@ -27,12 +27,12 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   const nav = page.getByLabel('Primary navigation magnets');
   await nav.getByRole('link', { name: 'Needs', exact: true }).click();
   await nav.getByRole('link', { name: 'Observations', exact: true }).click();
-  await expect(editor).toHaveValue(observation);
+  await expect(editor).toHaveText(observation);
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByRole('heading', { name: 'Possible feelings & needs to explore' })).toBeVisible();
 
   await page.reload();
-  await expect(editor).toHaveValue(observation);
+  await expect(editor).toHaveText(observation);
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Open in Journal', exact: true }).click();
 
@@ -42,7 +42,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await journalDialog.getByRole('button', { name: 'Clear', exact: true }).click();
   await journalDialog.getByRole('button', { name: 'Close full screen journal' }).click();
   await nav.getByRole('link', { name: 'Observations', exact: true }).click();
-  await expect(editor).toHaveValue('');
+  await expect(editor).toHaveText('');
   expect(runtimeProblems).toEqual([]);
 });
 
