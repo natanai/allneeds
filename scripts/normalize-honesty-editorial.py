@@ -89,8 +89,12 @@ needs_newline = text.rfind('\n', 0, needs_close)
 honesty_block = property_block('honesty', CURRENT['needs']['honesty'])
 text = text[:needs_newline] + ',\n' + honesty_block + text[needs_newline:]
 
+# Recompute the full needs-object boundary after inserting Honesty, then find the
+# top-level strategy catalog that follows it rather than a nested Need strategy list.
+needs_open = text.index('{', needs_marker_index)
+needs_close = matching_close(text, needs_open, '{', '}')
 strategies_marker = '  "strategies": ['
-strategies_marker_index = text.index(strategies_marker)
+strategies_marker_index = text.index(strategies_marker, needs_close)
 strategies_open = text.index('[', strategies_marker_index)
 strategies_close = matching_close(text, strategies_open, '[', ']')
 strategies_newline = text.rfind('\n', 0, strategies_close)
