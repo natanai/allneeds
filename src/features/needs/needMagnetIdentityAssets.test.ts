@@ -64,4 +64,22 @@ describe('approved Need magnet identities', () => {
     expect(art).toContain('viewBox="0 0 160 48"');
     expect(art).toContain('<circle cx="80" cy="24" r="3.2" fill="black"/>');
   });
+
+  it('promotes Honesty · Heart to Honesty with its unique heart-and-voice icon and corrected destination art', () => {
+    const css = readFileSync(new URL('./NeedsPage.module.css', import.meta.url), 'utf8');
+    const icon = readFileSync(new URL('../../../public/icons/needs/honesty.svg', import.meta.url), 'utf8');
+    const art = readFileSync(
+      new URL('../../../public/icons/needs/art/honesty-corrected-destination.svg', import.meta.url),
+      'utf8',
+    );
+
+    expect(css).toContain("[data-magnet-id='needs-honesty']");
+    expect(css).toContain("url('/icons/needs/honesty.svg')");
+    expect(css).toContain("url('/icons/needs/art/honesty-corrected-destination.svg')");
+    expect(icon).toContain('M12 20.2S3.6 15.1');
+    expect(icon).toContain('M14.9 10.2h4.5');
+    expect(art).toContain('viewBox="0 0 160 48"');
+    expect(art).toContain('m49 20 5 4-5 4');
+  });
+
 });
