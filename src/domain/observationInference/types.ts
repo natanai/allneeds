@@ -105,6 +105,7 @@ export type ObservationEntityMatch = {
   entityType: ObservationEntityType;
   slug: string;
   title: string;
+  matchKind: EntityMatchKind;
   text: string;
   start: number;
   end: number;

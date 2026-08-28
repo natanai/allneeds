@@ -71,6 +71,28 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Compact controls can use smaller typography and tighter internal padding, but should not become difficult to tap.
 - Disabled/unavailable actions should remain understandable through state and context rather than simply disappearing when the function still matters to the user.
 
+## Body-cue match language
+
+**Accepted 2026-08-27.** Preserve Body Cues as a first-class tactile experience and use one shared body-clue scorer wherever its authored associations appear.
+
+- Display a whole-number `Clue match` as fit to the cues the person entered, not as probability, confidence, certainty, accuracy, diagnosis, or a share of all possible Feelings.
+- Candidate matches are independent. They do not have to sum to 100, and the first-ranked candidate must not become 100 merely because it ranks first.
+- Body Cues and the body channel within Alexithymia Support read the same forward association strengths and use the same formula. Do not restore the legacy per-emotion-normalized reverse weights as a scoring path.
+- Compass candidates do not display percentages until that clue channel has its own approved numerator, denominator, and missing-data behavior.
+- `Not this time` is a current-check-in choice outside the score. It must not create a device-wide penalty for that Feeling in unrelated situations.
+
+## Alexithymia Support check-in
+
+**Accepted 2026-08-28.** Alexithymia Support is a four-stage, present-moment working surface: `What happened?`, `Clues`, `Words`, and `Your words`. It is not a lesson, detached practice mode, diagnostic test, treatment, or strategy library.
+
+- At compact widths, use a full-bleed mobile stage with a compact app bar, safe-area padding, one immediate job, and a persistent next action. Do not restore the legacy stack of outlined region cards or expand every option into the page.
+- Body and Feeling shape are optional peer clue cards. Body opens one canonical region at a time in a bottom sheet and returns selections to a compact clue tray; the full Body Cues page remains available as its own tactile experience.
+- Feeling and Need choices reuse the shared `MagnetBoard`. Candidate details, score explanations, and full Need browsing open in focus-managed sheets so research copy does not displace the working task.
+- Use familiar icon-only controls for Back, Close, Info, Copy, Read aloud, and Journal when context supplies the label; retain accessible names and approximately 44px targets. Keep text for semantic choices such as `Fits`, `Maybe`, `Not this time`, and `No word yet`.
+- `Clue match` is a compatibility estimate derived only from clues the person chose. Candidate decisions and selected Needs remain direct user choices outside the score.
+- The final composer may use only the person's observation, selected words, and selected Needs. It must not infer a Need, generate a request, or offer a lane-local care recommendation. Selected Need magnets route to the canonical Need pages and their strategy decks.
+- Drafts resume the same stage after route changes, reload, or iOS backgrounding. `Start over` is the explicit destructive boundary.
+
 ## Canonical utility controls
 
 ### Shuffle

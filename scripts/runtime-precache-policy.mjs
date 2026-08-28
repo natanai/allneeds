@@ -1,6 +1,4 @@
-const requiredRuntimeData = new Set([
-  './data/reverse-inference.json',
-]);
+const requiredRuntimeData = new Set();
 
 export const REQUIRED_RUNTIME_PRECACHE_PATHS = Object.freeze([
   './index.html',

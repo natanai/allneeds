@@ -1,278 +1,673 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
-import { loadBodyCueResources, readBodyCueResources } from '../../app/appResources';
+import { MagnetBoard } from '../../components/magnets/MagnetBoard';
+import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
 import bodyRegionsRaw from '../../data/body-regions.json';
-import { assetPath, needs } from '../../data/catalog';
+import { assetPath, needsBySlug } from '../../data/catalog';
+import { analyzeObservation, selectExactObservationEntities } from '../../domain/observationInference';
 import {
   clearAlexithymiaDraft,
   readAlexithymiaDraft,
-  writeJournalDraft,
   writeAlexithymiaDraft,
+  writeJournalDraft,
 } from '../../persistence/workflowDrafts';
 import type { AlexithymiaDraft } from '../../persistence/workflowDrafts';
+import { readMagnetPlayPreference } from '../../persistence/magnetLayoutStore';
 import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
-import { categorizeCompass, inferZone, scoreSensations, type EmotionCandidate } from './alexithymiaMath';
+import {
+  BackIcon,
+  BodyClueSheet,
+  BodyIcon,
+  CandidateSheet,
+  CloseIcon,
+  FeelingShapeSheet,
+  InfoIcon,
+  NeedCatalogSheet,
+  SearchIcon,
+  ShapeIcon,
+  SupportSheet,
+  type BodyRegion,
+} from './AlexithymiaSupportSheets';
+import { alexithymiaCandidates, shapeDimensions } from './alexithymiaData';
+import {
+  roundedMatchPercent,
+  scoreCandidateClues,
+  selectedShapeDimensions,
+} from './alexithymiaMath';
+import {
+  buildSupportStatement,
+  catalogOnlyTerms,
+  createSupportJournalDraft,
+  customTermId,
+  customWorkingTerm,
+  fauxFeelingTerms,
+  profileTerms,
+  supportTermIndex,
+  type SupportTerm,
+} from './alexithymiaTerms';
 import styles from './AlexithymiaSupportPage.module.css';
 
-type BodyOption = { id: string; title: string; note: string; insight?: string; defaultIntensity?: number; emotions?: Record<string, number> };
-type BodyRegion = { id: string; label: string; prompt: string; options: BodyOption[] };
-type Quadrant = { label: string; description: string; emotions: string[]; care: string[] };
-type Emotion = {
-  name: string; definition: string; bodySignals: string[]; thoughts: string[]; contexts: string[];
-  needs: string[]; regulation: string[]; communication: string;
-};
-type SupportData = { EMOTION_LIBRARY: Record<string, Emotion>; QUADRANT_SUGGESTIONS: Record<string, Quadrant> };
+type SheetKind = 'info' | 'body' | 'shape' | 'candidate' | 'needs' | null;
+type WordFilter = 'matches' | 'all' | 'mine';
 
-const regions = bodyRegionsRaw as unknown as BodyRegion[];
-const rejectionKey = 'nvc_rejected_emotions';
-const evidenceNoteKey = 'nvc_evidence_note_dismissed';
+const bodyRegions = bodyRegionsRaw as unknown as BodyRegion[];
+const bodyOptionById = new Map(bodyRegions.flatMap((region) => region.options.map((option) => [option.id, {
+  ...option,
+  regionLabel: region.label,
+}])));
 
-function emptyAlexithymiaDraft(): AlexithymiaDraft {
+function emptyDraft(): AlexithymiaDraft {
   return {
-    phase: 0,
-    openRegion: null,
+    stage: 0,
+    observation: '',
+    openRegion: bodyRegions[0]?.id ?? null,
     selectedCues: {},
-    energy: 0,
-    valence: 0,
-    compassTouched: false,
-    selectedEmotion: null,
-    journalOpen: false,
-    reflection: '',
-    journalNeeds: [],
-    intensity: 5,
+    bodyClear: false,
+    shape: {},
+    decisions: {},
+    termOrder: [],
+    customTerms: [],
+    noWordYet: false,
+    selectedNeeds: [],
+    statement: '',
+    statementEdited: false,
   };
 }
 
-function readRejections() {
-  try {
-    const value: unknown = JSON.parse(window.localStorage.getItem(rejectionKey) ?? '{}');
-    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, number> : {};
-  } catch { return {}; }
-}
-
-function feelingSlug(name: string) {
-  const key = name.toLocaleLowerCase();
-  const direct: Record<string, string> = {
-    anxiety: 'anxiety', fear: 'fear', anger: 'angry', overwhelm: 'overwhelmed', sadness: 'sad',
-    stress: 'tense', frustration: 'frustrated', excitement: 'excited', calm: 'calm', relief: 'relieved',
-    joyful: 'joyful', hope: 'hopeful', hopeful: 'hopeful', lonely: 'lonely', tired: 'tired', pride: 'proud',
-    shame: 'embarrassed', uncertain: 'confused', determined: 'defiant', numb: 'powerless',
+function shapeClueLabel(dimension: string, value: number) {
+  const labels: Record<string, string> = {
+    pleasantness: 'Pleasantness',
+    energy: 'Energy',
+    power: 'Power / control',
+    expectedness: 'Expectedness',
   };
-  return direct[key] ?? key;
+  return `${labels[dimension] ?? dimension}: ${Math.round(value * 4) + 1}/5`;
 }
 
-function breathingSequence(pattern: string) {
-  if (pattern === 'physiological_sigh') return [{ label: 'Inhale', seconds: 2 }, { label: 'Sip in', seconds: 1 }, { label: 'Long exhale', seconds: 6 }];
-  if (pattern === 'resonance_6bpm') return [{ label: 'Inhale', seconds: 5 }, { label: 'Exhale', seconds: 5 }];
-  return [{ label: 'Inhale', seconds: 4 }, { label: 'Hold', seconds: 4 }, { label: 'Exhale', seconds: 6 }];
+function roleTone(term: SupportTerm, decision?: AlexithymiaDraft['decisions'][string]) {
+  if (decision === 'fits') return 'positive' as const;
+  if (decision === 'maybe') return 'attention' as const;
+  if (term.role === 'faux-feeling') return 'quiet' as const;
+  return 'selection' as const;
 }
 
-function EmotionButtons({ candidates, emotions, selected, onSelect, onReject }: {
-  candidates: EmotionCandidate[]; emotions: Record<string, Emotion>; selected: string | null;
-  onSelect: (key: string) => void; onReject: (key: string) => void;
-}) {
-  if (!candidates.length) return <p className={styles.note}>No clear matches yet. That is okay—try the emotion compass or pick any word to explore.</p>;
-  return <ul className={styles.suggestionList}>{candidates.slice(0, 8).map(({ key, confidence }) => <li key={key}><div className={styles.emotionTag}><button type="button" aria-pressed={selected === key} onClick={() => onSelect(key)}>{emotions[key]?.name ?? key}<span>{Math.round(confidence * 100)}%</span></button><button type="button" aria-label={`Reject ${emotions[key]?.name ?? key}`} onClick={() => onReject(key)}>Not it</button></div></li>)}</ul>;
+function CopyIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" /></svg>;
+}
+
+function SpeakIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4Z" /><path d="M16 9c1.3 1.6 1.3 4.4 0 6M19 6c3.3 3.3 3.3 8.7 0 12" /></svg>;
+}
+
+function JournalIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h13a1 1 0 0 1 1 1v17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" /><path d="M8 7h7M8 11h7M8 15h4" /></svg>;
+}
+
+function ResetIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 16a8 8 0 1 0 .5-9l-2 3" /></svg>;
 }
 
 export function AlexithymiaSupportPage() {
   const navigate = useNavigate();
-  const [initialDraft] = useState(() => readAlexithymiaDraft() ?? emptyAlexithymiaDraft());
-  const [phase, setPhase] = useState(initialDraft.phase);
-  const [supportData, setSupportData] = useState<SupportData | null>(
-    () => readBodyCueResources()?.supportData as unknown as SupportData ?? null,
+  const [initialDraft] = useState(() => readAlexithymiaDraft() ?? emptyDraft());
+  const [draft, setDraft] = useState<AlexithymiaDraft>(initialDraft);
+  const [entryVisible, setEntryVisible] = useState(true);
+  const [sheet, setSheet] = useState<SheetKind>(null);
+  const [activeTermId, setActiveTermId] = useState<string | null>(null);
+  const [wordFilter, setWordFilter] = useState<WordFilter>('matches');
+  const [wordQuery, setWordQuery] = useState('');
+  const [needQuery, setNeedQuery] = useState('');
+  const [wordPlayMode, setWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-words'));
+  const [partialPlayMode, setPartialPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-partial-words'));
+  const [needPlayMode, setNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-needs'));
+  const [status, setStatus] = useState('');
+  const draftRef = useWorkflowDraftPersistence(draft, writeAlexithymiaDraft);
+
+  const bodySelections = useMemo(() => Object.entries(draft.selectedCues).flatMap(([id, intensity]) => {
+    const option = bodyOptionById.get(id);
+    return option && intensity > 0 ? [{ option, intensity }] : [];
+  }), [draft.selectedCues]);
+  const shapeDimensionList = selectedShapeDimensions(draft.shape);
+  const scores = useMemo(
+    () => scoreCandidateClues(alexithymiaCandidates, bodySelections, draft.shape),
+    [bodySelections, draft.shape],
   );
-  const [openRegion, setOpenRegion] = useState<string | null>(initialDraft.openRegion);
-  const [selectedCues, setSelectedCues] = useState<Record<string, number>>(initialDraft.selectedCues);
-  const [bodyCandidates, setBodyCandidates] = useState<EmotionCandidate[]>([]);
-  const [bodyMessage, setBodyMessage] = useState('Body-based matches will appear here after you choose sensations.');
-  const [energy, setEnergy] = useState(initialDraft.energy);
-  const [valence, setValence] = useState(initialDraft.valence);
-  const [compassTouched, setCompassTouched] = useState(initialDraft.compassTouched);
-  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(initialDraft.selectedEmotion);
-  const [rejections, setRejections] = useState<Record<string, number>>(readRejections);
-  const [breathing, setBreathing] = useState<{ pattern: string; elapsed: number; phase: number; remaining: number } | null>(null);
-  const [intensity] = useState(initialDraft.intensity);
-  const [communicationStatus, setCommunicationStatus] = useState('');
-  const [evidenceNoteVisible, setEvidenceNoteVisible] = useState(() => {
-    try { return window.localStorage.getItem(evidenceNoteKey) !== '1'; } catch { return true; }
+  const scoreByCandidateKey = useMemo(
+    () => new Map(scores.map((score) => [score.key, score])),
+    [scores],
+  );
+  const termIndex = useMemo(() => supportTermIndex(draft.customTerms), [draft.customTerms]);
+  const selectedTerms = draft.termOrder
+    .map((id) => termIndex.get(id))
+    .filter((term): term is SupportTerm => Boolean(term))
+    .filter((term) => draft.decisions[term.id] === 'fits' || draft.decisions[term.id] === 'maybe');
+  const observationMatches = useMemo(
+    () => selectExactObservationEntities(analyzeObservation(draft.observation)),
+    [draft.observation],
+  );
+  const cueLabels = bodySelections.map(({ option }) => option.title);
+  const clueTray = [
+    ...bodySelections.map(({ option, intensity }) => ({ id: `body:${option.id}`, label: `${option.title} · ${Math.round(intensity)}%` })),
+    ...shapeDimensionList.map((dimension) => ({ id: `shape:${dimension}`, label: shapeClueLabel(dimension, draft.shape[dimension] ?? 0) })),
+  ];
+  const canCompare = bodySelections.length > 0 || shapeDimensionList.length >= 2;
+
+  const completeMatches = profileTerms.map((term) => ({
+    term,
+    score: scoreByCandidateKey.get(term.candidate!.key)!,
+  })).filter(({ score, term }) => (
+    score.complete
+    && (score.clueMatch ?? 0) > 0
+    && draft.decisions[term.id] !== 'not-this-time'
+  )).sort((left, right) => (
+    (right.score.clueMatch ?? 0) - (left.score.clueMatch ?? 0)
+    || left.term.label.localeCompare(right.term.label)
+  ));
+  const partialMatches = profileTerms.map((term) => ({
+    term,
+    score: scoreByCandidateKey.get(term.candidate!.key)!,
+  })).filter(({ score, term }) => (
+    score.usedChannels.length > 0
+    && !score.complete
+    && draft.decisions[term.id] !== 'not-this-time'
+  ));
+
+  const allSearchTerms = useMemo(() => [
+    ...profileTerms,
+    ...catalogOnlyTerms,
+    ...fauxFeelingTerms,
+    ...draft.customTerms.map(customWorkingTerm),
+  ], [draft.customTerms]);
+  const normalizedWordQuery = wordQuery.trim().toLocaleLowerCase();
+  const visibleTerms = useMemo(() => {
+    if (normalizedWordQuery) {
+      return allSearchTerms
+        .filter((term) => term.label.toLocaleLowerCase().includes(normalizedWordQuery))
+        .sort((left, right) => left.label.localeCompare(right.label));
+    }
+    if (wordFilter === 'mine') return selectedTerms;
+    if (wordFilter === 'all') {
+      return [...profileTerms.filter((term) => term.role === 'feeling'), ...catalogOnlyTerms]
+        .sort((left, right) => left.label.localeCompare(right.label));
+    }
+    return completeMatches.map(({ term }) => term);
+  }, [allSearchTerms, completeMatches, normalizedWordQuery, selectedTerms, wordFilter]);
+
+  const visibleWordItems: MagnetBoardItem[] = visibleTerms.map((term) => {
+    const score = term.candidate ? scoreByCandidateKey.get(term.candidate.key) : null;
+    const percent = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
+    const decision = draft.decisions[term.id];
+    const detail = normalizedWordQuery || wordFilter !== 'matches'
+      ? decision === 'fits' ? 'Fits' : decision === 'maybe' ? 'Maybe' : percent === null ? undefined : `${percent}% clue match`
+      : percent === null ? undefined : `${percent}% clue match`;
+    return {
+      id: `alex-word-${term.id}`,
+      label: term.label,
+      detail,
+      badge: term.roleLabel,
+      tone: roleTone(term, decision),
+      ariaLabel: `${term.label}, ${term.roleLabel}${detail ? `, ${detail}` : ''}`,
+      onActivate: () => {
+        setActiveTermId(term.id);
+        setSheet('candidate');
+      },
+    };
   });
-  const compassRef = useRef<HTMLDivElement>(null);
-  const workflowDraft = useMemo<AlexithymiaDraft>(() => ({
-    phase,
-    openRegion,
-    selectedCues,
-    energy,
-    valence,
-    compassTouched,
-    selectedEmotion,
-    journalOpen: false,
-    reflection: '',
-    journalNeeds: [],
-    intensity,
-  }), [compassTouched, energy, intensity, openRegion, phase, selectedCues, selectedEmotion, valence]);
-  const workflowDraftRef = useWorkflowDraftPersistence(workflowDraft, writeAlexithymiaDraft);
+  const partialWordItems: MagnetBoardItem[] = partialMatches.map(({ term }) => ({
+    id: `alex-partial-${term.id}`,
+    label: term.label,
+    detail: 'Unscored for one or more clues',
+    badge: term.roleLabel,
+    tone: roleTone(term, draft.decisions[term.id]),
+    ariaLabel: `${term.label}, ${term.roleLabel}, unscored for one or more of your clues`,
+    onActivate: () => {
+      setActiveTermId(term.id);
+      setSheet('candidate');
+    },
+  }));
+  const activeTerm = activeTermId ? termIndex.get(activeTermId) ?? null : null;
+  const activeScore = activeTerm?.candidate
+    ? scoreByCandidateKey.get(activeTerm.candidate.key) ?? null
+    : null;
+  const exactSearchTerm = normalizedWordQuery
+    ? allSearchTerms.find((term) => term.label.toLocaleLowerCase() === normalizedWordQuery)
+    : null;
+  const selectedNeedItems: MagnetBoardItem[] = draft.selectedNeeds.flatMap((slug) => {
+    const need = needsBySlug.get(slug);
+    return need ? [{
+      id: `alex-selected-need-${slug}`,
+      label: need.title,
+      detail: 'Open strategies',
+      badge: 'Need',
+      kind: 'need' as const,
+      tone: 'positive' as const,
+      iconUrl: assetPath(`icons/needs/${slug}.svg`),
+      to: `/needs/${slug}`,
+      ariaLabel: `${need.title}, selected Need, open strategies`,
+    }] : [];
+  });
 
-  useEffect(() => {
-    if (supportData) return;
-    let active = true;
-    void loadBodyCueResources().then((resources) => {
-      if (active) setSupportData(resources.supportData as unknown as SupportData);
+  function updateDraft(update: (current: AlexithymiaDraft) => AlexithymiaDraft) {
+    setDraft((current) => update(current));
+  }
+
+  function goToStage(stage: number) {
+    setStatus('');
+    updateDraft((current) => ({ ...current, stage }));
+    setEntryVisible(false);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function decideTerm(term: SupportTerm, decision: AlexithymiaDraft['decisions'][string]) {
+    updateDraft((current) => {
+      const decisions = { ...current.decisions, [term.id]: decision };
+      const selected = decision === 'fits' || decision === 'maybe';
+      const termOrder = selected
+        ? current.termOrder.includes(term.id) ? current.termOrder : [...current.termOrder, term.id]
+        : current.termOrder.filter((id) => id !== term.id);
+      return {
+        ...current,
+        decisions,
+        termOrder,
+        noWordYet: selected ? false : current.noWordYet,
+      };
     });
-    return () => { active = false; };
-  }, [supportData]);
-
-  useEffect(() => {
-    if (!breathing) return;
-    const timer = window.setInterval(() => {
-      setBreathing((current) => {
-        if (!current) return null;
-        if (current.elapsed >= 29) { setPhase((value) => Math.max(value, 2)); return null; }
-        const sequence = breathingSequence(current.pattern);
-        if (current.remaining > 1) return { ...current, elapsed: current.elapsed + 1, remaining: current.remaining - 1 };
-        const next = (current.phase + 1) % sequence.length;
-        return { ...current, elapsed: current.elapsed + 1, phase: next, remaining: sequence[next]?.seconds ?? 1 };
-      });
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [breathing?.pattern]);
-
-  const selected = useMemo(() => regions.flatMap((region) => region.options
-    .filter((option) => selectedCues[option.id] !== undefined)
-    .map((option) => ({ option: { ...option, regionLabel: region.label }, intensity: selectedCues[option.id] ?? 5 }))), [selectedCues]);
-  const inferredZone = useMemo(() => inferZone(selected), [selected]);
-  const energyInfo = categorizeCompass(energy, 'energy');
-  const valenceInfo = categorizeCompass(valence, 'valence');
-  const compassKey = `${energyInfo.key}-${valenceInfo.key}`;
-  const quadrant = supportData?.QUADRANT_SUGGESTIONS[compassTouched ? compassKey : (inferredZone ?? '')];
-  const compassCandidates = useMemo(() => {
-    if (!supportData || !compassTouched) return [];
-    const info = supportData.QUADRANT_SUGGESTIONS[compassKey];
-    if (!info) return [];
-    return info.emotions.map((key, index) => ({ key, score: 1 / (index + 1) / (1 + (rejections[key] ?? 0)), confidence: 0 }))
-      .sort((a, b) => b.score - a.score).map((entry, _, values) => ({ ...entry, confidence: entry.score / (values[0]?.score || 1) }));
-  }, [compassKey, compassTouched, rejections, supportData]);
-  const emotion = selectedEmotion ? supportData?.EMOTION_LIBRARY[selectedEmotion] : null;
-  const activeCueCount = Object.keys(selectedCues).length;
-
-  useEffect(() => {
-    if (phase < 4) return;
-    const results = scoreSensations(selected, rejections);
-    setBodyCandidates(results);
-    if (!selected.length) {
-      setBodyMessage('Try choosing a region and setting how strong the sensation feels. If nothing stands out, move on to the emotion compass.');
-      return;
-    }
-    const notes = regions.flatMap((region) => region.options
-      .filter((option) => selectedCues[option.id] !== undefined)
-      .map((option) => `• ${region.label}: ${option.title} (${selectedCues[option.id]}/10). ${option.insight ?? ''}`));
-    const zoneLine = inferredZone && supportData?.QUADRANT_SUGGESTIONS[inferredZone]
-      ? `• Affective zone estimate: ${supportData.QUADRANT_SUGGESTIONS[inferredZone].label}.`
-      : '• Affective zone estimate: not clear yet (that’s okay).';
-    setBodyMessage(`${notes.join(' ')} ${zoneLine} Use these as invitations, not rules.`);
-  }, [inferredZone, phase, rejections, selected, selectedCues, supportData]);
-
-  function startBreathing(pattern = 'slow_446') {
-    const sequence = breathingSequence(pattern);
-    setBreathing({ pattern, elapsed: 0, phase: 0, remaining: sequence[0]?.seconds ?? 1 });
   }
 
-  function submitSensations() {
-    const results = scoreSensations(selected, rejections);
-    setBodyCandidates(results);
-    if (!selected.length) setBodyMessage('Try choosing a region and setting how strong the sensation feels. If nothing stands out, move on to the emotion compass.');
-    else {
-      const notes = regions.flatMap((region) => region.options.filter((option) => selectedCues[option.id] !== undefined).map((option) => `• ${region.label}: ${option.title} (${selectedCues[option.id]}/10). ${option.insight ?? ''}`));
-      const zoneLine = inferredZone && supportData?.QUADRANT_SUGGESTIONS[inferredZone] ? `• Affective zone estimate: ${supportData.QUADRANT_SUGGESTIONS[inferredZone].label}.` : '• Affective zone estimate: not clear yet (that’s okay).';
-      setBodyMessage(`${notes.join(' ')} ${zoneLine} Use these as invitations, not rules.`);
-    }
-    setPhase(3);
+  function useCustomWord() {
+    const label = wordQuery.trim();
+    if (!label) return;
+    const id = customTermId(label);
+    updateDraft((current) => ({
+      ...current,
+      customTerms: current.customTerms.some((term) => customTermId(term) === id)
+        ? current.customTerms
+        : [...current.customTerms, label],
+    }));
+    setActiveTermId(id);
+    window.requestAnimationFrame(() => setSheet('candidate'));
   }
 
-  function rejectEmotion(key: string) {
-    const next = { ...rejections, [key]: (rejections[key] ?? 0) + 1 };
-    setRejections(next); window.localStorage.setItem(rejectionKey, JSON.stringify(next));
-    setBodyCandidates(scoreSensations(selected, next));
-    if (selectedEmotion === key) setSelectedEmotion(null);
+  function chooseNoWordYet() {
+    updateDraft((current) => ({
+      ...current,
+      decisions: Object.fromEntries(Object.entries(current.decisions)
+        .filter(([, decision]) => decision === 'not-this-time')),
+      termOrder: [],
+      noWordYet: true,
+    }));
+    setStatus('No word yet selected.');
   }
 
-  function chooseEmotion(key: string) {
-    setSelectedEmotion(key); setCommunicationStatus('');
-  }
-
-  function moveCompass(event: ReactPointerEvent<HTMLDivElement>) {
-    const box = event.currentTarget.getBoundingClientRect();
-    const radius = Math.min(box.width, box.height) / 2;
-    let nextValence = (event.clientX - (box.left + box.width / 2)) / radius;
-    let nextEnergy = ((box.top + box.height / 2) - event.clientY) / radius;
-    const magnitude = Math.hypot(nextEnergy, nextValence);
-    if (magnitude > 1) { nextEnergy /= magnitude; nextValence /= magnitude; }
-    setEnergy(nextEnergy); setValence(nextValence); setCompassTouched(true);
-  }
-
-  function openJournal() {
-    const feeling = emotion?.name ?? '';
-    writeJournalDraft({
-      notes: '',
-      emotion: feeling,
-      intensity,
-      feelings: feeling ? [{ feeling, intensity }] : [],
-      selectedNeeds: [],
-      tags: 'alexithymia-check-in',
-      editingId: null,
+  function moveTerm(id: string, direction: -1 | 1) {
+    updateDraft((current) => {
+      const index = current.termOrder.indexOf(id);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= current.termOrder.length) return current;
+      const termOrder = [...current.termOrder];
+      [termOrder[index], termOrder[nextIndex]] = [termOrder[nextIndex]!, termOrder[index]!];
+      return { ...current, termOrder };
     });
+  }
+
+  function buildSentence() {
+    const statement = buildSupportStatement({
+      observation: draft.observation,
+      terms: selectedTerms,
+      needSlugs: draft.selectedNeeds,
+      noWordYet: draft.noWordYet,
+    });
+    updateDraft((current) => ({ ...current, statement, statementEdited: false }));
+    setStatus(statement ? 'Sentence built from your selections.' : 'Choose a word, “No word yet,” or a Need first.');
+  }
+
+  function addToJournal() {
+    writeJournalDraft(createSupportJournalDraft({
+      observation: draft.observation,
+      terms: selectedTerms,
+      needSlugs: draft.selectedNeeds,
+      statement: draft.statement,
+    }));
     void navigate('/inventory/journal?compose=new');
   }
 
   function resetCheckIn() {
-    const empty = emptyAlexithymiaDraft();
-    workflowDraftRef.current = empty;
+    if (!window.confirm('Start over and clear this check-in?')) return;
+    const next = emptyDraft();
+    draftRef.current = next;
     clearAlexithymiaDraft();
-    setPhase(0);
-    setOpenRegion(null);
-    setSelectedCues({});
-    setBodyCandidates([]);
-    setBodyMessage('Body-based matches will appear here after you choose sensations.');
-    setEnergy(0);
-    setValence(0);
-    setCompassTouched(false);
-    setSelectedEmotion(null);
-    setBreathing(null);
-    setCommunicationStatus('');
+    setDraft(next);
+    setEntryVisible(true);
+    setSheet(null);
+    setActiveTermId(null);
+    setWordFilter('matches');
+    setWordQuery('');
+    setNeedQuery('');
+    setStatus('');
   }
 
-  const activeZone = compassTouched ? compassKey : inferredZone;
-  const breathPattern = quadrant && activeZone?.startsWith('high-unpleasant') ? 'physiological_sigh' : activeZone?.startsWith('high-') ? 'resonance_6bpm' : 'slow_446';
-  const breathLabel = breathPattern === 'physiological_sigh' ? 'Physiological sigh' : breathPattern === 'resonance_6bpm' ? 'Resonance breath (6 bpm)' : '4-4-6 breath';
-  const template = emotion ? `I feel ${emotion.name.toLocaleLowerCase()} because I need ${(emotion.needs[0] ?? 'support').toLocaleLowerCase()}.` : '';
+  const stageTitle = ['What happened?', 'Clues', 'Words', 'Your words'][Math.max(0, draft.stage - 1)] ?? 'Check in';
+
+  if (entryVisible) {
+    const hasDraft = draft.stage > 0;
+    return (
+      <article className={styles.entry} aria-labelledby="alexithymia-title">
+        <header>
+          <p className={styles.eyebrow}>Alexithymia Support</p>
+          <h1 id="alexithymia-title">Find words for right now</h1>
+          <p>Use any clues you can notice. The app can compare possible words, but you decide what fits.</p>
+        </header>
+        <div className={styles.entryActions}>
+          <button type="button" className={styles.primaryButton} onClick={() => {
+            if (hasDraft) setEntryVisible(false);
+            else goToStage(1);
+          }}>
+            {hasDraft ? 'Continue check-in' : 'Start check-in'}
+          </button>
+          <button type="button" className={styles.iconButton} aria-label="About Alexithymia Support" onClick={() => setSheet('info')}><InfoIcon /></button>
+        </div>
+        {!hasDraft ? <p className={styles.entryDisclosure}>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p> : null}
+        <a className={styles.methodsLink} href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">Methods &amp; References</a>
+        <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
+          <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
+          <p>You can use any clues that are available, keep more than one possible word, or choose no word yet.</p>
+          <a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How word comparison works</a>
+        </SupportSheet>
+      </article>
+    );
+  }
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}><h1>Alexithymia Support</h1><p>Alexithymia can make it difficult to identify, distinguish, or describe emotions. This step-by-step check-in uses body sensations and affect dimensions to help you consider possible feeling labels and decide what may be useful next.</p><p className={styles.mini}><a href={assetPath('docs/body-scan-sourcing-review.md')} target="_blank" rel="noreferrer">Methods &amp; References</a></p></header>
+    <article className={styles.page} aria-label={`Alexithymia Support: ${stageTitle}`}>
+      <header className={styles.appBar}>
+        <button type="button" className={styles.iconButton} aria-label="Back" onClick={() => {
+          if (draft.stage <= 1) setEntryVisible(true);
+          else goToStage(draft.stage - 1);
+        }}><BackIcon /></button>
+        <div className={styles.appBarCenter}>
+          <strong>Check in</strong>
+          <div className={styles.progress} role="progressbar" aria-label={`${draft.stage} of 4, ${stageTitle}`} aria-valuemin={1} aria-valuemax={4} aria-valuenow={draft.stage}>
+            {[1, 2, 3, 4].map((step) => <span key={step} data-active={step <= draft.stage ? 'true' : undefined} />)}
+          </div>
+        </div>
+        <button type="button" className={styles.iconButton} aria-label="About this check-in" onClick={() => setSheet('info')}><InfoIcon /></button>
+        <button type="button" className={styles.iconButton} aria-label="Close check-in" onClick={() => void navigate('/feelings')}><CloseIcon /></button>
+      </header>
 
-      <section className={styles.flow} aria-labelledby="support-flow-title"><h2 id="support-flow-title" className="visually-hidden">Guided support flow</h2>
-        {evidenceNoteVisible ? <div className={styles.evidenceNote}><p>Suggestions are hypotheses based on affect science, not diagnoses. Use “Why these?” to review sources and limitations.</p><button type="button" onClick={() => { setEvidenceNoteVisible(false); try { window.localStorage.setItem(evidenceNoteKey, '1'); } catch { /* Dismissal still applies for this visit. */ } }}>Got it</button></div> : null}
+      <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
+        <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
+        <p>Clue matches compare reviewed word profiles with only the clues you choose. Your judgment remains the final step.</p>
+        <a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How word comparison works</a>
+      </SupportSheet>
 
-        {phase === 0 ? <article className={styles.step}><h3>Start with what you can observe</h3><p>There is no single correct response. Use any sensations you notice as observations, and skip or revise a step if it does not fit your experience.</p><button className={styles.primary} type="button" onClick={() => setPhase(1)}>Begin <span aria-hidden="true">→</span></button></article> : null}
+      {draft.stage === 1 ? (
+        <section className={styles.stage} aria-labelledby="alex-stage-one">
+          <header className={styles.stageHeader}>
+            <p>1 of 4 · What happened?</p>
+            <h1 id="alex-stage-one">What are you trying to put into words?</h1>
+            <p>If it helps, write one or two observable facts about what just happened.</p>
+          </header>
+          <label className={styles.observationField}>
+            <span className="visually-hidden">What happened?</span>
+            <textarea
+              rows={7}
+              value={draft.observation}
+              placeholder={'For example: “When we stopped talking after…”'}
+              onChange={(event) => updateDraft((current) => ({ ...current, observation: event.target.value }))}
+              autoFocus
+            />
+          </label>
+          {(observationMatches.feelings.length || observationMatches.needs.length || observationMatches.fauxFeelings.length) ? (
+            <section className={styles.detectedTerms} aria-label="Words found in what you wrote">
+              <h2>Words in what you wrote</h2>
+              <p>Linked for reference only. Nothing has been selected or scored.</p>
+              <div>
+                {observationMatches.feelings.map((item) => <Link key={`feeling-${item.slug}`} to={`/feelings/${item.slug}`}>{item.title}<small>Feeling</small></Link>)}
+                {observationMatches.needs.map((item) => <Link key={`need-${item.slug}`} to={`/needs/${item.slug}`}>{item.title}<small>Need</small></Link>)}
+                {observationMatches.fauxFeelings.map((item) => <Link key={`faux-${item.slug}`} to={`/faux-feelings/${item.slug}`}>{item.title}<small>Faux Feeling</small></Link>)}
+              </div>
+            </section>
+          ) : null}
+          <p className={styles.helperLink}><Link to="/observations">Open the Observation helper</Link></p>
+          <div className={styles.stickyActions}>
+            <button type="button" className={styles.textButton} onClick={() => {
+              updateDraft((current) => ({ ...current, observation: '' }));
+              goToStage(2);
+            }}>Skip</button>
+            <button type="button" className={styles.primaryButton} onClick={() => goToStage(2)}>Continue</button>
+          </div>
+        </section>
+      ) : null}
 
-        {phase === 1 ? <article className={styles.step}><h3>Optional pause: paced breathing</h3><p>If activation feels high, you can try a brief paced-breathing exercise before continuing. Skip it if breathing exercises are not useful for you.</p><div className={styles.breathing}><p>{breathing ? `${breathLabel}: ${breathingSequence(breathing.pattern)[breathing.phase]?.label} • ${breathing.remaining}s` : 'Press start to try a 30-second guided breath.'}</p><div className={`${styles.breathVisual} ${breathing ? styles.breathActive : ''}`} aria-hidden="true" /><div><button className={styles.primary} type="button" onClick={() => startBreathing()} aria-label="Start breathing"><span aria-hidden="true">▶</span> Start</button><button className={styles.ghost} type="button" onClick={() => { setBreathing(null); setPhase(2); }} aria-label="Skip breathing and continue to the body check-in">Skip <span aria-hidden="true">→</span></button></div></div></article> : null}
+      {draft.stage === 2 ? (
+        <section className={styles.stage} aria-labelledby="alex-stage-two">
+          <header className={styles.stageHeader}>
+            <p>2 of 4 · Clues</p>
+            <h1 id="alex-stage-two">What can you notice right now?</h1>
+            <p>Use any clue that is available. You can skip the rest.</p>
+          </header>
 
-        {phase === 2 ? <article className={styles.step}><h3>Step 1: What does your body notice?</h3><p>Notice any body sensations that stand out. Open a region to see examples, choose any that fit, then rate their intensity from 0–10.</p><p className={styles.note}>Tap any region below in any order.</p><fieldset className={styles.regions}><legend>Explore sensations by region</legend>{regions.map((region) => { const chosen = region.options.filter((option) => selectedCues[option.id] !== undefined); const open = openRegion === region.id; return <section className={`${styles.region} ${open ? styles.regionOpen : ''}`} key={region.id}><header><div><h4>{region.label}</h4><p>{chosen.length ? `Noticing: ${chosen.slice(0,3).map((option) => `${option.title} (${selectedCues[option.id]}/10)`).join(', ')}.` : 'We can check in here whenever you’re ready.'}</p></div><button className={styles.ghost} type="button" aria-expanded={open} onClick={() => setOpenRegion(open ? null : region.id)}>{chosen.length && !open ? 'Completed' : 'Check in'}</button></header>{open ? <div className={styles.regionDetails}><p>{region.prompt}</p><p>Tap the sensation that fits. A 0–10 slider will appear after you choose.</p><div className={styles.options}>{region.options.map((option) => { const checked = selectedCues[option.id] !== undefined; return <div className={`${styles.option} ${checked ? styles.optionSelected : ''}`} key={option.id}><button type="button" aria-pressed={checked} aria-label={`${region.label}: ${option.title}`} onClick={() => setSelectedCues((current) => { const next = {...current}; if (checked) delete next[option.id]; else next[option.id] = option.defaultIntensity ?? 5; return next; })}><strong>{option.title}</strong><span>{option.note}</span></button>{checked ? <label>Intensity (0–10) <output>{selectedCues[option.id]}</output><input type="range" min="0" max="10" step="1" value={selectedCues[option.id]} aria-label={`${option.title} intensity (0 to 10)`} onChange={(event) => setSelectedCues((current) => ({...current,[option.id]:Number(event.target.value)}))} /><span className={styles.scale}><span>0</span><span>10</span></span></label> : null}</div>; })}</div><button className={styles.ghost} type="button" onClick={() => setOpenRegion(null)}>Done with this area</button></div> : null}</section>; })}</fieldset><div className={styles.actions}><button className={styles.primary} type="button" onClick={submitSensations}>Continue <span aria-hidden="true">→</span></button><button className={styles.ghost} type="button" aria-label="Clear body choices" title="Clear body choices" onClick={() => {setSelectedCues({});setBodyCandidates([]);}}>↺</button></div></article> : null}
+          <section className={styles.clueTray} aria-labelledby="your-clues-title">
+            <h2 id="your-clues-title">Your clues</h2>
+            {clueTray.length ? <div>{clueTray.map((clue) => <span key={clue.id}>{clue.label}</span>)}</div> : <p>No clues selected yet.</p>}
+          </section>
 
-        {phase === 3 ? <article className={styles.step}><h3>Step 2: Emotion compass</h3><p>Use the compass to estimate current activation (energy) and pleasantness. These two dimensions provide another way to generate possible emotion matches.</p><div className={styles.compassPanel}><div ref={compassRef} className={styles.compass} role="application" tabIndex={0} aria-label="Emotion compass" aria-valuetext={`Energy: ${energyInfo.label} · Pleasantness: ${valenceInfo.label}`} onPointerDown={moveCompass} onPointerMove={(event) => { if (event.buttons === 1) moveCompass(event); }} onKeyDown={(event) => { const step=0.1; if(event.key==='ArrowUp')setEnergy((v)=>Math.min(1,v+step)); else if(event.key==='ArrowDown')setEnergy((v)=>Math.max(-1,v-step)); else if(event.key==='ArrowRight')setValence((v)=>Math.min(1,v+step)); else if(event.key==='ArrowLeft')setValence((v)=>Math.max(-1,v-step)); else return; event.preventDefault(); setCompassTouched(true);}}><span className={styles.compassTop}>High energy</span><span className={styles.compassBottom}>Low energy</span><span className={styles.compassLeft}>Unpleasant</span><span className={styles.compassRight}>Pleasant</span><span className={styles.compassHandle} style={{left:`${(valence+1)*50}%`,top:`${(1-(energy+1)/2)*100}%`}} /></div><div className={styles.readout}><div><span>Energy</span><strong>{energyInfo.label}</strong></div><div><span>Pleasantness</span><strong>{valenceInfo.label}</strong></div></div><div className={styles.compassSliders}><label>Energy<input type="range" min="-1" max="1" step="0.1" value={energy} onChange={(event)=>{setEnergy(Number(event.target.value));setCompassTouched(true);}} /></label><label>Pleasantness<input type="range" min="-1" max="1" step="0.1" value={valence} onChange={(event)=>{setValence(Number(event.target.value));setCompassTouched(true);}} /></label></div></div><div className={styles.stepNav}><button className={styles.ghost} type="button" onClick={() => setPhase(2)}><span aria-hidden="true">←</span> Back</button><button className={styles.ghost} type="button" onClick={() => setPhase(4)}>Not sure</button><button className={styles.primary} type="button" onClick={() => setPhase(4)}>Continue <span aria-hidden="true">→</span></button></div></article> : null}
+          <div className={styles.clueCards}>
+            <button type="button" onClick={() => {
+              if (!draft.openRegion) updateDraft((current) => ({ ...current, openRegion: bodyRegions[0]?.id ?? null }));
+              setSheet('body');
+            }}>
+              <span className={styles.clueIcon}><BodyIcon /></span>
+              <span><strong>Body</strong><small>{draft.bodyClear ? 'Nothing clear right now.' : bodySelections.length ? `${bodySelections.length} ${bodySelections.length === 1 ? 'cue' : 'cues'} selected.` : 'Choose sensations that stand out.'}</small></span>
+              <span aria-hidden="true">›</span>
+            </button>
+            <button type="button" onClick={() => setSheet('shape')}>
+              <span className={styles.clueIcon}><ShapeIcon /></span>
+              <span><strong>Feeling shape</strong><small>{shapeDimensionList.length ? `${shapeDimensionList.length} of 4 parts placed.` : 'Place any parts you can sense.'}</small></span>
+              <span aria-hidden="true">›</span>
+            </button>
+          </div>
 
-        {phase === 4 ? <article className={styles.step}><h3>Step 3: Explore an emotion</h3><p>Review the candidates from the body check-in and emotion compass. Select one to compare its definition, possible body cues, common contexts, and related needs. <a className={styles.jumpLink} href="#compass-suggestions">Jump to emotion candidates</a>.</p><section className={styles.suggestions}><header><h4>Body-based matches</h4><details><summary>Why these?</summary><p>Selected sensations are weighted by their intensity and source associations. These are hypotheses, not diagnoses.</p></details></header><p className={styles.note}>{bodyMessage}</p><EmotionButtons candidates={bodyCandidates} emotions={supportData?.EMOTION_LIBRARY ?? {}} selected={selectedEmotion} onSelect={chooseEmotion} onReject={rejectEmotion} /></section><section id="compass-suggestions" className={styles.suggestions}><header><h4>Emotion compass matches</h4><details><summary>Why these?</summary><p>The compass uses the source model’s energy and pleasantness zones to suggest nearby feeling words.</p></details></header><p className={styles.note}>{compassTouched && supportData?.QUADRANT_SUGGESTIONS[compassKey] ? `${supportData.QUADRANT_SUGGESTIONS[compassKey].label}: ${supportData.QUADRANT_SUGGESTIONS[compassKey].description}` : 'Pick one energy and one pleasantness option to see compass matches.'}</p><EmotionButtons candidates={compassCandidates} emotions={supportData?.EMOTION_LIBRARY ?? {}} selected={selectedEmotion} onSelect={chooseEmotion} onReject={rejectEmotion} /></section>{emotion ? <section className={styles.emotionDetail}><h3>{emotion.name}</h3><p>{emotion.definition}</p>{([['Common body cues',emotion.bodySignals],['Typical thoughts',emotion.thoughts],['When it often appears',emotion.contexts]] as const).map(([title,items])=><div key={title}><h4>{title}</h4><ul>{items.map((item)=><li key={item}>{item}</li>)}</ul></div>)}<div><h4>Possible needs this feeling can point to (hypotheses)</h4><ul>{emotion.needs.map((need)=><li key={need}><Link to={`/needs/${needs.find((item)=>item.title.toLocaleLowerCase()===need.toLocaleLowerCase())?.slug ?? feelingSlug(need)}`}>{need}</Link></li>)}</ul></div><div><h4>Care ideas to experiment with</h4><ul>{emotion.regulation.map((item)=><li key={item}>{item}</li>)}</ul></div><p className={styles.note}>Everyone feels emotions uniquely. Use these clues as invitations, not rules.</p></section> : <p className={styles.note}>Select an emotion above to load its details.</p>}<div className={styles.stepNav}><button className={styles.ghost} type="button" onClick={() => setPhase(3)}><span aria-hidden="true">←</span> Back</button><button className={styles.primary} type="button" disabled={!emotion} onClick={() => setPhase(5)}>Continue <span aria-hidden="true">→</span></button></div></article> : null}
+          {!canCompare ? <p className={styles.noClueMessage}>Nothing has to be clear yet. You can still browse words or choose “No word yet.”</p> : null}
+          <div className={styles.stickyActions}>
+            <button type="button" className={styles.textButton} onClick={() => {
+              setWordFilter('all');
+              goToStage(3);
+            }}>Browse words without a match</button>
+            <button type="button" className={styles.primaryButton} disabled={!canCompare} onClick={() => {
+              setWordFilter('matches');
+              goToStage(3);
+            }}>Compare words</button>
+          </div>
 
-        {phase === 5 && emotion ? <article className={styles.step}><h3>Step 4: Reflect and journal</h3><p>Open the same Journal used throughout allneeds.app when you want to record what you noticed. Entries saved here appear in the same Journal history as entries made elsewhere.</p><button className={styles.primary} type="button" onClick={openJournal}>Journal</button><div className={styles.stepNav}><button className={styles.ghost} type="button" onClick={() => setPhase(4)}><span aria-hidden="true">←</span> Back</button><button className={styles.primary} type="button" onClick={() => setPhase(6)}>Continue <span aria-hidden="true">→</span></button></div></article> : null}
+          <BodyClueSheet
+            open={sheet === 'body'}
+            regions={bodyRegions}
+            openRegion={draft.openRegion ?? bodyRegions[0]?.id ?? ''}
+            selected={draft.selectedCues}
+            onRegionChange={(openRegion) => updateDraft((current) => ({ ...current, openRegion }))}
+            onSelectedChange={(selectedCues) => updateDraft((current) => ({ ...current, selectedCues, bodyClear: false }))}
+            onNothingClear={() => {
+              updateDraft((current) => ({ ...current, selectedCues: {}, bodyClear: true }));
+              setSheet(null);
+            }}
+            onClose={() => setSheet(null)}
+          />
+          <FeelingShapeSheet
+            open={sheet === 'shape'}
+            shape={draft.shape}
+            onChange={(shape) => updateDraft((current) => ({ ...current, shape }))}
+            onClose={() => setSheet(null)}
+          />
+        </section>
+      ) : null}
 
-        {phase === 6 && emotion ? <article className={styles.step}><h3>Step 5: Consider regulation options</h3><div className={styles.care}><h4>Support for {emotion.name}</h4><h4>Options to consider</h4><ul>{emotion.regulation.map((item)=><li key={item}>{item}</li>)}</ul>{quadrant?.care?.length ? <><h4>Options for {quadrant.label.toLocaleLowerCase()}</h4><ul>{quadrant.care.map((item)=><li key={item}>{item}</li>)}</ul></> : null}<div className={styles.matchedBreath}><h4>Matched breathing option</h4><p>{breathPattern==='physiological_sigh'?'Use a physiological sigh (double inhale, long exhale) to release high unpleasant activation.':breathPattern==='resonance_6bpm'?'Resonance breathing (5s in, 5s out) steadies high energy while staying grounded.':'Try a steady 4-4-6 breath to invite calm and soften the edges.'}</p><button className={styles.ghost} type="button" onClick={()=>startBreathing(breathPattern)}>Start {breathLabel}</button></div><p className={styles.note}>These are options, not prescriptions. Stop or choose something else if an option does not fit.</p></div><div className={styles.stepNav}><button className={styles.ghost} type="button" onClick={() => setPhase(5)}><span aria-hidden="true">←</span> Back</button><button className={styles.primary} type="button" onClick={() => setPhase(7)}>Continue <span aria-hidden="true">→</span></button></div></article> : null}
+      {draft.stage === 3 ? (
+        <section className={styles.stage} aria-labelledby="alex-stage-three">
+          <header className={styles.stageHeader}>
+            <p>3 of 4 · Words</p>
+            <h1 id="alex-stage-three">Possible words</h1>
+            <p>These are clue matches, not answers. More than one may fit—or none yet.</p>
+          </header>
 
-        {phase === 7 && emotion ? <article className={styles.step}><h3>Step 6: Put it into words</h3><p>If useful, use the suggested sentence as a starting point and edit it to match what you mean. You can also leave the feeling uncertain and revise it later.</p><div className={styles.communication}><p>{template}</p><div><button className={styles.primary} type="button" onClick={async()=>{try{await navigator.clipboard.writeText(template);setCommunicationStatus('Sentence copied.');}catch{setCommunicationStatus('Copy was unavailable. Select the sentence to copy it.');}}}>Copy sentence</button><button className={styles.ghost} type="button" onClick={()=>{if('speechSynthesis' in window){window.speechSynthesis.cancel();window.speechSynthesis.speak(new SpeechSynthesisUtterance(template));setCommunicationStatus('Reading the sentence aloud.');}}}>Read it aloud</button></div><p className={styles.note} role="status">{communicationStatus}</p></div><div className={styles.stepNav}><button className={styles.ghost} type="button" onClick={() => setPhase(6)}><span aria-hidden="true">←</span> Back</button><button className={styles.primary} type="button" onClick={() => setPhase(8)}>Finish <span aria-hidden="true">✓</span></button></div></article> : null}
+          {selectedTerms.length || draft.noWordYet ? (
+            <section className={styles.wordTray} aria-label="Your current words">
+              <h2>My words</h2>
+              <div>{selectedTerms.map((term) => <span key={term.id}>{term.label}<small>{draft.decisions[term.id] === 'fits' ? 'Fits' : 'Maybe'}</small></span>)}{draft.noWordYet ? <span>No word yet</span> : null}</div>
+            </section>
+          ) : null}
 
-        {phase === 8 ? <article className={styles.step}><h3>Review and repeat as useful</h3><p>Emotion identification can become easier with repeated observation and comparison. Return to the flow when it is useful, and revise earlier labels as new information becomes available.</p><div className={styles.stepNav}><button className={styles.ghost} type="button" onClick={() => setPhase(7)}><span aria-hidden="true">←</span> Back</button><button className={styles.primary} type="button" onClick={resetCheckIn}>Start over</button></div></article> : null}
-      </section>
-    </div>
+          <label className={styles.wordSearch}>
+            <SearchIcon />
+            <span className="visually-hidden">Search Feelings, Faux Feelings, and working terms</span>
+            <input type="search" value={wordQuery} placeholder="Search words" onChange={(event) => setWordQuery(event.target.value)} autoComplete="off" />
+          </label>
+          <div className={styles.segmented} role="radiogroup" aria-label="Word view">
+            {([['matches', 'Matches'], ['all', 'All feelings'], ['mine', 'My words']] as const).map(([value, label]) => (
+              <button key={value} type="button" role="radio" aria-checked={wordFilter === value} onClick={() => { setWordFilter(value); setWordQuery(''); }}>{label}</button>
+            ))}
+          </div>
+
+          {visibleWordItems.length ? (
+            <MagnetBoard
+              className={styles.wordBoard}
+              items={visibleWordItems}
+              playMode={wordPlayMode}
+              onPlayModeChange={setWordPlayMode}
+              storageKey={`alexithymia-words:${normalizedWordQuery ? 'search' : wordFilter}`}
+              ariaLabel="Possible words"
+            />
+          ) : (
+            <p className={styles.emptyMessage}>{wordFilter === 'mine' ? 'No words selected yet.' : normalizedWordQuery ? `No reviewed words match “${wordQuery}”.` : 'No scored matches yet. Browse all feelings or choose “No word yet.”'}</p>
+          )}
+
+          {normalizedWordQuery && !exactSearchTerm ? (
+            <button type="button" className={styles.customWordButton} onClick={useCustomWord}>Use “{wordQuery.trim()}” as a working word</button>
+          ) : null}
+
+          {!normalizedWordQuery && wordFilter === 'matches' && partialWordItems.length ? (
+            <section className={styles.partialWords} aria-labelledby="partial-words-title">
+              <header><h2 id="partial-words-title">More words to consider</h2><p>Unscored for one or more of your clues.</p></header>
+              <MagnetBoard
+                className={styles.wordBoard}
+                items={partialWordItems}
+                playMode={partialPlayMode}
+                onPlayModeChange={setPartialPlayMode}
+                storageKey="alexithymia-partial-words"
+                ariaLabel="Words with incomplete clue coverage"
+              />
+            </section>
+          ) : null}
+
+          <div className={styles.wordAlternatives}>
+            <button type="button" aria-pressed={draft.noWordYet} onClick={chooseNoWordYet}>No word yet</button>
+            <button type="button" onClick={() => { setWordFilter('all'); setWordQuery(''); }}>Browse all feelings</button>
+          </div>
+          <p className={styles.liveStatus} role="status">{status}</p>
+          <div className={styles.stickyActions}>
+            <button type="button" className={styles.textButton} onClick={() => goToStage(2)}>Back to clues</button>
+            <button type="button" className={styles.primaryButton} disabled={!selectedTerms.length && !draft.noWordYet} onClick={() => goToStage(4)}>Use these words</button>
+          </div>
+
+          <CandidateSheet
+            term={sheet === 'candidate' ? activeTerm : null}
+            score={activeScore}
+            decision={activeTerm ? draft.decisions[activeTerm.id] : undefined}
+            cueLabels={cueLabels}
+            onDecision={(decision) => {
+              if (activeTerm) decideTerm(activeTerm, decision);
+              setStatus(decision === 'not-this-time' ? 'Marked “Not this time” for this check-in.' : `${activeTerm?.label ?? 'Word'} added to My words.`);
+            }}
+            onClose={() => setSheet(null)}
+          />
+        </section>
+      ) : null}
+
+      {draft.stage === 4 ? (
+        <section className={styles.stage} aria-labelledby="alex-stage-four">
+          <header className={styles.stageHeader}>
+            <p>4 of 4 · Your words</p>
+            <h1 id="alex-stage-four">What fits right now?</h1>
+          </header>
+
+          <section className={styles.selectionSection} aria-labelledby="selected-feelings-title">
+            <header><div><h2 id="selected-feelings-title">Feelings and working words</h2><p>Your choices, not the app’s conclusion.</p></div><button type="button" className={styles.smallAction} onClick={() => goToStage(3)}>Edit</button></header>
+            {selectedTerms.length ? (
+              <ol className={styles.selectedTermList}>
+                {selectedTerms.map((term, index) => (
+                  <li key={term.id}>
+                    <span><strong>{term.label}</strong><small>{term.roleLabel} · {draft.decisions[term.id] === 'fits' ? 'Fits' : 'Maybe'}</small></span>
+                    <span className={styles.reorderActions}>
+                      <button type="button" disabled={index === 0} aria-label={`Move ${term.label} earlier`} onClick={() => moveTerm(term.id, -1)}>←</button>
+                      <button type="button" disabled={index === selectedTerms.length - 1} aria-label={`Move ${term.label} later`} onClick={() => moveTerm(term.id, 1)}>→</button>
+                      <button type="button" aria-label={`Remove ${term.label}`} onClick={() => decideTerm(term, 'not-this-time')}><CloseIcon /></button>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            ) : draft.noWordYet ? <p className={styles.noWordSelection}>I’m not sure what I feel yet.</p> : <p className={styles.emptyMessage}>No words selected.</p>}
+          </section>
+
+          <section className={styles.selectionSection} aria-labelledby="selected-needs-title">
+            <header><div><h2 id="selected-needs-title">What are you needing?</h2><p>Choose any Needs that fit. A feeling does not prove a particular Need.</p></div><button type="button" className={styles.smallAction} onClick={() => setSheet('needs')}>{draft.selectedNeeds.length ? 'Edit Needs' : 'Add Needs'}</button></header>
+            {observationMatches.needs.some((need) => !draft.selectedNeeds.includes(need.slug)) ? (
+              <div className={styles.wordsAlreadyUsed}><strong>Words you already used</strong>{observationMatches.needs.filter((need) => !draft.selectedNeeds.includes(need.slug)).map((need) => <button key={need.slug} type="button" onClick={() => updateDraft((current) => ({ ...current, selectedNeeds: [...current.selectedNeeds, need.slug] }))}>{need.title}<span aria-hidden="true">+</span></button>)}</div>
+            ) : null}
+            {draft.selectedNeeds.length ? (
+              <MagnetBoard
+                className={styles.selectedNeedBoard}
+                items={selectedNeedItems}
+                playMode={needPlayMode}
+                onPlayModeChange={setNeedPlayMode}
+                storageKey="alexithymia-selected-needs"
+                ariaLabel="Selected Needs; open a Need's strategies"
+              />
+            ) : <button type="button" className={styles.notSureChoice} onClick={() => setSheet('needs')}>Not sure yet</button>}
+          </section>
+
+          <section className={styles.composer} aria-labelledby="composer-title">
+            <header><h2 id="composer-title">Put it into your words</h2><p>Build from only what you selected, then edit anything.</p></header>
+            <button type="button" className={styles.buildButton} onClick={buildSentence}>Build sentence</button>
+            <label>
+              <span className="visually-hidden">Your statement</span>
+              <textarea rows={6} value={draft.statement} placeholder="Your words will appear here." onChange={(event) => updateDraft((current) => ({ ...current, statement: event.target.value, statementEdited: true }))} />
+            </label>
+            <div className={styles.composerActions}>
+              <button type="button" onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(draft.statement);
+                  setStatus('Statement copied.');
+                } catch {
+                  setStatus('Copy was unavailable. Select the statement to copy it.');
+                }
+              }} disabled={!draft.statement.trim()}><CopyIcon /><span>Copy</span></button>
+              <button type="button" onClick={() => {
+                if (!('speechSynthesis' in window) || !draft.statement.trim()) return;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(draft.statement));
+                setStatus('Reading your statement aloud.');
+              }} disabled={!draft.statement.trim()}><SpeakIcon /><span>Read aloud</span></button>
+              <button type="button" onClick={addToJournal} disabled={!draft.statement.trim() && !draft.observation.trim() && !selectedTerms.length && !draft.selectedNeeds.length}><JournalIcon /><span>Add to Journal</span></button>
+              <button type="button" onClick={resetCheckIn}><ResetIcon /><span>Start over</span></button>
+            </div>
+            <p className={styles.liveStatus} role="status">{status}</p>
+          </section>
+
+          <p className={styles.completion}>These are your working words for this moment. You can change them whenever more becomes clear.</p>
+
+          <NeedCatalogSheet
+            open={sheet === 'needs'}
+            query={needQuery}
+            selected={draft.selectedNeeds}
+            playMode={needPlayMode}
+            onQueryChange={setNeedQuery}
+            onSelectedChange={(selectedNeeds) => updateDraft((current) => ({ ...current, selectedNeeds }))}
+            onPlayModeChange={setNeedPlayMode}
+            onClose={() => setSheet(null)}
+          />
+        </section>
+      ) : null}
+    </article>
   );
 }

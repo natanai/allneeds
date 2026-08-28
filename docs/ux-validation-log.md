@@ -2,6 +2,21 @@
 
 This log records reproducible local evidence for the stability roadmap. It is not a substitute for production field data at the 75th percentile.
 
+## 2026-08-28 — Observation 2.0 + Alexithymia combined gate
+
+- The combined branch uses `analyzeObservation` as the only Observation text owner. Alexithymia Support projects exact catalog-title entities from that analysis and contains no legacy or lane-local scanner.
+- Both deterministic compilers passed freshness checks. Strict TypeScript validation and all `214/214` tests across `48/48` files passed.
+- The production build transformed `193` modules, generated the installed-app service worker with `164` runtime assets, and passed the production artifact verifier.
+- Observation, Alexithymia, and startup Playwright tests were discovered, but could not execute because this workspace has no Playwright browser binary. The checked-in Chromium, Firefox, mobile WebKit, target-device, large-text, keyboard, and screen-reader checks therefore remain release requirements rather than claimed local passes.
+
+## 2026-08-28 — Alexithymia Support implementation gate
+
+- The deterministic Alexithymia Support compiler validated candidate roles, fixed-catalog routes, body-profile references, source coverage, and Feeling-shape coordinates; the generated runtime asset was fresh.
+- Strict TypeScript validation passed. Vitest passed `198/198` tests across `48/48` files.
+- The production build transformed `191` modules, generated the installed-app service worker with `170` runtime assets, and passed the production artifact verifier.
+- Playwright discovered all `63` production flows, including new Alexithymia checks for combined, body-only, shape-only, Faux Feeling, Working term, multiple-word, `No word yet`, direct Need routing, Journal handoff, Feeling-page boundaries, and mobile overflow contracts.
+- The browser flows could not execute in this workspace because its configured Playwright Chromium binary is unavailable. This entry therefore records no screenshot, live-browser, iOS standalone, large-text, reduced-motion, keyboard, or screen-reader sign-off. Those checks remain required on the normal browser runner and target devices before release approval.
+
 ## 2026-08-23 — current-reference parity refresh
 
 Reference: `natanai/nvc-app`, branch `performance/immediate-response-v1`, commit `7fb6b397d35efc3ceb9cca99aac9a93ddcf18ca3`.

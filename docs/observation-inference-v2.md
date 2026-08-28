@@ -38,6 +38,8 @@ The compiler currently reads the repository's canonical owners for entity famili
 
 The page does not run a second textarea detector. The Quick Check, inline highlights, detected-word links, caret explanations, and suggestion ranking all consume the same analysis result.
 
+Alexithymia Support also calls this analyzer for its optional present-moment observation. That lane projects exact catalog-title entities from the analysis for reference links only; it does not run a second scanner, treat fuzzy spelling support as an exact term, or use Observation suggestions to select a Feeling or Need.
+
 ## Matching safeguards
 
 - Catalog title and approved bridge recognition is token-boundary based and case-insensitive.

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { observationInferenceIndex } from '../../data/generated/observationInference';
 import { analyzeObservation } from './analyze';
+import { selectExactObservationEntities } from './select';
 
 const EXAMPLE = "Last Thursday, two days after my partner and I had agreed to have dinner together at home at 7 p.m., I arrived back at the apartment at 6:50 p.m. and started setting the table. At 7:15 p.m. my partner was not home yet, and at 7:20 p.m. I saw a message on my phone sent at 6:55 p.m. that said, 'I decided to stay late at work and will eat here tonight.'";
 
@@ -60,12 +61,24 @@ describe('Observation Inference Engine 2.0', () => {
   });
 
   it('keeps typo support bounded and guidance ranges available to the shared annotation ledger', () => {
-    expect(analyzeObservation('I feel anxios.').suggestions.feelings[0]).toMatchObject({ slug: 'anxious', basis: 'related' });
+    const typo = analyzeObservation('I feel anxios.');
+    expect(typo.suggestions.feelings[0]).toMatchObject({ slug: 'anxious', basis: 'related' });
+    expect(typo.entities.find((entity) => entity.slug === 'anxious')).toMatchObject({ matchKind: 'fuzzy' });
     const guidance = analyzeObservation('You are always rude on purpose.');
     expect(guidance.annotations.some((annotation) => annotation.text.toLocaleLowerCase('en-US') === 'always'
       && annotation.evidence.some((evidence) => evidence.kind === 'guidance'))).toBe(true);
     expect(guidance.annotations.some((annotation) => annotation.text.toLocaleLowerCase('en-US') === 'on purpose'
       && annotation.evidence.some((evidence) => evidence.kind === 'guidance'))).toBe(true);
+  });
+
+  it('projects exact catalog titles without silently translating bridges or fuzzy wording', () => {
+    const exact = selectExactObservationEntities(analyzeObservation('I felt sad and betrayed, and I wanted safety.'));
+    expect(exact.feelings.map((entity) => entity.slug)).toContain('sad');
+    expect(exact.fauxFeelings.map((entity) => entity.slug)).toContain('betrayed');
+    expect(exact.needs.map((entity) => entity.slug)).toContain('safety');
+
+    const inexact = selectExactObservationEntities(analyzeObservation('I felt sadness and anxios.'));
+    expect(inexact.feelings).toEqual([]);
   });
 
   it('preserves guilt as unlinked user wording without inventing an official mapping', () => {

@@ -290,6 +290,7 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
       entityType: evidence.entityType,
       slug: evidence.slug,
       title: evidence.title,
+      matchKind: evidence.matchKind,
       text: annotation.text,
       start: annotation.start,
       end: annotation.end,

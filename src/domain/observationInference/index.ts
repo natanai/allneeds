@@ -1,5 +1,6 @@
 export { analyzeObservation } from './analyze';
 export { annotationDescriptions, evidenceDescription, suggestionBasisSummary } from './explain';
+export { selectExactObservationEntities } from './select';
 export type {
   EvidenceTier,
   ObservationAnalysis,
@@ -11,3 +12,4 @@ export type {
   ObservationSlotId,
   ObservationSuggestion,
 } from './types';
+export type { ExactObservationEntities } from './select';
