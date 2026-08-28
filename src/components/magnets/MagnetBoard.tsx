@@ -39,6 +39,8 @@ export type MagnetKind = 'default' | 'feeling' | 'need' | 'nav';
 export type MagnetBoardItem = {
   id: string;
   label: string;
+  detail?: string;
+  badge?: string;
   to?: string;
   onActivate?: () => void;
   tone?: MagnetTone;
@@ -46,6 +48,7 @@ export type MagnetBoardItem = {
   icon?: ReactNode;
   iconUrl?: string;
   active?: boolean;
+  selected?: boolean;
   count?: number;
   ariaLabel?: string;
   ariaExpanded?: boolean;
@@ -1237,12 +1240,17 @@ export function MagnetBoard({
           styles.magnet,
           styles[item.tone ?? 'quiet'],
           styles[item.kind ?? 'default'],
-          item.active ? styles.active : '',
+          item.detail ? styles.hasDetail : '',
+          item.active || item.selected ? styles.active : '',
         ].filter(Boolean).join(' ');
         const content = (
           <>
             {item.icon ? <span className={styles.icon} aria-hidden="true">{item.icon}</span> : null}
-            <span className={styles.label}>{item.label}</span>
+            <span className={styles.label}>
+              {item.label}
+              {item.detail ? <span className={styles.detail}>{item.detail}</span> : null}
+            </span>
+            {item.badge ? <span className={styles.badge}>{item.badge}</span> : null}
             {typeof item.count === 'number' ? <span className={styles.count}>{item.count}</span> : null}
           </>
         );
@@ -1252,6 +1260,7 @@ export function MagnetBoard({
           'data-magnet-id': item.id,
           'aria-label': item.ariaLabel,
           'aria-current': item.active ? ('page' as const) : undefined,
+          'aria-pressed': !item.to && item.selected !== undefined ? item.selected : undefined,
           'aria-expanded': item.ariaExpanded,
           'aria-haspopup': item.ariaHasPopup,
           'aria-controls': item.ariaControls,

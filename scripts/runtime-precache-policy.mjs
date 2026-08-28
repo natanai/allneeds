@@ -2,7 +2,6 @@ const requiredRuntimeData = new Set([
   './data/observation-guide.json',
   './data/observation_cue_modules.json',
   './data/observation_cues.csv',
-  './data/reverse-inference.json',
 ]);
 
 export const REQUIRED_RUNTIME_PRECACHE_PATHS = Object.freeze([

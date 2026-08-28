@@ -111,6 +111,7 @@ export function JournalPage() {
   );
   const [selectedNeeds, setSelectedNeeds] = useState<string[]>(startingNewFromObservation ? [] : savedDraft?.selectedNeeds ?? []);
   const [tags, setTags] = useState(startingNewFromObservation ? '' : savedDraft?.tags ?? '');
+  const [guidedSupport, setGuidedSupport] = useState(startingNewFromObservation ? undefined : savedDraft?.guidedSupport);
   const [editingId, setEditingId] = useState<string | null>(startingNewFromObservation ? null : savedDraft?.editingId ?? null);
   const [feelingPickerOpen, setFeelingPickerOpen] = useState(false);
   const [needsPickerOpen, setNeedsPickerOpen] = useState(false);
@@ -126,8 +127,8 @@ export function JournalPage() {
   const importRef = useRef<HTMLInputElement>(null);
   const emotion = selectedFeelings.map((item) => item.feeling).join(', ');
   const intensity = selectedFeelings.length ? Math.max(...selectedFeelings.map((item) => item.intensity)) : 5;
-  const draftRef = useRef<JournalComposerDraft>({ notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId });
-  draftRef.current = { notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId };
+  const draftRef = useRef<JournalComposerDraft>({ notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId, guidedSupport });
+  draftRef.current = { notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId, guidedSupport };
 
   useEffect(() => {
     if (shouldOpen) setOpen(true);
@@ -138,7 +139,7 @@ export function JournalPage() {
       try { writeJournalDraft(draftRef.current); } catch { /* Saving still remains available. */ }
     }, 180);
     return () => window.clearTimeout(timer);
-  }, [editingId, notes, selectedFeelings, selectedNeeds, tags]);
+  }, [editingId, guidedSupport, notes, selectedFeelings, selectedNeeds, tags]);
 
   useEffect(() => {
     const flush = () => {
@@ -185,6 +186,7 @@ export function JournalPage() {
     setSelectedFeelings([]);
     setSelectedNeeds([]);
     setTags('');
+    setGuidedSupport(undefined);
     setEditingId(null);
     setFeelingPickerOpen(false);
     setNeedsPickerOpen(false);
@@ -218,9 +220,10 @@ export function JournalPage() {
         feelings: selectedFeelings,
         needs: selectedNeeds,
         tags: [...new Set(parsedTags)],
+        ...(guidedSupport ? { guidedSupport } : {}),
       } : entry);
     } else {
-      next = [...entries, createJournalRecord({ notes, feelings: selectedFeelings, needs: selectedNeeds, tags: parsedTags })];
+      next = [...entries, createJournalRecord({ notes, feelings: selectedFeelings, needs: selectedNeeds, tags: parsedTags, guidedSupport })];
     }
     setEntries(writeJournal(next));
     setFeedback({ kind: 'success', message: editingId ? 'Journal entry updated.' : 'Journal entry saved to this device.' });
@@ -235,6 +238,7 @@ export function JournalPage() {
     setSelectedFeelings(recordFeelings(entry));
     setSelectedNeeds(entry.needs);
     setTags(entry.tags.join(', '));
+    setGuidedSupport(entry.guidedSupport);
     setOpen(true);
   };
 

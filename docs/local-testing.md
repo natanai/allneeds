@@ -60,7 +60,7 @@ then verifies titles, landmarks, shell order, and overflow. It also covers the
 non-sticky persistent nav behavior and filtered browse/scroll restoration
 through Back and Forward. Workflow continuity tests exercise Observation →
 Journal handoff, Journal save/clear, Body Cue reset, Inventory and per-Need
-draft isolation, the current Alexithymia body/compass/emotion lane, and a real
+draft isolation, the four-stage Alexithymia present-moment check-in, and a real
 download → delete → import backup recovery using only visible controls. Feed
 prewarming is intercepted with an empty public response inside automated browser
 checks so an optional external service cannot invalidate otherwise local tests.
@@ -92,18 +92,18 @@ Record milestone measurements in [`ux-validation-log.md`](ux-validation-log.md),
 - Navigation magnets: enable play, drag magnets into a visibly different reading order, disable play, and confirm they form a tight grid while preserving that top-to-bottom/left-to-right order. Reload and confirm the ordered grid returns. Repeat once at compact width and once at wide width.
 - Home: open each of the three doorways and Alexithymia Support.
 - Feelings: search, shuffle, toggle physics, pick up and relocate a magnet, confirm only contacted or nearby magnets react and the board settles without a global reshuffle, navigate away and back, reload, and confirm the settled location returns before opening a feeling, Body Cues, and the emotions wheel.
-- Body Cues: move a region slider, confirm possible feelings appear, navigate away/back and reload, then confirm the exact cue returns. “Reset all cues” must remove it permanently.
+- Body Cues: move a region slider, confirm possible words appear with honest Feeling or Working term roles, navigate away/back and reload, then confirm the exact cue returns. “Reset all cues” must remove it permanently.
 - Needs: search, open a need, page/shuffle its strategies, save one to the device, and add a personal strategy. Leave an unsaved personal strategy, navigate to another need and back, and confirm each need keeps its own draft until Save or “Clear draft.”
 - Faux feelings: search, open one, and follow its related feeling and need magnets.
 - Observations: insert the example, load matches, toggle met/unmet language, open the full guide, and convert the observation to a journal draft.
 - Inventory: confirm the saved item and need coverage, then edit/remove a strategy. Leave text in the add and edit forms, navigate away/back and reload, and confirm the exact fields and coverage filter return; “Clear draft,” Cancel, and successful Save must clear the appropriate editor state. Download/restore the full-device backup from Menu → Account & data (or Journal → Backup & restore).
 - Journal: confirm the Journal nav magnet opens the full-screen entry composer directly, close it to reach History, save/edit/filter an entry, export a backup, and verify an observation draft opens automatically.
 - Dialog keyboard behavior: open Menu, Observation help, and Journal. Confirm working focus moves inside, Escape closes, focus returns to the opener, and Tab/Shift+Tab cannot leave each modal surface. Customizer is intentionally non-modal and must not trap Tab.
-- Warm-route resources: after the entrance gate, open Body Cues and Observations and confirm neither page renders “Loading body-cue matches…” nor “Loading guide…”.
+- Warm-route resources: after the entrance gate, open Body Cues and Observations and confirm neither page renders “Loading body-cue matches…” nor “Loading guide…”. Body Cues and Feeling-page descriptive cue data are bundled local assets rather than separate startup fetches.
 - Clean boot: open the browser console before a fresh entrance and confirm the preloaded Observation matcher emits no invalid-regex warnings or errors.
 - Draft continuity: type unsaved text in Observations and Journal, navigate away/back, close the Journal composer, reload, and confirm the exact text returns. Save or Clear should remove the corresponding draft.
 - Browse continuity: filter Feelings, Needs, and Faux Feelings, open a result, use Back, and confirm the same query and filtered magnets return for the current tab session.
-- Alexithymia Support: complete a body selection, use the compass, select/reject a suggested feeling, navigate away/back and reload, and confirm the lane, body value, compass values, and selected emotion return. Continue to the shared Journal when useful, try the care and communication steps, then use “Start over” and confirm the cleared lane stays cleared after reload.
+- Alexithymia Support: at `390 × 844`, record an optional observation, use body-only, Feeling-shape-only, and combined clue paths, and confirm match percentages remain independent. Exercise `Fits`, `Maybe`, `Not this time`, multiple words, `No word yet`, a searched Faux Feeling, and an unbridged Working term. Select no Need and confirm none appears; then select one Need and open its canonical strategy page. Build/edit/copy/read the statement, hand it to Journal, navigate away/back and reload, and confirm stage and selections return. Use `Start over` and confirm the cleared lane stays cleared after reload. Repeat with large text, reduced motion, keyboard-only sheet/scales, and a wide viewport; confirm no horizontal overflow and focus returns to each opener.
 - Shared feed in `pnpm dev`: pull public strategies and save one locally; confirm the Inventory count changes even if the best-effort live add-count update is unavailable. With a restored production session, confirm the following feed unlocks.
 - Account & data: confirm Bluesky handle validation is active, Profile actions remain unavailable while signed out, and backup/restore stays fully local. Complete OAuth redirect/profile-cookie acceptance on `https://allneeds.app`; the registered client intentionally returns localhost/GitHub preview sign-ins to the official origin.
 - Customizer: change colors/roundness, reload, and confirm the choices persist.
@@ -142,7 +142,6 @@ The main V2 keys are:
 - `allneeds.v2.alexithymia.draft`
 - `allneeds.v2.need-strategy.draft:<need-slug>`
 - `nvcApp.theme`
-- `nvc_rejected_emotions`
 - `magnetPositions:*`
 
 Export a backup from Menu → Account & data or Journal → Backup & restore before clearing anything you want to keep.
