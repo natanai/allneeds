@@ -30,130 +30,49 @@
         }
       ],
       "strategies": [
-        {
-          "title": "Write a letter",
-          "slug": "write-a-letter-for-connection"
-        },
-        {
-          "title": "Remember a connected moment",
-          "slug": "remember-a-connected-moment"
-        },
-        {
-          "title": "Map your connection options",
-          "slug": "map-your-connection-options"
-        },
-        {
-          "title": "Notice where you are",
-          "slug": "notice-where-you-are"
-        }
+        { "title": "Write a letter", "slug": "write-a-letter-for-connection" },
+        { "title": "Remember a connected moment", "slug": "remember-a-connected-moment" },
+        { "title": "Map your connection options", "slug": "map-your-connection-options" },
+        { "title": "Notice where you are", "slug": "notice-where-you-are" }
       ]
     },
     "support": {
       "summary": "Across human evolutionary history, survival often depended on sharing food, care, information, labor, and risk rather than meeting every demand alone. This need may motivate us to seek help, make our needs visible, notice when others need assistance, and offer or accept emotional, informational, or practical support. Tending to support can distribute burdens, preserve capacity during hardship, and make difficult circumstances more manageable than they would be alone.",
       "narrative": "Evolutionary anthropology gives human support-seeking and support-giving a deep historical context. Jaeggi and Gurven describe food sharing as having a “central role in shaping evolved human life history, social organization, and cooperative psychology.” They argue that humans expanded patterns of sharing in part to buffer risk in a demanding and uncertain foraging niche. Kaplan and colleagues likewise call exchange among non-kin a “hallmark of human sociality” and report experimental evidence consistent with risk reduction helping motivate reciprocal exchange under variable resource availability. These sources do not establish that every modern desire for help is an adaptation to a particular ancestral problem, but they place dependence on shared resources firmly within the natural history of our species. [1][2]\n\nModern social-support research shows that what people provide one another can take importantly different forms. Thoits distinguishes two broad categories, “emotional sustenance” and “active coping assistance.” Support can therefore involve empathy and reassurance, but it can also involve information, practical help, problem-solving, material resources, or other assistance that changes what a person has to carry alone. [3]\n\nThe usefulness of support also depends on how well it corresponds to the situation. Cohen and Wills reviewed evidence for general benefits associated with social integration and for a stress-buffering process, where support may matter especially when it matches demands created by a stressful event. Having people nearby, receiving some form of help, and receiving the kind of help that is actually useful are therefore not interchangeable ideas. [4]\n\nResearch also distinguishes believing that support is available from actually receiving supportive behavior. Uchino argues that perceived and received support can arise from different circumstances and may work through different processes. Haber and colleagues' meta-analysis of 23 studies found that the two were related, but only moderately, with an average correlation of r = .35. A person can therefore receive assistance without experiencing themselves as well supported, or experience a dependable source of support even when they are not currently receiving help. [5][6]\n\nSupport is not limited to surviving emergencies. Feeney and Collins propose that supportive relationships can matter both while coping with adversity and while pursuing opportunities for exploration and growth. A large systematic review and meta-analysis by Yeo, Lansford, and Rudolph synthesized 604 studies and 1,014 effect sizes and found that perceived emotional, informational, practical, and combined support were associated with outcomes across mental health, physical health, education, work, and risk-taking. The review found associations rather than evidence that any particular supportive act will necessarily produce a particular outcome. [7][8]\n\nSharing resources and care has repeatedly been part of how humans manage demands that exceed what one person can reliably handle. Seeking support or responding to another person's need for it can be understood as part of human cooperation rather than simply as a failure of self-sufficiency. What support is useful still depends on what the person needs in that situation.",
       "sources": [
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/23943272/",
-          "description": "Jaeggi, A. V., & Gurven, M. (2013). Natural cooperators: food sharing in humans and other primates. Evolutionary Anthropology, 22(4), 186–195."
-        },
-        {
-          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3385467/",
-          "description": "Kaplan, H. S., Schniter, E., Smith, V. L., & Wilson, B. J. (2012). Risk and the evolution of human exchange. Proceedings of the Royal Society B, 279(1740), 2930–2935."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/21673143/",
-          "description": "Thoits, P. A. (2011). Mechanisms linking social ties and support to physical and mental health. Journal of Health and Social Behavior, 52(2), 145–161."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/3901065/",
-          "description": "Cohen, S., & Wills, T. A. (1985). Stress, social support, and the buffering hypothesis. Psychological Bulletin, 98(2), 310–357."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/26158961/",
-          "description": "Uchino, B. N. (2009). Understanding the Links Between Social Support and Physical Health: A Life-Span Perspective With Emphasis on the Separability of Perceived and Received Support. Perspectives on Psychological Science, 4(3), 236–255."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/17308966/",
-          "description": "Haber, M. G., Cohen, J. L., Lucas, T., & Baltes, B. B. (2007). The relationship between self-reported received and perceived social support: a meta-analytic review. American Journal of Community Psychology, 39(1–2), 133–144."
-        },
-        {
-          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5480897/",
-          "description": "Feeney, B. C., & Collins, N. L. (2015). A New Look at Social Support: A Theoretical Perspective on Thriving through Relationships. Personality and Social Psychology Review, 19(2), 113–147."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/41100292/",
-          "description": "Yeo, G., Lansford, J. E., & Rudolph, K. D. (2025). How does perceived social support relate to human thriving? A systematic review with meta-analyses. Psychological Bulletin, 151(9), 1089–1124."
-        }
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/23943272/", "description": "Jaeggi, A. V., & Gurven, M. (2013). Natural cooperators: food sharing in humans and other primates. Evolutionary Anthropology, 22(4), 186–195." },
+        { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3385467/", "description": "Kaplan, H. S., Schniter, E., Smith, V. L., & Wilson, B. J. (2012). Risk and the evolution of human exchange. Proceedings of the Royal Society B, 279(1740), 2930–2935." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/21673143/", "description": "Thoits, P. A. (2011). Mechanisms linking social ties and support to physical and mental health. Journal of Health and Social Behavior, 52(2), 145–161." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/3901065/", "description": "Cohen, S., & Wills, T. A. (1985). Stress, social support, and the buffering hypothesis. Psychological Bulletin, 98(2), 310–357." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/26158961/", "description": "Uchino, B. N. (2009). Understanding the Links Between Social Support and Physical Health: A Life-Span Perspective With Emphasis on the Separability of Perceived and Received Support. Perspectives on Psychological Science, 4(3), 236–255." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/17308966/", "description": "Haber, M. G., Cohen, J. L., Lucas, T., & Baltes, B. B. (2007). The relationship between self-reported received and perceived social support: a meta-analytic review. American Journal of Community Psychology, 39(1–2), 133–144." },
+        { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5480897/", "description": "Feeney, B. C., & Collins, N. L. (2015). A New Look at Social Support: A Theoretical Perspective on Thriving through Relationships. Personality and Social Psychology Review, 19(2), 113–147." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/41100292/", "description": "Yeo, G., Lansford, J. E., & Rudolph, K. D. (2025). How does perceived social support relate to human thriving? A systematic review with meta-analyses. Psychological Bulletin, 151(9), 1089–1124." }
       ],
       "strategies": [
-        {
-          "title": "Map your support",
-          "slug": "map-your-support"
-        },
-        {
-          "title": "Prepare one request for help",
-          "slug": "prepare-one-request-for-help"
-        },
-        {
-          "title": "Call or text 988",
-          "slug": "call-or-text-988"
-        },
-        {
-          "title": "Call 116 123",
-          "slug": "call-116-123"
-        }
+        { "title": "Map your support", "slug": "map-your-support" },
+        { "title": "Prepare one request for help", "slug": "prepare-one-request-for-help" },
+        { "title": "Call or text 988", "slug": "call-or-text-988" },
+        { "title": "Call 116 123", "slug": "call-116-123" }
       ]
     },
     "safety": {
       "summary": "Across evolutionary history, avoiding harm depended on detecting danger, taking protective action, and recognizing when conditions were safe enough to return to other activities. We may be motivated to create distance from harm, seek shelter or trustworthy people, set boundaries, reduce exposure, and look for credible signs that danger has passed. Protective responses can change with the situation rather than following one fixed pattern. Tending to Safety can mean responding when danger is present while also noticing when enough safety has returned for rest, exploration, connection, and other goals.",
       "narrative": "Protection from harm is among the oldest problems living organisms have had to solve. LeDoux distinguishes ancient defensive survival functions shared across animals from the conscious experience of fear. Mobbs and colleagues similarly describe human defense as involving processes such as anticipating danger, preventing exposure, assessing threats, searching for safety, escaping, and responding rapidly when danger becomes immediate. These accounts describe defensive functions rather than one single conscious feeling or one universally agreed psychological need. [1][2]\n\nProtective responding is not one fixed reaction. In a human experiment, Mobbs and colleagues had participants escape from a virtual predator capable of delivering painful stimulation. As the predator became more immediate, patterns of neural activity and participants' experience of the threat changed. In this virtual-predator laboratory task, protective responding changed as the threat became more immediate; the study does not establish one universal defensive sequence for ordinary life. [3]\n\nLaing and colleagues review safety learning as an active process in which the unexpected absence of an anticipated threat can create new associations with safety. Gilbert offers a related distinction among responding to threat, seeking safety, and detecting what he calls safeness: resources and conditions that support coping and allow activities such as exploration to resume. Both are theoretical frameworks rather than a universally accepted taxonomy. They describe protection as including credible information that harm is not occurring, has ended, or can now be managed. [4][5]\n\nProtective learning is imperfect. Cooper and colleagues' meta-analysis found that learned fear responses spread more broadly to similar cues among people with anxiety-related disorders than among comparison participants. That spread can be useful when similar situations really do share danger, but it can become costly when alarm extends to harmless cues. This does not mean that someone's sense of danger should be dismissed. Alarm is information worth attending to without having to be treated as proof by itself. [6]\n\nA person can be frightened or physiologically activated while taking sensible protective action, and feeling calm does not establish that a situation is harmless. Tending to Safety can involve responding to credible danger, reducing exposure to harm where possible, and remaining able to notice when circumstances have changed enough for defensive attention to ease.",
       "sources": [
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/34957848/",
-          "description": "LeDoux, J. E. (2022). As soon as there was life, there was danger: the deep history of survival behaviours and the shallower history of consciousness."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/25852451/",
-          "description": "Mobbs, D., Hagan, C. C., Dalgleish, T., Silston, B., & Prévost, C. (2015). The ecology of human fear: survival optimization and the nervous system."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/17717184/",
-          "description": "Mobbs, D., Petrovic, P., Marchant, J. L., et al. (2007). When fear is near: threat imminence elicits prefrontal-periaqueductal gray shifts in humans."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/39167292/",
-          "description": "Laing, P. A. F., Vervliet, B., Dunsmoor, J. E., & Harrison, B. J. (2025). Pavlovian safety learning: An integrative theoretical review."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/38698734/",
-          "description": "Gilbert, P. (2024). Threat, safety, safeness and social safeness 30 years on."
-        },
-        {
-          "url": "https://pubmed.ncbi.nlm.nih.gov/35501429/",
-          "description": "Cooper, S. E., van Dis, E. A. M., Hagenaars, M. A., et al. (2022). A meta-analysis of conditioned fear generalization in anxiety-related disorders."
-        }
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/34957848/", "description": "LeDoux, J. E. (2022). As soon as there was life, there was danger: the deep history of survival behaviours and the shallower history of consciousness." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/25852451/", "description": "Mobbs, D., Hagan, C. C., Dalgleish, T., Silston, B., & Prévost, C. (2015). The ecology of human fear: survival optimization and the nervous system." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/17717184/", "description": "Mobbs, D., Petrovic, P., Marchant, J. L., et al. (2007). When fear is near: threat imminence elicits prefrontal-periaqueductal gray shifts in humans." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/39167292/", "description": "Laing, P. A. F., Vervliet, B., Dunsmoor, J. E., & Harrison, B. J. (2025). Pavlovian safety learning: An integrative theoretical review." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/38698734/", "description": "Gilbert, P. (2024). Threat, safety, safeness and social safeness 30 years on." },
+        { "url": "https://pubmed.ncbi.nlm.nih.gov/35501429/", "description": "Cooper, S. E., van Dis, E. A. M., Hagenaars, M. A., et al. (2022). A meta-analysis of conditioned fear generalization in anxiety-related disorders." }
       ],
       "strategies": [
-        {
-          "title": "Comfy gaming",
-          "slug": "comfy-gaming"
-        },
-        {
-          "title": "Orient with 5-4-3-2-1",
-          "slug": "5-4-3-2-1-check"
-        },
-        {
-          "title": "Slow your breathing",
-          "slug": "slow-breathing-safety"
-        },
-        {
-          "title": "Call or text 988",
-          "slug": "call-or-text-988"
-        },
-        {
-          "title": "Call 116 123",
-          "slug": "call-116-123"
-        }
+        { "title": "Comfy gaming", "slug": "comfy-gaming" },
+        { "title": "Orient with 5-4-3-2-1", "slug": "5-4-3-2-1-check" },
+        { "title": "Slow your breathing", "slug": "slow-breathing-safety" },
+        { "title": "Call or text 988", "slug": "call-or-text-988" },
+        { "title": "Call 116 123", "slug": "call-116-123" }
       ]
     },
     "understanding": {
@@ -168,22 +87,10 @@
           "summary": "Trying to make sense of something that is uncertain or unexplained. We may notice what we do not yet know, gather information, ask questions, compare explanations, or revise our picture as new information becomes available.",
           "narrative": "Uncertainty creates a practical information problem. Humans and other animals often seek information that can improve present decisions, and they sometimes seek information even when it has no immediate practical use. Ajuwon and colleagues' comparative review places these behaviors in a broader animal context while emphasizing that the evolutionary origins of curiosity remain unresolved. [1]\n\nInformation-seeking is also more varied than simply collecting as much information as possible. Gottlieb and colleagues review mechanisms ranging from responses to novelty and surprise to more systematic searches for learning progress and information gain. Gottlieb and Oudeyer later distinguish information sampling, where an organism reduces uncertainty relevant to a current task, from more open-ended information search. These distinctions help explain why Understanding can sometimes feel like finding one missing answer and at other times like exploring a topic until a more coherent picture develops. [2][3]\n\nCuriosity is closely related to this process but should not be treated as identical to Understanding. Kidd and Hayden describe curiosity as an important motivator of learning and information-seeking while also noting that the field lacks a single accepted definition or comprehensive account of its mechanisms and functions. Here, Understanding is a broader everyday label for these information-seeking processes, not the name of a formally established psychological need. [4]\n\nReaching a useful understanding does not require eliminating every uncertainty. Sometimes the most informative outcome is discovering exactly what is still unknown.",
           "sources": [
-            {
-              "url": "https://link.springer.com/article/10.3758/s13420-024-00647-y",
-              "description": "Ajuwon, V., Monteiro, T., Schnell, A. K., & Clayton, N. S. (2025). To know or not to know? Curiosity and the value of prospective information in animals. Learning & Behavior."
-            },
-            {
-              "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4193662/",
-              "description": "Gottlieb, J., Oudeyer, P.-Y., Lopes, M., & Baranes, A. (2013). Information-seeking, curiosity, and attention: computational and neural mechanisms. Trends in Cognitive Sciences, 17(11), 585–593."
-            },
-            {
-              "url": "https://www.nature.com/articles/s41583-018-0078-0",
-              "description": "Gottlieb, J., & Oudeyer, P.-Y. (2018). Towards a neuroscience of active sampling and curiosity. Nature Reviews Neuroscience, 19, 758–770."
-            },
-            {
-              "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4635443/",
-              "description": "Kidd, C., & Hayden, B. Y. (2015). The Psychology and Neuroscience of Curiosity. Neuron, 88(3), 449–460."
-            }
+            { "url": "https://link.springer.com/article/10.3758/s13420-024-00647-y", "description": "Ajuwon, V., Monteiro, T., Schnell, A. K., & Clayton, N. S. (2025). To know or not to know? Curiosity and the value of prospective information in animals. Learning & Behavior." },
+            { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4193662/", "description": "Gottlieb, J., Oudeyer, P.-Y., Lopes, M., & Baranes, A. (2013). Information-seeking, curiosity, and attention: computational and neural mechanisms. Trends in Cognitive Sciences, 17(11), 585–593." },
+            { "url": "https://www.nature.com/articles/s41583-018-0078-0", "description": "Gottlieb, J., & Oudeyer, P.-Y. (2018). Towards a neuroscience of active sampling and curiosity. Nature Reviews Neuroscience, 19, 758–770." },
+            { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4635443/", "description": "Kidd, C., & Hayden, B. Y. (2015). The Psychology and Neuroscience of Curiosity. Neuron, 88(3), 449–460." }
           ]
         },
         {
@@ -193,42 +100,18 @@
           "summary": "Trying to grasp another person's meaning and help them grasp ours well enough to communicate or coordinate. We may listen, explain our own meaning, check an interpretation, or notice where our perspectives differ.",
           "narrative": "Human cooperation provides one context for why interpersonal understanding matters. Tomasello and colleagues propose that human cognition is distinctive partly because people participate in collaborative activities involving shared goals, attention, and intentions. Their Shared Intentionality Theory offers an influential evolutionary account of how coordinating psychological states may have contributed to human cooperation and cultural cognition. A later comparative and developmental review by Sauciuc and Persson argues that evidence challenges some of its stronger claims, particularly the proposed late evolutionary origin of shared intentionality and a sharp divide between human and ape psychology. [1][2]\n\nCoordination does not require everyone to hold an identical picture. DeChurch and Mesmer-Magnus synthesized 23 independent studies of shared team mental models, a research term for knowledge team members hold in common about their work. Shared mental models were positively related to team performance, but the observed relationships depended in meaningful ways on how shared knowledge was represented and measured. The findings concern shared team knowledge, not a requirement that everyone hold identical views. [3]\n\nRelationships add another important distinction. Actually understanding another person, believing that we understand them, and feeling understood by them are not the same thing. Reis, Lemay, and Finkenauer review research showing that people's perceptions of being understood are only modestly related to actually being understood. In a study of 152 couples discussing conflict, Hinnekens and colleagues found that perceived understanding was positively associated with measures of how well the relationship was functioning, while measured accuracy in reading a partner's thoughts and feelings was not. Because the study was associational, it does not show that making someone feel understood causes a better relationship. Its results distinguish perceived understanding from measured accuracy in reading a partner's thoughts and feelings. [4][5]\n\nUnderstanding can improve while disagreement remains.",
           "sources": [
-            {
-              "url": "https://pubmed.ncbi.nlm.nih.gov/16262930/",
-              "description": "Tomasello, M., Carpenter, M., Call, J., Behne, T., & Moll, H. (2005). Understanding and sharing intentions: the origins of cultural cognition. Behavioral and Brain Sciences, 28(5), 675–691."
-            },
-            {
-              "url": "https://pubmed.ncbi.nlm.nih.gov/37901066/",
-              "description": "Sauciuc, G.-A., & Persson, T. (2023). Empirical challenges from the comparative and developmental literature to the Shared Intentionality Theory. Neuroscience & Biobehavioral Reviews, 155, 105441."
-            },
-            {
-              "url": "https://doi.org/10.1037/a0017455",
-              "description": "DeChurch, L. A., & Mesmer-Magnus, J. R. (2010). Measuring shared team mental models: A meta-analysis. Group Dynamics: Theory, Research, and Practice, 14(1), 1–14."
-            },
-            {
-              "url": "https://doi.org/10.1111/spc3.12308",
-              "description": "Reis, H. T., Lemay, E. P., Jr., & Finkenauer, C. (2017). Toward understanding understanding: The importance of feeling understood in relationships. Social and Personality Psychology Compass, 11(3), e12308."
-            },
-            {
-              "url": "https://doi.org/10.1002/ejsp.2614",
-              "description": "Hinnekens, C., Stas, L., Gistelinck, F., & Verhofstadt, L. L. (2020). ‘I think you understand me.’ Studying the associations between actual, assumed, and perceived understanding within couples. European Journal of Social Psychology, 50(1), 46–60."
-            }
+            { "url": "https://pubmed.ncbi.nlm.nih.gov/16262930/", "description": "Tomasello, M., Carpenter, M., Call, J., Behne, T., & Moll, H. (2005). Understanding and sharing intentions: the origins of cultural cognition. Behavioral and Brain Sciences, 28(5), 675–691." },
+            { "url": "https://pubmed.ncbi.nlm.nih.gov/37901066/", "description": "Sauciuc, G.-A., & Persson, T. (2023). Empirical challenges from the comparative and developmental literature to the Shared Intentionality Theory. Neuroscience & Biobehavioral Reviews, 155, 105441." },
+            { "url": "https://doi.org/10.1037/a0017455", "description": "DeChurch, L. A., & Mesmer-Magnus, J. R. (2010). Measuring shared team mental models: A meta-analysis. Group Dynamics: Theory, Research, and Practice, 14(1), 1–14." },
+            { "url": "https://doi.org/10.1111/spc3.12308", "description": "Reis, H. T., Lemay, E. P., Jr., & Finkenauer, C. (2017). Toward understanding understanding: The importance of feeling understood in relationships. Social and Personality Psychology Compass, 11(3), e12308." },
+            { "url": "https://doi.org/10.1002/ejsp.2614", "description": "Hinnekens, C., Stas, L., Gistelinck, F., & Verhofstadt, L. L. (2020). ‘I think you understand me.’ Studying the associations between actual, assumed, and perceived understanding within couples. European Journal of Social Psychology, 50(1), 46–60." }
           ]
         }
       ],
       "strategies": [
-        {
-          "title": "Turn the gap into a question",
-          "slug": "turn-gap-into-question"
-        },
-        {
-          "title": "Explain it in your own words",
-          "slug": "explain-in-your-own-words"
-        },
-        {
-          "title": "Reflect and check",
-          "slug": "reflect-and-check"
-        }
+        { "title": "Turn the gap into a question", "slug": "turn-gap-into-question" },
+        { "title": "Explain it in your own words", "slug": "explain-in-your-own-words" },
+        { "title": "Reflect and check", "slug": "reflect-and-check" }
       ]
     },
     "clarity": {
@@ -243,22 +126,10 @@
           "summary": "When something feels ambiguous, we may seek clarity by making the relevant information easier to work with. We might bring related material together, state an expectation more precisely, or identify what is still uncertain. Making a statement easier to perceive does not tell us whether it is true. Making uncertainty explicit does not make it disappear.",
           "narrative": "Chandler and Sweller studied instructional materials in which learners had to combine related information presented in separate places. Across two experiments, learners performed better when the related information was physically integrated. Their findings show that presentation can affect how easily people work with information that belongs together. [1]\n\nTubre and Collins combined 74 correlations from studies of role ambiguity, role conflict, and job performance. Greater role ambiguity was associated with lower job performance. In this research, role ambiguity refers to uncertainty about what a person's role requires, giving one example of how unclear expectations can be studied directly. [2]\n\nReber and Schwarz changed how easy statements were to perceive while keeping their content the same. Statements that were easier to perceive were more likely to be judged true. The experiment separates perceptual clarity from the truth of the statement itself. [3]\n\nVan der Bles and colleagues reviewed research on communicating uncertainty about facts, numbers, and scientific knowledge. The work they examined included ways of communicating probabilities, ranges, and limitations directly. This research shows how uncertainty can be made more explicit without first being resolved. [4]",
           "sources": [
-            {
-              "url": "https://doi.org/10.1111/j.2044-8279.1992.tb01017.x",
-              "description": "Chandler, P., & Sweller, J. (1992). The split-attention effect as a factor in the design of instruction."
-            },
-            {
-              "url": "https://doi.org/10.1177/014920630002600104",
-              "description": "Tubre, T. C., & Collins, J. M. (2000). Jackson and Schuler (1985) Revisited: A Meta-Analysis of the Relationships Between Role Ambiguity, Role Conflict, and Job Performance."
-            },
-            {
-              "url": "https://pubmed.ncbi.nlm.nih.gov/10487787/",
-              "description": "Reber, R., & Schwarz, N. (1999). Effects of perceptual fluency on judgments of truth."
-            },
-            {
-              "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6549952/",
-              "description": "van der Bles, A. M., et al. (2019). Communicating uncertainty about facts, numbers and science."
-            }
+            { "url": "https://doi.org/10.1111/j.2044-8279.1992.tb01017.x", "description": "Chandler, P., & Sweller, J. (1992). The split-attention effect as a factor in the design of instruction." },
+            { "url": "https://doi.org/10.1177/014920630002600104", "description": "Tubre, T. C., & Collins, J. M. (2000). Jackson and Schuler (1985) Revisited: A Meta-Analysis of the Relationships Between Role Ambiguity, Role Conflict, and Job Performance." },
+            { "url": "https://pubmed.ncbi.nlm.nih.gov/10487787/", "description": "Reber, R., & Schwarz, N. (1999). Effects of perceptual fluency on judgments of truth." },
+            { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6549952/", "description": "van der Bles, A. M., et al. (2019). Communicating uncertainty about facts, numbers and science." }
           ]
         },
         {
@@ -268,30 +139,15 @@
           "summary": "Sometimes clarity concerns our own beliefs or values rather than outside information. We may want to put what matters into words, notice when important values conflict, or recognize that we have not decided yet.",
           "narrative": "Campbell and colleagues developed a measure of self-concept clarity. It examines how clearly and confidently people define their beliefs about themselves, along with how consistent and stable those beliefs are. Their work gives one example of psychology studying clarity within a person's own view of themselves. [1]\n\nWitteman and colleagues reviewed 33 articles evaluating 43 explicit values-clarification methods used in health decisions. Across the included studies, these methods modestly reduced decisional conflict and choices that did not align with participants' stated values compared with control conditions or less explicit approaches. The methods used different ways of helping people make what mattered to them more explicit while deciding. [2]",
           "sources": [
-            {
-              "url": "https://doi.org/10.1037/0022-3514.70.1.141",
-              "description": "Campbell, J. D., et al. (1996). Self-concept clarity: Measurement, personality correlates, and cultural boundaries."
-            },
-            {
-              "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8482297/",
-              "description": "Witteman, H. O., et al. (2021). Clarifying Values: An Updated and Expanded Systematic Review and Meta-Analysis."
-            }
+            { "url": "https://doi.org/10.1037/0022-3514.70.1.141", "description": "Campbell, J. D., et al. (1996). Self-concept clarity: Measurement, personality correlates, and cultural boundaries." },
+            { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8482297/", "description": "Witteman, H. O., et al. (2021). Clarifying Values: An Updated and Expanded Systematic Review and Meta-Analysis." }
           ]
         }
       ],
       "strategies": [
-        {
-          "title": "Name what you know and what is still uncertain",
-          "slug": "name-what-you-know-and-what-is-still-uncertain"
-        },
-        {
-          "title": "Separate what happened from what you think it means",
-          "slug": "separate-event-from-meaning"
-        },
-        {
-          "title": "Name what matters here",
-          "slug": "name-what-matters-here"
-        }
+        { "title": "Name what you know and what is still uncertain", "slug": "name-what-you-know-and-what-is-still-uncertain" },
+        { "title": "Separate what happened from what you think it means", "slug": "separate-event-from-meaning" },
+        { "title": "Name what matters here", "slug": "name-what-matters-here" }
       ]
     },
     "honesty": {
@@ -410,285 +266,129 @@
       "title": "Write a letter",
       "slug": "write-a-letter-for-connection",
       "summary": "Set a five-minute timer. Choose someone you trust, miss, or would like to feel closer to. Write what has been happening in your life and one thing you wish they knew. Sending it is optional.",
-      "needs": [
-        {
-          "title": "Connection",
-          "slug": "connection"
-        }
-      ],
+      "needs": [{ "title": "Connection", "slug": "connection" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://pubmed.ncbi.nlm.nih.gov/40643373/",
-        "description": "Communicating messages of care and positivity to peers with SCI/D improves loneliness in volunteer letter writers",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://pubmed.ncbi.nlm.nih.gov/40643373/", "description": "Communicating messages of care and positivity to peers with SCI/D improves loneliness in volunteer letter writers", "kind": "scholarly" }
     },
     {
       "title": "Remember a connected moment",
       "slug": "remember-a-connected-moment",
       "summary": "Recall one moment when you felt connected to a person, animal, place, group, or activity. Write where you were, what was happening, one detail that made the moment feel connected, and one part of the experience you could recreate.",
-      "needs": [
-        {
-          "title": "Connection",
-          "slug": "connection"
-        }
-      ],
+      "needs": [{ "title": "Connection", "slug": "connection" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://pubmed.ncbi.nlm.nih.gov/26751632/",
-        "description": "Nostalgia fosters self-continuity: Uncovering the mechanism (social connectedness) and consequence (eudaimonic well-being)",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://pubmed.ncbi.nlm.nih.gov/26751632/", "description": "Nostalgia fosters self-continuity: Uncovering the mechanism (social connectedness) and consequence (eudaimonic well-being)", "kind": "scholarly" }
     },
     {
       "title": "Map your connection options",
       "slug": "map-your-connection-options",
       "summary": "On paper, make three headings: People, Places, Groups. List any person, place, or group where you have felt even slightly more connected. Leave a heading blank if needed. Circle the easiest option to move toward and write one specific next step.",
-      "needs": [
-        {
-          "title": "Connection",
-          "slug": "connection"
-        }
-      ],
+      "needs": [{ "title": "Connection", "slug": "connection" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535",
-        "description": "The Community Navigator Study: Results from a feasibility randomised controlled trial of a programme to reduce loneliness for people with complex anxiety or depression",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535", "description": "The Community Navigator Study: Results from a feasibility randomised controlled trial of a programme to reduce loneliness for people with complex anxiety or depression", "kind": "scholarly" }
     },
     {
       "title": "Notice where you are",
       "slug": "notice-where-you-are",
       "summary": "Stop for one minute. Notice one thing you can see, one sound you can hear, one physical sensation, and one detail that makes the place distinct. Write it down, photograph it, or simply spend a few seconds with it.",
-      "needs": [
-        {
-          "title": "Connection",
-          "slug": "connection"
-        }
-      ],
+      "needs": [{ "title": "Connection", "slug": "connection" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://www.sciencedirect.com/science/article/pii/S0272494409000620",
-        "description": "Defining place attachment: A tripartite organizing framework",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://www.sciencedirect.com/science/article/pii/S0272494409000620", "description": "Defining place attachment: A tripartite organizing framework", "kind": "scholarly" }
     },
     {
       "title": "Orient with 5-4-3-2-1",
       "slug": "5-4-3-2-1-check",
       "summary": "If immediate physical action is not needed, look around and name 5 things you can see, 4 things you can feel or touch, 3 things you can hear, 2 things you can smell, and 1 thing you can taste. Go slowly and bring your attention to what is actually around you right now.",
-      "needs": [
-        {
-          "title": "Safety",
-          "slug": "safety"
-        },
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        }
-      ],
+      "needs": [{ "title": "Safety", "slug": "safety" }, { "title": "Clarity", "slug": "clarity" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://www.fhft.nhs.uk/patients-and-visitors/patient-information-library/anxiety-information-pack",
-        "description": "Frimley Health NHS Foundation Trust. Anxiety information pack: 5-4-3-2-1 grounding technique.",
-        "kind": "clinical-guidance"
-      }
+      "evidence": { "url": "https://www.fhft.nhs.uk/patients-and-visitors/patient-information-library/anxiety-information-pack", "description": "Frimley Health NHS Foundation Trust. Anxiety information pack: 5-4-3-2-1 grounding technique.", "kind": "clinical-guidance" }
     },
     {
       "title": "Slow your breathing",
       "slug": "slow-breathing-safety",
       "summary": "If immediate physical action is not needed and your body is still on high alert, spend about five minutes breathing slowly at a comfortable depth. Keep the breath gentle rather than forcing it. If counting helps, count steadily as you breathe in and out.",
-      "needs": [
-        {
-          "title": "Safety",
-          "slug": "safety"
-        }
-      ],
+      "needs": [{ "title": "Safety", "slug": "safety" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://pubmed.ncbi.nlm.nih.gov/38137060/",
-        "description": "Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://pubmed.ncbi.nlm.nih.gov/38137060/", "description": "Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature", "kind": "scholarly" }
     },
     {
       "title": "Map your support",
       "slug": "map-your-support",
       "summary": "Set a five-minute timer. Write down any people, groups, services, or places you could turn to. Next to each, write what kind of help it could realistically offer, such as listening or practical help. Leave anything blank if no option comes to mind.",
-      "needs": [
-        {
-          "title": "Support",
-          "slug": "support"
-        }
-      ],
+      "needs": [{ "title": "Support", "slug": "support" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535",
-        "description": "The Community Navigator Study: Results from a feasibility randomised controlled trial of a programme to reduce loneliness for people with complex anxiety or depression",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233535", "description": "The Community Navigator Study: Results from a feasibility randomised controlled trial of a programme to reduce loneliness for people with complex anxiety or depression", "kind": "scholarly" }
     },
     {
       "title": "Prepare one request for help",
       "slug": "prepare-one-request-for-help",
       "summary": "Choose one thing that would be easier with help. Write the smallest concrete request that would make a difference. Add a person, group, or service you could ask if one comes to mind. You do not have to send it.",
-      "needs": [
-        {
-          "title": "Support",
-          "slug": "support"
-        }
-      ],
+      "needs": [{ "title": "Support", "slug": "support" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://pubmed.ncbi.nlm.nih.gov/36067802/",
-        "description": "Surprisingly Happy to Have Helped: Underestimating Prosociality Creates a Misplaced Barrier to Asking for Help",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://pubmed.ncbi.nlm.nih.gov/36067802/", "description": "Surprisingly Happy to Have Helped: Underestimating Prosociality Creates a Misplaced Barrier to Asking for Help", "kind": "scholarly" }
     },
     {
       "title": "Call or text 988",
       "slug": "call-or-text-988",
       "summary": "If you are in the United States and need immediate emotional or crisis support, call or text 988 to reach a 988 Lifeline counselor. The service is available 24/7/365, and conversations are free and confidential.",
-      "needs": [
-        {
-          "title": "Support",
-          "slug": "support"
-        },
-        {
-          "title": "Safety",
-          "slug": "safety"
-        }
-      ],
+      "needs": [{ "title": "Support", "slug": "support" }, { "title": "Safety", "slug": "safety" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://988lifeline.org/",
-        "description": "988 Suicide & Crisis Lifeline",
-        "kind": "official-resource"
-      }
+      "evidence": { "url": "https://988lifeline.org/", "description": "988 Suicide & Crisis Lifeline", "kind": "official-resource" }
     },
     {
       "title": "Call 116 123",
       "slug": "call-116-123",
       "summary": "If you are in an EU country where 116 123 is available, call 116 123 for an emotional support helpline. The number is free and usable in most EU countries, although coverage is not yet EU-wide.",
-      "needs": [
-        {
-          "title": "Support",
-          "slug": "support"
-        },
-        {
-          "title": "Safety",
-          "slug": "safety"
-        }
-      ],
+      "needs": [{ "title": "Support", "slug": "support" }, { "title": "Safety", "slug": "safety" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm",
-        "description": "116 123 — Emotional support helplines",
-        "kind": "official-resource"
-      }
+      "evidence": { "url": "https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/faq/index_en.htm", "description": "116 123 — Emotional support helplines", "kind": "official-resource" }
     },
     {
       "title": "Turn the gap into a question",
       "slug": "turn-gap-into-question",
       "summary": "Write one sentence about what you are trying to understand. Then finish: “The part I still do not understand is ___.” Turn that gap into one question you could investigate.",
-      "needs": [
-        {
-          "title": "Understanding",
-          "slug": "understanding"
-        }
-      ],
+      "needs": [{ "title": "Understanding", "slug": "understanding" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://journals.sagepub.com/doi/10.3102/00346543066002181",
-        "description": "Rosenshine, B., Meister, C., & Chapman, S. (1996). Teaching Students to Generate Questions: A Review of the Intervention Studies. Review of Educational Research, 66(2), 181–221.",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://journals.sagepub.com/doi/10.3102/00346543066002181", "description": "Rosenshine, B., Meister, C., & Chapman, S. (1996). Teaching Students to Generate Questions: A Review of the Intervention Studies. Review of Educational Research, 66(2), 181–221.", "kind": "scholarly" }
     },
     {
       "title": "Explain it in your own words",
       "slug": "explain-in-your-own-words",
       "summary": "Choose the idea or situation you are trying to understand. Explain your current understanding in plain language without checking the source. Notice the first place your explanation becomes vague, then look back or gather information there.",
-      "needs": [
-        {
-          "title": "Understanding",
-          "slug": "understanding"
-        }
-      ],
+      "needs": [{ "title": "Understanding", "slug": "understanding" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://link.springer.com/article/10.1007/s10648-018-9434-x",
-        "description": "Bisra, K., Liu, Q., Nesbit, J. C., Salimi, F., & Winne, P. H. (2018). Inducing Self-Explanation: a Meta-Analysis. Educational Psychology Review, 30, 703–725.",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://link.springer.com/article/10.1007/s10648-018-9434-x", "description": "Bisra, K., Liu, Q., Nesbit, J. C., Salimi, F., & Winne, P. H. (2018). Inducing Self-Explanation: a Meta-Analysis. Educational Psychology Review, 30, 703–725.", "kind": "scholarly" }
     },
     {
       "title": "Reflect and check",
       "slug": "reflect-and-check",
       "summary": "In a conversation, briefly say what you think the other person means, then ask whether you got it right. If not, let them correct the part you missed before you respond.",
-      "needs": [
-        {
-          "title": "Understanding",
-          "slug": "understanding"
-        }
-      ],
+      "needs": [{ "title": "Understanding", "slug": "understanding" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://doi.org/10.1080/10904018.2013.813234",
-        "description": "Weger, H., Jr., Castle Bell, G., Minei, E. M., & Robinson, M. C. (2014). The Relative Effectiveness of Active Listening in Initial Interactions. International Journal of Listening, 28(1), 13–31.",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://doi.org/10.1080/10904018.2013.813234", "description": "Weger, H., Jr., Castle Bell, G., Minei, E. M., & Robinson, M. C. (2014). The Relative Effectiveness of Active Listening in Initial Interactions. International Journal of Listening, 28(1), 13–31.", "kind": "scholarly" }
     },
     {
       "title": "Name what you know and what is still uncertain",
       "slug": "name-what-you-know-and-what-is-still-uncertain",
       "summary": "Van der Bles and colleagues reviewed ways of making uncertainty explicit without requiring it to be resolved. Choose one situation that feels unclear. Write two headings: “What I know” and “What is still uncertain.” Put each relevant point under the heading that fits best. You do not need to fill the second side with answers. The goal is to make the boundary between what you know and what you do not yet know easier to see.",
-      "needs": [
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        }
-      ],
+      "needs": [{ "title": "Clarity", "slug": "clarity" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6549952/",
-        "description": "van der Bles, A. M., et al. (2019). Communicating uncertainty about facts, numbers and science.",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6549952/", "description": "van der Bles, A. M., et al. (2019). Communicating uncertainty about facts, numbers and science.", "kind": "scholarly" }
     },
     {
       "title": "Separate what happened from what you think it means",
       "slug": "separate-event-from-meaning",
       "summary": "One exercise used in cognitive behavioral therapy asks people to describe what happened, then separately write down the thoughts or interpretations that came up about it. You do not need to decide that your interpretation is wrong to make that distinction. Try two lines, mentally or in a note: “What happened:” and “What I think it means:”. Give each its own answer.",
-      "needs": [
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        }
-      ],
+      "needs": [{ "title": "Clarity", "slug": "clarity" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/self-help-cbt-techniques/thought-record/",
-        "description": "NHS Every Mind Matters. Thought record.",
-        "kind": "clinical-guidance"
-      }
+      "evidence": { "url": "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/self-help-cbt-techniques/thought-record/", "description": "NHS Every Mind Matters. Thought record.", "kind": "clinical-guidance" }
     },
     {
       "title": "Name what matters here",
       "slug": "name-what-matters-here",
       "summary": "A systematic review and meta-analysis by Witteman and colleagues found that explicit values-clarification methods modestly reduced decisional conflict and choices that did not match participants' stated values in health decisions. Think of a decision or tension that is present for you. Name what matters to you in it. If two things matter, notice whether they point in the same direction or pull against each other.",
-      "needs": [
-        {
-          "title": "Clarity",
-          "slug": "clarity"
-        }
-      ],
+      "needs": [{ "title": "Clarity", "slug": "clarity" }],
       "provenance": "system",
-      "evidence": {
-        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8482297/",
-        "description": "Witteman, H. O., et al. (2021). Clarifying Values: An Updated and Expanded Systematic Review and Meta-Analysis.",
-        "kind": "scholarly"
-      }
+      "evidence": { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8482297/", "description": "Witteman, H. O., et al. (2021). Clarifying Values: An Updated and Expanded Systematic Review and Meta-Analysis.", "kind": "scholarly" }
     },
     {
       "title": "Sort what you know",
@@ -755,71 +455,26 @@
     "trace-your-hand"
   ],
   "strategyNeedRemovals": {
-    "ambient-postcard": [
-      "connection"
-    ],
-    "back-to-wall-lean": [
-      "safety"
-    ],
-    "butterfly-taps": [
-      "safety"
-    ],
-    "hand-on-heart-breaths": [
-      "safety"
-    ],
-    "floor-starfish": [
-      "safety",
-      "support"
-    ],
-    "feel-your-feet": [
-      "safety"
-    ],
-    "wrap-in-a-blanket": [
-      "safety"
-    ],
-    "name-support-options": [
-      "safety",
-      "support"
-    ],
-    "exit-count": [
-      "safety"
-    ],
-    "seat-press": [
-      "safety"
-    ],
-    "pillow-nest": [
-      "support"
-    ],
-    "name-one-help-to-ask": [
-      "support"
-    ],
-    "inanimate-interview": [
-      "understanding"
-    ],
-    "nearest-job": [
-      "understanding",
-      "clarity"
-    ],
-    "5-4-3-2-1-check": [
-      "clarity"
-    ],
-    "micro-request-to-self": [
-      "clarity"
-    ],
-    "ask-for-channel-shift": [
-      "clarity"
-    ],
-    "calendar-one-thing": [
-      "clarity"
-    ],
-    "name-what-s-within-control": [
-      "clarity"
-    ],
-    "value-compass-card": [
-      "clarity"
-    ],
-    "window-quarter": [
-      "clarity"
-    ]
+    "ambient-postcard": ["connection"],
+    "back-to-wall-lean": ["safety"],
+    "butterfly-taps": ["safety"],
+    "hand-on-heart-breaths": ["safety"],
+    "floor-starfish": ["safety", "support"],
+    "feel-your-feet": ["safety"],
+    "wrap-in-a-blanket": ["safety"],
+    "name-support-options": ["safety", "support"],
+    "exit-count": ["safety"],
+    "seat-press": ["safety"],
+    "pillow-nest": ["support"],
+    "name-one-help-to-ask": ["support"],
+    "inanimate-interview": ["understanding"],
+    "nearest-job": ["understanding", "clarity"],
+    "5-4-3-2-1-check": ["clarity"],
+    "micro-request-to-self": ["clarity"],
+    "ask-for-channel-shift": ["clarity"],
+    "calendar-one-thing": ["clarity"],
+    "name-what-s-within-control": ["clarity"],
+    "value-compass-card": ["clarity"],
+    "window-quarter": ["clarity"]
   }
 }
