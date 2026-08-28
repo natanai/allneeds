@@ -2,6 +2,18 @@
 
 This file is the root-level implementation contract for automated coding agents working in `natanai/allneeds`. Read it before making changes. It applies to the entire repository unless a more specific `AGENTS.md` exists below a directory.
 
+## STOP: full Need audits require the Need Audit Handshake first
+
+**If the user asks you to audit, re-audit, research, or prepare an approval-ready package for a Need, your first Need-audit action is to read and complete `docs/need-audit-handshake.md`. Do not skip directly to research or drafting.**
+
+The handshake is a proof-of-comprehension gate, not a reading acknowledgment. It tells you exactly which current repository contracts and reference audits must be read, which concepts must be carried forward as active constraints, and the H01–H18 checklist you must report back to the user before substantive audit conclusions.
+
+You may not check a handshake item merely because you opened the named document. Each checked item must restate the rule in your own words and say what it changes about the audit you are about to perform. If you cannot do that, reread the source.
+
+Before an approval-ready proposal, reuse the same H01–H18 IDs in the required verification matrix and show exactly where the draft passed each rule. The verification matrix is separate audit metadata. The official proposal artifact that follows it remains site-content only under `docs/need-audit-proposal-format.md`.
+
+If you inherit or resume a Need audit after losing working context, rerun the handshake. Do not rely on remembered instructions from a previous Need.
+
 ## Repository boundary
 
 - Work only in `natanai/allneeds` for V2 changes.
@@ -106,4 +118,4 @@ For behavior-affecting work, add or update regression coverage at the same layer
 
 ## Documentation priority
 
-`AGENTS.md` is the concise implementation contract. `docs/psychological-model.md` is the canonical psychological-content model and is mandatory before Need, Feeling, Observation, or Strategy work. `docs/design-language.md` is the living record of accepted visual/interaction decisions and is required reading for UI work. `docs/magnet-behavior.md` is the canonical detailed magnet interaction/physics contract and is mandatory before magnet work. **Before changing explanatory, psychological, behavioral, health, or research-facing copy, read `docs/content-evidence-review.md` and follow its approval ledger.** `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here or in the design-language record, update the older documentation rather than following the stale sentence.
+`AGENTS.md` is the concise implementation contract. **`docs/need-audit-handshake.md` is the mandatory entry protocol for every full Need audit and must be completed before substantive audit work.** `docs/psychological-model.md` is the canonical psychological-content model and is mandatory before Need, Feeling, Observation, or Strategy work. `docs/design-language.md` is the living record of accepted visual/interaction decisions and is required reading for UI work. `docs/magnet-behavior.md` is the canonical detailed magnet interaction/physics contract and is mandatory before magnet work. **Before changing explanatory, psychological, behavioral, health, or research-facing copy, read `docs/content-evidence-review.md` and follow its approval ledger.** `docs/architecture.md` and `docs/ux-stability-roadmap.md` provide the deeper rationale and measurable targets. When older prose conflicts with an explicit later product decision recorded here or in the design-language record, update the older documentation rather than following the stale sentence.
