@@ -42,6 +42,14 @@ Function lenses are optional and must earn their place through three requirement
 
 When lenses are approved, they remain part of one canonical Need. Their content must be owned by canonical editorial data and rendered generically through the deterministic catalog pipeline. Do not create slug-specific page conditionals or runtime repair layers for a lensed Need.
 
+## Canonical Need legacy retirement
+
+`src/data/editorialCatalog.json` is the reviewed current Need lane. Once a Need package is approved for implementation, it must receive complete canonical entity ownership there, including its title, catalog position, Feeling relationships, and Faux Feeling relationships, before its superseded Need entity is physically removed from `src/data/generated/legacyData.json`. The approved implementation must complete both steps; do not ship a reviewed Need as a partial editorial override that still depends on its own legacy Need record.
+
+Every Need present in `editorialCatalog.json` must therefore be absent from the legacy `needs` array. Reverse Need references inside still-legacy-owned Feeling or Faux Feeling entities are cross-entity relationships owned by those entity families and remain until those families receive their own canonical migration. They are not duplicate Need ownership.
+
+Regression coverage must enforce this generically so future audited Needs cannot drift back into legacy ownership. Do not hand-edit the generated snapshot to achieve retirement; use the deterministic migration/compiler ownership path required by the root Bedrock rule.
+
 ## Protected user strategy registry
 
 `src/data/userStrategies.json` is the canonical registry for repository-resident user-submitted strategies, including strategies published by `.github/workflows/upload-user-submitted-strategies.yml`. Treat **every entry in this file as protected user-authored content**, regardless of contributor name, location, age of submission, or how many contributors are present.

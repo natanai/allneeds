@@ -1,6 +1,117 @@
 {
   "needs": {
     "connection": {
+      "title": "Connection",
+      "category": "Community/Belonging",
+      "catalogOrder": 2,
+      "feelings": [
+        {
+          "title": "Terrified",
+          "slug": "terrified"
+        },
+        {
+          "title": "Hurt",
+          "slug": "hurt"
+        },
+        {
+          "title": "Bewildered",
+          "slug": "bewildered"
+        },
+        {
+          "title": "Sad",
+          "slug": "sad"
+        },
+        {
+          "title": "Frightened",
+          "slug": "frightened"
+        },
+        {
+          "title": "Lonely",
+          "slug": "lonely"
+        },
+        {
+          "title": "Upset",
+          "slug": "upset"
+        },
+        {
+          "title": "Scared",
+          "slug": "scared"
+        },
+        {
+          "title": "Embarrassed",
+          "slug": "embarrassed"
+        },
+        {
+          "title": "Anxious",
+          "slug": "anxious"
+        },
+        {
+          "title": "Angry",
+          "slug": "angry"
+        },
+        {
+          "title": "Powerless",
+          "slug": "powerless"
+        },
+        {
+          "title": "Thwarted",
+          "slug": "thwarted"
+        },
+        {
+          "title": "Frustrated",
+          "slug": "frustrated"
+        },
+        {
+          "title": "Defiant",
+          "slug": "defiant"
+        },
+        {
+          "title": "Overwhelmed",
+          "slug": "overwhelmed"
+        }
+      ],
+      "fauxFeelings": [
+        {
+          "title": "Abandoned",
+          "slug": "abandoned"
+        },
+        {
+          "title": "(Not) Accepted",
+          "slug": "not-accepted"
+        },
+        {
+          "title": "Disliked",
+          "slug": "disliked"
+        },
+        {
+          "title": "Ignored",
+          "slug": "ignored"
+        },
+        {
+          "title": "Left out",
+          "slug": "left-out"
+        },
+        {
+          "title": "Manipulated",
+          "slug": "manipulated"
+        },
+        {
+          "title": "Neglected",
+          "slug": "neglected"
+        },
+        {
+          "title": "Rejected",
+          "slug": "rejected"
+        },
+        {
+          "title": "Trampled",
+          "slug": "trampled"
+        },
+        {
+          "title": "Unloved",
+          "slug": "unloved"
+        }
+      ],
       "summary": "As a highly social species, humans appear to have evolved strong motivations to maintain connection with others. Across human evolutionary history, social bonds supported protection, caregiving, cooperation, and group living, making social connection consequential for survival and reproduction across generations. This need may drive us to seek others, maintain relationships, repair social ruptures, and coordinate with the people around us. Evolutionary accounts propose that even the discomfort of disconnection may help motivate behavior directed toward restoring socially important bonds.",
       "narrative": "Evolutionary accounts offer one way to understand why connection can feel urgent. Cacioppo, Cacioppo, and Boomsma (2014) note that early humans “survived and prospered by banding together” and propose that loneliness may have evolved as an aversive signal related to socially important relationships. Their account examines the possible function of sensitivity to disconnection over evolutionary time without treating every episode of loneliness as adaptive. Chronic loneliness can still be harmful, and loneliness is not identical to Connection. [4]\n\nPsychological motivation research approaches closely related social motivations from another direction. Baumeister and Leary (1995) reviewed evidence around a hypothesized need to form and maintain stable interpersonal bonds, including “frequent, nonaversive interactions within an ongoing relational bond.” Ryan and Deci (2000) place relatedness alongside autonomy and competence within Self-Determination Theory. Vansteenkiste, Ryan, and Soenens (2020) review later Basic Psychological Need Theory research, describe relatedness partly through “warmth, bonding, and care,” and distinguish low satisfaction from active need frustration. Across these theories, stable social bonds and relatedness are treated as persistent human motivations. The site's broader Connection label is not identical to Belonging or to the research term relatedness. [1][2][3]\n\nCoan and Sbarra (2015) propose in Social Baseline Theory that the human brain expects access to social relationships that can “mitigate risk and diminish the level of effort needed.” Their account treats relationships as potential sources of shared effort and resources that can affect experienced risk. [5]\n\nLarge-scale outcome research shows that social relationships are associated with consequential health differences. Holt-Lunstad, Smith, and Layton (2010) combined 148 prospective studies involving 308,849 participants and reported “a 50% increased likelihood of survival for participants with stronger social relationships.” Because most of the evidence was observational, the meta-analysis does not show that increasing connection will necessarily cause a particular individual to live longer. [6]",
       "sources": [
@@ -37,6 +148,61 @@
       ]
     },
     "support": {
+      "title": "Support",
+      "category": "Sustenance/Health",
+      "catalogOrder": 4,
+      "feelings": [
+        {
+          "title": "Terrified",
+          "slug": "terrified"
+        },
+        {
+          "title": "Hurt",
+          "slug": "hurt"
+        },
+        {
+          "title": "Bewildered",
+          "slug": "bewildered"
+        },
+        {
+          "title": "Sad",
+          "slug": "sad"
+        },
+        {
+          "title": "Frightened",
+          "slug": "frightened"
+        },
+        {
+          "title": "Lonely",
+          "slug": "lonely"
+        },
+        {
+          "title": "Angry",
+          "slug": "angry"
+        },
+        {
+          "title": "Frustrated",
+          "slug": "frustrated"
+        },
+        {
+          "title": "Resentful",
+          "slug": "resentful"
+        }
+      ],
+      "fauxFeelings": [
+        {
+          "title": "Abandoned",
+          "slug": "abandoned"
+        },
+        {
+          "title": "Abused",
+          "slug": "abused"
+        },
+        {
+          "title": "Unsupported",
+          "slug": "unsupported"
+        }
+      ],
       "summary": "Across human evolutionary history, survival often depended on sharing food, care, information, labor, and risk rather than meeting every demand alone. This need may motivate us to seek help, make our needs visible, notice when others need assistance, and offer or accept emotional, informational, or practical support. Tending to support can distribute burdens, preserve capacity during hardship, and make difficult circumstances more manageable than they would be alone.",
       "narrative": "Evolutionary anthropology gives human support-seeking and support-giving a deep historical context. Jaeggi and Gurven describe food sharing as having a “central role in shaping evolved human life history, social organization, and cooperative psychology.” They argue that humans expanded patterns of sharing in part to buffer risk in a demanding and uncertain foraging niche. Kaplan and colleagues likewise call exchange among non-kin a “hallmark of human sociality” and report experimental evidence consistent with risk reduction helping motivate reciprocal exchange under variable resource availability. These sources do not establish that every modern desire for help is an adaptation to a particular ancestral problem, but they place dependence on shared resources firmly within the natural history of our species. [1][2]\n\nModern social-support research shows that what people provide one another can take importantly different forms. Thoits distinguishes two broad categories, “emotional sustenance” and “active coping assistance.” Support can therefore involve empathy and reassurance, but it can also involve information, practical help, problem-solving, material resources, or other assistance that changes what a person has to carry alone. [3]\n\nThe usefulness of support also depends on how well it corresponds to the situation. Cohen and Wills reviewed evidence for general benefits associated with social integration and for a stress-buffering process, where support may matter especially when it matches demands created by a stressful event. Having people nearby, receiving some form of help, and receiving the kind of help that is actually useful are therefore not interchangeable ideas. [4]\n\nResearch also distinguishes believing that support is available from actually receiving supportive behavior. Uchino argues that perceived and received support can arise from different circumstances and may work through different processes. Haber and colleagues' meta-analysis of 23 studies found that the two were related, but only moderately, with an average correlation of r = .35. A person can therefore receive assistance without experiencing themselves as well supported, or experience a dependable source of support even when they are not currently receiving help. [5][6]\n\nSupport is not limited to surviving emergencies. Feeney and Collins propose that supportive relationships can matter both while coping with adversity and while pursuing opportunities for exploration and growth. A large systematic review and meta-analysis by Yeo, Lansford, and Rudolph synthesized 604 studies and 1,014 effect sizes and found that perceived emotional, informational, practical, and combined support were associated with outcomes across mental health, physical health, education, work, and risk-taking. The review found associations rather than evidence that any particular supportive act will necessarily produce a particular outcome. [7][8]\n\nSharing resources and care has repeatedly been part of how humans manage demands that exceed what one person can reliably handle. Seeking support or responding to another person's need for it can be understood as part of human cooperation rather than simply as a failure of self-sufficiency. What support is useful still depends on what the person needs in that situation.",
       "sources": [
@@ -57,6 +223,101 @@
       ]
     },
     "safety": {
+      "title": "Safety",
+      "category": "Safety/Security",
+      "catalogOrder": 9,
+      "feelings": [
+        {
+          "title": "Scared",
+          "slug": "scared"
+        },
+        {
+          "title": "Angry",
+          "slug": "angry"
+        },
+        {
+          "title": "Anxiety",
+          "slug": "anxiety"
+        },
+        {
+          "title": "Frightened",
+          "slug": "frightened"
+        },
+        {
+          "title": "Alarmed",
+          "slug": "alarmed"
+        },
+        {
+          "title": "Agitated",
+          "slug": "agitated"
+        },
+        {
+          "title": "Defiant",
+          "slug": "defiant"
+        },
+        {
+          "title": "Helpless",
+          "slug": "helpless"
+        },
+        {
+          "title": "Sad",
+          "slug": "sad"
+        },
+        {
+          "title": "Hurt",
+          "slug": "hurt"
+        },
+        {
+          "title": "Resentful",
+          "slug": "resentful"
+        },
+        {
+          "title": "Irritated",
+          "slug": "irritated"
+        },
+        {
+          "title": "Anxious",
+          "slug": "anxious"
+        },
+        {
+          "title": "Overwhelmed",
+          "slug": "overwhelmed"
+        }
+      ],
+      "fauxFeelings": [
+        {
+          "title": "Attacked",
+          "slug": "attacked"
+        },
+        {
+          "title": "Bullied",
+          "slug": "bullied"
+        },
+        {
+          "title": "Intimidated",
+          "slug": "intimidated"
+        },
+        {
+          "title": "Threatened",
+          "slug": "threatened"
+        },
+        {
+          "title": "Victimized",
+          "slug": "victimized"
+        },
+        {
+          "title": "Violated",
+          "slug": "violated"
+        },
+        {
+          "title": "Wronged",
+          "slug": "wronged"
+        },
+        {
+          "title": "Pressured",
+          "slug": "pressured"
+        }
+      ],
       "summary": "Across evolutionary history, avoiding harm depended on detecting danger, taking protective action, and recognizing when conditions were safe enough to return to other activities. We may be motivated to create distance from harm, seek shelter or trustworthy people, set boundaries, reduce exposure, and look for credible signs that danger has passed. Protective responses can change with the situation rather than following one fixed pattern. Tending to Safety can mean responding when danger is present while also noticing when enough safety has returned for rest, exploration, connection, and other goals.",
       "narrative": "Protection from harm is among the oldest problems living organisms have had to solve. LeDoux distinguishes ancient defensive survival functions shared across animals from the conscious experience of fear. Mobbs and colleagues similarly describe human defense as involving processes such as anticipating danger, preventing exposure, assessing threats, searching for safety, escaping, and responding rapidly when danger becomes immediate. These accounts describe defensive functions rather than one single conscious feeling or one universally agreed psychological need. [1][2]\n\nProtective responding is not one fixed reaction. In a human experiment, Mobbs and colleagues had participants escape from a virtual predator capable of delivering painful stimulation. As the predator became more immediate, patterns of neural activity and participants' experience of the threat changed. In this virtual-predator laboratory task, protective responding changed as the threat became more immediate; the study does not establish one universal defensive sequence for ordinary life. [3]\n\nLaing and colleagues review safety learning as an active process in which the unexpected absence of an anticipated threat can create new associations with safety. Gilbert offers a related distinction among responding to threat, seeking safety, and detecting what he calls safeness: resources and conditions that support coping and allow activities such as exploration to resume. Both are theoretical frameworks rather than a universally accepted taxonomy. They describe protection as including credible information that harm is not occurring, has ended, or can now be managed. [4][5]\n\nProtective learning is imperfect. Cooper and colleagues' meta-analysis found that learned fear responses spread more broadly to similar cues among people with anxiety-related disorders than among comparison participants. That spread can be useful when similar situations really do share danger, but it can become costly when alarm extends to harmless cues. This does not mean that someone's sense of danger should be dismissed. Alarm is information worth attending to without having to be treated as proof by itself. [6]\n\nA person can be frightened or physiologically activated while taking sensible protective action, and feeling calm does not establish that a situation is harmless. Tending to Safety can involve responding to credible danger, reducing exposure to harm where possible, and remaining able to notice when circumstances have changed enough for defensive attention to ease.",
       "sources": [
@@ -76,6 +337,89 @@
       ]
     },
     "understanding": {
+      "title": "Understanding",
+      "category": "Empathy/Understanding",
+      "catalogOrder": 32,
+      "feelings": [
+        {
+          "title": "In pain",
+          "slug": "in-pain"
+        },
+        {
+          "title": "Scared",
+          "slug": "scared"
+        },
+        {
+          "title": "Anxious",
+          "slug": "anxious"
+        },
+        {
+          "title": "Frustrated",
+          "slug": "frustrated"
+        },
+        {
+          "title": "Angry",
+          "slug": "angry"
+        },
+        {
+          "title": "Embarrassed",
+          "slug": "embarrassed"
+        },
+        {
+          "title": "Sad",
+          "slug": "sad"
+        },
+        {
+          "title": "Lonely",
+          "slug": "lonely"
+        },
+        {
+          "title": "Hurt",
+          "slug": "hurt"
+        },
+        {
+          "title": "Upset",
+          "slug": "upset"
+        },
+        {
+          "title": "Hostile",
+          "slug": "hostile"
+        },
+        {
+          "title": "Resentful",
+          "slug": "resentful"
+        }
+      ],
+      "fauxFeelings": [
+        {
+          "title": "Criticized",
+          "slug": "criticized"
+        },
+        {
+          "title": "Disliked",
+          "slug": "disliked"
+        },
+        {
+          "title": "Misunderstood",
+          "slug": "misunderstood"
+        },
+        {
+          "title": "Put down",
+          "slug": "put-down"
+        },
+        {
+          "title": "Unheard",
+          "slug": "unheard"
+        },
+        {
+          "title": "Unsupported",
+          "slug": "unsupported"
+        },
+        {
+          "title": "Humiliated",
+          "slug": "humiliated"
+        }
+      ],
       "summary": "Humans and other animals actively seek information when uncertainty matters, and human cooperation often involves coordinating attention, intentions, and meanings with other people. This need may motivate us to ask questions, seek explanations, check assumptions, make our own thinking easier to grasp, and listen for what we may have missed. Understanding does not require certainty or agreement. Tending it may mean building a clearer picture of what is happening or finding where two people's meanings align or differ.",
       "narrative": "",
       "sources": [],
@@ -115,6 +459,61 @@
       ]
     },
     "clarity": {
+      "title": "Clarity",
+      "category": "Empathy/Understanding",
+      "catalogOrder": 22,
+      "feelings": [
+        {
+          "title": "Angry",
+          "slug": "angry"
+        },
+        {
+          "title": "Hurt",
+          "slug": "hurt"
+        },
+        {
+          "title": "Disappointment",
+          "slug": "disappointment"
+        },
+        {
+          "title": "Enraged",
+          "slug": "enraged"
+        },
+        {
+          "title": "Upset",
+          "slug": "upset"
+        },
+        {
+          "title": "Frustrated",
+          "slug": "frustrated"
+        },
+        {
+          "title": "Anxious",
+          "slug": "anxious"
+        },
+        {
+          "title": "Resentful",
+          "slug": "resentful"
+        },
+        {
+          "title": "Overwhelmed",
+          "slug": "overwhelmed"
+        }
+      ],
+      "fauxFeelings": [
+        {
+          "title": "Betrayed",
+          "slug": "betrayed"
+        },
+        {
+          "title": "Misunderstood",
+          "slug": "misunderstood"
+        },
+        {
+          "title": "Pressured",
+          "slug": "pressured"
+        }
+      ],
       "summary": "Our value for clarity may motivate us to make something easier to distinguish or work with. This can involve making outside information more explicit or getting clearer about what matters to us. The amount of detail that feels sufficient can differ between people and situations. Clarity can help us see what is being claimed or what remains uncertain without deciding whether a claim is true or an uncertainty is resolved.",
       "narrative": "",
       "sources": [],
