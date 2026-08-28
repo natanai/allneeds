@@ -6,6 +6,12 @@ describe('need magnet audit candidates', () => {
   it('keeps the active review set limited to Honesty', () => {
     expect(needMagnetAuditCandidates).toHaveLength(4);
     expect(new Set(needMagnetAuditCandidates.map((candidate) => candidate.needSlug))).toEqual(new Set(['honesty']));
+    expect(needMagnetAuditCandidates.map((candidate) => candidate.id)).toEqual([
+      'honesty-belief-speech-alignment',
+      'honesty-matched-signal',
+      'honesty-revision-path',
+      'honesty-statement-impression-overlap',
+    ]);
   });
 
   it('gives every Honesty candidate two semantic icons and full-face artwork', () => {
