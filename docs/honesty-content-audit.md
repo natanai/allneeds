@@ -1,6 +1,6 @@
 # Honesty content audit
 
-> Status: content approved and implemented 2026-08-27. Honesty is not fully audited until its redesigned magnet is separately approved and live.
+> Status: content and magnet approved, implemented, and live 2026-08-27. Honesty is fully audited.
 
 This document is the authoritative current audit record for the Honesty Need. It supersedes the imported Honesty copy and strategy associations in the historical legacy snapshot.
 
@@ -104,4 +104,12 @@ No runtime repair layer, post-processor, injected content, or duplicate Honesty 
 
 ## Visual audit
 
-Content approval does not approve the Honesty magnet. Honesty remains pending visual review in `/design-lab/need-magnets`; it becomes fully audited only after an approved redesigned magnet is live.
+Approved and promoted: **H1 · Heart to Honesty**.
+
+The production magnet uses one Honesty-specific heart-and-voice icon with a corrected-path full-face field. A faint abandoned route ends before the label area, while the stronger corrected route resolves toward the `Honesty` label so the Need itself reads as the destination rather than something being struck through.
+
+Production assets:
+- `public/icons/needs/honesty.svg`
+- `public/icons/needs/art/honesty-corrected-destination.svg`
+
+Honesty is now fully audited.

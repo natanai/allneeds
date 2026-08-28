@@ -37,6 +37,17 @@ describe('approved Need magnet identities', () => {
     expect(needsCss).toContain('opacity: 0.3;');
   });
 
+  it('ships Honesty with the approved Heart to Honesty identity', () => {
+    expect(needsCss).toContain("[data-magnet-id='needs-honesty']");
+    expect(needsCss).toContain("url('/icons/needs/honesty.svg')");
+    expect(needsCss).toContain("url('/icons/needs/art/honesty-corrected-destination.svg')");
+    expect(needsCss).toContain('color-mix(in srgb, var(--quiet) 82%, var(--selection) 18%)');
+    expect(needsCss).toContain('color-mix(in srgb, var(--selection) 72%, var(--quiet) 28%)');
+    expect(needsCss).toContain('color-mix(in srgb, var(--primary) 72%, var(--text) 28%)');
+    expect(needsCss).toContain('color-mix(in srgb, var(--action) 62%, var(--text) 38%)');
+    expect(needsCss).toContain('opacity: 0.29;');
+  });
+
   it('uses only functional Customizer roles in approved Need identity CSS', () => {
     expect(needsCss).not.toMatch(/var\(--(?:plum|lavender|ink|rose|mint|gold|sky|peach)\)/);
   });

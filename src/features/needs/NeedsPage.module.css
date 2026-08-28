@@ -276,6 +276,42 @@
   pointer-events: none;
 }
 
+
+/* Approved Need identity: Honesty · Heart to Honesty.
+   The heart-and-voice glyph stays primary while a corrected route resolves
+   before the label so Honesty itself reads as the destination. */
+.boardWrapper :global([data-magnet-id='needs-honesty']) {
+  --magnet-icon: url('/icons/needs/honesty.svg');
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--quiet) 82%, var(--selection) 18%),
+    color-mix(in srgb, var(--selection) 72%, var(--quiet) 28%)
+  );
+}
+
+.boardWrapper :global([data-magnet-id='needs-honesty'])::before {
+  position: relative;
+  z-index: 2;
+  background: color-mix(in srgb, var(--primary) 72%, var(--text) 28%);
+}
+
+.boardWrapper :global([data-magnet-id='needs-honesty'])::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--primary) 72%, var(--text) 28%),
+    color-mix(in srgb, var(--action) 62%, var(--text) 38%)
+  );
+  opacity: 0.29;
+  mask: url('/icons/needs/art/honesty-corrected-destination.svg') left center / 100% 100% no-repeat;
+  -webkit-mask: url('/icons/needs/art/honesty-corrected-destination.svg') left center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
 .empty {
   margin: 0;
   padding: 1rem;
