@@ -87,15 +87,12 @@ describe('approved Clarity audit', () => {
   it('removes only the Clarity association from shared legacy strategies and preserves their remaining needs', () => {
     const expectedRemainingNeeds: Record<string, string[]> = {
       '5-4-3-2-1-check': ['safety'],
-      'write-three-sentences': ['honesty'],
-      'observation-only': ['honesty'],
       'micro-request-to-self': ['autonomy'],
       'ask-for-channel-shift': ['autonomy', 'consideration'],
       'calendar-one-thing': ['order', 'predictability'],
-      'self-check-scale': ['honesty'],
       'name-what-s-within-control': ['autonomy'],
       'value-compass-card': ['integrity'],
-      'name-a-want-a-don-t': ['autonomy', 'honesty'],
+      'name-a-want-a-don-t': ['autonomy'],
       'window-quarter': ['appreciation', 'beauty', 'calm'],
       'nearest-job': ['order'],
     };
