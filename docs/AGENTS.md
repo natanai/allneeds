@@ -8,6 +8,12 @@ Before researching, drafting, revising, or presenting a full Need audit, read an
 
 Before an approval-ready proposal, rerun those same H01–H18 checkpoints through the required verification matrix. The verification matrix is reviewer-facing metadata and appears immediately before the official proposal. The official proposal artifact itself begins at `# Need for {Need}` and remains site-content only through its final line.
 
+## Mandatory Need magnet handshake
+
+Before mocking up, redesigning, reviewing, refining, or promoting a specific Need magnet identity, read and complete `docs/need-magnet-handshake.md`. The M01–M18 checklist is a proof-of-comprehension gate. The designer must demonstrate the approved meaning of the target Need, the site-wide icon/identity inventory, shared-shell constraints, Customizer/preset requirements, and the review/production boundary before treating candidates as review-ready.
+
+Before telling the user that the live Magnet Lab is ready, rerun M01–M18 through the required **Need Magnet Verification** matrix. The matrix must point to the actual lab candidates, complete icon-inventory check, real preset/roundness rendering, and production-diff boundary. Any `FAIL` means the set is not review-ready.
+
 ## Canonical psychological model
 
 Before auditing, drafting, revising, or approving any Need, Feeling, Observation, or Strategy content, read `docs/psychological-model.md` and treat it as a hard product-model contract.
