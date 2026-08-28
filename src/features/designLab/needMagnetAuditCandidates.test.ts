@@ -7,17 +7,18 @@ describe('need magnet audit candidates', () => {
     expect(needMagnetAuditCandidates).toHaveLength(4);
     expect(new Set(needMagnetAuditCandidates.map((candidate) => candidate.needSlug))).toEqual(new Set(['honesty']));
     expect(needMagnetAuditCandidates.map((candidate) => candidate.id)).toEqual([
-      'honesty-belief-speech-alignment',
+      'honesty-alignment-field',
       'honesty-matched-signal',
       'honesty-revision-path',
-      'honesty-statement-impression-overlap',
+      'honesty-impression-overlap',
     ]);
   });
 
-  it('gives every Honesty candidate two semantic icons and full-face artwork', () => {
+  it('uses one semantic icon and full-face artwork for every Honesty candidate', () => {
     for (const candidate of needMagnetAuditCandidates) {
       expect(candidate.iconPath).toMatch(/honesty-/);
-      expect(candidate.secondaryIconPath).toMatch(/honesty-/);
+      expect(candidate.secondaryIconPath).toBeUndefined();
+      expect(candidate.secondaryIconFill).toBeUndefined();
       expect(candidate.artMaskPath).toMatch(/honesty-/);
       expect(candidate.artOpacity ?? 0).toBeGreaterThan(0);
     }
