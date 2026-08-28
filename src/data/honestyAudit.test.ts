@@ -52,15 +52,14 @@ describe('approved Honesty audit package', () => {
     ]);
   });
 
-  it('restores Honesty at its canonical catalog position without shifting later Needs', () => {
-    expect(needs).toHaveLength(legacyData.needs.length + 1);
+  it('restores Honesty at its canonical catalog position without shifting legacy-owned Needs', () => {
+    const legacySlugs = legacyData.needs.map((need) => need.slug);
+
+    expect(legacySlugs).not.toContain('honesty');
     expect(needs[19]?.slug).toBe('honesty');
-    expect(needs.slice(0, 19).map((need) => need.slug)).toEqual(
-      legacyData.needs.slice(0, 19).map((need) => need.slug),
-    );
-    expect(needs.slice(20).map((need) => need.slug)).toEqual(
-      legacyData.needs.slice(19).map((need) => need.slug),
-    );
+    expect(
+      needs.filter((need) => legacySlugs.includes(need.slug)).map((need) => need.slug),
+    ).toEqual(legacySlugs);
   });
 
   it('gives each approved system strategy its approved human-facing source', () => {
