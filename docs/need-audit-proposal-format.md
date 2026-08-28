@@ -33,7 +33,7 @@ Show the complete final static audited state for every site-facing area owned by
 For an ordinary Need without function lenses, the proposal contains:
 
 1. the Need title;
-2. the exact main Evidence copy, including enough concise conceptual clarification to make clear what the Need refers to in the site's model;
+2. the exact main Evidence copy as one tight paragraph, including enough concise conceptual clarification to make clear what the Need refers to in the site's model;
 3. the exact Details copy, when present;
 4. the exact public Supporting sources and raw human-facing URLs;
 5. the final static Strategies deck in display order;
@@ -67,6 +67,20 @@ Instead, the short copy should usually include a concise phrase or sentence that
 This clarification is an orientation point, not the central thesis of the description. It may be framework/editorial language constrained by the evidence rather than a quotation or consensus scientific definition. Avoid dictionary-style prose, circular definitions, unnecessary taxonomy, and attempts to eliminate every possible borderline case.
 
 The goal is stable conceptual use across audits. Future readers and editors should be able to tell whether two pages are discussing genuinely different Needs even when neither Need has a formal definition.
+
+## Short Evidence is one tight paragraph
+
+The main Evidence copy for an ordinary Need must render as **one concise paragraph**. Do not split conceptual clarification, evolutionary grounding, present-day function, therapeutic meaning, or boundary distinctions into separate short-copy paragraphs. Those ideas should be integrated into a single coherent description.
+
+That paragraph should accomplish all of the short description's jobs at once:
+
+- orient the reader clearly enough to know what Need, value, or motivation is under discussion without offering a formal definition;
+- help the reader understand why experiencing the Need can make sense and what useful human problem or function it may relate to;
+- preserve motivational framing by showing what the Need may draw a person toward noticing, seeking, protecting, expressing, changing, or doing;
+- include only the conceptual distinctions necessary to keep the Need clear and distinct from neighboring concepts;
+- introduce, in concise reader-facing language, every idea that earns a public Need-level citation.
+
+The paragraph is not a compressed literature review. It should read as one natural explanation of the Need. Citation coverage must not force the prose into a source-by-source list, and conceptual clarity must not turn the opening into a dictionary entry. If the complete citation set cannot be meaningfully seeded in one tight paragraph, reduce or rethink the citation set rather than expanding the short description into multiple paragraphs.
 
 ## Citation traceability: every source starts in the short copy
 
@@ -120,7 +134,7 @@ A normal non-lensed proposal should follow this shape:
 # Need for {Need}
 
 ## Evidence
-{exact main copy, including concise conceptual clarification without formal definition}
+{exact one-paragraph main copy, including concise conceptual clarification without formal definition and a conceptual foothold for every public Need-level citation}
 
 ### Details
 {exact expanded copy}
@@ -147,7 +161,7 @@ A lensed proposal should follow this shape where applicable:
 # Need for {Need}
 
 ## Evidence
-{exact umbrella main copy, including concise conceptual orientation when the site has umbrella copy}
+{exact one-paragraph umbrella main copy, including concise conceptual orientation and citation footholds when the site has umbrella copy}
 
 ## This need can involve
 
