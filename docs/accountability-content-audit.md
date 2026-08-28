@@ -2,7 +2,7 @@
 
 > Status: content approved and implemented 2026-08-27. Accountability is not fully audited until its redesigned magnet is separately approved and live.
 
-This document is the authoritative audit record for the approved Accountability Need content package. It supersedes the imported Accountability copy and Need-level citations in the historical legacy snapshot once the canonical migration in this branch is complete.
+This document is the authoritative audit record for the approved Accountability Need content package. It supersedes the imported Accountability copy and Need-level citations in the historical legacy snapshot.
 
 ## Approved short Evidence copy
 
