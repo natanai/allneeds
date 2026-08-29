@@ -5,7 +5,7 @@ const slotById = new Map(observationInferenceIndex.slots.map((slot) => [slot.id,
 
 export function suggestionBasisSummary(suggestions: ObservationSuggestionResult) {
   if (suggestions.basis === 'direct') return 'Some suggestions are linked directly to words you used for your own experience.';
-  if (suggestions.basis === 'related') return 'Some suggestions come from known relationships to words or observable event patterns in your text.';
+  if (suggestions.basis === 'related') return 'Some suggestions come from fixed relationships between words or observable event patterns and possible Feelings or Needs.';
   if (suggestions.basis === 'broad') return 'Some suggestions come from broader cues in your wording.';
   if (suggestions.basis === 'mixed') return 'These suggestions come from more than one kind of match in your wording.';
   return '';
