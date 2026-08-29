@@ -17,6 +17,7 @@ describe('Observation annotation event-family scope', () => {
   it('recognizes trait-label evidence in the words directed toward the user', () => {
     for (const text of [
       'My coworker said to me “you are rude.”',
+      'My coworker said to me “you are rude to me.”',
       'My coworker called me rude.',
       'My coworker told me I was rude.',
     ]) {
