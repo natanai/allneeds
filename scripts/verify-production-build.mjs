@@ -264,10 +264,11 @@ if (!observationEditorSource.includes('contentEditable')
 }
 
 const observationStyles = await readFile(resolve(root, 'src/features/observations/ObservationsPage.module.css'), 'utf8');
-if (!/\.recipeDisclosure\s*\{[^}]*overflow:\s*hidden;/.test(observationStyles)
-  || !/\.recipeDisclosure\s*>\s*summary\s*\{[^}]*cursor:\s*pointer;/.test(observationStyles)
-  || !/@media \(max-width: 640px\)[\s\S]*?\.recipeDisclosure\s*>\s*summary/.test(observationStyles)) {
-  fail('the Observation recipe is no longer a compact progressive disclosure.');
+if (!/<details className=\{styles\.recipeDisclosure\}>\s*<summary>/.test(observationsSource)
+  || !observationStyles.includes('.recipeDisclosure > summary')
+  || !observationStyles.includes('.recipeDisclosure[open] > summary > span:last-child')
+  || !/\.supportRail\s*\{[^}]*display:\s*grid;/.test(observationStyles)) {
+  fail('the Observation recipe no longer uses the approved progressive-disclosure support-rail pattern.');
 }
 
 const feedSource = await readFile(resolve(root, 'src/features/feed/FeedPage.tsx'), 'utf8');
@@ -289,5 +290,5 @@ if (allBuiltText.some((text) => /fonts\.(googleapis|gstatic)\.com/i.test(text)))
 console.log(
   `Verified ${precachePaths.length} runtime-preloaded assets from ${deployPaths.length} deploy files, `
   + `${emittedFonts.length} local fonts, build-shaped catalog data, a cache-first installed shell, `
-  + 'an eager route graph, compiled Observation inference, route semantics, modal focus behavior, and compact-workflow guards.',
+  + 'an eager route graph, compiled Observation inference, route semantics, modal focus behavior, and responsive-workflow guards.',
 );
