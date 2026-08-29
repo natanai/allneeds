@@ -48,7 +48,7 @@ import {
 } from './alexithymiaTerms';
 import styles from './AlexithymiaSupportPage.module.css';
 
-type SheetKind = 'info' | 'body' | 'shape' | 'candidate' | 'needs' | null;
+type SheetKind = 'info' | 'matching' | 'body' | 'shape' | 'candidate' | 'needs' | null;
 type WordFilter = 'matches' | 'all' | 'mine';
 
 const stageSteps = [
@@ -113,6 +113,25 @@ function JournalIcon() {
 
 function ResetIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 16a8 8 0 1 0 .5-9l-2 3" /></svg>;
+}
+
+function MatchingSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  return (
+    <SupportSheet open={open} title="How matching works" titleId="alex-matching-sheet-title" onClose={onClose}>
+      <p><strong>Short version:</strong> the app compares only the clues you choose with fixed descriptions of emotion words. It suggests possibilities; it does not decide what you feel.</p>
+      <ol className={styles.entryJourney} aria-label="How matching works">
+        <li><span aria-hidden="true">1</span><div><strong>You choose clues</strong><small>Use body sensations, broad overall-feeling ratings, both, or browse without matching.</small></div></li>
+        <li><span aria-hidden="true">2</span><div><strong>The app compares fixed profiles</strong><small>Only the clues you chose are compared with reviewed descriptions for each word.</small></div></li>
+        <li><span aria-hidden="true">3</span><div><strong>You decide what fits</strong><small>More than one word can fit, or none yet. Fits and Maybe are your choices.</small></div></li>
+      </ol>
+      <section className={styles.detectedTerms} aria-label="What a match percentage means">
+        <h2>A percentage is similarity, not certainty</h2>
+        <p><strong>86% match</strong> means that word’s fixed profile is similar to the clues you chose. It does not mean there is an 86% chance that this is what you feel.</p>
+      </section>
+      <p>The event text you type is not scored. The app does not infer a Need, diagnose anything, or send the check-in to a language model.</p>
+      <p className={styles.helperLink}><a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">Full technical methods &amp; sources ↗</a></p>
+    </SupportSheet>
+  );
 }
 
 export function AlexithymiaSupportPage() {
@@ -389,15 +408,16 @@ export function AlexithymiaSupportPage() {
           <div>
             <strong>You stay in charge</strong>
             <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
-            <a className={styles.methodsLink} href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How matching works and sources</a>
+            <p className={styles.helperLink}><a className={styles.methodsLink} href="#matching-explanation" aria-haspopup="dialog" onClick={(event) => { event.preventDefault(); setSheet('matching'); }}>How matching works</a></p>
           </div>
         </aside>
         <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
           <p>Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.</p>
           <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
           <p>You can use any clues that are available, keep more than one possible word, or choose no word yet.</p>
-          <a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How word comparison works</a>
+          <p className={styles.helperLink}><a href="#matching-explanation" aria-haspopup="dialog" onClick={(event) => { event.preventDefault(); setSheet('matching'); }}>How matching works</a></p>
         </SupportSheet>
+        <MatchingSheet open={sheet === 'matching'} onClose={() => setSheet(null)} />
       </article>
     );
   }
@@ -427,8 +447,9 @@ export function AlexithymiaSupportPage() {
         <p>Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.</p>
         <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
         <p>The app compares the clues you choose with general descriptions of emotion words. It cannot know what you feel; you decide what fits.</p>
-        <a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How word comparison works</a>
+        <p className={styles.helperLink}><a href="#matching-explanation" aria-haspopup="dialog" onClick={(event) => { event.preventDefault(); setSheet('matching'); }}>How matching works</a></p>
       </SupportSheet>
+      <MatchingSheet open={sheet === 'matching'} onClose={() => setSheet(null)} />
 
       {draft.stage === 1 ? (
         <section className={`${styles.stage} ${styles.stageOne}`} aria-labelledby="alex-stage-one">
