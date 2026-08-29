@@ -16,13 +16,13 @@ type CandidateState = {
   slug: string;
   title: string;
   score: number;
-  basis: Exclude<EvidenceTier, 'exploration'>;
+  basis: EvidenceTier;
   evidence: SuggestionEvidence[];
   catalogOrder: number;
   family: string;
 };
 
-const tierOrder: Record<EvidenceTier, number> = { exploration: 0, broad: 1, related: 2, direct: 3 };
+const tierOrder: Record<EvidenceTier, number> = { broad: 1, related: 2, direct: 3 };
 type CatalogFeeling = { slug: string; title: string; needSatisfaction: 'met' | 'unmet' | 'both'; catalogOrder: number };
 type CatalogNeed = { slug: string; title: string; category: string; feelingSlugs: readonly string[]; fauxFeelingSlugs: readonly string[]; catalogOrder: number };
 type CatalogFauxFeeling = { slug: string; title: string; feelingSlugs: readonly string[]; needSlugs: readonly string[] };
@@ -86,7 +86,7 @@ function addCandidate(
   candidates: Map<string, CandidateState>,
   entityType: 'feeling' | 'need',
   slug: string,
-  basis: Exclude<EvidenceTier, 'exploration'>,
+  basis: EvidenceTier,
   score: number,
   family: string,
   evidence: SuggestionEvidence,
@@ -153,23 +153,6 @@ function suggestion(candidate: CandidateState): ObservationSuggestion {
   };
 }
 
-function fillExploration(
-  selected: ObservationSuggestion[],
-  pool: readonly string[],
-  entityType: 'feeling' | 'need',
-  limit = 4,
-) {
-  const seen = new Set(selected.map((candidate) => candidate.slug));
-  for (const slug of pool) {
-    if (selected.length >= limit) break;
-    if (seen.has(slug)) continue;
-    const entity = entityType === 'feeling' ? feelingBySlug.get(slug) : needBySlug.get(slug);
-    if (!entity) continue;
-    selected.push({ slug, title: entity.title, basis: 'exploration', evidence: [] });
-    seen.add(slug);
-  }
-}
-
 function overallBasis(feelings: ObservationSuggestion[], needs: ObservationSuggestion[]) {
   const bases = new Set([...feelings, ...needs].map((candidate) => candidate.basis));
   if (!bases.size) return null;
@@ -196,7 +179,7 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
     annotation.evidence.forEach((evidence) => {
       if (evidence.kind === 'entity') {
         if (evidence.entityType === 'feeling') {
-          if (!modeAllowsFeeling(evidence.slug, mode) || !directSelfReport(annotation, 'feeling', clauses, source)) return;
+          if (!directSelfReport(annotation, 'feeling', clauses, source)) return;
           const basis = evidence.matchKind === 'fuzzy' ? 'related' : 'direct';
           const score = evidence.matchKind === 'title' ? 1000 : evidence.matchKind === 'fuzzy' ? 760 : 900;
           addCandidate(feelingCandidates, 'feeling', evidence.slug, basis, score, 'self-report', {
@@ -249,14 +232,6 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
   const blank = !source.trim();
   const feelings = blank ? [] : selectDiverse(rankedCandidates(feelingCandidates), 4).map(suggestion);
   const needs = blank ? [] : selectDiverse(rankedCandidates(needCandidates), 4).map(suggestion);
-  if (!blank) {
-    fillExploration(
-      feelings,
-      mode === 'met' ? observationInferenceIndex.explorationPools.metFeelings : observationInferenceIndex.explorationPools.unmetFeelings,
-      'feeling',
-    );
-    fillExploration(needs, observationInferenceIndex.explorationPools.needs, 'need');
-  }
 
   const slots = Object.fromEntries(observationInferenceIndex.slots.map((slot) => {
     const matches = annotations.filter((annotation) => annotation.evidence.some((evidence) => (
