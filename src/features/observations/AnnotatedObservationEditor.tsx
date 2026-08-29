@@ -58,7 +58,7 @@ function highlightNames(annotation: ObservationAnnotation): HighlightName[] {
   annotation.evidence.forEach((evidence) => {
     if (evidence.kind === 'formula') names.add('observation-formula');
     else if (evidence.kind === 'guidance') names.add('observation-guidance');
-    else if (evidence.kind === 'cue') names.add('observation-cue');
+    else if (evidence.kind === 'cue' || evidence.kind === 'eventFamily') names.add('observation-cue');
     else if (evidence.kind === 'surface') return;
     else if (evidence.entityType === 'feeling') names.add('observation-feeling');
     else if (evidence.entityType === 'need') names.add('observation-need');
