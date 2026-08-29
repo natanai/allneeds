@@ -75,8 +75,8 @@ test('the shared local analysis powers highlights, Quick Check, and evidence-bac
   await expect(page.getByTestId('observation-needs')).toHaveCount(0);
   await expect(page.getByTestId('observation-feelings')).toHaveCount(0);
   await expect(page.getByText('Why these?', { exact: true })).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Met', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Unmet', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Add more detail' }).click();
   await expect(editor).toBeFocused();
@@ -101,6 +101,8 @@ test('concrete zero-result observations are not framed as incomplete', async ({ 
   await expect(page.getByRole('heading', { name: 'No specific Feeling or Need matches yet' })).toBeVisible();
   await expect(page.getByText(/already includes useful concrete details/i)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add more detail' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Unmet', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Add more detail' }).click();
   await expect(editor).toHaveText(concrete);
   await expect(editor).toBeFocused();
