@@ -51,6 +51,17 @@ const cueDetectors = observationInferenceIndex.expressions.map((expression) => (
   regex: compiledRegex(expression.pattern, expression.flags),
 }));
 
+const guidanceRuleById = new Map(observationInferenceIndex.guidanceRules.map((rule) => [rule.id, rule]));
+const eventFamilyDetectors = observationInferenceIndex.eventFamilies.flatMap((family) => family.patterns.map((pattern) => ({
+  ...pattern,
+  familyId: family.id,
+  tier: family.tier,
+  label: family.label,
+  explanation: family.explanation,
+  lexiconRuleId: family.lexiconRuleId,
+  regex: compiledRegex(pattern.pattern, pattern.flags),
+})));
+
 const guidancePatternDetectors = observationInferenceIndex.guidanceRules.flatMap((rule) => rule.patterns.map((pattern) => ({
   ...pattern,
   ruleId: rule.id,
@@ -142,6 +153,24 @@ function findRegexMatches<T>(detector: CompiledDetector<T>, text: string) {
   return matches;
 }
 
+function containsTokenPhrase(source: string, term: string) {
+  const sourceTokens = phraseTokens(source);
+  const termTokens = phraseTokens(term);
+  if (!termTokens.length || termTokens.length > sourceTokens.length) return false;
+  for (let start = 0; start <= sourceTokens.length - termTokens.length; start += 1) {
+    if (termTokens.every((token, offset) => sourceTokens[start + offset] === token)) return true;
+  }
+  return false;
+}
+
+function eventFamilyRangeHasRequiredLexicon(text: string, range: TextRange, lexiconRuleId: string | undefined) {
+  if (!lexiconRuleId) return true;
+  const rule = guidanceRuleById.get(lexiconRuleId);
+  if (!rule?.terms.length) return false;
+  const matchedText = text.slice(range.start, range.end);
+  return rule.terms.some((term) => containsTokenPhrase(matchedText, term));
+}
+
 function samePhrase(tokens: ObservationToken[], startIndex: number, matcher: TermMatcher, text: string) {
   if (startIndex + matcher.tokens.length > tokens.length) return null;
   for (let offset = 0; offset < matcher.tokens.length; offset += 1) {
@@ -200,6 +229,7 @@ function evidenceKey(evidence: ObservationEvidence) {
   if (evidence.kind === 'formula') return `${evidence.kind}:${evidence.slot}:${evidence.detectorId}`;
   if (evidence.kind === 'entity') return `${evidence.kind}:${evidence.entityType}:${evidence.slug}:${evidence.matchKind}`;
   if (evidence.kind === 'cue') return `${evidence.kind}:${evidence.expressionId}:${evidence.tier}`;
+  if (evidence.kind === 'eventFamily') return `${evidence.kind}:${evidence.familyId}:${evidence.tier}`;
   if (evidence.kind === 'guidance') return `${evidence.kind}:${evidence.ruleId}`;
   return `${evidence.kind}:${evidence.termId}`;
 }
@@ -238,6 +268,18 @@ export function annotateObservation(text: string) {
       expressionId: detector.id,
       tier: detector.tier,
     }));
+  });
+
+  eventFamilyDetectors.forEach((detector) => {
+    findRegexMatches(detector, text)
+      .filter((range) => eventFamilyRangeHasRequiredLexicon(text, range, detector.lexiconRuleId))
+      .forEach((range) => add(range, {
+        kind: 'eventFamily',
+        familyId: detector.familyId,
+        tier: detector.tier,
+        label: detector.label,
+        explanation: detector.explanation,
+      }));
   });
 
   guidancePatternDetectors.forEach((detector) => {
