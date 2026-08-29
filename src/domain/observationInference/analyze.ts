@@ -50,9 +50,11 @@ const FEELING_FRAME = /\b(?:i|we)\s+(?:feel|felt|am|are|was|were|have\s+been|had
 const NEED_FRAME = /\b(?:i|we)\s+(?:need|needed|want|wanted|value|valued|care\s+about|long\s+for|wish\s+for|am\s+seeking|are\s+seeking)\b/i;
 const OTHER_EXPERIENCER_TAIL = /\b(?:(?:(?:because|while|when|if|although|though|since|that|like)\s+|as\s+(?:if|though)\s+)?(?:he|she|they|you|someone|somebody)\s+(?:is|are|was|were|feels?|felt|needs?|needed|wants?|wanted|values?|valued|cares?|cared|longs?|longed|wishes?|wished))\b|\b(?:for\s+)?(?:him|her|them)\s+to\s+(?:be|feel|have|get|need|receive)\b|\b(?:my|our)\s+(?:partner|spouse|friend|coworker|colleague|manager|supervisor|boss|parent|mother|father|mom|dad|child|kid|son|daughter|sibling|brother|sister|roommate|neighbor|client|customer|student|teacher|doctor|nurse|therapist|mentor|teammate|classmate)s?\s+to\s+(?:be|feel|have|get|need|receive)\b/i;
 const NAMED_OTHER_EXPERIENCER_TAIL = /\b[A-Z][\w.'’-]*(?:\s+[A-Z][\w.'’-]*){0,2}\s+(?:is|are|was|were|feels?|felt|needs?|needed|wants?|wanted|values?|valued)\b/u;
-const OTHER_REPORTER_FRAME = /\b(?:he|she|they|you|(?:my|our|the|a|an|his|her|their|your)\s+[A-Za-z][\w'’-]*(?:\s+[A-Za-z][\w'’-]*){0,2})\s+(?:said|says|wrote|writes|texted|texts|messaged|messages|reported|reports|claimed|claims|thought|thinks|believed|believes|told(?:\s+(?:me|us))?)\s*[,:-]?\s*(?:that\s*)?$/i;
-const NAMED_REPORTER_FRAME = /(?:^|[\s,(])(?!(?:I|We)\b)(?:[A-Z][\w.'’-]*(?:\s+[A-Z][\w.'’-]*){0,2})\s+(?:said|says|wrote|writes|texted|texts|messaged|messages|reported|reports|claimed|claims|thought|thinks|believed|believes|told(?:\s+(?:me|us))?)\s*[,:-]?\s*(?:that\s*)?$/u;
+const OTHER_REPORTER_FRAME = /\b(?:he|she|they|you|(?:my|our|the|a|an|his|her|their|your)\s+[A-Za-z][\w'’-]*(?:\s+[A-Za-z][\w'’-]*){0,2})\s+(?:said|says|wrote|writes|texted|texts|messaged|messages|reported|reports|claimed|claims|thought|thinks|believed|believes|asked|asks|wondered|wonders|told(?:\s+(?:me|us))?)\s*[,:-]?\s*(?:(?:that|if|whether|maybe|perhaps)\s*)?$/i;
+const NAMED_REPORTER_FRAME = /(?:^|[\s,(])(?!(?:I|We)\b)(?:[A-Z][\w.'’-]*(?:\s+[A-Z][\w.'’-]*){0,2})\s+(?:said|says|wrote|writes|texted|texts|messaged|messages|reported|reports|claimed|claims|thought|thinks|believed|believes|asked|asks|wondered|wonders|told(?:\s+(?:me|us))?)\s*[,:-]?\s*(?:(?:that|if|whether|maybe|perhaps)\s*)?$/u;
 const ATTRIBUTED_FRAME = /\baccording\s+to\s+[^,;.!?\n]{1,40}\s*,?\s*$/i;
+const NEGATED_SELF_EMBEDDING = /\b(?:i|we)\s+(?:(?:do|did)\s+not|don't|didn't|never)\s+(?:think|believe|feel|say|said|claim|report|suppose|expect|mean)\b[^,;.!?\n]{0,24}$/i;
+const DENIED_SELF_EMBEDDING = /\b(?:i|we)\s+(?:doubt|doubted|deny|denied)\b[^,;.!?\n]{0,24}$/i;
 
 function statementPrefix(annotation: ObservationAnnotation, text: string) {
   const prefix = text.slice(0, annotation.start);
@@ -79,7 +81,9 @@ function hasAffirmativeFrame(prefix: string, frame: RegExp) {
     && !NAMED_OTHER_EXPERIENCER_TAIL.test(tail)
     && !OTHER_REPORTER_FRAME.test(beforeFrame)
     && !NAMED_REPORTER_FRAME.test(beforeFrame)
-    && !ATTRIBUTED_FRAME.test(beforeFrame);
+    && !ATTRIBUTED_FRAME.test(beforeFrame)
+    && !NEGATED_SELF_EMBEDDING.test(beforeFrame)
+    && !DENIED_SELF_EMBEDDING.test(beforeFrame);
 }
 
 function directSelfReport(annotation: ObservationAnnotation, entityType: 'feeling' | 'need', text: string) {
