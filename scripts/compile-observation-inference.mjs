@@ -130,7 +130,7 @@ function validateSource(source) {
     if (/\\\\[bdswnrt]/i.test(item.pattern) || item.pattern.includes('\\|')) {
       fail(`expressions[${index}].pattern still contains CSV escape-layer artifacts.`);
     }
-    if (!['related', 'broad'].includes(item.tier)) fail(`expressions[${index}].tier must be related or broad in Observation 2.1.`);
+    if (!['direct', 'related', 'broad'].includes(item.tier)) fail(`expressions[${index}].tier is invalid.`);
     validateSlugList(item.feelingSlugs, `expressions[${index}].feelingSlugs`);
     validateSlugList(item.needSlugs, `expressions[${index}].needSlugs`);
     if (!item.feelingSlugs.length && !item.needSlugs.length) fail(`expressions[${index}] has no candidates.`);
@@ -179,11 +179,20 @@ function validateSource(source) {
     const item = requireObject(family, `eventFamilies[${index}]`);
     requireString(item.label, `eventFamilies[${index}].label`);
     if (!['related', 'broad'].includes(item.tier)) fail(`eventFamilies[${index}].tier must be related or broad.`);
+    validateStringList(item.lexiconExcludeTerms, `eventFamilies[${index}].lexiconExcludeTerms`);
     if (item.lexiconRuleId !== null) {
       const lexiconRuleId = requireSlug(item.lexiconRuleId, `eventFamilies[${index}].lexiconRuleId`);
       const rule = guidanceRuleById.get(lexiconRuleId);
       if (!rule) fail(`eventFamilies[${index}] references unknown guidance lexicon ${lexiconRuleId}.`);
       if (!rule.terms.length) fail(`eventFamilies[${index}] lexicon ${lexiconRuleId} has no terms.`);
+      const availableTerms = new Set(rule.terms.map((term) => term.toLocaleLowerCase('en-US')));
+      item.lexiconExcludeTerms.forEach((term) => {
+        if (!availableTerms.has(term.toLocaleLowerCase('en-US'))) {
+          fail(`eventFamilies[${index}] excludes unknown term ${term} from lexicon ${lexiconRuleId}.`);
+        }
+      });
+    } else if (item.lexiconExcludeTerms.length) {
+      fail(`eventFamilies[${index}] cannot exclude lexicon terms without lexiconRuleId.`);
     }
     const patterns = requireArray(item.patterns, `eventFamilies[${index}].patterns`);
     if (!patterns.length) fail(`eventFamilies[${index}].patterns must not be empty.`);
