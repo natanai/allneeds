@@ -168,6 +168,16 @@ function containsTokenPhrase(source: string, term: string) {
   return false;
 }
 
+const EVENT_TARGET_ANCHOR = /\b(?:me|us)\b|\b(?:i|we)\s+(?:am|are|was|were)\b/giu;
+
+function eventFamilyLexiconText(matchedText: string) {
+  EVENT_TARGET_ANCHOR.lastIndex = 0;
+  const anchors = [...matchedText.matchAll(EVENT_TARGET_ANCHOR)];
+  const anchor = anchors.at(-1);
+  if (!anchor) return matchedText;
+  return matchedText.slice((anchor.index ?? 0) + anchor[0].length);
+}
+
 function eventFamilyRangeHasRequiredLexicon(
   text: string,
   range: TextRange,
@@ -179,9 +189,10 @@ function eventFamilyRangeHasRequiredLexicon(
   if (!rule?.terms.length) return false;
   const excluded = new Set(lexiconExcludeTerms.map(normalizedPhrase));
   const matchedText = text.slice(range.start, range.end);
+  const lexiconText = eventFamilyLexiconText(matchedText);
   return rule.terms
     .filter((term) => !excluded.has(normalizedPhrase(term)))
-    .some((term) => containsTokenPhrase(matchedText, term));
+    .some((term) => containsTokenPhrase(lexiconText, term));
 }
 
 function samePhrase(tokens: ObservationToken[], startIndex: number, matcher: TermMatcher, text: string) {
