@@ -59,6 +59,7 @@ const eventFamilyDetectors = observationInferenceIndex.eventFamilies.flatMap((fa
   label: family.label,
   explanation: family.explanation,
   lexiconRuleId: family.lexiconRuleId,
+  lexiconExcludeTerms: family.lexiconExcludeTerms,
   regex: compiledRegex(pattern.pattern, pattern.flags),
 })));
 
@@ -153,6 +154,10 @@ function findRegexMatches<T>(detector: CompiledDetector<T>, text: string) {
   return matches;
 }
 
+function normalizedPhrase(term: string) {
+  return phraseTokens(term).join(' ');
+}
+
 function containsTokenPhrase(source: string, term: string) {
   const sourceTokens = phraseTokens(source);
   const termTokens = phraseTokens(term);
@@ -163,12 +168,20 @@ function containsTokenPhrase(source: string, term: string) {
   return false;
 }
 
-function eventFamilyRangeHasRequiredLexicon(text: string, range: TextRange, lexiconRuleId: string | undefined) {
+function eventFamilyRangeHasRequiredLexicon(
+  text: string,
+  range: TextRange,
+  lexiconRuleId: string | null | undefined,
+  lexiconExcludeTerms: readonly string[],
+) {
   if (!lexiconRuleId) return true;
   const rule = guidanceRuleById.get(lexiconRuleId);
   if (!rule?.terms.length) return false;
+  const excluded = new Set(lexiconExcludeTerms.map(normalizedPhrase));
   const matchedText = text.slice(range.start, range.end);
-  return rule.terms.some((term) => containsTokenPhrase(matchedText, term));
+  return rule.terms
+    .filter((term) => !excluded.has(normalizedPhrase(term)))
+    .some((term) => containsTokenPhrase(matchedText, term));
 }
 
 function samePhrase(tokens: ObservationToken[], startIndex: number, matcher: TermMatcher, text: string) {
@@ -272,7 +285,12 @@ export function annotateObservation(text: string) {
 
   eventFamilyDetectors.forEach((detector) => {
     findRegexMatches(detector, text)
-      .filter((range) => eventFamilyRangeHasRequiredLexicon(text, range, detector.lexiconRuleId))
+      .filter((range) => eventFamilyRangeHasRequiredLexicon(
+        text,
+        range,
+        detector.lexiconRuleId,
+        detector.lexiconExcludeTerms,
+      ))
       .forEach((range) => add(range, {
         kind: 'eventFamily',
         familyId: detector.familyId,
