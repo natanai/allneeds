@@ -131,6 +131,9 @@ function validateSource(source) {
       fail(`expressions[${index}].pattern still contains CSV escape-layer artifacts.`);
     }
     if (!['direct', 'related', 'broad'].includes(item.tier)) fail(`expressions[${index}].tier is invalid.`);
+    if (item.tier === 'direct' && item.provenance !== 'legacy-observation-cues') {
+      fail(`expressions[${index}] may preserve direct only as legacy import metadata.`);
+    }
     validateSlugList(item.feelingSlugs, `expressions[${index}].feelingSlugs`);
     validateSlugList(item.needSlugs, `expressions[${index}].needSlugs`);
     if (!item.feelingSlugs.length && !item.needSlugs.length) fail(`expressions[${index}] has no candidates.`);
@@ -417,6 +420,10 @@ type ObservationInferenceSource = {
 };
 
 const validatedSource = source as unknown as ObservationInferenceSource;
+const expressions = validatedSource.expressions.map((expression) => ({
+  ...expression,
+  tier: expression.tier === 'direct' ? 'related' as const : expression.tier,
+}));
 const catalog = {
   feelings: feelings.map((feeling) => ({
     slug: feeling.slug,
@@ -446,7 +453,7 @@ export const observationInferenceIndex = {
   provenance: validatedSource.provenance,
   catalog,
   slots: validatedSource.slots,
-  expressions: validatedSource.expressions,
+  expressions,
   eventFamilies: validatedSource.eventFamilies,
   lexicalBridges: validatedSource.lexicalBridges,
   surfaceTerms: validatedSource.surfaceTerms,
