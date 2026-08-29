@@ -132,7 +132,7 @@
     "eventFamily": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "label", "tier", "lexiconRuleId", "patterns", "feelingSlugs", "needSlugs", "explanation", "provenance"],
+      "required": ["id", "label", "tier", "lexiconRuleId", "lexiconExcludeTerms", "patterns", "feelingSlugs", "needSlugs", "explanation", "provenance"],
       "properties": {
         "id": { "$ref": "#/$defs/slug" },
         "label": { "type": "string", "minLength": 1 },
@@ -140,6 +140,11 @@
         "lexiconRuleId": {
           "type": ["string", "null"],
           "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "lexiconExcludeTerms": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
         },
         "patterns": {
           "type": "array",
