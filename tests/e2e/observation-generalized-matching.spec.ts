@@ -10,7 +10,9 @@ test('ordinary quoted wording with a postposed recipient yields evidence-backed 
   await expect(page.getByTestId('observation-no-suggestions')).toHaveCount(0);
   await expect(page.getByTestId('observation-needs').getByRole('link', { name: 'Respect', exact: true })).toBeVisible();
   await expect(page.getByTestId('observation-feelings').locator('a').first()).toBeVisible();
-  await expect(page.getByText('Why these?', { exact: true })).toBeVisible();
+  const whyThese = page.getByText('Why these?', { exact: true });
+  await expect(whyThese).toBeVisible();
+  await whyThese.click();
   await expect(page.getByText('The app noticed a personal evaluation directed toward you.', { exact: true })).toBeVisible();
 });
 
