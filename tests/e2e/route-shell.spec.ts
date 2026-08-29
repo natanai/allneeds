@@ -24,7 +24,7 @@ const publicRoutes: RouteExpectation[] = [
   { path: '/inventory', label: 'Inventory' },
   { path: '/inventory/journal', label: 'Journal history' },
   { path: '/feed', label: 'Shared strategies' },
-  { path: '/alexithymia-support', label: 'Alexithymia support' },
+  { path: '/alexithymia-support', label: 'Feeling word support' },
   { path: '/not-a-real-route', label: 'Page not found' },
 ];
 

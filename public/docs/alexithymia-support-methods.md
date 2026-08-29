@@ -1,66 +1,88 @@
-# How Alexithymia Support compares words
+# How feeling-word matching works
 
-_Last reviewed: 2026-08-28_
+_Last reviewed: 2026-08-29_
 
-This check-in compares clues you choose with reviewed profiles of emotion words. The result is a compatibility estimate, not a probability or a determination of what you feel. More than one word can match the same clues, and your own judgment is the final step.
+## Plain-language summary
+
+This check-in helps when feelings are hard to identify or describe. That difficulty is sometimes called alexithymia, but you do not need that label or a diagnosis to use the page.
+
+You can choose body sensations, rate a few parts of the overall feeling, or browse without choosing clues. The app compares only the clues you choose with fixed descriptions of emotion words. A displayed percentage means “similar to these clues,” not “this is probably what you feel.” More than one word can fit, and you make the final choice.
+
+The app does not score what you wrote about the event. It does not infer a Need, select a word for you, diagnose anything, or send the check-in to a language model.
 
 ## Body clues
 
-The body channel uses the same regions, sensations, authored forward association strengths, and scorer as the full Body Cues page. For candidate `f`, selected cues `S`, cue intensity `I(c)` on `0–1`, association strength `W(c,f)` on `0–1.4`, and `Wmax = 1.4`:
+The body part of the comparison uses the same regions and sensations as the full Body Cues page. Each possible word has an authored strength for each body cue. A selected cue counts more when you set a higher intensity. A cue you leave off does not count.
+
+For readers who want the calculation, for possible word `f` and selected cues `S`:
 
 `bodyMatch(f) = Σ(I(c) × W(c,f)) / (Wmax × Σ I(c))`
 
-Candidates are calculated independently. An active cue with no authored association contributes zero within the covered candidate set; an unselected cue contributes nothing. The body maps in the research were prompted self-reports, not tests of the reverse inference from one sensation to one emotion. The app's micro-cues and exact weights remain a reviewed editorial map rather than a calibrated classifier. [Read the full Body Cues methods](./body-scan-sourcing-review.md).
+- `I(c)` is the intensity you chose for cue `c`, converted to a `0–1` scale.
+- `W(c,f)` is the authored link between that cue and word `f`, on a `0–1.4` scale.
+- `Wmax` is `1.4`, the largest available link value.
 
-## Feeling shape
+Each word is calculated independently. The source body maps are reports from groups of people who were asked where emotions felt active in the body. They do not show that one sensation proves one emotion. The app’s smaller cue list and exact strengths are reviewed editorial choices, not a diagnostic classifier. [Read the full Body Cues methods](./body-scan-sourcing-review.md).
 
-The optional Feeling-shape card uses four broad dimensions: pleasantness (Valence), energy (Arousal), power or control (Power), and expectedness (Novelty). The person can answer any dimension or choose `Not sure`; `Not sure` is missing information, not the midpoint. At least two answered dimensions are required before shape is scored.
+## Overall feeling
 
-The fixed word coordinates come from Table A2 of Soriano et al. (2026). The source's complete English table ranges are mapped to `0–1`:
+The optional Overall feeling card asks about four broad qualities:
 
-| App dimension | Source dimension | Raw range |
+| What the app asks | Research term | Source range |
 | --- | --- | ---: |
-| Pleasantness | Valence | −1.37 to 1.74 |
+| Pleasant or unpleasant | Valence | −1.37 to 1.74 |
 | Energy | Arousal | −2.68 to 1.79 |
-| Power / control | Power | −1.66 to 2.63 |
-| Expectedness | Novelty | −2.57 to 3.38 |
+| Ability to influence what happens | Power | −1.66 to 2.63 |
+| Familiar or surprising | Novelty | −2.57 to 3.38 |
 
-For used dimensions `D`, the app calculates:
+You can answer any rating or choose `Not sure`. `Not sure` means the app has no information for that rating; it is not treated as the middle. At least two answered ratings are needed before this part is compared.
+
+The fixed word values come from Table A2 of Soriano et al. (2026). The source values are converted to a `0–1` scale. For the ratings you answered, called `D` below:
 
 `shapeMatch(f) = Σ(1 − |user(d) − profile(f,d)|) / |D|`
 
-The five-position input and distance formula are transparent allneeds editorial rules. The cited study supplies group-level norms for the shared meanings of words; it did not validate this app's percentage or identify an individual's present emotion. Candidates without a complete source profile remain selectable but are not shape-scored.
+In plain language, the app measures the distance between each rating you chose and the fixed value for that word, then averages those similarities. The five-position control and this distance calculation are allneeds editorial rules. The study describes group-level meanings of words; it did not validate this app’s percentage or identify any individual person’s present emotion.
 
-## Combining channels
+## Combining body and overall-feeling clues
 
-When both Body and Feeling shape were used and a candidate has complete coverage for both, the displayed Clue match is their equal average:
+When both kinds of clues can be compared for a word, the app gives them equal weight:
 
 `clueMatch(f) = Σ channelMatch(f,k) / |K(f)|`
 
-Equal weighting is an allneeds editorial choice, not a claim that the channels are equally diagnostic. A candidate missing coverage for any used channel appears as `Unscored for one or more of your clues`; the app does not compare a one-channel number with a two-channel number. Only the final display is rounded to a whole percent.
+Equal weight is an allneeds editorial choice. It does not mean body clues and overall-feeling ratings are equally good at identifying an emotion. If a word cannot be compared with every kind of clue you used, it appears under “More words to consider” without a combined percentage. Only the displayed result is rounded to a whole percent.
 
-## What is not scored
+## What is not compared
 
-The app does not score the observation text, Faux Feelings, unprofiled or user-entered terms, Need selections, or the person's `Fits`, `Maybe`, and `Not this time` decisions. Exact catalog terms found in an observation are linked for reference only. No Need is selected, inferred, or inserted by the app.
+The app does not assign a percentage to:
 
-## Word roles
+- the event text you write;
+- Faux Feelings;
+- words without the needed fixed descriptions;
+- words you enter yourself;
+- Needs you choose;
+- your `Fits`, `Maybe`, or `Not this time` decisions.
 
-- **Feeling** means one of the unchanged official allneeds Feeling words.
-- **Faux Feeling** means one of the unchanged official Faux Feeling terms: a word that may combine emotion with an interpretation of what happened. The label does not mean the event was unreal.
-- **Working term** is lane-local research language or a word entered by the person. It does not enter or alter an official catalog.
+Recognized Feeling, Need, and Faux Feeling words in the event text become reference links only. The app does not select or insert them.
 
-Alexithymia Support does not add, remove, reclassify, or silently substitute official Feeling, Need, or Faux Feeling words. An automatic route exists only for an explicitly reviewed bridge.
+## What the word labels mean
+
+- **Feeling** means a word in the allneeds Feeling list, with a linked Feeling page.
+- **Faux Feeling** means a word that may combine an emotion with an interpretation of what happened. This label does not mean the event was unreal.
+- **Other emotion word** means a useful emotion word in this check-in that is not part of the linked allneeds Feeling list.
+- **Your word** means a word you entered for this check-in.
+
+The support page does not add, remove, or reclassify the site’s Feeling, Need, or Faux Feeling words. It creates a page link only when that exact relationship has been reviewed.
 
 ## Limits
 
-This is a present-moment support tool, not a test, diagnosis, treatment, or therapy. Alexithymia is multidimensional, and people differ in which clues are available. Body maps are prompted self-reports rather than diagnostic physiological signatures; Feeling-shape profiles are group-level word-meaning norms rather than personal emotion models. Context, language, culture, neurodiversity, medication, health, and individual learning can all matter. A compatibility estimate cannot determine what someone feels.
+This is a present-moment support tool, not a test, diagnosis, treatment, or therapy. People differ in which clues they can notice. Context, language, culture, neurodiversity, medication, health, and individual learning can all matter. Body maps are group self-reports, and overall-feeling profiles are group-level word meanings. A similarity percentage cannot determine what one person feels.
 
 ## Sources
 
-- [Luminet and Nielson (2025), *Alexithymia: Toward an Experimental, Processual Affective Science with Effective Interventions*](https://doi.org/10.1146/annurev-psych-021424-030718) — current multidimensional account and uncertainty in mechanisms.
-- [Mazza et al. (2026), systematic review and meta-analysis of therapies addressing alexithymia](https://pubmed.ncbi.nlm.nih.gov/41525940/) — bounds the product claim; this check-in is not one of the studied therapies.
-- [Nunes da Silva (2021), clinical intervention guidelines](https://pubmed.ncbi.nlm.nih.gov/34749373/) — supports respectfully connecting events, vocabulary, and bodily sensations without transferring a therapeutic relationship into the app.
-- [Trevisan et al. (2019), alexithymia and interoceptive awareness meta-analysis](https://pubmed.ncbi.nlm.nih.gov/31380655/) — supports making body clues optional rather than the only entrance.
-- [Nummenmaa et al. (2014), *Bodily maps of emotions*](https://doi.org/10.1073/pnas.1321664111) — broad prompted self-report body topographies and their limits for reverse inference.
-- [Posner, Russell, and Peterson (2005), *The circumplex model of affect*](https://doi.org/10.1017/S0954579405050340) — broad affective dimensions; not a discrete-emotion detector.
-- [Soriano et al. (2026), *Emotion word meaning and grammatical class: do nouns and adjectives mean the same?*](https://doi.org/10.1016/j.langsci.2026.101807) — CC BY 4.0 English CoreGRID factor scores used for the fixed Feeling-shape profiles and noun/adjective bridge review.
+- [Luminet and Nielson (2025), *Alexithymia: Toward an Experimental, Processual Affective Science with Effective Interventions*](https://doi.org/10.1146/annurev-psych-021424-030718), a current multidimensional account and a review of uncertainty in the mechanisms.
+- [Mazza et al. (2026), systematic review and meta-analysis of therapies addressing alexithymia](https://pubmed.ncbi.nlm.nih.gov/41525940/), used to bound product claims; this check-in is not one of the studied therapies.
+- [Nunes da Silva (2021), clinical intervention guidelines](https://pubmed.ncbi.nlm.nih.gov/34749373/), support for respectfully connecting events, vocabulary, and bodily sensations without treating an app as a therapeutic relationship.
+- [Trevisan et al. (2019), alexithymia and interoceptive awareness meta-analysis](https://pubmed.ncbi.nlm.nih.gov/31380655/), support for making body clues optional rather than the only way in.
+- [Nummenmaa et al. (2014), *Bodily maps of emotions*](https://doi.org/10.1073/pnas.1321664111), broad prompted body-location reports and their limits for working backward from sensation to emotion.
+- [Posner, Russell, and Peterson (2005), *The circumplex model of affect*](https://doi.org/10.1017/S0954579405050340), broad qualities of emotional experience, not a detector of discrete emotions.
+- [Soriano et al. (2026), *Emotion word meaning and grammatical class: do nouns and adjectives mean the same?*](https://doi.org/10.1016/j.langsci.2026.101807), CC BY 4.0 English CoreGRID factor scores used for the fixed overall-feeling profiles and noun/adjective bridge review.

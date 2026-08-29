@@ -84,10 +84,10 @@ function emptyDraft(): AlexithymiaDraft {
 
 function shapeClueLabel(dimension: string, value: number) {
   const labels: Record<string, string> = {
-    pleasantness: 'Pleasantness',
+    pleasantness: 'Pleasant or unpleasant',
     energy: 'Energy',
-    power: 'Power / control',
-    expectedness: 'Expectedness',
+    power: 'Ability to influence what happens',
+    expectedness: 'Familiar or surprising',
   };
   return `${labels[dimension] ?? dimension}: ${Math.round(value * 4) + 1}/5`;
 }
@@ -224,10 +224,10 @@ export function AlexithymiaSupportPage() {
   const partialWordItems: MagnetBoardItem[] = partialMatches.map(({ term }) => ({
     id: `alex-partial-${term.id}`,
     label: term.label,
-    detail: 'Unscored for one or more clues',
+    detail: 'Some clues cannot be compared',
     badge: term.roleLabel,
     tone: roleTone(term, draft.decisions[term.id]),
-    ariaLabel: `${term.label}, ${term.roleLabel}, unscored for one or more of your clues`,
+    ariaLabel: `${term.label}, ${term.roleLabel}, some clues cannot be compared`,
     onActivate: () => {
       setActiveTermId(term.id);
       setSheet('candidate');
@@ -245,13 +245,13 @@ export function AlexithymiaSupportPage() {
     return need ? [{
       id: `alex-selected-need-${slug}`,
       label: need.title,
-      detail: 'Open strategies',
+      detail: 'Open ways to support this Need',
       badge: 'Need',
       kind: 'need' as const,
       tone: 'positive' as const,
       iconUrl: assetPath(`icons/needs/${slug}.svg`),
       to: `/needs/${slug}`,
-      ariaLabel: `${need.title}, selected Need, open strategies`,
+      ariaLabel: `${need.title}, selected Need, open ways to support it`,
     }] : [];
   });
 
@@ -326,7 +326,7 @@ export function AlexithymiaSupportPage() {
       noWordYet: draft.noWordYet,
     });
     updateDraft((current) => ({ ...current, statement, statementEdited: false }));
-    setStatus(statement ? 'Sentence built from your selections.' : 'Choose a word, “No word yet,” or a Need first.');
+    setStatus(statement ? 'Your draft sentence is ready to edit.' : 'Choose a word, “No word yet,” or a Need first.');
   }
 
   function addToJournal() {
@@ -362,7 +362,7 @@ export function AlexithymiaSupportPage() {
       <article className={styles.entry} aria-labelledby="alexithymia-title">
         <div className={styles.entryMain}>
           <header>
-            <p className={styles.eyebrow}>Alexithymia Support</p>
+            <p className={styles.eyebrow}>Feeling word support</p>
             <h1 id="alexithymia-title">Find words for right now</h1>
             <p>Use any clues you can notice. The app can compare possible words, but you decide what fits.</p>
           </header>
@@ -381,7 +381,7 @@ export function AlexithymiaSupportPage() {
             }}>
               {hasDraft ? 'Continue check-in' : 'Start check-in'}
             </button>
-            <button type="button" className={styles.iconButton} aria-label="About Alexithymia Support" onClick={() => setSheet('info')}><InfoIcon /></button>
+            <button type="button" className={styles.iconButton} aria-label="About this feeling check-in" onClick={() => setSheet('info')}><InfoIcon /></button>
           </div>
         </div>
         <aside className={styles.entryAside} aria-label="About this check-in">
@@ -389,10 +389,11 @@ export function AlexithymiaSupportPage() {
           <div>
             <strong>You stay in charge</strong>
             <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
-            <a className={styles.methodsLink} href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">Methods &amp; References</a>
+            <a className={styles.methodsLink} href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How matching works and sources</a>
           </div>
         </aside>
         <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
+          <p>Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.</p>
           <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
           <p>You can use any clues that are available, keep more than one possible word, or choose no word yet.</p>
           <a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How word comparison works</a>
@@ -402,7 +403,7 @@ export function AlexithymiaSupportPage() {
   }
 
   return (
-    <article className={styles.page} aria-label={`Alexithymia Support: ${stageTitle}`}>
+    <article className={styles.page} aria-label={`Feeling word support: ${stageTitle}`}>
       <header className={styles.appBar}>
         <button type="button" className={styles.iconButton} aria-label="Back" onClick={() => {
           if (draft.stage <= 1) setEntryVisible(true);
@@ -423,8 +424,9 @@ export function AlexithymiaSupportPage() {
       </header>
 
       <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
+        <p>Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.</p>
         <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
-        <p>Clue matches compare reviewed word profiles with only the clues you choose. Your judgment remains the final step.</p>
+        <p>The app compares the clues you choose with general descriptions of emotion words. It cannot know what you feel; you decide what fits.</p>
         <a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">How word comparison works</a>
       </SupportSheet>
 
@@ -433,7 +435,7 @@ export function AlexithymiaSupportPage() {
           <header className={styles.stageHeader}>
             <p>1 of 4 · What happened?</p>
             <h1 id="alex-stage-one">What are you trying to put into words?</h1>
-            <p>If it helps, write one or two observable facts about what just happened.</p>
+            <p>If it helps, write one or two details someone could have seen or heard, such as what happened or the exact words used.</p>
           </header>
           <div className={styles.observationWorkspace}>
             <div className={styles.observationPrimary}>
@@ -450,12 +452,14 @@ export function AlexithymiaSupportPage() {
               {(observationMatches.feelings.length || observationMatches.needs.length || observationMatches.fauxFeelings.length) ? (
                 <section className={styles.detectedTerms} aria-label="Words found in what you wrote">
                   <h2>Words in what you wrote</h2>
-                  <p>Linked for reference only. Nothing has been selected or scored.</p>
+                  <p>Open a recognized word to learn more. The app has not chosen it for you.</p>
                   <div>
                     {observationMatches.feelings.map((item) => <Link key={`feeling-${item.slug}`} to={`/feelings/${item.slug}`}>{item.title}<small>Feeling</small></Link>)}
                     {observationMatches.needs.map((item) => <Link key={`need-${item.slug}`} to={`/needs/${item.slug}`}>{item.title}<small>Need</small></Link>)}
                     {observationMatches.fauxFeelings.map((item) => <Link key={`faux-${item.slug}`} to={`/faux-feelings/${item.slug}`}>{item.title}<small>Faux Feeling</small></Link>)}
                   </div>
+                  {observationMatches.needs.length ? <p>A Need means something that matters, such as rest, safety, connection, or understanding.</p> : null}
+                  {observationMatches.fauxFeelings.length ? <p>A Faux Feeling may combine an emotion with an interpretation of what happened. The label does not mean the event was unreal.</p> : null}
                 </section>
               ) : null}
             </div>
@@ -463,7 +467,7 @@ export function AlexithymiaSupportPage() {
               <p className={styles.sectionLabel}>A useful starting point</p>
               <strong>Keep it concrete</strong>
               <p>Names, visible actions, or exact words are enough. You can skip this step if nothing is clear.</p>
-              <Link to="/observations">Open the Observation helper</Link>
+              <Link to="/observations">Get help describing what happened</Link>
               <div className={styles.stickyActions}>
                 <button type="button" className={styles.textButton} onClick={() => {
                   updateDraft((current) => ({ ...current, observation: '' }));
@@ -497,7 +501,7 @@ export function AlexithymiaSupportPage() {
                 </button>
                 <button type="button" onClick={() => setSheet('shape')}>
                   <span className={styles.clueIcon}><ShapeIcon /></span>
-                  <span><strong>Feeling shape</strong><small>{shapeDimensionList.length ? `${shapeDimensionList.length} of 4 parts placed.` : 'Place any parts you can sense.'}</small></span>
+                  <span><strong>Overall feeling</strong><small>{shapeDimensionList.length ? `${shapeDimensionList.length} of 4 ratings chosen.` : 'Rate any parts you can tell.'}</small></span>
                   <span className={styles.cardArrow} aria-hidden="true">›</span>
                 </button>
               </div>
@@ -512,7 +516,7 @@ export function AlexithymiaSupportPage() {
                 <button type="button" className={styles.textButton} onClick={() => {
                   setWordFilter('all');
                   goToStage(3);
-                }}>Browse words without a match</button>
+                }}>Browse all feelings</button>
                 <button type="button" className={styles.primaryButton} disabled={!canCompare} onClick={() => {
                   setWordFilter('matches');
                   goToStage(3);
@@ -548,14 +552,14 @@ export function AlexithymiaSupportPage() {
           <header className={styles.stageHeader}>
             <p>3 of 4 · Words</p>
             <h1 id="alex-stage-three">Possible words</h1>
-            <p>These are clue matches, not answers. More than one may fit—or none yet.</p>
+            <p>These are words to consider, not answers. More than one may fit, or none yet.</p>
           </header>
           <div className={styles.wordWorkspace}>
             <div className={styles.wordMain}>
               <div className={styles.wordToolbar}>
                 <label className={styles.wordSearch}>
                   <SearchIcon />
-                  <span className="visually-hidden">Search feelings and working words</span>
+                  <span className="visually-hidden">Search feelings and other emotion words</span>
                   <input type="search" value={wordQuery} placeholder="Search words" onChange={(event) => setWordQuery(event.target.value)} autoComplete="off" />
                 </label>
                 <div className={styles.segmented} role="radiogroup" aria-label="Word view">
@@ -575,23 +579,23 @@ export function AlexithymiaSupportPage() {
                   ariaLabel="Possible words"
                 />
               ) : (
-                <p className={styles.emptyMessage}>{wordFilter === 'mine' ? 'No words selected yet.' : normalizedWordQuery ? `No reviewed words match “${wordQuery}”.` : 'No scored matches yet. Browse all feelings or choose “No word yet.”'}</p>
+                <p className={styles.emptyMessage}>{wordFilter === 'mine' ? 'No words selected yet.' : normalizedWordQuery ? `No listed words match “${wordQuery}”.` : 'Choose at least two clues to compare words, or browse all feelings.'}</p>
               )}
 
               {normalizedWordQuery && !exactSearchTerm ? (
-                <button type="button" className={styles.customWordButton} onClick={useCustomWord}>Use “{wordQuery.trim()}” as a working word</button>
+                <button type="button" className={styles.customWordButton} onClick={useCustomWord}>Use “{wordQuery.trim()}” as my word</button>
               ) : null}
 
               {!normalizedWordQuery && wordFilter === 'matches' && partialWordItems.length ? (
                 <section className={styles.partialWords} aria-labelledby="partial-words-title">
-                  <header><h2 id="partial-words-title">More words to consider</h2><p>Unscored for one or more of your clues.</p></header>
+                  <header><h2 id="partial-words-title">More words to consider</h2><p>These words fit some clues, but the app cannot compare every clue you chose.</p></header>
                   <MagnetBoard
                     className={styles.wordBoard}
                     items={partialWordItems}
                     playMode={partialPlayMode}
                     onPlayModeChange={setPartialPlayMode}
                     storageKey="alexithymia-partial-words"
-                    ariaLabel="Words with incomplete clue coverage"
+                    ariaLabel="Words that cannot be compared with every clue"
                   />
                 </section>
               ) : null}
@@ -640,7 +644,7 @@ export function AlexithymiaSupportPage() {
           <div className={styles.reviewWorkspace}>
             <div className={styles.reviewSelections}>
               <section className={styles.selectionSection} aria-labelledby="selected-feelings-title">
-                <header><div><h2 id="selected-feelings-title">Feelings and working words</h2><p>Your choices, not the app’s conclusion.</p></div><button type="button" className={styles.smallAction} onClick={() => goToStage(3)}>Edit</button></header>
+                <header><div><h2 id="selected-feelings-title">Your feeling words</h2><p>Your choices, not the app’s conclusion.</p></div><button type="button" className={styles.smallAction} onClick={() => goToStage(3)}>Edit</button></header>
                 {selectedTerms.length ? (
                   <ol className={styles.selectedTermList}>
                     {selectedTerms.map((term, index) => (
@@ -658,7 +662,7 @@ export function AlexithymiaSupportPage() {
               </section>
 
               <section className={styles.selectionSection} aria-labelledby="selected-needs-title">
-                <header><div><h2 id="selected-needs-title">What are you needing?</h2><p>Choose any Needs that fit. A feeling does not prove a particular Need.</p></div><button type="button" className={styles.smallAction} onClick={() => setSheet('needs')}>{draft.selectedNeeds.length ? 'Edit Needs' : 'Add Needs'}</button></header>
+                <header><div><h2 id="selected-needs-title">What matters to you here?</h2><p>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p></div><button type="button" className={styles.smallAction} onClick={() => setSheet('needs')}>{draft.selectedNeeds.length ? 'Edit Needs' : 'Add Needs'}</button></header>
                 {observationMatches.needs.some((need) => !draft.selectedNeeds.includes(need.slug)) ? (
                   <div className={styles.wordsAlreadyUsed}><strong>Words you already used</strong>{observationMatches.needs.filter((need) => !draft.selectedNeeds.includes(need.slug)).map((need) => <button key={need.slug} type="button" onClick={() => updateDraft((current) => ({ ...current, selectedNeeds: [...current.selectedNeeds, need.slug] }))}>{need.title}<span aria-hidden="true">+</span></button>)}</div>
                 ) : null}
@@ -669,7 +673,7 @@ export function AlexithymiaSupportPage() {
                     playMode={needPlayMode}
                     onPlayModeChange={setNeedPlayMode}
                     storageKey="alexithymia-selected-needs"
-                    ariaLabel="Selected Needs; open a Need's strategies"
+                    ariaLabel="Selected Needs; open ways to support a Need"
                   />
                 ) : <button type="button" className={styles.notSureChoice} onClick={() => setSheet('needs')}>Not sure yet</button>}
               </section>
@@ -677,7 +681,7 @@ export function AlexithymiaSupportPage() {
 
             <div className={styles.reviewOutcome}>
               <section className={styles.composer} aria-labelledby="composer-title">
-                <header><h2 id="composer-title">Put it into your words</h2><p>Build from only what you selected, then edit anything.</p></header>
+                <header><h2 id="composer-title">Put it into your words</h2><p>Start with the words you chose, then edit the sentence however you want.</p></header>
                 <button type="button" className={styles.buildButton} onClick={buildSentence}>Build sentence</button>
                 <label>
                   <span className="visually-hidden">Your statement</span>
@@ -703,7 +707,7 @@ export function AlexithymiaSupportPage() {
                 </div>
                 <p className={styles.liveStatus} role="status">{status}</p>
               </section>
-              <p className={styles.completion}>These are your working words for this moment. You can change them whenever more becomes clear.</p>
+              <p className={styles.completion}>These are the words that fit for this moment. You can change them whenever more becomes clear.</p>
             </div>
           </div>
 

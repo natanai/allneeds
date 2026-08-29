@@ -101,11 +101,6 @@
   text-decoration: underline dotted color-mix(in srgb, var(--secondary) 76%, transparent) 1.5px;
 }
 
-.surface::highlight(observation-surface-term) {
-  background-color: color-mix(in srgb, var(--quiet) 56%, transparent);
-  text-decoration: underline dashed var(--secondary) 1px;
-}
-
 .surface::highlight(observation-active) {
   background-color: color-mix(in srgb, var(--attention) 64%, transparent);
   text-decoration-color: var(--outline);

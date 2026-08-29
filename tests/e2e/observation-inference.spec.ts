@@ -62,7 +62,7 @@ test('the shared local analysis powers highlights, signals, links, and guarantee
 
   const unmatched = '🙂 banana telescope purple';
   await editor.fill(unmatched);
-  await expect(page.getByRole('heading', { name: 'Possible feelings & needs to explore' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Possible Feelings and Needs' })).toBeVisible();
   await expect(needs).toHaveCount(4);
   await expect(feelings).toHaveCount(4);
   const firstPass = await feelings.evaluateAll((links) => links.map((link) => link.getAttribute('href')));
@@ -71,10 +71,11 @@ test('the shared local analysis powers highlights, signals, links, and guarantee
   await expect(feelings).toHaveCount(4);
   expect(await feelings.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(firstPass);
 
-  await page.getByRole('radio', { name: 'Met', exact: true }).click();
+  await page.getByRole('radio', { name: 'Something feels supported', exact: true }).click();
   await expect(feelings).toHaveCount(4);
   await expect(feelings.first()).toHaveAttribute('href', '/feelings/calm');
-  await expect(page.getByText(/\b(?:exact|nearby|probability|confidence)\b/i)).toHaveCount(0);
+  await expect(page.getByText(/\b(?:probability|confidence)\b/i)).toHaveCount(0);
+  await expect(page.getByText(/\b(?:exact|nearby) match\b/i)).toHaveCount(0);
 
   expect(retiredAssetRequests).toEqual([]);
   expect(runtimeProblems).toEqual([]);
@@ -103,6 +104,7 @@ test('plain-text editing, line breaks, explanations, and highlight ranges stay o
     element.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: clipboard }));
   });
   await expect.poll(() => editor.textContent()).toBe('I feel anxious.\nI need rest.\nI felt ignored.');
+  await expect(page.getByRole('link', { name: 'Open Anxious' })).toHaveCount(0);
   await expect(editor.locator('*')).toHaveCount(0);
 
   await editor.press('ControlOrMeta+z');
@@ -132,4 +134,33 @@ test('plain-text editing, line breaks, explanations, and highlight ranges stay o
   await expect(editor.locator('*')).toHaveCount(0);
 
   expect(runtimeProblems).toEqual([]);
+});
+
+test('unclassified wording stays internal and typing cannot open a duplicate explanation', async ({ page }) => {
+  await page.goto('/observations');
+  const editor = page.getByRole('textbox', { name: 'What did you notice?' });
+
+  await editor.fill('Guilt');
+  await editor.press('End');
+
+  await expect(page.getByText('Your wording', { exact: true })).toHaveCount(0);
+  await expect(page.getByText(/preserved as your wording|catalog match/i)).toHaveCount(0);
+  await expect(page.locator('[aria-label^="About “Guilt”"]')).toHaveCount(0);
+  await expect.poll(() => highlightedText(page, 'observation-surface-term')).toEqual([]);
+
+  await page.getByRole('button', { name: 'Load possible feelings and needs' }).click();
+  await expect(page.getByTestId('observation-needs').locator('a')).toHaveCount(4);
+  await expect(page.getByTestId('observation-feelings').locator('a')).toHaveCount(4);
+
+  await editor.fill('I am autistic.');
+  await expect.poll(() => highlightedText(page, 'observation-guidance')).not.toContain('autistic');
+});
+
+test('plain-language guide citations reveal their matching source', async ({ page }) => {
+  await page.goto('/observations');
+  await page.getByText('Observation guide', { exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Describe what happened with concrete details' })).toBeVisible();
+
+  await page.getByRole('link', { name: '[2]' }).first().click();
+  await expect(page.getByRole('link', { name: '[2] Concreteness and comprehension' })).toBeVisible();
 });

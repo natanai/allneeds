@@ -22,8 +22,8 @@ async function addTwoBodyCues(page: Page) {
 }
 
 async function addFeelingShape(page: Page) {
-  await page.getByRole('button', { name: /^Feeling shape/ }).click();
-  const sheet = page.getByRole('dialog', { name: 'Feeling shape' });
+  await page.getByRole('button', { name: /^Overall feeling/ }).click();
+  const sheet = page.getByRole('dialog', { name: 'Overall feeling' });
   await sheet.locator('input[name="alex-shape-pleasantness"][value="0"]').check();
   await sheet.locator('input[name="alex-shape-energy"][value="1"]').check();
   await sheet.locator('input[name="alex-shape-power"][value="0.25"]').check();
@@ -52,36 +52,36 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
 
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   let sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await expect(sheet.getByText(/equal average of 2 channels/)).toBeVisible();
-  await expect(sheet.getByText(/^Body$/)).toBeVisible();
-  await expect(sheet.getByText(/^Feeling shape$/)).toBeVisible();
+  await expect(sheet.getByText(/gives body clues and overall-feeling ratings equal weight/)).toBeVisible();
+  await expect(sheet.getByText(/^Body clues$/)).toBeVisible();
+  await expect(sheet.getByText(/^Overall feeling$/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
 
-  const search = page.getByRole('searchbox', { name: 'Search feelings and working words' });
+  const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
   await search.fill('Guilt');
-  await page.getByRole('button', { name: /^Guilt, Working term/ }).click();
+  await page.getByRole('button', { name: /^Guilt, Other emotion word/ }).click();
   sheet = page.getByRole('dialog', { name: 'Guilt' });
-  await expect(sheet.getByText('Working term')).toBeVisible();
-  await expect(sheet.getByRole('link', { name: /Open Working term page/ })).toHaveCount(0);
+  await expect(sheet.getByText('Other emotion word')).toBeVisible();
+  await expect(sheet.getByRole('link', { name: /Open Other emotion word page/ })).toHaveCount(0);
   await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
 
   await search.fill('Blamed');
   await page.getByRole('button', { name: /^Blamed, Faux Feeling/ }).click();
   sheet = page.getByRole('dialog', { name: 'Blamed' });
-  await expect(sheet.getByText(/Faux Feelings are not scored/)).toBeVisible();
+  await expect(sheet.getByText(/Faux Feelings are not compared with clues/)).toBeVisible();
   await expect(sheet.getByText(/That label does not mean the event was unreal/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
 
   await expect(page.getByText('My words').first()).toBeVisible();
   await page.getByRole('button', { name: 'Use these words' }).click();
-  await expect(page.getByLabel("Selected Needs; open a Need's strategies")).toHaveCount(0);
+  await expect(page.getByLabel('Selected Needs; open ways to support a Need')).toHaveCount(0);
   await page.getByRole('button', { name: /Understanding/ }).click();
-  const selectedNeeds = page.getByLabel("Selected Needs; open a Need's strategies");
+  const selectedNeeds = page.getByLabel('Selected Needs; open ways to support a Need');
   await expect(selectedNeeds).toBeVisible();
-  await expect(selectedNeeds.getByRole('link', { name: /Understanding, selected Need, open strategies/ })).toHaveAttribute('href', '/needs/understanding');
+  await expect(selectedNeeds.getByRole('link', { name: /Understanding, selected Need, open ways to support it/ })).toHaveAttribute('href', '/needs/understanding');
 
   await page.getByRole('button', { name: 'Build sentence' }).click();
   const statement = page.getByLabel('Your statement');
@@ -151,7 +151,7 @@ test('body-only and shape-only candidates name the channel used', async ({ page 
   await page.getByRole('button', { name: 'Compare words' }).click();
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await expect(sheet.getByText(/% feeling-shape match/)).toBeVisible();
+  await expect(sheet.getByText(/% overall-feeling match/)).toBeVisible();
   await expect(sheet.getByText(/^Body$/)).toHaveCount(0);
 });
 
@@ -159,11 +159,11 @@ test('No word yet builds no Feeling, Need, request, or care recommendation', asy
   await page.setViewportSize({ width: 390, height: 844 });
   await startCheckIn(page);
   await skipObservation(page);
-  await page.getByRole('button', { name: 'Browse words without a match' }).click();
+  await page.getByRole('button', { name: 'Browse all feelings' }).click();
   await page.getByRole('button', { name: 'No word yet' }).click();
   await page.getByRole('button', { name: 'Use these words' }).click();
   await expect(page.getByText('I’m not sure what I feel yet.')).toBeVisible();
-  await expect(page.getByLabel("Selected Needs; open a Need's strategies")).toHaveCount(0);
+  await expect(page.getByLabel('Selected Needs; open ways to support a Need')).toHaveCount(0);
   await page.getByRole('button', { name: 'Build sentence' }).click();
   await expect(page.getByLabel('Your statement')).toHaveValue('I’m not sure what I feel yet.');
   await expect(page.getByText(/Try now|breathing exercise|grounding action|care recommendation/i)).toHaveCount(0);

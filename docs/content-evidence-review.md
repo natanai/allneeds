@@ -167,6 +167,8 @@ Remember:
 
 **Status:** complete package approved 2026-08-28 and implemented in the `test/observation-2-alexithymia` combined review branch. The fixed-catalog, present-moment, no-recommendation boundary below is the production contract; new candidate claims or catalog changes still require a separate review.
 
+**Plain-language addendum approved 2026-08-29.** The internal feature and source package may continue to use `Alexithymia Support`, `working`, and shape-dimension identifiers, but the public doorway is `Feeling word support`. Public role labels are `Feeling`, `Faux Feeling`, `Other emotion word`, and `Your word`; the public shape control is `Overall feeling`. First-use copy defines alexithymia, Need, and Faux Feeling, while preserving the person's authority. This addendum changes display language only and does not reclassify a term, alter a score, infer a Need, or add a recommendation.
+
 ### Audience, purpose, and product boundary
 
 The Alexithymia Support lane is a client-facing, in-the-moment translation aid. Its use case is a person who wants help identifying what they feel and need now, often after a real interaction and in preparation to communicate with another person. It should help the person notice available clues, compare possible feeling words, identify present Needs, and put their own working interpretation into words. It should be academically and clinically credible without presenting itself as therapy, a treatment, a diagnostic test, or an automated therapist.
@@ -208,7 +210,7 @@ The approved design-language rules apply directly:
 - keep the current working clues and primary next action in view while optional explanations open through progressive disclosure;
 - use the canonical `MagnetBoard` interaction for Feeling and Need magnets rather than creating a second physical system;
 - use short, tappable clue choices and a compact selected-clue tray instead of keeping all body regions and all sensation descriptions expanded in the document;
-- use a bottom sheet or similarly compact disclosure for candidate details and `Why this match?`, so evidence does not displace the tactile task;
+- use a bottom sheet or similarly compact disclosure for candidate details and `How this was compared`, so evidence does not displace the tactile task;
 - use familiar icons for Back, Close, Undo/Clear, Info, Copy, Read aloud, and Journal when surrounding context makes the action clear, with accessible names and approximately 44-pixel targets;
 - retain text for choices whose meaning would be ambiguous as an icon, including Feeling terms, Need terms, `Fits`, `Maybe`, `Not this time`, and uncertainty choices;
 - keep progress compact and resumable. A person interrupted by the conversation or by iOS backgrounding should return to the same present-moment check-in.
@@ -322,7 +324,7 @@ The check-in is a working surface rather than a lesson. A person may start it im
 
 #### Exact entry copy
 
-Page title: `Alexithymia Support`
+Public page label: `Feeling word support`
 
 Working title: `Find words for right now`
 
@@ -336,6 +338,8 @@ Compact information disclosure:
 
 `This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.`
 
+The expanded disclosure first explains: `Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.`
+
 The disclosure should be reachable through an Info icon after the first visit rather than remaining as a dismissible paragraph above every check-in.
 
 #### Stage 1 — What happened?
@@ -344,7 +348,7 @@ Progress label: `1 of 4 · What happened?`
 
 Heading: `What are you trying to put into words?`
 
-Prompt: `If it helps, write one or two observable facts about what just happened.`
+Prompt: `If it helps, write one or two details someone could have seen or heard, such as what happened or the exact words used.`
 
 Placeholder: `For example: “When we stopped talking after…”`
 
@@ -378,17 +382,17 @@ The stage contains two compact tactile clue cards and one selected-clue tray. Ne
 
 The full Body Cues page remains unchanged except for separately approved evidence or data corrections. The support lane does not embed its long region accordion.
 
-**Feeling-shape card**
+**Overall-feeling card**
 
-- Label: `Feeling shape`
-- Helper: `Place any parts you can sense.`
+- Label: `Overall feeling`
+- Helper: `Rate any parts you can tell. Skip anything that is unclear.`
 - Contains four independently skippable five-position tactile scales:
-  - `Pleasantness`: `Unpleasant` to `Pleasant`;
+  - `Pleasant or unpleasant`: `Unpleasant` to `Pleasant`;
   - `Energy`: `Low` to `High`;
-  - `Power / control`: `Less able to influence this` to `More able to influence this`;
-  - `Expectedness`: `Expected or familiar` to `Sudden or surprising`.
+  - `Ability to influence what happens`: `Less able to influence this` to `More able to influence this`;
+  - `Familiar or surprising`: `Expected or familiar` to `Sudden or surprising`.
 - Every scale has a separate `Not sure` state. `Not sure` is missing information; it is not the midpoint.
-- Power disclosure: `This asks whether you feel able to influence or respond to what is happening. It is not a judgment about whether you should be in control.`
+- Influence disclosure: `This asks whether you feel able to influence or respond to what is happening. It is not asking whether you should be in control.`
 - Expectedness disclosure: `This asks whether what happened felt familiar or expected, or sudden and new.`
 
 These four dimensions follow the GRID/CoreGRID affective-semantic structure. They are a compact way to compare the shape of emotion words, not a claim that every emotion episode has one fixed coordinate. Context can change the typical feature profile of an emotion word, especially its appraisals. https://doi.org/10.1080/02699931.2017.1287668
@@ -397,7 +401,7 @@ Selected-clue tray label: `Your clues`
 
 Primary action after at least one scorable body cue or two feeling-shape dimensions: `Compare words`
 
-Always-available secondary action: `Browse words without a match`
+Always-available secondary action: `Browse all feelings`
 
 When no clue is available, show: `Nothing has to be clear yet. You can still browse words or choose “No word yet.”`
 
@@ -407,15 +411,15 @@ Progress label: `3 of 4 · Words`
 
 Heading: `Possible words`
 
-Prompt: `These are clue matches, not answers. More than one may fit—or none yet.`
+Prompt: `These are words to consider, not answers. More than one may fit, or none yet.`
 
 Candidates render as magnets on the shared physical `MagnetBoard`; do not create card-shaped substitutes or a second drag engine. A compact segmented filter may show `Matches`, `All feelings`, and `My words`. Search covers the unchanged canonical catalog plus the approved lane-local working terms.
 
 Tap a candidate magnet to open a mobile bottom sheet. The sheet contains:
 
-1. term and role: `Feeling`, `Faux Feeling`, or `Working term`;
+1. term and public role: `Feeling`, `Faux Feeling`, `Other emotion word`, or `Your word`;
 2. whole-number `Clue match`, only when the term has complete source coverage for the channels shown;
-3. `Why this match?`, showing each channel separately and the exact clues used;
+3. `How this was compared`, showing each kind of clue separately and the exact clues used;
 4. one short sourced definition or the canonical Feeling-page summary;
 5. the actions `Fits`, `Maybe`, and `Not this time`;
 6. a route to the canonical Feeling or Faux Feeling page when one exists.
@@ -509,15 +513,15 @@ For the set `K(f)` of used channels for which candidate `f` has complete source 
 
 Equal channel weighting is likewise an explicit allneeds editorial choice, not an empirically calibrated statement that body and feeling-shape information are equally diagnostic.
 
-Body and feeling shape therefore have equal channel weight; selecting several body micro-cues does not allow the body channel to overwhelm the broad affect channel. Display the total only when every clue channel the person used has coverage for that candidate. Put terms with partial or absent coverage in `More words to consider` with `Unscored for one or more of your clues`; do not compare a one-channel number directly with a two-channel number.
+Body and overall-feeling ratings therefore have equal weight; selecting several body micro-cues does not allow the body clues to overwhelm the broad affect ratings. Display the total only when every kind of clue the person used can be compared for that candidate. Put terms with partial or absent coverage in `More words to consider` with `These words fit some clues, but the app cannot compare every clue you chose`; do not compare a one-kind number directly with a two-kind number.
 
 Example disclosure:
 
-- `Body: 64% from 2 cues`
-- `Feeling shape: 81% from pleasantness, energy, and power`
-- `Clue match: 73% · equal average of 2 channels`
+- `Body clues: 64% from 2 cues`
+- `Overall feeling: 81% from pleasant or unpleasant, energy, and ability to influence what happens`
+- `Combined result: 73%. The app gives body clues and overall-feeling ratings equal weight.`
 
-If only one complete channel was used, name it: `64% body clue match` or `81% feeling-shape match`. If neither is complete, show `Not enough scored clues for a match`.
+If only one complete kind of clue was used, name it: `64% body clue match` or `81% overall-feeling match`. If neither can be compared, tell the person which input is needed instead of saying that their clues were “not scored.”
 
 This is a transparent compatibility calculation, not a validated diagnostic or emotion-recognition probability. Published word profiles describe shared semantic expectations; they do not establish what a particular person feels in a particular context.
 
@@ -529,23 +533,23 @@ Heading: `What fits right now?`
 
 The stage contains two tactile trays:
 
-1. `Feelings and working words` — the person's `Fits` and optional `Maybe` terms, with role labels and remove/reorder controls;
+1. `Your feeling words` — the person's `Fits` and optional `Maybe` terms, with role labels and remove/reorder controls;
 2. `Needs` — the unchanged full 67-Need magnet catalog with search. No Need is preselected, and no fallback Need is inserted.
 
 Needs detected verbatim in the person's observation may be offered as `Words you already used`; this is text recognition, not emotion-to-Need inference. A selected Faux Feeling may link to its canonical detail page, but the lane must not automatically import its related Needs into the person's statement.
 
 Need selector copy:
 
-- Heading: `What are you needing?`
-- Helper: `Choose any Needs that fit. A feeling does not prove a particular Need.`
+- Heading: `What matters to you here?`
+- Helper: `A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.`
 - Search placeholder: `Search all needs`
 - Empty choice: `Not sure yet`
 
-Each selected Need remains a real magnet and provides `Open [Need] strategies`, which routes to the canonical Need page. The lane itself provides no strategy card, breathing exercise, grounding action, regulation suggestion, repair instruction, or generated request.
+Each selected Need remains a real magnet and provides `Open ways to support this Need`, which routes to the canonical Need page. The lane itself provides no strategy card, breathing exercise, grounding action, regulation suggestion, repair instruction, or generated request.
 
 Communication composer heading: `Put it into your words`
 
-Helper: `Build from only what you selected, then edit anything.`
+Helper: `Start with the words you chose, then edit the sentence however you want.`
 
 `Build sentence` may assemble:
 
@@ -564,7 +568,7 @@ Actions use familiar icons with accessible labels: `Copy`, `Read aloud`, `Add to
 
 Completion copy:
 
-`These are your working words for this moment. You can change them whenever more becomes clear.`
+`These are the words that fit for this moment. You can change them whenever more becomes clear.`
 
 There is no repetition or practice prescription.
 
@@ -577,7 +581,7 @@ At `390 × 844`, use the page as one edge-to-edge working stage below the persis
 - one main job per viewport, one light surface hierarchy, and no repeated heavy rectangular outlines;
 - selected clues or selected words remain in a compact horizontal tray near the top;
 - primary action sits in a safe-area-aware sticky bottom bar and never covers content;
-- Body, Feeling shape, candidate detail, and Need catalog use bottom sheets that can expand to full height for large text;
+- Body, Overall feeling, candidate detail, and Need catalog use bottom sheets that can expand to full height for large text;
 - approximately 44-pixel targets for Back, Close, Clear/Undo, Info, Copy, Read aloud, Journal, search, and sheet handles/actions;
 - visible text remains for ambiguous choices and all term labels;
 - no horizontal document panning; a horizontal tray scrolls only within its named region;
@@ -588,7 +592,7 @@ All surfaces use Customizer-owned functional color roles, outline, corner, typog
 
 #### Public Methods and References copy
 
-Public title: `How Alexithymia Support compares words`
+Public title: `How feeling-word matching works`
 
 Opening:
 
@@ -597,14 +601,14 @@ Opening:
 Required compact sections:
 
 1. `Body clues` — publish the approved body formula, source ownership, current micro-cue limitation, and reverse-inference limitation.
-2. `Feeling shape` — explain the four dimensions, exact source dataset, fixed normalization ranges, per-axis closeness formula, and two-dimension minimum.
+2. `Overall feeling` — explain the four dimensions, exact source dataset, fixed normalization ranges, per-axis closeness formula, and two-dimension minimum.
 3. `Combining channels` — publish the equal-channel formula and coverage rule.
 4. `What is not scored` — observation text, Faux Feelings, unprofiled terms, Need selection, and user candidate decisions.
-5. `Word roles` — distinguish canonical Feelings, canonical Faux Feelings, and lane-local working terms; state that the catalogs are unchanged.
+5. `What the word labels mean` — distinguish canonical Feelings, canonical Faux Feelings, other emotion words, and words entered by the person; state that the catalogs are unchanged.
 6. `Limits` — profiles are group-level word-meaning norms; body maps are prompted self-reports rather than diagnostic physiological signatures; context and individual differences matter; the lane is not therapy or diagnosis.
 7. `Sources` — provide human-reachable raw URLs and identify the claim or data role of every source.
 
-Academic source text stays on this surface and in compact `Why this match?` disclosures. It does not become paragraphs between the person and the next tactile action.
+Academic source text stays on this surface and in compact `How this was compared` disclosures. It does not become paragraphs between the person and the next tactile action.
 
 #### Removal scope
 
@@ -827,6 +831,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-08-26 | Understanding | Umbrella copy, two function lenses, nine lens-local citations, three system strategies, and two legacy association removals approved | Authorized for content implementation; magnet pending |
 | 2026-08-28 | Observation Inference 2.0 | Local deterministic exploratory-matching contract, non-probabilistic explanation copy, approved fallback safeguards, shared highlight/detector model, legacy retirement, and implementation plan approved | Implemented on combined review branch; not yet merged |
 | 2026-08-28 | Alexithymia Support | Complete present-moment lane, fixed-catalog roles, shared scoring, source package, and no-recommendation boundary approved | Implemented on combined review branch; browser/device validation pending |
+| 2026-08-29 | Observation and Feeling word support | Plain-language labels, internal-only surface terms, deliberate annotation activation, and non-invalidating guidance approved | Implemented on test branch; browser/device validation pending |
 
 ## Implementation notes / handoff
 

@@ -34,7 +34,6 @@ type HighlightName =
   | 'observation-faux-feeling'
   | 'observation-guidance'
   | 'observation-cue'
-  | 'observation-surface-term'
   | 'observation-active';
 
 const HIGHLIGHT_NAMES: HighlightName[] = [
@@ -44,7 +43,6 @@ const HIGHLIGHT_NAMES: HighlightName[] = [
   'observation-faux-feeling',
   'observation-guidance',
   'observation-cue',
-  'observation-surface-term',
   'observation-active',
 ];
 
@@ -61,7 +59,7 @@ function highlightNames(annotation: ObservationAnnotation): HighlightName[] {
     if (evidence.kind === 'formula') names.add('observation-formula');
     else if (evidence.kind === 'guidance') names.add('observation-guidance');
     else if (evidence.kind === 'cue') names.add('observation-cue');
-    else if (evidence.kind === 'surface') names.add('observation-surface-term');
+    else if (evidence.kind === 'surface') return;
     else if (evidence.entityType === 'feeling') names.add('observation-feeling');
     else if (evidence.entityType === 'need') names.add('observation-need');
     else names.add('observation-faux-feeling');
@@ -179,7 +177,11 @@ function annotationAtOffset(annotations: ObservationAnnotation[], offset: number
     return 3;
   };
   return annotations
-    .filter((annotation) => offset >= annotation.start && offset <= annotation.end)
+    .filter((annotation) => (
+      offset >= annotation.start
+      && offset < annotation.end
+      && annotation.evidence.some((evidence) => evidence.kind !== 'surface')
+    ))
     .sort((left, right) => priority(left) - priority(right) || (left.end - left.start) - (right.end - right.start))[0]
     ?? null;
 }
@@ -324,7 +326,6 @@ export function AnnotatedObservationEditor({
         onDrop={handleDrop}
         onPointerUp={() => window.requestAnimationFrame(inspectCaret)}
         onKeyUp={handleKeyUp}
-        onSelect={inspectCaret}
       />
       {activeAnnotation ? (
         <aside className={styles.annotationAction} aria-label={`About “${activeAnnotation.text}”`}>

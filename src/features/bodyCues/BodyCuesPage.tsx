@@ -95,7 +95,7 @@ export function BodyCuesPage() {
                     <span className={styles.matchIdentity}>
                       <span className={styles.matchName}>{name}</span>
                       <span className={styles.matchRole}>
-                        {candidate?.role === 'feeling' ? 'Feeling' : 'Working term'}
+                        {candidate?.role === 'feeling' ? 'Feeling' : 'Other emotion word'}
                       </span>
                     </span>
                     <span className={styles.matchPercent}>{Math.round(match.percent)}% clue match</span>

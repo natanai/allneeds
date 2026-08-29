@@ -4,11 +4,11 @@ import type { ObservationAnnotation, ObservationEvidence, ObservationSuggestionR
 const slotById = new Map(observationInferenceIndex.slots.map((slot) => [slot.id, slot]));
 
 export function suggestionBasisSummary(suggestions: ObservationSuggestionResult) {
-  if (suggestions.basis === 'direct') return 'Some possibilities come directly from words you used.';
-  if (suggestions.basis === 'related') return 'These possibilities come from related wording in your observation.';
-  if (suggestions.basis === 'broad') return 'These possibilities come from the broader context of your observation.';
-  if (suggestions.basis === 'exploration') return 'We could not find a close language match, so these are broad starting points to explore.';
-  if (suggestions.basis === 'mixed') return 'Some possibilities come directly from your words, while others come from related wording or broader starting points.';
+  if (suggestions.basis === 'direct') return 'Some suggestions are linked directly to words in your text.';
+  if (suggestions.basis === 'related') return 'Some words in your text are linked with these suggestions.';
+  if (suggestions.basis === 'broad') return 'These are broader possibilities connected with language in your text.';
+  if (suggestions.basis === 'exploration') return 'No close word match was found, so the app added varied starting points instead of leaving this blank.';
+  if (suggestions.basis === 'mixed') return 'Some suggestions are linked to your words; the rest are broader starting points.';
   return '';
 }
 
@@ -18,15 +18,19 @@ export function evidenceDescription(text: string, evidence: ObservationEvidence)
     return `“${text}” helps answer ${slot?.question ?? evidence.slot}.`;
   }
   if (evidence.kind === 'entity') {
-    if (evidence.entityType === 'feeling') return `“${text}” matches the Feeling ${evidence.title}.`;
-    if (evidence.entityType === 'need') return `“${text}” matches the Need ${evidence.title}.`;
-    return `“${text}” matches the faux feeling ${evidence.title}.`;
+    if (evidence.entityType === 'feeling') return `“${text}” is listed as the Feeling ${evidence.title}.`;
+    if (evidence.entityType === 'need') return `“${text}” is listed as the Need ${evidence.title}.`;
+    return `“${text}” is listed as the Faux Feeling ${evidence.title}. A Faux Feeling may combine an emotion with an interpretation of what happened; the label does not mean the event was unreal.`;
   }
   if (evidence.kind === 'guidance') return `${evidence.label}: ${evidence.explanation}`;
-  if (evidence.kind === 'surface') return `“${text}” is preserved as your wording.`;
-  return `“${text}” matches an authored observation cue used to offer possibilities.`;
+  if (evidence.kind === 'surface') return '';
+  return `“${text}” helped shape some of the suggestions below.`;
 }
 
 export function annotationDescriptions(annotation: ObservationAnnotation) {
-  return annotation.evidence.map((evidence) => ({ evidence, description: evidenceDescription(annotation.text, evidence) }));
+  const userFacingEvidence = annotation.evidence.filter((evidence) => evidence.kind !== 'surface');
+  const entityEvidence = userFacingEvidence.filter((evidence) => evidence.kind === 'entity');
+  const selectedEvidence = entityEvidence.length ? entityEvidence : userFacingEvidence;
+  return selectedEvidence
+    .map((evidence) => ({ evidence, description: evidenceDescription(annotation.text, evidence) }));
 }

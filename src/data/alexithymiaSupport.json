@@ -15,7 +15,7 @@
     "merriam-webster": {
       "title": "Merriam-Webster Dictionary",
       "url": "https://www.merriam-webster.com/",
-      "role": "Plain-language orientation for lane-local working terms; it does not assign those terms to the official allneeds Feeling catalog."
+      "role": "Plain-language definitions for emotion words that are not part of the allneeds Feeling list."
     }
   },
   "shapeNormalization": {
@@ -82,7 +82,7 @@
       "display": "Bored",
       "role": "working",
       "bodyProfileKey": "bored",
-      "definition": "A working word for feeling uninterested or under-stimulated.",
+      "definition": "Feeling uninterested or not mentally engaged.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/bored",
       "shape": {
         "source": "coregrid-2026",
@@ -112,7 +112,7 @@
       "display": "Determined",
       "role": "working",
       "bodyProfileKey": "determined",
-      "definition": "A working word for feeling firmly resolved to keep moving toward something.",
+      "definition": "Feeling firmly resolved to keep moving toward something.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/determined"
     },
     {
@@ -120,7 +120,7 @@
       "display": "Disgust",
       "role": "working",
       "bodyProfileKey": "disgust",
-      "definition": "A working word for strong aversion or revulsion.",
+      "definition": "A strong feeling of aversion or revulsion.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/disgust",
       "shape": {
         "source": "coregrid-2026",
@@ -176,7 +176,7 @@
       "display": "Gratitude",
       "role": "working",
       "bodyProfileKey": "gratitude",
-      "definition": "A working word for appreciation of something received or valued.",
+      "definition": "Appreciation for something received or valued.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/gratitude",
       "shape": {
         "source": "coregrid-2026",
@@ -190,7 +190,7 @@
       "display": "Grief",
       "role": "working",
       "bodyProfileKey": "grief",
-      "definition": "A working word for sorrow connected with loss.",
+      "definition": "Sorrow connected with loss.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/grief",
       "shape": {
         "source": "coregrid-2026",
@@ -204,7 +204,7 @@
       "display": "Guilt",
       "role": "working",
       "bodyProfileKey": "guilt",
-      "definition": "A working word for distress about something a person believes they did or failed to do.",
+      "definition": "Distress about something a person believes they did or failed to do.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/guilt",
       "shape": {
         "source": "coregrid-2026",
@@ -260,7 +260,7 @@
       "display": "Numb",
       "role": "working",
       "bodyProfileKey": "numb",
-      "definition": "A working word for feeling emotionally blunted, distant, or hard to reach.",
+      "definition": "Feeling emotionally blunted, distant, or hard to reach.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/numb"
     },
     {
@@ -324,7 +324,7 @@
       "display": "Shame",
       "role": "working",
       "bodyProfileKey": "shame",
-      "definition": "A working word for painful self-consciousness about oneself.",
+      "definition": "Painful self-consciousness about oneself.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/shame",
       "shape": {
         "source": "coregrid-2026",
@@ -338,7 +338,7 @@
       "display": "Stress",
       "role": "working",
       "bodyProfileKey": "stress",
-      "definition": "A working word for feeling taxed or strained by demands.",
+      "definition": "Feeling taxed or strained by demands.",
       "definitionSource": "https://www.merriam-webster.com/dictionary/stress",
       "shape": {
         "source": "coregrid-2026",

@@ -172,18 +172,18 @@ const shapeControls: Array<{
   high: string;
   disclosure?: string;
 }> = [
-  { dimension: 'pleasantness', label: 'Pleasantness', low: 'Unpleasant', high: 'Pleasant' },
+  { dimension: 'pleasantness', label: 'Pleasant or unpleasant', low: 'Unpleasant', high: 'Pleasant' },
   { dimension: 'energy', label: 'Energy', low: 'Low', high: 'High' },
   {
     dimension: 'power',
-    label: 'Power / control',
+    label: 'Ability to influence what happens',
     low: 'Less able to influence this',
     high: 'More able to influence this',
-    disclosure: 'This asks whether you feel able to influence or respond to what is happening. It is not a judgment about whether you should be in control.',
+    disclosure: 'This asks whether you feel able to influence or respond to what is happening. It is not asking whether you should be in control.',
   },
   {
     dimension: 'expectedness',
-    label: 'Expectedness',
+    label: 'Familiar or surprising',
     low: 'Expected or familiar',
     high: 'Sudden or surprising',
     disclosure: 'This asks whether what happened felt familiar or expected, or sudden and new.',
@@ -250,14 +250,14 @@ export function FeelingShapeSheet({
   onClose: () => void;
 }) {
   return (
-    <SupportSheet open={open} title="Feeling shape" titleId="alex-shape-sheet-title" onClose={onClose} wide>
-      <p className={styles.sheetIntro}>Place any parts you can sense. Each scale is optional.</p>
+    <SupportSheet open={open} title="Overall feeling" titleId="alex-shape-sheet-title" onClose={onClose} wide>
+      <p className={styles.sheetIntro}>Rate any parts you can tell. Skip anything that is unclear.</p>
       <div className={styles.shapeGroups}>
         <section className={styles.shapeGroup} aria-labelledby="alex-shape-core-title">
           <header>
             <p>Start here</p>
-            <h3 id="alex-shape-core-title">Core shape</h3>
-            <span>Use either scale that feels available.</span>
+            <h3 id="alex-shape-core-title">General feeling</h3>
+            <span>Two ratings are enough to compare words.</span>
           </header>
           <div className={styles.shapeScales}>
             {shapeControls.slice(0, 2).map((control) => (
@@ -278,8 +278,8 @@ export function FeelingShapeSheet({
         <section className={`${styles.shapeGroup} ${styles.shapeGroupSecondary}`} aria-labelledby="alex-shape-context-title">
           <header>
             <p>Optional detail</p>
-            <h3 id="alex-shape-context-title">Situation shape</h3>
-            <span>These clues can narrow the comparison.</span>
+            <h3 id="alex-shape-context-title">How the situation felt</h3>
+            <span>These ratings can make the comparison more specific.</span>
           </header>
           <div className={styles.shapeScales}>
             {shapeControls.slice(2).map((control) => (
@@ -305,7 +305,17 @@ export function FeelingShapeSheet({
 
 function percentLine(value: number | null) {
   const percent = roundedMatchPercent(value);
-  return percent === null ? 'Not scored' : `${percent}%`;
+  return percent === null ? 'Cannot compare' : `${percent}%`;
+}
+
+function plainShapeDimension(dimension: string) {
+  const labels: Record<string, string> = {
+    pleasantness: 'pleasant or unpleasant',
+    energy: 'energy',
+    power: 'ability to influence what happens',
+    expectedness: 'familiar or surprising',
+  };
+  return labels[dimension] ?? dimension;
 }
 
 export function CandidateSheet({
@@ -330,7 +340,7 @@ export function CandidateSheet({
   const matchLabel = singleChannel === 'body'
     ? 'body clue match'
     : singleChannel === 'shape'
-      ? 'feeling-shape match'
+      ? 'overall-feeling match'
       : 'Clue match';
   const hasReviewedScore = Boolean(score?.usedChannels.length);
   return (
@@ -345,27 +355,28 @@ export function CandidateSheet({
           {term.role === 'faux-feeling' ? <p className={styles.fauxNotice}>{term.definition}</p> : (
             <p className={styles.termDefinition}>{term.definition}</p>
           )}
+          {term.role === 'working' ? <p className={styles.scoreDisclosure}>{term.candidate ? 'This is an emotion word you can use here, but it is not one of the site’s linked Feeling pages.' : 'This is a word you entered for this check-in.'}</p> : null}
 
           {term.role !== 'faux-feeling' ? (
             <details className={styles.matchDetails} open>
-              <summary>Why this match?</summary>
+              <summary>How this was compared</summary>
               {score?.usedChannels.length ? (
                 <dl>
-                  {score.body ? <><dt>Body</dt><dd>{percentLine(score.body.match)} from {score.body.cueCount} {score.body.cueCount === 1 ? 'cue' : 'cues'}{cueLabels.length ? ` · ${cueLabels.join(', ')}` : ''}</dd></> : null}
-                  {score.shape ? <><dt>Feeling shape</dt><dd>{percentLine(score.shape.match)} from {score.shape.dimensions.join(', ')}</dd></> : null}
-                  {score.complete && score.usedChannels.length > 1 ? <><dt>Clue match</dt><dd>{percentLine(score.clueMatch)} · equal average of {score.usedChannels.length} channels</dd></> : null}
-                  {score.missingChannels.length ? <><dt>Coverage</dt><dd>Unscored for one or more of your clues.</dd></> : null}
+                  {score.body ? <><dt>Body clues</dt><dd>{percentLine(score.body.match)} from {score.body.cueCount} {score.body.cueCount === 1 ? 'cue' : 'cues'}{cueLabels.length ? `: ${cueLabels.join(', ')}` : ''}</dd></> : null}
+                  {score.shape ? <><dt>Overall feeling</dt><dd>{percentLine(score.shape.match)} from {score.shape.dimensions.map(plainShapeDimension).join(', ')}</dd></> : null}
+                  {score.complete && score.usedChannels.length > 1 ? <><dt>Combined result</dt><dd>{percentLine(score.clueMatch)}. The app gives body clues and overall-feeling ratings equal weight.</dd></> : null}
+                  {score.missingChannels.length ? <><dt>Some clues unavailable</dt><dd>The app cannot compare every clue you chose for this word.</dd></> : null}
                 </dl>
-              ) : <p>Not enough scored clues for a match.</p>}
+              ) : <p>Choose body clues or at least two overall-feeling ratings to compare this word.</p>}
             </details>
           ) : null}
 
           {term.role === 'faux-feeling' ? (
-            <p className={styles.scoreDisclosure}>Faux Feelings are not scored. You can keep this term if it helps describe your experience.</p>
+            <p className={styles.scoreDisclosure}>Faux Feelings are not compared with clues. You can keep this word if it helps describe your experience.</p>
           ) : hasReviewedScore ? (
-            <p className={styles.scoreDisclosure}>Clue match estimates how closely this word’s reviewed profile fits the clues you entered. It is not a probability, diagnosis, or determination of what you feel. You remain the judge.</p>
+            <p className={styles.scoreDisclosure}>This percentage shows how closely the word matches the clues you chose. It cannot tell you what you feel; you decide what fits.</p>
           ) : (
-            <p className={styles.scoreDisclosure}>This word has no reviewed profile for these clues, so it is not scored. You can still decide whether it fits.</p>
+            <p className={styles.scoreDisclosure}>The app cannot compare this word with these clues. You can still decide whether it fits.</p>
           )}
 
           <div className={styles.decisionButtons} role="group" aria-label={`Does ${term.label} fit?`}>
@@ -377,7 +388,7 @@ export function CandidateSheet({
           <div className={styles.sheetFooterSplit}>
             {term.route ? <Link to={term.route}>Open {term.roleLabel} page</Link> : null}
             {term.definitionSource?.startsWith('https://') ? (
-              <a href={term.definitionSource} target="_blank" rel="noopener noreferrer">Definition source</a>
+              <a href={term.definitionSource} target="_blank" rel="noopener noreferrer">Where this definition comes from</a>
             ) : null}
             <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
           </div>
@@ -423,8 +434,8 @@ export function NeedCatalogSheet({
       : [...selected, need.slug]),
   }));
   return (
-    <SupportSheet open={open} title="What are you needing?" titleId="alex-needs-sheet-title" onClose={onClose} wide>
-      <p className={styles.sheetIntro}>Choose any Needs that fit. A feeling does not prove a particular Need.</p>
+    <SupportSheet open={open} title="What matters to you here?" titleId="alex-needs-sheet-title" onClose={onClose} wide>
+      <p className={styles.sheetIntro}>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p>
       <label className={styles.sheetSearch}>
         <span className="visually-hidden">Search all needs</span>
         <SearchIcon />

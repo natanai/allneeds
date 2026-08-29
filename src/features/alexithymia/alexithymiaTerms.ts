@@ -16,7 +16,7 @@ export type SupportTerm = {
   id: string;
   label: string;
   role: SupportTermRole;
-  roleLabel: 'Feeling' | 'Faux Feeling' | 'Working term';
+  roleLabel: 'Feeling' | 'Faux Feeling' | 'Other emotion word' | 'Your word';
   route: string | null;
   definition: string;
   definitionSource: string | null;
@@ -31,7 +31,7 @@ export function candidateTerm(candidate: AlexithymiaCandidate): SupportTerm {
     id: `candidate:${candidate.key}`,
     label: candidate.display,
     role: candidate.role,
-    roleLabel: candidate.role === 'feeling' ? 'Feeling' : 'Working term',
+    roleLabel: candidate.role === 'feeling' ? 'Feeling' : 'Other emotion word',
     route: candidate.route,
     definition: canonicalFeeling?.summary ?? candidate.definition ?? '',
     definitionSource: candidate.definitionSource === 'catalog'
@@ -79,9 +79,9 @@ export function customWorkingTerm(label: string): SupportTerm {
     id: customTermId(label),
     label: label.trim(),
     role: 'working',
-    roleLabel: 'Working term',
+    roleLabel: 'Your word',
     route: null,
-    definition: 'A word you entered for this moment. It is not being added to the official Feeling catalog.',
+    definition: 'A word you entered for this moment. It stays with this check-in and is not added to the site’s Feeling list.',
     definitionSource: null,
     candidate: null,
   };
@@ -164,7 +164,7 @@ export function createSupportJournalDraft({
       : '',
   ].filter(Boolean).join('\n\n');
   const notes = assembledNotes || (terms.length
-    ? `Working words: ${terms.map((term) => `${term.label} (${term.roleLabel})`).join(', ')}`
+    ? `Words you chose: ${terms.map((term) => `${term.label} (${term.roleLabel})`).join(', ')}`
     : '');
   return {
     notes,

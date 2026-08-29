@@ -1,4 +1,4 @@
-# Body Cues — Methods & References
+# Body Cues: Methods and references
 
 _Last reviewed: 2026-08-28_
 
@@ -14,19 +14,19 @@ Zero-intensity cues are omitted. Within the reviewed candidate set, a selected c
 
 ## Data ownership
 
-The selectable regions, micro-cues, and forward association strengths are owned in `src/data/body-regions.json`. Both Body Cues and Alexithymia Support call the same TypeScript scorer over that source. The older per-emotion-normalized reverse weights are retained only for descriptive Feeling-page cue details; they are not a scoring path.
+The selectable regions, small body cues, and fixed links to possible words are owned in `src/data/body-regions.json`. Both Body Cues and Feeling word support use the same calculation over that source. Older reverse weights are retained only for descriptive details on Feeling pages; they are not used to rank words.
 
 ## Evidence and limits
 
 Published body-map studies support the broad observation that people report partly differentiable bodily patterns after emotion prompts or stimuli. They do not directly validate this app's thirty micro-cue descriptions, exact intensity bands, exact association strengths, or the reverse question “given this sensation, which emotion is present?” The current micro-cue map is an authored editorial model undergoing a claim-level audit, not an empirically calibrated classifier.
 
-Body reports can reflect physiology, action preparation, learned concepts or metaphors, health, medication, culture, context, and individual differences. Body awareness is therefore one optional source of information. A person can use the full Body Cues page by itself, combine body clues with Feeling shape in Alexithymia Support, or skip body clues.
+Body reports can reflect physiology, action preparation, learned concepts or metaphors, health, medication, culture, context, and individual differences. Body awareness is therefore one optional source of information. A person can use the full Body Cues page by itself, combine body clues with Overall feeling ratings in Feeling word support, or skip body clues.
 
 ## Sources
 
-- [Nummenmaa et al. (2014), *Bodily maps of emotions*](https://doi.org/10.1073/pnas.1321664111) — broad prompted self-report body topographies.
-- [Volynets et al. (2020), *Bodily maps of emotions are culturally universal*](https://pubmed.ncbi.nlm.nih.gov/31259590/) — cross-cultural similarity in prompted self-reported maps.
-- [Daikoku, Minatoya, and Tanaka (2026), *Mapping emotional feeling in the body*](https://pubmed.ncbi.nlm.nih.gov/41207576/) — review distinguishing physiological, action-related, and conceptual contributions.
-- [Trevisan et al. (2019), alexithymia and interoceptive awareness meta-analysis](https://pubmed.ncbi.nlm.nih.gov/31380655/) — small, measurement-dependent average relationship; supports keeping body awareness optional.
+- [Nummenmaa et al. (2014), *Bodily maps of emotions*](https://doi.org/10.1073/pnas.1321664111), broad prompted self-report body topographies.
+- [Volynets et al. (2020), *Bodily maps of emotions are culturally universal*](https://pubmed.ncbi.nlm.nih.gov/31259590/), cross-cultural similarity in prompted self-reported maps.
+- [Daikoku, Minatoya, and Tanaka (2026), *Mapping emotional feeling in the body*](https://pubmed.ncbi.nlm.nih.gov/41207576/), review distinguishing physiological, action-related, and conceptual contributions.
+- [Trevisan et al. (2019), alexithymia and interoceptive awareness meta-analysis](https://pubmed.ncbi.nlm.nih.gov/31380655/), a small, measurement-dependent average relationship that supports keeping body awareness optional.
 
-For the multi-channel word comparison, see [How Alexithymia Support compares words](./alexithymia-support-methods.md).
+For the combined word comparison, see [How feeling-word matching works](./alexithymia-support-methods.md).

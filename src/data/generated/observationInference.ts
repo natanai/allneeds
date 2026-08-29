@@ -2,8 +2,8 @@
 
 export const observationInferenceIndex = {
   "schemaVersion": 1,
-  "modelVersion": "2.0.0",
-  "sourceChecksum": "a7dd495630cc3b30f967d87e05eb8847dad78b7b4f3eb20d4adc5732026ea8be",
+  "modelVersion": "2.0.1",
+  "sourceChecksum": "081c61d1d6019d9130bca03229ce136ee37310f5795c067e7f04257a8b015e2f",
   "catalogChecksum": "5574e09ecd3d601599d663b3cd40fe6ae586644d6f0ac58082a6224d5e762750",
   "provenance": {
     "repository": "natanai/nvc-app",
@@ -2599,7 +2599,7 @@ export const observationInferenceIndex = {
       "label": "What you directly sensed",
       "noun": "sensory detail",
       "question": "What did you see or hear?",
-      "summary": "Use sensory verbs and direct quotes so the observation stays factual.",
+      "summary": "Describe a visible action or the exact words you heard.",
       "examples": [
         "I saw him close the laptop.",
         "I heard “Please wrap this up.”"
@@ -2627,7 +2627,7 @@ export const observationInferenceIndex = {
       "label": "Counts and quotes",
       "noun": "measurement",
       "question": "What can be counted or quoted?",
-      "summary": "Mention quantities or repeat the exact words to make it verifiable.",
+      "summary": "Mention quantities or repeat the exact words when that detail matters.",
       "examples": [
         "They called three times.",
         "She said “I’ll handle it tomorrow.”"
@@ -4155,8 +4155,8 @@ export const observationInferenceIndex = {
   "guidanceRules": [
     {
       "id": "trait-labels",
-      "label": "Trait / character labels",
-      "explanation": "Swap labels for the concrete action you saw or heard.",
+      "label": "A word that summarizes someone",
+      "explanation": "This word may describe your experience. If you want a more concrete observation too, add the words or actions that led you to use it.",
       "terms": [
         "rude",
         "mean",
@@ -4263,8 +4263,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "catastrophe-language",
-      "label": "Catastrophic impact language",
-      "explanation": "Describe what happened instead of phrases like “destroyed” or “ruined.”",
+      "label": "A broad description of impact",
+      "explanation": "If this word summarizes the result, add the specific damage or change you mean. Keep the word if it is already the most accurate description.",
       "terms": [
         "destroy",
         "destroyed",
@@ -4296,8 +4296,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "comparison-stories",
-      "label": "Comparison or “as usual” stories",
-      "explanation": "Point to one recent moment instead of comparing to a pattern.",
+      "label": "A repeated pattern",
+      "explanation": "If you are describing a pattern, add one recent example or a count to make it easier to understand.",
       "terms": [
         "as usual",
         "same as always",
@@ -4316,8 +4316,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "moralizing-language",
-      "label": "Moralizing language",
-      "explanation": "Skip should/shouldn’t judgments and name what happened instead.",
+      "label": "A rule or judgment",
+      "explanation": "If this expresses what you believe should happen, also add what actually happened in this moment.",
       "terms": [
         "should",
         "shouldn’t",
@@ -4327,10 +4327,6 @@ export const observationInferenceIndex = {
         "oughtn't",
         "supposed to",
         "not supposed to",
-        "must",
-        "have to",
-        "need to",
-        "required to",
         "the right thing",
         "the wrong thing",
         "proper",
@@ -4347,8 +4343,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "mind-reading-claims",
-      "label": "Mind-reading or motive claims",
-      "explanation": "Describe the observable action and leave motives like “on purpose” for later.",
+      "label": "A possible motive",
+      "explanation": "You may be right about the motive. If you want a concrete observation too, add the words or actions that led you to this conclusion.",
       "terms": [
         "on purpose",
         "intentionally",
@@ -4366,12 +4362,6 @@ export const observationInferenceIndex = {
         "to get back at me",
         "to punish me",
         "to manipulate me",
-        "obviously",
-        "clearly",
-        "because you",
-        "because he",
-        "because she",
-        "because they",
         "for no reason",
         "to hurt me",
         "to hurt us",
@@ -4394,8 +4384,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "global-language",
-      "label": "Global or absolute language",
-      "explanation": "Anchor the moment in a specific time frame instead of absolutes like “always”.",
+      "label": "A broad time or frequency word",
+      "explanation": "If you mean a repeated pattern, add a timeframe, recent example, or count when you can.",
       "terms": [
         "always",
         "never",
@@ -4404,23 +4394,17 @@ export const observationInferenceIndex = {
         "incessantly",
         "every time",
         "all the time",
-        "everyone",
-        "no one",
-        "nobody",
         "all of you",
         "none of you",
-        "all",
-        "none",
-        "whenever",
-        "everybody"
+        "whenever"
       ],
       "patterns": [],
       "provenance": "legacy-nvc-lint"
     },
     {
       "id": "vague-quantifiers",
-      "label": "Vague quantifiers or comparatives",
-      "explanation": "Give a count or timeframe instead of words like “often” or “too much”.",
+      "label": "An amount that could be more specific",
+      "explanation": "If the amount matters, add a count, duration, or timeframe. An estimate is fine when an exact number is not available.",
       "terms": [
         "a lot",
         "lots",
@@ -4440,30 +4424,15 @@ export const observationInferenceIndex = {
         "mostly",
         "too much",
         "too little",
-        "too many",
-        "enough",
-        "not enough",
-        "more",
-        "less",
-        "better",
-        "worse",
-        "very",
-        "really",
-        "extremely",
-        "totally",
-        "completely",
-        "kind of",
-        "sorta",
-        "sort of",
-        "somewhat"
+        "too many"
       ],
       "patterns": [],
       "provenance": "legacy-nvc-lint"
     },
     {
       "id": "faux-feeling-story-words",
-      "label": "Faux-feelings or story words",
-      "explanation": "Name the words or actions you witnessed instead of story words like these.",
+      "label": "A word about impact or interpretation",
+      "explanation": "This word may describe your experience. If you also want a concrete observation, add the specific words, actions, or events that led you to use it.",
       "terms": [
         "ignored",
         "dismissed",
@@ -4537,8 +4506,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "idiom-evaluations",
-      "label": "Idioms that conceal evaluations",
-      "explanation": "Translate the idiom into what a camera or microphone would capture.",
+      "label": "A figure of speech",
+      "explanation": "If this phrase summarizes the moment, add the words or actions you mean by it.",
       "terms": [
         "threw me under the bus",
         "stabbed me in the back",
@@ -4561,30 +4530,22 @@ export const observationInferenceIndex = {
     },
     {
       "id": "pathologizing-labels",
-      "label": "Pathologizing labels used as insults",
-      "explanation": "Describe the specific behaviour instead of medical labels.",
-      "terms": [
-        "crazy",
-        "insane",
-        "psycho",
-        "hysterical",
-        "unstable",
-        "borderline",
-        "bipolar",
-        "adhd",
-        "autistic",
-        "ocd",
-        "sociopath",
-        "psychopath",
-        "delusional"
+      "label": "A mental-health label used as a judgment",
+      "explanation": "If this is a diagnosis or identity, keep it as written. If it is a judgment about someone, also add the words or actions you observed.",
+      "terms": [],
+      "patterns": [
+        {
+          "id": "judgmental-mental-health-label",
+          "pattern": "\\b(?:you|he|she|they)\\s+(?:are|is|was|were)\\s+(?:crazy|insane|psycho|hysterical|unstable|delusional)\\b",
+          "flags": "i"
+        }
       ],
-      "patterns": [],
       "provenance": "legacy-nvc-lint"
     },
     {
       "id": "speculation-language",
-      "label": "Speculation or inference language",
-      "explanation": "Stick with what you directly observed instead of “seems” or “probably”.",
+      "label": "An uncertain conclusion",
+      "explanation": "Uncertainty is useful to name. You can also add the details that led you to this possibility.",
       "terms": [
         "probably",
         "likely",
@@ -4598,19 +4559,15 @@ export const observationInferenceIndex = {
         "seeming",
         "seems like",
         "seem to",
-        "appears to",
-        "looks like",
-        "sounds like",
-        "felt like",
-        "feel like"
+        "appears to"
       ],
       "patterns": [],
       "provenance": "legacy-nvc-lint"
     },
     {
       "id": "prediction-language",
-      "label": "Predictions framed as certainty",
-      "explanation": "Focus on what already happened rather than predicting the future.",
+      "label": "A prediction",
+      "explanation": "If this is about what may happen next, also add what has happened so far.",
       "terms": [
         "bound to",
         "never going to",
@@ -4629,8 +4586,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "thinking-language",
-      "label": "Interpretations framed as thoughts",
-      "explanation": "Move “I think…” statements to the interpretation step and keep observations factual.",
+      "label": "A thought or interpretation",
+      "explanation": "Your thought can stay. If you want a concrete observation too, add what you saw, heard, or were told.",
       "terms": [
         "i think",
         "i believe",
@@ -4647,8 +4604,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "blame-language",
-      "label": "Blame or fault language",
-      "explanation": "Drop blame phrases and recount the observable sequence instead.",
+      "label": "A statement about blame or fault",
+      "explanation": "This may matter to your experience. You can also add the sequence of events that led you to describe responsibility this way.",
       "terms": [
         "fault",
         "faults",
@@ -4663,8 +4620,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "absence-language",
-      "label": "Abstract lack statements",
-      "explanation": "Swap “lack of…” for a description of what you actually saw or heard.",
+      "label": "A statement about what was missing",
+      "explanation": "If you can, add the action, response, or information you expected and did not observe.",
       "terms": [
         "lack of respect",
         "lack of consideration",
@@ -4685,8 +4642,8 @@ export const observationInferenceIndex = {
     },
     {
       "id": "thoughts-as-feelings",
-      "label": "Thoughts masquerading as feelings",
-      "explanation": "If you want to share feelings, keep them in a separate sentence after the observation.",
+      "label": "An “I feel that…” statement",
+      "explanation": "This phrase usually introduces a thought. If it helps, name the emotion separately and add the event that led to the thought.",
       "terms": [
         "i feel that",
         "i feel like",
@@ -4705,16 +4662,11 @@ export const observationInferenceIndex = {
     },
     {
       "id": "evaluative-language",
-      "label": "Evaluative language",
-      "explanation": "Replace the evaluation with the words, actions, or measurable result you noticed.",
+      "label": "An evaluation",
+      "explanation": "This evaluation can stay. You may also want to add the words, actions, or result that led you to it.",
       "terms": [
-        "always",
-        "never",
-        "must",
         "right",
-        "wrong",
         "good",
-        "bad",
         "better",
         "worse",
         "best",
@@ -4722,21 +4674,13 @@ export const observationInferenceIndex = {
         "horrid",
         "appalling",
         "terrific",
-        "unacceptable",
         "ridiculous",
         "pathetic",
-        "annoying",
-        "annoyed",
-        "annoy",
-        "annoys",
-        "annoyingly",
-        "annoyance",
         "horrible",
         "awful",
         "terrible",
         "useless",
         "pointless",
-        "unprofessional",
         "shameful",
         "disgusting",
         "amazing",
@@ -4745,18 +4689,15 @@ export const observationInferenceIndex = {
         "incredible",
         "perfect",
         "unfair",
-        "inexcusable",
-        "disappointing",
-        "procrastinating",
-        "procrastinate"
+        "inexcusable"
       ],
       "patterns": [],
       "provenance": "legacy-nvc-lint"
     },
     {
       "id": "agentive-language",
-      "label": "Causal or coercive language",
-      "explanation": "Describe the observable sequence without assigning another person full responsibility for your response.",
+      "label": "A statement about cause or pressure",
+      "explanation": "If this describes pressure or coercion, add the exact words, actions, or constraints involved. This does not mean the pressure was unreal.",
       "terms": [],
       "patterns": [
         {

@@ -27,17 +27,17 @@ type GuideData = {
 };
 
 const slotDefinitions = [
-  { id: 'time', label: 'When?', missing: 'Missing' },
-  { id: 'context', label: 'Where?', missing: 'Missing' },
-  { id: 'sensory', label: 'What did you see/hear?', missing: 'Missing' },
-  { id: 'measure', label: 'Measurement or quote (optional)', missing: 'Optional' },
+  { id: 'time', label: 'When?', missing: 'Add a time' },
+  { id: 'context', label: 'Where or with whom?', missing: 'Add context' },
+  { id: 'sensory', label: 'What did you see or hear?', missing: 'Add a detail' },
+  { id: 'measure', label: 'Number or exact words', missing: 'Optional' },
 ] as const;
 
 const recipe = [
-  ['When did it happen?', 'Add a day, date, or timeframe so the moment is anchored in time.', 'Yesterday at 3 p.m.… · On Monday around noon…'],
-  ['Where did it happen and who was involved?', 'Name the space or people so the scene is easy to picture.', 'In the conference room with Alex… · With my kids in the kitchen…'],
-  ['What did you see or hear?', 'Use sensory verbs and direct quotes so the observation stays factual.', 'I saw him close the laptop. · I heard “Please wrap this up.”'],
-  ['What can be counted or quoted?', 'Mention quantities or repeat the exact words to make it verifiable.', 'They called three times. · She said “I’ll handle it tomorrow.”'],
+  ['When did it happen?', 'Add a day, date, or general time so the moment is easier to place.', 'Yesterday at 3 p.m. · On Monday around noon'],
+  ['Where were you, and who was involved?', 'Name the place or people if that helps someone picture the moment.', 'In the conference room with Alex · With my kids in the kitchen'],
+  ['What did you see or hear?', 'Describe a visible action or the words you heard. Your own feelings can stay in the text too.', 'I saw him close the laptop. · I heard “Please wrap this up.”'],
+  ['What can be counted or quoted?', 'A number, duration, or exact quote can make the moment easier to revisit.', 'They called three times. · She said “I’ll handle it tomorrow.”'],
 ] as const;
 
 const guide = observationGuide as unknown as GuideData;
@@ -50,24 +50,24 @@ function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
     }
     if (block.type === 'callout') return <aside key={blockIndex} className={styles.guideCallout} dangerouslySetInnerHTML={{ __html: block.html }} />;
     if (block.type === 'paragraph') return <p key={blockIndex} dangerouslySetInnerHTML={{ __html: block.text }} />;
-    return <div key={blockIndex} className={styles.guideExamples}>{block.items.map((item, itemIndex) => <article key={itemIndex}><p><strong>Evaluation:</strong> <span dangerouslySetInnerHTML={{ __html: item.evaluation }} /></p><p><strong>Observation:</strong> <span dangerouslySetInnerHTML={{ __html: item.observation }} /></p><p dangerouslySetInnerHTML={{ __html: item.why }} /></article>)}</div>;
+    return <div key={blockIndex} className={styles.guideExamples}>{block.items.map((item, itemIndex) => <article key={itemIndex}><p><strong>Broad wording:</strong> <span dangerouslySetInnerHTML={{ __html: item.evaluation }} /></p><p><strong>More concrete:</strong> <span dangerouslySetInnerHTML={{ __html: item.observation }} /></p><p dangerouslySetInnerHTML={{ __html: item.why }} /></article>)}</div>;
   });
 }
 
 function ObservationRecipe({ onOpenGuide }: { onOpenGuide: () => void }) {
   return (
     <>
-      <p>Use these prompts to keep your statement observational.</p>
+      <p>These prompts can help separate what happened from what you think it meant. You can keep both; the prompts simply help you add concrete details.</p>
       <ol>{recipe.map(([title, body, exampleText]) => <li key={title}><strong>{title}</strong><p>{body}</p><small>Try: {exampleText}</small></li>)}</ol>
-      <p>Need a refresher? Visit the <a href="#observation-guide" onClick={(event) => { event.preventDefault(); onOpenGuide(); }}>full observation guide</a> below for principles, steps, and examples.</p>
+      <p>For more examples and sources, open the <a href="#observation-guide" onClick={(event) => { event.preventDefault(); onOpenGuide(); }}>observation guide</a> below.</p>
     </>
   );
 }
 
 function infoCopy(topic: string) {
-  if (topic === 'slots') return <><p>The checklist is a quick quality pass for your sentence.</p><ul><li><strong>When?</strong> Add a time or event anchor.</li><li><strong>Where?</strong> Name the setting.</li><li><strong>What did you see/hear?</strong> Use observable words or actions.</li><li><strong>Measurement or quote</strong> is optional, but counts and exact words can make a memory easier to revisit.</li></ul></>;
-  if (topic === 'matching') return <><p>Matching looks for feeling and need words, related phrases, and broader context in your observation. It works on this device and does not send your text anywhere.</p><p>These are possibilities to explore, not a conclusion about what you feel or need. When the wording is unclear, we include a balanced set of starting points so you are never left with an empty result.</p></>;
-  return <><p>Start with what a camera or microphone could capture: the time, place, and words or actions you saw or heard.</p><p>Save feelings, needs, motives, and interpretations for the next step.</p></>;
+  if (topic === 'slots') return <><p>Quick Check shows which concrete details the app noticed. It is a writing aid, not a score.</p><ul><li><strong>When?</strong> Add a time or event, such as “yesterday” or “after lunch.”</li><li><strong>Where or with whom?</strong> Name the setting or people if they matter.</li><li><strong>What did you see or hear?</strong> Add a visible action or the words you heard.</li><li><strong>Number or exact words</strong> is optional, but a count, duration, or quote can make the moment clearer.</li></ul></>;
+  if (topic === 'matching') return <><p>This page checks your text against a fixed list on this device. Your text is not sent anywhere.</p><p>It can notice exact words and a limited set of related phrases, but it cannot understand your situation or know what you feel or need.</p><p>Every non-empty entry receives four possible Feelings and four possible Needs. When there is no close match, the page uses a varied starting list so you always have words to explore.</p></>;
+  return <><p>An observation is a description of what happened: what someone could see, hear, quote, or count.</p><p>You can write in your own words. Quick Check only suggests details that may help another person picture the same moment. It does not decide whether your interpretation is true.</p></>;
 }
 
 function entityRoute(entityType: 'feeling' | 'need' | 'fauxFeeling', slug: string) {
@@ -107,11 +107,6 @@ export function ObservationsPage() {
     analysis.entities.forEach((entity) => unique.set(`${entity.entityType}:${entity.slug}`, entity));
     return [...unique.values()];
   }, [analysis.entities]);
-  const detectedSurfaceTerms = useMemo(() => {
-    const unique = new Map<string, (typeof analysis.surfaceTerms)[number]>();
-    analysis.surfaceTerms.forEach((term) => unique.set(`${term.id}:${term.text.toLocaleLowerCase()}`, term));
-    return [...unique.values()];
-  }, [analysis.surfaceTerms]);
   const evidenceText = useMemo(() => {
     const annotationById = new Map(analysis.annotations.map((annotation) => [annotation.id, annotation]));
     const selected = [...analysis.suggestions.needs, ...analysis.suggestions.feelings]
@@ -173,7 +168,10 @@ export function ObservationsPage() {
   return (
     <article className={styles.page}>
       <header className={styles.header}>
-        <h1>Observations</h1>
+        <div>
+          <h1>Observations</h1>
+          <p>Write what happened in your own words. This page can point out concrete details and offer Feelings and Needs you may want to consider.</p>
+        </div>
         <button type="button" className={styles.infoButton} onClick={() => setHelpTopic('basics')} aria-label="Observation basics">i</button>
       </header>
 
@@ -188,40 +186,46 @@ export function ObservationsPage() {
                 value={text}
                 analysis={analysis}
                 onChange={updateText}
-                placeholder={<><span>• When ⟨time anchor⟩</span><span>• Where/with whom ⟨setting or people⟩</span><span>• I saw/heard ⟨camera-ready action⟩</span><span>• Counted/quoted ⟨number or exact words⟩</span></>}
+                placeholder={<><span>• When did it happen?</span><span>• Where were you, and who was there?</span><span>• What did you see or hear?</span><span>• Can you add a number or exact quote?</span></>}
               />
 
-              {detectedEntities.length || detectedSurfaceTerms.length ? (
+              {detectedEntities.length ? (
                 <section className={styles.detectedLanguage} aria-labelledby="detected-language-title" aria-live="polite">
-                  {detectedEntities.length ? <div><h2 id="detected-language-title">Words in your text</h2><div className={styles.detectedLinks}>{detectedEntities.map((entity) => <Link key={`${entity.entityType}:${entity.slug}`} to={entityRoute(entity.entityType, entity.slug)}><span>{entity.text}</span><small>{entityTypeLabel(entity.entityType)} · {entity.title}</small></Link>)}</div></div> : null}
-                  {detectedSurfaceTerms.length ? <div className={styles.wording}><h2 id={detectedEntities.length ? undefined : 'detected-language-title'}>Your wording</h2><p>{detectedSurfaceTerms.map((term) => `“${term.text}”`).join(', ')} can be explored as written without treating it as a catalog match.</p></div> : null}
+                  <div>
+                    <h2 id="detected-language-title">Recognized words</h2>
+                    <p className={styles.detectedIntro}>Open a word to learn how allneeds uses it. These links do not mean the app has chosen it for you.</p>
+                    <div className={styles.detectedLinks}>{detectedEntities.map((entity) => <Link key={`${entity.entityType}:${entity.slug}`} to={entityRoute(entity.entityType, entity.slug)}><span>{entity.text}</span><small>{entityTypeLabel(entity.entityType)} · {entity.title}</small></Link>)}</div>
+                    {detectedEntities.some((entity) => entity.entityType === 'need') ? <p className={styles.termHelp}>Here, a Need means something that matters, such as rest, safety, connection, or understanding.</p> : null}
+                    {detectedEntities.some((entity) => entity.entityType === 'fauxFeeling') ? <p className={styles.termHelp}>A Faux Feeling may combine an emotion with an interpretation of what happened. The label does not mean the event was unreal.</p> : null}
+                  </div>
                 </section>
               ) : null}
 
               <section className={styles.suggestions} aria-live="polite" data-mode={resultsOpen ? 'results' : 'editing'}>
                 <header>
-                  {resultsOpen ? <div><h2>Possible feelings &amp; needs to explore</h2><p>These suggestions update as you edit.</p></div> : <span />}
+                  {resultsOpen ? <div><h2>Possible Feelings and Needs</h2><p>A Feeling is an emotion word. A Need is something that may matter to you. Only you can decide what fits.</p></div> : <span />}
                   <div className={styles.actionRow}>
                     {!resultsOpen ? <button type="button" disabled={!canLoad} onClick={() => setShowSuggestions(true)} aria-label="Load possible feelings and needs">Explore feelings &amp; needs</button> : null}
                     <button type="button" className={styles.ghost} onClick={clear}>Clear</button>
                   </div>
                 </header>
                 {resultsOpen ? <>
-                  <div className={styles.resultPanels}>
-                    <div>
-                      <div className={styles.modeToggle} role="radiogroup" aria-label="Need status">
-                        <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Unmet</button>
-                        <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Met</button>
-                      </div>
-                      <section className={styles.resultPanel} data-testid="observation-needs"><h3>Needs that may be alive in you</h3><div className={styles.chips}>{analysis.suggestions.needs.map((need) => <Link key={need.slug} to={`/needs/${need.slug}`}>{need.title}</Link>)}</div></section>
+                  <div className={styles.modeControl}>
+                    <p className={styles.modePrompt}>Does this moment feel more like something is missing or something is supported?</p>
+                    <div className={styles.modeToggle} role="radiogroup" aria-label="What is happening with your needs">
+                      <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Something feels missing</button>
+                      <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Something feels supported</button>
                     </div>
-                    <section className={styles.resultPanel} data-testid="observation-feelings"><h3>Possible feelings</h3><div className={styles.chips}>{analysis.suggestions.feelings.map((feeling) => <Link key={feeling.slug} to={`/feelings/${feeling.slug}`}>{feeling.title}</Link>)}</div></section>
+                  </div>
+                  <div className={styles.resultPanels}>
+                    <section className={styles.resultPanel} data-testid="observation-needs"><h3>Possible Needs</h3><div className={styles.chips}>{analysis.suggestions.needs.map((need) => <Link key={need.slug} to={`/needs/${need.slug}`}>{need.title}</Link>)}</div></section>
+                    <section className={styles.resultPanel} data-testid="observation-feelings"><h3>Possible Feelings</h3><div className={styles.chips}>{analysis.suggestions.feelings.map((feeling) => <Link key={feeling.slug} to={`/feelings/${feeling.slug}`}>{feeling.title}</Link>)}</div></section>
                   </div>
                   <details className={styles.why}>
-                    <summary><span><strong>Why these possibilities?</strong><small>Language cues and starting points</small></span><span aria-hidden="true">›</span></summary>
+                    <summary><span><strong>How were these chosen?</strong><small>Words from your text and broad starting points</small></span><span aria-hidden="true">›</span></summary>
                     <div className={styles.basis}>
                       <div><p>{suggestionBasisSummary(analysis.suggestions)}</p><button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('matching')} aria-label="How matching works">i</button></div>
-                      {evidenceText.length ? <p>Language considered: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
+                      {evidenceText.length ? <p>Words that influenced these suggestions: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
                     </div>
                   </details>
                   <p className={styles.browse}><Link to="/feelings">Browse all feelings</Link><span aria-hidden="true">•</span><Link to="/needs">Browse all needs</Link></p>
@@ -238,7 +242,7 @@ export function ObservationsPage() {
                   return (
                     <div key={slot.id} className={styles.slot} data-complete={satisfied} role="listitem">
                       <span aria-hidden="true" /><strong>{slot.label}</strong>
-                      <span className="visually-hidden">{satisfied ? 'Complete' : slot.missing}</span>
+                      <small>{satisfied ? 'Found' : slot.missing}</small>
                     </div>
                   );
                 })}
@@ -266,12 +270,21 @@ export function ObservationsPage() {
       </section>
 
       <section className={styles.overview}>
-        <details><summary><span><strong>Why try this?</strong><small>Why observations help</small></span><span aria-hidden="true">›</span></summary><div><p>Using concrete, time-and-place descriptions of what you saw or heard can be easier to process than abstract labels. Putting what you notice into words is also linked with lower emotional activation and distress.</p><div><span>Time</span><span>Place</span><span>What you saw/heard</span><span>Measurement/quote (optional)</span></div></div></details>
+        <details><summary><span><strong>Why add concrete details?</strong><small>What this writing step can do</small></span><span aria-hidden="true">›</span></summary><div><p>Concrete details can make a specific moment easier to remember, explain, or discuss. They do not prove someone’s intent, and they do not replace your feelings or interpretation.</p><div><span>Time</span><span>Place or people</span><span>What you saw or heard</span><span>Number or exact words (optional)</span></div></div></details>
       </section>
 
       <details ref={guideRef} id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
-        <summary><span><small>Detailed reference</small><strong>Full guide &amp; research</strong></span><span aria-hidden="true">›</span></summary>
-        {guideOpen ? <div className={styles.guideCard}>
+        <summary><span><small>Examples and sources</small><strong>Observation guide</strong></span><span aria-hidden="true">›</span></summary>
+        {guideOpen ? <div className={styles.guideCard} onClick={(event) => {
+          const target = event.target as Element;
+          const link = target.closest<HTMLAnchorElement>('a[href^="#observation-guide-ref-"]');
+          if (!link) return;
+          const reference = document.querySelector<HTMLElement>(link.getAttribute('href') ?? '');
+          if (!reference) return;
+          event.preventDefault();
+          reference.closest('details')?.setAttribute('open', '');
+          window.requestAnimationFrame(() => reference.scrollIntoView({ block: 'center' }));
+        }}>
           {guide.intro ? <header><small>{guide.intro.eyebrow}</small><h2>{guide.intro.title}</h2>{guide.intro.paragraphs?.map((paragraph, index) => <p key={index} dangerouslySetInnerHTML={{ __html: paragraph }} />)}</header> : null}
           <div className={styles.guideSections}>{guide.mobile?.sections?.map((section) => <details key={section.id}><summary><span><small>{section.eyebrow}</small><strong>{section.title}</strong><span>{section.description}</span></span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
         </div> : null}

@@ -38,7 +38,7 @@ The compiler currently reads the repository's canonical owners for entity famili
 
 The page does not run a second textarea detector. The Quick Check, inline highlights, detected-word links, caret explanations, and suggestion ranking all consume the same analysis result.
 
-Alexithymia Support also calls this analyzer for its optional present-moment observation. That lane projects exact catalog-title entities from the analysis for reference links only; it does not run a second scanner, treat fuzzy spelling support as an exact term, or use Observation suggestions to select a Feeling or Need.
+Feeling word support (the internal Alexithymia Support feature) also calls this analyzer for its optional present-moment observation. That lane projects exact catalog-title entities from the analysis for reference links only; it does not run a second scanner, treat fuzzy spelling support as an exact term, or use Observation suggestions to select a Feeling or Need.
 
 ## Matching safeguards
 
@@ -50,7 +50,8 @@ Alexithymia Support also calls this analyzer for its optional present-moment obs
 - Authored cue expressions use direct, related, or broad evidence tiers and receive an ambiguity penalty when they map to many candidates.
 - Bounded edit-distance matching supports likely single-token typos, rejects ties, ignores short tokens and stop words, and ranks below exact wording.
 - Automatic invented inflections are not generated. Only canonical titles and explicit authored bridges can add non-fuzzy variants.
-- `guilt` and `guilty` remain visible as the person's wording but are not silently mapped to a canonical Feeling or Need.
+- `guilt` and `guilty` remain available as internal unlinked surface wording but are not silently mapped to a canonical Feeling or Need. Surface wording does not receive a public highlight, explanation card, or duplicate “your wording” panel.
+- Guidance prompts are invitations to add detail, not corrections. Identity or diagnosis wording such as `I am autistic` is not flagged. Words about harm, pressure, and coercion may retain their meaning while inviting specific events or constraints.
 - Formula evidence never changes Feeling or Need scores.
 - Stable catalog order resolves equal scores, followed by deterministic diversity selection and approved fallback completion.
 
@@ -58,7 +59,9 @@ Alexithymia Support also calls this analyzer for its optional present-moment obs
 
 The editor is one plain-text `contenteditable` surface. The CSS Custom Highlight API paints DOM `Range` objects on that same text. There is no mirrored text layer, duplicate wrapping layout, scroll synchronization, or pixel-offset calculation to drift out of alignment.
 
-Paste, drop, and line breaks are normalized to plain text. Normal typing is not rewritten, preserving the browser's editing and undo behavior. Selecting or placing the caret in an annotated range opens its explanation and, for catalog entities, its direct Feeling, Need, or Faux Feeling link.
+Paste, drop, and line breaks are normalized to plain text. Normal typing is not rewritten, preserving the browser's editing and undo behavior. A pointer activation inside an actionable annotated range opens its explanation and, for catalog entities, its direct Feeling, Need, or Faux Feeling link. Merely finishing a word or placing the caret immediately after it does not open a card; annotation ends use exclusive offsets. Keyboard caret navigation can inspect an actionable range.
+
+The page keeps technical model terms out of the primary experience. It defines Observation, Feeling, Need, and Faux Feeling at first use; explains the missing/supported mode in ordinary language; shows visible Quick Check states; and states that suggestions are local starting points the person must judge for themselves.
 
 When the Custom Highlight API is unavailable, editing, Quick Check signals, detected-word links, suggestions, and explanations remain available. Highlight support is a release-browser requirement rather than a reason to reintroduce a mirrored overlay.
 
@@ -85,6 +88,8 @@ Build and test gates cover:
 - blank and arbitrary nonblank fallback invariants;
 - direct, negated, quoted, third-person, Unicode, repeated-range, and adversarial input behavior;
 - formula range identity and all four slot rollups;
+- internal-only surface wording, exclusive annotation boundaries, and no typing-triggered duplicate card;
+- identity-safe guidance and non-invalidating harm/coercion explanations;
 - byte-stable output for the same text and mode;
 - retired source, public asset, loader, and deployment boundaries;
 - a dedicated Chromium, Firefox, and mobile WebKit Observation browser matrix.

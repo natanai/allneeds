@@ -22,7 +22,7 @@ Local workspace: `C:\allneedsV2` (independent comparison and publishing worktree
 | `/inventory/` | Current compact Needs/Strategies inventory, filtering, details, editing, and personal strategy form |
 | `/inventory/journal/` | History-first journal with filters, disclosures, migrations, and full-screen entry composer |
 | `/feed/` | Live public/following feeds, local saving, and shared add-count updates |
-| `/alexithymia-support/` | Approved four-stage present-moment check-in with optional Body and Feeling-shape clues, tactile word comparison, user-selected Needs, editable statement, and shared Journal handoff; no lane-local care recommendations |
+| `/alexithymia-support/` | Approved four-stage present-moment Feeling word support check-in with optional Body and Overall feeling clues, tactile word comparison, user-selected Needs, editable statement, and shared Journal handoff; no lane-local care recommendations |
 
 ## Canonical snapshot checks
 

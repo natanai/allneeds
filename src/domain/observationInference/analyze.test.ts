@@ -71,6 +71,16 @@ describe('Observation Inference Engine 2.0', () => {
       && annotation.evidence.some((evidence) => evidence.kind === 'guidance'))).toBe(true);
   });
 
+  it('does not treat a diagnosis or neurodivergent identity as a writing problem', () => {
+    for (const text of ['I am autistic.', 'I have ADHD.', 'I am bipolar.', 'I have OCD.']) {
+      const identity = text.split(/\s+/).at(-1)!.replace('.', '').toLocaleLowerCase('en-US');
+      const guidanceText = analyzeObservation(text).annotations
+        .filter((annotation) => annotation.evidence.some((evidence) => evidence.kind === 'guidance'))
+        .map((annotation) => annotation.text.toLocaleLowerCase('en-US'));
+      expect(guidanceText, text).not.toContain(identity);
+    }
+  });
+
   it('projects exact catalog titles without silently translating bridges or fuzzy wording', () => {
     const exact = selectExactObservationEntities(analyzeObservation('I felt sad and betrayed, and I wanted safety.'));
     expect(exact.feelings.map((entity) => entity.slug)).toContain('sad');

@@ -29,7 +29,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await nav.getByRole('link', { name: 'Observations', exact: true }).click();
   await expect(editor).toHaveText(observation);
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByRole('heading', { name: 'Possible feelings & needs to explore' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Possible Feelings and Needs' })).toBeVisible();
 
   await page.reload();
   await expect(editor).toHaveText(observation);
