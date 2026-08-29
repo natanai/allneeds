@@ -4,8 +4,8 @@ import type { ObservationAnnotation, ObservationEvidence, ObservationSuggestionR
 const slotById = new Map(observationInferenceIndex.slots.map((slot) => [slot.id, slot]));
 
 export function suggestionBasisSummary(suggestions: ObservationSuggestionResult) {
-  if (suggestions.basis === 'direct') return 'Some suggestions are linked directly to words in your text.';
-  if (suggestions.basis === 'related') return 'Some suggestions come from known relationships to words in your text.';
+  if (suggestions.basis === 'direct') return 'Some suggestions are linked directly to words you used for your own experience.';
+  if (suggestions.basis === 'related') return 'Some suggestions come from known relationships to words or observable event patterns in your text.';
   if (suggestions.basis === 'broad') return 'Some suggestions come from broader cues in your wording.';
   if (suggestions.basis === 'mixed') return 'These suggestions come from more than one kind of match in your wording.';
   return '';
@@ -21,6 +21,7 @@ export function evidenceDescription(text: string, evidence: ObservationEvidence)
     if (evidence.entityType === 'need') return `“${text}” is listed as the Need ${evidence.title}.`;
     return `“${text}” is listed as the Faux Feeling ${evidence.title}. A Faux Feeling may combine an emotion with an interpretation of what happened; the label does not mean the event was unreal.`;
   }
+  if (evidence.kind === 'eventFamily') return `${evidence.label}: ${evidence.explanation}`;
   if (evidence.kind === 'guidance') return `${evidence.label}: ${evidence.explanation}`;
   if (evidence.kind === 'surface') return '';
   return `“${text}” helped shape some of the suggestions below.`;
