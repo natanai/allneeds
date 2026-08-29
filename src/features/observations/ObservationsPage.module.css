@@ -140,7 +140,7 @@
 
 .resultsHeader h2,
 .resultPanel h3,
-.noResults h3 {
+.noResults h2 {
   margin: 0;
   font-family: var(--font-display);
 }
@@ -304,7 +304,7 @@
   border-inline-start: 4px solid var(--attention);
 }
 
-.noResults h3 {
+.noResults h2 {
   font-size: 1rem;
 }
 
