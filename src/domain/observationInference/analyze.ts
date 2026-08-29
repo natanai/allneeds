@@ -27,11 +27,13 @@ type CatalogFeeling = { slug: string; title: string; needSatisfaction: 'met' | '
 type CatalogNeed = { slug: string; title: string; category: string; feelingSlugs: readonly string[]; fauxFeelingSlugs: readonly string[]; catalogOrder: number };
 type CatalogFauxFeeling = { slug: string; title: string; feelingSlugs: readonly string[]; needSlugs: readonly string[] };
 type CatalogExpression = (typeof observationInferenceIndex.expressions)[number];
+type CatalogEventFamily = (typeof observationInferenceIndex.eventFamilies)[number];
 
 const feelingBySlug = new Map<string, CatalogFeeling>(observationInferenceIndex.catalog.feelings.map((feeling, index) => [feeling.slug, { ...feeling, catalogOrder: index }]));
 const needBySlug = new Map<string, CatalogNeed>(observationInferenceIndex.catalog.needs.map((need, index) => [need.slug, { ...need, catalogOrder: index }]));
 const fauxFeelingBySlug = new Map<string, CatalogFauxFeeling>(observationInferenceIndex.catalog.fauxFeelings.map((feeling) => [feeling.slug, feeling]));
 const expressionById = new Map<string, CatalogExpression>(observationInferenceIndex.expressions.map((expression) => [expression.id, expression]));
+const eventFamilyById = new Map<string, CatalogEventFamily>(observationInferenceIndex.eventFamilies.map((family) => [family.id, family]));
 const needSlugsByFeeling = new Map<string, string[]>();
 observationInferenceIndex.catalog.needs.forEach((need) => need.feelingSlugs.forEach((feelingSlug) => {
   const needSlugs = needSlugsByFeeling.get(feelingSlug) ?? [];
@@ -211,19 +213,34 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
             kind: 'fauxFeeling', tier: 'related', annotationId: annotation.id, evidenceId: evidence.slug,
           }));
         }
+      } else if (evidence.kind === 'eventFamily') {
+        const family = eventFamilyById.get(evidence.familyId);
+        if (!family) return;
+        const ambiguity = family.feelingSlugs.length + family.needSlugs.length;
+        const base = evidence.tier === 'related' ? 720 : 480;
+        const score = Math.max(240, base + Math.min(80, annotation.text.length) - Math.max(0, ambiguity - 4) * 4);
+        family.feelingSlugs.forEach((slug) => {
+          if (modeAllowsFeeling(slug, mode)) addCandidate(feelingCandidates, 'feeling', slug, evidence.tier, score, family.id, {
+            kind: 'eventFamily', tier: evidence.tier, annotationId: annotation.id, evidenceId: family.id,
+          });
+        });
+        family.needSlugs.forEach((slug) => addCandidate(needCandidates, 'need', slug, evidence.tier, score, family.id, {
+          kind: 'eventFamily', tier: evidence.tier, annotationId: annotation.id, evidenceId: family.id,
+        }));
       } else if (evidence.kind === 'cue') {
         const expression = expressionById.get(evidence.expressionId);
         if (!expression) return;
+        const basis = evidence.tier === 'broad' ? 'broad' : 'related';
         const ambiguity = expression.feelingSlugs.length + expression.needSlugs.length;
-        const base = evidence.tier === 'direct' ? 690 : evidence.tier === 'related' ? 510 : 360;
+        const base = basis === 'related' ? 510 : 360;
         const score = Math.max(180, base + Math.min(80, annotation.text.length) - Math.max(0, ambiguity - 2) * 3);
         expression.feelingSlugs.forEach((slug) => {
-          if (modeAllowsFeeling(slug, mode)) addCandidate(feelingCandidates, 'feeling', slug, evidence.tier, score, expression.id, {
-            kind: 'cue', tier: evidence.tier, annotationId: annotation.id, evidenceId: expression.id,
+          if (modeAllowsFeeling(slug, mode)) addCandidate(feelingCandidates, 'feeling', slug, basis, score, expression.id, {
+            kind: 'cue', tier: basis, annotationId: annotation.id, evidenceId: expression.id,
           });
         });
-        expression.needSlugs.forEach((slug) => addCandidate(needCandidates, 'need', slug, evidence.tier, score, expression.id, {
-          kind: 'cue', tier: evidence.tier, annotationId: annotation.id, evidenceId: expression.id,
+        expression.needSlugs.forEach((slug) => addCandidate(needCandidates, 'need', slug, basis, score, expression.id, {
+          kind: 'cue', tier: basis, annotationId: annotation.id, evidenceId: expression.id,
         }));
       }
     });
