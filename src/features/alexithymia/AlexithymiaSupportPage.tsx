@@ -446,7 +446,6 @@ export function AlexithymiaSupportPage() {
                   value={draft.observation}
                   placeholder={'For example: “When we stopped talking after…”'}
                   onChange={(event) => updateDraft((current) => ({ ...current, observation: event.target.value }))}
-                  autoFocus
                 />
               </label>
               {(observationMatches.feelings.length || observationMatches.needs.length || observationMatches.fauxFeelings.length) ? (
