@@ -9,7 +9,6 @@ import type {
   ObservationSlotId,
   ObservationSuggestion,
   SuggestionEvidence,
-  TextRange,
 } from './types';
 
 type CandidateState = {
@@ -47,41 +46,47 @@ function modeAllowsFeeling(slug: string, mode: ObservationMode) {
   return mode === 'met' ? feeling.needSatisfaction !== 'unmet' : feeling.needSatisfaction !== 'met';
 }
 
-function clauseFor(annotation: ObservationAnnotation, clauses: TextRange[], text: string) {
-  const clause = clauses.find((range) => annotation.start >= range.start && annotation.start <= range.end)
-    ?? { start: 0, end: text.length };
-  return {
-    text: text.slice(clause.start, clause.end),
-    prefix: text.slice(clause.start, annotation.start),
-  };
-}
-
 const FEELING_FRAME = /\b(?:i|we)\s+(?:feel|felt|am|are|was|were|have\s+been|had\s+been|am\s+feeling|are\s+feeling)\b/i;
 const NEED_FRAME = /\b(?:i|we)\s+(?:need|needed|want|wanted|value|valued|care\s+about|long\s+for|wish\s+for|am\s+seeking|are\s+seeking)\b/i;
-const FIRST_PERSON = /\b(?:i|me|my|mine|we|us|our|ours)\b/i;
+const OTHER_EXPERIENCER_TAIL = /\b(?:(?:(?:because|while|when|if|although|though|since|that|like)\s+|as\s+(?:if|though)\s+)?(?:he|she|they|you|someone|somebody)\s+(?:is|are|was|were|feels?|felt|needs?|needed|wants?|wanted|values?|valued|cares?|cared|longs?|longed|wishes?|wished))\b|\b(?:for\s+)?(?:him|her|them)\s+to\s+(?:be|feel|have|get|need|receive)\b|\b(?:my|our)\s+(?:partner|spouse|friend|coworker|colleague|manager|supervisor|boss|parent|mother|father|mom|dad|child|kid|son|daughter|sibling|brother|sister|roommate|neighbor|client|customer|student|teacher|doctor|nurse|therapist|mentor|teammate|classmate)s?\s+to\s+(?:be|feel|have|get|need|receive)\b/i;
+const NAMED_OTHER_EXPERIENCER_TAIL = /\b[A-Z][\w.'’-]*(?:\s+[A-Z][\w.'’-]*){0,2}\s+(?:is|are|was|were|feels?|felt|needs?|needed|wants?|wanted|values?|valued)\b/u;
+const OTHER_REPORTER_FRAME = /\b(?:he|she|they|you|(?:my|our|the|a|an|his|her|their|your)\s+[A-Za-z][\w'’-]*(?:\s+[A-Za-z][\w'’-]*){0,2})\s+(?:said|says|wrote|writes|texted|texts|messaged|messages|reported|reports|claimed|claims|thought|thinks|believed|believes|told(?:\s+(?:me|us))?)\s*[,:-]?\s*(?:that\s*)?$/i;
+const NAMED_REPORTER_FRAME = /(?:^|[\s,(])(?!(?:I|We)\b)(?:[A-Z][\w.'’-]*(?:\s+[A-Z][\w.'’-]*){0,2})\s+(?:said|says|wrote|writes|texted|texts|messaged|messages|reported|reports|claimed|claims|thought|thinks|believed|believes|told(?:\s+(?:me|us))?)\s*[,:-]?\s*(?:that\s*)?$/u;
+const ATTRIBUTED_FRAME = /\baccording\s+to\s+[^,;.!?\n]{1,40}\s*,?\s*$/i;
+
+function statementPrefix(annotation: ObservationAnnotation, text: string) {
+  const prefix = text.slice(0, annotation.start);
+  let start = 0;
+  for (const boundary of ['.', '!', '?', ';', '\n']) {
+    const index = prefix.lastIndexOf(boundary);
+    if (index >= start) start = index + 1;
+  }
+  return prefix.slice(start);
+}
 
 function hasAffirmativeFrame(prefix: string, frame: RegExp) {
   const matcher = new RegExp(frame.source, `${frame.flags.replace(/g/g, '')}g`);
   const matches = [...prefix.matchAll(matcher)];
   const match = matches.at(-1);
   if (!match) return false;
-  const tail = prefix.slice((match.index ?? 0) + match[0].length);
+  const matchIndex = match.index ?? 0;
+  const beforeFrame = prefix.slice(0, matchIndex).trimEnd();
+  const tail = prefix.slice(matchIndex + match[0].length);
   return tail.length <= 48
     && !/[,;.!?\n]/.test(tail)
-    && !/\b(?:not|never|without)\b/i.test(tail);
+    && !/\b(?:not|never|without)\b/i.test(tail)
+    && !OTHER_EXPERIENCER_TAIL.test(tail)
+    && !NAMED_OTHER_EXPERIENCER_TAIL.test(tail)
+    && !OTHER_REPORTER_FRAME.test(beforeFrame)
+    && !NAMED_REPORTER_FRAME.test(beforeFrame)
+    && !ATTRIBUTED_FRAME.test(beforeFrame);
 }
 
-function directSelfReport(annotation: ObservationAnnotation, entityType: 'feeling' | 'need', clauses: TextRange[], text: string) {
+function directSelfReport(annotation: ObservationAnnotation, entityType: 'feeling' | 'need', text: string) {
   const wholeInputIsTerm = normalizedObservationText(text) === normalizedObservationText(annotation.text);
   if (wholeInputIsTerm) return true;
-  const clause = clauseFor(annotation, clauses, text);
   const frame = entityType === 'feeling' ? FEELING_FRAME : NEED_FRAME;
-  return hasAffirmativeFrame(clause.prefix, frame);
-}
-
-function firstPersonContext(annotation: ObservationAnnotation, clauses: TextRange[], text: string) {
-  const wholeInputIsTerm = normalizedObservationText(text) === normalizedObservationText(annotation.text);
-  return wholeInputIsTerm || FIRST_PERSON.test(clauseFor(annotation, clauses, text).text);
+  return hasAffirmativeFrame(statementPrefix(annotation, text), frame);
 }
 
 function addCandidate(
@@ -173,7 +178,7 @@ function fingerprint(text: string) {
 
 export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'): ObservationAnalysis {
   const source = typeof text === 'string' ? text : '';
-  const { annotations, clauses } = annotateObservation(source);
+  const { annotations } = annotateObservation(source);
   const feelingCandidates = new Map<string, CandidateState>();
   const needCandidates = new Map<string, CandidateState>();
 
@@ -181,7 +186,7 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
     annotation.evidence.forEach((evidence) => {
       if (evidence.kind === 'entity') {
         if (evidence.entityType === 'feeling') {
-          if (!directSelfReport(annotation, 'feeling', clauses, source)) return;
+          if (!directSelfReport(annotation, 'feeling', source)) return;
           const basis = evidence.matchKind === 'fuzzy' ? 'related' : 'direct';
           const score = evidence.matchKind === 'title' ? 1000 : evidence.matchKind === 'fuzzy' ? 760 : 900;
           addCandidate(feelingCandidates, 'feeling', evidence.slug, basis, score, 'self-report', {
@@ -191,7 +196,7 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
             kind: 'entity', tier: 'related', annotationId: annotation.id, evidenceId: `feeling:${evidence.slug}`,
           }));
         } else if (evidence.entityType === 'need') {
-          if (!directSelfReport(annotation, 'need', clauses, source)) return;
+          if (!directSelfReport(annotation, 'need', source)) return;
           const basis = evidence.matchKind === 'fuzzy' ? 'related' : 'direct';
           const score = evidence.matchKind === 'title' ? 1000 : evidence.matchKind === 'fuzzy' ? 760 : 900;
           addCandidate(needCandidates, 'need', evidence.slug, basis, score, 'self-report', {
@@ -202,7 +207,7 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
               kind: 'entity', tier: 'related', annotationId: annotation.id, evidenceId: `need:${evidence.slug}`,
             });
           });
-        } else if (firstPersonContext(annotation, clauses, source)) {
+        } else if (directSelfReport(annotation, 'feeling', source)) {
           const fauxFeeling = fauxFeelingBySlug.get(evidence.slug);
           fauxFeeling?.feelingSlugs.forEach((slug) => {
             if (modeAllowsFeeling(slug, mode)) addCandidate(feelingCandidates, 'feeling', slug, 'related', 735, `faux:${evidence.slug}`, {
