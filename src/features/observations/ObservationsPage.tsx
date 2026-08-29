@@ -234,22 +234,22 @@ export function ObservationsPage() {
                   </div>
                 ) : (
                   <>
-                    <header className={styles.resultsHeader}>
-                      <div><h2>Feelings and Needs to explore</h2><p>Feelings are emotion words. Needs are values or motivations that may matter here. These are possibilities, not conclusions. Only you can decide what fits.</p></div>
-                      {hasSuggestions ? <div className={styles.resultActions}><button type="button" className={styles.reviseAction} onClick={reviseObservation}>Revise observation</button><button type="button" className={styles.clearText} onClick={clear}>Clear observation</button></div> : null}
-                    </header>
-
-                    <div className={styles.modeControl}>
-                      <p className={styles.modePrompt}>How does this situation relate to your Needs?</p>
-                      <div className={styles.modeToggle} role="radiogroup" aria-label="Need status">
-                        <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Unmet</button>
-                        <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Met</button>
-                      </div>
-                      <p className={styles.modeHelp}>A Need can matter whether it is met or unmet. This choice changes the Feeling possibilities, not the importance of the Need.</p>
-                    </div>
-
                     {hasSuggestions ? (
                       <>
+                        <header className={styles.resultsHeader}>
+                          <div><h2>Feelings and Needs to explore</h2><p>Feelings are emotion words. Needs are values or motivations that may matter here. These are possibilities, not conclusions. Only you can decide what fits.</p></div>
+                          <div className={styles.resultActions}><button type="button" className={styles.reviseAction} onClick={reviseObservation}>Revise observation</button><button type="button" className={styles.clearText} onClick={clear}>Clear observation</button></div>
+                        </header>
+
+                        <div className={styles.modeControl}>
+                          <p className={styles.modePrompt}>How does this situation relate to your Needs?</p>
+                          <div className={styles.modeToggle} role="radiogroup" aria-label="Need status">
+                            <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Unmet</button>
+                            <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Met</button>
+                          </div>
+                          <p className={styles.modeHelp}>A Need can matter whether it is met or unmet. This choice changes the Feeling possibilities, not the importance of the Need.</p>
+                        </div>
+
                         <div className={styles.resultPanels}>
                           <section className={styles.resultPanel} data-testid="observation-needs">
                             <h3>Needs that may be alive in you</h3>
@@ -271,7 +271,7 @@ export function ObservationsPage() {
                       </>
                     ) : (
                       <section className={styles.noResults} data-testid="observation-no-suggestions">
-                        {hasConcreteObservation ? <><h3>No specific Feeling or Need matches yet</h3><p>Your observation already includes useful concrete details. I couldn't connect its wording with specific Feeling or Need possibilities yet.</p></> : <><h3>Not enough information yet</h3><p>I couldn't connect this wording with specific Feelings or Needs yet. Add a little more about what happened, who was involved, or what was said.</p></>}
+                        {hasConcreteObservation ? <><h2>No specific Feeling or Need matches yet</h2><p>Your observation already includes useful concrete details. I couldn't connect its wording with specific Feeling or Need possibilities yet.</p></> : <><h2>Not enough information yet</h2><p>I couldn't connect this wording with specific Feelings or Needs yet. Add a little more about what happened, who was involved, or what was said.</p></>}
                         <div className={styles.noResultActions}><button type="button" className={styles.reviseAction} onClick={reviseObservation}>Add more detail</button><button type="button" className={styles.clearText} onClick={clear}>Clear observation</button></div>
                       </section>
                     )}
