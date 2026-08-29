@@ -16,7 +16,9 @@ Suggestions are possibilities to explore. Formula signals such as When, Where, W
 
 `direct` has a narrow meaning in 2.1: the person directly named a canonical Feeling or Need for themselves, either as the whole input or inside an affirmative first-person frame such as `I feel anxious` or `I need rest`.
 
-Observable events may support **related** or **broad** possibilities, but they do not become direct statements about the person's internal state. This applies both to the reusable 2.1 event families and to the older imported authored cue expressions. Some imported expressions retain their historical `tier: direct` metadata in the canonical source for provenance compatibility; the analyzer deliberately caps that evidence at `related` unless the direct-self-report rule above is independently satisfied.
+Observable events may support **related** or **broad** possibilities, but they do not become direct statements about the person's internal state. This applies both to the reusable 2.1 event families and to the older imported authored cue expressions.
+
+The raw imported cue records preserve their historical `tier: direct` value only as provenance metadata. The deterministic Observation compiler is the single owner of the source-to-product translation and emits those imported cues as `related` production evidence. Newly authored event families may be only `related` or `broad`. The runtime analyzer therefore does not depend on a second repair layer to reinterpret event evidence after generation.
 
 Quoted, third-person, and negated Feeling wording does not become direct self-report. Another person saying `I am angry` inside a quote is not treated as the user's Feeling.
 
@@ -55,9 +57,9 @@ The six initial event families are:
 
 These are compositional event detectors rather than one-off sentence templates. They may recognize multiple ordinary phrasings while remaining bounded to authored regular expressions and canonical candidate lists. The directed-evaluation family reuses the canonical `trait-labels` guidance lexicon and explicitly excludes positive labels such as `hero`, `angel`, `saint`, `savior`, `rockstar`, and `superstar` from that psychological event family.
 
-`scripts/compile-observation-inference.mjs` is the single compiler and validator. It validates source structure, IDs, regular expressions, relationships, flags, event-family lexicon ownership, current catalog ownership, and generated freshness. `explorationPools` are not part of schema 2 and the compiler fails if they are reintroduced.
+`scripts/compile-observation-inference.mjs` is the single compiler and validator. It validates source structure, IDs, regular expressions, relationships, flags, event-family lexicon ownership, current catalog ownership, legacy provenance-only tier metadata, and generated freshness. `explorationPools` are not part of schema 2 and the compiler fails if they are reintroduced.
 
-The compiler emits `src/data/generated/observationInference.ts`. The generated module is a deterministic projection: it imports the validated canonical Observation source and projects the repository's canonical runtime Feelings, Needs, and Faux Feelings rather than embedding a second full copy of those catalogs. The compiler still reconstructs the canonical catalog during generation/checking so every referenced slug and relationship is validated and a catalog checksum is recorded. The source checksum is the content-addressed Git blob checksum of the canonical source, so changing that source makes the generated projection stale until regenerated.
+The compiler emits `src/data/generated/observationInference.ts`. The generated module is a deterministic projection: it imports the validated canonical Observation source, normalizes provenance-only legacy `direct` cue metadata to `related` production evidence, and projects the repository's canonical runtime Feelings, Needs, and Faux Feelings rather than embedding a second full copy of those catalogs. The compiler still reconstructs the canonical catalog during generation/checking so every referenced slug and relationship is validated and a catalog checksum is recorded. The source checksum is the content-addressed Git blob checksum of the canonical source, so changing that source makes the generated projection stale until regenerated.
 
 This preserves the Bedrock ownership chain:
 
@@ -97,7 +99,7 @@ Quick Check remains a writing aid rather than an inference score. Its four slots
 - Negated, quoted, and third-person catalog language does not become a direct self-report.
 - Faux Feelings contribute only their canonical Feeling and Need relationships and require first-person context.
 - Reusable event families can contribute only `related` or `broad` evidence.
-- Imported authored cue expressions are also capped at `related`/`broad` by the analyzer even when historical source metadata says `direct`.
+- Imported authored cue records may preserve historical `direct` metadata in the hand-edited import source, but the compiler emits them only as `related`/`broad` production evidence.
 - Bounded edit-distance matching supports likely single-token typos, rejects ties, ignores short tokens and stop words, and ranks below exact wording.
 - Automatic invented inflections are not generated. Only canonical titles and explicit authored bridges can add non-fuzzy variants.
 - `guilt` and `guilty` remain available as internal unlinked surface wording but are not silently mapped to a canonical Feeling or Need. Surface wording does not receive a public highlight, explanation card, or duplicate “your wording” panel.
