@@ -66,7 +66,7 @@ function ObservationRecipe({ onOpenGuide }: { onOpenGuide: () => void }) {
 
 function infoCopy(topic: string) {
   if (topic === 'slots') return <><p>Quick Check shows which concrete details the app noticed. It is a writing aid, not a score.</p><ul><li><strong>When?</strong> Add a time or event, such as “yesterday” or “after lunch.”</li><li><strong>Where or with whom?</strong> Name the setting or people if they matter.</li><li><strong>What did you see or hear?</strong> Add a visible action or the words you heard.</li><li><strong>Number or exact words</strong> is optional, but a count, duration, or quote can make the moment clearer.</li></ul></>;
-  if (topic === 'matching') return <><p>This page checks your text against a fixed list on this device. Your text is not sent anywhere.</p><p>It can notice exact words and a limited set of related phrases, but it cannot understand your situation or know what you feel or need.</p><p>Every non-empty entry receives four possible Feelings and four possible Needs. When there is no close match, the page uses a varied starting list so you always have words to explore.</p></>;
+  if (topic === 'matching') return <><p>This page checks your text against a fixed list on this device. Your text is not sent anywhere.</p><p>It can notice exact words and a limited set of related phrases, but it cannot understand your situation or know what you feel or need.</p><p>Suggestions appear only when the page finds language evidence connected with them. It may show fewer than four possibilities, or none.</p></>;
   return <><p>An observation is a description of what happened: what someone could see, hear, quote, or count.</p><p>You can write in your own words. Quick Check only suggests details that may help another person picture the same moment. It does not decide whether your interpretation is true.</p></>;
 }
 
@@ -79,7 +79,7 @@ function entityRoute(entityType: 'feeling' | 'need' | 'fauxFeeling', slug: strin
 function entityTypeLabel(entityType: 'feeling' | 'need' | 'fauxFeeling') {
   if (entityType === 'feeling') return 'Feeling';
   if (entityType === 'need') return 'Need';
-  return 'Faux feeling';
+  return 'Faux Feeling';
 }
 
 export function ObservationsPage() {
@@ -102,6 +102,7 @@ export function ObservationsPage() {
   const analysis = useMemo(() => analyzeObservation(text, feelingsMode), [feelingsMode, text]);
   const canLoad = Boolean(text.trim());
   const resultsOpen = showSuggestions && canLoad;
+  const hasSuggestions = analysis.suggestions.feelings.length > 0 || analysis.suggestions.needs.length > 0;
   const detectedEntities = useMemo(() => {
     const unique = new Map<string, (typeof analysis.entities)[number]>();
     analysis.entities.forEach((entity) => unique.set(`${entity.entityType}:${entity.slug}`, entity));
@@ -178,7 +179,7 @@ export function ObservationsPage() {
       <section className={styles.editor} aria-label="Observation editor">
         <div className={styles.editorCard}>
           <div className={styles.editorGrid}>
-            <div className={styles.field}>
+            <div className={styles.field} data-testid="observation-workspace-main">
               <span id="observation-text-label" className={styles.editorLabel}>What did you notice?</span>
               <AnnotatedObservationEditor
                 id="observation-text"
@@ -189,78 +190,104 @@ export function ObservationsPage() {
                 placeholder={<><span>• When did it happen?</span><span>• Where were you, and who was there?</span><span>• What did you see or hear?</span><span>• Can you add a number or exact quote?</span></>}
               />
 
-              {detectedEntities.length ? (
-                <section className={styles.detectedLanguage} aria-labelledby="detected-language-title" aria-live="polite">
-                  <div>
-                    <h2 id="detected-language-title">Recognized words</h2>
-                    <p className={styles.detectedIntro}>Open a word to learn how allneeds uses it. These links do not mean the app has chosen it for you.</p>
-                    <div className={styles.detectedLinks}>{detectedEntities.map((entity) => <Link key={`${entity.entityType}:${entity.slug}`} to={entityRoute(entity.entityType, entity.slug)}><span>{entity.text}</span><small>{entityTypeLabel(entity.entityType)} · {entity.title}</small></Link>)}</div>
-                    {detectedEntities.some((entity) => entity.entityType === 'need') ? <p className={styles.termHelp}>Here, a Need means something that matters, such as rest, safety, connection, or understanding.</p> : null}
-                    {detectedEntities.some((entity) => entity.entityType === 'fauxFeeling') ? <p className={styles.termHelp}>A Faux Feeling may combine an emotion with an interpretation of what happened. The label does not mean the event was unreal.</p> : null}
-                  </div>
-                </section>
-              ) : null}
-
               <section className={styles.suggestions} aria-live="polite" data-mode={resultsOpen ? 'results' : 'editing'}>
-                <header>
-                  {resultsOpen ? <div><h2>Possible Feelings and Needs</h2><p>A Feeling is an emotion word. A Need is something that may matter to you. Only you can decide what fits.</p></div> : <span />}
+                {!resultsOpen ? (
                   <div className={styles.actionRow}>
-                    {!resultsOpen ? <button type="button" disabled={!canLoad} onClick={() => setShowSuggestions(true)} aria-label="Load possible feelings and needs">Explore feelings &amp; needs</button> : null}
+                    <button type="button" disabled={!canLoad} onClick={() => setShowSuggestions(true)} aria-label="Explore possible feelings and needs">Explore Feelings &amp; Needs</button>
                     <button type="button" className={styles.ghost} onClick={clear}>Clear</button>
                   </div>
-                </header>
-                {resultsOpen ? <>
-                  <div className={styles.modeControl}>
-                    <p className={styles.modePrompt}>Does this moment feel more like something is missing or something is supported?</p>
-                    <div className={styles.modeToggle} role="radiogroup" aria-label="What is happening with your needs">
-                      <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Something feels missing</button>
-                      <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Something feels supported</button>
+                ) : (
+                  <>
+                    <header className={styles.resultsHeader}>
+                      <div><h2>Feelings and Needs to explore</h2><p>Feelings are emotion words. Needs are values or motivations that may matter here. These are possibilities, not conclusions. Only you can decide what fits.</p></div>
+                      <button type="button" className={styles.clearText} onClick={clear}>Clear</button>
+                    </header>
+
+                    <div className={styles.modeControl}>
+                      <p className={styles.modePrompt}>How does this situation relate to your Needs?</p>
+                      <div className={styles.modeToggle} role="radiogroup" aria-label="Need status">
+                        <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Unmet</button>
+                        <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Met</button>
+                      </div>
+                      <p className={styles.modeHelp}>A Need can matter whether it is met or unmet. This choice changes the Feeling possibilities, not the importance of the Need.</p>
                     </div>
-                  </div>
-                  <div className={styles.resultPanels}>
-                    <section className={styles.resultPanel} data-testid="observation-needs"><h3>Possible Needs</h3><div className={styles.chips}>{analysis.suggestions.needs.map((need) => <Link key={need.slug} to={`/needs/${need.slug}`}>{need.title}</Link>)}</div></section>
-                    <section className={styles.resultPanel} data-testid="observation-feelings"><h3>Possible Feelings</h3><div className={styles.chips}>{analysis.suggestions.feelings.map((feeling) => <Link key={feeling.slug} to={`/feelings/${feeling.slug}`}>{feeling.title}</Link>)}</div></section>
-                  </div>
-                  <details className={styles.why}>
-                    <summary><span><strong>How were these chosen?</strong><small>Words from your text and broad starting points</small></span><span aria-hidden="true">›</span></summary>
-                    <div className={styles.basis}>
-                      <div><p>{suggestionBasisSummary(analysis.suggestions)}</p><button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('matching')} aria-label="How matching works">i</button></div>
-                      {evidenceText.length ? <p>Words that influenced these suggestions: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
-                    </div>
-                  </details>
-                  <p className={styles.browse}><Link to="/feelings">Browse all feelings</Link><span aria-hidden="true">•</span><Link to="/needs">Browse all needs</Link></p>
-                </> : null}
+
+                    {hasSuggestions ? (
+                      <>
+                        <div className={styles.resultPanels}>
+                          <section className={styles.resultPanel} data-testid="observation-needs">
+                            <h3>Needs that may be alive in you</h3>
+                            {analysis.suggestions.needs.length ? <div className={styles.chips}>{analysis.suggestions.needs.map((need) => <Link key={need.slug} to={`/needs/${need.slug}`}>{need.title}</Link>)}</div> : <p>No specific Need suggestions from this wording yet.</p>}
+                          </section>
+                          <section className={styles.resultPanel} data-testid="observation-feelings">
+                            <h3>Possible Feelings</h3>
+                            {analysis.suggestions.feelings.length ? <div className={styles.chips}>{analysis.suggestions.feelings.map((feeling) => <Link key={feeling.slug} to={`/feelings/${feeling.slug}`}>{feeling.title}</Link>)}</div> : <p>No specific Feeling suggestions from this wording yet.</p>}
+                          </section>
+                        </div>
+                        <details className={styles.why}>
+                          <summary><span><strong>Why these?</strong><small>What in your text contributed</small></span><span aria-hidden="true">›</span></summary>
+                          <div className={styles.basis}>
+                            <div><p>{suggestionBasisSummary(analysis.suggestions)}</p><button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('matching')} aria-label="How matching works">i</button></div>
+                            {evidenceText.length ? <p>Words that contributed: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
+                          </div>
+                        </details>
+                      </>
+                    ) : (
+                      <section className={styles.noResults} data-testid="observation-no-suggestions">
+                        <h3>Not enough information yet</h3>
+                        <p>I couldn't find enough in what you wrote to connect it with specific Feelings or Needs yet. You can add what happened, what you saw or heard, or exact words that were said.</p>
+                      </section>
+                    )}
+
+                    <p className={styles.browse}><Link to="/feelings">Browse Feelings</Link><span aria-hidden="true">•</span><Link to="/needs">Browse Needs</Link></p>
+                  </>
+                )}
               </section>
 
-              <div className={styles.slotHeader}>
-                <span>Quick check</span>
-                <button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('slots')} aria-label="How the observation checklist works">i</button>
-              </div>
-              <div className={styles.slots} role="list" aria-label="Observation slots">
-                {slotDefinitions.map((slot) => {
-                  const satisfied = analysis.slots[slot.id].satisfied;
-                  return (
-                    <div key={slot.id} className={styles.slot} data-complete={satisfied} role="listitem">
-                      <span aria-hidden="true" /><strong>{slot.label}</strong>
-                      <small>{satisfied ? 'Found' : slot.missing}</small>
-                    </div>
-                  );
-                })}
-              </div>
+              {detectedEntities.length ? (
+                <details className={styles.detectedLanguage}>
+                  <summary><span><strong>Recognized words</strong><small>{detectedEntities.length} {detectedEntities.length === 1 ? 'word' : 'words'}</small></span><span aria-hidden="true">›</span></summary>
+                  <div>
+                    <div className={styles.detectedLinks}>{detectedEntities.map((entity) => <Link key={`${entity.entityType}:${entity.slug}`} to={entityRoute(entity.entityType, entity.slug)}><span>{entity.text}</span><small>{entityTypeLabel(entity.entityType)} · {entity.title}</small></Link>)}</div>
+                    {detectedEntities.some((entity) => entity.entityType === 'fauxFeeling') ? <p className={styles.termHelp}>A Faux Feeling may combine an emotion with an interpretation of what happened. The label does not mean the event was unreal.</p> : null}
+                  </div>
+                </details>
+              ) : null}
+            </div>
+
+            <aside className={styles.supportRail} aria-label="Observation writing support">
+              <section className={styles.quickCheck}>
+                <div className={styles.slotHeader}>
+                  <span>Quick Check</span>
+                  <button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('slots')} aria-label="How the observation checklist works">i</button>
+                </div>
+                <div className={styles.slots} role="list" aria-label="Observation slots">
+                  {slotDefinitions.map((slot) => {
+                    const satisfied = analysis.slots[slot.id].satisfied;
+                    return (
+                      <div key={slot.id} className={styles.slot} data-complete={satisfied} role="listitem">
+                        <span aria-hidden="true" /><strong>{slot.label}</strong>
+                        <small>{satisfied ? 'Found' : slot.missing}</small>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
 
               <div className={styles.example}>
                 <button type="button" onClick={() => setShowExample((current) => !current)} aria-expanded={showExample}><span><strong>{showExample ? 'Hide example sentence' : 'Show an example sentence'}</strong><small>Writing example</small></span><span aria-hidden="true">›</span></button>
                 {showExample ? <div><p>“{EXAMPLE}”</p><button type="button" onClick={() => updateText(EXAMPLE)}>Insert this example</button></div> : null}
               </div>
-            </div>
 
-            <details className={styles.recipeDisclosure}>
-              <summary><span><strong>Observation recipe</strong><small>Step-by-step prompts</small></span><span aria-hidden="true">›</span></summary>
-              <div className={styles.recipe} aria-label="Observation recipe"><ObservationRecipe onOpenGuide={openGuide} /></div>
-            </details>
+              <details className={styles.recipeDisclosure}>
+                <summary><span><strong>Observation recipe</strong><small>Step-by-step prompts</small></span><span aria-hidden="true">›</span></summary>
+                <div className={styles.recipe} aria-label="Observation recipe"><ObservationRecipe onOpenGuide={openGuide} /></div>
+              </details>
+            </aside>
           </div>
+
           <footer className={styles.footer}>
-            <span className="visually-hidden" aria-live="polite">{resultsOpen ? 'Possibilities loaded and updating.' : canLoad ? 'Ready to explore feelings and needs.' : 'Enter an observation to explore feelings and needs.'}</span>
+            <span className="visually-hidden" aria-live="polite">{resultsOpen ? hasSuggestions ? 'Possibilities loaded and updating.' : 'Not enough information for specific Feeling or Need suggestions yet.' : canLoad ? 'Ready to explore feelings and needs.' : 'Enter an observation to explore feelings and needs.'}</span>
             {resultsOpen ? <section className={styles.journalHandoff} aria-labelledby="journal-handoff-title">
               <span><small>Continue your reflection</small><strong id="journal-handoff-title">Bring this observation into Journal</strong><span>Journal will open with your observation already filled in.</span></span>
               <button type="button" onClick={convertToJournal}>Open in Journal</button>
