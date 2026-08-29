@@ -71,6 +71,10 @@ type ObservationInferenceSource = {
 };
 
 const validatedSource = source as unknown as ObservationInferenceSource;
+const expressions = validatedSource.expressions.map((expression) => ({
+  ...expression,
+  tier: expression.tier === 'direct' ? 'related' as const : expression.tier,
+}));
 const catalog = {
   feelings: feelings.map((feeling) => ({
     slug: feeling.slug,
@@ -100,7 +104,7 @@ export const observationInferenceIndex = {
   provenance: validatedSource.provenance,
   catalog,
   slots: validatedSource.slots,
-  expressions: validatedSource.expressions,
+  expressions,
   eventFamilies: validatedSource.eventFamilies,
   lexicalBridges: validatedSource.lexicalBridges,
   surfaceTerms: validatedSource.surfaceTerms,
