@@ -15,6 +15,9 @@ describe('Observation direct self-report boundary', () => {
       ['My friend asked me whether I need rest.', 'need', 'rest'],
       ['Jordan wondered whether I am angry.', 'feeling', 'angry'],
       ['She said maybe I am angry.', 'feeling', 'angry'],
+      ['She said to me I am angry.', 'feeling', 'angry'],
+      ['Jordan texted me that I am angry.', 'feeling', 'angry'],
+      ['My friend messaged me that I need rest.', 'need', 'rest'],
     ] as const;
 
     cases.forEach(([text, entityType, slug]) => {
