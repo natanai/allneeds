@@ -66,7 +66,7 @@ function ObservationRecipe({ onOpenGuide }: { onOpenGuide: () => void }) {
 
 function infoCopy(topic: string) {
   if (topic === 'slots') return <><p>Quick Check shows which concrete details the app noticed. It is a writing aid, not a score.</p><ul><li><strong>When?</strong> Add a time or event, such as “yesterday” or “after lunch.”</li><li><strong>Where or with whom?</strong> Name the setting or people if they matter.</li><li><strong>What did you see or hear?</strong> Add a visible action or the words you heard.</li><li><strong>Number or exact words</strong> is optional, but a count, duration, or quote can make the moment clearer.</li></ul></>;
-  if (topic === 'matching') return <><p>This page checks your text against a fixed list on this device. Your text is not sent anywhere.</p><p>It can notice exact words and a limited set of related phrases, but it cannot understand your situation or know what you feel or need.</p><p>Suggestions appear only when the page finds language evidence connected with them. It may show fewer than four possibilities, or none.</p></>;
+  if (topic === 'matching') return <><p>This page checks your text against a fixed local vocabulary and a limited set of observable event patterns. Your text is not sent anywhere.</p><p>It can notice direct words you use for your own experience and some patterns in what happened, but it cannot know what you feel or need.</p><p>Suggestions appear only when the page finds language evidence connected with them. It may show fewer than four possibilities, or none.</p></>;
   return <><p>An observation is a description of what happened: what someone could see, hear, quote, or count.</p><p>You can write in your own words. Quick Check only suggests details that may help another person picture the same moment. It does not decide whether your interpretation is true.</p></>;
 }
 
@@ -103,6 +103,9 @@ export function ObservationsPage() {
   const canLoad = Boolean(text.trim());
   const resultsOpen = showSuggestions && canLoad;
   const hasSuggestions = analysis.suggestions.feelings.length > 0 || analysis.suggestions.needs.length > 0;
+  const concreteSlotCount = slotDefinitions.filter((slot) => analysis.slots[slot.id].satisfied).length;
+  const hasConcreteObservation = concreteSlotCount >= 3
+    && (analysis.slots.sensory.satisfied || analysis.slots.measure.satisfied);
   const detectedEntities = useMemo(() => {
     const unique = new Map<string, (typeof analysis.entities)[number]>();
     analysis.entities.forEach((entity) => unique.set(`${entity.entityType}:${entity.slug}`, entity));
@@ -112,9 +115,25 @@ export function ObservationsPage() {
     const annotationById = new Map(analysis.annotations.map((annotation) => [annotation.id, annotation]));
     const selected = [...analysis.suggestions.needs, ...analysis.suggestions.feelings]
       .flatMap((suggestion) => suggestion.evidence)
+      .filter((evidence) => evidence.kind !== 'eventFamily')
       .map((evidence) => annotationById.get(evidence.annotationId)?.text.trim())
       .filter((entry): entry is string => Boolean(entry));
     return [...new Set(selected)].slice(0, 4);
+  }, [analysis.annotations, analysis.suggestions]);
+  const eventEvidence = useMemo(() => {
+    const selectedFamilyIds = new Set(
+      [...analysis.suggestions.needs, ...analysis.suggestions.feelings]
+        .flatMap((suggestion) => suggestion.evidence)
+        .filter((evidence) => evidence.kind === 'eventFamily')
+        .map((evidence) => evidence.evidenceId),
+    );
+    const unique = new Map<string, { id: string; explanation: string }>();
+    analysis.annotations.forEach((annotation) => annotation.evidence.forEach((evidence) => {
+      if (evidence.kind === 'eventFamily' && selectedFamilyIds.has(evidence.familyId)) {
+        unique.set(evidence.familyId, { id: evidence.familyId, explanation: evidence.explanation });
+      }
+    }));
+    return [...unique.values()];
   }, [analysis.annotations, analysis.suggestions]);
 
   useEffect(() => {
@@ -149,9 +168,27 @@ export function ObservationsPage() {
     setShowExample(false);
   };
 
+  const focusEditorAtEnd = () => {
+    const editor = document.getElementById('observation-text');
+    if (!(editor instanceof HTMLElement)) return;
+    editor.focus();
+    const selection = window.getSelection();
+    if (!selection) return;
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
+  const reviseObservation = () => {
+    setShowSuggestions(false);
+    focusEditorAtEnd();
+  };
+
   const updateText = (nextText: string) => {
     setText(nextText);
-    if (!nextText.trim()) setShowSuggestions(false);
+    if (showSuggestions) setShowSuggestions(false);
   };
 
   const convertToJournal = () => {
@@ -194,26 +231,26 @@ export function ObservationsPage() {
                 {!resultsOpen ? (
                   <div className={styles.actionRow}>
                     <button type="button" disabled={!canLoad} onClick={() => setShowSuggestions(true)} aria-label="Explore possible feelings and needs">Explore Feelings &amp; Needs</button>
-                    <button type="button" className={styles.ghost} onClick={clear}>Clear</button>
+                    <button type="button" className={styles.ghost} onClick={clear}>Clear observation</button>
                   </div>
                 ) : (
                   <>
-                    <header className={styles.resultsHeader}>
-                      <div><h2>Feelings and Needs to explore</h2><p>Feelings are emotion words. Needs are values or motivations that may matter here. These are possibilities, not conclusions. Only you can decide what fits.</p></div>
-                      <button type="button" className={styles.clearText} onClick={clear}>Clear</button>
-                    </header>
-
-                    <div className={styles.modeControl}>
-                      <p className={styles.modePrompt}>How does this situation relate to your Needs?</p>
-                      <div className={styles.modeToggle} role="radiogroup" aria-label="Need status">
-                        <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Unmet</button>
-                        <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Met</button>
-                      </div>
-                      <p className={styles.modeHelp}>A Need can matter whether it is met or unmet. This choice changes the Feeling possibilities, not the importance of the Need.</p>
-                    </div>
-
                     {hasSuggestions ? (
                       <>
+                        <header className={styles.resultsHeader}>
+                          <div><h2>Feelings and Needs to explore</h2><p>Feelings are emotion words. Needs are values or motivations that may matter here. These are possibilities, not conclusions. Only you can decide what fits.</p></div>
+                          <div className={styles.resultActions}><button type="button" className={styles.reviseAction} onClick={reviseObservation}>Revise observation</button><button type="button" className={styles.clearText} onClick={clear}>Clear observation</button></div>
+                        </header>
+
+                        <div className={styles.modeControl}>
+                          <p className={styles.modePrompt}>How does this situation relate to your Needs?</p>
+                          <div className={styles.modeToggle} role="radiogroup" aria-label="Need status">
+                            <button type="button" role="radio" aria-checked={feelingsMode === 'unmet'} onClick={() => setFeelingsMode('unmet')}>Unmet</button>
+                            <button type="button" role="radio" aria-checked={feelingsMode === 'met'} onClick={() => setFeelingsMode('met')}>Met</button>
+                          </div>
+                          <p className={styles.modeHelp}>A Need can matter whether it is met or unmet. This choice changes the Feeling possibilities, not the importance of the Need.</p>
+                        </div>
+
                         <div className={styles.resultPanels}>
                           <section className={styles.resultPanel} data-testid="observation-needs">
                             <h3>Needs that may be alive in you</h3>
@@ -228,14 +265,15 @@ export function ObservationsPage() {
                           <summary><span><strong>Why these?</strong><small>What in your text contributed</small></span><span aria-hidden="true">›</span></summary>
                           <div className={styles.basis}>
                             <div><p>{suggestionBasisSummary(analysis.suggestions)}</p><button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('matching')} aria-label="How matching works">i</button></div>
-                            {evidenceText.length ? <p>Words that contributed: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
+                            {eventEvidence.slice(0, 2).map((entry) => <p key={entry.id}>{entry.explanation}</p>)}
+                            {evidenceText.length ? <p>Text that contributed: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
                           </div>
                         </details>
                       </>
                     ) : (
                       <section className={styles.noResults} data-testid="observation-no-suggestions">
-                        <h3>Not enough information yet</h3>
-                        <p>I couldn't find enough in what you wrote to connect it with specific Feelings or Needs yet. You can add what happened, what you saw or heard, or exact words that were said.</p>
+                        {hasConcreteObservation ? <><h2>No specific Feeling or Need matches yet</h2><p>Your observation already includes useful concrete details. I couldn't connect its wording with specific Feeling or Need possibilities yet.</p></> : <><h2>Not enough information yet</h2><p>I couldn't connect this wording with specific Feelings or Needs yet. Add a little more about what happened, who was involved, or what was said.</p></>}
+                        <div className={styles.noResultActions}><button type="button" className={styles.reviseAction} onClick={reviseObservation}>Add more detail</button><button type="button" className={styles.clearText} onClick={clear}>Clear observation</button></div>
                       </section>
                     )}
 
@@ -287,7 +325,7 @@ export function ObservationsPage() {
           </div>
 
           <footer className={styles.footer}>
-            <span className="visually-hidden" aria-live="polite">{resultsOpen ? hasSuggestions ? 'Possibilities loaded and updating.' : 'Not enough information for specific Feeling or Need suggestions yet.' : canLoad ? 'Ready to explore feelings and needs.' : 'Enter an observation to explore feelings and needs.'}</span>
+            <span className="visually-hidden" aria-live="polite">{resultsOpen ? hasSuggestions ? 'Possibilities loaded and updating.' : 'No specific Feeling or Need matches are available from this wording yet.' : canLoad ? 'Ready to explore feelings and needs.' : 'Enter an observation to explore feelings and needs.'}</span>
             {resultsOpen ? <section className={styles.journalHandoff} aria-labelledby="journal-handoff-title">
               <span><small>Continue your reflection</small><strong id="journal-handoff-title">Bring this observation into Journal</strong><span>Journal will open with your observation already filled in.</span></span>
               <button type="button" onClick={convertToJournal}>Open in Journal</button>

@@ -65,23 +65,59 @@ test('the shared local analysis powers highlights, Quick Check, and evidence-bac
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toBeVisible();
   await expect(page.getByText(/something feels missing|something feels supported/i)).toHaveCount(0);
   await expect(page.getByText('Why these?', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Revise observation' })).toBeVisible();
 
   await editor.fill('🙂 banana telescope purple');
+  await expect(page.getByRole('button', { name: 'Explore possible feelings and needs' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Feelings and Needs to explore' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
   await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
   await expect(page.getByTestId('observation-needs')).toHaveCount(0);
   await expect(page.getByTestId('observation-feelings')).toHaveCount(0);
   await expect(page.getByText('Why these?', { exact: true })).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Met', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Unmet', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveCount(0);
 
-  await page.getByRole('radio', { name: 'Unmet', exact: true }).click();
+  await page.getByRole('button', { name: 'Add more detail' }).click();
+  await expect(editor).toBeFocused();
+  await expect(editor).toHaveText('🙂 banana telescope purple');
   await editor.fill('I feel calm.');
+  await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
   await expect(page.getByTestId('observation-feelings').locator('a[href="/feelings/calm"]')).toBeVisible();
   await expect(page.getByText(/\b(?:probability|confidence)\b/i)).toHaveCount(0);
   await expect(page.getByText(/\b(?:exact|nearby) match\b/i)).toHaveCount(0);
 
   expect(retiredAssetRequests).toEqual([]);
   expect(runtimeProblems).toEqual([]);
+});
+
+test('concrete zero-result observations are not framed as incomplete', async ({ page }) => {
+  await page.goto('/observations');
+  const editor = page.getByRole('textbox', { name: 'What did you notice?' });
+  const concrete = 'Tuesday at 3 p.m. in the kitchen, I heard “Please wait” twice.';
+
+  await editor.fill(concrete);
+  await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
+  await expect(page.getByRole('heading', { name: 'No specific Feeling or Need matches yet' })).toBeVisible();
+  await expect(page.getByText(/already includes useful concrete details/i)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add more detail' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Unmet', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Add more detail' }).click();
+  await expect(editor).toHaveText(concrete);
+  await expect(editor).toBeFocused();
+});
+
+test('observable event-family matches explain themselves without becoming direct self-report', async ({ page }) => {
+  await page.goto('/observations');
+  const editor = page.getByRole('textbox', { name: 'What did you notice?' });
+
+  await editor.fill('My coworker interrupted me while I was speaking.');
+  await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
+  await expect(page.getByTestId('observation-needs').locator('a[href="/needs/to-be-heard"]')).toBeVisible();
+  await page.getByText('Why these?', { exact: true }).click();
+  await expect(page.getByText('The app noticed an interruption or blocked attempt to finish speaking.')).toBeVisible();
+  await expect(page.getByText(/linked directly to words in your text/i)).toHaveCount(0);
 });
 
 test('plain-text editing, line breaks, explanations, and highlight ranges stay on one surface', async ({ page }) => {
@@ -153,8 +189,10 @@ test('unclassified and identity wording do not trigger fabricated results', asyn
   await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
   await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
 
+  await page.getByRole('button', { name: 'Add more detail' }).click();
   await editor.fill('I am autistic.');
   await expect.poll(() => highlightedText(page, 'observation-guidance')).not.toContain('autistic');
+  await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
   await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
 });
 

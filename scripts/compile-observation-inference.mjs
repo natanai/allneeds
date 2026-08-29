@@ -61,9 +61,10 @@ function validateDetector(detector, label) {
   }
 }
 
-function validateSlugList(value, label, minimum = 0) {
+function validateSlugList(value, label, minimum = 0, maximum = Number.POSITIVE_INFINITY) {
   const slugs = requireArray(value, label);
   if (slugs.length < minimum) fail(`${label} must contain at least ${minimum} entries.`);
+  if (slugs.length > maximum) fail(`${label} must contain no more than ${maximum} entries.`);
   const seen = new Set();
   slugs.forEach((slug, index) => {
     requireSlug(slug, `${label}[${index}]`);
@@ -86,10 +87,11 @@ function validateStringList(value, label, minimum = 0) {
 
 function validateSource(source) {
   const value = requireObject(source, 'root');
-  if (value.schemaVersion !== 1) fail('schemaVersion must be 1.');
+  if (value.schemaVersion !== 2) fail('schemaVersion must be 2.');
   if (!/^\d+\.\d+\.\d+$/.test(requireString(value.modelVersion, 'modelVersion'))) {
     fail('modelVersion must use semantic versioning.');
   }
+  if ('explorationPools' in value) fail('explorationPools are retired in Observation 2.1.');
 
   const provenance = requireObject(value.provenance, 'provenance');
   requireString(provenance.repository, 'provenance.repository');
@@ -129,6 +131,9 @@ function validateSource(source) {
       fail(`expressions[${index}].pattern still contains CSV escape-layer artifacts.`);
     }
     if (!['direct', 'related', 'broad'].includes(item.tier)) fail(`expressions[${index}].tier is invalid.`);
+    if (item.tier === 'direct' && item.provenance !== 'legacy-observation-cues') {
+      fail(`expressions[${index}] may preserve direct only as legacy import metadata.`);
+    }
     validateSlugList(item.feelingSlugs, `expressions[${index}].feelingSlugs`);
     validateSlugList(item.needSlugs, `expressions[${index}].needSlugs`);
     if (!item.feelingSlugs.length && !item.needSlugs.length) fail(`expressions[${index}] has no candidates.`);
@@ -157,6 +162,7 @@ function validateSource(source) {
 
   const guidanceRules = requireArray(value.guidanceRules, 'guidanceRules');
   uniqueIds(guidanceRules, 'guidanceRules');
+  const guidanceRuleById = new Map();
   guidanceRules.forEach((rule, index) => {
     const item = requireObject(rule, `guidanceRules[${index}]`);
     requireString(item.label, `guidanceRules[${index}].label`);
@@ -166,12 +172,40 @@ function validateSource(source) {
     patterns.forEach((pattern, patternIndex) => validateDetector(pattern, `guidanceRules[${index}].patterns[${patternIndex}]`));
     if (!item.terms.length && !patterns.length) fail(`guidanceRules[${index}] has no terms or patterns.`);
     requireString(item.provenance, `guidanceRules[${index}].provenance`);
+    guidanceRuleById.set(item.id, item);
   });
 
-  const pools = requireObject(value.explorationPools, 'explorationPools');
-  validateSlugList(pools.unmetFeelings, 'explorationPools.unmetFeelings', 4);
-  validateSlugList(pools.metFeelings, 'explorationPools.metFeelings', 4);
-  validateSlugList(pools.needs, 'explorationPools.needs', 4);
+  const eventFamilies = requireArray(value.eventFamilies, 'eventFamilies');
+  if (eventFamilies.length < 6) fail('eventFamilies must contain the approved initial six families.');
+  uniqueIds(eventFamilies, 'eventFamilies');
+  eventFamilies.forEach((family, index) => {
+    const item = requireObject(family, `eventFamilies[${index}]`);
+    requireString(item.label, `eventFamilies[${index}].label`);
+    if (!['related', 'broad'].includes(item.tier)) fail(`eventFamilies[${index}].tier must be related or broad.`);
+    validateStringList(item.lexiconExcludeTerms, `eventFamilies[${index}].lexiconExcludeTerms`);
+    if (item.lexiconRuleId !== null) {
+      const lexiconRuleId = requireSlug(item.lexiconRuleId, `eventFamilies[${index}].lexiconRuleId`);
+      const rule = guidanceRuleById.get(lexiconRuleId);
+      if (!rule) fail(`eventFamilies[${index}] references unknown guidance lexicon ${lexiconRuleId}.`);
+      if (!rule.terms.length) fail(`eventFamilies[${index}] lexicon ${lexiconRuleId} has no terms.`);
+      const availableTerms = new Set(rule.terms.map((term) => term.toLocaleLowerCase('en-US')));
+      item.lexiconExcludeTerms.forEach((term) => {
+        if (!availableTerms.has(term.toLocaleLowerCase('en-US'))) {
+          fail(`eventFamilies[${index}] excludes unknown term ${term} from lexicon ${lexiconRuleId}.`);
+        }
+      });
+    } else if (item.lexiconExcludeTerms.length) {
+      fail(`eventFamilies[${index}] cannot exclude lexicon terms without lexiconRuleId.`);
+    }
+    const patterns = requireArray(item.patterns, `eventFamilies[${index}].patterns`);
+    if (!patterns.length) fail(`eventFamilies[${index}].patterns must not be empty.`);
+    uniqueIds(patterns, `eventFamilies[${index}].patterns`);
+    patterns.forEach((pattern, patternIndex) => validateDetector(pattern, `eventFamilies[${index}].patterns[${patternIndex}]`));
+    validateSlugList(item.feelingSlugs, `eventFamilies[${index}].feelingSlugs`, 1, 8);
+    validateSlugList(item.needSlugs, `eventFamilies[${index}].needSlugs`, 1, 8);
+    requireString(item.explanation, `eventFamilies[${index}].explanation`);
+    requireString(item.provenance, `eventFamilies[${index}].provenance`);
+  });
 }
 
 function compileCatalogLexicon(legacyCatalog, editorialCatalog) {
@@ -286,6 +320,14 @@ function validateCatalogLexicon(catalog, source) {
       if (!needSlugs.has(slug)) fail(`Expression ${expression.id} references unknown Need ${slug}.`);
     });
   });
+  source.eventFamilies.forEach((family) => {
+    family.feelingSlugs.forEach((slug) => {
+      if (!feelingSlugs.has(slug)) fail(`Event family ${family.id} references unknown Feeling ${slug}.`);
+    });
+    family.needSlugs.forEach((slug) => {
+      if (!needSlugs.has(slug)) fail(`Event family ${family.id} references unknown Need ${slug}.`);
+    });
+  });
   source.lexicalBridges.forEach((bridge) => {
     const slugs = bridge.entityType === 'feeling'
       ? feelingSlugs
@@ -294,41 +336,138 @@ function validateCatalogLexicon(catalog, source) {
         : fauxFeelingSlugs;
     if (!slugs.has(bridge.slug)) fail(`Lexical bridge ${bridge.id} references unknown ${bridge.entityType} ${bridge.slug}.`);
   });
-  source.explorationPools.unmetFeelings.forEach((slug) => {
-    const feeling = catalog.feelings.find((item) => item.slug === slug);
-    if (!feeling || feeling.needSatisfaction === 'met') fail(`Unmet exploration Feeling ${slug} is invalid.`);
-  });
-  source.explorationPools.metFeelings.forEach((slug) => {
-    const feeling = catalog.feelings.find((item) => item.slug === slug);
-    if (!feeling || feeling.needSatisfaction === 'unmet') fail(`Met exploration Feeling ${slug} is invalid.`);
-  });
-  source.explorationPools.needs.forEach((slug) => {
-    if (!needSlugs.has(slug)) fail(`Exploration Need ${slug} is invalid.`);
-  });
 }
 
-function generatedSource(source, checksum, catalog, catalogChecksum) {
-  const index = {
-    schemaVersion: source.schemaVersion,
-    modelVersion: source.modelVersion,
-    sourceChecksum: checksum,
-    catalogChecksum,
-    provenance: source.provenance,
-    catalog,
-    slots: source.slots,
-    expressions: source.expressions,
-    lexicalBridges: source.lexicalBridges,
-    surfaceTerms: source.surfaceTerms,
-    guidanceRules: source.guidanceRules,
-    explorationPools: source.explorationPools,
+function gitBlobChecksum(content) {
+  const bytes = Buffer.from(content, 'utf8');
+  return createHash('sha1')
+    .update(`blob ${bytes.length}\0`)
+    .update(bytes)
+    .digest('hex');
+}
+
+function generatedSource(source, checksum, catalogChecksum) {
+  const compiledExpressionRows = source.expressions
+    .map((expression, index) => `  { ...validatedSource.expressions[${index}]!, tier: '${expression.tier === 'direct' ? 'related' : expression.tier}' as const },`)
+    .join('\n');
+  return `/* This file is generated by scripts/compile-observation-inference.mjs. */
+
+import source from '../observationInference/source.json';
+import { fauxFeelings, feelings, needs } from '../catalog';
+
+type Detector = {
+  id: string;
+  pattern: string;
+  flags: string;
+};
+
+type ObservationInferenceSource = {
+  schemaVersion: number;
+  modelVersion: string;
+  provenance: {
+    repository: string;
+    branch: string;
+    commit: string;
+    importedAt: string;
+    cueRows: number;
   };
-  return `/* This file is generated by scripts/compile-observation-inference.mjs. */\n\nexport const observationInferenceIndex = ${JSON.stringify(index, null, 2)} as const;\n`;
+  slots: Array<{
+    id: 'time' | 'context' | 'sensory' | 'measure';
+    label: string;
+    noun: string;
+    question: string;
+    summary: string;
+    examples: string[];
+    detectors: Detector[];
+  }>;
+  expressions: Array<Detector & {
+    tier: 'direct' | 'related' | 'broad';
+    feelingSlugs: string[];
+    needSlugs: string[];
+    cueIds: string[];
+    examples: string[];
+    provenance: string;
+  }>;
+  eventFamilies: Array<{
+    id: string;
+    label: string;
+    tier: 'related' | 'broad';
+    lexiconRuleId: string | null;
+    lexiconExcludeTerms: string[];
+    patterns: Detector[];
+    feelingSlugs: string[];
+    needSlugs: string[];
+    explanation: string;
+    provenance: string;
+  }>;
+  lexicalBridges: Array<{
+    id: string;
+    entityType: 'feeling' | 'need' | 'fauxFeeling';
+    slug: string;
+    terms: string[];
+    provenance: string;
+  }>;
+  surfaceTerms: Array<{
+    id: string;
+    label: string;
+    terms: string[];
+  }>;
+  guidanceRules: Array<{
+    id: string;
+    label: string;
+    explanation: string;
+    terms: string[];
+    patterns: Detector[];
+    provenance: string;
+  }>;
+};
+
+const validatedSource = source as unknown as ObservationInferenceSource;
+const expressions = [
+${compiledExpressionRows}
+] as const;
+const catalog = {
+  feelings: feelings.map((feeling) => ({
+    slug: feeling.slug,
+    title: feeling.title,
+    needSatisfaction: feeling.needSatisfaction,
+  })),
+  needs: needs.map((need) => ({
+    slug: need.slug,
+    title: need.title,
+    category: need.category ?? '',
+    feelingSlugs: need.feelings.map((feeling) => feeling.slug),
+    fauxFeelingSlugs: need.fauxFeelings.map((feeling) => feeling.slug),
+  })),
+  fauxFeelings: fauxFeelings.map((feeling) => ({
+    slug: feeling.slug,
+    title: feeling.title,
+    feelingSlugs: feeling.feelings.map((entry) => entry.slug),
+    needSlugs: feeling.needs.map((entry) => entry.slug),
+  })),
+};
+
+export const observationInferenceIndex = {
+  schemaVersion: validatedSource.schemaVersion,
+  modelVersion: validatedSource.modelVersion,
+  sourceChecksum: '${checksum}',
+  catalogChecksum: '${catalogChecksum}',
+  provenance: validatedSource.provenance,
+  catalog,
+  slots: validatedSource.slots,
+  expressions,
+  eventFamilies: validatedSource.eventFamilies,
+  lexicalBridges: validatedSource.lexicalBridges,
+  surfaceTerms: validatedSource.surfaceTerms,
+  guidanceRules: validatedSource.guidanceRules,
+} as const;
+`;
 }
 
 const rawSource = await readFile(sourcePath, 'utf8');
 const parsedSource = JSON.parse(rawSource);
 validateSource(parsedSource);
-const checksum = createHash('sha256').update(rawSource).digest('hex');
+const checksum = gitBlobChecksum(rawSource);
 const [rawLegacyCatalog, rawEditorialCatalog] = await Promise.all([
   readFile(legacyCatalogPath, 'utf8'),
   readFile(editorialCatalogPath, 'utf8'),
@@ -338,13 +477,13 @@ validateCatalogLexicon(catalog, parsedSource);
 const catalogChecksum = createHash('sha256')
   .update(JSON.stringify(catalog))
   .digest('hex');
-const expected = generatedSource(parsedSource, checksum, catalog, catalogChecksum);
+const expected = generatedSource(parsedSource, checksum, catalogChecksum);
 const mode = process.argv.includes('--write') ? 'write' : 'check';
 
 if (mode === 'write') {
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, expected);
-  console.log(`Generated ${outputPath} from ${parsedSource.expressions.length} expressions (${checksum.slice(0, 12)}).`);
+  console.log(`Generated ${outputPath} from ${parsedSource.expressions.length} expressions and ${parsedSource.eventFamilies.length} event families (${checksum.slice(0, 12)}).`);
 } else {
   let current = '';
   try {

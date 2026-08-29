@@ -51,6 +51,18 @@ const cueDetectors = observationInferenceIndex.expressions.map((expression) => (
   regex: compiledRegex(expression.pattern, expression.flags),
 }));
 
+const guidanceRuleById = new Map(observationInferenceIndex.guidanceRules.map((rule) => [rule.id, rule]));
+const eventFamilyDetectors = observationInferenceIndex.eventFamilies.flatMap((family) => family.patterns.map((pattern) => ({
+  ...pattern,
+  familyId: family.id,
+  tier: family.tier,
+  label: family.label,
+  explanation: family.explanation,
+  lexiconRuleId: family.lexiconRuleId,
+  lexiconExcludeTerms: family.lexiconExcludeTerms,
+  regex: compiledRegex(pattern.pattern, pattern.flags),
+})));
+
 const guidancePatternDetectors = observationInferenceIndex.guidanceRules.flatMap((rule) => rule.patterns.map((pattern) => ({
   ...pattern,
   ruleId: rule.id,
@@ -142,6 +154,55 @@ function findRegexMatches<T>(detector: CompiledDetector<T>, text: string) {
   return matches;
 }
 
+function normalizedPhrase(term: string) {
+  return phraseTokens(term).join(' ');
+}
+
+function containsTokenPhrase(source: string, term: string) {
+  const sourceTokens = phraseTokens(source);
+  const termTokens = phraseTokens(term);
+  if (!termTokens.length || termTokens.length > sourceTokens.length) return false;
+  for (let start = 0; start <= sourceTokens.length - termTokens.length; start += 1) {
+    if (termTokens.every((token, offset) => sourceTokens[start + offset] === token)) return true;
+  }
+  return false;
+}
+
+const EVENT_SELF_STATE_ANCHOR = /\b(?:i|we)\s+(?:am|are|was|were)\b/giu;
+const EVENT_TARGET_PRONOUN = /\b(?:me|us)\b/giu;
+
+function eventFamilyLexiconText(matchedText: string) {
+  const quote = findQuoteRanges(matchedText)[0];
+  if (quote) return matchedText.slice(quote.start, quote.end);
+
+  EVENT_SELF_STATE_ANCHOR.lastIndex = 0;
+  const selfState = [...matchedText.matchAll(EVENT_SELF_STATE_ANCHOR)].at(-1);
+  if (selfState) return matchedText.slice((selfState.index ?? 0) + selfState[0].length);
+
+  EVENT_TARGET_PRONOUN.lastIndex = 0;
+  const target = [...matchedText.matchAll(EVENT_TARGET_PRONOUN)][0];
+  if (target) return matchedText.slice((target.index ?? 0) + target[0].length);
+
+  return matchedText;
+}
+
+function eventFamilyRangeHasRequiredLexicon(
+  text: string,
+  range: TextRange,
+  lexiconRuleId: string | null | undefined,
+  lexiconExcludeTerms: readonly string[],
+) {
+  if (!lexiconRuleId) return true;
+  const rule = guidanceRuleById.get(lexiconRuleId);
+  if (!rule?.terms.length) return false;
+  const excluded = new Set(lexiconExcludeTerms.map(normalizedPhrase));
+  const matchedText = text.slice(range.start, range.end);
+  const lexiconText = eventFamilyLexiconText(matchedText);
+  return rule.terms
+    .filter((term) => !excluded.has(normalizedPhrase(term)))
+    .some((term) => containsTokenPhrase(lexiconText, term));
+}
+
 function samePhrase(tokens: ObservationToken[], startIndex: number, matcher: TermMatcher, text: string) {
   if (startIndex + matcher.tokens.length > tokens.length) return null;
   for (let offset = 0; offset < matcher.tokens.length; offset += 1) {
@@ -200,6 +261,7 @@ function evidenceKey(evidence: ObservationEvidence) {
   if (evidence.kind === 'formula') return `${evidence.kind}:${evidence.slot}:${evidence.detectorId}`;
   if (evidence.kind === 'entity') return `${evidence.kind}:${evidence.entityType}:${evidence.slug}:${evidence.matchKind}`;
   if (evidence.kind === 'cue') return `${evidence.kind}:${evidence.expressionId}:${evidence.tier}`;
+  if (evidence.kind === 'eventFamily') return `${evidence.kind}:${evidence.familyId}:${evidence.tier}`;
   if (evidence.kind === 'guidance') return `${evidence.kind}:${evidence.ruleId}`;
   return `${evidence.kind}:${evidence.termId}`;
 }
@@ -233,11 +295,31 @@ export function annotateObservation(text: string) {
   });
 
   cueDetectors.forEach((detector) => {
-    findRegexMatches(detector, text).forEach((range) => add(range, {
-      kind: 'cue',
-      expressionId: detector.id,
-      tier: detector.tier,
-    }));
+    findRegexMatches(detector, text)
+      .filter((range) => !rangeInside(range, quoteRanges))
+      .forEach((range) => add(range, {
+        kind: 'cue',
+        expressionId: detector.id,
+        tier: detector.tier,
+      }));
+  });
+
+  eventFamilyDetectors.forEach((detector) => {
+    findRegexMatches(detector, text)
+      .filter((range) => !rangeInside(range, quoteRanges))
+      .filter((range) => eventFamilyRangeHasRequiredLexicon(
+        text,
+        range,
+        detector.lexiconRuleId,
+        detector.lexiconExcludeTerms,
+      ))
+      .forEach((range) => add(range, {
+        kind: 'eventFamily',
+        familyId: detector.familyId,
+        tier: detector.tier,
+        label: detector.label,
+        explanation: detector.explanation,
+      }));
   });
 
   guidancePatternDetectors.forEach((detector) => {
