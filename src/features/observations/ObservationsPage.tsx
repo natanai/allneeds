@@ -179,7 +179,7 @@ export function ObservationsPage() {
       <section className={styles.editor} aria-label="Observation editor">
         <div className={styles.editorCard}>
           <div className={styles.editorGrid}>
-            <main className={styles.field}>
+            <div className={styles.field} data-testid="observation-workspace-main">
               <span id="observation-text-label" className={styles.editorLabel}>What did you notice?</span>
               <AnnotatedObservationEditor
                 id="observation-text"
@@ -253,7 +253,7 @@ export function ObservationsPage() {
                   </div>
                 </details>
               ) : null}
-            </main>
+            </div>
 
             <aside className={styles.supportRail} aria-label="Observation writing support">
               <section className={styles.quickCheck}>
