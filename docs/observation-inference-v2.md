@@ -36,6 +36,8 @@ The hand-edited owner is `src/data/observationInference/source.json`, validated 
 
 The compiler currently reads the repository's canonical owners for entity families: the imported catalog snapshot for still-unmigrated Feelings and Faux Feelings, and the reviewed editorial catalog for canonically migrated Needs. The generated Observation index owns the runtime lexicon, so the Observation feature has no runtime import from `src/legacy`.
 
+**Staging cleanup note.** The former `explorationPools` arrays still exist as inert fields in the current hand-edited source, schema/compiler validation, and generated index. Observation runtime code and result types no longer consume them, so they cannot enter an inference result. They are migration residue rather than an authorized fallback and should be removed from the source/schema/compiler/generated owner together before this correction is promoted beyond `site-test`. Do not restore runtime use of them.
+
 ## One analysis, one annotation ledger
 
 `analyzeObservation(text, mode)` performs one immediate analysis and returns:
