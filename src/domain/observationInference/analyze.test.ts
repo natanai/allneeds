@@ -81,6 +81,25 @@ describe('Observation Inference Engine 2.1', () => {
     expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct'), text).toBe(true);
   });
 
+  it('keeps a direct report of words said to the user eligible for related event-family evidence', () => {
+    const analysis = analyzeObservation('My coworker said to me “you are rude.”');
+    expect(analysis.annotations.some((annotation) => annotation.evidence.some((evidence) => (
+      evidence.kind === 'eventFamily' && evidence.familyId === 'directed-personal-evaluation'
+    )))).toBe(true);
+    expect(analysis.suggestions.needs.some((candidate) => candidate.slug === 'respect')).toBe(true);
+    expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct')).toBe(true);
+  });
+
+  it('does not infer event-family or imported-cue evidence from a story wholly contained in another person’s quote', () => {
+    const quotedEvent = analyzeObservation('She said “My coworker told me I was rude.”');
+    expect(quotedEvent.annotations.some((annotation) => annotation.evidence.some((evidence) => evidence.kind === 'eventFamily'))).toBe(false);
+    expect(quotedEvent.suggestions).toEqual({ feelings: [], needs: [], basis: null });
+
+    const quotedCue = analyzeObservation('She said “I reached to hug them and they stepped back.”');
+    expect(quotedCue.annotations.some((annotation) => annotation.evidence.some((evidence) => evidence.kind === 'cue'))).toBe(false);
+    expect(quotedCue.suggestions).toEqual({ feelings: [], needs: [], basis: null });
+  });
+
   it('does not turn excluded positive trait labels into the directed-evaluation event family', () => {
     for (const text of ['My coworker called me a hero.', 'My manager called me a rockstar.']) {
       const analysis = analyzeObservation(text);
