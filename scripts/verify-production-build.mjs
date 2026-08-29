@@ -65,12 +65,15 @@ if (deployPaths.includes('./data/index.json')) {
   fail('the duplicate public legacy catalog was emitted into the production deployment.');
 }
 const navigationHandler = worker.match(/if \(request\.mode === 'navigate'\) \{([\s\S]*?)\n  \}/)?.[1] ?? '';
+const deployOnlyBypassIndex = navigationHandler.indexOf('deployOnlyNavigationRoots.some');
 const navigationCacheIndex = navigationHandler.indexOf('cache.match(fallbackUrl');
 const navigationFetchIndex = navigationHandler.indexOf('return fetch(request)');
-if (navigationCacheIndex < 0
+if (deployOnlyBypassIndex < 0
+  || navigationCacheIndex < 0
   || navigationFetchIndex < 0
+  || deployOnlyBypassIndex > navigationCacheIndex
   || navigationCacheIndex > navigationFetchIndex) {
-  fail('installed navigation does not prefer the version-matched cached app shell before network fallback.');
+  fail('installed navigation does not bypass deploy-only documents before preferring the version-matched cached app shell.');
 }
 if (!worker.includes('await self.skipWaiting()')) {
   fail('a newly installed worker cannot immediately replace an older cached deployment.');

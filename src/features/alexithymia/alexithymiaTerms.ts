@@ -126,7 +126,7 @@ export function buildSupportStatement({
       : `When ${sentenceCase(cleanObservation)}`
     : '';
   const feelingsClause = terms.length
-    ? `I feel ${joinWords(terms.map((term) => term.label.toLocaleLowerCase()))}`
+    ? joinWords(terms.map((term) => `I feel ${term.label.toLocaleLowerCase()}`))
     : noWordYet
       ? 'I’m not sure what I feel yet'
       : '';

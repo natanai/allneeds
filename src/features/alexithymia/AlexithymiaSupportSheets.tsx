@@ -93,62 +93,68 @@ export function BodyClueSheet({
 }) {
   const region = regions.find((item) => item.id === openRegion) ?? regions[0]!;
   return (
-    <SupportSheet open={open} title="Body clues" titleId="alex-body-sheet-title" onClose={onClose}>
+    <SupportSheet open={open} title="Body clues" titleId="alex-body-sheet-title" onClose={onClose} wide>
       <p className={styles.sheetIntro}>Choose sensations that stand out. You can leave every other cue off.</p>
-      <div className={styles.regionPicker} role="list" aria-label="Body regions">
-        {regions.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            aria-pressed={item.id === region.id}
-            onClick={() => onRegionChange(item.id)}
-          >
-            {item.label}
-            {item.options.some((option) => (selected[option.id] ?? 0) > 0) ? <span aria-label="has selected cues">•</span> : null}
-          </button>
-        ))}
-      </div>
+      <div className={styles.bodySheetLayout}>
+        <nav className={styles.regionPanel} aria-label="Body regions">
+          <p className={styles.regionPickerLabel}>Choose an area</p>
+          <div className={styles.regionPicker} role="list">
+            {regions.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={item.id === region.id}
+                onClick={() => onRegionChange(item.id)}
+              >
+                <span>{item.label}</span>
+                {item.options.some((option) => (selected[option.id] ?? 0) > 0) ? <span className={styles.regionSelected} aria-label="has selected cues">✓</span> : null}
+              </button>
+            ))}
+          </div>
+        </nav>
 
-      <section className={styles.bodyRegionSheet} aria-labelledby={`alex-region-${region.id}`}>
-        <header>
-          <h3 id={`alex-region-${region.id}`}>{region.label}</h3>
-          <p>{region.prompt}</p>
-        </header>
-        <div className={styles.bodyOptions}>
-          {region.options.map((option) => {
-            const value = selected[option.id] ?? 0;
-            const active = value > 0;
-            return (
-              <article key={option.id} className={styles.bodyOption} data-active={active ? 'true' : undefined}>
-                <button type="button" aria-pressed={active} onClick={() => {
-                  const next = { ...selected };
-                  if (active) delete next[option.id];
-                  else next[option.id] = Math.max(5, (option.defaultIntensity ?? 5) * 10);
-                  onSelectedChange(next);
-                }}>
-                  <span><strong>{option.title}</strong><small>{option.note}</small></span>
-                  <span className={styles.bodyCheck} aria-hidden="true">{active ? '✓' : '+'}</span>
-                </button>
-                {active ? (
-                  <label className={styles.bodyIntensity}>
-                    <span>Intensity <output>{describeCueIntensity(value)}</output></span>
-                    <input
-                      type="range"
-                      min="5"
-                      max="100"
-                      step="5"
-                      value={value}
-                      aria-label={`${option.title} intensity`}
-                      aria-valuetext={describeCueIntensity(value)}
-                      onChange={(event) => onSelectedChange({ ...selected, [option.id]: Number(event.target.value) })}
-                    />
-                  </label>
-                ) : null}
-              </article>
-            );
-          })}
-        </div>
-      </section>
+        <section className={styles.bodyRegionSheet} aria-labelledby={`alex-region-${region.id}`}>
+          <header>
+            <p className={styles.regionEyebrow}>Right now</p>
+            <h3 id={`alex-region-${region.id}`}>{region.label}</h3>
+            <p>{region.prompt}</p>
+          </header>
+          <div className={styles.bodyOptions}>
+            {region.options.map((option) => {
+              const value = selected[option.id] ?? 0;
+              const active = value > 0;
+              return (
+                <article key={option.id} className={styles.bodyOption} data-active={active ? 'true' : undefined}>
+                  <button type="button" aria-pressed={active} onClick={() => {
+                    const next = { ...selected };
+                    if (active) delete next[option.id];
+                    else next[option.id] = Math.max(5, (option.defaultIntensity ?? 5) * 10);
+                    onSelectedChange(next);
+                  }}>
+                    <span><strong>{option.title}</strong><small>{option.note}</small></span>
+                    <span className={styles.bodyCheck} aria-hidden="true">{active ? '✓' : '+'}</span>
+                  </button>
+                  {active ? (
+                    <label className={styles.bodyIntensity}>
+                      <span>Intensity <output>{describeCueIntensity(value)}</output></span>
+                      <input
+                        type="range"
+                        min="5"
+                        max="100"
+                        step="5"
+                        value={value}
+                        aria-label={`${option.title} intensity`}
+                        aria-valuetext={describeCueIntensity(value)}
+                        onInput={(event) => onSelectedChange({ ...selected, [option.id]: Number(event.currentTarget.value) })}
+                      />
+                    </label>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      </div>
 
       <div className={styles.sheetFooterSplit}>
         <Link to="/feelings/body-cues">Open full Body Cues</Link>
@@ -244,22 +250,53 @@ export function FeelingShapeSheet({
   onClose: () => void;
 }) {
   return (
-    <SupportSheet open={open} title="Feeling shape" titleId="alex-shape-sheet-title" onClose={onClose}>
+    <SupportSheet open={open} title="Feeling shape" titleId="alex-shape-sheet-title" onClose={onClose} wide>
       <p className={styles.sheetIntro}>Place any parts you can sense. Each scale is optional.</p>
-      <div className={styles.shapeScales}>
-        {shapeControls.map((control) => (
-          <ShapeScale
-            key={control.dimension}
-            {...control}
-            value={shape[control.dimension]}
-            onChange={(value) => {
-              const next = { ...shape };
-              if (value === undefined) delete next[control.dimension];
-              else next[control.dimension] = value;
-              onChange(next);
-            }}
-          />
-        ))}
+      <div className={styles.shapeGroups}>
+        <section className={styles.shapeGroup} aria-labelledby="alex-shape-core-title">
+          <header>
+            <p>Start here</p>
+            <h3 id="alex-shape-core-title">Core shape</h3>
+            <span>Use either scale that feels available.</span>
+          </header>
+          <div className={styles.shapeScales}>
+            {shapeControls.slice(0, 2).map((control) => (
+              <ShapeScale
+                key={control.dimension}
+                {...control}
+                value={shape[control.dimension]}
+                onChange={(value) => {
+                  const next = { ...shape };
+                  if (value === undefined) delete next[control.dimension];
+                  else next[control.dimension] = value;
+                  onChange(next);
+                }}
+              />
+            ))}
+          </div>
+        </section>
+        <section className={`${styles.shapeGroup} ${styles.shapeGroupSecondary}`} aria-labelledby="alex-shape-context-title">
+          <header>
+            <p>Optional detail</p>
+            <h3 id="alex-shape-context-title">Situation shape</h3>
+            <span>These clues can narrow the comparison.</span>
+          </header>
+          <div className={styles.shapeScales}>
+            {shapeControls.slice(2).map((control) => (
+              <ShapeScale
+                key={control.dimension}
+                {...control}
+                value={shape[control.dimension]}
+                onChange={(value) => {
+                  const next = { ...shape };
+                  if (value === undefined) delete next[control.dimension];
+                  else next[control.dimension] = value;
+                  onChange(next);
+                }}
+              />
+            ))}
+          </div>
+        </section>
       </div>
       <div className={styles.sheetFooter}><button type="button" className={styles.primaryButton} onClick={onClose}>Done</button></div>
     </SupportSheet>

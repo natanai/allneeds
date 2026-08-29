@@ -85,7 +85,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
 
   await page.getByRole('button', { name: 'Build sentence' }).click();
   const statement = page.getByLabel('Your statement');
-  await expect(statement).toHaveValue(/I feel anxiety, guilt, and blamed because I need understanding/);
+  await expect(statement).toHaveValue(/I feel anxiety, I feel guilt, and I feel blamed because I need understanding/);
   await expect(statement).not.toHaveValue(/request|should/i);
   await page.getByRole('button', { name: /Add to Journal/ }).click();
 
@@ -93,6 +93,40 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(journal.getByLabel('Reflection')).toHaveValue(/guilt.*blamed.*understanding/i);
   await expect(journal.getByRole('button', { name: 'Feeling' })).toContainText('Anxiety');
   await expect(journal.getByRole('button', { name: 'Feeling' })).not.toContainText(/Guilt|Blamed/);
+  await expectNoHorizontalOverflow(page);
+});
+
+test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await startCheckIn(page);
+  await skipObservation(page);
+  await page.getByRole('button', { name: /^Body clues/ }).click();
+  const sheet = page.getByRole('dialog', { name: 'Body clues' });
+  await sheet.getByRole('button', { name: /Tight or constricted/ }).click();
+  await sheet.getByLabel('Tight or constricted intensity').fill('80');
+  await expect(sheet.getByLabel('Tight or constricted intensity')).toHaveValue('80');
+  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(page.getByText('Tight or constricted · 80%')).toBeVisible();
+});
+
+test('desktop uses a two-pane clue workspace and centered dialog without document overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await startCheckIn(page);
+  await skipObservation(page);
+
+  const sourceArea = page.locator('[class*="clueSourceArea"]');
+  const summary = page.locator('[class*="clueSummary"]');
+  await expect.poll(async () => {
+    const [sourceBox, summaryBox] = await Promise.all([sourceArea.boundingBox(), summary.boundingBox()]);
+    return Boolean(sourceBox && summaryBox && summaryBox.x > sourceBox.x + sourceBox.width - 2);
+  }).toBe(true);
+
+  await page.getByRole('button', { name: /^Body clues/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'Body clues' });
+  await expect.poll(async () => {
+    const box = await dialog.boundingBox();
+    return Boolean(box && box.y > 40 && box.y + box.height < 960);
+  }).toBe(true);
   await expectNoHorizontalOverflow(page);
 });
 

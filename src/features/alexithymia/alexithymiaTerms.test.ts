@@ -47,6 +47,15 @@ describe('Alexithymia Support statement builder', () => {
     })).toBe('I feel betrayed.');
   });
 
+  it('repeats the feeling phrase so mixed nouns and adjectives remain grammatical', () => {
+    expect(buildSupportStatement({
+      observation: '',
+      terms: [customWorkingTerm('anxiety'), customWorkingTerm('overwhelmed')],
+      needSlugs: ['understanding'],
+      noWordYet: false,
+    })).toBe('I feel anxiety and I feel overwhelmed because I need understanding.');
+  });
+
   it('uses the exact no-word-yet sentence and omits empty clauses', () => {
     expect(buildSupportStatement({
       observation: '',

@@ -1,20 +1,26 @@
 .entry,
 .page {
-  width: min(100%, 72rem);
+  width: min(100%, 74rem);
   min-width: 0;
   margin-inline: auto;
   color: var(--text);
 }
 
 .entry {
-  min-height: min(38rem, 72dvh);
+  min-height: min(40rem, 76dvh);
   padding: clamp(1rem, 4vw, 2.75rem);
   display: grid;
-  align-content: center;
-  gap: 1rem;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
 }
 
-.entry > header {
+.entryMain {
+  min-width: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.entryMain > header {
   max-width: 40rem;
   display: grid;
   gap: 0.7rem;
@@ -37,7 +43,7 @@
   letter-spacing: 0.015em;
 }
 
-.entry > header > p:last-child {
+.entryMain > header > p:last-child {
   max-width: 34rem;
   color: var(--secondary);
   font-size: clamp(1rem, 2.4vw, 1.2rem);
@@ -58,11 +64,82 @@
   gap: 0.7rem;
 }
 
-.entryDisclosure {
-  max-width: 34rem;
+.entryJourney {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.15rem;
+  list-style: none;
+}
+
+.entryJourney li {
+  min-width: 0;
+  padding: 0.62rem 0;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.7rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 14%, transparent);
+}
+
+.entryJourney li:last-child { border-bottom: 0; }
+
+.entryJourney li > span {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--selection) 70%, var(--surface-raised) 30%);
+  color: var(--primary);
+  font: 800 0.72rem / 1 var(--font-display);
+}
+
+.entryJourney strong,
+.entryJourney small {
+  display: block;
+}
+
+.entryJourney strong { font: 800 0.9rem / 1.15 var(--font-display); }
+.entryJourney small { margin-top: 0.14rem; color: var(--secondary); font-size: 0.72rem; }
+
+.entryAside {
+  padding: clamp(1rem, 2.5vw, 1.35rem);
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.85rem;
+  border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+  background: color-mix(in srgb, var(--surface-raised) 78%, var(--selection) 22%);
+}
+
+.entryAside strong { font: 800 0.95rem / 1.2 var(--font-display); }
+
+.entryAside p {
+  margin: 0.35rem 0 0.75rem;
   color: var(--secondary);
   font-size: 0.82rem;
   line-height: 1.45;
+}
+
+.entryAsideIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  color: var(--primary);
+}
+
+.entryAsideIcon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
 }
 
 .methodsLink,
@@ -147,10 +224,10 @@
   display: grid;
   gap: 0;
   overflow: clip;
-  background: color-mix(in srgb, var(--quiet) 66%, var(--surface-raised) 34%);
-  border: 2px solid color-mix(in srgb, var(--outline) 78%, transparent);
+  background: color-mix(in srgb, var(--quiet) 48%, var(--surface-raised) 52%);
+  border: 1.5px solid color-mix(in srgb, var(--outline) 58%, transparent);
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-medium);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--outline) 15%, transparent);
 }
 
 .appBar {
@@ -158,52 +235,100 @@
   z-index: 18;
   top: 0;
   min-width: 0;
-  padding: 0.55rem;
+  padding: 0.55rem 0.7rem;
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
   align-items: center;
   gap: 0.35rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
-  background: color-mix(in srgb, var(--surface-raised) 88%, var(--quiet) 12%);
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 94%, var(--quiet) 6%);
   backdrop-filter: blur(18px);
 }
 
 .appBarCenter {
   min-width: 0;
   display: grid;
-  gap: 0.38rem;
+  gap: 0.55rem;
+}
+
+.appBarTitle {
+  display: none;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.45rem;
   text-align: center;
 }
 
-.appBarCenter strong {
-  font: 750 0.9rem / 1 var(--font-display);
-}
+.appBarTitle strong { font: 800 0.9rem / 1 var(--font-display); }
+.appBarTitle small { color: var(--secondary); font-size: 0.68rem; }
 
 .progress {
-  width: min(14rem, 100%);
+  width: min(31rem, 100%);
   margin-inline: auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.28rem;
+  gap: 0.4rem;
 }
 
 .progress span {
-  height: 4px;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--outline) 18%, var(--quiet) 82%);
+  min-width: 0;
+  min-height: 34px;
+  padding: 0.25rem 0.38rem;
+  display: grid;
+  grid-template-columns: 1.45rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--radius-md);
+  color: var(--secondary);
 }
 
 .progress span[data-active='true'] {
+  color: var(--text);
+}
+
+.progress span[data-current='true'] {
+  background: color-mix(in srgb, var(--selection) 66%, var(--surface-raised) 34%);
+}
+
+.progress i {
+  width: 1.45rem;
+  height: 1.45rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--quiet) 60%, var(--surface-raised) 40%);
+  font: 800 0.62rem / 1 var(--font-display);
+  font-style: normal;
+}
+
+.progress span[data-active='true'] i {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--outline) 45%);
   background: var(--primary);
+  color: var(--surface-raised);
+}
+
+.progress small {
+  overflow: hidden;
+  font: 750 0.66rem / 1.1 var(--font-display);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stage {
   min-width: 0;
   min-height: min(44rem, 78dvh);
-  padding: clamp(1rem, 3.2vw, 2rem) clamp(0.85rem, 3.2vw, 2rem) calc(6.3rem + env(safe-area-inset-bottom));
+  padding: clamp(1.1rem, 3.2vw, 2.3rem) clamp(0.85rem, 3.2vw, 2.3rem) calc(6.3rem + env(safe-area-inset-bottom));
   display: grid;
   align-content: start;
-  gap: 1rem;
+  gap: clamp(1.1rem, 2.5vw, 1.65rem);
+}
+
+.stageOne,
+.stageClues,
+.stageWords,
+.stageReview {
+  isolation: isolate;
 }
 
 .stageHeader {
@@ -213,7 +338,7 @@
 }
 
 .stageHeader h1 {
-  font: 800 clamp(1.55rem, 5.5vw, 2.7rem) / 1.05 var(--font-display);
+  font: 800 clamp(1.6rem, 5.5vw, 2.75rem) / 1.02 var(--font-display);
   letter-spacing: 0.01em;
 }
 
@@ -221,6 +346,76 @@
   max-width: 40rem;
   color: var(--secondary);
   line-height: 1.48;
+}
+
+.sectionLabel {
+  margin: 0;
+  color: var(--primary);
+  font: 800 0.7rem / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.observationWorkspace,
+.clueWorkspace,
+.wordWorkspace,
+.reviewWorkspace,
+.observationPrimary,
+.clueSourceArea,
+.wordMain,
+.wordSidebar,
+.reviewSelections,
+.reviewOutcome {
+  min-width: 0;
+}
+
+.observationWorkspace,
+.clueWorkspace,
+.wordWorkspace,
+.reviewWorkspace,
+.observationPrimary,
+.clueSourceArea,
+.wordMain,
+.wordSidebar,
+.reviewSelections,
+.reviewOutcome {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.guideRail,
+.clueSummary,
+.wordSidebar {
+  min-width: 0;
+}
+
+.guideRail {
+  padding: 1rem;
+  border-top: 3px solid var(--primary);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: color-mix(in srgb, var(--selection) 18%, var(--surface-raised) 82%);
+}
+
+.guideRail > strong {
+  display: block;
+  margin-top: 0.6rem;
+  font: 800 1rem / 1.2 var(--font-display);
+}
+
+.guideRail > p:not(.sectionLabel) {
+  margin: 0.35rem 0 0.8rem;
+  color: var(--secondary);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.guideRail > a {
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
 }
 
 .observationField textarea,
@@ -255,10 +450,10 @@
 .composer,
 .partialWords {
   min-width: 0;
-  padding: 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
+  padding: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent);
   border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--surface-raised) 82%, var(--selection) 18%);
+  background: color-mix(in srgb, var(--surface-raised) 90%, var(--selection) 10%);
 }
 
 .detectedTerms h2,
@@ -288,8 +483,12 @@
   gap: 0.48rem;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
+
+.detectedTerms > div::-webkit-scrollbar,
+.clueTray > div::-webkit-scrollbar,
+.wordTray > div::-webkit-scrollbar { display: none; }
 
 .detectedTerms a,
 .clueTray span,
@@ -334,7 +533,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
   border-radius: var(--radius-xl);
   background: color-mix(in srgb, var(--surface-raised) 88%, var(--quiet) 12%);
   box-shadow: 0 10px 28px color-mix(in srgb, var(--outline) 18%, transparent);
@@ -349,28 +548,31 @@
 
 .clueCards {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
 .clueCards > button {
-  min-height: 8.4rem;
-  padding: 1rem;
+  min-height: 7.4rem;
+  padding: 1rem 1.05rem;
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.7rem;
-  border: 2px solid var(--outline);
+  border: 1.5px solid color-mix(in srgb, var(--outline) 46%, transparent);
   border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--surface-raised) 78%, var(--selection) 22%);
+  background: color-mix(in srgb, var(--surface-raised) 82%, var(--selection) 18%);
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 6px 0 color-mix(in srgb, var(--outline) 24%, transparent);
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--outline) 18%, transparent);
 }
 
 .clueCards > button:nth-child(2) {
-  background: color-mix(in srgb, var(--surface-raised) 78%, var(--positive) 22%);
+  min-height: 6.5rem;
+  margin-inline: 0.5rem;
+  border-color: color-mix(in srgb, var(--outline) 28%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 90%, var(--positive) 10%);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 12%, transparent);
 }
 
 .clueCards strong,
@@ -379,7 +581,7 @@
 }
 
 .clueCards strong {
-  font: 800 1.08rem / 1.1 var(--font-display);
+  font: 800 1.12rem / 1.1 var(--font-display);
 }
 
 .clueCards small {
@@ -395,6 +597,17 @@
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--primary) 13%, var(--surface-raised) 87%);
   color: var(--primary);
+}
+
+.cardArrow {
+  color: var(--primary);
+  font: 700 1.65rem / 1 var(--font-display);
+}
+
+.clueSummary {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
 }
 
 .noClueMessage,
@@ -413,18 +626,18 @@
   display: grid;
   align-items: end;
   justify-items: center;
-  background: color-mix(in srgb, var(--outline) 32%, transparent);
-  backdrop-filter: blur(2px);
+  background: color-mix(in srgb, var(--outline) 34%, transparent);
+  backdrop-filter: blur(3px);
 }
 
 .sheet {
   width: min(100%, 45rem);
-  max-height: min(88dvh, 54rem);
+  max-height: min(90dvh, 55rem);
   padding: 0 0 env(safe-area-inset-bottom);
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
   overflow: hidden;
-  border: 2px solid var(--outline);
+  border: 1.5px solid var(--outline);
   border-bottom: 0;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   outline: none;
@@ -460,7 +673,7 @@
 
 .sheetBody {
   min-height: 0;
-  padding: 1rem;
+  padding: clamp(0.9rem, 2vw, 1.25rem);
   overflow: auto;
   overscroll-behavior: contain;
 }
@@ -470,6 +683,7 @@
 }
 
 .sheetIntro {
+  margin-bottom: 1rem;
   color: var(--secondary);
   line-height: 1.45;
 }
@@ -490,32 +704,69 @@
   margin-right: auto;
 }
 
+.bodySheetLayout {
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.regionPanel {
+  min-width: 0;
+}
+
+.regionPickerLabel,
+.regionEyebrow {
+  margin: 0;
+  color: var(--primary);
+  font: 800 0.68rem / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .regionPicker {
-  margin: 0 -1rem 0.8rem;
-  padding: 0.1rem 1rem 0.6rem;
+  margin: 0 calc(clamp(0.9rem, 2vw, 1.25rem) * -1) 0.8rem;
+  padding: 0.65rem clamp(0.9rem, 2vw, 1.25rem) 0.35rem;
   display: flex;
   gap: 0.45rem;
   overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
 }
+
+.regionPicker::-webkit-scrollbar { display: none; }
 
 .regionPicker button {
   min-height: 44px;
   padding: 0.45rem 0.7rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: space-between;
+  gap: 0.5rem;
   flex: 0 0 auto;
-  border: 1.5px solid color-mix(in srgb, var(--outline) 55%, transparent);
+  scroll-snap-align: start;
+  border: 1px solid color-mix(in srgb, var(--outline) 34%, transparent);
   border-radius: var(--radius-pill);
-  background: var(--surface-raised);
+  background: color-mix(in srgb, var(--surface-raised) 90%, var(--quiet) 10%);
   color: var(--text);
   font-weight: 750;
   cursor: pointer;
 }
 
 .regionPicker button[aria-pressed='true'] {
-  border-color: var(--outline);
-  background: var(--selection);
+  border-color: color-mix(in srgb, var(--primary) 68%, var(--outline) 32%);
+  background: color-mix(in srgb, var(--selection) 76%, var(--surface-raised) 24%);
+  color: var(--primary);
+}
+
+.regionSelected {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--positive);
+  color: var(--text);
+  font-size: 0.62rem;
 }
 
 .bodyRegionSheet > header h3,
@@ -524,7 +775,8 @@
 }
 
 .bodyRegionSheet > header h3 {
-  font: 800 1.1rem / 1.1 var(--font-display);
+  margin-top: 0.32rem;
+  font: 800 clamp(1.2rem, 3vw, 1.55rem) / 1.1 var(--font-display);
 }
 
 .bodyRegionSheet > header p {
@@ -543,14 +795,15 @@
 
 .bodyOption {
   overflow: hidden;
-  border: 1.5px solid color-mix(in srgb, var(--outline) 36%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 25%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-raised) 88%, var(--quiet) 12%);
+  background: color-mix(in srgb, var(--surface-raised) 94%, var(--quiet) 6%);
 }
 
 .bodyOption[data-active='true'] {
-  border-color: var(--outline);
-  background: color-mix(in srgb, var(--positive) 22%, var(--surface-raised) 78%);
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--outline) 42%);
+  background: color-mix(in srgb, var(--selection) 25%, var(--surface-raised) 75%);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--outline) 13%, transparent);
 }
 
 .bodyOption > button {
@@ -585,17 +838,19 @@
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border: 1.5px solid var(--outline);
+  border: 1px solid color-mix(in srgb, var(--outline) 55%, transparent);
   border-radius: 50%;
   background: var(--surface-raised);
   font-weight: 900;
 }
 
 .bodyIntensity {
-  padding: 0 0.7rem 0.75rem;
+  margin: 0 0.7rem 0.75rem;
+  padding: 0.65rem 0.7rem 0.35rem;
   display: grid;
   gap: 0.35rem;
   font-size: 0.76rem;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 15%, transparent);
   font-weight: 750;
 }
 
@@ -615,13 +870,59 @@
   accent-color: var(--primary);
 }
 
+.shapeGroups {
+  display: grid;
+  gap: 1rem;
+}
+
+.shapeGroup {
+  min-width: 0;
+  padding: 1rem;
+  border-top: 4px solid var(--primary);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: color-mix(in srgb, var(--selection) 16%, var(--surface-raised) 84%);
+}
+
+.shapeGroupSecondary {
+  border-top-width: 2px;
+  border-top-color: color-mix(in srgb, var(--outline) 35%, transparent);
+  background: color-mix(in srgb, var(--quiet) 18%, var(--surface-raised) 82%);
+}
+
+.shapeGroup > header p,
+.shapeGroup > header h3,
+.shapeGroup > header span {
+  margin: 0;
+}
+
+.shapeGroup > header p {
+  color: var(--primary);
+  font: 800 0.67rem / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.shapeGroup > header h3 {
+  margin-top: 0.35rem;
+  font: 800 1.12rem / 1.15 var(--font-display);
+}
+
+.shapeGroup > header span {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--secondary);
+  font-size: 0.78rem;
+}
+
 .shapeScale {
   margin: 0;
-  padding: 0.8rem;
-  border: 1.5px solid color-mix(in srgb, var(--outline) 36%, transparent);
-  border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--surface-raised) 90%, var(--selection) 10%);
+  padding: 0.9rem 0;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 17%, transparent);
+  background: transparent;
 }
+
+.shapeScale:first-child { border-top: 0; }
 
 .shapeScale legend {
   width: 100%;
@@ -833,6 +1134,12 @@
   background: var(--surface-raised);
 }
 
+.wordToolbar {
+  min-width: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
 .wordSearch svg,
 .sheetSearch svg {
   width: 1.25rem;
@@ -887,6 +1194,14 @@
   box-shadow: none;
 }
 
+.wordMain {
+  grid-auto-rows: max-content;
+}
+
+.wordSidebar {
+  grid-auto-rows: max-content;
+}
+
 .selectedNeedBoard { min-height: 7.5rem; }
 
 .partialWords {
@@ -906,13 +1221,16 @@
 }
 
 .wordAlternatives {
-  display: flex;
-  gap: 0.55rem;
-  flex-wrap: wrap;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
 }
 
 .wordAlternatives button {
+  width: 100%;
   background: color-mix(in srgb, var(--surface-raised) 80%, var(--quiet) 20%);
+  box-shadow: none;
 }
 
 .wordAlternatives button[aria-pressed='true'] { background: var(--positive); }
@@ -921,6 +1239,11 @@
 .composer {
   display: grid;
   gap: 0.8rem;
+}
+
+.reviewSelections,
+.reviewOutcome {
+  grid-auto-rows: max-content;
 }
 
 .selectionSection > header,
@@ -1069,6 +1392,7 @@
 }
 
 .completion {
+  margin: 0;
   padding: 0.75rem;
   border-left: 4px solid var(--positive);
   border-radius: var(--radius-md);
@@ -1083,25 +1407,150 @@
 }
 
 @media (min-width: 720px) {
+  .entry {
+    grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.65fr);
+  }
+
   .stickyActions {
-    position: sticky;
+    position: static;
     right: auto;
-    bottom: 0.75rem;
+    bottom: auto;
     left: auto;
     width: 100%;
     margin-top: 0.5rem;
+    padding: 0.6rem 0 0;
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .stage { padding-bottom: 2rem; }
+
+  .observationWorkspace {
+    grid-template-columns: minmax(0, 1.45fr) minmax(15rem, 0.55fr);
+    align-items: start;
+  }
+
+  .clueWorkspace {
+    grid-template-columns: minmax(0, 1.45fr) minmax(16rem, 0.55fr);
+    align-items: start;
+  }
+
+  .wordWorkspace {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 18rem);
+    align-items: start;
+  }
+
+  .reviewWorkspace {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    align-items: start;
+  }
+
+  .guideRail,
+  .clueSummary,
+  .wordSidebar,
+  .reviewOutcome {
+    position: sticky;
+    top: 6.25rem;
+    align-self: start;
+  }
+
+  .wordSidebar {
+    padding-left: 0.9rem;
+    border-left: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
+  }
+
+  .wordToolbar {
+    grid-template-columns: minmax(12rem, 1fr) minmax(17rem, 0.8fr);
+  }
+
+  .sheetBackdrop {
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  .sheet {
+    max-height: min(86dvh, 54rem);
+    border-bottom: 1.5px solid var(--outline);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 22px 60px color-mix(in srgb, var(--outline) 28%, transparent);
+  }
+
+  .sheetHandle { display: none; }
+  .sheetHeader { padding-top: 0.75rem; }
+
+  .bodySheetLayout {
+    grid-template-columns: minmax(12rem, 13.5rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.2rem;
+  }
+
+  .regionPanel {
+    padding: 0.75rem;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--quiet) 32%, var(--surface-raised) 68%);
+  }
+
+  .regionPicker {
+    max-height: min(60dvh, 33rem);
+    margin: 0.55rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.32rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: none;
+  }
+
+  .regionPicker button {
+    width: 100%;
+    min-height: 40px;
+    border-color: transparent;
+    border-radius: var(--radius-md);
+    text-align: left;
+  }
+
+  .regionPicker button[aria-pressed='true'] {
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+
   .bodyOptions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .shapeScales { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shapeGroups { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
 
 @media (max-width: 640px) {
   .entry {
     min-height: 62dvh;
     padding: 1.15rem 0.55rem;
+    gap: 1.25rem;
   }
+
+  .entryJourney {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .entryJourney li {
+    padding: 0.45rem;
+    grid-template-columns: 1.7rem minmax(0, 1fr);
+    gap: 0.45rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--surface-raised) 70%, var(--quiet) 30%);
+  }
+
+  .entryJourney li > span { width: 1.7rem; height: 1.7rem; }
+  .entryJourney small { font-size: 0.64rem; line-height: 1.2; }
+
+  .entryAside {
+    padding: 0.85rem;
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .entryAsideIcon { width: 2rem; height: 2rem; padding: 0.38rem; }
 
   .page {
     width: calc(100% + 1.56rem);
@@ -1112,13 +1561,38 @@
   }
 
   .appBar { padding-top: max(0.45rem, env(safe-area-inset-top)); }
+  .appBarCenter { gap: 0.32rem; }
+  .appBarTitle { display: flex; }
+  .progress { width: min(12rem, 100%); gap: 0.25rem; }
+  .progress span {
+    min-height: 4px;
+    height: 4px;
+    padding: 0;
+    display: block;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--outline) 16%, var(--quiet) 84%);
+  }
+  .progress span[data-current='true'] { background: var(--primary); }
+  .progress span[data-active='true']:not([data-current='true']) { background: color-mix(in srgb, var(--primary) 52%, var(--quiet) 48%); }
+  .progress i,
+  .progress small { display: none; }
   .stage { min-height: 72dvh; }
-  .clueCards { grid-template-columns: 1fr; }
-  .clueCards > button { min-height: 6.8rem; }
+  .clueCards > button { min-height: 6.5rem; }
+  .clueCards > button:nth-child(2) { min-height: 5.8rem; margin-inline: 0.35rem; }
+
+  .wordToolbar { position: sticky; z-index: 8; top: calc(3.9rem + env(safe-area-inset-top)); }
+  .wordSearch,
+  .segmented { background: color-mix(in srgb, var(--surface-raised) 94%, var(--quiet) 6%); }
+
+  .wordAlternatives { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wordAlternatives .sectionLabel { grid-column: 1 / -1; }
 
   .sheet {
     max-height: calc(100dvh - max(0.35rem, env(safe-area-inset-top)));
   }
+
+  .regionPickerLabel { padding-inline: 0.1rem; }
+  .shapeGroup { padding: 0.8rem; }
 
   .decisionButtons { grid-template-columns: 1fr 1fr; }
   .decisionButtons button:last-child { grid-column: 1 / -1; }

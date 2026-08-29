@@ -93,6 +93,16 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - The final composer may use only the person's observation, selected words, and selected Needs. It must not infer a Need, generate a request, or offer a lane-local care recommendation. Selected Need magnets route to the canonical Need pages and their strategy decks.
 - Drafts resume the same stage after route changes, reload, or iOS backgrounding. `Start over` is the explicit destructive boundary.
 
+**Responsive hierarchy accepted 2026-08-29.** The same four-stage journey must read as a guided workspace rather than a stack of equal cards.
+
+- The app bar names all four steps on desktop and keeps a compact current-step indicator on mobile. The stage heading owns the primary visual emphasis; clue summaries, alternatives, and research disclosures remain visibly secondary.
+- Desktop stages use available width for a task-and-context layout: the active work stays in the main column while selected clues, word choices, or the next action stay in a quieter side rail. Do not render a widened mobile stack or abandon the persistent next action.
+- Mobile remains a single-column, full-bleed flow. Avoid horizontal document panning; when a named control such as the body-region picker scrolls horizontally, hide the native scrollbar, use snap-aligned choices, and make the active region unmistakable.
+- In the Body-clue sheet, desktop uses a body-region navigation rail and a separate sensation workspace. Selected sensations may expand to reveal intensity, but unselected sensations should remain compact.
+- Feeling shape groups Pleasantness and Energy as the first, broadest place to start. Power / control and Expectedness remain optional situation detail. These groups establish sequence without implying that any input is required or more diagnostically valid.
+- Do not box every element. Use spacing, dividers, type scale, restrained surface color, and one clearly emphasized action to distinguish primary work from reference material.
+- Generated statements repeat the grammatical frame for each selected term (`I feel anxiety and I feel overwhelmed`) so official Feelings, Faux Feelings, and working terms can coexist without silently renaming or reclassifying any word.
+
 ## Canonical utility controls
 
 ### Shuffle
