@@ -586,23 +586,28 @@
 }
 
 .segmented {
+  min-width: 0;
   padding: .16rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: .14rem;
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--outline) 9%, var(--quiet) 91%);
 }
 
 .segmented button {
+  min-width: 0;
   min-height: 40px;
   padding: .38rem .24rem;
+  overflow: hidden;
   border: 0;
   border-radius: calc(var(--radius-lg) * .78);
   background: transparent;
   color: var(--text);
   font-size: .7rem;
   font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -1141,7 +1146,7 @@
   .reviewOutcome { position: sticky; top: 5.5rem; align-self: start; }
 
   .wordSidebar { padding-left: .8rem; border-left: 1px solid color-mix(in srgb, var(--outline) 13%, transparent); }
-  .wordToolbar { grid-template-columns: minmax(12rem, 1fr) minmax(17rem, .8fr); }
+  .wordToolbar { grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); }
 
   .sheetBackdrop { align-items: center; padding: 1.5rem; }
   .sheet { max-height: min(86dvh, 54rem); border-bottom: 1px solid var(--outline); border-radius: var(--radius-2xl); box-shadow: 0 18px 54px color-mix(in srgb, var(--outline) 22%, transparent); }
