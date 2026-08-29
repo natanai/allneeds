@@ -168,14 +168,22 @@ function containsTokenPhrase(source: string, term: string) {
   return false;
 }
 
-const EVENT_TARGET_ANCHOR = /\b(?:me|us)\b|\b(?:i|we)\s+(?:am|are|was|were)\b/giu;
+const EVENT_SELF_STATE_ANCHOR = /\b(?:i|we)\s+(?:am|are|was|were)\b/giu;
+const EVENT_TARGET_PRONOUN = /\b(?:me|us)\b/giu;
 
 function eventFamilyLexiconText(matchedText: string) {
-  EVENT_TARGET_ANCHOR.lastIndex = 0;
-  const anchors = [...matchedText.matchAll(EVENT_TARGET_ANCHOR)];
-  const anchor = anchors.at(-1);
-  if (!anchor) return matchedText;
-  return matchedText.slice((anchor.index ?? 0) + anchor[0].length);
+  const quote = findQuoteRanges(matchedText)[0];
+  if (quote) return matchedText.slice(quote.start, quote.end);
+
+  EVENT_SELF_STATE_ANCHOR.lastIndex = 0;
+  const selfState = [...matchedText.matchAll(EVENT_SELF_STATE_ANCHOR)].at(-1);
+  if (selfState) return matchedText.slice((selfState.index ?? 0) + selfState[0].length);
+
+  EVENT_TARGET_PRONOUN.lastIndex = 0;
+  const target = [...matchedText.matchAll(EVENT_TARGET_PRONOUN)][0];
+  if (target) return matchedText.slice((target.index ?? 0) + target[0].length);
+
+  return matchedText;
 }
 
 function eventFamilyRangeHasRequiredLexicon(
