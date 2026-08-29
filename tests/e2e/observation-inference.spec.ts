@@ -161,21 +161,21 @@ test('unclassified and identity wording do not trigger fabricated results', asyn
 test('desktop uses a task-and-context workspace and mobile returns to one linear column', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/observations');
-  const main = page.locator('main').filter({ has: page.getByRole('textbox', { name: 'What did you notice?' }) });
+  const work = page.getByTestId('observation-workspace-main');
   const rail = page.getByRole('complementary', { name: 'Observation writing support' });
-  const desktopMain = await main.boundingBox();
+  const desktopWork = await work.boundingBox();
   const desktopRail = await rail.boundingBox();
-  expect(desktopMain).not.toBeNull();
+  expect(desktopWork).not.toBeNull();
   expect(desktopRail).not.toBeNull();
-  expect(desktopRail!.x).toBeGreaterThan(desktopMain!.x + desktopMain!.width - 8);
-  expect(Math.abs(desktopRail!.y - desktopMain!.y)).toBeLessThan(8);
+  expect(desktopRail!.x).toBeGreaterThan(desktopWork!.x + desktopWork!.width - 8);
+  expect(Math.abs(desktopRail!.y - desktopWork!.y)).toBeLessThan(8);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  const mobileMain = await main.boundingBox();
+  const mobileWork = await work.boundingBox();
   const mobileRail = await rail.boundingBox();
-  expect(mobileMain).not.toBeNull();
+  expect(mobileWork).not.toBeNull();
   expect(mobileRail).not.toBeNull();
-  expect(mobileRail!.y).toBeGreaterThan(mobileMain!.y + mobileMain!.height - 8);
+  expect(mobileRail!.y).toBeGreaterThan(mobileWork!.y + mobileWork!.height - 8);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
