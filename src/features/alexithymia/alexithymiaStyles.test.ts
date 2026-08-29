@@ -1,8 +1,10 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
-import pageSource from './AlexithymiaSupportPage.tsx?raw';
-import sheetSource from './AlexithymiaSupportSheets.tsx?raw';
-import cssSource from './AlexithymiaSupportPage.module.css?raw';
+const pageSource = readFileSync(new URL('./AlexithymiaSupportPage.tsx', import.meta.url), 'utf8');
+const sheetSource = readFileSync(new URL('./AlexithymiaSupportSheets.tsx', import.meta.url), 'utf8');
+const cssSource = readFileSync(new URL('./AlexithymiaSupportPage.module.css', import.meta.url), 'utf8');
 
 function referencedStyleNames(source: string) {
   return [...source.matchAll(/styles\.([A-Za-z0-9_]+)/g)].map((match) => match[1]!);
