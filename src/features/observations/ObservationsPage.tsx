@@ -120,12 +120,20 @@ export function ObservationsPage() {
     return [...new Set(selected)].slice(0, 4);
   }, [analysis.annotations, analysis.suggestions]);
   const eventEvidence = useMemo(() => {
+    const selectedFamilyIds = new Set(
+      [...analysis.suggestions.needs, ...analysis.suggestions.feelings]
+        .flatMap((suggestion) => suggestion.evidence)
+        .filter((evidence) => evidence.kind === 'eventFamily')
+        .map((evidence) => evidence.evidenceId),
+    );
     const unique = new Map<string, { id: string; explanation: string }>();
     analysis.annotations.forEach((annotation) => annotation.evidence.forEach((evidence) => {
-      if (evidence.kind === 'eventFamily') unique.set(evidence.familyId, { id: evidence.familyId, explanation: evidence.explanation });
+      if (evidence.kind === 'eventFamily' && selectedFamilyIds.has(evidence.familyId)) {
+        unique.set(evidence.familyId, { id: evidence.familyId, explanation: evidence.explanation });
+      }
     }));
     return [...unique.values()];
-  }, [analysis.annotations]);
+  }, [analysis.annotations, analysis.suggestions]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
