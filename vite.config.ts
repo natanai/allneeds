@@ -244,7 +244,9 @@ function runtimeCatalogSource() {
     slug: feeling.slug,
     title: feeling.title,
     feelings: feeling.feelings ?? [],
-    needs: feeling.needs ?? [],
+    needs: needs
+      .filter((need) => need.fauxFeelings.some((reference) => reference.slug === feeling.slug))
+      .map((need) => ({ slug: need.slug, title: need.title })),
   }));
 
   const userStrategySlugs = new Set(userStrategies.map((strategy) => strategy.slug));
