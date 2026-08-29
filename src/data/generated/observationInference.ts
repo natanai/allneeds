@@ -125,7 +125,7 @@ const catalog = {
 export const observationInferenceIndex = {
   schemaVersion: validatedSource.schemaVersion,
   modelVersion: validatedSource.modelVersion,
-  sourceChecksum: 'd62fb4a577aa8f9e8c15033d2550f904773c0302',
+  sourceChecksum: '24a3d7a75bca817446cd9124655796e6da5eaa99',
   catalogChecksum: '5574e09ecd3d601599d663b3cd40fe6ae586644d6f0ac58082a6224d5e762750',
   provenance: validatedSource.provenance,
   catalog,
