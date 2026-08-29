@@ -276,15 +276,18 @@ export function annotateObservation(text: string) {
   });
 
   cueDetectors.forEach((detector) => {
-    findRegexMatches(detector, text).forEach((range) => add(range, {
-      kind: 'cue',
-      expressionId: detector.id,
-      tier: detector.tier,
-    }));
+    findRegexMatches(detector, text)
+      .filter((range) => !rangeInside(range, quoteRanges))
+      .forEach((range) => add(range, {
+        kind: 'cue',
+        expressionId: detector.id,
+        tier: detector.tier,
+      }));
   });
 
   eventFamilyDetectors.forEach((detector) => {
     findRegexMatches(detector, text)
+      .filter((range) => !rangeInside(range, quoteRanges))
       .filter((range) => eventFamilyRangeHasRequiredLexicon(
         text,
         range,
