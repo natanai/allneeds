@@ -22,7 +22,7 @@ export type EntityEvidence = {
 export type CueEvidence = {
   kind: 'cue';
   expressionId: string;
-  tier: EvidenceTier;
+  tier: EventEvidenceTier;
 };
 
 export type EventFamilyEvidence = {
