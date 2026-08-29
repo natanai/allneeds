@@ -230,17 +230,16 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
       } else if (evidence.kind === 'cue') {
         const expression = expressionById.get(evidence.expressionId);
         if (!expression) return;
-        const basis = evidence.tier === 'broad' ? 'broad' : 'related';
         const ambiguity = expression.feelingSlugs.length + expression.needSlugs.length;
-        const base = basis === 'related' ? 510 : 360;
+        const base = evidence.tier === 'related' ? 510 : 360;
         const score = Math.max(180, base + Math.min(80, annotation.text.length) - Math.max(0, ambiguity - 2) * 3);
         expression.feelingSlugs.forEach((slug) => {
-          if (modeAllowsFeeling(slug, mode)) addCandidate(feelingCandidates, 'feeling', slug, basis, score, expression.id, {
-            kind: 'cue', tier: basis, annotationId: annotation.id, evidenceId: expression.id,
+          if (modeAllowsFeeling(slug, mode)) addCandidate(feelingCandidates, 'feeling', slug, evidence.tier, score, expression.id, {
+            kind: 'cue', tier: evidence.tier, annotationId: annotation.id, evidenceId: expression.id,
           });
         });
-        expression.needSlugs.forEach((slug) => addCandidate(needCandidates, 'need', slug, basis, score, expression.id, {
-          kind: 'cue', tier: basis, annotationId: annotation.id, evidenceId: expression.id,
+        expression.needSlugs.forEach((slug) => addCandidate(needCandidates, 'need', slug, evidence.tier, score, expression.id, {
+          kind: 'cue', tier: evidence.tier, annotationId: annotation.id, evidenceId: expression.id,
         }));
       }
     });
