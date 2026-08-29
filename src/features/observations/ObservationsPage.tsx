@@ -115,6 +115,7 @@ export function ObservationsPage() {
     const annotationById = new Map(analysis.annotations.map((annotation) => [annotation.id, annotation]));
     const selected = [...analysis.suggestions.needs, ...analysis.suggestions.feelings]
       .flatMap((suggestion) => suggestion.evidence)
+      .filter((evidence) => evidence.kind !== 'eventFamily')
       .map((evidence) => annotationById.get(evidence.annotationId)?.text.trim())
       .filter((entry): entry is string => Boolean(entry));
     return [...new Set(selected)].slice(0, 4);
@@ -265,7 +266,7 @@ export function ObservationsPage() {
                           <div className={styles.basis}>
                             <div><p>{suggestionBasisSummary(analysis.suggestions)}</p><button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('matching')} aria-label="How matching works">i</button></div>
                             {eventEvidence.slice(0, 2).map((entry) => <p key={entry.id}>{entry.explanation}</p>)}
-                            {evidenceText.length ? <p>Words that contributed: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
+                            {evidenceText.length ? <p>Text that contributed: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
                           </div>
                         </details>
                       </>
