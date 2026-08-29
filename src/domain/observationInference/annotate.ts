@@ -171,9 +171,13 @@ function containsTokenPhrase(source: string, term: string) {
 const EVENT_SELF_STATE_ANCHOR = /\b(?:i|we)\s+(?:am|are|was|were)\b/giu;
 const EVENT_TARGET_PRONOUN = /\b(?:me|us)\b/giu;
 
-function eventFamilyLexiconText(matchedText: string) {
+function eventFamilyLexiconText(matchedText: string, lexiconRuleId: string | null | undefined) {
   const quote = findQuoteRanges(matchedText)[0];
-  if (quote) return matchedText.slice(quote.start, quote.end);
+  if (quote) {
+    const quoteText = matchedText.slice(quote.start, quote.end);
+    if (lexiconRuleId === 'trait-labels' && !/\byou\b/iu.test(quoteText)) return '';
+    return quoteText;
+  }
 
   EVENT_SELF_STATE_ANCHOR.lastIndex = 0;
   const selfState = [...matchedText.matchAll(EVENT_SELF_STATE_ANCHOR)].at(-1);
@@ -197,7 +201,7 @@ function eventFamilyRangeHasRequiredLexicon(
   if (!rule?.terms.length) return false;
   const excluded = new Set(lexiconExcludeTerms.map(normalizedPhrase));
   const matchedText = text.slice(range.start, range.end);
-  const lexiconText = eventFamilyLexiconText(matchedText);
+  const lexiconText = eventFamilyLexiconText(matchedText, lexiconRuleId);
   return rule.terms
     .filter((term) => !excluded.has(normalizedPhrase(term)))
     .some((term) => containsTokenPhrase(lexiconText, term));
