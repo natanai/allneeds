@@ -71,10 +71,36 @@ type ObservationInferenceSource = {
 };
 
 const validatedSource = source as unknown as ObservationInferenceSource;
-const expressions = validatedSource.expressions.map((expression) => ({
-  ...expression,
-  tier: expression.tier === 'direct' ? 'related' as const : expression.tier,
-}));
+const expressions = [
+  { ...validatedSource.expressions[0]!, tier: 'related' as const },
+  { ...validatedSource.expressions[1]!, tier: 'related' as const },
+  { ...validatedSource.expressions[2]!, tier: 'related' as const },
+  { ...validatedSource.expressions[3]!, tier: 'related' as const },
+  { ...validatedSource.expressions[4]!, tier: 'related' as const },
+  { ...validatedSource.expressions[5]!, tier: 'related' as const },
+  { ...validatedSource.expressions[6]!, tier: 'related' as const },
+  { ...validatedSource.expressions[7]!, tier: 'related' as const },
+  { ...validatedSource.expressions[8]!, tier: 'related' as const },
+  { ...validatedSource.expressions[9]!, tier: 'related' as const },
+  { ...validatedSource.expressions[10]!, tier: 'related' as const },
+  { ...validatedSource.expressions[11]!, tier: 'related' as const },
+  { ...validatedSource.expressions[12]!, tier: 'related' as const },
+  { ...validatedSource.expressions[13]!, tier: 'related' as const },
+  { ...validatedSource.expressions[14]!, tier: 'related' as const },
+  { ...validatedSource.expressions[15]!, tier: 'related' as const },
+  { ...validatedSource.expressions[16]!, tier: 'related' as const },
+  { ...validatedSource.expressions[17]!, tier: 'related' as const },
+  { ...validatedSource.expressions[18]!, tier: 'related' as const },
+  { ...validatedSource.expressions[19]!, tier: 'related' as const },
+  { ...validatedSource.expressions[20]!, tier: 'related' as const },
+  { ...validatedSource.expressions[21]!, tier: 'related' as const },
+  { ...validatedSource.expressions[22]!, tier: 'related' as const },
+  { ...validatedSource.expressions[23]!, tier: 'related' as const },
+  { ...validatedSource.expressions[24]!, tier: 'related' as const },
+  { ...validatedSource.expressions[25]!, tier: 'related' as const },
+  { ...validatedSource.expressions[26]!, tier: 'related' as const },
+  { ...validatedSource.expressions[27]!, tier: 'related' as const },
+] as const;
 const catalog = {
   feelings: feelings.map((feeling) => ({
     slug: feeling.slug,
