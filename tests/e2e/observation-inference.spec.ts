@@ -21,7 +21,7 @@ async function highlightedText(page: Page, name: string) {
   }, name);
 }
 
-test('the shared local analysis powers highlights, signals, links, and guaranteed live suggestions', async ({ page }) => {
+test('the shared local analysis powers highlights, Quick Check, and evidence-backed live suggestions', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   const retiredAssetRequests: string[] = [];
   page.on('request', (request) => {
@@ -44,36 +44,39 @@ test('the shared local analysis powers highlights, signals, links, and guarantee
   await expect(slots).toHaveCount(4);
   for (let index = 0; index < 4; index += 1) await expect(slots.nth(index)).toHaveAttribute('data-complete', 'true');
 
-  await expect(page.locator('a[href="/feelings/anxious"]')).toBeVisible();
-  await expect(page.locator('a[href="/needs/rest"]')).toBeVisible();
-  await expect(page.locator('a[href="/faux-feelings/ignored"]')).toBeVisible();
+  await expect(page.locator('a[href="/feelings/anxious"]')).toHaveCount(1);
+  await expect(page.locator('a[href="/needs/rest"]')).toHaveCount(1);
+  await expect(page.locator('a[href="/faux-feelings/ignored"]')).toHaveCount(1);
   await expect.poll(() => highlightedText(page, 'observation-feeling')).toContain('anxious');
   await expect.poll(() => highlightedText(page, 'observation-need')).toContain('rest');
   await expect.poll(() => highlightedText(page, 'observation-faux-feeling')).toContain('ignored');
   expect((await highlightedText(page, 'observation-formula')).length).toBeGreaterThan(0);
 
-  await page.getByRole('button', { name: 'Load possible feelings and needs' }).click();
+  await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
   const needs = page.getByTestId('observation-needs').locator('a');
   const feelings = page.getByTestId('observation-feelings').locator('a');
-  await expect(needs).toHaveCount(4);
-  await expect(feelings).toHaveCount(4);
-  await expect(feelings.first()).toHaveAttribute('href', '/feelings/anxious');
   await expect(needs.first()).toHaveAttribute('href', '/needs/rest');
+  await expect(feelings.first()).toHaveAttribute('href', '/feelings/anxious');
+  expect(await needs.count()).toBeGreaterThan(0);
+  expect(await needs.count()).toBeLessThanOrEqual(4);
+  expect(await feelings.count()).toBeGreaterThan(0);
+  expect(await feelings.count()).toBeLessThanOrEqual(4);
+  await expect(page.getByRole('radio', { name: 'Unmet', exact: true })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Met', exact: true })).toBeVisible();
+  await expect(page.getByText(/something feels missing|something feels supported/i)).toHaveCount(0);
+  await expect(page.getByText('Why these?', { exact: true })).toBeVisible();
 
-  const unmatched = '🙂 banana telescope purple';
-  await editor.fill(unmatched);
-  await expect(page.getByRole('heading', { name: 'Possible Feelings and Needs' })).toBeVisible();
-  await expect(needs).toHaveCount(4);
-  await expect(feelings).toHaveCount(4);
-  const firstPass = await feelings.evaluateAll((links) => links.map((link) => link.getAttribute('href')));
-  await editor.fill(`${unmatched} `);
-  await editor.fill(unmatched);
-  await expect(feelings).toHaveCount(4);
-  expect(await feelings.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(firstPass);
+  await editor.fill('🙂 banana telescope purple');
+  await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
+  await expect(page.getByTestId('observation-needs')).toHaveCount(0);
+  await expect(page.getByTestId('observation-feelings')).toHaveCount(0);
+  await expect(page.getByText('Why these?', { exact: true })).toHaveCount(0);
+  await page.getByRole('radio', { name: 'Met', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
 
-  await page.getByRole('radio', { name: 'Something feels supported', exact: true }).click();
-  await expect(feelings).toHaveCount(4);
-  await expect(feelings.first()).toHaveAttribute('href', '/feelings/calm');
+  await page.getByRole('radio', { name: 'Unmet', exact: true }).click();
+  await editor.fill('I feel calm.');
+  await expect(page.getByTestId('observation-feelings').locator('a[href="/feelings/calm"]')).toBeVisible();
   await expect(page.getByText(/\b(?:probability|confidence)\b/i)).toHaveCount(0);
   await expect(page.getByText(/\b(?:exact|nearby) match\b/i)).toHaveCount(0);
 
@@ -136,24 +139,44 @@ test('plain-text editing, line breaks, explanations, and highlight ranges stay o
   expect(runtimeProblems).toEqual([]);
 });
 
-test('unclassified wording stays internal and typing cannot open a duplicate explanation', async ({ page }) => {
+test('unclassified and identity wording do not trigger fabricated results', async ({ page }) => {
   await page.goto('/observations');
   const editor = page.getByRole('textbox', { name: 'What did you notice?' });
 
   await editor.fill('Guilt');
   await editor.press('End');
-
   await expect(page.getByText('Your wording', { exact: true })).toHaveCount(0);
   await expect(page.getByText(/preserved as your wording|catalog match/i)).toHaveCount(0);
   await expect(page.locator('[aria-label^="About “Guilt”"]')).toHaveCount(0);
   await expect.poll(() => highlightedText(page, 'observation-surface-term')).toEqual([]);
 
-  await page.getByRole('button', { name: 'Load possible feelings and needs' }).click();
-  await expect(page.getByTestId('observation-needs').locator('a')).toHaveCount(4);
-  await expect(page.getByTestId('observation-feelings').locator('a')).toHaveCount(4);
+  await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();
+  await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
 
   await editor.fill('I am autistic.');
   await expect.poll(() => highlightedText(page, 'observation-guidance')).not.toContain('autistic');
+  await expect(page.getByRole('heading', { name: 'Not enough information yet' })).toBeVisible();
+});
+
+test('desktop uses a task-and-context workspace and mobile returns to one linear column', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/observations');
+  const main = page.locator('main').filter({ has: page.getByRole('textbox', { name: 'What did you notice?' }) });
+  const rail = page.getByRole('complementary', { name: 'Observation writing support' });
+  const desktopMain = await main.boundingBox();
+  const desktopRail = await rail.boundingBox();
+  expect(desktopMain).not.toBeNull();
+  expect(desktopRail).not.toBeNull();
+  expect(desktopRail!.x).toBeGreaterThan(desktopMain!.x + desktopMain!.width - 8);
+  expect(Math.abs(desktopRail!.y - desktopMain!.y)).toBeLessThan(8);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileMain = await main.boundingBox();
+  const mobileRail = await rail.boundingBox();
+  expect(mobileMain).not.toBeNull();
+  expect(mobileRail).not.toBeNull();
+  expect(mobileRail!.y).toBeGreaterThan(mobileMain!.y + mobileMain!.height - 8);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
 test('plain-language guide citations reveal their matching source', async ({ page }) => {
