@@ -1,13 +1,15 @@
+import type { Page } from '@playwright/test';
+
 import { expect, test } from './fixtures';
 
-async function openWordStep(page: Parameters<typeof test>[0]['page']) {
+async function openWordStep(page: Page) {
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
   await page.getByRole('button', { name: 'Browse all feelings' }).click();
 }
 
-async function expectWordControlsInsideMainPane(page: Parameters<typeof test>[0]['page']) {
+async function expectWordControlsInsideMainPane(page: Page) {
   const filters = page.getByRole('radiogroup', { name: 'Word view' });
   const sidebar = page.locator('aside[aria-label="Your word choices"]');
 
