@@ -203,8 +203,12 @@ export function AnnotatedObservationEditor({
   const editorRef = useRef<HTMLDivElement>(null);
   const composingRef = useRef(false);
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
+  const [ledgerOpen, setLedgerOpen] = useState(false);
   const activeAnnotation = analysis.annotations.find((annotation) => annotation.id === activeAnnotationId) ?? null;
-  const hasInspectableAnnotations = analysis.annotations.some((annotation) => annotationDescriptions(annotation).length > 0);
+  const inspectableAnnotations = analysis.annotations
+    .map((annotation) => ({ annotation, descriptions: annotationDescriptions(annotation) }))
+    .filter((entry) => entry.descriptions.length > 0);
+  const ledgerId = `${id}-annotation-ledger`;
 
   const emitText = () => {
     const editor = editorRef.current;
@@ -334,8 +338,51 @@ export function AnnotatedObservationEditor({
         onPointerUp={() => window.requestAnimationFrame(inspectCaret)}
         onKeyUp={handleKeyUp}
       />
-      {hasInspectableAnnotations && !activeAnnotation ? (
-        <p className={styles.annotationHint}>Underlined text has notes — tap it for details.</p>
+      {inspectableAnnotations.length ? (
+        <div className={styles.annotationControls}>
+          <button
+            type="button"
+            className={styles.ledgerToggle}
+            aria-expanded={ledgerOpen}
+            aria-controls={ledgerId}
+            onClick={() => setLedgerOpen((open) => !open)}
+          >
+            <span>Notes</span>
+            <span className={styles.ledgerCount}>{inspectableAnnotations.length}</span>
+            <span aria-hidden="true">{ledgerOpen ? '▴' : '▾'}</span>
+          </button>
+        </div>
+      ) : null}
+      {ledgerOpen && inspectableAnnotations.length ? (
+        <aside id={ledgerId} className={styles.annotationLedger} aria-label="Observation text notes">
+          <div className={styles.ledgerHeader}>
+            <div>
+              <strong>Text notes</strong>
+              <span>Explanations for the marked text above</span>
+            </div>
+            <button type="button" onClick={() => setLedgerOpen(false)} aria-label="Close text notes">×</button>
+          </div>
+          <div className={styles.ledgerEntries}>
+            {inspectableAnnotations.map(({ annotation, descriptions }) => (
+              <section key={annotation.id} className={styles.ledgerEntry}>
+                <button type="button" className={styles.ledgerPhrase} onClick={() => setActiveAnnotationId(annotation.id)}>
+                  “{annotation.text}”
+                </button>
+                <div>
+                  {descriptions.map(({ evidence, description }, index) => {
+                    const route = routeForEvidence(evidence);
+                    return (
+                      <p key={`${evidence.kind}-${index}`}>
+                        <span>{description}</span>
+                        {route && evidence.kind === 'entity' ? <Link to={route}>Open {evidence.title}</Link> : null}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        </aside>
       ) : null}
       {activeAnnotation ? (
         <aside className={styles.annotationAction} aria-label={`About “${activeAnnotation.text}”`}>
