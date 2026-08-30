@@ -2,6 +2,9 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - design/observation-result-surfaces-canonical-magnets
 
 permissions:
   contents: read
