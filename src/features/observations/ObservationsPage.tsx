@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
+import { InlineMagnet } from '../../components/magnets/InlineMagnet';
+import { feelingMagnetItem, needMagnetItem } from '../../components/magnets/catalogMagnetItems';
 import observationGuide from '../../data/observationGuide.json';
 import { analyzeObservation, suggestionBasisSummary } from '../../domain/observationInference';
 import type { ObservationDraft } from '../../persistence/workflowDrafts';
@@ -227,7 +229,7 @@ export function ObservationsPage() {
                 placeholder={<><span>• When did it happen?</span><span>• Where were you, and who was there?</span><span>• What did you see or hear?</span><span>• Can you add a number or exact quote?</span></>}
               />
 
-              <section className={styles.suggestions} aria-live="polite" data-mode={resultsOpen ? 'results' : 'editing'}>
+              <section className={styles.suggestions} aria-live="polite" data-mode={resultsOpen ? 'results' : 'editing'} data-testid={resultsOpen ? 'observation-results-surface' : undefined}>
                 {!resultsOpen ? (
                   <div className={styles.actionRow}>
                     <button type="button" disabled={!canLoad} onClick={() => setShowSuggestions(true)} aria-label="Explore possible feelings and needs">Explore</button>
@@ -245,11 +247,11 @@ export function ObservationsPage() {
                         <div className={styles.resultPanels}>
                           <section className={styles.resultPanel} data-testid="observation-needs">
                             <h3>Needs that may be alive in you</h3>
-                            {analysis.suggestions.needs.length ? <div className={styles.chips}>{analysis.suggestions.needs.map((need) => <Link key={need.slug} to={`/needs/${need.slug}`}>{need.title}</Link>)}</div> : <p>No specific Need suggestions from this wording yet.</p>}
+                            {analysis.suggestions.needs.length ? <div className={styles.magnetResults}>{analysis.suggestions.needs.map((need) => <InlineMagnet key={need.slug} item={needMagnetItem(need)} />)}</div> : <p>No specific Need suggestions from this wording yet.</p>}
                           </section>
                           <section className={styles.resultPanel} data-testid="observation-feelings">
                             <h3>Possible Feelings</h3>
-                            {analysis.suggestions.feelings.length ? <div className={styles.chips}>{analysis.suggestions.feelings.map((feeling) => <Link key={feeling.slug} to={`/feelings/${feeling.slug}`}>{feeling.title}</Link>)}</div> : <p>No specific Feeling suggestions from this wording yet.</p>}
+                            {analysis.suggestions.feelings.length ? <div className={styles.magnetResults}>{analysis.suggestions.feelings.map((feeling) => <InlineMagnet key={feeling.slug} item={feelingMagnetItem(feeling)} />)}</div> : <p>No specific Feeling suggestions from this wording yet.</p>}
                             <div className={styles.modeControl}>
                               <p className={styles.modePrompt}>If these Needs are</p>
                               <div className={styles.modeToggle} role="radiogroup" aria-label="Need status">
@@ -293,7 +295,7 @@ export function ObservationsPage() {
             </div>
 
             <aside className={styles.supportRail} aria-label="Observation writing support">
-              <section className={styles.quickCheck}>
+              <section className={styles.quickCheck} data-testid="observation-quick-check-surface">
                 <div className={styles.slotHeader}>
                   <span>Quick Check</span>
                   <button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('slots')} aria-label="How the observation checklist works">i</button>
