@@ -50,7 +50,9 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expectNoHorizontalOverflow(page);
   await page.getByRole('button', { name: 'Compare words' }).click();
 
-  await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
+  const anxietyMagnet = page.getByRole('button', { name: /^Anxiety, Feeling/ });
+  await expect(anxietyMagnet).toHaveAttribute('data-magnet-id', /^feelings-/);
+  await anxietyMagnet.click();
   let sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await expect(sheet.getByText(/gives body clues and overall-feeling ratings equal weight/)).toBeVisible();
   await expect(sheet.getByText(/^Body clues$/)).toBeVisible();
@@ -81,7 +83,9 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await page.getByRole('button', { name: /Understanding/ }).click();
   const selectedNeeds = page.getByLabel('Selected Needs; open ways to support a Need');
   await expect(selectedNeeds).toBeVisible();
-  await expect(selectedNeeds.getByRole('link', { name: /Understanding, selected Need, open ways to support it/ })).toHaveAttribute('href', '/needs/understanding');
+  const understandingMagnet = selectedNeeds.getByRole('link', { name: /Understanding, selected Need, open ways to support it/ });
+  await expect(understandingMagnet).toHaveAttribute('href', '/needs/understanding');
+  await expect(understandingMagnet).toHaveAttribute('data-magnet-id', 'needs-understanding');
 
   await page.getByRole('button', { name: 'Build sentence' }).click();
   const statement = page.getByLabel('Your statement');
