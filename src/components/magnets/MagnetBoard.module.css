@@ -1,3 +1,5 @@
+@import './MagnetFaces.css';
+
 .board {
   position: relative;
   isolation: isolate;

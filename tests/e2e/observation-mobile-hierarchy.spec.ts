@@ -30,6 +30,8 @@ test('mobile keeps observation actions compact and results ahead of secondary co
   const needState = page.getByRole('radiogroup', { name: 'Need status' });
   await expect(firstNeed).toBeVisible();
   await expect(firstFeeling).toBeVisible();
+  await expect(firstNeed).toHaveAttribute('data-magnet-id', /^needs-/);
+  await expect(firstFeeling).toHaveAttribute('data-magnet-id', /^feelings-/);
   await expect(needState).toBeVisible();
 
   const needBox = await firstNeed.boundingBox();
@@ -40,6 +42,20 @@ test('mobile keeps observation actions compact and results ahead of secondary co
   expect(modeBox).not.toBeNull();
   expect(needBox!.y).toBeLessThan(modeBox!.y);
   expect(feelingBox!.y).toBeLessThan(modeBox!.y);
+
+  const resultsSurface = page.getByTestId('observation-results-surface');
+  const quickCheckSurface = page.getByTestId('observation-quick-check-surface');
+  const surfaces = await Promise.all([resultsSurface, quickCheckSurface].map((locator) => locator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      background: style.backgroundColor,
+      border: style.borderTopColor,
+      shadow: style.boxShadow,
+    };
+  })));
+  expect(surfaces[0].background).not.toBe('rgba(0, 0, 0, 0)');
+  expect(surfaces[1].background).not.toBe('rgba(0, 0, 0, 0)');
+  expect(surfaces[0]).not.toEqual(surfaces[1]);
 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });

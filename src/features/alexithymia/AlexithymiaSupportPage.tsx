@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
+import { feelingMagnetItem, needMagnetItem } from '../../components/magnets/catalogMagnetItems';
 import bodyRegionsRaw from '../../data/body-regions.json';
 import { assetPath, needsBySlug } from '../../data/catalog';
 import { analyzeObservation, selectExactObservationEntities } from '../../domain/observationInference';
@@ -97,6 +98,13 @@ function roleTone(term: SupportTerm, decision?: AlexithymiaDraft['decisions'][st
   if (decision === 'maybe') return 'attention' as const;
   if (term.role === 'faux-feeling') return 'quiet' as const;
   return 'selection' as const;
+}
+
+function catalogFeelingSlug(term: SupportTerm) {
+  if (term.role !== 'feeling') return null;
+  if (term.candidate?.catalogSlug) return term.candidate.catalogSlug;
+  if (term.id.startsWith('feeling:')) return term.id.slice('feeling:'.length);
+  return null;
 }
 
 function CopyIcon() {
@@ -227,9 +235,11 @@ export function AlexithymiaSupportPage() {
     const detail = normalizedWordQuery || wordFilter !== 'matches'
       ? decision === 'fits' ? 'Fits' : decision === 'maybe' ? 'Maybe' : percent === null ? undefined : `${percent}% clue match`
       : percent === null ? undefined : `${percent}% clue match`;
+    const feelingSlug = catalogFeelingSlug(term);
+    const canonicalItem = feelingSlug ? feelingMagnetItem({ slug: feelingSlug, title: term.label }) : null;
     return {
-      id: `alex-word-${term.id}`,
-      label: term.label,
+      ...(canonicalItem ?? { id: `alex-word-${term.id}`, label: term.label }),
+      to: undefined,
       detail,
       badge: term.roleLabel,
       tone: roleTone(term, decision),
@@ -240,18 +250,22 @@ export function AlexithymiaSupportPage() {
       },
     };
   });
-  const partialWordItems: MagnetBoardItem[] = partialMatches.map(({ term }) => ({
-    id: `alex-partial-${term.id}`,
-    label: term.label,
-    detail: 'Some clues cannot be compared',
-    badge: term.roleLabel,
-    tone: roleTone(term, draft.decisions[term.id]),
-    ariaLabel: `${term.label}, ${term.roleLabel}, some clues cannot be compared`,
-    onActivate: () => {
-      setActiveTermId(term.id);
-      setSheet('candidate');
-    },
-  }));
+  const partialWordItems: MagnetBoardItem[] = partialMatches.map(({ term }) => {
+    const feelingSlug = catalogFeelingSlug(term);
+    const canonicalItem = feelingSlug ? feelingMagnetItem({ slug: feelingSlug, title: term.label }) : null;
+    return {
+      ...(canonicalItem ?? { id: `alex-partial-${term.id}`, label: term.label }),
+      to: undefined,
+      detail: 'Some clues cannot be compared',
+      badge: term.roleLabel,
+      tone: roleTone(term, draft.decisions[term.id]),
+      ariaLabel: `${term.label}, ${term.roleLabel}, some clues cannot be compared`,
+      onActivate: () => {
+        setActiveTermId(term.id);
+        setSheet('candidate');
+      },
+    };
+  });
   const activeTerm = activeTermId ? termIndex.get(activeTermId) ?? null : null;
   const activeScore = activeTerm?.candidate
     ? scoreByCandidateKey.get(activeTerm.candidate.key) ?? null
@@ -262,14 +276,10 @@ export function AlexithymiaSupportPage() {
   const selectedNeedItems: MagnetBoardItem[] = draft.selectedNeeds.flatMap((slug) => {
     const need = needsBySlug.get(slug);
     return need ? [{
-      id: `alex-selected-need-${slug}`,
-      label: need.title,
+      ...needMagnetItem(need),
       detail: 'Open ways to support this Need',
       badge: 'Need',
-      kind: 'need' as const,
       tone: 'positive' as const,
-      iconUrl: assetPath(`icons/needs/${slug}.svg`),
-      to: `/needs/${slug}`,
       ariaLabel: `${need.title}, selected Need, open ways to support it`,
     }] : [];
   });

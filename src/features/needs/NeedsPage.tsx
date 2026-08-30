@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
-import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
-import { assetPath, needs } from '../../data/catalog';
+import { needMagnetItem } from '../../components/magnets/catalogMagnetItems';
+import { needs } from '../../data/catalog';
 import { readBrowseQuery, writeBrowseQuery } from '../../persistence/browseState';
 import { readMagnetPlayPreference } from '../../persistence/magnetLayoutStore';
 import styles from './NeedsPage.module.css';
@@ -19,14 +19,7 @@ export function NeedsPage() {
       : needs,
     [normalizedQuery],
   );
-  const items = useMemo<MagnetBoardItem[]>(() => visibleNeeds.map((need) => ({
-    id: `needs-${need.slug}`,
-    label: need.title,
-    to: `/needs/${need.slug}`,
-    kind: 'need',
-    tone: 'selection',
-    iconUrl: assetPath(`icons/needs/${need.slug}.svg`),
-  })), [visibleNeeds]);
+  const items = useMemo(() => visibleNeeds.map(needMagnetItem), [visibleNeeds]);
 
   return (
     <section className={styles.page} aria-labelledby="needs-title">

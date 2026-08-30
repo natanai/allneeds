@@ -91,6 +91,17 @@ Content and navigation magnets share interaction semantics but may have intentio
 
 Canonical visual implementation: `src/components/magnets/MagnetBoard.module.css`.
 
+## Catalog magnet face identity
+
+Feeling and Need identity is separate from board physics, but it has one shared owner.
+
+- A catalog Feeling or Need shown as a magnet must use its canonical catalog magnet item identity: stable `feelings-<slug>` / `needs-<slug>` ID, canonical route, kind, and icon asset.
+- Approved full-face Need identities belong in `src/components/magnets/MagnetFaces.css`. A feature page must not recreate or override the same identity in page-scoped CSS.
+- `MagnetBoard` is the canonical renderer when the surrounding surface is a physical/playable board.
+- `InlineMagnet` may render the same canonical face without board physics when a compact result or summary needs a magnet but a free-floating physics surface would be distracting. It is a presentation mode of the shared magnet face, not a second magnet design system.
+- Feature-specific state may add details, badges, selection state, or an activation callback around the canonical identity. It must not replace the Feeling/Need face with a page-specific imitation.
+- Custom emotion words, Faux Feelings, navigation controls, and other non-catalog entities may use their own magnet treatments because they are not canonical Feeling/Need entities.
+
 ## Layout, first paint, and persistence
 
 - Magnets remain hidden until the board has valid measured geometry (`data-ready=true`). Users should not see magnets animate outward from the top-left during initial load.
@@ -136,7 +147,9 @@ Primary browser coverage lives in `tests/e2e/magnet-surface-interactions.spec.ts
 - navigation order/geometry stability;
 - compact/wide persistence separation;
 - drag/click suppression and fling/release behavior;
-- Play/rest semantics and first-paint stability.
+- Play/rest semantics and first-paint stability;
+- canonical Feeling/Need item IDs and icon ownership;
+- approved Need face identities remaining shared rather than page-scoped.
 
 Run `pnpm check` at minimum for magnet changes, and use the browser/repository validation path for interaction-sensitive changes as required by root `AGENTS.md`.
 
@@ -145,10 +158,13 @@ Run `pnpm check` at minimum for magnet changes, and use the browser/repository v
 Current source-of-truth files:
 
 - `src/components/magnets/MagnetBoard.tsx` — lifecycle, drag, pressure, collisions, pusher, release waves, persistence integration.
-- `src/components/magnets/MagnetBoard.module.css` — magnet rendering and pickup presentation.
+- `src/components/magnets/MagnetBoard.module.css` — shared magnet shell, generic Feeling/Need rendering, and pickup presentation.
+- `src/components/magnets/MagnetFaces.css` — approved catalog Feeling/Need face identities and full-face artwork treatment.
+- `src/components/magnets/catalogMagnetItems.ts` — canonical catalog magnet IDs, routes, kinds, and icon assets.
+- `src/components/magnets/InlineMagnet.tsx` — non-physics rendering of the same shared magnet face for compact result/summary contexts.
 - `src/components/magnets/magnetMath.ts` — packing, collision/math helpers, coordinate scaling.
 - `src/persistence/magnetLayoutStore.ts` — viewport-specific saved layouts.
 - `tests/e2e/magnet-surface-interactions.spec.ts` — direct interaction regressions.
 - `tests/e2e/magnet-nav-order.spec.ts` and related navigation tests — navigation layout/order invariants.
 
-If magnet behavior is implemented somewhere else, first ask whether that logic belongs in one of these owning layers rather than creating a second physics or presentation system.
+If magnet behavior or catalog face identity is implemented somewhere else, first ask whether that logic belongs in one of these owning layers rather than creating a second physics or presentation system.

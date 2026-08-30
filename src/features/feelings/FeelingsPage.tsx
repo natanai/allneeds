@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
-import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
-import { assetPath, feelings } from '../../data/catalog';
+import { feelingMagnetItem } from '../../components/magnets/catalogMagnetItems';
+import { feelings } from '../../data/catalog';
 import { readBrowseQuery, writeBrowseQuery } from '../../persistence/browseState';
 import { readMagnetPlayPreference } from '../../persistence/magnetLayoutStore';
 import styles from './FeelingsPage.module.css';
@@ -22,14 +22,7 @@ export function FeelingsPage() {
     [normalizedQuery],
   );
 
-  const items = useMemo<MagnetBoardItem[]>(() => visibleFeelings.map((feeling) => ({
-    id: `feelings-${feeling.slug}`,
-    label: feeling.title,
-    to: `/feelings/${feeling.slug}`,
-    kind: 'feeling',
-    tone: 'selection',
-    iconUrl: assetPath(`icons/feelings/${feeling.slug}.svg`),
-  })), [visibleFeelings]);
+  const items = useMemo(() => visibleFeelings.map(feelingMagnetItem), [visibleFeelings]);
 
   return (
     <section className={styles.page} aria-labelledby="feelings-title">

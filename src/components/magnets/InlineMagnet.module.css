@@ -1,0 +1,14 @@
+.inline {
+  position: relative;
+  left: auto;
+  top: auto;
+  max-width: 100%;
+  flex: 0 1 auto;
+}
+
+@media (max-width: 640px) {
+  .inline {
+    min-height: 44px;
+    padding: 0.36rem 0.58rem;
+  }
+}

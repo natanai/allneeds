@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const magnetCss = readFileSync(new URL('./MagnetBoard.module.css', import.meta.url), 'utf8');
+const faceCss = readFileSync(new URL('./MagnetFaces.css', import.meta.url), 'utf8');
+const needsPageCss = readFileSync(new URL('../../features/needs/NeedsPage.module.css', import.meta.url), 'utf8');
 
 function ruleBody(selector: string) {
   const marker = `${selector} {`;
@@ -74,5 +76,30 @@ describe('magnet theme styling', () => {
     expect(desktopActiveRule.match(/box-shadow:/g)).toHaveLength(1);
     expect(desktopActiveRule).not.toContain('inset');
     expect(desktopActiveRule).not.toContain('filter:');
+  });
+
+  it('owns approved Need faces in the shared magnet layer rather than the Needs page', () => {
+    expect(magnetCss).toContain("@import './MagnetFaces.css';");
+    [
+      'connection',
+      'support',
+      'safety',
+      'understanding',
+      'clarity',
+      'honesty',
+      'accountability',
+    ].forEach((slug) => {
+      expect(faceCss).toContain(`[data-magnet-id][data-magnet-id='needs-${slug}']`);
+    });
+    expect(needsPageCss).not.toContain("data-magnet-id='needs-");
+    expect(faceCss).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  });
+
+  it('keeps approved faces stronger than generic tone/icon rules and scopes second icons to the label', () => {
+    expect(faceCss).toContain("[data-magnet-id][data-magnet-id='needs-connection']::before");
+    expect(faceCss).toContain("[data-magnet-id][data-magnet-id='needs-understanding'] > span:first-of-type::after");
+    expect(faceCss).toContain("[data-magnet-id][data-magnet-id='needs-clarity'] > span:first-of-type::after");
+    expect(faceCss).not.toContain("[data-magnet-id='needs-understanding'] > span::after");
+    expect(faceCss).not.toContain("[data-magnet-id='needs-clarity'] > span::after");
   });
 });
