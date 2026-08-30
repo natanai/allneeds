@@ -309,6 +309,8 @@ Rules:
 
 - Feeling word support uses the Info button as the sole landing-page explanatory disclosure. The previous persistent `You stay in charge` / `How matching works` card is removed as redundant; matching details remain available through Info, and deeper methods remain one disclosure level further in.
 - Public Feeling word support and Body Cues methods documents are written to remain readable when a browser serves the `.md` files as raw text rather than rendered Markdown. They use ordinary text headings/formulas/lists and direct human-reachable URLs instead of visible Markdown syntax.
+- Observation editing uses one compact primary `Explore` control while Clear remains a quiet maintenance action with the same accessible meaning but much less visual weight.
+- Observation results surface the actual Need and Feeling possibilities immediately after a compact results header. Met/Unmet remains fully available but belongs contextually inside the Feeling results, after the result vocabulary, rather than occupying a large explanatory block before any suggestions.
 
 ### 2026-08-28
 
