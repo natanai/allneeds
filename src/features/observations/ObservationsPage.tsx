@@ -66,7 +66,7 @@ function ObservationRecipe({ onOpenGuide }: { onOpenGuide: () => void }) {
 
 function infoCopy(topic: string) {
   if (topic === 'slots') return <><p>Quick Check shows which concrete details the app noticed. It is a writing aid, not a score.</p><ul><li><strong>When?</strong> Add a time or event, such as “yesterday” or “after lunch.”</li><li><strong>Where or with whom?</strong> Name the setting or people if they matter.</li><li><strong>What did you see or hear?</strong> Add a visible action or the words you heard.</li><li><strong>Number or exact words</strong> is optional, but a count, duration, or quote can make the moment clearer.</li></ul></>;
-  if (topic === 'matching') return <><p>This page checks your text against a fixed local vocabulary and a limited set of observable event patterns. Your text is not sent anywhere.</p><p>It can notice direct words you use for your own experience and some patterns in what happened, but it cannot know what you feel or need.</p><p>Suggestions appear only when the page finds language evidence connected with them. It may show fewer than four possibilities, or none.</p></>;
+  if (topic === 'matching') return <><p>This page searches a fixed local vocabulary built from the site's Feelings, Needs, Faux Feelings, and authored Observation relationships. Your text is not sent anywhere.</p><p>Words you name directly and specific event matches rank highest. Broader keyword relationships can also bring possible Needs into view, and the selected Needs are used to find Feeling words for the Met or Unmet view.</p><p>If the wording does not strongly match the index, the page still offers broader catalog starting points. These are words to consider, not conclusions about what you feel or need.</p></>;
   return <><p>An observation is a description of what happened: what someone could see, hear, quote, or count.</p><p>You can write in your own words. Quick Check only suggests details that may help another person picture the same moment. It does not decide whether your interpretation is true.</p></>;
 }
 
@@ -262,7 +262,7 @@ export function ObservationsPage() {
                           </section>
                         </div>
                         <details className={styles.why}>
-                          <summary><span><strong>Why these?</strong><small>What in your text contributed</small></span><span aria-hidden="true">›</span></summary>
+                          <summary><span><strong>Why these?</strong><small>How these were chosen</small></span><span aria-hidden="true">›</span></summary>
                           <div className={styles.basis}>
                             <div><p>{suggestionBasisSummary(analysis.suggestions)}</p><button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('matching')} aria-label="How matching works">i</button></div>
                             {eventEvidence.slice(0, 2).map((entry) => <p key={entry.id}>{entry.explanation}</p>)}

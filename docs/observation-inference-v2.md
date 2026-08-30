@@ -1,52 +1,103 @@
-# Observation Inference 2.1
+# Observation Inference 2.1: retrieval-first staging revision
 
-Status: approved implementation in review on 2026-08-29.
+Status: staging implementation for live product review on `site-test`. The stored model metadata remains `2.1.0` while this retrieval-first behavior is being evaluated. If the behavior is accepted for promotion, bump the model version as part of finalization rather than treating the staging experiment as already settled.
 
-## Product contract
+## Product job
 
-Observation Inference 2.1 is a local, synchronous, deterministic language aid. It does not call a language model, send observation text to a server, assign a psychological probability, or claim to determine what a person feels or needs.
+Observation is a local vocabulary exploration aid. It is not a language model, diagnostic system, clinical inference engine, or probability estimator. Observation text stays in the browser.
 
-For nonblank input it returns **up to four evidence-bearing possible Feelings and up to four evidence-bearing possible Needs**. It may return fewer than four, or none. A suggestion is allowed into the result set only when the analysis ledger contains language evidence connecting it to the person's text. The engine does not fill empty positions merely to make a result set look complete.
+The page should help a person who knows what happened but may not yet have Feeling or Need words. It should therefore prefer a useful place to start over an empty result screen.
 
-Suggestions are possibilities to explore. Formula signals such as When, Where, What, and Measurement never add psychological weight. Feeling and Need mode remains explicit as `unmet` and `met`. The mode filters **derived Feeling possibilities** by canonical Need-satisfaction metadata. It never suppresses a Feeling the person directly names for themselves.
+For ordinary nonblank language input, Explore returns up to four Feelings and up to four Needs and is designed to fill all four positions. Blank input and input without ordinary language, such as emoji alone, may remain empty.
 
-`Unmet` and `Met` are an inference lens, not a diagnosis or claim that a Need exists only when something is lacking. A Need remains a value or motivation that can matter whether it is currently being tended well, poorly, partially, or in more than one way.
+All returned words are possibilities to consider. The person remains the authority on what fits.
 
-## Evidence tiers and the direct-self-report boundary
+## Retrieval-first pipeline
 
-`direct` has a narrow meaning in 2.1: the person directly named a canonical Feeling or Need for themselves, either as the whole input or inside an affirmative first-person frame such as `I feel anxious` or `I need rest`.
+The ranking pipeline is intentionally layered:
 
-Observable events may support **related** or **broad** possibilities, but they do not become direct statements about the person's internal state. This applies both to the reusable 2.1 event families and to the older imported authored cue expressions.
+1. **Direct self-report.** Canonical Feelings and Needs the person affirmatively names for themselves rank highest.
+2. **Specific authored relationships.** Faux Feeling relationships, reusable observable event families, and migrated authored Observation cues contribute stronger related evidence.
+3. **Deterministic keyword retrieval.** The observation is treated as a search query over canonical Need-centered documents. Keyword retrieval contributes broader candidate Needs.
+4. **Need-to-Feeling projection.** Candidate Needs supply canonical Feeling relationships for the selected `Unmet` or `Met` view.
+5. **Catalog-derived starter completion.** When stronger layers do not fill the result set, broad starter Needs and Feelings derived from the canonical catalogs fill remaining exploration positions.
 
-The raw imported cue records preserve their historical `tier: direct` value only as provenance metadata. The deterministic Observation compiler is the single owner of the source-to-product translation and writes those imported cues into the generated production projection with `related` tier literals. Newly authored event families may be only `related` or `broad`. Runtime analysis therefore consumes already-compiled production tiers and does not contain a second conditional repair layer that reinterprets the historical source metadata.
+The specific event grammar is therefore a ranking boost, not permission for the page to return anything at all.
 
-Quoted, third-person, and negated Feeling wording does not become direct self-report. Another person saying `I am angry` inside a quote is not treated as the user's Feeling.
+## Search documents
 
-## Honest insufficient-information boundary
+`src/domain/observationInference/retrieve.ts` builds one deterministic search document per canonical Need from existing owned material:
 
-No arbitrary word-count minimum exists. The threshold is semantic evidence rather than input length.
+- Need title and slug;
+- Need summary and category;
+- titles of canonically linked Faux Feelings;
+- titles, summaries, and body-signal wording of canonically linked Feelings;
+- existing authored Observation cue identifiers/examples associated with the Need;
+- existing reusable event-family identifiers, labels, and explanations associated with the Need.
 
-A one-word input such as a canonical Feeling or Need can contain useful direct evidence. Arbitrary or unrelated wording such as `banana`, `🙂`, or a concrete Observation with no psychological cue may appropriately yield no Feeling or Need suggestions.
+The retrieval layer does not author a second Feeling-to-Need taxonomy. It indexes relationships and content already owned by the canonical catalogs and Observation source.
 
-The page distinguishes two honest zero-result states:
+Search uses normalized tokens, a small deterministic stemming layer, stopword filtering for ranking, field weights, and inverse document frequency. A rare term in a Need title or Faux Feeling relationship can therefore contribute more than a common term occurring across many Need documents.
 
-- when the writing still has little concrete event information, it says it could not connect the wording yet and invites the person to add more detail;
-- when Quick Check already shows a substantially concrete Observation, it says **No specific Feeling or Need matches yet** rather than implying the Observation itself is incomplete.
+Stopwords affect ranking but do not control whether exploration is available. If the input contains ordinary language but yields no useful keyword hit, the starter layer still provides vocabulary.
 
-Quick Check is independent from psychological inference. A person can write a strong concrete Observation that satisfies all four writing signals while the psychological inference correctly returns no suggestions.
+## Starter completion
 
-## Canonical ownership
+Starter completion is explicit and lowest-confidence. It does not masquerade as a keyword match.
 
-The hand-edited owner is `src/data/observationInference/source.json`, validated against `source.schema.json`. It contains:
+There is no hand-authored `explorationPools` dataset. Starter Needs are derived deterministically from the canonical Need graph using relationship breadth and category diversity. Starter Feelings are derived from the canonical Feeling graph, filtered by the selected Met/Unmet lens and ranked by relationship breadth.
 
-- four formula slots and their exact range-producing detectors;
-- 28 imported authored cue expressions representing the 219 legacy cue relationships;
-- six reusable 2.1 observable-event families;
-- approved lexical bridges and deliberately unlinked surface wording;
-- 18 observation-guidance rule groups;
-- the exact legacy repository, branch, commit, import date, and row count used as provenance.
+This preserves the ownership boundary:
 
-The six initial event families are:
+> canonical catalogs + canonical Observation relationships → deterministic retrieval/ranking → exploration result
+
+The starter layer exists to guarantee a useful browsing doorway, not to claim that an arbitrary situation implies those Needs.
+
+## Evidence tiers
+
+The runtime has four tiers:
+
+- `direct`: the person directly named a canonical Feeling or Need for themselves;
+- `related`: a strong canonical relationship or specific authored event/cue supports the candidate;
+- `broad`: keyword retrieval or a broader relationship supports the candidate;
+- `exploratory`: a catalog-derived starting point fills an otherwise empty exploration position.
+
+`direct` remains narrowly protected. Event-family and migrated cue evidence can never become direct self-report. Keyword retrieval and starter completion can never become direct self-report.
+
+`Why these?` must describe these distinctions honestly. It may say that some results are broader starting points. It must not imply that the app determined the person's internal state.
+
+## Met and Unmet
+
+Needs are the stable center of the Met/Unmet interaction.
+
+A Need can matter whether it is being tended well or poorly. Changing the mode does not make the Need valid or invalid and should not require the engine to re-understand the English sentence from scratch.
+
+After Need candidates are ranked, canonical Feeling relationships for those Needs are projected through the selected lens:
+
+- `Unmet` permits Feelings whose canonical satisfaction metadata is `unmet` or `both`;
+- `Met` permits Feelings whose canonical satisfaction metadata is `met` or `both`.
+
+A directly self-reported Feeling remains visible even when its canonical satisfaction metadata differs from the selected lens, because the user's own wording outranks the derived lens.
+
+Starter Feelings are also mode-filtered, so both Met and Unmet can remain useful even when the original event-family mapping only authored one side.
+
+## Direct-self-report boundary
+
+A canonical Feeling or Need becomes direct only as the whole input or inside an affirmative first-person frame such as `I feel anxious` or `I need rest`.
+
+Existing safeguards remain:
+
+- quoted Feeling language is not the user's direct self-report;
+- another person's Feeling or Need cannot become direct merely because an earlier `I feel` or `I need` appears in the same sentence;
+- reported questions and attributions such as `She asked if I am angry` do not become direct;
+- negated nested self-attributions such as `I don't think I am angry` do not become direct;
+- Faux Feeling relationship inference requires the Faux Feeling to belong to the user's own experience frame.
+
+Quoted and third-person wording may still contribute to broad keyword retrieval because retrieval is explicitly a vocabulary search, not a claim of direct ownership.
+
+## Observable event families
+
+The six existing event families remain:
 
 1. personal evaluation directed toward the user;
 2. dismissal or minimization of experience;
@@ -55,119 +106,70 @@ The six initial event families are:
 5. a decision made under constrained time or choice;
 6. a change after a prior agreement.
 
-These are compositional event detectors rather than one-off sentence templates. They may recognize multiple ordinary phrasings while remaining bounded to authored regular expressions and canonical candidate lists. The directed-evaluation family reuses the canonical `trait-labels` guidance lexicon and explicitly excludes positive labels such as `hero`, `angel`, `saint`, `savior`, `rockstar`, and `superstar` from that psychological event family.
+They provide stronger `related` evidence when their bounded grammar matches. They no longer determine whether the page is allowed to return vocabulary.
 
-`scripts/compile-observation-inference.mjs` is the single compiler and validator. It validates source structure, IDs, regular expressions, relationships, flags, event-family lexicon ownership, current catalog ownership, legacy provenance-only tier metadata, and generated freshness. `explorationPools` are not part of schema 2 and the compiler fails if they are reintroduced.
+Quote safeguards remain intact. For example, `They said “you are stupid” to me` may match the directed-evaluation family, while `They said “the computer is stupid” to me` must not be treated as a personal evaluation of the user. Both inputs may still receive broader exploratory vocabulary from the retrieval pipeline.
 
-The compiler emits `src/data/generated/observationInference.ts`. The generated module is a deterministic projection. Unchanged Observation structures may still reference the validated canonical source, while each imported cue expression receives its production tier as an explicit compiler-written literal. There is no runtime `direct → related` decision. The module also projects the repository's canonical runtime Feelings, Needs, and Faux Feelings rather than embedding a second full copy of those catalogs. The compiler reconstructs the canonical catalog during generation/checking so every referenced slug and relationship is validated and a catalog checksum is recorded. The source checksum is the content-addressed Git blob checksum of the canonical source, so changing that source makes the generated projection stale until regenerated.
+## Quick Check
 
-This preserves the Bedrock ownership chain:
+Quick Check remains independent from psychological ranking. It reports whether the writing contains time, context/people, sensory detail, and an optional count/quote.
 
-> `source.json` + canonical entity catalogs → one Observation compiler/validator → generated Observation production module.
+Formula evidence never becomes direct, related, broad, or exploratory psychological evidence merely because Quick Check recognized it. A concrete observation can receive exploration vocabulary through retrieval/starter completion without Quick Check itself causing a particular Need.
 
-Runtime Observation code consumes the generated module and does not read from `src/legacy`.
+## Page behavior
 
-## One analysis, one annotation ledger
+The primary journey remains:
 
-`analyzeObservation(text, mode)` performs one immediate analysis and returns:
+`write → Explore Feelings & Needs → review possibilities → revise or continue`
 
-- UTF-16-safe annotations with exact `start` and `end` offsets;
-- formula, entity, imported cue, event-family, guidance, and surface evidence attached to those ranges;
-- the four Quick Check slot rollups derived from formula annotations;
-- recognized Feeling, Need, and Faux Feeling entities for direct navigation;
-- zero to four possible Feelings and zero to four possible Needs, their evidence tier, and their evidence annotation IDs;
-- model, source, catalog, mode, and input fingerprint metadata.
+For ordinary language, the normal Explore state is a result state rather than a dead-end no-match state.
 
-Every returned psychological suggestion has one or more `SuggestionEvidence` entries. There is no evidence-free Observation suggestion tier.
+The page retains:
 
-The page does not run a second textarea detector. Quick Check, inline highlights, recognized-word links, caret explanations, event-family matching, and suggestion ranking all consume the same analysis result.
+- `Revise observation`, which preserves text and returns focus to the editor;
+- `Clear observation`, which is the destructive action;
+- `Unmet | Met`, which changes derived Feeling possibilities while retaining Need exploration;
+- `Why these?`, now subtitled `How these were chosen` because some candidates may be broader search or starter results rather than a literal highlighted substring;
+- recognized catalog terms and the single-surface highlight editor;
+- Quick Check, the example sentence, Observation Recipe, and Journal handoff.
 
-Feeling word support also calls this analyzer for its optional present-moment observation. That lane projects exact catalog-title entities from the analysis for reference links only; it does not run a second scanner, treat fuzzy spelling support as an exact term, or use Observation suggestions to select a Feeling or Need.
-
-## Quick Check 2.1
-
-Quick Check remains a writing aid rather than an inference score. Its four slots are unchanged: time, context/people, direct sensory detail, and optional count/quote.
-
-2.1 broadens only the **observable context** vocabulary needed for ordinary prose. Speech-participant constructions such as `a coworker said…`, `my partner asked…`, or a named speaker can satisfy the people/context signal. A direct quote can satisfy the sensory and optional quote signal. These formula annotations do not add psychological weight by themselves.
-
-## Matching safeguards
-
-- Catalog title and approved bridge recognition is token-boundary based and case-insensitive.
-- Unicode normalization preserves source offsets because normalization is used only for comparison.
-- Direct Feeling or Need wording affects ranking only as a standalone term or in an affirmative first-person frame.
-- A directly self-reported Feeling remains available regardless of the selected `met` or `unmet` inference lens.
-- Negated, quoted, and third-person catalog language does not become a direct self-report.
-- Faux Feelings contribute only their canonical Feeling and Need relationships and require first-person context.
-- Reusable event families can contribute only `related` or `broad` evidence.
-- Imported authored cue records may preserve historical `direct` metadata in the hand-edited import source, but the compiler emits them only as compiler-written `related`/`broad` production tiers.
-- Bounded edit-distance matching supports likely single-token typos, rejects ties, ignores short tokens and stop words, and ranks below exact wording.
-- Automatic invented inflections are not generated. Only canonical titles and explicit authored bridges can add non-fuzzy variants.
-- `guilt` and `guilty` remain available as internal unlinked surface wording but are not silently mapped to a canonical Feeling or Need. Surface wording does not receive a public highlight, explanation card, or duplicate “your wording” panel.
-- Guidance prompts are invitations to add detail, not corrections. Identity or diagnosis wording such as `I am autistic` is not flagged. Words about harm, pressure, and coercion may retain their meaning while inviting specific events or constraints.
-- Formula evidence never changes Feeling or Need scores.
-- Stable catalog order resolves equal scores, followed by deterministic diversity selection. No fallback completion follows ranking.
-
-## Observation page experience
-
-The primary journey is `write → Explore Feelings & Needs → review possibilities or an honest zero-result state → revise or continue if useful`.
-
-The page uses the model-aligned `Unmet | Met` control. Public copy explains that a Need can matter either way and that the choice changes derived Feeling possibilities rather than the importance of the Need.
-
-When evidence exists, the page uses `Needs that may be alive in you` and `Possible Feelings`, with a `Why these?` disclosure that explains actual evidence from the person's text. Event-family explanations can appear there in ordinary language. The disclosure is not rendered when no suggestions exist.
-
-Exploring is not destructive. `Revise observation` returns focus to the existing text. A no-result state offers `Add more detail`. Directly editing the observation after results have been explored closes the now-stale result state automatically; the person explicitly explores again after the revision. `Clear observation` is the destructive action and is labeled accordingly.
-
-Recognized catalog terms remain accessible through inline highlighting and a secondary `Recognized words` disclosure. Quick Check, the example sentence, and the Observation Recipe remain writing supports rather than required diagnostic steps.
-
-Desktop uses a task-and-context workspace: editor, primary action, results, and Journal continuation stay in the main work column while Quick Check, the example, and the recipe occupy a quieter support rail. Mobile collapses to one linear column with no document-level horizontal panning.
+The old zero-result component remains only as a defensive UI fallback for input that produces no exploration at all. Ordinary language is not expected to reach it under the retrieval-first contract.
 
 ## Single-surface highlighting
 
-The editor is one plain-text `contenteditable` surface. The CSS Custom Highlight API paints DOM `Range` objects on that same text. There is no mirrored text layer, duplicate wrapping layout, scroll synchronization, or pixel-offset calculation to drift out of alignment.
+The editor remains one plain-text `contenteditable` surface. CSS Custom Highlight paints ranges on that same text. Do not reintroduce a mirrored overlay or a second textarea detector.
 
-Paste, drop, and line breaks are normalized to plain text. Normal typing is not rewritten, preserving the browser's editing and undo behavior. A pointer activation inside an actionable annotated range opens its explanation and, for catalog entities, its direct Feeling, Need, or Faux Feeling link. Merely finishing a word or placing the caret immediately after it does not open a card; annotation ends use exclusive offsets. Keyboard caret navigation can inspect an actionable range.
+Retrieval does not need to create fake highlight ranges. Inline highlights continue to represent actual recognized terms, formula ranges, guidance ranges, cue ranges, and event-family evidence. Broader retrieval/starter provenance belongs in result metadata and `Why these?`, not as invented text spans.
 
-When the Custom Highlight API is unavailable, editing, Quick Check signals, recognized-word links, suggestions, and explanations remain available. Highlight support is a release-browser requirement rather than a reason to reintroduce a mirrored overlay.
+## Canonical ownership and Bedrock
 
-## Retired Observation boundary
+The existing canonical Observation source remains `src/data/observationInference/source.json`, validated by `source.schema.json` and compiled by `scripts/compile-observation-inference.mjs` into `src/data/generated/observationInference.ts`.
 
-Observation 2.1 keeps retired:
+The canonical entity catalogs remain the owners of Feelings, Needs, Faux Feelings, and their relationships. Retrieval reads those canonical runtime entities and the generated Observation relationship index. It does not maintain a second hand-authored search taxonomy.
 
-- `src/legacy/observations/`;
-- `public/data/observation_cues.csv`;
-- `public/data/observation_cue_modules.json`;
-- `public/data/observation-guide.json`;
-- Observation resource loaders and their warm-start fetches;
-- Observation public-asset precache entries;
-- evidence-free exploration completion as an Observation inference behavior;
-- `explorationPools` as either source data or runtime fallback.
+`explorationPools` remain retired and must not be restored. Guaranteed exploration is derived deterministically from the canonical catalog graph rather than stored as another fallback content source.
 
-The research guide lives at `src/data/observationGuide.json` and is bundled locally. Its disclosure markup is still instantiated only when opened.
+The current staging implementation builds the small search-document index once at module initialization. If profiling shows that this work is material on cold start, move the deterministic projection into the existing Observation compiler rather than creating a runtime cache/repair layer.
 
 ## Verification contract
 
-Build and test gates cover:
+Regression coverage should enforce behavior rather than depend on one privileged corpus of example sentences.
 
-- all canonical Feelings, Needs, and Faux Feelings through the canonical runtime catalog projection;
-- all 219 migrated cue relationships and execution of representative imported cues;
-- all six initial reusable event families;
-- the invariant that event/imported-cue inference never impersonates direct self-report;
-- the directed-evaluation positive-label exclusions;
-- ordinary speech-participant Quick Check detection without psychological weighting;
-- blank, arbitrary nonblank, one-word canonical, partial-evidence, and no-evidence behavior;
-- the invariant that every returned suggestion has evidence;
-- direct self-reported Feelings surviving either inference lens;
-- direct, negated, quoted, third-person, Unicode, repeated-range, and adversarial input behavior;
-- formula range identity and all four slot rollups without psychological weighting;
-- internal-only surface wording, exclusive annotation boundaries, and no typing-triggered duplicate card;
-- identity-safe guidance and non-invalidating harm/coercion explanations;
-- byte-stable output for the same text and mode;
-- retired source, public asset, loader, and deployment boundaries;
-- both honest zero-result states, model-aligned `Unmet | Met`, and absence of `missing / supported` copy;
-- nondestructive revision and stale-result invalidation after edits;
-- desktop task-and-context and mobile single-column hierarchy;
-- a dedicated Chromium, Firefox, and mobile WebKit Observation browser matrix.
+Required invariants include:
 
-A warm local benchmark on 2026-08-28 analyzed a 1,908-character observation 250 times at 8.3 ms p50, 10.4 ms p95, and 13.7 ms maximum in the repository's Node test runtime. This is a development benchmark, not a cross-device guarantee.
+- blank or non-language-only input may return no suggestions;
+- ordinary language input returns four Needs and four Feelings under the current staging contract;
+- a combinatorial set of independently assembled subjects/actions/contexts also receives four-by-four exploration;
+- direct self-report remains highest priority;
+- event families and migrated cues remain non-direct;
+- keyword retrieval and starter completion remain non-direct;
+- Met and Unmet both remain populated and derive Feelings from surviving Need candidates;
+- quoted, negated, attributed, third-person, identity, and Faux Feeling ownership safeguards remain intact;
+- object-directed negative language does not become a personal-evaluation event merely because retrieval still returns broader vocabulary;
+- repeated analysis of the same input remains deterministic;
+- Quick Check does not become psychological evidence;
+- no network or language-model dependency is introduced;
+- retired public Observation assets and legacy loaders remain retired;
+- single-surface editing/highlighting and desktop/mobile layout contracts remain intact.
 
-Manual release review still includes keyboard editing, screen-reader labeling, iPhone Safari wrapping and scroll behavior, browser zoom, font size changes, direct navigation from recognized terms, event-family explanation language, revision focus behavior, and both zero-result states.
+Fresh batches of natural-language examples are quality audits for ranking. They are not the mechanism guaranteeing nonempty results. The guarantee comes from the retrieval/starter pipeline itself.
