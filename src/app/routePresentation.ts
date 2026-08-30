@@ -16,7 +16,7 @@ const exactRouteLabels: Record<string, string> = {
   '/inventory': 'Inventory',
   '/inventory/journal': 'Journal history',
   '/feed': 'Shared strategies',
-  '/alexithymia-support': 'Alexithymia support',
+  '/alexithymia-support': 'Feeling word support',
 };
 
 const segmentLabels: Record<string, string> = {
@@ -27,7 +27,7 @@ const segmentLabels: Record<string, string> = {
   inventory: 'Inventory',
   journal: 'Journal',
   'body-cues': 'Body cues',
-  'alexithymia-support': 'Alexithymia support',
+  'alexithymia-support': 'Feeling word support',
   'emotions-wheel': 'Emotions wheel',
   feed: 'Shared strategies',
 };

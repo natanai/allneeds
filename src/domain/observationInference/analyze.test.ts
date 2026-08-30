@@ -1,0 +1,323 @@
+import { describe, expect, it } from 'vitest';
+
+import { observationInferenceIndex } from '../../data/generated/observationInference';
+import { analyzeObservation } from './analyze';
+import { selectExactObservationEntities } from './select';
+
+const EXAMPLE = "Last Thursday, two days after my partner and I had agreed to have dinner together at home at 7 p.m., I arrived back at the apartment at 6:50 p.m. and started setting the table. At 7:15 p.m. my partner was not home yet, and at 7:20 p.m. I saw a message on my phone sent at 6:55 p.m. that said, 'I decided to stay late at work and will eat here tonight.'";
+
+describe('Observation Inference retrieval-first staging', () => {
+  it('keeps blank or non-word input empty but guarantees exploration for searchable text', () => {
+    expect(analyzeObservation('   ').suggestions).toEqual({ feelings: [], needs: [], basis: null });
+    expect(analyzeObservation('🙂').suggestions).toEqual({ feelings: [], needs: [], basis: null });
+
+    for (const text of ['banana telescope purple', 'A completely unfamiliar situation happened today.', 'The caterer brought thirty chairs instead of fifty.']) {
+      const analysis = analyzeObservation(text);
+      expect(analysis.suggestions.needs.length, text).toBe(4);
+      expect(analysis.suggestions.feelings.length, text).toBe(4);
+      expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct'), text).toBe(true);
+    }
+  });
+
+  it('keeps direct evidence first while deterministic completion stays explicitly lower-tier', () => {
+    const analysis = analyzeObservation('I feel anxious.');
+    expect(analysis.suggestions.feelings[0]).toMatchObject({ slug: 'anxious', basis: 'direct' });
+    expect(analysis.suggestions.feelings.length).toBeLessThanOrEqual(4);
+    expect(analysis.suggestions.needs.length).toBeLessThanOrEqual(4);
+    for (const suggestion of [...analysis.suggestions.feelings, ...analysis.suggestions.needs]) {
+      expect(suggestion.evidence.length).toBeGreaterThan(0);
+      expect(['direct', 'related', 'broad', 'exploratory']).toContain(suggestion.basis);
+    }
+  });
+
+  it('ranks direct first-person Feeling and Need language first', () => {
+    const analysis = analyzeObservation('I feel anxious and I need rest.');
+    expect(analysis.suggestions.feelings[0]).toMatchObject({ slug: 'anxious', basis: 'direct' });
+    expect(analysis.suggestions.needs[0]).toMatchObject({ slug: 'rest', basis: 'direct' });
+  });
+
+  it('keeps coordinated first-person self-report inside the direct boundary', () => {
+    const analysis = analyzeObservation('I feel sad and angry. I need rest and support.');
+    expect(analysis.suggestions.feelings).toContainEqual(expect.objectContaining({ slug: 'sad', basis: 'direct' }));
+    expect(analysis.suggestions.feelings).toContainEqual(expect.objectContaining({ slug: 'angry', basis: 'direct' }));
+    expect(analysis.suggestions.needs).toContainEqual(expect.objectContaining({ slug: 'rest', basis: 'direct' }));
+    expect(analysis.suggestions.needs).toContainEqual(expect.objectContaining({ slug: 'support', basis: 'direct' }));
+  });
+
+  it('keeps a directly named Feeling even when its catalog status differs from the selected mode', () => {
+    const unmetLens = analyzeObservation('I feel calm.', 'unmet');
+    expect(unmetLens.suggestions.feelings[0]).toMatchObject({ slug: 'calm', basis: 'direct' });
+
+    const metLens = analyzeObservation('I feel anxious.', 'met');
+    expect(metLens.suggestions.feelings[0]).toMatchObject({ slug: 'anxious', basis: 'direct' });
+  });
+
+  it('uses mode only for derived Feeling possibilities', () => {
+    const unmet = analyzeObservation('I need rest.', 'unmet');
+    const met = analyzeObservation('I need rest.', 'met');
+    expect(unmet.suggestions.needs[0]).toMatchObject({ slug: 'rest', basis: 'direct' });
+    expect(met.suggestions.needs[0]).toMatchObject({ slug: 'rest', basis: 'direct' });
+    expect(unmet.suggestions.feelings.map((candidate) => candidate.slug)).not.toEqual(met.suggestions.feelings.map((candidate) => candidate.slug));
+  });
+
+  it('projects Met and Unmet Feelings from surviving Need candidates instead of rerunning event recognition', () => {
+    const unmet = analyzeObservation(EXAMPLE, 'unmet');
+    const met = analyzeObservation(EXAMPLE, 'met');
+    expect(unmet.suggestions.needs.length).toBe(4);
+    expect(met.suggestions.needs.length).toBe(4);
+    expect(unmet.suggestions.needs.some((need) => met.suggestions.needs.some((candidate) => candidate.slug === need.slug))).toBe(true);
+    expect(unmet.suggestions.feelings.length).toBe(4);
+    expect(met.suggestions.feelings.length).toBe(4);
+    const satisfactionBySlug = new Map(observationInferenceIndex.catalog.feelings.map((feeling) => [feeling.slug, feeling.needSatisfaction]));
+    expect(unmet.suggestions.feelings.every((feeling) => feeling.basis === 'direct' || satisfactionBySlug.get(feeling.slug) !== 'met')).toBe(true);
+    expect(met.suggestions.feelings.every((feeling) => feeling.basis === 'direct' || satisfactionBySlug.get(feeling.slug) !== 'unmet')).toBe(true);
+  });
+
+  it('uses current canonical relationships around direct Feeling and Need words', () => {
+    const fromFeeling = analyzeObservation('I feel anxious.');
+    expect(fromFeeling.suggestions.needs.length).toBeGreaterThan(0);
+    expect(fromFeeling.suggestions.needs.some((candidate) => candidate.basis === 'related')).toBe(true);
+
+    const fromNeed = analyzeObservation('I need rest.');
+    expect(fromNeed.suggestions.feelings).toContainEqual(expect.objectContaining({ slug: 'tired', basis: 'related' }));
+  });
+
+  it('keeps migrated authored cue expressions as related evidence rather than direct self-report', () => {
+    const analysis = analyzeObservation('I reached to hug them and they stepped back.');
+    expect(analysis.annotations.some((annotation) => annotation.evidence.some((evidence) => (
+      evidence.kind === 'cue' && evidence.expressionId === 'comfort-turned-away'
+    )))).toBe(true);
+    expect(analysis.suggestions.needs.some((candidate) => candidate.slug === 'love-caring')).toBe(true);
+    expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct')).toBe(true);
+  });
+
+  it.each([
+    ['directed-personal-evaluation', 'My coworker told me I was rude.', 'respect'],
+    ['dismissal-of-experience', 'My coworker told me I was overreacting.', 'understanding'],
+    ['interruption-of-speech', 'My coworker interrupted me while I was speaking.', 'to-be-heard'],
+    ['social-exclusion', 'The meeting started without me.', 'inclusion'],
+    ['constrained-decision', 'My manager asked me to sign immediately.', 'autonomy'],
+    ['agreement-change', 'We agreed to meet at 7 and then they canceled.', 'dependability'],
+  ])('recognizes the %s event family as related observable-event evidence', (familyId, text, expectedNeed) => {
+    const analysis = analyzeObservation(text);
+    expect(analysis.annotations.some((annotation) => annotation.evidence.some((evidence) => (
+      evidence.kind === 'eventFamily' && evidence.familyId === familyId
+    ))), text).toBe(true);
+    expect(analysis.suggestions.needs.some((candidate) => candidate.slug === expectedNeed), text).toBe(true);
+    expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct'), text).toBe(true);
+  });
+
+  it('keeps a direct report of words said to the user eligible for related event-family evidence', () => {
+    const analysis = analyzeObservation('My coworker said to me “you are rude.”');
+    expect(analysis.annotations.some((annotation) => annotation.evidence.some((evidence) => (
+      evidence.kind === 'eventFamily' && evidence.familyId === 'directed-personal-evaluation'
+    )))).toBe(true);
+    expect(analysis.suggestions.needs.some((candidate) => candidate.slug === 'respect')).toBe(true);
+    expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct')).toBe(true);
+  });
+
+  it('does not infer event-family or imported-cue evidence from a story wholly contained in another person’s quote', () => {
+    const quotedEvent = analyzeObservation('She said “My coworker told me I was rude.”');
+    expect(quotedEvent.annotations.some((annotation) => annotation.evidence.some((evidence) => evidence.kind === 'eventFamily'))).toBe(false);
+    expect([...quotedEvent.suggestions.feelings, ...quotedEvent.suggestions.needs].every((candidate) => candidate.basis !== 'direct')).toBe(true);
+
+    const quotedCue = analyzeObservation('She said “I reached to hug them and they stepped back.”');
+    expect(quotedCue.annotations.some((annotation) => annotation.evidence.some((evidence) => evidence.kind === 'cue'))).toBe(false);
+    expect([...quotedCue.suggestions.feelings, ...quotedCue.suggestions.needs].every((candidate) => candidate.basis !== 'direct')).toBe(true);
+  });
+
+  it('does not turn excluded positive trait labels into the directed-evaluation event family', () => {
+    for (const text of ['My coworker called me a hero.', 'My manager called me a rockstar.']) {
+      const analysis = analyzeObservation(text);
+      expect(analysis.annotations.some((annotation) => annotation.evidence.some((evidence) => (
+        evidence.kind === 'eventFamily' && evidence.familyId === 'directed-personal-evaluation'
+      ))), text).toBe(false);
+      expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct'), text).toBe(true);
+    }
+  });
+
+  it('recognizes ordinary speech participants for Quick Check without turning that writing signal into direct evidence', () => {
+    for (const text of ['A coworker said “Please wait.”', 'My partner asked “Are you coming?”', 'Jordan told me “The meeting moved.”']) {
+      const analysis = analyzeObservation(text);
+      expect(analysis.slots.context.satisfied, text).toBe(true);
+      expect(analysis.slots.sensory.satisfied, text).toBe(true);
+      expect(analysis.suggestions.needs.length, text).toBe(4);
+      expect(analysis.suggestions.feelings.length, text).toBe(4);
+      expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct'), text).toBe(true);
+    }
+  });
+
+  it('does not treat negated, third-person, or quoted Feeling language as direct self-report', () => {
+    expect(analyzeObservation('I am not angry.').suggestions.feelings.some((candidate) => candidate.slug === 'angry' && candidate.basis === 'direct')).toBe(false);
+    expect(analyzeObservation('She is angry.').suggestions.feelings.some((candidate) => candidate.slug === 'angry' && candidate.basis === 'direct')).toBe(false);
+    const quoted = analyzeObservation('She said “I am angry.”');
+    expect(quoted.suggestions.feelings.some((candidate) => candidate.slug === 'angry' && candidate.basis === 'direct')).toBe(false);
+    expect(quoted.entities.some((entity) => entity.slug === 'angry')).toBe(false);
+  });
+
+  it('does not let a first-person frame reach into another person’s Feeling or Need', () => {
+    const cases = [
+      ['I feel sad because she is angry.', 'feeling', 'angry'],
+      ['I feel that she is angry.', 'feeling', 'angry'],
+      ['I feel sad because Jordan is angry.', 'feeling', 'angry'],
+      ['I need rest because they need support.', 'need', 'support'],
+      ['I want her to have rest.', 'need', 'rest'],
+      ['I want my child to have rest.', 'need', 'rest'],
+      ['She said I am angry.', 'feeling', 'angry'],
+      ['She said, I am angry.', 'feeling', 'angry'],
+      ['My friend told me I need rest.', 'need', 'rest'],
+      ['Jordan told me I am angry.', 'feeling', 'angry'],
+      ['According to her, I am angry.', 'feeling', 'angry'],
+    ] as const;
+
+    cases.forEach(([text, entityType, slug]) => {
+      const analysis = analyzeObservation(text);
+      const suggestions = entityType === 'feeling' ? analysis.suggestions.feelings : analysis.suggestions.needs;
+      expect(suggestions.some((candidate) => candidate.slug === slug && candidate.basis === 'direct'), text).toBe(false);
+    });
+  });
+
+  it('requires Faux Feeling relationship inference to belong to the user’s own experience frame', () => {
+    const own = analyzeObservation('I feel ignored.');
+    expect([...own.suggestions.feelings, ...own.suggestions.needs].some((candidate) => (
+      candidate.evidence.some((evidence) => evidence.kind === 'fauxFeeling')
+    ))).toBe(true);
+
+    const other = analyzeObservation('I told her she felt ignored.');
+    expect([...other.suggestions.feelings, ...other.suggestions.needs].some((candidate) => (
+      candidate.evidence.some((evidence) => evidence.kind === 'fauxFeeling')
+    ))).toBe(false);
+  });
+
+  it('keeps typo support bounded and guidance ranges available to the shared annotation ledger', () => {
+    const typo = analyzeObservation('I feel anxios.');
+    expect(typo.suggestions.feelings[0]).toMatchObject({ slug: 'anxious', basis: 'related' });
+    expect(typo.entities.find((entity) => entity.slug === 'anxious')).toMatchObject({ matchKind: 'fuzzy' });
+    const guidance = analyzeObservation('You are always rude on purpose.');
+    expect(guidance.annotations.some((annotation) => annotation.text.toLocaleLowerCase('en-US') === 'always'
+      && annotation.evidence.some((evidence) => evidence.kind === 'guidance'))).toBe(true);
+    expect(guidance.annotations.some((annotation) => annotation.text.toLocaleLowerCase('en-US') === 'on purpose'
+      && annotation.evidence.some((evidence) => evidence.kind === 'guidance'))).toBe(true);
+  });
+
+  it('does not treat a diagnosis or neurodivergent identity as direct psychological evidence or a writing problem', () => {
+    for (const text of ['I am autistic.', 'I have ADHD.', 'I am bipolar.', 'I have OCD.']) {
+      const identity = text.split(/\s+/).at(-1)!.replace('.', '').toLocaleLowerCase('en-US');
+      const analysis = analyzeObservation(text);
+      const guidanceText = analysis.annotations
+        .filter((annotation) => annotation.evidence.some((evidence) => evidence.kind === 'guidance'))
+        .map((annotation) => annotation.text.toLocaleLowerCase('en-US'));
+      expect(guidanceText, text).not.toContain(identity);
+      expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct'), text).toBe(true);
+    }
+  });
+
+  it('projects exact catalog titles without silently translating bridges or fuzzy wording', () => {
+    const exact = selectExactObservationEntities(analyzeObservation('I felt sad and betrayed, and I wanted safety.'));
+    expect(exact.feelings.map((entity) => entity.slug)).toContain('sad');
+    expect(exact.fauxFeelings.map((entity) => entity.slug)).toContain('betrayed');
+    expect(exact.needs.map((entity) => entity.slug)).toContain('safety');
+
+    const inexact = selectExactObservationEntities(analyzeObservation('I felt sadness and anxios.'));
+    expect(inexact.feelings).toEqual([]);
+  });
+
+  it('preserves guilt as unlinked user wording while still offering broader exploration', () => {
+    const analysis = analyzeObservation('I feel guilty.');
+    expect(analysis.surfaceTerms.map((term) => term.text)).toContain('guilty');
+    expect(analysis.entities.some((entity) => entity.text.toLocaleLowerCase('en-US') === 'guilty')).toBe(false);
+    expect(analysis.suggestions.needs.length).toBe(4);
+    expect(analysis.suggestions.feelings.length).toBe(4);
+    expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct')).toBe(true);
+  });
+
+  it('recognizes every canonical Feeling title regardless of the selected inference lens', () => {
+    observationInferenceIndex.catalog.feelings.forEach((feeling) => {
+      for (const mode of ['unmet', 'met'] as const) {
+        const analysis = analyzeObservation(`I feel ${feeling.title}.`, mode);
+        expect(analysis.suggestions.feelings[0]?.slug, `${feeling.slug}:${mode}`).toBe(feeling.slug);
+        expect(analysis.entities.some((entity) => entity.entityType === 'feeling' && entity.slug === feeling.slug), feeling.slug).toBe(true);
+      }
+    });
+  });
+
+  it('recognizes every canonical Need title', () => {
+    observationInferenceIndex.catalog.needs.forEach((need) => {
+      const analysis = analyzeObservation(`I need ${need.title}.`);
+      expect(analysis.suggestions.needs[0]?.slug, need.slug).toBe(need.slug);
+      expect(analysis.entities.some((entity) => entity.entityType === 'need' && entity.slug === need.slug), need.slug).toBe(true);
+    });
+  });
+
+  it('recognizes and links canonical Faux Feeling titles while keeping every returned item evidence-tagged', () => {
+    observationInferenceIndex.catalog.fauxFeelings.forEach((fauxFeeling) => {
+      const analysis = analyzeObservation(`I feel ${fauxFeeling.title}.`);
+      expect(analysis.entities.some((entity) => entity.entityType === 'fauxFeeling' && entity.slug === fauxFeeling.slug), fauxFeeling.slug).toBe(true);
+      for (const suggestion of [...analysis.suggestions.feelings, ...analysis.suggestions.needs]) {
+        expect(suggestion.evidence.length, fauxFeeling.slug).toBeGreaterThan(0);
+      }
+    });
+  });
+
+  it('rolls Quick Check signals up from the same exact formula annotations without making them direct evidence', () => {
+    const text = 'Tuesday at 3 p.m. in the kitchen, I heard “Please wait” twice.';
+    const analysis = analyzeObservation(text);
+    expect(Object.values(analysis.slots).every((slot) => slot.satisfied)).toBe(true);
+    Object.values(analysis.slots).forEach((slot) => {
+      expect(slot.annotationIds.length).toBeGreaterThan(0);
+      slot.annotationIds.forEach((annotationId) => {
+        const annotation = analysis.annotations.find((candidate) => candidate.id === annotationId);
+        expect(annotation?.evidence.some((evidence) => evidence.kind === 'formula' && evidence.slot === slot.id)).toBe(true);
+      });
+    });
+    expect(analysis.suggestions.needs.length).toBe(4);
+    expect(analysis.suggestions.feelings.length).toBe(4);
+    expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct')).toBe(true);
+    const twiceStart = text.indexOf('twice');
+    expect(analysis.annotations.some((annotation) => (
+      annotation.start === twiceStart
+      && annotation.end === twiceStart + 'twice'.length
+      && annotation.evidence.some((evidence) => evidence.kind === 'formula' && evidence.slot === 'measure')
+    ))).toBe(true);
+  });
+
+  it('guarantees four-by-four exploration across a large combinatorial set without relying on event grammar', () => {
+    const subjects = ['my partner', 'a coworker', 'my neighbor', 'the bus driver', 'my friend', 'the cashier', 'my roommate', 'my teacher'];
+    const actions = ['changed something', 'did not reply', 'arrived late', 'moved my things', 'looked away', 'closed the door', 'forgot the plan', 'said something unexpected'];
+    const contexts = ['after lunch', 'at home', 'during a call', 'before work', 'in the parking lot', 'this morning'];
+    let checked = 0;
+    for (const subject of subjects) {
+      for (const action of actions) {
+        for (const context of contexts) {
+          const analysis = analyzeObservation(`${context}, ${subject} ${action}.`);
+          expect(analysis.suggestions.needs.length).toBe(4);
+          expect(analysis.suggestions.feelings.length).toBe(4);
+          checked += 1;
+        }
+      }
+    }
+    expect(checked).toBe(384);
+  });
+
+  it('retains exact UTF-16 offsets for repeated and Unicode text', () => {
+    const text = '🙂 I feel sad, then I wrote sad.';
+    const analysis = analyzeObservation(text);
+    const sadOffsets = analysis.entities
+      .filter((entity) => entity.slug === 'sad')
+      .map((entity) => [entity.start, entity.end]);
+    expect(sadOffsets).toEqual([
+      [text.indexOf('sad'), text.indexOf('sad') + 3],
+      [text.lastIndexOf('sad'), text.lastIndexOf('sad') + 3],
+    ]);
+  });
+
+  it('is byte-stable for the same text and mode', () => {
+    expect(JSON.stringify(analyzeObservation(EXAMPLE, 'unmet'))).toBe(JSON.stringify(analyzeObservation(EXAMPLE, 'unmet')));
+    expect(analyzeObservation(EXAMPLE, 'unmet').version).not.toBe(analyzeObservation(EXAMPLE, 'met').version);
+  });
+
+  it('does not throw on long adversarial text', () => {
+    const text = `${'a'.repeat(3_000)} ${'(without '.repeat(120)} ${EXAMPLE}`;
+    expect(() => analyzeObservation(text)).not.toThrow();
+  });
+});

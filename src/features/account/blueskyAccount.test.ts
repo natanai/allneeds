@@ -116,6 +116,7 @@ describe('Bluesky account compatibility', () => {
     values.set('kept-profile-setting', 'kept');
     values.set('allneeds:bsky-session-hint', 'active');
     values.set('allneeds:shared-feed:public-recent:v1', '{"transient":true}');
+    values.set('nvc_rejected_emotions', '{"anxiety":4}');
     const storage = {
       get length() { return values.size; },
       key: (index: number) => [...values.keys()][index] ?? null,

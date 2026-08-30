@@ -9,7 +9,7 @@ const remoteBootHosts = new Set([
 
 test('mounts the app beneath an opaque full-screen splash while local resources finish', async ({ page }) => {
   let delayedLocalResource = false;
-  await page.route('**/data/reverse-inference.json', async (route) => {
+  await page.route('**/icons/door-observations.svg', async (route) => {
     delayedLocalResource = true;
     await new Promise((resolve) => setTimeout(resolve, 1_200));
     await route.continue();

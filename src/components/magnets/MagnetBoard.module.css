@@ -313,6 +313,38 @@
   z-index: 1;
 }
 
+.hasDetail {
+  min-width: 6.75rem;
+  padding-block: 0.42rem;
+  white-space: normal;
+}
+
+.hasDetail .label {
+  display: grid;
+  gap: 0.12rem;
+  text-align: left;
+}
+
+.detail {
+  color: color-mix(in srgb, var(--text) 72%, var(--secondary) 28%);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.badge {
+  position: relative;
+  z-index: 1;
+  padding: 0.18rem 0.36rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 46%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--surface-raised) 78%, transparent);
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .count {
   min-width: 1.5rem;
   padding: 0.2rem 0.45rem;

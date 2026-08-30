@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://allneeds.app/schemas/observation-inference-source-v2.json",
+  "title": "allneeds Observation Inference Source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "modelVersion",
+    "provenance",
+    "slots",
+    "expressions",
+    "eventFamilies",
+    "lexicalBridges",
+    "surfaceTerms",
+    "guidanceRules"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 2 },
+    "modelVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "branch", "commit", "importedAt", "cueRows"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "branch": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "importedAt": { "type": "string", "minLength": 1 },
+        "cueRows": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "slots": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/slot" }
+    },
+    "expressions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/expression" }
+    },
+    "eventFamilies": {
+      "type": "array",
+      "minItems": 6,
+      "items": { "$ref": "#/$defs/eventFamily" }
+    },
+    "lexicalBridges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lexicalBridge" }
+    },
+    "surfaceTerms": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/surfaceTerm" }
+    },
+    "guidanceRules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/guidanceRule" }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "detector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "pattern", "flags"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "pattern": { "type": "string", "minLength": 1 },
+        "flags": { "type": "string", "pattern": "^[imsu]*$" }
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "noun", "question", "summary", "examples", "detectors"],
+      "properties": {
+        "id": { "enum": ["time", "context", "sensory", "measure"] },
+        "label": { "type": "string", "minLength": 1 },
+        "noun": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "detectors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/detector" }
+        }
+      }
+    },
+    "expression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "tier", "pattern", "flags", "feelingSlugs", "needSlugs", "cueIds", "examples", "provenance"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "tier": { "enum": ["direct", "related", "broad"] },
+        "pattern": { "type": "string", "minLength": 1 },
+        "flags": { "type": "string", "pattern": "^[imsu]*$" },
+        "feelingSlugs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/slug" },
+          "uniqueItems": true
+        },
+        "needSlugs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/slug" },
+          "uniqueItems": true
+        },
+        "cueIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/slug" },
+          "uniqueItems": true
+        },
+        "examples": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "provenance": { "type": "string", "minLength": 1 }
+      }
+    },
+    "eventFamily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "tier", "lexiconRuleId", "lexiconExcludeTerms", "patterns", "feelingSlugs", "needSlugs", "explanation", "provenance"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "label": { "type": "string", "minLength": 1 },
+        "tier": { "enum": ["related", "broad"] },
+        "lexiconRuleId": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "lexiconExcludeTerms": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "patterns": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/detector" }
+        },
+        "feelingSlugs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/slug" },
+          "uniqueItems": true
+        },
+        "needSlugs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/slug" },
+          "uniqueItems": true
+        },
+        "explanation": { "type": "string", "minLength": 1 },
+        "provenance": { "type": "string", "minLength": 1 }
+      }
+    },
+    "lexicalBridge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "entityType", "slug", "terms", "provenance"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "entityType": { "enum": ["feeling", "need", "fauxFeeling"] },
+        "slug": { "$ref": "#/$defs/slug" },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "provenance": { "type": "string", "minLength": 1 }
+      }
+    },
+    "surfaceTerm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "terms"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "label": { "type": "string", "minLength": 1 },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "guidanceRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "explanation", "terms", "patterns", "provenance"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "label": { "type": "string", "minLength": 1 },
+        "explanation": { "type": "string", "minLength": 1 },
+        "terms": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "patterns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/detector" }
+        },
+        "provenance": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

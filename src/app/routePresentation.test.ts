@@ -15,7 +15,7 @@ describe('route presentation', () => {
     expect(routePresentation('/observations').documentTitle).toBe('Observations • allneeds.app');
     expect(routePresentation('/feelings/body-cues').label).toBe('Body cues');
     expect(routePresentation('/feed').label).toBe('Shared strategies');
-    expect(routePresentation('/alexithymia-support').label).toBe('Alexithymia support');
+    expect(routePresentation('/alexithymia-support').label).toBe('Feeling word support');
   });
 
   it('distinguishes the journal composer from history', () => {

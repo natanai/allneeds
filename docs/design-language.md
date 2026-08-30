@@ -71,6 +71,43 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Compact controls can use smaller typography and tighter internal padding, but should not become difficult to tap.
 - Disabled/unavailable actions should remain understandable through state and context rather than simply disappearing when the function still matters to the user.
 
+## Body-cue match language
+
+**Accepted 2026-08-27.** Preserve Body Cues as a first-class tactile experience and use one shared body-clue scorer wherever its authored associations appear.
+
+- Display a whole-number `Clue match` as fit to the cues the person entered, not as probability, confidence, certainty, accuracy, diagnosis, or a share of all possible Feelings.
+- Candidate matches are independent. They do not have to sum to 100, and the first-ranked candidate must not become 100 merely because it ranks first.
+- Body Cues and the body channel within Alexithymia Support read the same forward association strengths and use the same formula. Do not restore the legacy per-emotion-normalized reverse weights as a scoring path.
+- Compass candidates do not display percentages until that clue channel has its own approved numerator, denominator, and missing-data behavior.
+- `Not this time` is a current-check-in choice outside the score. It must not create a device-wide penalty for that Feeling in unrelated situations.
+
+## Alexithymia Support check-in
+
+**Accepted 2026-08-28.** Alexithymia Support is a four-stage, present-moment working surface: `What happened?`, `Clues`, `Words`, and `Your words`. It is not a lesson, detached practice mode, diagnostic test, treatment, or strategy library.
+
+**Plain-language addendum accepted 2026-08-29.** The public doorway and in-product label are `Feeling word support`; an Info disclosure defines alexithymia without requiring the user to identify with it. `Overall feeling` replaces the public label `Feeling shape`, and `Other emotion word` / `Your word` replace the internal-sounding `Working term`. These display labels do not change routes, scoring roles, fixed catalogs, or persistence values.
+
+**Disclosure hierarchy refined 2026-08-30.** The Feeling word support landing page has one explanatory disclosure affordance: the Info button beside the primary check-in action. Do not duplicate the same safety/matching explanation in a persistent landing-page card. The Info sheet may lead to `How matching works`, and that friendly in-app explanation may then offer the deeper technical methods and sources document. Public methods documents that are intentionally served directly from `public/docs` must remain readable as raw browser text without depending on Markdown rendering; avoid Markdown heading markers, inline-code/backtick notation, Markdown link syntax, and table syntax on those public copies, and show human-reachable source URLs directly.
+
+- At compact widths, use a full-bleed mobile stage with a compact app bar, safe-area padding, one immediate job, and a persistent next action. Do not restore the legacy stack of outlined region cards or expand every option into the page.
+- Body and Overall feeling are optional peer clue cards. Body opens one canonical region at a time in a bottom sheet and returns selections to a compact clue tray; the full Body Cues page remains available as its own tactile experience.
+- Feeling and Need choices reuse the shared `MagnetBoard`. Candidate details, score explanations, and full Need browsing open in focus-managed sheets so research copy does not displace the working task.
+- Use familiar icon-only controls for Back, Close, Info, Copy, Read aloud, and Journal when context supplies the label; retain accessible names and approximately 44px targets. Keep text for semantic choices such as `Fits`, `Maybe`, `Not this time`, and `No word yet`.
+- `Clue match` is a compatibility estimate derived only from clues the person chose. Candidate decisions and selected Needs remain direct user choices outside the score.
+- The final composer may use only the person's observation, selected words, and selected Needs. It must not infer a Need, generate a request, or offer a lane-local care recommendation. Selected Need magnets route to the canonical Need pages and their strategy decks.
+- Drafts resume the same stage after route changes, reload, or iOS backgrounding. `Start over` is the explicit destructive boundary.
+- First-use text defines unfamiliar terms. Match details use ordinary labels before research terms, and percentages are explained as similarity to chosen clues rather than probability. Observation guidance must never present a person's interpretation, identity, report of harm, or report of coercion as unreal.
+
+**Responsive hierarchy accepted 2026-08-29.** The same four-stage journey must read as a guided workspace rather than a stack of equal cards.
+
+- The app bar names all four steps on desktop and keeps a compact current-step indicator on mobile. The stage heading owns the primary visual emphasis; clue summaries, alternatives, and research disclosures remain visibly secondary.
+- Desktop stages use available width for a task-and-context layout: the active work stays in the main column while selected clues, word choices, or the next action stay in a quieter side rail. Do not render a widened mobile stack or abandon the persistent next action.
+- Mobile remains a single-column, full-bleed flow. Avoid horizontal document panning; when a named control such as the body-region picker scrolls horizontally, hide the native scrollbar, use snap-aligned choices, and make the active region unmistakable.
+- In the Body-clue sheet, desktop uses a body-region navigation rail and a separate sensation workspace. Selected sensations may expand to reveal intensity, but unselected sensations should remain compact.
+- Overall feeling groups `Pleasant or unpleasant` and `Energy` as the first, broadest place to start. `Ability to influence what happens` and `Familiar or surprising` remain optional situation detail. These groups establish sequence without implying that any input is required or more diagnostically valid.
+- Do not box every element. Use spacing, dividers, type scale, restrained surface color, and one clearly emphasized action to distinguish primary work from reference material.
+- Generated statements repeat the grammatical frame for each selected term (`I feel anxiety and I feel overwhelmed`) so official Feelings, Faux Feelings, and working terms can coexist without silently renaming or reclassifying any word.
+
 ## Canonical utility controls
 
 ### Shuffle
@@ -267,6 +304,21 @@ Rules:
 - Feed scope, sort, Bluesky sign-in gating for Following, refresh/cache behavior, Needs-supported details, owner Edit, moderation controls, and inventory-save behavior must not be lost during visual cleanup.
 
 ## Decision log
+
+### 2026-08-30
+
+- Feeling word support uses the Info button as the sole landing-page explanatory disclosure. The previous persistent `You stay in charge` / `How matching works` card is removed as redundant; matching details remain available through Info, and deeper methods remain one disclosure level further in.
+- Public Feeling word support and Body Cues methods documents are written to remain readable when a browser serves the `.md` files as raw text rather than rendered Markdown. They use ordinary text headings/formulas/lists and direct human-reachable URLs instead of visible Markdown syntax.
+- Observation editing uses one compact primary `Explore` control while Clear remains a quiet maintenance action with the same accessible meaning but much less visual weight.
+- Observation results surface the actual Need and Feeling possibilities immediately after a compact results header. Met/Unmet remains fully available but belongs contextually inside the Feeling results, after the result vocabulary, rather than occupying a large explanatory block before any suggestions.
+
+### 2026-08-28
+
+- Observation text uses one plain-text editing surface. CSS Custom Highlight ranges paint directly on the same DOM text that receives the caret, selection, wrapping, scrolling, and zoom. Do not restore a mirrored overlay, duplicate text renderer, scroll synchronizer, or pixel-offset positioning.
+- The Observation Quick Check, inline formula/entity/faux/guidance/cue styling, immediate detected-word links, caret explanations, and possible Feeling/Need results all consume the same analysis and exact-range ledger.
+- Formula highlights remain visually distinct from Feeling, Need, Faux Feeling, guidance, and broad cue treatments. Do not use percentages or confidence meters for Observation suggestions.
+- Detected Feeling, Need, and Faux Feeling words remain directly navigable. The page also keeps the recipe, research guide, Clear action, met/unmet choice, and Journal handoff.
+- On narrow screens the editor keeps a stable working height while explanations expand below it, so annotation help never overlaps the following controls.
 
 ### 2026-08-27
 

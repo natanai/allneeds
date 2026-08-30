@@ -244,15 +244,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-high",
       "emotion-anxiety",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "chest-tight",
       "chest-pounding",
       "limbs-restless",
@@ -422,15 +416,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-high",
       "emotion-fear",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "temp-chill",
       "chest-tight",
       "chest-pounding",
@@ -570,15 +558,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-high",
       "emotion-anger",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "jaw-clench",
       "temp-flush",
       "jaw-heat",
@@ -781,15 +763,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-high",
       "emotion-overwhelm",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "head-pressure",
       "chest-tight",
       "overall-floating",
@@ -984,15 +960,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-low",
       "emotion-sadness",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "gut-emptiness",
       "chest-pressure",
       "throat-lump",
@@ -1102,15 +1072,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-low",
       "emotion-grief",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "chest-pressure",
       "gut-emptiness",
       "throat-lump",
@@ -1229,15 +1193,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-high",
       "emotion-stress",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "shoulders-weighted",
       "head-pressure",
       "chest-pressure",
@@ -1314,15 +1272,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "slow_446"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-medium",
       "emotion-guilt",
-      "skill-labeling",
-      "skill-slow_446",
       "shoulders-weighted",
       "chest-pressure",
       "jaw-heat"
@@ -1453,15 +1405,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-pleasant-high",
       "emotion-excited",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "limbs-tingly",
       "chest-pounding",
       "limbs-restless",
@@ -1538,15 +1484,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-pleasant-low",
       "emotion-calm",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "overall-calm",
       "chest-open",
       "gut-warm"
@@ -1605,15 +1545,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-pleasant-low",
       "emotion-relief",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "chest-open",
       "overall-calm"
     ]
@@ -1673,15 +1607,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-pleasant-high",
       "emotion-joyful",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "chest-open",
       "limbs-tingly"
     ]
@@ -1754,15 +1682,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "slow_446"
-    ],
     "evidenceKeys": [
       "zone-pleasant-medium",
       "emotion-gratitude",
-      "skill-labeling",
-      "skill-slow_446",
       "overall-calm",
       "chest-open",
       "gut-warm"
@@ -1821,15 +1743,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-low",
       "emotion-lonely",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "gut-emptiness",
       "throat-lump"
     ]
@@ -1944,15 +1860,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-neutral-low",
       "emotion-numb",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "overall-numb",
       "limbs-heavy",
       "head-fog",
@@ -2001,15 +1911,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "slow_446"
-    ],
     "evidenceKeys": [
       "zone-pleasant-medium",
       "emotion-hopeful",
-      "skill-labeling",
-      "skill-slow_446",
       "gut-warm"
     ]
   },
@@ -2068,15 +1972,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "slow_446"
-    ],
     "evidenceKeys": [
       "zone-pleasant-medium",
       "emotion-contented",
-      "skill-labeling",
-      "skill-slow_446",
       "overall-calm",
       "gut-warm"
     ]
@@ -2162,15 +2060,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "slow_446"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-medium",
       "emotion-shame",
-      "skill-labeling",
-      "skill-slow_446",
       "jaw-heat",
       "temp-flush",
       "throat-tight",
@@ -2245,15 +2137,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-unpleasant-high",
       "emotion-frustration",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "jaw-clench",
       "limbs-restless",
       "jaw-heat"
@@ -2313,15 +2199,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-neutral-high",
       "emotion-determined",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "jaw-clench",
       "shoulders-braced"
     ]
@@ -2408,15 +2288,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-neutral-low",
       "emotion-tired",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "limbs-heavy",
       "head-fog",
       "shoulders-droop",
@@ -2463,15 +2337,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "physiological_sigh"
-    ],
     "evidenceKeys": [
       "zone-pleasant-high",
       "emotion-pride",
-      "skill-labeling",
-      "skill-physiological_sigh",
       "temp-flush"
     ]
   },
@@ -2515,15 +2383,9 @@
         }
       ]
     },
-    "skills": [
-      "labeling",
-      "resonance_6bpm"
-    ],
     "evidenceKeys": [
       "zone-neutral-low",
       "emotion-bored",
-      "skill-labeling",
-      "skill-resonance_6bpm",
       "overall-numb"
     ]
   },
