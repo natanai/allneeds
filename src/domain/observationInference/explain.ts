@@ -5,16 +5,31 @@ const slotById = new Map(observationInferenceIndex.slots.map((slot) => [slot.id,
 
 export function suggestionBasisSummary(suggestions: ObservationSuggestionResult) {
   const trace = new Set<string>();
+  const starterTrace = new Set<string>();
+
   [...suggestions.needs, ...suggestions.feelings].forEach((suggestion) => {
     suggestion.evidence.forEach((evidence) => {
-      if (evidence.kind === 'retrieval' && evidence.evidenceId && !evidence.evidenceId.startsWith('need:')) {
-        evidence.evidenceId.split('|').filter(Boolean).forEach((term) => trace.add(`word: ${term}`));
+      if (evidence.kind === 'starter') {
+        starterTrace.add(`starter: ${evidence.evidenceId}`);
+        return;
+      }
+      if (evidence.kind === 'retrieval') {
+        if (evidence.evidenceId.startsWith('need:')) {
+          trace.add(`need: ${evidence.evidenceId.slice('need:'.length)}`);
+        } else {
+          evidence.evidenceId.split('|').filter(Boolean).forEach((term) => trace.add(`word: ${term}`));
+        }
+        return;
+      }
+      if (evidence.kind === 'eventFamily') {
+        trace.add(`event: ${evidence.evidenceId}`);
         return;
       }
       trace.add(`${evidence.kind}: ${evidence.evidenceId}`);
     });
   });
-  return [...trace].join(' · ');
+
+  return [...(trace.size ? trace : starterTrace)].join(' · ');
 }
 
 export function evidenceDescription(text: string, evidence: ObservationEvidence) {
