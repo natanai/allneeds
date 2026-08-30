@@ -29,6 +29,16 @@ describe('Observation deterministic retrieval', () => {
     expect(retrieveNeedCandidates(text)).toEqual(retrieveNeedCandidates(text));
   });
 
+  it('keeps the exact same Need candidates across Met and Unmet while changing Feeling projection', () => {
+    const text = 'We agreed to meet at 7 and then they canceled.';
+    const unmet = analyzeObservation(text, 'unmet');
+    const met = analyzeObservation(text, 'met');
+    expect(unmet.suggestions.needs.map((need) => need.slug)).toEqual(met.suggestions.needs.map((need) => need.slug));
+    expect(unmet.suggestions.feelings).toHaveLength(4);
+    expect(met.suggestions.feelings).toHaveLength(4);
+    expect(unmet.suggestions.feelings.map((feeling) => feeling.slug)).not.toEqual(met.suggestions.feelings.map((feeling) => feeling.slug));
+  });
+
   it('guarantees vocabulary even when ordinary language has no useful index hit', () => {
     for (const text of ['I was there.', '这是一次观察', 'Something happened between us.']) {
       const analysis = analyzeObservation(text);
