@@ -1,16 +1,18 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
+import { needMagnetItem } from '../../components/magnets/catalogMagnetItems';
 import { needMagnetAuditCandidates } from '../designLab/needMagnetAuditCandidates';
 
-const css = readFileSync('src/features/needs/NeedsPage.module.css', 'utf8');
+const css = readFileSync('src/components/magnets/MagnetFaces.css', 'utf8');
 const icon = readFileSync('public/icons/needs/accountability.svg', 'utf8');
 const art = readFileSync('public/icons/needs/art/accountability-responsibility-mosaic.svg', 'utf8');
 
 describe('approved Accountability magnet identity', () => {
   it('ships Responsibility Mosaic A1 through the canonical Need identity owner', () => {
+    const item = needMagnetItem({ slug: 'accountability', title: 'Accountability' });
     expect(css).toContain("data-magnet-id='needs-accountability'");
-    expect(css).toContain("--magnet-icon: url('/icons/needs/accountability.svg')");
+    expect(item.iconUrl).toContain('icons/needs/accountability.svg');
     expect(css).toContain("mask: url('/icons/needs/art/accountability-responsibility-mosaic.svg')");
     expect(css).toContain('var(--quiet) 72%');
     expect(css).toContain('var(--selection) 76%');
