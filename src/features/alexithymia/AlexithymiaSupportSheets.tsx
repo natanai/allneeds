@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { useDialogFocus } from '../../app/useDialogFocus';
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
+import { needMagnetItem } from '../../components/magnets/catalogMagnetItems';
 import { assetPath, needs } from '../../data/catalog';
 import { describeCueIntensity } from '../bodyCues/bodyCueMath';
 import type { CandidateClueScore, ShapeSelections } from './alexithymiaMath';
@@ -422,11 +423,9 @@ export function NeedCatalogSheet({
     ? needs.filter((need) => need.title.toLocaleLowerCase().includes(normalized))
     : needs;
   const items: MagnetBoardItem[] = visibleNeeds.map((need) => ({
-    id: `alex-need-${need.slug}`,
-    label: need.title,
-    kind: 'need',
+    ...needMagnetItem(need),
+    to: undefined,
     tone: selected.includes(need.slug) ? 'positive' : 'selection',
-    iconUrl: assetPath(`icons/needs/${need.slug}.svg`),
     selected: selected.includes(need.slug),
     ariaLabel: `${need.title}${selected.includes(need.slug) ? ', selected' : ''}`,
     onActivate: () => onSelectedChange(selected.includes(need.slug)
