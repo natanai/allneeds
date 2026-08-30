@@ -14,6 +14,7 @@ type SearchDocument = {
   slug: string;
   title: string;
   category: string;
+  titleTokens: string[];
   weights: Map<string, number>;
   breadth: number;
 };
@@ -57,6 +58,38 @@ function searchableTokens(text: string) {
 
 function hasLanguageText(text: string) {
   return phraseTokens(text).some((token) => /\p{L}/u.test(token));
+}
+
+function sequenceStarts(haystack: readonly string[], needle: readonly string[]) {
+  if (!needle.length || needle.length > haystack.length) return [];
+  const starts: number[] = [];
+  for (let start = 0; start <= haystack.length - needle.length; start += 1) {
+    if (needle.every((token, offset) => haystack[start + offset] === token)) starts.push(start);
+  }
+  return starts;
+}
+
+function shadowedExactTitleSlugs(queryTokens: readonly string[]) {
+  const exactSpans = documents.flatMap((document) => sequenceStarts(queryTokens, document.titleTokens).map((start) => ({
+    slug: document.slug,
+    start,
+    end: start + document.titleTokens.length,
+  })));
+  const shadowed = new Set<string>();
+
+  documents.forEach((document) => {
+    const ownSpans = exactSpans.filter((span) => span.slug === document.slug);
+    if (!ownSpans.length) return;
+    const everyOccurrenceIsNested = ownSpans.every((own) => exactSpans.some((other) => (
+      other.slug !== own.slug
+      && other.start <= own.start
+      && other.end >= own.end
+      && (other.end - other.start) > (own.end - own.start)
+    )));
+    if (everyOccurrenceIsNested) shadowed.add(document.slug);
+  });
+
+  return shadowed;
 }
 
 function addWeightedText(weights: Map<string, number>, text: string | undefined, weight: number) {
@@ -118,6 +151,7 @@ const documents: SearchDocument[] = needs.map((need) => {
     slug: need.slug,
     title: need.title,
     category: need.category ?? '',
+    titleTokens: phraseTokens(need.title),
     weights,
     breadth: need.feelings.length + (need.fauxFeelings.length * 2) + Math.min(6, Math.floor(weights.size / 12)),
   };
@@ -156,9 +190,12 @@ export function retrieveNeedCandidates(text: string, limit = 12): NeedRetrievalM
   const queryCounts = new Map<string, number>();
   queryTokens.forEach((token) => queryCounts.set(token, Math.min(3, (queryCounts.get(token) ?? 0) + 1)));
   const normalizedText = normalizeForMatch(text);
+  const phraseQueryTokens = phraseTokens(text);
+  const shadowedExactSlugs = shadowedExactTitleSlugs(phraseQueryTokens);
 
   return documents
     .map((document) => {
+      if (shadowedExactSlugs.has(document.slug)) return { slug: document.slug, title: document.title, score: 0, matchedTerms: [] };
       let score = 0;
       const matchedTerms: string[] = [];
       queryCounts.forEach((count, token) => {
