@@ -6,8 +6,9 @@ const slotById = new Map(observationInferenceIndex.slots.map((slot) => [slot.id,
 export function suggestionBasisSummary(suggestions: ObservationSuggestionResult) {
   if (suggestions.basis === 'direct') return 'Some suggestions are linked directly to words you used for your own experience.';
   if (suggestions.basis === 'related') return 'Some suggestions come from fixed relationships between words or observable event patterns and possible Feelings or Needs.';
-  if (suggestions.basis === 'broad') return 'Some suggestions come from broader cues in your wording.';
-  if (suggestions.basis === 'mixed') return 'These suggestions come from more than one kind of match in your wording.';
+  if (suggestions.basis === 'broad') return 'Some suggestions come from broader keyword and relationship matches in your wording.';
+  if (suggestions.basis === 'exploratory') return 'These are broader starting points from the fixed local catalog. They are offered to give you words to consider, not because the app determined what you feel or need.';
+  if (suggestions.basis === 'mixed') return 'These suggestions combine stronger matches with broader search results or starting points. They are all possibilities to consider, not conclusions.';
   return '';
 }
 
