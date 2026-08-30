@@ -29,6 +29,13 @@ describe('Observation deterministic retrieval', () => {
     expect(retrieveNeedCandidates(text)).toEqual(retrieveNeedCandidates(text));
   });
 
+  it('lets a longer exact canonical Need phrase outrank its nested shorter title', () => {
+    const matches = retrieveNeedCandidates('I need Peer Respect.');
+    expect(matches[0]?.slug).toBe('peer-respect');
+    expect(matches.some((match) => match.slug === 'respect')).toBe(false);
+    expect(analyzeObservation('I need Peer Respect.').suggestions.needs[0]?.slug).toBe('peer-respect');
+  });
+
   it('keeps the exact same Need candidates across Met and Unmet while changing Feeling projection', () => {
     const text = 'We agreed to meet at 7 and then they canceled.';
     const unmet = analyzeObservation(text, 'unmet');
