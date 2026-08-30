@@ -403,14 +403,6 @@ export function AlexithymiaSupportPage() {
             <button type="button" className={styles.iconButton} aria-label="About this feeling check-in" onClick={() => setSheet('info')}><InfoIcon /></button>
           </div>
         </div>
-        <aside className={styles.entryAside} aria-label="About this check-in">
-          <span className={styles.entryAsideIcon}><InfoIcon /></span>
-          <div>
-            <strong>You stay in charge</strong>
-            <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
-            <p className={styles.helperLink}><a className={styles.methodsLink} href="#matching-explanation" aria-haspopup="dialog" onClick={(event) => { event.preventDefault(); setSheet('matching'); }}>How matching works</a></p>
-          </div>
-        </aside>
         <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
           <p>Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.</p>
           <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
