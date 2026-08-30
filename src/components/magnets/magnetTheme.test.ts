@@ -89,9 +89,17 @@ describe('magnet theme styling', () => {
       'honesty',
       'accountability',
     ].forEach((slug) => {
-      expect(faceCss).toContain(`[data-magnet-id='needs-${slug}']`);
+      expect(faceCss).toContain(`[data-magnet-id][data-magnet-id='needs-${slug}']`);
     });
     expect(needsPageCss).not.toContain("data-magnet-id='needs-");
     expect(faceCss).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  });
+
+  it('keeps approved faces stronger than generic tone/icon rules and scopes second icons to the label', () => {
+    expect(faceCss).toContain("[data-magnet-id][data-magnet-id='needs-connection']::before");
+    expect(faceCss).toContain("[data-magnet-id][data-magnet-id='needs-understanding'] > span:first-of-type::after");
+    expect(faceCss).toContain("[data-magnet-id][data-magnet-id='needs-clarity'] > span:first-of-type::after");
+    expect(faceCss).not.toContain("[data-magnet-id='needs-understanding'] > span::after");
+    expect(faceCss).not.toContain("[data-magnet-id='needs-clarity'] > span::after");
   });
 });
