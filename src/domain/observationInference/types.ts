@@ -1,8 +1,8 @@
 export type ObservationMode = 'unmet' | 'met';
 export type ObservationSlotId = 'time' | 'context' | 'sensory' | 'measure';
 export type ObservationEntityType = 'feeling' | 'need' | 'fauxFeeling';
-export type EvidenceTier = 'direct' | 'related' | 'broad';
-export type EventEvidenceTier = Exclude<EvidenceTier, 'direct'>;
+export type EvidenceTier = 'direct' | 'related' | 'broad' | 'exploratory';
+export type EventEvidenceTier = Extract<EvidenceTier, 'related' | 'broad'>;
 export type EntityMatchKind = 'title' | 'bridge' | 'fuzzy';
 
 export type FormulaEvidence = {
@@ -84,7 +84,7 @@ export type ObservationSlotResult = {
 };
 
 export type SuggestionEvidence = {
-  kind: 'entity' | 'cue' | 'eventFamily' | 'fauxFeeling';
+  kind: 'entity' | 'cue' | 'eventFamily' | 'fauxFeeling' | 'retrieval' | 'starter';
   tier: EvidenceTier;
   annotationId: string;
   evidenceId: string;
