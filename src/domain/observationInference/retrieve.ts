@@ -30,6 +30,7 @@ const STOPWORDS = new Set([
 function stemToken(token: string) {
   let value = token.toLocaleLowerCase('en-US');
   if (value.length > 5 && value.endsWith('ies')) value = `${value.slice(0, -3)}y`;
+  else if (value.length > 5 && value.endsWith('ied')) value = `${value.slice(0, -3)}y`;
   else if (value.length > 6 && value.endsWith('ing')) {
     value = value.slice(0, -3);
     if (/([b-df-hj-np-tv-z])\1$/u.test(value)) value = value.slice(0, -1);
@@ -38,17 +39,24 @@ function stemToken(token: string) {
     if (/([b-df-hj-np-tv-z])\1$/u.test(value)) value = value.slice(0, -1);
   } else if (value.length > 5 && value.endsWith('ly')) value = value.slice(0, -2);
   else if (value.length > 4 && value.endsWith('s') && !value.endsWith('ss')) value = value.slice(0, -1);
+  else if (value.length > 4 && value.endsWith('e')) value = value.slice(0, -1);
   return value;
+}
+
+function tokenVariants(token: string) {
+  const normalized = token.toLocaleLowerCase('en-US');
+  const stem = stemToken(normalized);
+  return stem === normalized ? [normalized] : [normalized, stem];
 }
 
 function searchableTokens(text: string) {
   return phraseTokens(text)
-    .map(stemToken)
+    .flatMap(tokenVariants)
     .filter((token) => token.length > 1 && !STOPWORDS.has(token));
 }
 
 function hasLanguageText(text: string) {
-  return phraseTokens(text).some((token) => token.length > 1 && /\p{L}/u.test(token));
+  return phraseTokens(text).some((token) => /\p{L}/u.test(token));
 }
 
 function addWeightedText(weights: Map<string, number>, text: string | undefined, weight: number) {
