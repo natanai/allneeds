@@ -43,6 +43,14 @@
   pointer-events: none;
 }
 
+.annotationHint {
+  display: none;
+  margin: .2rem .8rem .55rem;
+  color: var(--secondary);
+  font-size: .76rem;
+  line-height: 1.3;
+}
+
 .annotationAction {
   position: relative;
   z-index: 2;
@@ -110,6 +118,7 @@
   .root { min-height: 11.4rem; box-shadow: none; }
   .surface { height: 11.4rem; min-height: 11.4rem; padding: .82rem .86rem; }
   .placeholder { inset: .82rem .86rem; }
+  .annotationHint { display: block; }
 
   .annotationAction {
     margin-inline: .45rem;
