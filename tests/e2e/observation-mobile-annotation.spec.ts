@@ -1,6 +1,6 @@
 import { expect, test } from './fixtures';
 
-test('mobile explains an underlined guidance word when the caret lands at its end boundary', async ({ page }) => {
+test('mobile exposes every active annotation in a notes ledger while preserving tap-to-explain', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/observations');
 
@@ -8,7 +8,18 @@ test('mobile explains an underlined guidance word when the caret lands at its en
   const observation = 'My partner is confusing and sometimes just won’t talk to me.';
   await editor.fill(observation);
 
-  await expect(page.getByText('Underlined text has notes — tap it for details.')).toBeVisible();
+  const notesButton = page.getByRole('button', { name: /^Notes/ });
+  await expect(notesButton).toBeVisible();
+  await notesButton.click();
+
+  const ledger = page.getByRole('complementary', { name: 'Observation text notes' });
+  await expect(ledger).toBeVisible();
+  await expect(ledger).toContainText('“sometimes”');
+  await expect(ledger).toContainText('An amount that could be more specific');
+  await expect(ledger).toContainText('add a count, duration, or timeframe');
+
+  await page.getByRole('button', { name: 'Close text notes' }).click();
+  await expect(ledger).toHaveCount(0);
 
   await editor.evaluate((element) => {
     const textNode = element.firstChild;
