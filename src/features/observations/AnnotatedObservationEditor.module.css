@@ -1,3 +1,9 @@
+.shell {
+  position: relative;
+  display: grid;
+  gap: .42rem;
+}
+
 .root {
   position: relative;
   min-height: 12rem;
@@ -32,6 +38,12 @@
   caret-color: var(--text);
 }
 
+.surface:focus,
+.surface:focus-visible {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
 .placeholder {
   position: absolute;
   z-index: 0;
@@ -43,12 +55,11 @@
   pointer-events: none;
 }
 
-.annotationControls {
+.annotationTools {
   position: relative;
-  z-index: 3;
+  z-index: 10;
   display: flex;
   justify-content: flex-end;
-  padding: 0 .6rem .55rem;
 }
 
 .ledgerToggle {
@@ -80,10 +91,10 @@
 
 .annotationLedger {
   position: absolute;
-  z-index: 12;
-  left: .6rem;
-  right: .6rem;
-  top: calc(100% - .15rem);
+  z-index: 20;
+  top: calc(100% + .32rem);
+  right: 0;
+  width: min(34rem, calc(100vw - 2rem));
   max-height: min(22rem, 52vh);
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--outline) 20%, transparent);
@@ -182,7 +193,6 @@
 .annotationAction {
   position: relative;
   z-index: 2;
-  margin: .15rem .7rem .7rem;
   padding: .7rem;
   display: flex;
   align-items: flex-start;
@@ -231,15 +241,11 @@
 }
 
 @media (max-width: 640px) {
+  .shell { gap: .35rem; }
   .root { min-height: 11.4rem; box-shadow: none; }
   .surface { height: 11.4rem; min-height: 11.4rem; padding: .82rem .86rem; }
   .placeholder { inset: .82rem .86rem; }
-  .annotationControls { padding: 0 .48rem .48rem; }
   .ledgerToggle { min-height: 36px; font-size: .8rem; }
-  .annotationLedger { left: .42rem; right: .42rem; }
-
-  .annotationAction {
-    margin-inline: .45rem;
-    padding: .58rem;
-  }
+  .annotationLedger { width: min(32rem, calc(100vw - 1.5rem)); }
+  .annotationAction { padding: .58rem; }
 }
