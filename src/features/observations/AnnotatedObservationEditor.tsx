@@ -186,6 +186,12 @@ function annotationAtOffset(annotations: ObservationAnnotation[], offset: number
     ?? null;
 }
 
+function annotationAtCaretBoundary(annotations: ObservationAnnotation[], offset: number) {
+  const exact = annotationAtOffset(annotations, offset);
+  if (exact || offset <= 0) return exact;
+  return annotationAtOffset(annotations, offset - 1);
+}
+
 export function AnnotatedObservationEditor({
   id,
   labelledBy,
@@ -198,6 +204,7 @@ export function AnnotatedObservationEditor({
   const composingRef = useRef(false);
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
   const activeAnnotation = analysis.annotations.find((annotation) => annotation.id === activeAnnotationId) ?? null;
+  const hasInspectableAnnotations = analysis.annotations.some((annotation) => annotationDescriptions(annotation).length > 0);
 
   const emitText = () => {
     const editor = editorRef.current;
@@ -237,7 +244,7 @@ export function AnnotatedObservationEditor({
     const editor = editorRef.current;
     if (!editor) return;
     const offset = selectionOffset(editor);
-    setActiveAnnotationId(offset === null ? null : annotationAtOffset(analysis.annotations, offset)?.id ?? null);
+    setActiveAnnotationId(offset === null ? null : annotationAtCaretBoundary(analysis.annotations, offset)?.id ?? null);
   };
 
   const normalizeAndEmit = () => {
@@ -327,6 +334,9 @@ export function AnnotatedObservationEditor({
         onPointerUp={() => window.requestAnimationFrame(inspectCaret)}
         onKeyUp={handleKeyUp}
       />
+      {hasInspectableAnnotations && !activeAnnotation ? (
+        <p className={styles.annotationHint}>Underlined text has notes — tap it for details.</p>
+      ) : null}
       {activeAnnotation ? (
         <aside className={styles.annotationAction} aria-label={`About “${activeAnnotation.text}”`}>
           <div>
