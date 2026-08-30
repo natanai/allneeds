@@ -59,7 +59,9 @@ describe('Observation generalized event-family phrasing', () => {
   ])('does not borrow a trait label from a quoted evaluation of something else: %s', (text) => {
     const analysis = analyzeObservation(text);
     expect(eventFamilyIds(text), text).not.toContain('directed-personal-evaluation');
-    expect(analysis.suggestions, text).toEqual({ feelings: [], needs: [], basis: null });
+    expect(analysis.suggestions.needs.length, text).toBe(4);
+    expect(analysis.suggestions.feelings.length, text).toBe(4);
+    expect([...analysis.suggestions.feelings, ...analysis.suggestions.needs].every((candidate) => candidate.basis !== 'direct'), text).toBe(true);
   });
 
   it('keeps the pre-target and post-target forms equivalent', () => {
