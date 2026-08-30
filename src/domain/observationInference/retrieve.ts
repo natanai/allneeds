@@ -47,6 +47,10 @@ function searchableTokens(text: string) {
     .filter((token) => token.length > 1 && !STOPWORDS.has(token));
 }
 
+function hasLanguageText(text: string) {
+  return phraseTokens(text).some((token) => token.length > 1 && /\p{L}/u.test(token));
+}
+
 function addWeightedText(weights: Map<string, number>, text: string | undefined, weight: number) {
   if (!text) return;
   for (const token of new Set(searchableTokens(text))) {
@@ -174,7 +178,7 @@ export function starterNeedCandidates(limit = 12): NeedRetrievalMatch[] {
 }
 
 export function hasSearchableObservationText(text: string) {
-  return searchableTokens(text).length > 0;
+  return hasLanguageText(text);
 }
 
 export function starterFeelingSlugs(mode: ObservationMode, limit = 16) {
