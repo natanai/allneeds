@@ -1,5 +1,11 @@
 import { observationInferenceIndex } from '../../data/generated/observationInference';
 import { annotateObservation, normalizedObservationText } from './annotate';
+import {
+  hasSearchableObservationText,
+  retrieveNeedCandidates,
+  starterFeelingSlugs,
+  starterNeedCandidates,
+} from './retrieve';
 import type {
   EvidenceTier,
   ObservationAnalysis,
@@ -21,7 +27,7 @@ type CandidateState = {
   family: string;
 };
 
-const tierOrder: Record<EvidenceTier, number> = { broad: 1, related: 2, direct: 3 };
+const tierOrder: Record<EvidenceTier, number> = { exploratory: 0, broad: 1, related: 2, direct: 3 };
 type CatalogFeeling = { slug: string; title: string; needSatisfaction: 'met' | 'unmet' | 'both'; catalogOrder: number };
 type CatalogNeed = { slug: string; title: string; category: string; feelingSlugs: readonly string[]; fauxFeelingSlugs: readonly string[]; catalogOrder: number };
 type CatalogFauxFeeling = { slug: string; title: string; feelingSlugs: readonly string[]; needSlugs: readonly string[] };
@@ -180,6 +186,16 @@ function fingerprint(text: string) {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
+function retrievalScore(rawScore: number, rank: number) {
+  return Math.max(300, 570 - (rank * 24) + Math.min(90, Math.round(Math.log1p(rawScore) * 18)));
+}
+
+function projectionBasis(needBasis: EvidenceTier): EvidenceTier {
+  if (needBasis === 'exploratory') return 'exploratory';
+  if (needBasis === 'direct') return 'related';
+  return 'broad';
+}
+
 export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'): ObservationAnalysis {
   const source = typeof text === 'string' ? text : '';
   const { annotations } = annotateObservation(source);
@@ -253,6 +269,56 @@ export function analyzeObservation(text: string, mode: ObservationMode = 'unmet'
       }
     });
   });
+
+  const searchable = hasSearchableObservationText(source);
+  if (searchable) {
+    retrieveNeedCandidates(source).forEach((match, rank) => addCandidate(
+      needCandidates,
+      'need',
+      match.slug,
+      'broad',
+      retrievalScore(match.score, rank),
+      `retrieval:${match.slug}`,
+      { kind: 'retrieval', tier: 'broad', annotationId: 'observation-retrieval', evidenceId: match.matchedTerms.join('|') || match.slug },
+    ));
+
+    starterNeedCandidates().forEach((match, index) => addCandidate(
+      needCandidates,
+      'need',
+      match.slug,
+      'exploratory',
+      Math.max(90, 170 - (index * 6)),
+      `starter:${match.slug}`,
+      { kind: 'starter', tier: 'exploratory', annotationId: 'observation-starter', evidenceId: match.slug },
+    ));
+
+    rankedCandidates(needCandidates).forEach((needCandidate) => {
+      if (needCandidate.basis === 'direct') return;
+      const need = needBySlug.get(needCandidate.slug);
+      if (!need) return;
+      const basis = projectionBasis(needCandidate.basis);
+      const score = Math.max(105, Math.round(needCandidate.score * 0.72));
+      need.feelingSlugs.forEach((slug) => {
+        if (!modeAllowsFeeling(slug, mode)) return;
+        addCandidate(feelingCandidates, 'feeling', slug, basis, score, `need:${needCandidate.slug}`, {
+          kind: needCandidate.basis === 'exploratory' ? 'starter' : 'retrieval',
+          tier: basis,
+          annotationId: needCandidate.basis === 'exploratory' ? 'observation-starter' : 'observation-retrieval',
+          evidenceId: `need:${needCandidate.slug}`,
+        });
+      });
+    });
+
+    starterFeelingSlugs(mode).forEach((slug, index) => addCandidate(
+      feelingCandidates,
+      'feeling',
+      slug,
+      'exploratory',
+      Math.max(65, 115 - (index * 3)),
+      'starter-feeling',
+      { kind: 'starter', tier: 'exploratory', annotationId: 'observation-starter', evidenceId: slug },
+    ));
+  }
 
   const blank = !source.trim();
   const feelings = blank ? [] : selectDiverse(rankedCandidates(feelingCandidates), 4).map(suggestion);
