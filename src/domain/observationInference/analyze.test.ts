@@ -6,7 +6,7 @@ import { selectExactObservationEntities } from './select';
 
 const EXAMPLE = "Last Thursday, two days after my partner and I had agreed to have dinner together at home at 7 p.m., I arrived back at the apartment at 6:50 p.m. and started setting the table. At 7:15 p.m. my partner was not home yet, and at 7:20 p.m. I saw a message on my phone sent at 6:55 p.m. that said, 'I decided to stay late at work and will eat here tonight.'";
 
-describe('Observation Inference Engine 2.2', () => {
+describe('Observation Inference retrieval-first staging', () => {
   it('keeps blank or non-word input empty but guarantees exploration for searchable text', () => {
     expect(analyzeObservation('   ').suggestions).toEqual({ feelings: [], needs: [], basis: null });
     expect(analyzeObservation('🙂').suggestions).toEqual({ feelings: [], needs: [], basis: null });
