@@ -1,8 +1,6 @@
 name: Full repository validation
 
 on:
-  push:
-    branches: [agent/ui-consolidation]
   workflow_dispatch:
 
 permissions:
