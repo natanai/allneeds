@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { type MouseEvent, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
@@ -113,6 +113,10 @@ function JournalIcon() {
 
 function ResetIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 16a8 8 0 1 0 .5-9l-2 3" /></svg>;
+}
+
+function keepTextareaFocus(event: MouseEvent<HTMLButtonElement>) {
+  if (document.activeElement instanceof HTMLTextAreaElement) event.preventDefault();
 }
 
 function MatchingSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -484,8 +488,8 @@ export function AlexithymiaSupportPage() {
                 <button type="button" className={styles.textButton} onClick={() => {
                   updateDraft((current) => ({ ...current, observation: '' }));
                   goToStage(2);
-                }}>Skip</button>
-                <button type="button" className={styles.primaryButton} onClick={() => goToStage(2)}>Continue</button>
+                }} onMouseDown={keepTextareaFocus}>Skip</button>
+                <button type="button" className={styles.primaryButton} onMouseDown={keepTextareaFocus} onClick={() => goToStage(2)}>Continue</button>
               </div>
             </aside>
           </div>

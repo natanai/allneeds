@@ -1211,10 +1211,10 @@
   .guideRail > p:not(.sectionLabel) { margin: .18rem 0 .35rem; font-size: var(--text-xs); }
   .guideRail > a { font-size: var(--text-xs); }
 
-  .stageOne:has(.observationField textarea:focus, .stickyActions:focus-within) .stageHeader { display: none; }
-  .stageOne:has(.observationField textarea:focus, .stickyActions:focus-within) .observationWorkspace { padding-top: 3.45rem; }
-  .stageOne:has(.observationField textarea:focus, .stickyActions:focus-within) .guideRail > :not(.stickyActions) { display: none; }
-  .stageOne:has(.observationField textarea:focus, .stickyActions:focus-within) .stickyActions {
+  .stageOne:has(.observationField textarea:focus) .stageHeader { display: none; }
+  .stageOne:has(.observationField textarea:focus) .observationWorkspace { padding-top: 3.45rem; }
+  .stageOne:has(.observationField textarea:focus) .guideRail > :not(.stickyActions) { display: none; }
+  .stageOne:has(.observationField textarea:focus) .stickyActions {
     top: calc(max(.3rem, env(safe-area-inset-top)) + 3.25rem);
     bottom: auto;
   }
