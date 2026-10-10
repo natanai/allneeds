@@ -29,7 +29,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await nav.getByRole('link', { name: 'Observations', exact: true }).click();
   await expect(editor).toHaveText(observation);
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByRole('heading', { name: 'Possible Feelings and Needs' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Feelings and Needs to explore' })).toBeVisible();
 
   await page.reload();
   await expect(editor).toHaveText(observation);
@@ -186,11 +186,10 @@ test('a downloaded device backup restores removed Inventory data through the vis
   await download.saveAs(backupPath);
   await menu.getByRole('button', { name: 'Close menu' }).click();
 
+  const savedCard = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Backup restoration walk' }) });
+  await savedCard.getByRole('button', { name: 'More actions for Backup restoration walk' }).click();
   page.once('dialog', (dialog) => dialog.accept());
-  await page.getByRole('heading', { name: 'Backup restoration walk' })
-    .locator('..')
-    .getByRole('button', { name: 'Remove' })
-    .click();
+  await savedCard.getByRole('button', { name: 'Remove' }).click();
   await expect(page.getByRole('heading', { name: 'Backup restoration walk' })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Open menu' }).click();
@@ -210,7 +209,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('We stopped talking after dinner.');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('button', { name: /Body Choose sensations/ }).click();
+  await page.getByText('Body clues', { exact: true }).click();
   const bodySheet = page.getByRole('dialog', { name: 'Body clues' });
   await bodySheet.getByRole('button', { name: /Tight or constricted/ }).click();
   await bodySheet.getByLabel('Tight or constricted intensity').fill('70');

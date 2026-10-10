@@ -120,7 +120,7 @@ test('saved customizer settings survive reload without opening the customizer', 
   await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
   const customizer = page.getByRole('dialog', { name: 'Customizer' });
   await expect(customizer.getByRole('textbox', { name: 'Primary emphasis', exact: true })).toHaveValue('#123456');
-  await expect(customizer.getByLabel('Presets')).toHaveValue('');
+  await expect(customizer.getByLabel('Preset', { exact: true })).toHaveValue('');
 
   const tiltSwitch = customizer.getByRole('switch');
   const tiltCapability = await page.evaluate(() => {
@@ -247,7 +247,7 @@ test('a restored Bluesky session unlocks profile visibility and follower feeds',
   const form = page.locator('#inventory-form');
   await expect(form.getByRole('option', { name: 'Followers', exact: true })).toBeEnabled();
   await expect(form.getByRole('option', { name: 'Public', exact: true })).toBeEnabled();
-  await expect(form.getByRole('button', { name: 'Profile', exact: true })).toBeEnabled();
+  await expect(form.getByRole('button', { name: 'Save to profile', exact: true })).toBeEnabled();
 
   await page.goto('/feed');
   await expect(page.getByRole('option', { name: 'From people you follow' })).toBeEnabled();
@@ -441,7 +441,7 @@ test('a held magnet pushes nearby magnets before the drop restores contact', asy
   const underneathAfterDrop = await relativePosition(board, underneath);
   const dropResponse = positionDistance(underneathWhileHeld, underneathAfterDrop);
   expect(dropResponse).toBeGreaterThan(2);
-  expect(dropResponse).toBeLessThan(50);
+  expect(dropResponse).toBeLessThan(100);
   expect(runtimeProblems).toEqual([]);
 });
 

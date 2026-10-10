@@ -14,7 +14,7 @@ test.describe('Support reviewed content', () => {
     const detailParagraphs = evidence.locator('details').first().locator('p');
     await expect(detailParagraphs).toHaveCount(6);
     await expect(detailParagraphs.first()).toContainText('central role in shaping evolved human life history');
-    await expect(detailParagraphs.last()).toContainText('deeply cooperative human repertoire');
+    await expect(detailParagraphs.last()).toContainText('part of human cooperation rather than simply as a failure of self-sufficiency');
 
     await evidence.getByText('Citations', { exact: true }).click();
     const citationList = evidence.locator('ol');

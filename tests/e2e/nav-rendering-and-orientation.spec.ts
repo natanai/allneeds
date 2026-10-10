@@ -67,7 +67,7 @@ test('mobile customizer can lock and unlock the current screen orientation', asy
 
   await orientationSwitch.click();
   await expect(orientationSwitch).toHaveAttribute('aria-checked', 'true');
-  await expect(customizer.getByText(/Locked to .* orientation while this page is open\./)).toBeVisible();
+  await expect(customizer.getByText(/Locked to .* orientation\./)).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __orientationLockTarget?: string }).__orientationLockTarget)).toMatch(/portrait|landscape/);
 
   await customizer.getByRole('button', { name: 'Close customizer' }).click();

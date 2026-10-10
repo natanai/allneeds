@@ -132,7 +132,7 @@ function plainText(root: HTMLElement) {
   return (root.textContent ?? '').replace(/\r\n?/g, '\n');
 }
 
-function insertPlainText(root: HTMLElement, text: string) {
+function insertPlainText(root: HTMLElement, text: string, preserveUndo = true) {
   root.focus();
   const normalized = text.replace(/\r\n?/g, '\n');
   const asHtml = normalized
@@ -140,7 +140,7 @@ function insertPlainText(root: HTMLElement, text: string) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/\n/g, '&#10;');
-  if (document.execCommand(normalized.includes('\n') ? 'insertHTML' : 'insertText', false, normalized.includes('\n') ? asHtml : normalized)) return;
+  if (preserveUndo && document.execCommand(normalized.includes('\n') ? 'insertHTML' : 'insertText', false, normalized.includes('\n') ? asHtml : normalized)) return;
   const selection = window.getSelection();
   if (!selection) return;
   let range: Range;
@@ -281,11 +281,20 @@ export function AnnotatedObservationEditor({
       event.preventDefault();
       const editor = editorRef.current;
       if (!editor) return;
-      insertPlainText(editor, '\n');
+      insertPlainText(editor, '\n', false);
       emitText();
     } else if (nativeEvent.inputType?.startsWith('format')) {
       event.preventDefault();
     }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing || composingRef.current) return;
+    event.preventDefault();
+    const editor = editorRef.current;
+    if (!editor) return;
+    insertPlainText(editor, '\n', false);
+    emitText();
   };
 
   const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
@@ -390,6 +399,7 @@ export function AnnotatedObservationEditor({
           onPaste={handlePaste}
           onDrop={handleDrop}
           onPointerUp={() => window.requestAnimationFrame(inspectCaret)}
+          onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
         />
       </div>

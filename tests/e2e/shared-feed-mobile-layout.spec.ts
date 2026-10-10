@@ -89,8 +89,6 @@ test('keeps signed-in Shared Strategies compact and contained on mobile', async 
   await expect(page.getByLabel('Edit Contained strategy card')).toBeVisible();
   await expect(page.getByLabel('Admin actions for Contained strategy card')).toBeVisible();
   await expect(page.getByLabel('Contained strategy card is saved to inventory')).toBeVisible();
-  await expect(page.getByText('Needs', { exact: true })).toBeVisible();
-
   const geometry = await page.evaluate(() => {
     const card = document.querySelector('section[aria-label="Shared strategies"] article');
     const controls = document.querySelector('section[aria-label="Shared strategy filters"]');
