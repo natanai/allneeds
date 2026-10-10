@@ -187,7 +187,7 @@ test('a downloaded device backup restores removed Inventory data through the vis
   await menu.getByRole('button', { name: 'Close menu' }).click();
 
   const savedCard = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Backup restoration walk' }) });
-  await savedCard.getByRole('button', { name: 'More actions for Backup restoration walk' }).click();
+  await savedCard.locator('summary[aria-label="More actions for Backup restoration walk"]').click();
   page.once('dialog', (dialog) => dialog.accept());
   await savedCard.getByRole('button', { name: 'Remove' }).click();
   await expect(page.getByRole('heading', { name: 'Backup restoration walk' })).toHaveCount(0);
@@ -209,7 +209,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('We stopped talking after dinner.');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByText('Body clues', { exact: true }).click();
+  await page.getByRole('button', { name: /^Body clues/ }).click();
   const bodySheet = page.getByRole('dialog', { name: 'Body clues' });
   await bodySheet.getByRole('button', { name: /Tight or constricted/ }).click();
   await bodySheet.getByLabel('Tight or constricted intensity').fill('70');

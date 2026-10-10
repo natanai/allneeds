@@ -153,11 +153,13 @@ function insertPlainText(root: HTMLElement, text: string, preserveUndo = true) {
   }
   range.deleteContents();
   const node = document.createTextNode(normalized);
+  const prefix = document.createRange();
+  prefix.selectNodeContents(root);
+  prefix.setEnd(range.startContainer, range.startOffset);
+  const nextOffset = prefix.toString().length + normalized.length;
   range.insertNode(node);
-  range.setStartAfter(node);
-  range.collapse(true);
-  selection.removeAllRanges();
-  selection.addRange(range);
+  root.normalize();
+  restoreSelection(root, nextOffset);
 }
 
 function caretRangeFromPoint(x: number, y: number) {

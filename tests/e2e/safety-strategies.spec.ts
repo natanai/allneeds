@@ -8,21 +8,21 @@ test('Safety excludes migrated profile strategies while retaining the curated co
 
   for (const title of [
     'Comfy gaming',
-    '5-4-3-2-1 check',
-    'Slow breathing',
+    'Orient with 5-4-3-2-1',
+    'Slow your breathing',
     'Call or text 988',
     'Call 116 123',
   ]) {
     await expect(deck.locator('h3').filter({ hasText: title })).toHaveCount(1);
   }
 
-  const groundingCard = deck.locator('article').filter({ hasText: '5-4-3-2-1 check' });
-  await expect(groundingCard.locator('a[aria-label="Supporting source: Ground yourself: Using five senses technique to cope with test anxiety among nursing students"]')).toHaveAttribute(
+  const groundingCard = deck.locator('article').filter({ hasText: 'Orient with 5-4-3-2-1' });
+  await expect(groundingCard.locator('a[aria-label="Supporting source: Frimley Health NHS Foundation Trust. Anxiety information pack: 5-4-3-2-1 grounding technique."]')).toHaveAttribute(
     'href',
-    'https://www.sciencedirect.com/science/article/pii/S1557308725002999',
+    'https://www.fhft.nhs.uk/patients-and-visitors/patient-information-library/anxiety-information-pack',
   );
 
-  const breathingCard = deck.locator('article').filter({ hasText: 'Slow breathing' });
+  const breathingCard = deck.locator('article').filter({ hasText: 'Slow your breathing' });
   await expect(breathingCard.locator('a[aria-label="Supporting source: Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature"]')).toHaveAttribute(
     'href',
     'https://pubmed.ncbi.nlm.nih.gov/38137060/',

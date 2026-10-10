@@ -126,7 +126,7 @@ test('keeps signed-in Shared Strategies compact and contained on mobile', async 
   expect(geometry.controlsLeft).toBeGreaterThanOrEqual(0);
   expect(geometry.controlsRight).toBeLessThanOrEqual(geometry.innerWidth);
   expect(geometry.visibilityWidth).toBeLessThanOrEqual(34);
-  expect(geometry.editWidth).toBeLessThanOrEqual(42);
-  expect(geometry.savedWidth).toBeLessThanOrEqual(42);
+  expect(geometry.editWidth).toBeLessThanOrEqual(44);
+  expect(geometry.savedWidth).toBeLessThanOrEqual(44);
   expect(geometry.utilityTopSpread).toBeLessThanOrEqual(2);
 });

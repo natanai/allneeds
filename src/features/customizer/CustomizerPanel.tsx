@@ -372,7 +372,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
           <label className={styles.settingsRow}>
             <span className={styles.rowIcon}><PresetIcon /></span>
             <span className={styles.rowCopy}><span>Preset</span></span>
-            <select className={styles.compactSelect} value={preset} onChange={(event) => choosePreset(event.target.value)}>
+            <select className={styles.compactSelect} value={preset} aria-label="Preset" onChange={(event) => choosePreset(event.target.value)}>
               <option value="">Current colors</option>
               {themePresets.map((themePreset) => <option key={themePreset.name} value={themePreset.name}>{themePreset.name}</option>)}
             </select>

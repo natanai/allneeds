@@ -251,7 +251,7 @@ test('a restored Bluesky session unlocks profile visibility and follower feeds',
 
   await page.goto('/feed');
   await expect(page.getByRole('option', { name: 'From people you follow' })).toBeEnabled();
-  await expect(page.getByText('Following feed available for @nathanael.ink.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Following is available while you are signed in.', { exact: true })).toBeVisible();
   expect(runtimeProblems).toEqual([]);
 });
 
