@@ -1,8 +1,6 @@
 name: Full repository validation
 
 on:
-  push:
-    branches: [site-test]
   workflow_dispatch:
 
 permissions:
