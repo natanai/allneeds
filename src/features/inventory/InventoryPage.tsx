@@ -21,6 +21,8 @@ import {
   personalStrategiesEmailHref,
   PERSONAL_STRATEGIES_EMAIL_ADDRESS,
 } from './personalStrategiesExport';
+import { StrategyForm } from './StrategyForm';
+import strategyFormStyles from './StrategyForm.module.css';
 import { StrategySharingFields } from './StrategySharingFields';
 import styles from './InventoryPage.module.css';
 import popoverStyles from './NeedStrategyPopover.module.css';
@@ -473,17 +475,17 @@ export function InventoryPage() {
                 >
                   {editDraft?.id === entry.id ? (
                     <form className={styles.editForm} onSubmit={(event) => void updateEntry(event, entry)}>
-                      <label className={styles.formField}><span>Strategy name</span><span className={styles.inputCard}><input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></span></label>
-                      <label className={styles.formField}><span>Description</span><span className={styles.inputCard}><textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} required /></span></label>
-                      <div className={`${styles.formField} ${styles.needsFormField}`}>
+                      <label className={strategyFormStyles.formField}><span>Strategy name</span><span className={strategyFormStyles.inputCard}><input value={editDraft.title} onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })} required /></span></label>
+                      <label className={strategyFormStyles.formField}><span>Description</span><span className={strategyFormStyles.inputCard}><textarea value={editDraft.description} onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })} rows={4} required /></span></label>
+                      <div className={`${strategyFormStyles.formField} ${strategyFormStyles.needsFormField}`}>
                         <span id={`inventory-edit-needs-${entry.id}`}>Needs</span>
-                        <span className={styles.inputCard}>
+                        <span className={strategyFormStyles.inputCard}>
                           <NeedCatalogPicker labelId={`inventory-edit-needs-${entry.id}`} selectedNeeds={editDraft.selectedNeeds} onChange={(selectedNeeds) => setEditDraft({ ...editDraft, selectedNeeds })} />
                         </span>
                       </div>
-                      <div className={styles.formRow}>
-                        <label className={styles.formField}><span>First name (optional)</span><span className={styles.inputCard}><input value={editDraft.firstName} onChange={(event) => setEditDraft({ ...editDraft, firstName: event.target.value })} /></span></label>
-                        <label className={styles.formField}><span>Location (optional)</span><span className={styles.inputCard}><input value={editDraft.location} onChange={(event) => setEditDraft({ ...editDraft, location: event.target.value })} /></span></label>
+                      <div className={`${strategyFormStyles.formRow} ${styles.editFormRow}`}>
+                        <label className={strategyFormStyles.formField}><span>First name (optional)</span><span className={strategyFormStyles.inputCard}><input value={editDraft.firstName} onChange={(event) => setEditDraft({ ...editDraft, firstName: event.target.value })} /></span></label>
+                        <label className={strategyFormStyles.formField}><span>Location (optional)</span><span className={strategyFormStyles.inputCard}><input value={editDraft.location} onChange={(event) => setEditDraft({ ...editDraft, location: event.target.value })} /></span></label>
                       </div>
                       {entry.personal ? (
                         <StrategySharingFields
@@ -535,35 +537,15 @@ export function InventoryPage() {
       <details ref={addFormShellRef} className={styles.formShell} id="inventory-form-shell">
         <summary><span>Add a personal strategy</span><span aria-hidden="true">+</span></summary>
         <div className={styles.formBody}>
-          <form id="inventory-form" className={styles.formCard} onSubmit={handleAdd}>
-            <label className={styles.formField}>
-              <span>Strategy name</span>
-              <span className={styles.inputCard}><input id="inventory-title" name="title" type="text" value={addDraft.title} onChange={(event) => setAddDraft({ ...addDraft, title: event.target.value })} required /></span>
-            </label>
-            <label className={styles.formField}>
-              <span>How do you put it into practice?</span>
-              <span className={styles.inputCard}><textarea name="description" rows={4} value={addDraft.description} onChange={(event) => setAddDraft({ ...addDraft, description: event.target.value })} required /></span>
-            </label>
-            <div className={`${styles.formField} ${styles.needsFormField}`}>
-              <span id="inventory-needs-label">Needs</span>
-              <span className={styles.inputCard}>
-                <NeedCatalogPicker
-                  labelId="inventory-needs-label"
-                  selectedNeeds={addDraft.selectedNeeds}
-                  onChange={(selectedNeeds) => setAddDraft({ ...addDraft, selectedNeeds })}
-                />
-              </span>
-            </div>
-            <div className={styles.formRow}>
-              <label className={styles.formField}><span>First name (optional)</span><span className={styles.inputCard}><input name="name" type="text" value={addDraft.firstName} onChange={(event) => setAddDraft({ ...addDraft, firstName: event.target.value })} /></span></label>
-              <label className={styles.formField}><span>Location (optional)</span><span className={styles.inputCard}><input name="location" type="text" value={addDraft.location} onChange={(event) => setAddDraft({ ...addDraft, location: event.target.value })} /></span></label>
-            </div>
-            <StrategySharingFields signedIn={Boolean(session)} />
-            <div className={styles.formActions}>
-              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Save to device</button>
-              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Save to profile</button>
-            </div>
-          </form>
+          <StrategyForm
+            id="inventory-form"
+            titleInputId="inventory-title"
+            needsLabelId="inventory-needs-label"
+            draft={addDraft}
+            signedIn={Boolean(session)}
+            onDraftChange={setAddDraft}
+            onSubmit={handleAdd}
+          />
           <p className={styles.formNote}>Backup, restore, and account sync are in Menu → Account &amp; data.</p>
         </div>
       </details>

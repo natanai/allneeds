@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
+import { CatalogToolbar } from '../../components/forms/CatalogToolbar';
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
 import { assetPath, feelings } from '../../data/catalog';
@@ -71,28 +72,12 @@ export function FeelingsPage() {
           </Link>
         </div>
 
-        <div className={styles.toolbar}>
-          <label className={styles.searchField}>
-            <span className="visually-hidden">Search feelings</span>
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search feelings"
-              autoComplete="off"
-            />
-          </label>
-          <button
-            type="button"
-            className={styles.shuffle}
-            onClick={() => setShuffleVersion((current) => current + 1)}
-            aria-label="Shuffle magnets"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
-            </svg>
-          </button>
-        </div>
+        <CatalogToolbar
+          searchLabel="Search feelings"
+          query={query}
+          onQueryChange={setQuery}
+          onShuffle={() => setShuffleVersion((current) => current + 1)}
+        />
 
         {items.length ? (
           <div className={styles.boardWrapper}>

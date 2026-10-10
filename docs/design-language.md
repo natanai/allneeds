@@ -8,7 +8,7 @@ This is the living visual/interaction design record for `allneeds` V2. Read it b
 - Preserve behavior while improving presentation. A design pass must not remove, hide, disable, or silently relocate an existing function unless the user explicitly asks for that behavior change.
 - When the user approves a new visual pattern, record it here in the same PR that implements it.
 - When a later explicit decision supersedes an older one, update the older rule rather than accumulating contradictory variants.
-- Prefer a shared component when the same control is genuinely reused and extracting it does not create unnecessary abstraction. Otherwise match the canonical source implementation closely and keep this document pointed at the canonical source.
+- Consolidation is deletion-first: share only genuinely reused controls, remove their old implementations in the same change, and require a net reduction in production code. Otherwise match the canonical source closely instead of adding wrappers or configuration registries.
 
 ## Overall character
 

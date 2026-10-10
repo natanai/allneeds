@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { CatalogToolbar } from '../../components/forms/CatalogToolbar';
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
 import { fauxFeelings } from '../../data/catalog';
@@ -34,26 +35,12 @@ export function FauxFeelingsPage() {
       </header>
 
       <section className={styles.magnetSection} aria-label="Faux Feelings magnets">
-        <div className={styles.toolbar}>
-          <label className={styles.searchField}>
-            <span className="visually-hidden">Search faux feelings</span>
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search faux feelings"
-              autoComplete="off"
-            />
-          </label>
-          <button
-            type="button"
-            className={styles.shuffle}
-            onClick={() => setShuffleVersion((current) => current + 1)}
-            aria-label="Shuffle magnets"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" /></svg>
-          </button>
-        </div>
+        <CatalogToolbar
+          searchLabel="Search faux feelings"
+          query={query}
+          onQueryChange={setQuery}
+          onShuffle={() => setShuffleVersion((current) => current + 1)}
+        />
         {items.length ? (
           <div className={styles.boardWrapper}>
             <MagnetBoard

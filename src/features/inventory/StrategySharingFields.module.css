@@ -190,89 +190,7 @@
   min-width: 5.7rem;
 }
 
-/*
- * Shared Add Strategy chrome. Both canonical composers contain
- * StrategySharingFields, so these selectors keep their field and action
- * treatment aligned without runtime CSS or page-specific style injection.
- */
-:global(#inventory-form),
-:global(#suggestion-form) {
-  padding: clamp(.52rem, 1.4vw, .68rem);
-  gap: .42rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
-  border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--surface-raised) 96%, var(--positive) 4%);
-  box-shadow: none;
-}
-
-:global(#inventory-form) > label > span:first-child,
-:global(#suggestion-form) > label > span:first-child {
-  color: var(--secondary);
-  font-size: .72rem;
-  font-weight: 720;
-  line-height: 1.2;
-}
-
-:global(#inventory-form) input[type='text'],
-:global(#suggestion-form) input[type='text'],
-:global(#inventory-form) textarea,
-:global(#suggestion-form) textarea {
-  min-height: 44px;
-  padding: .5rem .58rem;
-  color: var(--text);
-  font-size: .84rem;
-  line-height: 1.35;
-}
-
-:global(#inventory-form) textarea,
-:global(#suggestion-form) textarea {
-  min-height: 5.75rem;
-}
-
-:global(#inventory-form) > div:has(> label input[name='name']),
-:global(#suggestion-form) > div:has(> label input[name='name']) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .34rem;
-}
-
-:global(#inventory-form) > div:has(> button[name='save-target']),
-:global(#suggestion-form) > div:has(> button[name='save-target']) {
-  grid-template-columns: 1fr;
-  gap: .34rem;
-}
-
-:global(#inventory-form) > div:has(> button[name='save-target'][value='profile']:not(:disabled)),
-:global(#suggestion-form) > div:has(> button[name='save-target'][value='profile']:not(:disabled)) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-:global(#inventory-form) button[name='save-target'],
-:global(#suggestion-form) button[name='save-target'] {
-  min-height: 44px;
-  border-radius: var(--radius-lg);
-  box-shadow: none;
-  font-size: .76rem;
-  font-weight: 720;
-}
-
-:global(#inventory-form) button[name='save-target'][value='profile']:disabled,
-:global(#suggestion-form) button[name='save-target'][value='profile']:disabled {
-  display: none;
-}
-
 @media (max-width: 640px) {
-  :global(#inventory-form),
-  :global(#suggestion-form) {
-    padding: .48rem;
-    gap: .36rem;
-    border-radius: var(--radius-lg);
-  }
-
-  :global(#inventory-form) textarea,
-  :global(#suggestion-form) textarea {
-    min-height: 5.25rem;
-  }
-
   .profileSharing {
     grid-template-columns: 1.75rem minmax(0, 1fr) auto;
     gap: .36rem;
@@ -290,11 +208,6 @@
 }
 
 @media (max-width: 360px) {
-  :global(#inventory-form) > div:has(> label input[name='name']),
-  :global(#suggestion-form) > div:has(> label input[name='name']) {
-    grid-template-columns: 1fr;
-  }
-
   .profileSharing {
     grid-template-columns: 1.7rem minmax(0, 1fr);
   }
