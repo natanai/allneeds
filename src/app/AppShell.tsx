@@ -4,6 +4,8 @@ import { Link, Outlet, useLocation, useNavigationType } from 'react-router';
 import { MagnetBoard } from '../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../components/magnets/MagnetBoard';
 import { CustomizerPanel } from '../features/customizer/CustomizerPanel';
+import { ProfileReview } from '../features/account/ProfileReview';
+import { useProfileReview } from '../features/account/blueskyAccount';
 import { AppMenu } from '../features/menu/AppMenu';
 import { UxDiagnostics } from './UxDiagnostics';
 import { markAppShellVisualReady } from './bootReadiness';
@@ -141,6 +143,7 @@ export function AppShell() {
   const [navPlayMode, setNavPlayMode] = useState(() => readMagnetPlayPreference('site-nav'));
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const profileReview = useProfileReview();
   const [inventoryCount, setInventoryCount] = useState(readInventoryCount);
   const [navSettings, setNavSettings] = useState(readNavSettings);
   const navBoardWrapperRef = useRef<HTMLDivElement>(null);
@@ -150,6 +153,10 @@ export function AppShell() {
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (profileReview) { setMenuOpen(false); setCustomizerOpen(false); }
+  }, [profileReview]);
 
   useEffect(() => {
     const updateCount = () => setInventoryCount(readInventoryCount());
@@ -388,6 +395,7 @@ export function AppShell() {
       />
       {customizerOpen ? <CustomizerPanel onClose={() => setCustomizerOpen(false)} /> : null}
       <UxDiagnostics />
+      <ProfileReview />
     </div>
   );
 }

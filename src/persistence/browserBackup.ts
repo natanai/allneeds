@@ -21,12 +21,12 @@ export function createBrowserBackup(storage: Storage = window.localStorage) {
   };
 }
 
-export function downloadBrowserBackup() {
-  const blob = new Blob([JSON.stringify(createBrowserBackup(), null, 2)], { type: 'application/json' });
+export function downloadBrowserBackup(snapshot = captureBrowserStorage(window.localStorage), filename = 'allneeds-browser-backup') {
+  const blob = new Blob([JSON.stringify({ version: BROWSER_BACKUP_VERSION, exportedAt: new Date().toISOString(), localStorage: snapshot }, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `allneeds-browser-backup-${new Date().toISOString().replace(/:/g, '-')}.json`;
+  link.download = `${filename}-${new Date().toISOString().replace(/:/g, '-')}.json`;
   document.body.append(link);
   link.click();
   link.remove();

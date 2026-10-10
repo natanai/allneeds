@@ -345,6 +345,8 @@ Rules:
 
 ### 2026-10-10
 
+- Sign-in and `Load saved profile` compare saved data in the shared `OverlayShell` before any browser data changes. `Keep entries from both` retains device-only and profile-only Journal/Inventory records, deduplicates unchanged IDs, and retains both versions of conflicting edits. Appearance/settings have an explicit device/profile choice; existing device drafts survive. Original snapshots are kept locally for recovery before combining. Profile upload remains a separate, explicit action.
+- Journal and Account & data show local saving and account sign-in as separate states; remembered Customizer settings are not evidence of an active account.
 - Consolidated repeated shuffle, save, overlay, disclosure, Need-picker, strategy-form, and browser-backup implementations into the canonical elements above.
 - Restored route-heading consistency, normal navigation on the emotions wheel, a readable wheel-list alternative, and Customizer ownership of ordinary feature surfaces and controls.
 - Added derived accessible foreground roles for Primary and Text colors so user-selected palettes retain readable high-emphasis content without adding more Customizer settings.

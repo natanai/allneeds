@@ -11,6 +11,9 @@ const focusableSelector = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
+const modalDialogs: HTMLElement[] = [];
+let bodyOverflowBeforeModals = '';
+
 type DialogFocusOptions = {
   open: boolean;
   onClose: () => void;
@@ -37,6 +40,10 @@ export function useDialogFocus<T extends HTMLElement>({
     if (!open || !dialogRef.current) return undefined;
 
     const dialog = dialogRef.current;
+    if (modal) {
+      if (!modalDialogs.length) bodyOverflowBeforeModals = document.body.style.overflow;
+      modalDialogs.push(dialog);
+    }
     const previousFocus = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null;
@@ -44,6 +51,7 @@ export function useDialogFocus<T extends HTMLElement>({
     if (modal) document.body.style.overflow = 'hidden';
 
     const focusFrame = window.requestAnimationFrame(() => {
+      if (modal && modalDialogs.at(-1) !== dialog) return;
       const initial = dialog.querySelector<HTMLElement>('[data-dialog-initial-focus]')
         ?? focusableElements(dialog)[0]
         ?? dialog;
@@ -51,6 +59,7 @@ export function useDialogFocus<T extends HTMLElement>({
     });
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (modal && modalDialogs.at(-1) !== dialog) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
@@ -80,10 +89,16 @@ export function useDialogFocus<T extends HTMLElement>({
     document.addEventListener('keydown', handleKeyDown, true);
     return () => {
       window.cancelAnimationFrame(focusFrame);
+      const modalIndex = modalDialogs.indexOf(dialog);
+      if (modalIndex >= 0) modalDialogs.splice(modalIndex, 1);
       document.removeEventListener('keydown', handleKeyDown, true);
-      if (modal) document.body.style.overflow = previousBodyOverflow;
+      if (modal) document.body.style.overflow = modalDialogs.length ? 'hidden' : bodyOverflowBeforeModals;
+      else document.body.style.overflow = previousBodyOverflow;
       if (previousFocus?.isConnected) {
-        window.requestAnimationFrame(() => previousFocus.focus({ preventScroll: true }));
+        window.requestAnimationFrame(() => {
+          const active = modalDialogs.at(-1);
+          if (!active || active.contains(previousFocus)) previousFocus.focus({ preventScroll: true });
+        });
       }
     };
   }, [modal, open]);

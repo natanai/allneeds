@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import { isTransientLocalStorageKey } from '../../persistence/transientStorage';
+import { captureBrowserStorage } from '../../persistence/browserBackup';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
 import { readJournal } from '../journal/journalRepository';
 import { profilePublishableStrategies } from './profileStrategySync';
+import {
+  applyCombinedProfile,
+  compareProfileSnapshots,
+  profileBrowserSnapshot,
+  profileHasDifferences,
+  type ProfileComparison,
+  type SettingsSource,
+} from './profileReconciliation';
 
 const BACKEND_BASE_URL = 'https://backend.allneeds.app';
 const BACKEND_API_URL = `${BACKEND_BASE_URL}/api`;
@@ -92,6 +100,39 @@ let currentSession: BlueskySession | null = restoredSession?.session ?? null;
 let currentSessionCheckedAt = restoredSession?.checkedAt ?? 0;
 let initializePromise: Promise<BlueskySession | null> | null = null;
 
+type ProfileReview =
+  | { phase: 'loading'; did: string }
+  | { phase: 'ready'; did: string; comparison: ProfileComparison }
+  | { phase: 'error'; did: string; message: string }
+  | { phase: 'done'; did: string; message: string; combined?: boolean };
+let profileReview: ProfileReview | null = null;
+const profileReviewListeners = new Set<() => void>();
+
+function publishProfileReview(review: ProfileReview | null) {
+  profileReview = review;
+  profileReviewListeners.forEach((listener) => listener());
+}
+
+export function useProfileReview() {
+  return useSyncExternalStore((listener) => {
+    profileReviewListeners.add(listener);
+    return () => { profileReviewListeners.delete(listener); };
+  }, () => profileReview, () => null);
+}
+
+export function dismissProfileReview() {
+  publishProfileReview(null);
+}
+
+export async function combineReviewedProfile(settings: SettingsSource) {
+  if (profileReview?.phase !== 'ready') throw new Error('Review your saved profile first.');
+  const review = profileReview;
+  if (getBlueskySession()?.did !== review.did) throw new Error('Your account changed. Review the saved profile again.');
+  const combined = applyCombinedProfile(window.localStorage, review.comparison, settings, review.did);
+  synchronizeCustomizerMirrors(combined);
+  publishProfileReview({ phase: 'done', did: review.did, combined: true, message: 'Entries from both places are now on this device. A recovery copy of each original is available in Account & data.' });
+}
+
 if (typeof window !== 'undefined' && currentSession) {
   window.allneedsSession = currentSession;
   writeSessionHint(true);
@@ -120,6 +161,7 @@ function consumeLoginIntent() {
 }
 
 function publishSession(session: BlueskySession | null, reason: string) {
+  if (profileReview && profileReview.did !== session?.did) dismissProfileReview();
   currentSession = session;
   currentSessionCheckedAt = session ? Date.now() : 0;
   writeSessionHint(Boolean(session));
@@ -268,21 +310,9 @@ export async function signOutFromBluesky() {
   }
 }
 
-function captureLocalStorage(includeTransient = false) {
-  const snapshot: Record<string, string> = {};
-  const storage = safeStorage('localStorage');
-  if (!storage) return snapshot;
-  for (let index = 0; index < storage.length; index += 1) {
-    const key = storage.key(index);
-    if (key && (includeTransient || !isTransientLocalStorageKey(key))) {
-      snapshot[key] = storage.getItem(key) ?? '';
-    }
-  }
-  return snapshot;
-}
-
 async function buildCurrentBrowserBackup() {
-  const localStorage = captureLocalStorage();
+  const storage = safeStorage('localStorage');
+  const localStorage = storage ? captureBrowserStorage(storage) : {};
   const parse = (key: string) => {
     try { return JSON.parse(localStorage[key] ?? 'null') as unknown; } catch { return null; }
   };
@@ -403,34 +433,38 @@ export function extractProfileSnapshot(data: unknown) {
 }
 
 export async function loadProfileIntoCurrentBrowser() {
-  await requireBackendSession();
-  const response = await fetch(`${BACKEND_API_URL}/user-settings`, { credentials: 'include' });
-  const data: unknown = await response.json().catch(() => null);
-  if (!response.ok) throw new Error('Unable to load your saved profile.');
-  const backup = extractProfileSnapshot(data);
-  if (!backup) return 'empty' as const;
-  const snapshot = backup.localStorage;
-  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new Error('The saved profile does not contain browser data.');
-  if (!window.confirm('Replace this browser’s allneeds data with your saved profile?')) return 'canceled' as const;
-
-  const previous = captureLocalStorage(true);
-  const transient = Object.fromEntries(Object.entries(previous).filter(([key]) => isTransientLocalStorageKey(key)));
+  const session = await requireBackendSession();
+  publishProfileReview({ phase: 'loading', did: session.did });
   try {
-    window.localStorage.clear();
-    Object.entries(snapshot as Record<string, unknown>).forEach(([key, value]) => {
-      if (!isTransientLocalStorageKey(key)) {
-        window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+    const response = await fetch(`${BACKEND_API_URL}/user-settings`, { credentials: 'include', cache: 'no-store' });
+    const data: unknown = await response.json().catch(() => null);
+    if (!response.ok || !data || typeof data !== 'object' || (data as { status?: string }).status !== 'ok') {
+      throw new Error('Unable to load your saved profile. Your device data has been left in place.');
+    }
+    if (getBlueskySession()?.did !== session.did || profileReview?.phase !== 'loading' || profileReview.did !== session.did) return 'canceled' as const;
+    const backup = extractProfileSnapshot(data);
+    if (!backup) {
+      const settings = (data as { settings?: unknown }).settings;
+      if (!Array.isArray(settings) || settings.some((setting) => setting && typeof setting === 'object' && (setting as { key?: unknown }).key === BACKEND_SNAPSHOT_KEY)) {
+        throw new Error('The saved profile is unreadable. Your device data has been left in place.');
       }
-    });
-    Object.entries(transient).forEach(([key, value]) => window.localStorage.setItem(key, value));
-    synchronizeCustomizerMirrors(snapshot as Record<string, unknown>);
+      publishProfileReview({ phase: 'done', did: session.did, message: 'No saved profile yet. Everything you saved on this device is still here.' });
+      return 'empty' as const;
+    }
+    if (backup.version !== undefined && backup.version !== 1) throw new Error('The saved profile uses an unsupported format. Your device data has been left in place.');
+    const comparison = compareProfileSnapshots(captureBrowserStorage(window.localStorage), profileBrowserSnapshot(backup.localStorage));
+    if (!profileHasDifferences(comparison)) {
+      publishProfileReview({ phase: 'done', did: session.did, message: 'This device and your saved profile already match.' });
+      return 'matching' as const;
+    }
+    publishProfileReview({ phase: 'ready', did: session.did, comparison });
+    return 'review' as const;
   } catch (error) {
-    window.localStorage.clear();
-    Object.entries(previous).forEach(([key, value]) => window.localStorage.setItem(key, value));
+    if (getBlueskySession()?.did === session.did && profileReview) {
+      publishProfileReview({ phase: 'error', did: session.did, message: error instanceof Error ? error.message : 'Unable to compare your saved profile. Your device data has been left in place.' });
+    }
     throw error;
   }
-  window.location.reload();
-  return 'loaded' as const;
 }
 
 export async function notifySharedStrategyAdded(strategyId: string) {
@@ -464,12 +498,19 @@ export function initializeBlueskyForCurrentPage() {
   }
 
   void initializeBlueskyOAuth().then(async (session) => {
-    if (!session) return;
+    if (!session) {
+      if (returningFromLogin) publishProfileReview({ phase: 'error', did: '', message: 'Sign-in did not finish in this browser. Your device data is still here. You can download a backup and try signing in again.' });
+      return;
+    }
     if (returningFromLogin) {
       clearVerifiedAuthReturn();
       await loadProfileIntoCurrentBrowser();
     }
-  }).catch(() => undefined);
+  }).catch((error) => {
+    if (returningFromLogin && !profileReview) {
+      publishProfileReview({ phase: 'error', did: getBlueskySession()?.did ?? '', message: error instanceof Error ? error.message : 'Unable to check sign-in. Your device data has been left in place.' });
+    }
+  });
 }
 
 declare global {

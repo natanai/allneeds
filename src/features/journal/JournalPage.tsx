@@ -8,6 +8,7 @@ import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { feelings, needsBySlug } from '../../data/catalog';
 import { downloadBrowserBackup, restoreBrowserBackup } from '../../persistence/browserBackup';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
+import { useBlueskySession } from '../account/blueskyAccount';
 import {
   clearJournalDraft,
   readJournalDraft,
@@ -63,6 +64,7 @@ function recordFeelings(entry: JournalRecord) {
 }
 
 export function JournalPage() {
+  const session = useBlueskySession();
   const { search } = useLocation();
   const navigate = useNavigate();
   const [savedDraft] = useState(readJournalDraft);
@@ -298,7 +300,7 @@ export function JournalPage() {
 
           <aside className={styles.prompts}><p>Optional reflection prompts</p><ul><li>What did you notice in your body, thoughts, or emotions?</li><li>What was happening when you noticed it?</li><li>What would be useful to understand, request, or do next?</li></ul></aside>
           <div className={styles.formActions}><button type="button" onClick={resetForm}>Clear</button><button type="submit">Save</button></div>
-          <p className={styles.localNote}>Reminder: This static site saves data in your browser; clearing local storage removes it, so export backups.</p>
+          <p className={styles.localNote}>Save keeps this entry on this device. {session ? 'Signed in; use Account & data to back up to your profile.' : 'Signed out; export a backup or sign in to back up to your profile.'}</p>
         </aside>
       </div>
     </form>
@@ -312,6 +314,8 @@ export function JournalPage() {
           <span aria-hidden="true">⛶</span> New entry
         </button>
       </header>
+
+      <p className={styles.localNote}>Journal entries are saved on this device. {session ? 'Signed in; profile backups are separate.' : 'Signed out; your entries stay here when you sign in.'}</p>
 
       {feedback ? <p className={`${styles.feedback} ${styles[feedback.kind]}`} role="status">{feedback.message}</p> : null}
 

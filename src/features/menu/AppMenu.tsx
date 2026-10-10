@@ -12,6 +12,7 @@ import {
   useBlueskySession,
 } from '../account/blueskyAccount';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
+import { readProfileRecovery } from '../account/profileReconciliation';
 import { readInventory } from '../inventory/inventoryRepository';
 import {
   downloadPersonalStrategiesExport,
@@ -104,6 +105,7 @@ export function AppMenu({
   const [handle, setHandle] = useState('');
   const [accountBusy, setAccountBusy] = useState(false);
   const session = useBlueskySession();
+  const recovery = open ? readProfileRecovery() : null;
   const importRef = useRef<HTMLInputElement>(null);
   const dialogRef = useDialogFocus<HTMLElement>({ open, onClose });
 
@@ -308,7 +310,7 @@ export function AppMenu({
               <section className={styles.section} aria-labelledby="menu-settings">
                 <h3 id="menu-settings">Settings</h3>
                 <button type="button" className={styles.row} onClick={() => setView('account-data')}>
-                  <span className={styles.rowCopy}><span className={styles.rowTitle}>Account &amp; data</span><span className={styles.rowNote}>Stored on this device</span></span>
+                  <span className={styles.rowCopy}><span className={styles.rowTitle}>Account &amp; data</span><span className={styles.rowNote}>{session ? 'Signed in · data stored on this device' : 'Signed out · data stored on this device'}</span></span>
                   <span className={styles.disclosure} aria-hidden="true">›</span>
                 </button>
                 <button type="button" className={styles.row} onClick={openCustomizer}>
@@ -344,15 +346,15 @@ export function AppMenu({
               <h3 id="menu-account">Account</h3>
               <div className={styles.systemCard}>
                 <h4>Bluesky</h4>
-                <p>Optional production sign-in can sync a profile snapshot across browsers and devices.</p>
+                <p>Sign in to back up or compare saved data across browsers and devices.</p>
                 {session ? <p><strong>{session.handle ? `Signed in as @${session.handle.replace(/^@/, '')}` : 'Signed in with Bluesky'}</strong></p> : <label>Bluesky username<input type="text" value={handle} placeholder="yourname.bsky.social" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={(event) => { setHandle(event.target.value); setStatus(null); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); void toggleBluesky(); } }} /></label>}
                 <button type="button" disabled={accountBusy || (!session && !handle.trim())} onClick={() => void toggleBluesky()}>{accountBusy ? (session ? 'Please wait…' : 'Checking username…') : session ? 'Sign out' : 'Sign in'}</button>
                 <StatusNotice status={status} target="account" />
-                <small>Your allneeds data remains local unless you choose a profile action.</small>
+                <small>Signing in lets you review differences before combining saved data.</small>
               </div>
               <div className={styles.systemCard}>
                 <h4>Profile snapshot</h4>
-                <p>Save this browser’s allneeds data to your profile or load a saved profile here.</p>
+                <p>Save this browser’s allneeds data to your profile or review a saved profile before combining it here.</p>
                 <div className={styles.actionPair}><button type="button" disabled={!session || accountBusy} onClick={() => void saveProfile()}>Save this browser</button><button type="button" disabled={!session || accountBusy} onClick={() => void loadProfile()}>Load saved profile</button></div>
                 <StatusNotice status={status} target="profile" />
                 {!session ? <small>Sign in with Bluesky to enable profile sync.</small> : null}
@@ -372,6 +374,11 @@ export function AppMenu({
                 <small>Restoring replaces this browser’s current allneeds data.</small>
                 <StatusNotice status={status} target="device" />
               </div>
+              {recovery ? <div className={styles.systemCard}>
+                <h4>Before the last combine</h4>
+                <p>Download either original as a backup if you need to recover something.</p>
+                <div className={styles.actionPair}><button type="button" onClick={() => downloadBrowserBackup(recovery.device, 'allneeds-device-before-combining')}>Original device data</button><button type="button" onClick={() => downloadBrowserBackup(recovery.profile, 'allneeds-saved-profile-before-combining')}>Original profile data</button></div>
+              </div> : null}
             </section>
           </div>
         )}
