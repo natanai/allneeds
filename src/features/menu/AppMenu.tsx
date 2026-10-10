@@ -105,7 +105,7 @@ export function AppMenu({
   const [handle, setHandle] = useState('');
   const [accountBusy, setAccountBusy] = useState(false);
   const session = useBlueskySession();
-  const recovery = open ? readProfileRecovery(window.localStorage) : null;
+  const recovery = open ? readProfileRecovery() : null;
   const importRef = useRef<HTMLInputElement>(null);
   const dialogRef = useDialogFocus<HTMLElement>({ open, onClose });
 

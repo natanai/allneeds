@@ -1,6 +1,6 @@
 import { captureBrowserStorage } from '../../persistence/browserBackup';
 import { LEGACY_STORAGE_KEYS } from '../../persistence/legacy/keys';
-import type { StorageDriver } from '../../persistence/storage';
+import { getBrowserStorage, type StorageDriver } from '../../persistence/storage';
 import { isTransientLocalStorageKey } from '../../persistence/transientStorage';
 import { INVENTORY_STORAGE_KEY, readInventory, type InventoryStrategy } from '../inventory/inventoryRepository';
 import { JOURNAL_STORAGE_KEY, readJournal, type JournalRecord } from '../journal/journalRepository';
@@ -231,7 +231,8 @@ export function applyCombinedProfile(storage: Storage, comparison: ProfileCompar
   return combined;
 }
 
-export function readProfileRecovery(storage: StorageDriver) {
+export function readProfileRecovery(storage: StorageDriver | null = getBrowserStorage()) {
+  if (!storage) return null;
   try {
     const value: unknown = JSON.parse(storage.getItem(PROFILE_RECOVERY_STORAGE_KEY) ?? 'null');
     if (!record(value) || value.schemaVersion !== 1 || !record(value.data)) return null;

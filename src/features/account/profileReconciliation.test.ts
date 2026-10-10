@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { captureBrowserStorage, createBrowserBackup } from '../../persistence/browserBackup';
 import { createPersonalInventoryEntry, INVENTORY_STORAGE_KEY, readInventory } from '../inventory/inventoryRepository';
 import { createJournalRecord, JOURNAL_STORAGE_KEY, readJournal } from '../journal/journalRepository';
 import { applyCombinedProfile, combineProfileSnapshots, compareProfileSnapshots, PROFILE_RECOVERY_STORAGE_KEY, profileHasDifferences, readProfileRecovery, type BrowserSnapshot } from './profileReconciliation';
+
+afterEach(() => vi.unstubAllGlobals());
 
 function storage(initial: BrowserSnapshot = {}) {
   const values = new Map(Object.entries(initial));
@@ -26,6 +28,10 @@ function snapshot(entries: ReturnType<typeof journal>[] = [], extras: BrowserSna
 }
 
 describe('profile reconciliation', () => {
+  it('keeps recovery lookup usable when browser storage is restricted', () => {
+    vi.stubGlobal('window', Object.defineProperty({}, 'localStorage', { get() { throw new Error('Storage unavailable'); } }));
+    expect(readProfileRecovery()).toBeNull();
+  });
   it('keeps the entry written while signed out and all account-only entries', () => {
     const device = snapshot([journal('old', 'Already in both'), journal('phone', 'Written on my phone')]);
     const profile = snapshot([journal('old', 'Already in both'), journal('account', 'From the other device')]);
