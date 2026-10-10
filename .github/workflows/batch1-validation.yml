@@ -1,8 +1,6 @@
 name: Full repository validation
 
 on:
-  push:
-    branches: [site-test]
   workflow_dispatch:
 
 permissions:
@@ -35,7 +33,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run full browser regression suite serially
-        run: pnpm exec playwright test tests/e2e/native-stability.spec.ts:100 tests/e2e/native-stability.spec.ts:236 tests/e2e/alexithymia-support.spec.ts:39 tests/e2e/observation-inference.spec.ts:140 tests/e2e/safety-strategies.spec.ts:3 tests/e2e/shared-feed-mobile-layout.spec.ts:3 tests/e2e/workflow-continuity.spec.ts:165 --workers=1
+        run: pnpm exec playwright test --workers=1
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
