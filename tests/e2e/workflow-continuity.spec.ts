@@ -209,7 +209,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('We stopped talking after dinner.');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.locator('section[aria-labelledby="alex-stage-two"] button').filter({ hasText: 'Body clues' }).click();
+  await page.getByRole('button', { name: /^Body clues/ }).click();
   const bodySheet = page.getByRole('dialog', { name: 'Body clues' });
   await bodySheet.getByRole('button', { name: /Tight or constricted/ }).click();
   await bodySheet.getByLabel('Tight or constricted intensity').fill('70');
