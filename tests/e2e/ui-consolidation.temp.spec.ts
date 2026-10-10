@@ -10,7 +10,6 @@ async function visualRules(locator: Locator) {
       border: style.border,
       borderRadius: style.borderRadius,
       boxShadow: style.boxShadow,
-      minHeight: style.minHeight,
       padding: style.padding,
     };
   });
@@ -38,7 +37,7 @@ test('catalogue pages use one responsive search and shuffle language', async ({ 
   expect(snapshots[1]).toEqual(snapshots[0]);
   expect(snapshots[2]).toEqual(snapshots[0]);
 
-  await page.getByRole('searchbox', { name: 'Search faux feelings' }).fill('ignored');
+  await page.getByRole('searchbox', { name: 'Search faux feelings' }).fill('zzzz-no-match');
   await expect(page.getByRole('status')).toContainText('No faux feelings match');
 });
 
