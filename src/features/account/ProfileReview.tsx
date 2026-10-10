@@ -63,7 +63,7 @@ export function ProfileReview() {
             <label><input type="radio" name="profile-settings" checked={settings === 'profile'} onChange={() => setSettings('profile')} /> Use saved profile settings</label>
             <p className={styles.note}>Settings found in only one place are kept. Drafts already on this device stay here.</p>
           </fieldset> : null}
-          <div className={styles.actions}>
+          <div className={`${styles.actions} ${styles.commitActions}`}>
             <button type="button" className={styles.primary} disabled={busy} onClick={() => void run(() => combineReviewedProfile(settings))}>Keep entries from both</button>
             <button type="button" disabled={busy} onClick={close}>Keep this device</button>
           </div>

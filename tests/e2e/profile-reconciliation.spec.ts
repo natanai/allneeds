@@ -35,6 +35,11 @@ test('phone sign-in keeps the signed-out journal and account entries, with expli
   });
   await signInReturn(page, device, profile);
   const review = page.getByRole('dialog', { name: 'Review saved data' });
+  const combineButton = review.getByRole('button', { name: 'Keep entries from both', exact: true });
+  await expect(combineButton).toBeVisible();
+  const combineBox = await combineButton.boundingBox();
+  expect(combineBox).not.toBeNull();
+  expect(combineBox!.y + combineBox!.height).toBeLessThanOrEqual(844);
   await review.getByText('Review journal differences').click();
   await expect(review.getByText('Written while signed out', { exact: true })).toBeVisible();
   await expect(review.getByText('Already in my account', { exact: true })).toBeVisible();

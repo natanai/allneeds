@@ -1,6 +1,6 @@
 import { captureBrowserStorage } from '../../persistence/browserBackup';
 import { LEGACY_STORAGE_KEYS } from '../../persistence/legacy/keys';
-import { getBrowserStorage, type StorageDriver } from '../../persistence/storage';
+import type { StorageDriver } from '../../persistence/storage';
 import { isTransientLocalStorageKey } from '../../persistence/transientStorage';
 import { INVENTORY_STORAGE_KEY, readInventory, type InventoryStrategy } from '../inventory/inventoryRepository';
 import { JOURNAL_STORAGE_KEY, readJournal, type JournalRecord } from '../journal/journalRepository';
@@ -231,10 +231,12 @@ export function applyCombinedProfile(storage: Storage, comparison: ProfileCompar
   return combined;
 }
 
-export function readProfileRecovery(storage: StorageDriver | null = getBrowserStorage()) {
-  if (!storage) return null;
+export function readProfileRecovery(storage?: StorageDriver | null) {
   try {
-    const value: unknown = JSON.parse(storage.getItem(PROFILE_RECOVERY_STORAGE_KEY) ?? 'null');
+    // Recovery must remain readable even when a storage quota prevents new writes.
+    const driver = storage === undefined ? (typeof window === 'undefined' ? null : window.localStorage) : storage;
+    if (!driver) return null;
+    const value: unknown = JSON.parse(driver.getItem(PROFILE_RECOVERY_STORAGE_KEY) ?? 'null');
     if (!record(value) || value.schemaVersion !== 1 || !record(value.data)) return null;
     return { device: profileBrowserSnapshot(value.data.device), profile: profileBrowserSnapshot(value.data.profile) };
   } catch { return null; }

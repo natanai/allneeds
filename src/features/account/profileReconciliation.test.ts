@@ -32,6 +32,16 @@ describe('profile reconciliation', () => {
     vi.stubGlobal('window', Object.defineProperty({}, 'localStorage', { get() { throw new Error('Storage unavailable'); } }));
     expect(readProfileRecovery()).toBeNull();
   });
+
+  it('reads the recovery copy when a full storage quota prevents even probe writes', () => {
+    const device = snapshot([journal('phone', 'Protected entry')]);
+    const profile = snapshot([]);
+    const driver = storage(device);
+    applyCombinedProfile(driver, compareProfileSnapshots(device, profile), 'device', 'did:plc:test');
+    driver.setItem = () => { throw new Error('Quota exceeded'); };
+    vi.stubGlobal('window', { localStorage: driver });
+    expect(readProfileRecovery()).toEqual({ device, profile });
+  });
   it('keeps the entry written while signed out and all account-only entries', () => {
     const device = snapshot([journal('old', 'Already in both'), journal('phone', 'Written on my phone')]);
     const profile = snapshot([journal('old', 'Already in both'), journal('account', 'From the other device')]);

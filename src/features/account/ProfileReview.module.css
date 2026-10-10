@@ -18,3 +18,4 @@
 .entries h3 { font-size: var(--text-sm); margin: .7rem 0 .25rem; }
 .entries p { white-space: pre-wrap; }
 .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.commitActions { position: sticky; bottom: 0; z-index: 1; padding-block: .5rem; background: var(--surface-raised); border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent); }
