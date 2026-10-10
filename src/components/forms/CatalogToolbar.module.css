@@ -26,6 +26,10 @@
 }
 
 @media (max-width: 640px) {
+  :global(section):has(> .toolbar:focus-within) {
+    padding-block-end: max(20rem, 45svh);
+  }
+
   .toolbar { align-items: center; gap: var(--space-1); }
   .searchField { flex: 1 1 10rem; }
   .searchField input {
