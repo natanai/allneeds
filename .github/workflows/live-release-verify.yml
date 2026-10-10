@@ -1,0 +1,38 @@
+name: Verify live release
+
+on:
+  push:
+    branches: [site-test]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deployed origin
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_js="dfa2c0305cad9270ab907a18edc4b6cae2aed5e2fca382b4dc174b27545076fd"
+          expected_css="095b0fce2d5bde36775c8c7e2660e7c6fb112497c8e5e60f800679220b102a19"
+          expected_sw="d7f6210d0b3c7f7681b8fa1eb3b6ec7aeb01652152532491b05d8cd2b05f9b20"
+          for attempt in {1..18}; do
+            html="$(curl -fsSL --retry 3 --retry-all-errors -H 'Cache-Control: no-cache' "https://allneeds.app/?release=60d932ea&attempt=$attempt")"
+            if grep -q '/assets/index-C0xELq86.js' <<<"$html" && grep -q '/assets/index-BBu1du0F.css' <<<"$html"; then
+              break
+            fi
+            if [[ "$attempt" -eq 18 ]]; then
+              echo "Live HTML did not reference the deployed release assets." >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          js_sha="$(curl -fsSL --retry 3 --retry-all-errors 'https://allneeds.app/assets/index-C0xELq86.js?release=60d932ea' | sha256sum | cut -d' ' -f1)"
+          css_sha="$(curl -fsSL --retry 3 --retry-all-errors 'https://allneeds.app/assets/index-BBu1du0F.css?release=60d932ea' | sha256sum | cut -d' ' -f1)"
+          sw_sha="$(curl -fsSL --retry 3 --retry-all-errors -H 'Cache-Control: no-cache' 'https://allneeds.app/service-worker.js?release=60d932ea' | sha256sum | cut -d' ' -f1)"
+          [[ "$js_sha" == "$expected_js" ]]
+          [[ "$css_sha" == "$expected_css" ]]
+          [[ "$sw_sha" == "$expected_sw" ]]
+          echo "Verified live release assets and service worker."
