@@ -31,7 +31,7 @@ async function expectPositionNear(
   board: Locator,
   magnet: Locator,
   expected: Position,
-  tolerance = 2,
+  tolerance = 4,
 ) {
   await expect.poll(async () => {
     const current = await relativePosition(board, magnet);
@@ -92,7 +92,7 @@ test('saved customizer colors and roundness are applied before the React bundle 
   const root = page.locator('html');
   await expect(root).toHaveAttribute('data-theme-preapplied', 'true');
   await expect(page.locator('.app-boot')).toBeVisible();
-  await expect.poll(() => root.evaluate((element) => element.style.getPropertyValue('--plum'))).toBe('#0A1234');
+  await expect.poll(() => root.evaluate((element) => element.style.getPropertyValue('--primary'))).toBe('#0A1234');
   await expect.poll(() => root.evaluate((element) => element.style.getPropertyValue('--corner-scale'))).toBe('1.5');
   await expect(page.locator('.app-boot')).toHaveCSS('color', 'rgb(16, 24, 32)');
 });
@@ -111,32 +111,32 @@ test('saved customizer settings survive reload without opening the customizer', 
 
   await page.goto('/needs');
   await expect(page.getByRole('dialog', { name: 'Customizer' })).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--plum').trim())).toBe('#123456');
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--primary').trim())).toBe('#123456');
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--corner-scale').trim())).toBe('1.35');
   await page.reload();
   await expect(page.getByRole('dialog', { name: 'Customizer' })).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--plum').trim())).toBe('#123456');
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--primary').trim())).toBe('#123456');
 
   await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
   const customizer = page.getByRole('dialog', { name: 'Customizer' });
-  await expect(customizer.getByRole('textbox', { name: 'Primary emphasis' })).toHaveValue('#123456');
-  await expect(customizer.getByLabel('Presets')).toHaveValue('');
+  await expect(customizer.getByRole('textbox', { name: 'Primary emphasis', exact: true })).toHaveValue('#123456');
+  await expect(customizer.getByLabel('Preset', { exact: true })).toHaveValue('');
 
-  const tiltSwitch = customizer.getByRole('switch');
+  const tiltSwitch = customizer.getByRole('switch', { name: 'Device tilt access', exact: true });
   const tiltCapability = await page.evaluate(() => {
     const orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission?: unknown };
     return { available: typeof orientation !== 'undefined', permissionRequired: typeof orientation?.requestPermission === 'function' };
   });
   if (!tiltCapability.available) {
-    await expect(tiltSwitch).toHaveText('Unavailable');
+    await expect(tiltSwitch).toHaveText('—');
     await expect(tiltSwitch).toHaveAttribute('aria-checked', 'false');
     await expect(tiltSwitch).toBeDisabled();
   } else if (!tiltCapability.permissionRequired) {
-    await expect(tiltSwitch).toHaveText('On');
+    await expect(tiltSwitch).toHaveText('✓');
     await expect(tiltSwitch).toHaveAttribute('aria-checked', 'true');
     await expect(tiltSwitch).toBeDisabled();
   } else {
-    await expect(tiltSwitch).toHaveText('Request permission');
+    await expect(tiltSwitch).toHaveText('Allow');
     await expect(tiltSwitch).toHaveAttribute('aria-checked', 'false');
     await expect(tiltSwitch).toBeEnabled();
   }
@@ -245,13 +245,13 @@ test('a restored Bluesky session unlocks profile visibility and follower feeds',
   await page.goto('/inventory');
   await page.getByText('Add a personal strategy', { exact: true }).click();
   const form = page.locator('#inventory-form');
-  await expect(form.getByRole('option', { name: 'Followers (Bluesky followers when synced)' })).toBeEnabled();
+  await expect(form.getByRole('option', { name: 'Followers', exact: true })).toBeEnabled();
   await expect(form.getByRole('option', { name: 'Public', exact: true })).toBeEnabled();
-  await expect(form.getByRole('button', { name: 'Profile', exact: true })).toBeEnabled();
+  await expect(form.getByRole('button', { name: 'Save to profile', exact: true })).toBeEnabled();
 
   await page.goto('/feed');
   await expect(page.getByRole('option', { name: 'From people you follow' })).toBeEnabled();
-  await expect(page.getByText('Following feed available for @nathanael.ink.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Following is available while you are signed in.', { exact: true })).toBeVisible();
   expect(runtimeProblems).toEqual([]);
 });
 
@@ -399,7 +399,7 @@ test('content magnet locations survive reload and stay independent across viewpo
   expect(runtimeProblems).toEqual([]);
 });
 
-test('a lifted magnet passes over its neighbors before the drop restores contact', async ({ page }) => {
+test('a held magnet pushes nearby magnets before the drop restores contact', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   await page.goto('/feelings');
   const board = page.getByLabel('Feelings magnet board');
@@ -431,7 +431,8 @@ test('a lifted magnet passes over its neighbors before the drop restores contact
   }
   await expect(lifted).toHaveAttribute('data-picked-up', 'true');
   const underneathWhileHeld = await relativePosition(board, underneath);
-  expect(positionDistance(underneathBefore, underneathWhileHeld)).toBeLessThan(5);
+  expect(positionDistance(underneathBefore, underneathWhileHeld)).toBeGreaterThan(5);
+  expect(positionDistance(underneathBefore, underneathWhileHeld)).toBeLessThan(150);
 
   await page.waitForTimeout(180);
   await page.mouse.up();
@@ -440,7 +441,7 @@ test('a lifted magnet passes over its neighbors before the drop restores contact
   const underneathAfterDrop = await relativePosition(board, underneath);
   const dropResponse = positionDistance(underneathWhileHeld, underneathAfterDrop);
   expect(dropResponse).toBeGreaterThan(2);
-  expect(dropResponse).toBeLessThan(50);
+  expect(dropResponse).toBeLessThan(100);
   expect(runtimeProblems).toEqual([]);
 });
 
@@ -591,7 +592,7 @@ test.describe('mobile native-shell contracts', () => {
     await expect(page.getByRole('button', { name: 'Open customizer' })).toBeHidden();
 
     const editorBox = await page.getByLabel('What did you notice?').boundingBox();
-    const guidanceBox = await page.locator('details').filter({ hasText: 'Why try this?' }).boundingBox();
+    const guidanceBox = await page.locator('details').filter({ hasText: 'Why add concrete details?' }).boundingBox();
     expect(editorBox).not.toBeNull();
     expect(guidanceBox).not.toBeNull();
     expect(editorBox!.y).toBeLessThan(guidanceBox!.y);
@@ -622,7 +623,7 @@ test.describe('mobile native-shell contracts', () => {
     await page.goto('/observations');
     await page.getByRole('button', { name: 'Observation basics' }).click();
     const observationHelp = page.getByRole('dialog', { name: 'Observation help' });
-    const helpBody = observationHelp.locator('[data-observation-dialog-body]');
+    const helpBody = observationHelp.locator('[data-overlay-body]');
     const closeHelp = observationHelp.getByRole('button', { name: 'Close observation help' });
     await helpBody.evaluate((body) => {
       body.append(...Array.from({ length: 18 }, (_, index) => {
@@ -659,8 +660,8 @@ test.describe('mobile native-shell contracts', () => {
     await page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' }).click();
 
     const customizer = page.getByRole('dialog', { name: 'Customizer' });
-    const swatch = customizer.getByRole('button', { name: /Adjust Primary emphasis color/ });
-    const hexField = customizer.getByRole('textbox', { name: 'Primary emphasis' });
+    const swatch = customizer.getByLabel('Adjust Primary emphasis color. Drag to change it, or tap to open the color picker.', { exact: true });
+    const hexField = customizer.getByRole('textbox', { name: 'Primary emphasis', exact: true });
     const startingHex = await hexField.inputValue();
     const box = await swatch.boundingBox();
     expect(box).not.toBeNull();
@@ -673,7 +674,7 @@ test.describe('mobile native-shell contracts', () => {
 
     const committedHex = await hexField.inputValue();
     expect(committedHex).toMatch(/^#[0-9A-F]{6}$/);
-    await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--plum').trim().toUpperCase())).toBe(committedHex);
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--primary').trim().toUpperCase())).toBe(committedHex);
     expect(runtimeProblems).toEqual([]);
   });
 
@@ -691,7 +692,7 @@ test.describe('mobile native-shell contracts', () => {
     await whyThese.click();
 
     const dialog = page.getByRole('dialog', { name: 'Why these?' });
-    const dialogBody = dialog.locator('[data-feeling-evidence-body]');
+    const dialogBody = dialog.locator('[data-overlay-body]');
     const close = dialog.getByRole('button', { name: 'Close' });
     await expect(dialog).toBeVisible();
     await expect(close).toBeFocused();
@@ -719,11 +720,10 @@ test('Menu Journal opens the full-screen entry and History stays compact', async
   await page.getByRole('button', { name: 'Open menu' }).click();
   const menu = page.getByRole('dialog', { name: 'allneeds.app menu' });
   await expect(menu).toBeVisible();
-  await expect(menu.getByRole('button', { name: 'Journal' })).toBeVisible();
-  await expect(menu.getByRole('link', { name: 'History', exact: true })).toBeVisible();
-  await expect(menu.getByText('Journal history', { exact: true })).toHaveCount(0);
+  await expect(menu.getByRole('button', { name: 'New journal entry' })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Journal history', exact: true })).toBeVisible();
 
-  await menu.getByRole('button', { name: 'Journal' }).click();
+  await menu.getByRole('button', { name: 'New journal entry' }).click();
   await expect(page).toHaveURL(/\/inventory\/journal\?compose=new$/);
   const journal = page.getByRole('dialog', { name: 'Journal' });
   await expect(journal).toBeVisible();

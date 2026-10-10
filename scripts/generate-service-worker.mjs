@@ -27,7 +27,7 @@ const allPublicPaths = [...publicPathByFile.values()];
 const publicPaths = selectRuntimePrecachePaths(allPublicPaths);
 const runtimeFiles = files.filter((path) => publicPaths.includes(publicPathByFile.get(path)));
 const versionHash = createHash('sha256');
-versionHash.update('worker-strategy:cache-first-navigation-v6-runtime-manifest');
+versionHash.update('worker-strategy:cache-first-navigation-v7-deploy-only-bypass');
 
 for (const path of runtimeFiles) {
   versionHash.update(relative(dist, path));
@@ -42,6 +42,10 @@ const PRECACHE_PATHS = ${JSON.stringify(publicPaths, null, 2)};
 const scopeUrl = new URL(self.registration.scope);
 const fallbackUrl = new URL('./index.html', scopeUrl).href;
 const apiPath = new URL('./allneeds-api', scopeUrl).pathname;
+const deployOnlyNavigationRoots = [
+  new URL('./docs/', scopeUrl).pathname,
+  new URL('./lib/', scopeUrl).pathname,
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
@@ -72,6 +76,10 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== scopeUrl.origin || url.pathname.startsWith(apiPath)) return;
 
   if (request.mode === 'navigate') {
+    if (deployOnlyNavigationRoots.some((root) => url.pathname.startsWith(root))) {
+      event.respondWith(fetch(request));
+      return;
+    }
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       const shell = await cache.match(fallbackUrl, { ignoreVary: true });

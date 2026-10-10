@@ -6,14 +6,14 @@
 .pageHeader {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .pageTitle {
   margin: 0;
   max-width: 100%;
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, calc(0.75rem + 3.6vw), 2.5rem);
+  font-size: clamp(1.25rem, calc(var(--text-xs) + 3.6vw), 2.5rem);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-wrap: balance;
@@ -21,67 +21,7 @@
 
 .magnetSection {
   display: grid;
-  gap: 1rem;
-}
-
-.toolbar {
-  width: 100%;
-  display: flex;
-  align-items: stretch;
-  gap: 0.45rem;
-}
-
-.searchField {
-  min-width: 0;
-  flex: 0 1 13.8rem;
-}
-
-.searchField input {
-  width: 100%;
-  min-height: 3.25rem;
-  padding: 0.65rem 0.9rem;
-  border: 3px solid var(--outline);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow: 0 8px 0 color-mix(in srgb, var(--outline) 30%, transparent);
-}
-
-.searchField input:focus-visible {
-  box-shadow: 0 10px 0 color-mix(in srgb, var(--outline) 35%, transparent);
-  transform: translateY(-2px);
-}
-
-.shuffle {
-  width: 2.7rem;
-  min-width: 2.7rem;
-  min-height: 44px;
-  margin-left: auto;
-  padding: 0.55rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--outline);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow: 0 8px 0 color-mix(in srgb, var(--outline) 22%, transparent);
-  color: var(--outline);
-  cursor: pointer;
-}
-
-.shuffle:hover,
-.shuffle:focus-visible {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 0 color-mix(in srgb, var(--outline) 28%, transparent);
-}
-
-.shuffle svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  gap: var(--space-4);
 }
 
 .boardWrapper {
@@ -199,7 +139,7 @@
 .boardWrapper :global([data-magnet-id='needs-understanding']) > span {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--space-2);
 }
 
 .boardWrapper :global([data-magnet-id='needs-understanding']) > span::after {
@@ -246,7 +186,7 @@
 .boardWrapper :global([data-magnet-id='needs-clarity']) > span {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--space-2);
 }
 
 .boardWrapper :global([data-magnet-id='needs-clarity']) > span::after {
@@ -352,54 +292,32 @@
   padding: 1rem;
   border: 2px dashed var(--outline);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
 }
 
 @media (max-width: 640px) {
   .page {
-    gap: .72rem;
+    gap: var(--space-3);
     padding: .1rem .35rem 0;
   }
 
   .pageHeader {
-    gap: .2rem;
+    gap: var(--space-1);
   }
 
   .pageTitle {
-    font-size: clamp(1.15rem, 6vw, 1.45rem);
+    font-size: clamp(var(--text-lg), 6vw, 1.45rem);
     letter-spacing: .045em;
     line-height: 1.08;
   }
 
   .magnetSection {
-    gap: .58rem;
-  }
-
-  .toolbar {
-    align-items: center;
-    gap: .35rem;
-  }
-
-  .searchField {
-    flex: 1 1 10rem;
-  }
-
-  .searchField input {
-    min-height: 44px;
-    padding: .48rem .68rem;
-    border-width: 2px;
-    box-shadow: 0 4px 0 color-mix(in srgb, var(--outline) 24%, transparent);
-    font-size: .82rem;
-  }
-
-  .searchField input:focus-visible {
-    box-shadow: 0 6px 0 color-mix(in srgb, var(--outline) 28%, transparent);
-    transform: translateY(-1px);
+    gap: var(--space-2);
   }
 
   .empty {
     padding: .72rem;
     border-width: 1.5px;
-    font-size: .8rem;
+    font-size: var(--text-sm);
   }
 }

@@ -7,7 +7,9 @@ import {
   readSharedFeedResources,
 } from '../../app/appResources';
 import type { SharedFeedResources, SharedFeedStrategy } from '../../app/appResources';
-import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
+import { SaveControl } from '../../components/forms/SaveControl';
+import saveControlStyles from '../../components/forms/SaveControl.module.css';
+import { ShuffleButton } from '../../components/forms/ShuffleButton';
 import { assetPath, needsBySlug, strategiesBySlug } from '../../data/catalog';
 import type { Strategy } from '../../domain/models';
 import {
@@ -41,7 +43,7 @@ import {
   writeInventory,
 } from '../inventory/inventoryRepository';
 import type { InventoryStrategy } from '../inventory/inventoryRepository';
-import { StrategySharingFields } from '../inventory/StrategySharingFields';
+import { StrategyForm } from '../inventory/StrategyForm';
 import { NeedFunctionLenses } from './NeedFunctionLenses';
 import styles from './NeedDetailPage.module.css';
 
@@ -604,11 +606,11 @@ export function NeedDetailPage() {
           <h2 id="strategy-heading" className={styles.sectionTitle}>Strategies</h2>
           {orderedStrategies.length ? (
             <div className={styles.deckHeader} aria-label="Strategy browsing controls">
-              <button type="button" aria-label="Shuffle strategy cards" onClick={() => {
+              <ShuffleButton label="Shuffle strategy cards" onClick={() => {
                 shuffledRef.current = true;
                 setStrategyOrder((current) => shuffled(current));
                 setActiveIndex(0);
-              }}>Shuffle</button>
+              }} />
               <button type="button" aria-pressed={showAll} onClick={() => setShowAll((current) => !current)}>
                 {showAll ? 'View one at a time' : 'View all'}
               </button>
@@ -652,6 +654,8 @@ export function NeedDetailPage() {
                       className={styles.strategyCard}
                       data-position={position}
                       data-strategy-slug={strategy.slug}
+                      aria-hidden={!showAll && position !== 'active' ? true : undefined}
+                      inert={!showAll && position !== 'active' ? true : undefined}
                       style={cardStyle}
                     >
                       <h3>{strategy.title}</h3>
@@ -683,31 +687,29 @@ export function NeedDetailPage() {
                       <div className={styles.cardActions}>
                         {isOwner && clientKey ? (
                           <Link
-                            className={`${styles.appAction} ${styles.editAction}`}
+                            className={`${saveControlStyles.control} ${saveControlStyles.compact} ${styles.editAction}`}
                             to={`/inventory?edit=${encodeURIComponent(clientKey)}`}
                             aria-label={`Edit ${strategy.title}`}
                           >Edit</Link>
                         ) : null}
-                        <button
+                        <SaveControl
                           type="button"
-                          className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction} ${saved ? styles.saved : ''}`}
-                          aria-pressed={saved}
-                          aria-label={saved ? 'Saved to device' : 'Save to device'}
+                          target="device"
+                          compact
+                          saved={saved}
                           onClick={() => void (shared
                             ? saveSharedStrategy(strategy, shared)
                             : saveCatalogStrategy(strategy))}
-                        >
-                          Device
-                        </button>
-                        <button
+                        />
+                        <SaveControl
                           type="button"
-                          className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`}
-                          aria-label="Save to profile"
+                          target="profile"
+                          compact
                           disabled={!session}
                           onClick={() => void (shared
                             ? saveSharedStrategy(strategy, shared, true)
                             : saveCatalogStrategy(strategy, true))}
-                        >Profile</button>
+                        />
                       </div>
                     </article>
                   );
@@ -727,43 +729,14 @@ export function NeedDetailPage() {
 
       <section className={styles.suggestion} aria-labelledby="suggestion-heading">
         <h2 id="suggestion-heading" className={styles.sectionTitle}>Add a strategy</h2>
-        <div className={styles.formCard}>
-          <form id="suggestion-form" className={styles.form} onSubmit={handlePersonalStrategy}>
-            <label className={styles.formField}>
-              <span>Strategy name</span>
-              <span className={styles.inputCard}><input name="title" type="text" value={formDraft.title} onChange={(event) => setFormDraft({ ...formDraft, title: event.target.value })} required /></span>
-            </label>
-            <label className={styles.formField}>
-              <span>How do you put it into practice?</span>
-              <span className={styles.inputCard}><textarea name="description" rows={4} value={formDraft.description} onChange={(event) => setFormDraft({ ...formDraft, description: event.target.value })} required /></span>
-            </label>
-            <div className={`${styles.formField} ${styles.needsFormField}`}>
-              <span id="need-strategy-needs-label">Needs</span>
-              <span className={styles.inputCard}>
-                <NeedCatalogPicker
-                  labelId="need-strategy-needs-label"
-                  selectedNeeds={formDraft.selectedNeeds}
-                  onChange={(selectedNeeds) => setFormDraft({ ...formDraft, selectedNeeds })}
-                />
-              </span>
-            </div>
-            <div className={styles.formRow}>
-              <label className={styles.formField}>
-                <span>First name (optional)</span>
-                <span className={styles.inputCard}><input name="name" type="text" value={formDraft.firstName} onChange={(event) => setFormDraft({ ...formDraft, firstName: event.target.value })} /></span>
-              </label>
-              <label className={styles.formField}>
-                <span>Location (optional)</span>
-                <span className={styles.inputCard}><input name="location" type="text" value={formDraft.location} onChange={(event) => setFormDraft({ ...formDraft, location: event.target.value })} /></span>
-              </label>
-            </div>
-            <StrategySharingFields signedIn={Boolean(session)} />
-            <div className={styles.formActions}>
-              <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Save to device</button>
-              <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!session}>Save to profile</button>
-            </div>
-          </form>
-        </div>
+        <StrategyForm
+          id="suggestion-form"
+          needsLabelId="need-strategy-needs-label"
+          draft={formDraft}
+          signedIn={Boolean(session)}
+          onDraftChange={setFormDraft}
+          onSubmit={handlePersonalStrategy}
+        />
         {formFeedback ? <p className={`${styles.feedback} ${styles[formFeedback.kind]}`} role="status">{formFeedback.message}</p> : null}
       </section>
     </article>

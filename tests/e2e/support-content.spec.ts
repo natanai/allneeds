@@ -1,21 +1,23 @@
-import { expect, test } from './fixtures';
+import { expect, routeReviewedSharedStrategies, test } from './fixtures';
 
 test.describe('Support reviewed content', () => {
   test.beforeEach(async ({ page }) => {
+    await routeReviewedSharedStrategies(page);
     await page.goto('/needs/support');
   });
 
   test('shows the approved evolutionary-therapeutic copy and eight direct citations', async ({ page }) => {
     await expect(page.getByText('Across human evolutionary history, survival often depended on sharing food, care, information, labor, and risk rather than meeting every demand alone.')).toBeVisible();
 
-    await page.getByText('Details', { exact: true }).click();
-    const detailParagraphs = page.locator('section[aria-labelledby="need-evidence-heading"] details').first().locator('p');
+    const evidence = page.locator('section[aria-labelledby="need-evidence-heading"]');
+    await evidence.locator('details').first().locator('summary').click();
+    const detailParagraphs = evidence.locator('details').first().locator('p');
     await expect(detailParagraphs).toHaveCount(6);
     await expect(detailParagraphs.first()).toContainText('central role in shaping evolved human life history');
-    await expect(detailParagraphs.last()).toContainText('deeply cooperative human repertoire');
+    await expect(detailParagraphs.last()).toContainText('part of human cooperation rather than simply as a failure of self-sufficiency');
 
-    await page.getByText('Citations', { exact: true }).click();
-    const citationList = page.locator('section[aria-labelledby="need-evidence-heading"] ol');
+    await evidence.getByText('Citations', { exact: true }).click();
+    const citationList = evidence.locator('ol');
     const citationLinks = citationList.locator('a');
     await expect(citationLinks).toHaveCount(8);
     await expect(citationLinks.nth(0)).toHaveAttribute('href', 'https://pubmed.ncbi.nlm.nih.gov/23943272/');
@@ -27,6 +29,7 @@ test.describe('Support reviewed content', () => {
   test('shows exactly the approved six Support strategies with parallel provenance', async ({ page }) => {
     const deck = page.locator('[data-strategy-deck]');
     await expect(deck.locator('article')).toHaveCount(6);
+    await page.getByRole('button', { name: 'View all' }).click();
 
     for (const title of [
       'Call a friend',

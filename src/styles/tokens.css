@@ -13,10 +13,12 @@
   /* Shared visual roles are derived rather than expanding the editable palette. */
   --surface-raised: color-mix(in srgb, var(--quiet) 12%, #ffffff 88%);
   --shadow: color-mix(in srgb, var(--outline) 55%, transparent);
+  --primary-fg: #ffffff;
+  --text-fg: #ffffff;
   --btn-bg: var(--action);
-  --btn-fg: #111111;
+  --btn-fg: #000000;
   --chip-bg: color-mix(in srgb, var(--surface-raised) 86%, var(--selection) 14%);
-  --chip-fg: #111111;
+  --chip-fg: #000000;
   --corner-scale: 1;
   --radius-xs: calc(var(--corner-scale) * 8px);
   --radius-sm: calc(var(--corner-scale) * 10px);
@@ -45,8 +47,10 @@
   --color-selection: var(--selection);
   --color-outline: var(--outline);
   --surface-canvas: var(--quiet);
+  --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
+  --text-lg: 1.125rem;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;

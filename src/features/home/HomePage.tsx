@@ -25,14 +25,14 @@ export function HomePage() {
               <span className={styles.label}>{doorway.label}</span>
             </Link>
             {doorway.tone === 'feelings' ? (
-              <Link className={styles.support} to="/alexithymia-support">Alexithymia support</Link>
+              <Link className={styles.support} to="/alexithymia-support">Feeling word support</Link>
             ) : null}
           </div>
         ))}
       </div>
 
       <p className={styles.mobileSupport}>
-        <Link to="/alexithymia-support">Alexithymia Support</Link>
+        <Link to="/alexithymia-support">Feeling word support</Link>
       </p>
     </section>
   );

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
-import { createPortal } from 'react-dom';
+import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
-import { useDialogFocus } from '../../app/useDialogFocus';
-import { feelings, needs, needsBySlug } from '../../data/catalog';
+import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
+import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
+import { OverlayShell } from '../../components/overlays/OverlayShell';
+import { feelings, needsBySlug } from '../../data/catalog';
+import { downloadBrowserBackup, restoreBrowserBackup } from '../../persistence/browserBackup';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import {
   clearJournalDraft,
@@ -12,7 +14,6 @@ import {
   writeJournalDraft,
 } from '../../persistence/workflowDrafts';
 import type { JournalComposerDraft } from '../../persistence/workflowDrafts';
-import { readInventory } from '../inventory/inventoryRepository';
 import { createJournalRecord, readJournal, writeJournal } from './journalRepository';
 import type { JournalFeelingRating, JournalRecord } from './journalRepository';
 import { journalHistoryNote } from './journalHistoryNote';
@@ -23,29 +24,6 @@ type DateRange = 'all' | '7' | '30' | '90';
 type Feedback = { kind: 'success' | 'error' | 'warning'; message: string } | null;
 
 const feelingCatalog = [...feelings].sort((left, right) => left.title.localeCompare(right.title));
-const needCatalog = [...needs].sort((left, right) => left.title.localeCompare(right.title));
-
-function downloadJson(payload: unknown) {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `nvc-localstorage-backup-${new Date().toISOString().replace(/:/g, '-')}.json`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
-function storageSnapshot() {
-  const result: Record<string, string> = {};
-  for (let index = 0; index < window.localStorage.length; index += 1) {
-    const key = window.localStorage.key(index);
-    if (key) result[key] = window.localStorage.getItem(key) ?? '';
-  }
-  return result;
-}
-
 function formatDate(value: string) {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
@@ -111,11 +89,10 @@ export function JournalPage() {
   );
   const [selectedNeeds, setSelectedNeeds] = useState<string[]>(startingNewFromObservation ? [] : savedDraft?.selectedNeeds ?? []);
   const [tags, setTags] = useState(startingNewFromObservation ? '' : savedDraft?.tags ?? '');
+  const [guidedSupport, setGuidedSupport] = useState(startingNewFromObservation ? undefined : savedDraft?.guidedSupport);
   const [editingId, setEditingId] = useState<string | null>(startingNewFromObservation ? null : savedDraft?.editingId ?? null);
   const [feelingPickerOpen, setFeelingPickerOpen] = useState(false);
-  const [needsPickerOpen, setNeedsPickerOpen] = useState(false);
   const [feelingSearch, setFeelingSearch] = useState('');
-  const [needSearch, setNeedSearch] = useState('');
   const [query, setQuery] = useState('');
   const [feelingFilter, setFeelingFilter] = useState('');
   const [needFilter, setNeedFilter] = useState('');
@@ -126,8 +103,8 @@ export function JournalPage() {
   const importRef = useRef<HTMLInputElement>(null);
   const emotion = selectedFeelings.map((item) => item.feeling).join(', ');
   const intensity = selectedFeelings.length ? Math.max(...selectedFeelings.map((item) => item.intensity)) : 5;
-  const draftRef = useRef<JournalComposerDraft>({ notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId });
-  draftRef.current = { notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId };
+  const draftRef = useRef<JournalComposerDraft>({ notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId, guidedSupport });
+  draftRef.current = { notes, emotion, intensity, feelings: selectedFeelings, selectedNeeds, tags, editingId, guidedSupport };
 
   useEffect(() => {
     if (shouldOpen) setOpen(true);
@@ -138,7 +115,7 @@ export function JournalPage() {
       try { writeJournalDraft(draftRef.current); } catch { /* Saving still remains available. */ }
     }, 180);
     return () => window.clearTimeout(timer);
-  }, [editingId, notes, selectedFeelings, selectedNeeds, tags]);
+  }, [editingId, guidedSupport, notes, selectedFeelings, selectedNeeds, tags]);
 
   useEffect(() => {
     const flush = () => {
@@ -185,9 +162,9 @@ export function JournalPage() {
     setSelectedFeelings([]);
     setSelectedNeeds([]);
     setTags('');
+    setGuidedSupport(undefined);
     setEditingId(null);
     setFeelingPickerOpen(false);
-    setNeedsPickerOpen(false);
     draftRef.current = { notes: '', emotion: '', intensity: 5, feelings: [], selectedNeeds: [], tags: '', editingId: null };
     try { clearJournalDraft(); } catch { /* The cleared form remains cleared in memory. */ }
     window.sessionStorage.removeItem('allneeds.v2.journal.observationDraft');
@@ -196,11 +173,8 @@ export function JournalPage() {
   const closeJournal = () => {
     setOpen(false);
     setFeelingPickerOpen(false);
-    setNeedsPickerOpen(false);
     if (search) void navigate('/inventory/journal', { replace: true });
   };
-  const journalDialogRef = useDialogFocus<HTMLDivElement>({ open, onClose: closeJournal });
-
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!notes.trim() && !selectedFeelings.length && !selectedNeeds.length) {
@@ -218,9 +192,10 @@ export function JournalPage() {
         feelings: selectedFeelings,
         needs: selectedNeeds,
         tags: [...new Set(parsedTags)],
+        ...(guidedSupport ? { guidedSupport } : {}),
       } : entry);
     } else {
-      next = [...entries, createJournalRecord({ notes, feelings: selectedFeelings, needs: selectedNeeds, tags: parsedTags })];
+      next = [...entries, createJournalRecord({ notes, feelings: selectedFeelings, needs: selectedNeeds, tags: parsedTags, guidedSupport })];
     }
     setEntries(writeJournal(next));
     setFeedback({ kind: 'success', message: editingId ? 'Journal entry updated.' : 'Journal entry saved to this device.' });
@@ -235,6 +210,7 @@ export function JournalPage() {
     setSelectedFeelings(recordFeelings(entry));
     setSelectedNeeds(entry.needs);
     setTags(entry.tags.join(', '));
+    setGuidedSupport(entry.guidedSupport);
     setOpen(true);
   };
 
@@ -253,38 +229,22 @@ export function JournalPage() {
     });
   };
 
-  const toggleNeed = (slug: string) => {
-    setSelectedNeeds((current) => current.includes(slug)
-      ? current.filter((value) => value !== slug)
-      : [...current, slug]);
-  };
-
   const exportAll = () => {
-    downloadJson({ version: 1, exportedAt: new Date().toISOString(), inventory: readInventory(), journalEntries: entries, localStorage: storageSnapshot() });
+    downloadBrowserBackup();
     setFeedback({ kind: 'success', message: `Exported a backup with ${entries.length} journal entries.` });
   };
 
-  const importAll = async (event: ChangeEvent<HTMLInputElement>) => {
+  const importAll = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
     try {
-      const parsed: unknown = JSON.parse(await file.text());
-      const snapshot = parsed && typeof parsed === 'object' && 'localStorage' in parsed
-        ? (parsed as { localStorage?: unknown }).localStorage
-        : null;
-      if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new Error('Invalid');
-      if (!window.confirm('Replace this browser’s current allneeds data with the selected backup?')) return;
-      const previous = storageSnapshot();
-      try {
-        window.localStorage.clear();
-        Object.entries(snapshot).forEach(([key, value]) => window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value)));
-        synchronizeCustomizerMirrors(snapshot as Record<string, unknown>);
-      } catch (error) {
-        window.localStorage.clear();
-        Object.entries(previous).forEach(([key, value]) => window.localStorage.setItem(key, value));
-        throw error;
+      const result = await restoreBrowserBackup(file);
+      if (result.status === 'canceled') {
+        setFeedback({ kind: 'warning', message: 'Restore canceled. No changes were made.' });
+        return;
       }
+      synchronizeCustomizerMirrors(result.snapshot);
       window.location.reload();
     } catch {
       setFeedback({ kind: 'error', message: 'Import failed. Choose an allneeds.app backup.' });
@@ -292,7 +252,6 @@ export function JournalPage() {
   };
 
   const filteredFeelings = feelingCatalog.filter((item) => item.title.toLocaleLowerCase().includes(feelingSearch.trim().toLocaleLowerCase()));
-  const filteredNeeds = needCatalog.filter((item) => item.title.toLocaleLowerCase().includes(needSearch.trim().toLocaleLowerCase()));
   const hasFilters = Boolean(query || feelingFilter || needFilter || tagFilter || dateRange !== 'all' || sortOrder !== 'newest');
 
   const entryForm = (idPrefix: string, initialFocus = false) => (
@@ -306,7 +265,7 @@ export function JournalPage() {
             <div className={styles.metaRow}>
               <label>Feeling</label>
               <div className={styles.catalogControl}>
-                <button type="button" aria-label="Feeling" aria-expanded={feelingPickerOpen} onClick={() => { setFeelingPickerOpen((value) => !value); setNeedsPickerOpen(false); }}><span data-placeholder={!selectedFeelings.length}>{selectedFeelings.length ? selectedFeelings.map((item) => item.feeling).join(', ') : 'Choose feelings'}</span><i aria-hidden="true" /></button>
+                <button type="button" aria-label="Feeling" aria-expanded={feelingPickerOpen} onClick={() => setFeelingPickerOpen((value) => !value)}><span data-placeholder={!selectedFeelings.length}>{selectedFeelings.length ? selectedFeelings.map((item) => item.feeling).join(', ') : 'Choose feelings'}</span><i aria-hidden="true" /></button>
                 {feelingPickerOpen ? (
                   <div className={styles.catalogPopover} role="dialog" aria-label="Choose one or more feelings">
                     <div className={styles.catalogToolbar}><input type="search" aria-label="Search feelings" placeholder="Search feelings" value={feelingSearch} onChange={(event) => setFeelingSearch(event.target.value)} /></div>
@@ -324,19 +283,9 @@ export function JournalPage() {
             </div>
 
             <div className={styles.metaRow}>
-              <label>Needs</label>
-              <div className={styles.catalogControl}>
-                <button type="button" aria-label="Needs" aria-expanded={needsPickerOpen} onClick={() => { setNeedsPickerOpen((value) => !value); setFeelingPickerOpen(false); }}><span data-placeholder={!selectedNeeds.length}>{selectedNeeds.length ? selectedNeeds.map((slug) => needsBySlug.get(slug)?.title ?? slug).join(', ') : 'Choose needs'}</span><i aria-hidden="true" /></button>
-                {needsPickerOpen ? (
-                  <div className={styles.catalogPopover} role="dialog" aria-label="Choose one or more needs">
-                    <div className={styles.catalogToolbar}><input type="search" aria-label="Search needs" placeholder="Search needs" value={needSearch} onChange={(event) => setNeedSearch(event.target.value)} /></div>
-                    <div className={styles.needOptions} role="listbox" aria-multiselectable="true">
-                      {filteredNeeds.map((item) => <button key={item.slug} type="button" role="option" aria-selected={selectedNeeds.includes(item.slug)} onClick={() => toggleNeed(item.slug)}><span>{item.title}</span><span aria-hidden="true">{selectedNeeds.includes(item.slug) ? '✓' : ''}</span></button>)}
-                      {!filteredNeeds.length ? <p>No matches</p> : null}
-                    </div>
-                    <div className={styles.catalogFooter}><button type="button" onClick={() => setSelectedNeeds([])}>Clear</button><button type="button" onClick={() => setNeedsPickerOpen(false)}>Done</button></div>
-                  </div>
-                ) : null}
+              <label id={`${idPrefix}-journal-needs`}>Needs</label>
+              <div onPointerDown={() => setFeelingPickerOpen(false)}>
+                <NeedCatalogPicker labelId={`${idPrefix}-journal-needs`} selectedNeeds={selectedNeeds} onChange={setSelectedNeeds} />
               </div>
             </div>
 
@@ -358,7 +307,7 @@ export function JournalPage() {
   return (
     <article className={styles.page}>
       <header className={styles.header}>
-        <h1>Journal</h1>
+        <h1>Journal history</h1>
         <button type="button" className={styles.newEntry} onClick={() => setOpen(true)} aria-expanded={open} aria-controls="journal-layer">
           <span aria-hidden="true">⛶</span> New entry
         </button>
@@ -367,7 +316,7 @@ export function JournalPage() {
       {feedback ? <p className={`${styles.feedback} ${styles[feedback.kind]}`} role="status">{feedback.message}</p> : null}
 
       <section className={styles.history} aria-labelledby="history-title">
-        <header><h2 id="history-title">History</h2></header>
+        <header><h2 id="history-title">Entries</h2></header>
         {entries.length ? (
           <form className={styles.historyControls} onSubmit={(event) => event.preventDefault()}>
             <label className={styles.historySearch}><span className="visually-hidden">Search journal</span><input type="search" placeholder="Search journal" autoComplete="off" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
@@ -411,9 +360,7 @@ export function JournalPage() {
       </section>
 
       <div className={styles.tools} aria-label="Journal tools">
-        <details className={styles.disclosure}>
-          <summary><span><strong>Patterns</strong><small>Trends across entries</small></span><span aria-hidden="true">›</span></summary>
-          <div className={styles.disclosureBody}>
+        <DisclosureRow variant="card" title="Patterns" description="Trends across entries" bodyClassName={styles.disclosureBody}>
             {entries.length ? (
               <div className={styles.stats}>
                 <article><strong>{entries.length}</strong><span>entries</span></article>
@@ -422,16 +369,12 @@ export function JournalPage() {
                 <article><strong>{needsBySlug.get(mostCommon(entries.flatMap((entry) => entry.needs)))?.title ?? mostCommon(entries.flatMap((entry) => entry.needs))}</strong><span>most noted need</span></article>
               </div>
             ) : <p><strong>Patterns grow with your journal.</strong><br />Recurring feelings, needs, tags, and intensity trends will appear here as you save entries.</p>}
-          </div>
-        </details>
+        </DisclosureRow>
 
-        <details className={styles.disclosure}>
-          <summary><strong>Backup &amp; restore</strong><span aria-hidden="true">›</span></summary>
-          <div className={styles.disclosureBody}>
+        <DisclosureRow variant="card" title="Backup & restore" bodyClassName={styles.disclosureBody}>
             <p>Export or import your journal, inventory, and customizer settings.</p>
             <div className={styles.backupActions}><button type="button" onClick={exportAll}>Export</button><button type="button" onClick={() => importRef.current?.click()}>Import</button><input ref={importRef} type="file" accept="application/json,.json" className="visually-hidden" onChange={importAll} /></div>
-          </div>
-        </details>
+        </DisclosureRow>
       </div>
 
       <details className={styles.fallbackEditor}>
@@ -445,17 +388,20 @@ export function JournalPage() {
         </div>
       </details>
 
-      {open ? createPortal((
-        <div ref={journalDialogRef} id="journal-layer" className={styles.modal} role="dialog" aria-modal="true" aria-label="Journal" tabIndex={-1}>
-          <header className={styles.modalHeader}><h3>Journal</h3><button type="button" onClick={closeJournal} aria-label="Close full screen journal">×</button></header>
-          <div className={styles.modalBody}>
-            <section aria-labelledby="new-entry-title">
-              <h2 id="new-entry-title">{editingId ? 'Edit entry' : 'New entry'}</h2>
-              {entryForm('modal', true)}
-            </section>
-          </div>
-        </div>
-      ), document.body) : null}
+      <OverlayShell
+        open={open}
+        id="journal-layer"
+        variant="fullscreen"
+        title="Journal"
+        onClose={closeJournal}
+        closeLabel="Close full screen journal"
+        bodyClassName={styles.modalBody}
+      >
+        <section aria-labelledby="new-entry-title">
+          <h2 id="new-entry-title">{editingId ? 'Edit entry' : 'New entry'}</h2>
+          {entryForm('modal', true)}
+        </section>
+      </OverlayShell>
     </article>
   );
 }

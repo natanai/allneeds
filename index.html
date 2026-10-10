@@ -77,6 +77,22 @@
           return hexPattern.test(prefixed) ? prefixed.toUpperCase() : '';
         }
 
+        function luminance(value) {
+          var normalized = color(value) || '#000000';
+          var channels = [1, 3, 5].map(function (start) {
+            var channel = parseInt(normalized.slice(start, start + 2), 16) / 255;
+            return channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+          });
+          return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+        }
+
+        function foreground(background) {
+          var backgroundLuminance = luminance(background);
+          var blackRatio = (backgroundLuminance + 0.05) / 0.05;
+          var whiteRatio = (luminance('#FFFFFF') + 0.05) / (backgroundLuminance + 0.05);
+          return blackRatio >= whiteRatio ? '#000000' : '#FFFFFF';
+        }
+
         function stored(name) {
           try { return parse(window[name]); } catch (error) { return null; }
         }
@@ -106,7 +122,10 @@
         var selection = resolved.selection;
         var surface = quiet ? 'color-mix(in srgb, ' + quiet + ' 12%, #FFFFFF 88%)' : '';
         if (surface) root.style.setProperty('--surface-raised', surface);
+        if (resolved.primary) root.style.setProperty('--primary-fg', foreground(resolved.primary));
+        if (resolved.text) root.style.setProperty('--text-fg', foreground(resolved.text));
         if (action) root.style.setProperty('--btn-bg', action);
+        if (action) root.style.setProperty('--btn-fg', foreground(action));
         if (outline) root.style.setProperty('--shadow', 'color-mix(in srgb, ' + outline + ' 55%, transparent)');
         if (surface && selection) root.style.setProperty('--chip-bg', 'color-mix(in srgb, ' + surface + ' 86%, ' + selection + ' 14%)');
         if (applied) root.setAttribute('data-theme-preapplied', 'true');

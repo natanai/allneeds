@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import reverseInferenceJson from '../../../public/data/reverse-inference.json';
+import reverseInferenceJson from '../../data/reverse-inference.json';
 import { feelings } from '../../data/catalog';
 import {
   collectFeelingEvidence,
@@ -58,10 +58,6 @@ describe('canonical Feeling detail inference', () => {
       'Russell 1980',
       'Bonanno & Keltner 1997',
       'Stroebe et al. 2007',
-      'Lieberman et al. 2007',
-      'Kircanski et al. 2012',
-      'Zaccaro et al. 2018',
-      'Lehrer & Gevirtz 2014',
       'Posner & Russell 2005',
       'Nummenmaa et al. 2014',
     ]);

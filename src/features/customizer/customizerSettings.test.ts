@@ -143,9 +143,11 @@ describe('saved customizer settings', () => {
       '--attention': defaultTheme.attention,
       '--selection': defaultTheme.selection,
       '--surface-raised': surface,
+      '--primary-fg': '#FFFFFF',
+      '--text-fg': '#FFFFFF',
       '--btn-bg': '#FFFFFF',
-      '--btn-fg': '#111111',
-      '--chip-fg': '#111111',
+      '--btn-fg': '#000000',
+      '--chip-fg': '#000000',
       '--chip-bg': `color-mix(in srgb, ${surface} 86%, ${defaultTheme.selection} 14%)`,
       '--corner-scale': '1.3',
       '--shadow': `color-mix(in srgb, ${defaultTheme.outline} 55%, transparent)`,
@@ -155,6 +157,12 @@ describe('saved customizer settings', () => {
     const dark = themeCssValues({ values: { ...defaultTheme, action: '#000000' }, roundness: -20 });
     expect(dark['--btn-fg']).toBe('#FFFFFF');
     expect(dark['--corner-scale']).toBe('0');
+
+    const lightPrimary = themeCssValues({ values: { ...defaultTheme, primary: '#FFFFFF' }, roundness: 100 });
+    expect(lightPrimary['--primary-fg']).toBe('#000000');
+
+    const middle = themeCssValues({ values: { ...defaultTheme, action: '#767676' }, roundness: 100 });
+    expect(middle['--btn-fg']).toBe('#000000');
   });
 
   it('synchronizes the pre-paint session mirrors during backup restore', () => {

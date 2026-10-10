@@ -12,6 +12,9 @@ test.describe('need strategy deck', () => {
     const activeTitle = activeCard.locator('h3');
 
     await expect(deck).toBeVisible();
+    const inactiveCards = deck.locator('article:not([data-position="active"])');
+    await expect(inactiveCards.first()).toHaveAttribute('inert', '');
+    await expect(inactiveCards.first()).toHaveAttribute('aria-hidden', 'true');
     const firstTitle = await activeTitle.textContent();
     expect(firstTitle).toBeTruthy();
 

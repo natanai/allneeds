@@ -12,17 +12,17 @@ Local workspace: `C:\allneedsV2` (independent comparison and publishing worktree
 | `/` | Home doorway page |
 | `/feelings/` | Searchable 48-feeling magnet board |
 | `/feelings/:slug/` | All 48 canonical detail pages |
-| `/feelings/body-cues/` | Body Cue explorer with canonical reverse inference |
+| `/feelings/body-cues/` | Body Cue explorer with shared independent clue matching from canonical forward associations |
 | `/feelings/emotions-wheel/` | Full clickable SVG wheel |
 | `/needs/` | Searchable 67-need magnet board |
 | `/needs/:slug/` | All 67 detail, evidence, source, and strategy views |
 | `/faux-feelings/` | Searchable 56-item magnet board |
 | `/faux-feelings/:slug/` | All 56 relationship pages |
-| `/observations/` | Current single-input Load flow, exact/nearby matching, quick check, recipe, guide, and direct Journal handoff |
+| `/observations/` | Local deterministic 2.0 analysis, single-surface exact-range highlights, immediate entity links, guaranteed exploratory Feelings/Needs, quick check, recipe, bundled guide, and direct Journal handoff |
 | `/inventory/` | Current compact Needs/Strategies inventory, filtering, details, editing, and personal strategy form |
 | `/inventory/journal/` | History-first journal with filters, disclosures, migrations, and full-screen entry composer |
 | `/feed/` | Live public/following feeds, local saving, and shared add-count updates |
-| `/alexithymia-support/` | Complete progressive body/compass/emotion/care/journal/communication lane |
+| `/alexithymia-support/` | Approved four-stage present-moment Feeling word support check-in with optional Body and Overall feeling clues, tactile word comparison, user-selected Needs, editable statement, and shared Journal handoff; no lane-local care recommendations |
 
 ## Canonical snapshot checks
 
@@ -33,8 +33,10 @@ Local workspace: `C:\allneedsV2` (independent comparison and publishing worktree
 - all entity slugs unique
 - every catalog relationship resolves to a current public record
 - all 142 production icon files copied with matching SHA-256 hashes
-- body regions, reverse inference, observation guide, cues, modules, detector stats, and public index content match the reference checkout (allowing for Git checkout line-ending normalization)
-- nine observation logic modules retain the reference source content
+- body regions and reverse inference match the reference checkout (allowing for Git checkout line-ending normalization)
+- the Observation 2.0 canonical source records the imported reference commit and preserves all 219 cue relationships in 28 normalized authored expressions
+- four formula slots, 18 guidance groups, 48 Feelings, 67 Needs, and 56 Faux Feelings compile into one checked runtime index
+- Observation-specific legacy modules, public cue/module/guide assets, loaders, and precache entries are retired
 
 ## Navigation and Journal acceptance behavior
 
@@ -79,3 +81,12 @@ The real Bluesky and backend profile code is present, including session restore,
 - `26/26` production-Chromium flows passed, including mobile/desktop route sweeps, pre-React saved-theme restoration, long Journal disclosures, account/profile session contracts, Play-order grid packing and reload persistence, full-screen Menu → Journal behavior, backup recovery, draft continuity, modal focus, warm navigation, and offline deep routes
 - the isolated stopped-server reload, fresh cached deep link, same-port reconnect, and cache-miss probe passed
 - current-reference comparisons were performed at `390×844` and `1440×1000` for the key Observation, Body Cues, Emotions Wheel, Inventory, Journal, and navigation surfaces; automatic pixel-diff baselines remain future hardening rather than an unverified claim
+
+## Observation Inference 2.0 verification (2026-08-28)
+
+- strict TypeScript validation, compiler freshness, domain/compiler tests, and the verified production build passed
+- every nonblank test input returns four official Feelings and four official Needs; blank input returns neither
+- representative migrated cue execution, catalog-wide direct matching, faux relationships, negation, quotes, Unicode offsets, formula ranges, and deterministic output are regression-covered
+- a 1,908-character warm benchmark measured 8.3 ms p50 and 10.4 ms p95 across 250 runs in the Node test runtime
+- production verification rejects retired Observation source/public paths and deployment assets
+- Chromium, Firefox, and mobile WebKit interaction coverage is checked in at `tests/e2e/observation-inference.spec.ts` and `playwright.observation.config.ts`; this implementation environment did not contain Playwright browser binaries, so that matrix remains a release-run requirement rather than a claimed local pass

@@ -1,0 +1,251 @@
+.shell {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.root {
+  position: relative;
+  min-height: 12rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--outline) 8%, transparent);
+}
+
+.root:focus-within {
+  outline: 3px solid color-mix(in srgb, var(--selection) 72%, var(--outline) 28%);
+  outline-offset: 2px;
+}
+
+.surface {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 12rem;
+  max-height: 28rem;
+  padding: 1.15rem;
+  overflow: auto;
+  border: 0;
+  border-radius: inherit;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  caret-color: var(--text);
+}
+
+.surface:focus,
+.surface:focus-visible {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.placeholder {
+  position: absolute;
+  z-index: 0;
+  inset: 1.1rem;
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  color: color-mix(in srgb, var(--secondary) 50%, transparent);
+  pointer-events: none;
+}
+
+.annotationTools {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ledgerToggle {
+  min-height: var(--control-min);
+  padding: .28rem .62rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--quiet) 18%, var(--surface-raised));
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ledgerCount {
+  min-width: 1.4rem;
+  min-height: 1.4rem;
+  padding-inline: .3rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--attention) 42%, var(--surface-raised));
+  font-size: var(--text-xs);
+}
+
+.annotationLedger {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + .32rem);
+  right: 0;
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: min(22rem, 52vh);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--outline) 20%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--quiet) 10%, var(--surface-raised));
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--outline) 18%, transparent);
+}
+
+.ledgerHeader {
+  padding: .72rem .8rem .62rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 12%, transparent);
+}
+
+.ledgerHeader > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ledgerHeader strong {
+  font-size: var(--text-sm);
+}
+
+.ledgerHeader span {
+  color: var(--secondary);
+  font-size: var(--text-xs);
+}
+
+.ledgerHeader button,
+.annotationAction button {
+  width: var(--control-min);
+  min-width: var(--control-min);
+  min-height: var(--control-min);
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+
+.ledgerEntries {
+  max-height: calc(min(22rem, 52vh) - 4.1rem);
+  overflow: auto;
+  padding: .28rem .75rem .75rem;
+}
+
+.ledgerEntry {
+  padding: .58rem 0;
+  display: grid;
+  gap: var(--space-1);
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 10%, transparent);
+}
+
+.ledgerEntry:last-child {
+  border-bottom: 0;
+}
+
+.ledgerPhrase {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ledgerEntry > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ledgerEntry p {
+  margin: 0;
+  color: var(--secondary);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.ledgerEntry a {
+  margin-left: .35rem;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.annotationAction {
+  position: relative;
+  z-index: 2;
+  padding: .7rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--quiet) 24%, var(--surface-raised));
+}
+
+.annotationAction > div { display: grid; gap: var(--space-2); }
+.annotationAction p { margin: 0; display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; color: var(--secondary); font-size: var(--text-sm); }
+.annotationAction a { color: var(--text); font-weight: 700; text-decoration: underline; }
+
+.surface::highlight(observation-formula) {
+  background-color: color-mix(in srgb, var(--positive) 48%, transparent);
+  text-decoration: underline solid color-mix(in srgb, var(--outline) 45%, transparent) 1px;
+}
+
+.surface::highlight(observation-feeling) {
+  background-color: color-mix(in srgb, var(--selection) 62%, transparent);
+  text-decoration: underline solid var(--outline) 1px;
+}
+
+.surface::highlight(observation-need) {
+  background-color: color-mix(in srgb, var(--action) 47%, transparent);
+  text-decoration: underline solid var(--outline) 1px;
+}
+
+.surface::highlight(observation-faux-feeling) {
+  background-color: color-mix(in srgb, var(--attention) 50%, transparent);
+  text-decoration: underline double var(--outline) 1px;
+}
+
+.surface::highlight(observation-guidance) {
+  text-decoration: underline wavy color-mix(in srgb, var(--attention) 78%, var(--outline)) 1.5px;
+}
+
+.surface::highlight(observation-cue) {
+  text-decoration: underline dotted color-mix(in srgb, var(--secondary) 76%, transparent) 1.5px;
+}
+
+.surface::highlight(observation-active) {
+  background-color: color-mix(in srgb, var(--attention) 64%, transparent);
+  text-decoration-color: var(--outline);
+}
+
+@media (max-width: 640px) {
+  .shell { gap: var(--space-1); }
+  .root { min-height: 11.4rem; box-shadow: none; }
+  .surface { height: 11.4rem; min-height: 11.4rem; padding: .82rem .86rem; }
+  .placeholder { inset: .82rem .86rem; }
+  .ledgerToggle { min-height: var(--control-min); font-size: var(--text-sm); }
+  .annotationLedger { width: min(32rem, calc(100vw - 1.5rem)); }
+  .annotationAction { padding: .58rem; }
+}

@@ -9,7 +9,7 @@ const remoteBootHosts = new Set([
 
 test('mounts the app beneath an opaque full-screen splash while local resources finish', async ({ page }) => {
   let delayedLocalResource = false;
-  await page.route('**/data/reverse-inference.json', async (route) => {
+  await page.route('**/icons/door-observations.svg', async (route) => {
     delayedLocalResource = true;
     await new Promise((resolve) => setTimeout(resolve, 1_200));
     await route.continue();
@@ -137,12 +137,10 @@ test('standalone emotion wheel cannot collapse or rewrite persistent nav geometr
 
   await page.getByRole('link', { name: 'Open interactive emotions wheel' }).click();
   await expect(page).toHaveURL(/\/feelings\/emotions-wheel\/?$/);
-  await expect(page.locator('[aria-label="Primary navigation magnets"]')).toHaveCount(0);
-
-  // Keep the wheel open long enough that the previous hidden 0×0 Play board
-  // would have collapsed and later persisted the navigation at the origin.
+  await expect(board).toHaveAttribute('data-ready', 'true');
   await page.waitForTimeout(500);
-  await page.getByRole('link', { name: 'Joyful' }).click();
+  expect(await readCoordinates()).toEqual(initialCoordinates);
+  await page.locator('svg[aria-label="Interactive emotion and feeling wheel"] a[aria-label="Joyful"]').click();
   await expect(page).toHaveURL(/\/feelings\/joyful\/?$/);
 
   board = page.locator('[aria-label="Primary navigation magnets"]');

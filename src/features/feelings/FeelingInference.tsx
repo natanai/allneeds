@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router';
 
-import { useDialogFocus } from '../../app/useDialogFocus';
+import { OverlayShell } from '../../components/overlays/OverlayShell';
 import {
   collectFeelingEvidence,
   formatZoneLabel,
@@ -10,35 +11,6 @@ import {
   type ZoneSuggestion,
 } from './feelingInferenceModel';
 import styles from './FeelingInference.module.css';
-
-type Skill = {
-  buttonLabel: string;
-  duration: string;
-  description: string;
-};
-
-const skillLibrary: Record<string, Skill> = {
-  labeling: {
-    buttonLabel: 'Label it',
-    duration: '15–45s',
-    description: 'Name the feeling softly—out loud or on paper—to give your brain a handle and reduce guessing loops.',
-  },
-  physiological_sigh: {
-    buttonLabel: 'Exhale-biased breath',
-    duration: '1–2 min',
-    description: 'Take two gentle inhales through your nose, then a long sigh out through your mouth. Repeat a few times to downshift arousal.',
-  },
-  slow_446: {
-    buttonLabel: '4-4-6 breath',
-    duration: '1–2 min',
-    description: 'Inhale for four counts, pause for four, and exhale for six. The longer exhale can invite a parasympathetic tilt.',
-  },
-  resonance_6bpm: {
-    buttonLabel: 'Resonance breath',
-    duration: '3–5 min',
-    description: 'Breathe at roughly six cycles per minute (for example, inhale five counts, exhale five) to steady heart-rate variability.',
-  },
-};
 
 const arousalLabels: Record<string, string> = {
   high: 'High energy',
@@ -91,13 +63,8 @@ export function FeelingInference({
   zoneSuggestions = {},
 }: FeelingInferenceProps) {
   const [expanded, setExpanded] = useState(false);
-  const [openSkills, setOpenSkills] = useState<Set<string>>(() => new Set());
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
-  const evidenceDialogRef = useDialogFocus<HTMLElement>({
-    open: evidenceOpen,
-    onClose: () => setEvidenceOpen(false),
-  });
   const groups = useMemo(() => groupBodyCues(entry.bodyCues ?? []), [entry.bodyCues]);
   const evidence = useMemo(
     () => collectFeelingEvidence(entry, feelingKey),
@@ -108,7 +75,6 @@ export function FeelingInference({
 
   useEffect(() => {
     setExpanded(false);
-    setOpenSkills(new Set());
     setEvidenceOpen(false);
   }, [feelingKey]);
 
@@ -123,17 +89,8 @@ export function FeelingInference({
     }
   }
 
-  function toggleSkill(skillId: string) {
-    setOpenSkills((current) => {
-      const next = new Set(current);
-      if (next.has(skillId)) next.delete(skillId);
-      else next.add(skillId);
-      return next;
-    });
-  }
-
   return (
-    <section className={styles.wrapper} aria-label={`Alexithymia support for ${feelingTitle}`}>
+    <section className={styles.wrapper} aria-label={`Feeling word support for ${feelingTitle}`}>
       <button
         type="button"
         className={styles.toggle}
@@ -142,7 +99,7 @@ export function FeelingInference({
         onClick={togglePanel}
       >
         <span className={styles.toggleCopy}>
-          <span className={styles.badge}>Alexithymia support</span>
+          <span className={styles.badge}>Feeling word support</span>
           <span className={styles.toggleLabel}>How this feeling may show up</span>
         </span>
       </button>
@@ -186,52 +143,23 @@ export function FeelingInference({
               </div>
             </section>
 
-            {entry.skills?.length ? (
-              <section className={`${styles.section} ${styles.skillsSection}`}>
-                <h3 className={styles.subheading}>Try now</h3>
-                <div className={styles.skills}>
-                  {entry.skills.map((skillId) => {
-                    const skill = skillLibrary[skillId];
-                    if (!skill) return null;
-                    const detailId = `feeling-skill-${feelingKey}-${skillId}`;
-                    const skillOpen = openSkills.has(skillId);
-                    return (
-                      <article key={skillId} className={styles.skill}>
-                        <button type="button" aria-expanded={skillOpen} aria-controls={detailId} onClick={() => toggleSkill(skillId)}>
-                          {skill.buttonLabel}<span>{skill.duration}</span>
-                        </button>
-                        {skillOpen ? <p id={detailId}>{skill.description}</p> : null}
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            ) : null}
-
             <div className={styles.actions}>
               <button type="button" onClick={() => setEvidenceOpen(true)}>Why these?</button>
+              <Link to="/alexithymia-support">Start a present-moment check-in</Link>
             </div>
           </section>
         </div>
       ) : null}
 
-      {evidenceOpen ? (
-        <div className={styles.popoverBackdrop} role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setEvidenceOpen(false);
-        }}>
-          <section
-            ref={evidenceDialogRef}
-            className={styles.popover}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={evidenceTitleId}
-            tabIndex={-1}
-          >
-            <header className={styles.popoverHeader}>
-              <h3 id={evidenceTitleId}>Why these?</h3>
-              <button type="button" onClick={() => setEvidenceOpen(false)} data-dialog-initial-focus>Close</button>
-            </header>
-            <div className={styles.popoverBody} data-feeling-evidence-body>
+      <OverlayShell
+        open={evidenceOpen}
+        title="Why these?"
+        titleId={evidenceTitleId}
+        onClose={() => setEvidenceOpen(false)}
+        closeInitialFocus
+        bodyClassName={styles.popoverBody}
+      >
+        <div>
               <ul className={styles.evidenceList}>
                 {evidence.supports.map((support) => (
                   <li key={`${support.label}|${support.ref ?? ''}|${support.href ?? ''}`}>
@@ -244,10 +172,8 @@ export function FeelingInference({
               </ul>
               <h4>Limitations</h4>
               <ul className={styles.limitations}>{evidence.limitations.map((limitation) => <li key={limitation}>{limitation}</li>)}</ul>
-            </div>
-          </section>
         </div>
-      ) : null}
+      </OverlayShell>
     </section>
   );
 }

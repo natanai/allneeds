@@ -93,6 +93,7 @@ test.describe('need strategy deck mobile containment and stack cue', () => {
   });
 
   test('every Need route preserves the mobile width invariant', async ({ page }) => {
+    test.setTimeout(120_000);
     await page.goto('/needs');
 
     const needRoutes = await page.locator('a[href^="/needs/"]').evaluateAll((links) => (

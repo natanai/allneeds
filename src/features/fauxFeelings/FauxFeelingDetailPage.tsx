@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
+import { ShuffleButton } from '../../components/forms/ShuffleButton';
 import { assetPath, fauxFeelingsBySlug } from '../../data/catalog';
 import { readMagnetPlayPreference } from '../../persistence/magnetLayoutStore';
 import styles from './FauxFeelingDetailPage.module.css';
@@ -20,9 +21,7 @@ function RelatedBoard({ title, items, storageKey }: RelatedBoardProps) {
     <section className={styles.related} aria-labelledby={`${storageKey}-title`}>
       <div className={styles.sectionHeader}>
         <h2 id={`${storageKey}-title`}>{title}</h2>
-        <button type="button" onClick={() => setShuffleVersion((current) => current + 1)} aria-label="Shuffle magnets">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" /></svg>
-        </button>
+        <ShuffleButton onClick={() => setShuffleVersion((current) => current + 1)} />
       </div>
       <div className={styles.boardWrapper}>
         <MagnetBoard items={items} playMode={playMode} onPlayModeChange={setPlayMode} storageKey={storageKey} shuffleVersion={shuffleVersion} ariaLabel={`${title} magnet board`} />

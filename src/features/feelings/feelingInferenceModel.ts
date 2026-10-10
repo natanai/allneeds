@@ -13,7 +13,6 @@ export type FeelingBodyCue = {
 export type FeelingInferenceEntry = {
   zones?: string[];
   bodyCues?: FeelingBodyCue[];
-  skills?: string[];
   evidenceKeys?: string[];
 };
 
@@ -69,70 +68,6 @@ const zoneEvidence: EvidenceRecord = {
     },
   ],
   limitations: ['Zones capture averages—personal context still matters.'],
-};
-
-const labelingEvidence: EvidenceRecord = {
-  supports: [
-    {
-      label: 'Affect labeling dampens limbic activity',
-      ref: 'Lieberman et al. 2007',
-      href: 'https://doi.org/10.1111/j.1467-9280.2007.01916.x',
-    },
-    {
-      label: 'Naming feelings supports regulation in practice',
-      ref: 'Kircanski et al. 2012',
-      href: 'https://doi.org/10.1177/0956797612443830',
-    },
-  ],
-  limitations: ['Language access varies by culture and learning history.'],
-};
-
-const sighEvidence: EvidenceRecord = {
-  supports: [
-    {
-      label: 'Double-inhale sigh lowers autonomic arousal',
-      ref: 'Hubner et al. 2023',
-      href: 'https://doi.org/10.1016/j.xcrm.2022.100895',
-    },
-    {
-      label: 'Slow exhalation improves state anxiety',
-      ref: 'Iwabe et al. 2025',
-      href: 'https://doi.org/10.3389/fnhum.2025.1605862',
-    },
-  ],
-  limitations: ['Breathing practices may need adaptation for respiratory conditions.'],
-};
-
-const resonanceEvidence: EvidenceRecord = {
-  supports: [
-    {
-      label: 'Resonance breathing stabilises HRV',
-      ref: 'Zaccaro et al. 2018',
-      href: 'https://doi.org/10.3389/fnhum.2018.00353',
-    },
-    {
-      label: '6 bpm breathing aids emotion regulation',
-      ref: 'Lehrer & Gevirtz 2014',
-      href: 'https://doi.org/10.3389/fpsyg.2014.00756',
-    },
-  ],
-  limitations: ['Breathing practices may need adaptation for respiratory conditions.'],
-};
-
-const slowBreathEvidence: EvidenceRecord = {
-  supports: [
-    {
-      label: 'Slow paced breathing steadies autonomic tone',
-      ref: 'Brown & Gerbarg 2005',
-      href: 'https://doi.org/10.1089/acm.2005.11.189',
-    },
-    {
-      label: 'Extended exhale promotes parasympathetic shift',
-      ref: 'Strauss-Blasche et al. 2000',
-      href: 'https://doi.org/10.1046/j.1440-1681.2000.03306.x',
-    },
-  ],
-  limitations: ['Breathing practices may need adaptation for respiratory conditions.'],
 };
 
 const emotionEvidenceGroups: Record<string, EvidenceRecord> = {
@@ -204,13 +139,6 @@ const emotionEvidenceMap: Record<string, string> = {
   excitement: 'positive',
 };
 
-const skillEvidence: Record<string, EvidenceRecord> = {
-  'skill-labeling': labelingEvidence,
-  'skill-physiological_sigh': sighEvidence,
-  'skill-resonance_6bpm': resonanceEvidence,
-  'skill-slow_446': slowBreathEvidence,
-};
-
 function slugify(value: string) {
   return value.toLocaleLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
@@ -248,7 +176,6 @@ export function formatZoneLabel(zoneKey: string, suggestions: Record<string, Zon
 
 function evidenceRecordForKey(key: string): EvidenceRecord | null {
   if (key.startsWith('zone-')) return zoneEvidence;
-  if (skillEvidence[key]) return skillEvidence[key];
   if (key.startsWith('emotion-')) {
     const group = emotionEvidenceMap[key.slice('emotion-'.length)];
     return group ? emotionEvidenceGroups[group] ?? null : null;

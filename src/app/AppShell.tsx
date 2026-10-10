@@ -133,7 +133,8 @@ export function AppShell() {
   const fullBleedMobile = pathname === '/observations'
     || pathname === '/inventory'
     || pathname === '/feed'
-    || pathname === '/feelings/body-cues';
+    || pathname === '/feelings/body-cues'
+    || pathname === '/alexithymia-support';
   const journalMobile = pathname === '/inventory/journal';
   const journalComposerActive = pathname === '/inventory/journal'
     && new URLSearchParams(search).get('compose') === 'new';
@@ -171,11 +172,6 @@ export function AppShell() {
   }, []);
 
   useLayoutEffect(() => {
-    if (wheelRoute) {
-      markAppShellVisualReady();
-      return;
-    }
-
     const wrapper = navBoardWrapperRef.current;
     if (!wrapper) return;
     const markWhenReady = () => {
@@ -194,7 +190,7 @@ export function AppShell() {
       attributeFilter: ['data-ready'],
     });
     return () => observer.disconnect();
-  }, [wheelRoute]);
+  }, []);
 
   const navItems = useMemo<MagnetBoardItem[]>(() => {
     const items: Array<MagnetBoardItem & { setting?: NavItemId }> = [
@@ -239,7 +235,7 @@ export function AppShell() {
       {
         id: 'nav-journal',
         setting: 'journal',
-        label: 'Journal',
+        label: 'New entry',
         to: '/inventory/journal?compose=new',
         tone: 'action',
         kind: 'nav',
@@ -295,7 +291,7 @@ export function AppShell() {
       {
         id: 'nav-journal-dashboard',
         setting: 'journalDashboard',
-        label: 'History',
+        label: 'Journal history',
         to: '/inventory/journal',
         tone: 'action',
         kind: 'nav',
@@ -348,20 +344,18 @@ export function AppShell() {
       <ScrollAndFocusManager />
       <a className="skip-link" href="#main-content">Skip to content</a>
 
-      {wheelRoute ? null : (
-        <nav className={styles.nav} aria-label="Primary">
-          <div ref={navBoardWrapperRef} className={styles.navBoardWrapper}>
-            <MagnetBoard
-              items={navItems}
-              playMode={navPlayMode}
-              onPlayModeChange={setNavPlayMode}
-              storageKey="site-nav"
-              variant="nav"
-              ariaLabel="Primary navigation magnets"
-            />
-          </div>
-        </nav>
-      )}
+      <nav className={styles.nav} aria-label="Primary">
+        <div ref={navBoardWrapperRef} className={styles.navBoardWrapper}>
+          <MagnetBoard
+            items={navItems}
+            playMode={navPlayMode}
+            onPlayModeChange={setNavPlayMode}
+            storageKey="site-nav"
+            variant="nav"
+            ariaLabel="Primary navigation magnets"
+          />
+        </div>
+      </nav>
 
       <Breadcrumbs />
 

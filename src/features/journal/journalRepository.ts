@@ -11,6 +11,12 @@ export interface JournalFeelingRating {
   intensity: number;
 }
 
+export interface JournalGuidedSupport {
+  observation: string;
+  terms: Array<{ label: string; role: 'feeling' | 'faux-feeling' | 'working' }>;
+  statement: string;
+}
+
 export interface JournalRecord {
   id: string;
   dateISO: string;
@@ -23,6 +29,7 @@ export interface JournalRecord {
   sensations: string[];
   strategies: string[];
   source: 'journal' | 'lane';
+  guidedSupport?: JournalGuidedSupport;
 }
 
 type JournalDataWire = { entries: unknown[] };
@@ -69,6 +76,25 @@ function feelingRatings(value: unknown, fallbackEmotion: string, fallbackIntensi
   return [...normalized.values()];
 }
 
+function guidedSupport(value: unknown): JournalGuidedSupport | undefined {
+  if (!isRecord(value)
+    || typeof value.observation !== 'string'
+    || typeof value.statement !== 'string'
+    || !Array.isArray(value.terms)) return undefined;
+  const terms: JournalGuidedSupport['terms'] = value.terms.flatMap((term) => {
+    if (!isRecord(term) || typeof term.label !== 'string') return [];
+    const role = term.role;
+    if (role !== 'feeling' && role !== 'faux-feeling' && role !== 'working') return [];
+    const label = term.label.trim();
+    return label ? [{ label, role }] : [];
+  });
+  return {
+    observation: value.observation.trim(),
+    terms,
+    statement: value.statement.trim(),
+  };
+}
+
 function makeId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
   return `journal_${Date.now().toString(36)}_${Math.random().toString(16).slice(2)}`;
@@ -88,6 +114,7 @@ function normalize(value: unknown): JournalRecord | null {
   const intensity = feelings.length ? Math.max(...feelings.map((item) => item.intensity)) : rawIntensity;
   const needs = list(value.needs ?? value.need ?? value.primaryNeed);
   const tags = list(value.tags ?? value.tagList ?? value.tag).map((tag) => tag.replace(/^#/, ''));
+  const supportContext = guidedSupport(value.guidedSupport);
   return {
     id: typeof value.id === 'string' && value.id.trim() ? value.id.trim() : makeId(),
     dateISO: Number.isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString(),
@@ -100,6 +127,7 @@ function normalize(value: unknown): JournalRecord | null {
     sensations: list(value.sensations ?? value.bodySignals ?? value.bodySensations),
     strategies: list(value.strategies ?? value.strategy ?? value.actions),
     source: value.source === 'lane' ? 'lane' : 'journal',
+    ...(supportContext ? { guidedSupport: supportContext } : {}),
   };
 }
 
@@ -162,8 +190,10 @@ export function createJournalRecord(input: {
   sensations?: string[];
   strategies?: string[];
   source?: JournalRecord['source'];
+  guidedSupport?: JournalGuidedSupport;
 }): JournalRecord {
   const feelings = feelingRatings(input.feelings, input.emotion ?? '', input.intensity);
+  const supportContext = guidedSupport(input.guidedSupport);
   return {
     id: makeId(),
     dateISO: new Date().toISOString(),
@@ -178,5 +208,6 @@ export function createJournalRecord(input: {
     sensations: list(input.sensations),
     strategies: list(input.strategies),
     source: input.source === 'lane' ? 'lane' : 'journal',
+    ...(supportContext ? { guidedSupport: supportContext } : {}),
   };
 }

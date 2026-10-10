@@ -3,11 +3,12 @@ import { Link, useParams } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
-import { loadBodyCueResources, readBodyCueResources } from '../../app/appResources';
+import { ShuffleButton } from '../../components/forms/ShuffleButton';
 import { assetPath, feelingsBySlug } from '../../data/catalog';
+import reverseInferenceJson from '../../data/reverse-inference.json';
 import { readMagnetPlayPreference } from '../../persistence/magnetLayoutStore';
 import { FeelingInference } from './FeelingInference';
-import { resolveFeelingInference, type ReverseInferenceIndex, type ZoneSuggestion } from './feelingInferenceModel';
+import { resolveFeelingInference, type ReverseInferenceIndex } from './feelingInferenceModel';
 import styles from './FeelingDetailPage.module.css';
 
 export function FeelingDetailPage() {
@@ -16,22 +17,10 @@ export function FeelingDetailPage() {
   const storageKey = `/feelings/${slug}/:0`;
   const [playMode, setPlayMode] = useState(() => readMagnetPlayPreference(storageKey));
   const [shuffleVersion, setShuffleVersion] = useState(0);
-  const [bodyCueResources, setBodyCueResources] = useState(readBodyCueResources);
 
   useEffect(() => {
     setPlayMode(readMagnetPlayPreference(storageKey));
   }, [storageKey]);
-
-  useEffect(() => {
-    if (bodyCueResources) return;
-    let active = true;
-    void loadBodyCueResources().then((resources) => {
-      if (active) setBodyCueResources(resources);
-    }).catch(() => {
-      // Feeling pages remain useful if the optional support resource cannot load.
-    });
-    return () => { active = false; };
-  }, [bodyCueResources]);
 
   const needs = useMemo<MagnetBoardItem[]>(() => (feeling?.needs ?? []).map((need) => ({
     id: `needs-${need.slug}`,
@@ -42,10 +31,9 @@ export function FeelingDetailPage() {
     iconUrl: assetPath(`icons/needs/${need.slug}.svg`),
   })), [feeling]);
   const inference = useMemo(
-    () => resolveFeelingInference(bodyCueResources?.reverseInference as ReverseInferenceIndex | null, slug),
-    [bodyCueResources, slug],
+    () => resolveFeelingInference(reverseInferenceJson as ReverseInferenceIndex, slug),
+    [slug],
   );
-  const zoneSuggestions = bodyCueResources?.supportData.QUADRANT_SUGGESTIONS as Record<string, ZoneSuggestion> | undefined;
 
   if (!feeling) {
     return (
@@ -59,20 +47,16 @@ export function FeelingDetailPage() {
 
   return (
     <article className={styles.page}>
+      <header className={styles.header}>
+        <h1>Feeling: {feeling.title}</h1>
+        <p>{feeling.summary}</p>
+      </header>
+
       {needs.length ? (
         <section className={styles.magnetSection} aria-labelledby="related-needs-heading">
           <div className={styles.sectionHeader}>
             <h2 id="related-needs-heading" className={styles.sectionTitle}>Related needs</h2>
-            <button
-              type="button"
-              className={styles.shuffle}
-              onClick={() => setShuffleVersion((current) => current + 1)}
-              aria-label="Shuffle magnets"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
-              </svg>
-            </button>
+            <ShuffleButton onClick={() => setShuffleVersion((current) => current + 1)} />
           </div>
           <div className={styles.boardWrapper}>
             <MagnetBoard
@@ -86,11 +70,6 @@ export function FeelingDetailPage() {
           </div>
         </section>
       ) : null}
-
-      <header className={styles.header}>
-        <h1>Feeling: {feeling.title}</h1>
-        <p>{feeling.summary}</p>
-      </header>
 
       {feeling.poem ? (
         <section className={styles.poem} aria-labelledby={`poem-${feeling.slug}`}>
@@ -111,7 +90,6 @@ export function FeelingDetailPage() {
           entry={inference.entry}
           feelingKey={inference.feelingKey}
           feelingTitle={feeling.title}
-          zoneSuggestions={zoneSuggestions}
         />
       ) : null}
     </article>

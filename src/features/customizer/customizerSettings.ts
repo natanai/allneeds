@@ -169,6 +169,13 @@ function relativeLuminance(hex: string) {
   return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
 }
 
+function contrastForeground(background: string) {
+  const backgroundLuminance = relativeLuminance(background);
+  const blackRatio = (backgroundLuminance + 0.05) / 0.05;
+  const whiteRatio = (relativeLuminance('#FFFFFF') + 0.05) / (backgroundLuminance + 0.05);
+  return blackRatio >= whiteRatio ? '#000000' : '#FFFFFF';
+}
+
 export function themeCssValues(theme: Pick<ThemeState, 'values' | 'roundness'>) {
   const css: Record<string, string> = {};
   (Object.keys(themeVariables) as Array<keyof ThemeValues>).forEach((key) => {
@@ -179,10 +186,9 @@ export function themeCssValues(theme: Pick<ThemeState, 'values' | 'roundness'>) 
   css['--shadow'] = `color-mix(in srgb, ${css['--outline']} 55%, transparent)`;
   css['--btn-bg'] = css['--action']!;
   css['--chip-bg'] = `color-mix(in srgb, ${css['--surface-raised']} 86%, ${css['--selection']} 14%)`;
-  const backgroundLuminance = relativeLuminance(css['--btn-bg']!);
-  const blackRatio = (backgroundLuminance + 0.05) / (relativeLuminance('#111111') + 0.05);
-  const whiteRatio = (relativeLuminance('#FFFFFF') + 0.05) / (backgroundLuminance + 0.05);
-  css['--btn-fg'] = blackRatio >= whiteRatio ? '#111111' : '#FFFFFF';
+  css['--primary-fg'] = contrastForeground(css['--primary']!);
+  css['--text-fg'] = contrastForeground(css['--text']!);
+  css['--btn-fg'] = contrastForeground(css['--btn-bg']!);
   css['--chip-fg'] = css['--btn-fg']!;
   return css;
 }

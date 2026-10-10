@@ -21,6 +21,7 @@ describe('runtime precache policy', () => {
     expect(isRuntimePrecachePath('./docs/body-scan-sourcing-review.md')).toBe(false);
     expect(isRuntimePrecachePath('./lib/observationFormula.js')).toBe(false);
     expect(isRuntimePrecachePath('./data/observation_module_blueprints.json')).toBe(false);
+    expect(isRuntimePrecachePath('./data/reverse-inference.json')).toBe(false);
     expect(isRuntimePrecachePath('./data/reverse-inference-overrides.json')).toBe(false);
   });
 
@@ -30,11 +31,10 @@ describe('runtime precache policy', () => {
       './404.html',
       './assets/index-123.js',
       './lib/observationSuggest.js',
-      './data/observation_cues.csv',
+      './data/reverse-inference.json',
     ])).toEqual([
       './index.html',
       './assets/index-123.js',
-      './data/observation_cues.csv',
     ]);
   });
 });

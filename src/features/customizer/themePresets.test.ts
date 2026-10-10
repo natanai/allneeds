@@ -3,6 +3,17 @@ import { describe, expect, it } from 'vitest';
 import { defaultTheme, themeCssValues } from './customizerSettings';
 import { resolveThemePresetName, themePresets } from './themePresets';
 
+function luminance(hex: string) {
+  const channels = [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255)
+    .map((channel) => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+}
+
+function contrast(left: string, right: string) {
+  const [light, dark] = [luminance(left), luminance(right)].sort((a, b) => b - a);
+  return (light! + 0.05) / (dark! + 0.05);
+}
+
 describe('customizer theme presets', () => {
   it('keeps a focused set of five meaningful presets', () => {
     expect(themePresets.map((preset) => preset.name)).toEqual([
@@ -66,6 +77,8 @@ describe('customizer theme presets', () => {
       expect(css['--btn-bg']).toBe(preset.values.action);
       expect(css['--corner-scale']).toBe(String(preset.roundness / 100));
       expect(css['--btn-fg']).toMatch(/^#[0-9A-F]{6}$/);
+      expect(contrast(preset.values.primary, css['--primary-fg']!)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(css['--btn-bg']!, css['--btn-fg']!)).toBeGreaterThanOrEqual(4.5);
     });
   });
 });

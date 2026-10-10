@@ -1,0 +1,85 @@
+.form {
+  padding: clamp(.52rem, 1.4vw, .68rem);
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface-raised) 96%, var(--positive) 4%);
+  box-shadow: none;
+}
+
+.formField { display: grid; gap: var(--space-1); }
+.formField > span:first-child {
+  color: var(--secondary);
+  font-size: var(--text-xs);
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+.inputCard {
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-raised) 94%, var(--positive) 6%);
+  box-shadow: none;
+}
+
+.inputCard:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--primary) 52%, transparent);
+  outline-offset: 1px;
+}
+
+.needsFormField .inputCard { overflow: visible; }
+.inputCard input,
+.inputCard textarea,
+.inputCard select {
+  width: 100%;
+  min-height: var(--control-min);
+  padding: .42rem .58rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.inputCard textarea { min-height: 4.75rem; display: block; resize: vertical; }
+.inputCard select { appearance: none; }
+.form input[type='text'],
+.form textarea {
+  min-height: var(--control-min);
+  padding: .5rem .58rem;
+  color: var(--text);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+.form textarea { min-height: 5.75rem; }
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.formActions {
+  width: 100%;
+  margin-top: .08rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-1);
+}
+
+.twoActions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 640px) {
+  .form { padding: .48rem; gap: var(--space-1); border-radius: var(--radius-lg); }
+  .form textarea { min-height: 5.25rem; }
+}
+
+@media (max-width: 360px) {
+  .formRow { grid-template-columns: 1fr; }
+}

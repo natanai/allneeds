@@ -22,7 +22,7 @@ The legacy application has a strong visual identity, content/data pipeline, and 
 - Stable slugs and useful public URL families.
 - Evidence and research metadata, including source-link validation.
 - Body-cue source data and reverse-inference behavior.
-- Observation cue/taxonomy data and the domain logic that can be isolated from the current editor.
+- Observation cue/taxonomy provenance, compiled into V2-owned deterministic source and domain logic.
 - Journal normalization and historical migration knowledge.
 - On-device privacy as the default persistence model.
 - **Visual parity by default:** the plum/lavender canvas, current page/card proportions, Atkinson Hyperlegible + Manrope typography, rose/mint/gold/sky/peach accents, dark outlines, rounded forms, tactile shadows, current navigation-magnet appearance, current doorway treatment, and existing information hierarchy.
@@ -113,7 +113,13 @@ The CSV/evidence files in production are editorial source material, not V2's com
 4. record the source production commit used for that generated snapshot;
 5. have React features consume the typed generated model, not legacy column names.
 
-`data/index.json`, `body-regions.json`, and `reverse-inference.json` are useful reference/build outputs, but their current shapes are not automatically the permanent V2 model. Migration adapters should be allowed to understand old shapes without forcing those shapes through the new UI.
+`data/index.json`, `body-regions.json`, and the descriptive `reverse-inference.json` are useful reference/build outputs, but their current shapes are not automatically the permanent V2 model. Migration adapters should be allowed to understand old shapes without forcing those shapes through the new UI.
+
+Alexithymia Support is a current canonical-source example. Editors change `src/data/alexithymiaSupport.json`; `scripts/compile-alexithymia-support.mjs` validates candidate roles, fixed Feeling routes, body-profile keys, source coverage, and fixed Feeling-shape coordinates before emitting `src/data/generated/alexithymiaSupport.json`. React and the shared clue scorer consume only that typed runtime asset. Body association strengths remain owned by `src/data/body-regions.json`; the lane references those records by key and does not copy or normalize them a second way. The former `src/legacy/alexithymia-support-data.js` runtime branch has been removed.
+
+Observation Inference 2.0 is the completed model for retiring one legacy slice. `src/data/observationInference/source.json` is its canonical hand-edited source, `scripts/compile-observation-inference.mjs` is its only compiler, and `src/data/generated/observationInference.ts` is its runtime asset. The React feature consumes the pure TypeScript domain engine in `src/domain/observationInference`; it does not import `src/legacy/observations`, fetch cue CSV/module files, or repair source data at runtime. See `docs/observation-inference-v2.md` for the full contract.
+
+Alexithymia Support's `What happened?` stage calls that same `analyzeObservation` owner and projects only exact catalog-title entities for reference links. It does not own another scanner, use fuzzy matches as silent translations, or consume Observation suggestions as Feeling or Need selections.
 
 ## State and persistence
 
@@ -131,7 +137,7 @@ Known production keys from the initial audit are recorded in `src/persistence/le
 
 For small settings and early personal-data slices, localStorage remains reasonable. The repository boundary keeps IndexedDB available later for larger journal/history datasets without coupling components to a storage engine.
 
-Unsaved Journal, Observation, Body Cues, Inventory add/edit, per-Need personal-strategy, and Alexithymia lane work uses separate schema-versioned draft stores. Drafts are debounced during interaction, flushed on page hide/mobile backgrounding and unmount, restored on return or reload, and cleared only by the feature's explicit Clear/Reset/Cancel boundary or a successful handoff/save. The guided breathing timer is deliberately not resumed mid-cycle. Browse-page search terms use session storage so Back/Forward restores the working set without turning a temporary filter into permanent personal data.
+Unsaved Journal, Observation, Body Cues, Inventory add/edit, per-Need personal-strategy, and Alexithymia lane work uses separate schema-versioned draft stores. Drafts are debounced during interaction, flushed on page hide/mobile backgrounding and unmount, restored on return or reload, and cleared only by the feature's explicit Clear/Reset/Cancel boundary or a successful handoff/save. Alexithymia draft schema v2 migrates compatible v1 clue and selected-word state at the persistence boundary while discarding removed breathing, care, and inferred-Need phases. Browse-page search terms use session storage so Back/Forward restores the working set without turning a temporary filter into permanent personal data.
 
 ## Routing
 
@@ -160,7 +166,7 @@ Basic startup is local-only. Shared strategy feeds, Cloudflare/backend account d
 
 Preloading means data and code are immediately available, not that every hidden interface subtree must already exist in the DOM. Large optional disclosures such as the Observation research guide keep their data in memory and instantiate their markup only when opened, avoiding invisible render work without introducing a fetch or route loading state.
 
-The navigation magnet surface belongs to the persistent app shell, not to an individual route. It remains the consistent first surface while normal routed pages render below it, but it scrolls normally with the document so it does not consume the mobile working viewport. Route-active, menu, ARIA, and other presentation state must not reconstruct or repack that persistent geometry when its measured dimensions have not changed. The production-parity emotions-wheel route deliberately keeps its standalone wheel shell and hides the navigation surface. Production builds generate a content-versioned service worker that precaches only public build assets, replaces old app-shell caches atomically, bypasses `/allneeds-api`, and never includes personal local data. Once installed, navigations use the version-matched cached shell first, and hashed asset matches ignore transport-only `Vary` headers so offline module loading cannot miss identical cached URLs.
+The navigation magnet surface belongs to the persistent app shell, not to an individual route. It remains the consistent first surface while routed pages render below it, but it scrolls normally with the document so it does not consume the mobile working viewport. Route-active, menu, ARIA, and other presentation state must not reconstruct or repack that persistent geometry when its measured dimensions have not changed. The emotions-wheel route keeps the same app navigation and renders its route-specific wheel workspace below it. Production builds generate a content-versioned service worker that precaches only public build assets, replaces old app-shell caches atomically, bypasses `/allneeds-api`, and never includes personal local data. Once installed, navigations use the version-matched cached shell first, and hashed asset matches ignore transport-only `Vary` headers so offline module loading cannot miss identical cached URLs.
 
 Detailed targets and follow-up work are tracked in `docs/ux-stability-roadmap.md`.
 
@@ -215,7 +221,7 @@ draft boundaries, real backup recovery, and stopped-listener/same-port reconnect
 accessibility and canonical visual-diff tooling remain milestone work rather
 than being implied by the current smoke coverage.
 
-The production build also runs `scripts/verify-production-build.mjs`. It fails when the service-worker manifest differs from `dist`, an API/external URL enters the precache, navigations or hashed assets lose their cache-first/`Vary`-safe contract, either local product font disappears, Google Fonts returns as a runtime dependency, lazy/Suspense route-loading UI is introduced, the Observation matcher skips cue/module detectors or its public copy drifts, routed features create nested `main` landmarks, route title/naming behavior disappears, shared modal focus behavior becomes incomplete, or the compact shell regresses its single Customizer entry and primary-work-before-guidance contracts.
+The production build also runs `scripts/verify-production-build.mjs`. It fails when the service-worker manifest differs from `dist`, an API/external URL enters the precache, navigations or hashed assets lose their cache-first/`Vary`-safe contract, either local product font disappears, Google Fonts returns as a runtime dependency, lazy/Suspense route-loading UI is introduced, the canonical Observation compiler/index is incomplete or a retired Observation legacy/public path returns, routed features create nested `main` landmarks, route title/naming behavior disappears, shared modal focus behavior becomes incomplete, or the compact shell regresses its single Customizer entry and primary-work-before-guidance contracts.
 
 ## GitHub Pages
 
@@ -240,7 +246,7 @@ If V2 later moves to a custom domain root, set the build base to `/` instead of 
 6. **Body Cues** — port inference math into pure TypeScript, retain current visual identity, stabilize dynamic results so slider changes do not bounce the page.
 7. **Strategy inventory** — typed personal strategy model, V2 store, legacy `nvcApp.inventory` import/export adapter.
 8. **Journal** — V2 journal repository plus adapters for `journal:v2`, `nvcApp.journal`, and `alexithymiaSupportJournal`.
-9. **Observations** — port the useful cue/taxonomy/matching modules first, then rebuild the existing experience around them with stable responsive behavior.
+9. **Observations (completed in 2.0 branch)** — one canonical V2 source and compiler, a pure synchronous inference domain, shared exact-range annotations, a single-surface editor, guaranteed exploration results, and no Observation legacy runtime or public data assets.
 10. **Alexithymia support** — compose body cues, energy/valence, possible feelings, needs, and journaling through stable progressive disclosure.
 11. **Customizer/personalization parity** — reconnect current theme/navigation options through V2 persistence boundaries.
 12. **Parity and migration hardening** — remaining content, redirects/prerender coverage, visual-regression references, full legacy import checks, performance/a11y regression suite.
