@@ -2,17 +2,48 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   extractProfileSnapshot,
+  dismissProfileReview,
+  loadProfileIntoCurrentBrowser,
   normalizeBlueskyHandle,
   resolveBlueskyHandle,
   saveCurrentBrowserToProfile,
 } from './blueskyAccount';
 
 afterEach(() => {
+  dismissProfileReview();
   vi.unstubAllGlobals();
   vi.resetModules();
 });
 
 describe('Bluesky account compatibility', () => {
+  it('compares a saved profile after sign-in without replacing device entries or asking a destructive confirm', async () => {
+    const values = new Map<string, string>([['allneeds.v2.journal', JSON.stringify({ schemaVersion: 1, data: { entries: [{ id: 'phone', dateISO: '2026-10-10T23:00:00Z', notes: 'My signed-out entry' }] } })]]);
+    const localStorage = {
+      get length() { return values.size; }, key: (index: number) => [...values.keys()][index] ?? null,
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: vi.fn((key: string, value: string) => { values.set(key, value); }),
+      removeItem: vi.fn((key: string) => { values.delete(key); }), clear: vi.fn(),
+    };
+    const confirm = vi.fn();
+    vi.stubGlobal('window', { localStorage, confirm, allneedsSession: { did: 'did:plc:review', handle: 'test.example', verified: true, admin: false } });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: 'ok', settings: [{ key: 'allneeds_export_v1', value: JSON.stringify({ localStorage: {} }) }] }))));
+    await expect(loadProfileIntoCurrentBrowser()).resolves.toBe('review');
+    expect(localStorage.setItem).not.toHaveBeenCalled();
+    expect(localStorage.clear).not.toHaveBeenCalled();
+    expect(confirm).not.toHaveBeenCalled();
+    expect(values.get('allneeds.v2.journal')).toContain('My signed-out entry');
+  });
+
+  it.each([503, 401])('keeps local data when profile comparison fails with HTTP %s', async (status) => {
+    const setItem = vi.fn();
+    const clear = vi.fn();
+    vi.stubGlobal('window', { localStorage: { setItem, clear }, allneedsSession: { did: 'did:plc:offline-review', verified: true } });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{}', { status })));
+    await expect(loadProfileIntoCurrentBrowser()).rejects.toThrow('device data has been left in place');
+    expect(setItem).not.toHaveBeenCalled();
+    expect(clear).not.toHaveBeenCalled();
+  });
+
   it('restores a recently verified session without another backend call on page reload', async () => {
     vi.resetModules();
     const local = new Map<string, string>([['allneeds:bsky-session-hint', 'active']]);

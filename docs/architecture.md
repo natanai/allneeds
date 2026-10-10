@@ -123,6 +123,8 @@ Alexithymia Support's `What happened?` stage calls that same `analyzeObservation
 
 ## State and persistence
 
+Account OAuth returns and explicit profile loads use the same read-only comparison boundary. The account adapter fetches the saved snapshot without mutating browser storage and exposes a review to the mounted app shell. `profileReconciliation` compares Journal/Inventory IDs and content through repository adapters, validates persisted formats before merging, and preserves both conflicting versions with stable copy IDs. Device-only values are not removed when profile settings are selected; device drafts always win locally. Before any application writes, a schema-versioned, device-local recovery record holds both original snapshots. A failed recovery write aborts the operation; failed application writes roll back touched keys. The recovery record is excluded from ordinary exports/profile uploads to prevent recursive backups, and each original can be downloaded explicitly from Account & data. A user must separately choose to save the combined browser data to their profile; sign-in and comparison do not upload personal data.
+
 - Prefer local component state for transient interaction.
 - Add feature context only for state that genuinely spans a feature subtree.
 - Do not add a global state library until a concrete cross-feature problem justifies one.
