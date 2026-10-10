@@ -55,7 +55,7 @@ export function OverlayShell({
           <h2 id={headingId}>{title}</h2>
           <button type="button" className={styles.close} onClick={onClose} aria-label={closeLabel} {...(closeInitialFocus ? { 'data-dialog-initial-focus': true } : {})}>×</button>
         </header>
-        <div className={`${styles.body} ${bodyClassName}`.trim()}>{children}</div>
+        <div className={`${styles.body} ${bodyClassName}`.trim()} data-overlay-body>{children}</div>
       </section>
     </div>,
     document.body,

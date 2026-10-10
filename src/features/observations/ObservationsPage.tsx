@@ -352,7 +352,7 @@ export function ObservationsPage() {
         closeInitialFocus
         bodyClassName={styles.dialogBody}
       >
-        <div data-observation-dialog-body>{helpTopic ? infoCopy(helpTopic) : null}</div>
+        <div>{helpTopic ? infoCopy(helpTopic) : null}</div>
       </OverlayShell>
     </article>
   );

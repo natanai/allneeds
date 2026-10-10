@@ -1235,6 +1235,10 @@
 
   .wordSearch,
   .segmented { background: color-mix(in srgb, var(--surface-raised) 96%, var(--quiet) 4%); }
+  .wordAlternatives {
+    margin-bottom: calc(var(--control-min) + 1rem + env(safe-area-inset-bottom));
+    scroll-margin-bottom: calc(var(--control-min) + 1rem + env(safe-area-inset-bottom));
+  }
   .wordAlternatives { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wordAlternatives .sectionLabel { grid-column: 1 / -1; }
 

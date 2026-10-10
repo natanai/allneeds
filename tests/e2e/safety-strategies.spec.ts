@@ -5,6 +5,7 @@ test('Safety excludes migrated profile strategies while retaining the curated co
 
   const deck = page.locator('[data-strategy-deck]');
   await expect(deck.locator('article')).toHaveCount(5);
+  await page.getByRole('button', { name: 'View all' }).click();
 
   for (const title of [
     'Comfy gaming',

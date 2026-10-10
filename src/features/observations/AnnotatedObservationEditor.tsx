@@ -134,7 +134,13 @@ function plainText(root: HTMLElement) {
 
 function insertPlainText(root: HTMLElement, text: string) {
   root.focus();
-  if (document.execCommand('insertText', false, text)) return;
+  const normalized = text.replace(/\r\n?/g, '\n');
+  const asHtml = normalized
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '&#10;');
+  if (document.execCommand(normalized.includes('\n') ? 'insertHTML' : 'insertText', false, normalized.includes('\n') ? asHtml : normalized)) return;
   const selection = window.getSelection();
   if (!selection) return;
   let range: Range;
@@ -146,7 +152,7 @@ function insertPlainText(root: HTMLElement, text: string) {
     range.collapse(false);
   }
   range.deleteContents();
-  const node = document.createTextNode(text);
+  const node = document.createTextNode(normalized);
   range.insertNode(node);
   range.setStartAfter(node);
   range.collapse(true);
@@ -277,7 +283,7 @@ export function AnnotatedObservationEditor({
       if (!editor) return;
       insertPlainText(editor, '\n');
       emitText();
-    } else if (nativeEvent.inputType.startsWith('format')) {
+    } else if (nativeEvent.inputType?.startsWith('format')) {
       event.preventDefault();
     }
   };

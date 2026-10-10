@@ -6,7 +6,7 @@ test('mobile check-in opens as a focused workspace without forcing the keyboard'
   await page.getByRole('button', { name: 'Start check-in' }).click();
 
   const checkIn = page.locator('article[aria-label^="Feeling word support:"]');
-  const textarea = page.getByLabel('What happened?');
+  const textarea = page.getByRole('textbox', { name: 'What happened?', exact: true });
   await expect(checkIn).toBeVisible();
   await expect(textarea).toBeVisible();
 

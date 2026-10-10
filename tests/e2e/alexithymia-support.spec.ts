@@ -41,7 +41,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await startCheckIn(page);
 
-  await page.getByLabel('What happened?').fill('I felt blamed and wanted understanding when we stopped talking.');
+  await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('I felt blamed and wanted understanding when we stopped talking.');
   await expect(page.getByRole('link', { name: /Blamed.*Faux Feeling/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /Understanding.*Need/ })).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();

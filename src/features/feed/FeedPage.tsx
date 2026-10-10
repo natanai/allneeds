@@ -347,7 +347,7 @@ export function FeedPage() {
                       compact
                       saved={isSaved}
                       label={isSaved ? '' : 'Save'}
-                      aria-label={isSaved ? `${strategyTitle} is saved to this device` : `Save ${strategyTitle} to this device`}
+                      aria-label={isSaved ? `${strategyTitle} is saved to inventory` : `Save ${strategyTitle} to this device`}
                       title={isSaved ? 'Saved to device' : 'Save to device'}
                       onClick={() => save(strategy)}
                     />

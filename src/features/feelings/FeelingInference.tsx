@@ -159,7 +159,7 @@ export function FeelingInference({
         closeInitialFocus
         bodyClassName={styles.popoverBody}
       >
-        <div data-feeling-evidence-body>
+        <div>
               <ul className={styles.evidenceList}>
                 {evidence.supports.map((support) => (
                   <li key={`${support.label}|${support.ref ?? ''}|${support.href ?? ''}`}>

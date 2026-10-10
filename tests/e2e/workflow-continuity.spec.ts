@@ -19,7 +19,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await page.goto('/observations');
   const editor = page.getByLabel('What did you notice?');
   await editor.fill(observation);
-  const loadMatches = page.getByRole('button', { name: 'Load possible feelings and needs' });
+  const loadMatches = page.getByRole('button', { name: 'Explore possible feelings and needs' });
   await expect(loadMatches).toBeEnabled();
   await loadMatches.click();
   await page.getByRole('radio', { name: 'Met', exact: true }).click();
@@ -137,7 +137,7 @@ test('Inventory and per-Need strategy drafts restore independently and clear aft
   await page.reload();
   await expect(inventoryForm.getByLabel('Strategy name')).toHaveValue('Ask for a quiet hour');
   await page.locator('#inventory-form-shell > summary').click();
-  await inventoryForm.getByRole('button', { name: 'Device', exact: true }).click();
+  await inventoryForm.getByRole('button', { name: 'Save to device', exact: true }).click();
   await page.reload();
   await expect(inventoryForm.getByLabel('Strategy name')).toHaveValue('');
   await expect(inventoryForm.getByLabel('How do you put it into practice?')).toHaveValue('');
@@ -155,7 +155,7 @@ test('Inventory and per-Need strategy drafts restore independently and clear aft
   needForm = page.locator('#suggestion-form');
   await expect(needForm.getByLabel('Strategy name')).toHaveValue('Send a caring message');
   await expect(needForm.getByLabel('How do you put it into practice?')).toHaveValue('Choose one person and send a specific appreciation.');
-  await needForm.getByRole('button', { name: 'Device', exact: true }).click();
+  await needForm.getByRole('button', { name: 'Save to device', exact: true }).click();
   await page.reload();
   await expect(needForm.getByLabel('Strategy name')).toHaveValue('');
   await expect(needForm.getByRole('button', { name: 'Needs', exact: true })).toContainText('Love/Caring');
@@ -173,7 +173,7 @@ test('a downloaded device backup restores removed Inventory data through the vis
   const needPicker = inventoryForm.getByRole('dialog', { name: 'Choose one or more needs' });
   await needPicker.getByRole('option', { name: 'Peace', exact: true }).click();
   await needPicker.getByRole('button', { name: 'Done', exact: true }).click();
-  await inventoryForm.getByRole('button', { name: 'Device', exact: true }).click();
+  await inventoryForm.getByRole('button', { name: 'Save to device', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Backup restoration walk' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Open menu' }).click();
@@ -208,7 +208,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   const runtimeProblems = collectRuntimeProblems(page);
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Start check-in' }).click();
-  await page.getByLabel('What happened?').fill('We stopped talking after dinner.');
+  await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('We stopped talking after dinner.');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: /Body Choose sensations/ }).click();
   const bodySheet = page.getByRole('dialog', { name: 'Body clues' });
