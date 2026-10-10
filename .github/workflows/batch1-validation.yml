@@ -1,8 +1,6 @@
 name: Full repository validation
 
 on:
-  push:
-    branches: [site-test]
   workflow_dispatch:
 
 permissions:
@@ -35,21 +33,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run full browser regression suite serially
-        run: >-
-          pnpm exec playwright test --workers=2
-          tests/e2e/alexithymia-support-mobile-ux.spec.ts
-          tests/e2e/alexithymia-support.spec.ts
-          tests/e2e/connection-content.spec.ts
-          tests/e2e/native-stability.spec.ts
-          tests/e2e/nav-rendering-and-orientation.spec.ts
-          tests/e2e/need-strategy-width.spec.ts
-          tests/e2e/observation-inference.spec.ts
-          tests/e2e/safety-strategies.spec.ts
-          tests/e2e/shared-feed-mobile-layout.spec.ts
-          tests/e2e/shared-feed-refresh.spec.ts
-          tests/e2e/startup-nav-readiness.spec.ts
-          tests/e2e/support-content.spec.ts
-          tests/e2e/workflow-continuity.spec.ts
+        run: pnpm exec playwright test --workers=1
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
