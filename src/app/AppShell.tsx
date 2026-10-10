@@ -172,11 +172,6 @@ export function AppShell() {
   }, []);
 
   useLayoutEffect(() => {
-    if (wheelRoute) {
-      markAppShellVisualReady();
-      return;
-    }
-
     const wrapper = navBoardWrapperRef.current;
     if (!wrapper) return;
     const markWhenReady = () => {
@@ -195,7 +190,7 @@ export function AppShell() {
       attributeFilter: ['data-ready'],
     });
     return () => observer.disconnect();
-  }, [wheelRoute]);
+  }, []);
 
   const navItems = useMemo<MagnetBoardItem[]>(() => {
     const items: Array<MagnetBoardItem & { setting?: NavItemId }> = [
@@ -349,20 +344,18 @@ export function AppShell() {
       <ScrollAndFocusManager />
       <a className="skip-link" href="#main-content">Skip to content</a>
 
-      {wheelRoute ? null : (
-        <nav className={styles.nav} aria-label="Primary">
-          <div ref={navBoardWrapperRef} className={styles.navBoardWrapper}>
-            <MagnetBoard
-              items={navItems}
-              playMode={navPlayMode}
-              onPlayModeChange={setNavPlayMode}
-              storageKey="site-nav"
-              variant="nav"
-              ariaLabel="Primary navigation magnets"
-            />
-          </div>
-        </nav>
-      )}
+      <nav className={styles.nav} aria-label="Primary">
+        <div ref={navBoardWrapperRef} className={styles.navBoardWrapper}>
+          <MagnetBoard
+            items={navItems}
+            playMode={navPlayMode}
+            onPlayModeChange={setNavPlayMode}
+            storageKey="site-nav"
+            variant="nav"
+            ariaLabel="Primary navigation magnets"
+          />
+        </div>
+      </nav>
 
       <Breadcrumbs />
 
