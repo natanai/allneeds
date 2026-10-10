@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
+import { ShuffleButton } from '../../components/forms/ShuffleButton';
 import { assetPath, feelingsBySlug } from '../../data/catalog';
 import reverseInferenceJson from '../../data/reverse-inference.json';
 import { readMagnetPlayPreference } from '../../persistence/magnetLayoutStore';
@@ -46,20 +47,16 @@ export function FeelingDetailPage() {
 
   return (
     <article className={styles.page}>
+      <header className={styles.header}>
+        <h1>Feeling: {feeling.title}</h1>
+        <p>{feeling.summary}</p>
+      </header>
+
       {needs.length ? (
         <section className={styles.magnetSection} aria-labelledby="related-needs-heading">
           <div className={styles.sectionHeader}>
             <h2 id="related-needs-heading" className={styles.sectionTitle}>Related needs</h2>
-            <button
-              type="button"
-              className={styles.shuffle}
-              onClick={() => setShuffleVersion((current) => current + 1)}
-              aria-label="Shuffle magnets"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
-              </svg>
-            </button>
+            <ShuffleButton onClick={() => setShuffleVersion((current) => current + 1)} />
           </div>
           <div className={styles.boardWrapper}>
             <MagnetBoard
@@ -73,11 +70,6 @@ export function FeelingDetailPage() {
           </div>
         </section>
       ) : null}
-
-      <header className={styles.header}>
-        <h1>Feeling: {feeling.title}</h1>
-        <p>{feeling.summary}</p>
-      </header>
 
       {feeling.poem ? (
         <section className={styles.poem} aria-labelledby={`poem-${feeling.slug}`}>

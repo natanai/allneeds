@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChangeEvent, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
-import { isTransientLocalStorageKey } from '../../persistence/transientStorage';
+import { downloadBrowserBackup, restoreBrowserBackup } from '../../persistence/browserBackup';
 import {
   loadProfileIntoCurrentBrowser,
   saveCurrentBrowserToProfile,
@@ -90,35 +90,6 @@ function localTime(isoTime: string) {
   }).format(date);
 }
 
-function captureLocalStorage(includeTransient = false) {
-  const snapshot: Record<string, string> = {};
-  for (let index = 0; index < window.localStorage.length; index += 1) {
-    const key = window.localStorage.key(index);
-    if (key && (includeTransient || !isTransientLocalStorageKey(key))) {
-      snapshot[key] = window.localStorage.getItem(key) ?? '';
-    }
-  }
-  return snapshot;
-}
-
-function downloadBackup() {
-  const payload = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    inventory: readInventory(),
-    localStorage: captureLocalStorage(),
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `nvc-localstorage-backup-${new Date().toISOString().replace(/:/g, '-')}.json`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
 export function AppMenu({
   open,
   pathname,
@@ -162,7 +133,7 @@ export function AppMenu({
   };
 
   const exportAll = () => {
-    downloadBackup();
+    downloadBrowserBackup();
     setStatus({ target: 'device', message: 'Backup downloaded.' });
   };
 
@@ -266,36 +237,17 @@ export function AppMenu({
     } finally { setAccountBusy(false); }
   };
 
-  const importAll = async (event: ChangeEvent<HTMLInputElement>) => {
+  const importAll = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
     try {
-      const parsed: unknown = JSON.parse(await file.text());
-      const snapshot = parsed && typeof parsed === 'object' && 'localStorage' in parsed
-        ? (parsed as { localStorage?: unknown }).localStorage
-        : null;
-      if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new Error('Invalid backup');
-      if (!window.confirm('Replace this browser’s current allneeds data with the selected backup?')) {
+      const result = await restoreBrowserBackup(file);
+      if (result.status === 'canceled') {
         setStatus({ target: 'device', message: 'Restore canceled. No changes were made.' });
         return;
       }
-      const previous = captureLocalStorage(true);
-      const transient = Object.fromEntries(Object.entries(previous).filter(([key]) => isTransientLocalStorageKey(key)));
-      try {
-        window.localStorage.clear();
-        Object.entries(snapshot).forEach(([key, value]) => {
-          if (!isTransientLocalStorageKey(key)) {
-            window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
-          }
-        });
-        Object.entries(transient).forEach(([key, value]) => window.localStorage.setItem(key, value));
-        synchronizeCustomizerMirrors(snapshot as Record<string, unknown>);
-      } catch (error) {
-        window.localStorage.clear();
-        Object.entries(previous).forEach(([key, value]) => window.localStorage.setItem(key, value));
-        throw error;
-      }
+      synchronizeCustomizerMirrors(result.snapshot);
       setStatus({ target: 'device', message: 'Backup restored. Reloading this local app…' });
       window.setTimeout(() => window.location.reload(), 120);
     } catch {
@@ -336,16 +288,16 @@ export function AppMenu({
                 <MenuLink to="/needs" label="Needs" pathname={pathname} onClose={onClose} />
                 <MenuLink to="/feelings/body-cues" label="Body cues" pathname={pathname} onClose={onClose} />
                 <MenuLink to="/faux-feelings" label="Faux feelings" pathname={pathname} onClose={onClose} />
-                <MenuLink to="/alexithymia-support" label="Guided check-in" note="Start with what you can notice" pathname={pathname} onClose={onClose} />
+                <MenuLink to="/alexithymia-support" label="Feeling word support" note="Start with what you can notice" pathname={pathname} onClose={onClose} />
               </section>
 
               <section className={styles.section} aria-labelledby="menu-practice">
                 <h3 id="menu-practice">Your practice</h3>
                 <MenuLink to="/inventory" label="Strategy inventory" note="Your personal library of what helps" count={inventoryCount} pathname={pathname} onClose={onClose} />
                 <button type="button" className={styles.row} onClick={openJournal}>
-                  <span className={styles.rowCopy}><span className={styles.rowTitle}>Journal</span><span className={styles.rowNote}>Check in with what is present now</span></span>
+                  <span className={styles.rowCopy}><span className={styles.rowTitle}>New journal entry</span><span className={styles.rowNote}>Check in with what is present now</span></span>
                 </button>
-                <MenuLink to="/inventory/journal" label="History" pathname={pathname} onClose={onClose} />
+                <MenuLink to="/inventory/journal" label="Journal history" pathname={pathname} onClose={onClose} />
               </section>
 
               <section className={styles.section} aria-labelledby="menu-discover">

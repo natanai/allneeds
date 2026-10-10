@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
-import { useDialogFocus } from '../../app/useDialogFocus';
+import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
+import { OverlayShell } from '../../components/overlays/OverlayShell';
 import observationGuide from '../../data/observationGuide.json';
 import { analyzeObservation, suggestionBasisSummary } from '../../domain/observationInference';
 import type { ObservationDraft } from '../../persistence/workflowDrafts';
@@ -91,10 +92,6 @@ export function ObservationsPage() {
   const [feelingsMode, setFeelingsMode] = useState<'unmet' | 'met'>(initialDraft?.feelingsMode ?? 'unmet');
   const [helpTopic, setHelpTopic] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
-  const helpDialogRef = useDialogFocus<HTMLElement>({
-    open: Boolean(helpTopic),
-    onClose: () => setHelpTopic(null),
-  });
   const guideRef = useRef<HTMLDetailsElement>(null);
   const draftRef = useRef<ObservationDraft>({ text, feelingsMode, showSuggestions, showExample });
   draftRef.current = { text, feelingsMode, showSuggestions, showExample };
@@ -260,14 +257,11 @@ export function ObservationsPage() {
                             </div>
                           </section>
                         </div>
-                        <details className={styles.why}>
-                          <summary><span><strong>Why these?</strong><small>How these were chosen</small></span><span aria-hidden="true">›</span></summary>
-                          <div className={styles.basis}>
+                        <DisclosureRow title="Why these?" description="How these were chosen" bodyClassName={styles.basis}>
                             <div><p>{suggestionBasisSummary(analysis.suggestions)}</p><button type="button" className={`${styles.infoButton} ${styles.subtle}`} onClick={() => setHelpTopic('matching')} aria-label="How matching works">i</button></div>
                             {eventEvidence.slice(0, 2).map((entry) => <p key={entry.id}>{entry.explanation}</p>)}
                             {evidenceText.length ? <p>Text that contributed: {evidenceText.map((entry) => `“${entry}”`).join(', ')}.</p> : null}
-                          </div>
-                        </details>
+                        </DisclosureRow>
                       </>
                     ) : (
                       <section className={styles.noResults} data-testid="observation-no-suggestions">
@@ -282,13 +276,10 @@ export function ObservationsPage() {
               </section>
 
               {detectedEntities.length ? (
-                <details className={styles.detectedLanguage}>
-                  <summary><span><strong>Recognized words</strong><small>{detectedEntities.length} {detectedEntities.length === 1 ? 'word' : 'words'}</small></span><span aria-hidden="true">›</span></summary>
-                  <div>
+                <DisclosureRow title="Recognized words" description={`${detectedEntities.length} ${detectedEntities.length === 1 ? 'word' : 'words'}`}>
                     <div className={styles.detectedLinks}>{detectedEntities.map((entity) => <Link key={`${entity.entityType}:${entity.slug}`} to={entityRoute(entity.entityType, entity.slug)}><span>{entity.text}</span><small>{entityTypeLabel(entity.entityType)} · {entity.title}</small></Link>)}</div>
                     {detectedEntities.some((entity) => entity.entityType === 'fauxFeeling') ? <p className={styles.termHelp}>A Faux Feeling may combine an emotion with an interpretation of what happened. The label does not mean the event was unreal.</p> : null}
-                  </div>
-                </details>
+                </DisclosureRow>
               ) : null}
             </div>
 
@@ -316,10 +307,9 @@ export function ObservationsPage() {
                 {showExample ? <div><p>“{EXAMPLE}”</p><button type="button" onClick={() => updateText(EXAMPLE)}>Insert this example</button></div> : null}
               </div>
 
-              <details className={styles.recipeDisclosure}>
-                <summary><span><strong>Observation recipe</strong><small>Step-by-step prompts</small></span><span aria-hidden="true">›</span></summary>
-                <div className={styles.recipe} aria-label="Observation recipe"><ObservationRecipe onOpenGuide={openGuide} /></div>
-              </details>
+              <DisclosureRow title="Observation recipe" description="Step-by-step prompts" bodyClassName={styles.recipe}>
+                <div aria-label="Observation recipe"><ObservationRecipe onOpenGuide={openGuide} /></div>
+              </DisclosureRow>
             </aside>
           </div>
 
@@ -334,7 +324,7 @@ export function ObservationsPage() {
       </section>
 
       <section className={styles.overview}>
-        <details><summary><span><strong>Why add concrete details?</strong><small>What this writing step can do</small></span><span aria-hidden="true">›</span></summary><div><p>Concrete details can make a specific moment easier to remember, explain, or discuss. They do not prove someone’s intent, and they do not replace your feelings or interpretation.</p><div><span>Time</span><span>Place or people</span><span>What you saw or heard</span><span>Number or exact words (optional)</span></div></div></details>
+        <DisclosureRow variant="section" title="Why add concrete details?" description="What this writing step can do" bodyClassName={styles.overviewBody}><p>Concrete details can make a specific moment easier to remember, explain, or discuss. They do not prove someone’s intent, and they do not replace your feelings or interpretation.</p><div><span>Time</span><span>Place or people</span><span>What you saw or heard</span><span>Number or exact words (optional)</span></div></DisclosureRow>
       </section>
 
       <details ref={guideRef} id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
@@ -354,14 +344,16 @@ export function ObservationsPage() {
         </div> : null}
       </details>
 
-      {helpTopic ? (
-        <div className={styles.dialogBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setHelpTopic(null); }}>
-          <section ref={helpDialogRef} className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="observation-help-title" tabIndex={-1}>
-            <header><h2 id="observation-help-title">Observation help</h2><button type="button" onClick={() => setHelpTopic(null)} aria-label="Close observation help" data-dialog-initial-focus>×</button></header>
-            <div className={styles.dialogBody} data-observation-dialog-body>{infoCopy(helpTopic)}</div>
-          </section>
-        </div>
-      ) : null}
+      <OverlayShell
+        open={Boolean(helpTopic)}
+        title="Observation help"
+        titleId="observation-help-title"
+        onClose={() => setHelpTopic(null)}
+        closeInitialFocus
+        bodyClassName={styles.dialogBody}
+      >
+        <div data-observation-dialog-body>{helpTopic ? infoCopy(helpTopic) : null}</div>
+      </OverlayShell>
     </article>
   );
 }

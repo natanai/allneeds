@@ -16,6 +16,7 @@ describe('route presentation', () => {
     expect(routePresentation('/feelings/body-cues').label).toBe('Body cues');
     expect(routePresentation('/feed').label).toBe('Shared strategies');
     expect(routePresentation('/alexithymia-support').label).toBe('Feeling word support');
+    expect(routePresentation('/design-lab/need-magnets').label).toBe('Need magnet audit');
   });
 
   it('distinguishes the journal composer from history', () => {

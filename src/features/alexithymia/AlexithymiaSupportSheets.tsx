@@ -1,9 +1,8 @@
-import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
 
-import { useDialogFocus } from '../../app/useDialogFocus';
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
+import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { assetPath, needs } from '../../data/catalog';
 import { describeCueIntensity } from '../bodyCues/bodyCueMath';
 import type { CandidateClueScore, ShapeSelections } from './alexithymiaMath';
@@ -44,31 +43,10 @@ export function SupportSheet({
   children,
   wide = false,
 }: SupportSheetProps) {
-  const dialogRef = useDialogFocus<HTMLElement>({ open, onClose });
-  if (!open) return null;
-  return createPortal(
-    <div className={styles.sheetBackdrop} role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) onClose();
-    }}>
-      <section
-        ref={dialogRef}
-        className={`${styles.sheet} ${wide ? styles.sheetWide : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        tabIndex={-1}
-      >
-        <div className={styles.sheetHandle} aria-hidden="true" />
-        <header className={styles.sheetHeader}>
-          <h2 id={titleId}>{title}</h2>
-          <button type="button" className={styles.iconButton} onClick={onClose} aria-label={`Close ${title}`}>
-            <CloseIcon />
-          </button>
-        </header>
-        <div className={styles.sheetBody}>{children}</div>
-      </section>
-    </div>,
-    document.body,
+  return (
+    <OverlayShell open={open} variant="sheet" title={title} titleId={titleId} onClose={onClose} wide={wide}>
+      {children}
+    </OverlayShell>
   );
 }
 

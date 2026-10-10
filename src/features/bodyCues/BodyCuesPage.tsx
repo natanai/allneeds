@@ -64,6 +64,10 @@ export function BodyCuesPage() {
 
   return (
     <div className={styles.page}>
+      <header className={styles.pageHeader}>
+        <h1>Body cues</h1>
+        <p>Notice what stands out, then compare possible Feeling words.</p>
+      </header>
       <div className={styles.explorer}>
         <section
           className={styles.resultsPanel}
@@ -135,7 +139,7 @@ export function BodyCuesPage() {
 
         <section className={styles.sliderPanel} aria-labelledby="body-cues-heading">
           <header className={styles.sliderHeader}>
-            <h2 id="body-cues-heading">Body cues</h2>
+            <h2 id="body-cues-heading">Cue intensity</h2>
             <p className={styles.instructions}>Move a slider only when a cue fits. Leave everything else off.</p>
             <p className={styles.activeCount}>{activeCount} {activeCount === 1 ? 'cue' : 'cues'} selected</p>
           </header>

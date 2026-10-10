@@ -115,10 +115,8 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 **Accepted 2026-08-24.** The canonical Shuffle treatment is the icon-only crossed-arrows control used on the Feelings and Needs magnet browsers.
 
 Canonical references:
-- `src/features/feelings/FeelingsPage.tsx`
-- `src/features/feelings/FeelingsPage.module.css` (`.shuffle`)
-- `src/features/needs/NeedsPage.tsx`
-- `src/features/needs/NeedsPage.module.css` (`.shuffle`)
+- `src/components/forms/ShuffleButton.tsx`
+- `src/components/forms/ShuffleButton.module.css`
 
 Visual/interaction contract:
 - crossed-arrows shuffle SVG, not a circular refresh arrow;
@@ -303,7 +301,53 @@ Rules:
 - On ordinary phone widths, the signed-in utility row should remain on one line when those compact controls fit. Do not widen the document or introduce horizontal scrolling to force the row; very narrow screens may wrap as a fallback.
 - Feed scope, sort, Bluesky sign-in gating for Following, refresh/cache behavior, Needs-supported details, owner Edit, moderation controls, and inventory-save behavior must not be lost during visual cleanup.
 
+## Cross-page visual grammar
+
+**Accepted 2026-10-10.** Repetition is a maintenance defect when two screens perform the same job with different markup, behavior, or styling. Prefer deleting a local implementation and using the smallest existing shared primitive. A wrapper that only renames markup is not a useful abstraction.
+
+### Canonical recurring elements
+
+| UI job | Canonical implementation | Contract |
+| --- | --- | --- |
+| Catalogue search and browse controls | `CatalogToolbar` | Search is the dominant field; adjacent utilities use the shared control height and do not introduce a second toolbar language. |
+| Shuffle | `ShuffleButton` | One crossed-arrows icon, accessible name, shared tactile surface, and shared target size everywhere. |
+| Need selection | `NeedCatalogPicker` | One searchable Need vocabulary and selection state. Full-screen support flows may change layout, not the Need data or selection meaning. |
+| Strategy composition | `StrategyForm` | One field order, validation path, persistence path, and signed-in sharing extension. |
+| Device/profile save | `SaveControl` | Device and profile are explicit destinations; saved state is passive and accessible; feature pages do not redraw these controls. |
+| Dialog, sheet, or full-screen task | `OverlayShell` | One backdrop, header, close action, focus trap, Escape behavior, and body region. App navigation and the nonmodal Customizer are intentional shell-level exceptions. |
+| Expandable supporting content | `DisclosureRow` | One summary-row rhythm, chevron, target size, and open-state treatment. Native semantic `details` behavior remains intact. |
+| Browser data backup | `browserBackup` | Menu and Journal call one capture/download/restore implementation with one version and transient-key policy. |
+| Strategy result card | Shared strategy tokens | `Positive` surface, strong `Outline`, `radius-3xl`, `shadow-small`, content-first hierarchy, and compact utilities across Need, Inventory, and Feed. |
+
+### Page-family rules
+
+| Routes | Primary visual language | Allowed specific identity |
+| --- | --- | --- |
+| `/` | One route heading and three equal navigation choices using functional color roles. | The three-door mark and fixed upper arch are protected brand geometry; lower corners still use Customizer roundness. |
+| `/feelings`, `/needs`, `/faux-feelings` | Shared catalogue hierarchy: title, compact toolbar, then browse surface. | Need and Feeling content may use their canonical magnet/icon artwork, but not separate control chrome. |
+| `/feelings/:slug`, `/needs/:slug`, `/faux-feelings/:slug` | Route heading precedes related content; evidence is secondary; actions use shared utilities. | Need strategy decks retain their approved direct-manipulation behavior. |
+| `/observations`, `/feelings/body-cues`, `/alexithymia-support` | One task heading, progressively disclosed guidance, and a clearly dominant next action. | Specialized editors and clue workspaces may own internal layout, while overlays and disclosures remain shared. |
+| `/inventory`, `/feed`, Need-page strategies | One strategy-card family and one save-destination language. | Feed filters, inventory editing, and deck navigation remain task-specific utilities. |
+| `/inventory/journal` | `Journal history` names the route; `New journal entry` names compose mode; Need selection, disclosures, overlays, and backup are shared. | The focused editor may use the full-screen `OverlayShell` variant. |
+| `/feelings/emotions-wheel` | Normal app navigation plus a readable grouped list available beside the graphic. | The radial wheel is a visualization, not a replacement navigation system. |
+| App menu, Customizer, Design Lab, not-found | Shell vocabulary, functional tokens, standard targets, and explicit route names. | App menu is navigation; Customizer is nonmodal; Design Lab may expose audit-only detail without creating production patterns. |
+
+### Token and hierarchy rules
+
+- Every route has one visible `h1` that names the page or current task. Nested regions begin at `h2`; card titles do not impersonate page headings.
+- Ordinary surfaces, text, outlines, semantic states, radii, spacing, shadows, type sizes, motion, and interactive minimum heights derive from Customizer-backed tokens. Feature CSS may compose tokens but must not create a parallel theme.
+- The default interactive minimum is 44px. Smaller marks are allowed only when they are noninteractive status or artwork.
+- Fixed colors are limited to asset masks, mathematically derived contrast endpoints, and explicitly approved identity artwork. The Home arch, Need art, and emotion-wheel geometry are not permission to hard-code surrounding UI.
+- Choice groups use native radio semantics or an equivalent named `radiogroup`; selected state uses the shared selection roles. Do not add a component merely to hide already-readable native markup.
+- A visually unique implementation is justified only by a unique task or protected identity. Record the exception here when it is introduced.
+
 ## Decision log
+
+### 2026-10-10
+
+- Consolidated repeated shuffle, save, overlay, disclosure, Need-picker, strategy-form, and browser-backup implementations into the canonical elements above.
+- Restored route-heading consistency, normal navigation on the emotions wheel, a readable wheel-list alternative, and Customizer ownership of ordinary feature surfaces and controls.
+- Added derived accessible foreground roles for Primary and Text colors so user-selected palettes retain readable high-emphasis content without adding more Customizer settings.
 
 ### 2026-08-30
 

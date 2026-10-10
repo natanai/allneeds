@@ -240,7 +240,7 @@ export function AppShell() {
       {
         id: 'nav-journal',
         setting: 'journal',
-        label: 'Journal',
+        label: 'New entry',
         to: '/inventory/journal?compose=new',
         tone: 'action',
         kind: 'nav',
@@ -296,7 +296,7 @@ export function AppShell() {
       {
         id: 'nav-journal-dashboard',
         setting: 'journalDashboard',
-        label: 'History',
+        label: 'Journal history',
         to: '/inventory/journal',
         tone: 'action',
         kind: 'nav',

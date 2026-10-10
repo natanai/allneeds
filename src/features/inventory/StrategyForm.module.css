@@ -1,17 +1,17 @@
 .form {
   padding: clamp(.52rem, 1.4vw, .68rem);
   display: grid;
-  gap: .42rem;
+  gap: var(--space-2);
   border: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
   border-radius: var(--radius-xl);
   background: color-mix(in srgb, var(--surface-raised) 96%, var(--positive) 4%);
   box-shadow: none;
 }
 
-.formField { display: grid; gap: .16rem; }
+.formField { display: grid; gap: var(--space-1); }
 .formField > span:first-child {
   color: var(--secondary);
-  font-size: .72rem;
+  font-size: var(--text-xs);
   font-weight: 720;
   line-height: 1.2;
 }
@@ -36,7 +36,7 @@
 .inputCard textarea,
 .inputCard select {
   width: 100%;
-  min-height: 44px;
+  min-height: var(--control-min);
   padding: .42rem .58rem;
   border: 0;
   outline: 0;
@@ -49,10 +49,10 @@
 .inputCard select { appearance: none; }
 .form input[type='text'],
 .form textarea {
-  min-height: 44px;
+  min-height: var(--control-min);
   padding: .5rem .58rem;
   color: var(--text);
-  font-size: .84rem;
+  font-size: var(--text-sm);
   line-height: 1.35;
 }
 .form textarea { min-height: 5.75rem; }
@@ -60,7 +60,7 @@
 .formRow {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .34rem;
+  gap: var(--space-1);
 }
 
 .formActions {
@@ -68,81 +68,16 @@
   margin-top: .08rem;
   display: grid;
   grid-template-columns: 1fr;
-  gap: .34rem;
+  gap: var(--space-1);
 }
 
-.formActions:has(.profileAction:not(:disabled)) {
+.twoActions {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.appAction {
-  min-width: 44px;
-  min-height: 44px;
-  padding: .56rem .78rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .42rem;
-  border: 1px solid color-mix(in srgb, var(--outline) 32%, transparent);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--surface-raised) 92%, var(--quiet) 8%);
-  box-shadow: 0 2px 0 color-mix(in srgb, var(--outline) 10%, transparent);
-  color: var(--text);
-  font: 650 .9rem/1 var(--font-body);
-  cursor: pointer;
-}
-
-.appAction::before {
-  content: '';
-  width: 1.05rem;
-  height: 1.05rem;
-  flex: 0 0 auto;
-  background: currentColor;
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: contain;
-  -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-}
-
-.deviceAction::before {
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M11 3h2v8.17l2.59-2.58L17 10l-5 5-5-5 1.41-1.41L11 11.17V3ZM5 17h14v3H5v-3Z'/%3E%3C/svg%3E");
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M11 3h2v8.17l2.59-2.58L17 10l-5 5-5-5 1.41-1.41L11 11.17V3ZM5 17h14v3H5v-3Z'/%3E%3C/svg%3E");
-}
-
-.profileAction::before {
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z'/%3E%3C/svg%3E");
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z'/%3E%3C/svg%3E");
-}
-
-.primaryAction { background: color-mix(in srgb, var(--action) 76%, var(--surface-raised) 24%); }
-.secondaryAction { background: color-mix(in srgb, var(--surface-raised) 88%, var(--quiet) 12%); }
-.appAction:hover:not(:disabled),
-.appAction:focus-visible:not(:disabled) {
-  transform: none;
-  border-color: var(--outline);
-  box-shadow: 0 3px 8px color-mix(in srgb, var(--outline) 13%, transparent);
-}
-.appAction:disabled { opacity: .46; cursor: not-allowed; }
-.form .appAction { border-radius: var(--radius-lg); box-shadow: none; font-size: .76rem; font-weight: 720; }
-.form .profileAction:disabled { display: none; }
-
-.compactAction {
-  min-width: 0;
-  min-height: 38px;
-  padding: .4rem .58rem;
-  gap: .3rem;
-  border-radius: var(--radius-pill);
-  box-shadow: none;
-  font-size: .72rem;
-}
-.compactAction::before { width: .9rem; height: .9rem; }
-
 @media (max-width: 640px) {
-  .form { padding: .48rem; gap: .36rem; border-radius: var(--radius-lg); }
+  .form { padding: .48rem; gap: var(--space-1); border-radius: var(--radius-lg); }
   .form textarea { min-height: 5.25rem; }
-  .compactAction { min-height: 44px; padding: .34rem .54rem; font-size: .7rem; }
 }
 
 @media (max-width: 360px) {

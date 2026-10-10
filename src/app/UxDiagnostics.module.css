@@ -9,17 +9,17 @@
   overflow: auto;
   border: 2px solid var(--outline);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, #fff 94%, var(--quiet) 6%);
-  box-shadow: 0 8px 0 color-mix(in srgb, var(--outline) 30%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 94%, var(--quiet) 6%);
+  box-shadow: var(--shadow-medium);
   color: var(--text);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
 }
 
 .panel header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .panel header strong {
@@ -36,14 +36,14 @@
   margin: 0.55rem 0 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.35rem;
+  gap: var(--space-1);
 }
 
 .panel dl div {
   min-width: 0;
   padding: 0.35rem 0.45rem;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--selection) 45%, #fff 55%);
+  background: color-mix(in srgb, var(--selection) 45%, var(--surface-raised) 55%);
 }
 
 .panel dt {

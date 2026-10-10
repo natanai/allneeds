@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
-import { useDialogFocus } from '../../app/useDialogFocus';
+import { OverlayShell } from '../../components/overlays/OverlayShell';
 import {
   collectFeelingEvidence,
   formatZoneLabel,
@@ -65,10 +65,6 @@ export function FeelingInference({
   const [expanded, setExpanded] = useState(false);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
-  const evidenceDialogRef = useDialogFocus<HTMLElement>({
-    open: evidenceOpen,
-    onClose: () => setEvidenceOpen(false),
-  });
   const groups = useMemo(() => groupBodyCues(entry.bodyCues ?? []), [entry.bodyCues]);
   const evidence = useMemo(
     () => collectFeelingEvidence(entry, feelingKey),
@@ -155,23 +151,15 @@ export function FeelingInference({
         </div>
       ) : null}
 
-      {evidenceOpen ? (
-        <div className={styles.popoverBackdrop} role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setEvidenceOpen(false);
-        }}>
-          <section
-            ref={evidenceDialogRef}
-            className={styles.popover}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={evidenceTitleId}
-            tabIndex={-1}
-          >
-            <header className={styles.popoverHeader}>
-              <h3 id={evidenceTitleId}>Why these?</h3>
-              <button type="button" onClick={() => setEvidenceOpen(false)} data-dialog-initial-focus>Close</button>
-            </header>
-            <div className={styles.popoverBody} data-feeling-evidence-body>
+      <OverlayShell
+        open={evidenceOpen}
+        title="Why these?"
+        titleId={evidenceTitleId}
+        onClose={() => setEvidenceOpen(false)}
+        closeInitialFocus
+        bodyClassName={styles.popoverBody}
+      >
+        <div data-feeling-evidence-body>
               <ul className={styles.evidenceList}>
                 {evidence.supports.map((support) => (
                   <li key={`${support.label}|${support.ref ?? ''}|${support.href ?? ''}`}>
@@ -184,10 +172,8 @@ export function FeelingInference({
               </ul>
               <h4>Limitations</h4>
               <ul className={styles.limitations}>{evidence.limitations.map((limitation) => <li key={limitation}>{limitation}</li>)}</ul>
-            </div>
-          </section>
         </div>
-      ) : null}
+      </OverlayShell>
     </section>
   );
 }

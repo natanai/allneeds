@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
+import { SaveControl } from '../../components/forms/SaveControl';
 import {
   loadSharedFeedResources,
   readSharedFeedResources,
@@ -339,16 +340,17 @@ export function FeedPage() {
                     </details>
                   ) : null}
                   {!reviewHidden ? (
-                    <button
-                      className={styles.saveButton}
+                    <SaveControl
+                      className={styles.feedSave}
                       type="button"
-                      disabled={isSaved}
-                      aria-label={isSaved ? `${strategyTitle} is saved to inventory` : `Save ${strategyTitle} to inventory`}
-                      title={isSaved ? 'Saved to inventory' : 'Save to inventory'}
+                      target="device"
+                      compact
+                      saved={isSaved}
+                      label={isSaved ? '' : 'Save'}
+                      aria-label={isSaved ? `${strategyTitle} is saved to this device` : `Save ${strategyTitle} to this device`}
+                      title={isSaved ? 'Saved to device' : 'Save to device'}
                       onClick={() => save(strategy)}
-                    >
-                      {isSaved ? <span className={styles.srOnly}>Saved</span> : 'Save'}
-                    </button>
+                    />
                   ) : null}
                 </div>
                 {contributorLabel || timestamp ? (

@@ -5,18 +5,18 @@
 
 .trigger {
   width: 100%;
-  min-height: 44px;
+  min-height: var(--control-min);
   padding: .38rem .7rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: .7rem;
+  gap: var(--space-3);
   border: 0;
   border-radius: inherit;
   background: transparent;
   box-shadow: none;
   color: var(--text);
-  font: 500 .94rem/1.25 var(--font-body);
+  font: 500 var(--text-sm)/1.25 var(--font-body);
   text-align: left;
   cursor: pointer;
 }
@@ -46,7 +46,7 @@
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
   transform: rotate(45deg);
-  transition: transform .16s ease;
+  transition: transform var(--motion-fast);
 }
 
 .trigger[aria-expanded='true'] .chevron {
@@ -66,7 +66,7 @@
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
   border-radius: var(--radius-lg);
-  background: #fff;
+  background: var(--surface-raised);
   box-shadow: 0 14px 30px color-mix(in srgb, var(--outline) 20%, transparent);
 }
 
@@ -77,12 +77,12 @@
 
 .toolbar input {
   width: 100%;
-  min-height: 42px;
+  min-height: var(--control-min);
   padding: .45rem .62rem;
   border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
   border-radius: var(--radius-md);
   outline: 0;
-  background: color-mix(in srgb, #fff 92%, var(--quiet) 8%);
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--quiet) 8%);
   color: var(--text);
   font: inherit;
 }
@@ -100,31 +100,31 @@
 
 .option {
   width: 100%;
-  min-height: 44px;
+  min-height: var(--control-min);
   padding: .48rem .58rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: .6rem;
+  gap: var(--space-2);
   border: 0;
   border-radius: var(--radius-md);
   background: transparent;
   box-shadow: none;
   color: var(--text);
-  font: 600 .88rem/1.2 var(--font-body);
+  font: 600 var(--text-sm)/1.2 var(--font-body);
   text-align: left;
   cursor: pointer;
 }
 
 .option:hover,
 .option:focus-visible {
-  background: color-mix(in srgb, var(--selection) 20%, #fff 80%);
+  background: color-mix(in srgb, var(--selection) 20%, var(--surface-raised) 80%);
   transform: none;
   box-shadow: none;
 }
 
 .option[aria-selected='true'] {
-  background: color-mix(in srgb, var(--positive) 48%, #fff 52%);
+  background: color-mix(in srgb, var(--positive) 48%, var(--surface-raised) 52%);
 }
 
 .check {
@@ -135,7 +135,7 @@
   justify-content: center;
   border: 1px solid color-mix(in srgb, var(--outline) 38%, transparent);
   border-radius: 50%;
-  font-size: .75rem;
+  font-size: var(--text-xs);
 }
 
 .option[aria-selected='true'] .check {
@@ -147,29 +147,29 @@
   margin: 0;
   padding: .8rem;
   color: var(--secondary);
-  font-size: .85rem;
+  font-size: var(--text-sm);
 }
 
 .footer {
   padding: .45rem .5rem;
   display: flex;
   justify-content: space-between;
-  gap: .5rem;
+  gap: var(--space-2);
   border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
 }
 
 .footer button {
-  min-height: 40px;
+  min-height: var(--control-min);
   padding: .4rem .7rem;
   border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
   border-radius: var(--radius-md);
-  background: #fff;
+  background: var(--surface-raised);
   box-shadow: none;
   color: var(--text);
-  font: 700 .8rem/1 var(--font-body);
+  font: 700 var(--text-sm)/1 var(--font-body);
   cursor: pointer;
 }
 
 .footer button:last-child {
-  background: color-mix(in srgb, var(--action) 68%, #fff 32%);
+  background: color-mix(in srgb, var(--action) 68%, var(--surface-raised) 32%);
 }

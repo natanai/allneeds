@@ -6,14 +6,14 @@
 .pageHeader {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .topline {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
   flex-wrap: nowrap;
 }
 
@@ -21,7 +21,7 @@
   margin: 0;
   max-width: 100%;
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, calc(0.75rem + 3.6vw), 2.5rem);
+  font-size: clamp(1.25rem, calc(var(--text-xs) + 3.6vw), 2.5rem);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-wrap: balance;
@@ -29,27 +29,27 @@
 
 .actions {
   display: flex;
-  gap: 0.4rem;
+  gap: var(--space-2);
   flex-wrap: nowrap;
 }
 
 .action {
-  min-height: 44px;
+  min-height: var(--control-min);
   padding: 0.55rem 1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 1px solid color-mix(in srgb, var(--outline) 22%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, #ffffff 95%, var(--selection) 5%);
+  background: color-mix(in srgb, var(--surface-raised) 95%, var(--selection) 5%);
   color: color-mix(in srgb, var(--outline) 75%, var(--secondary) 25%);
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
 .actionGhost {
-  background: color-mix(in srgb, var(--btn-bg) 12%, #ffffff 88%);
+  background: color-mix(in srgb, var(--btn-bg) 12%, var(--surface-raised) 88%);
 }
 
 .action:hover,
@@ -59,7 +59,7 @@
 
 .magnetSection {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .sectionHeader {
@@ -68,13 +68,13 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.6rem;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .sectionTitle {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: var(--text-lg);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -87,14 +87,14 @@
   justify-content: center;
   border: 2px solid color-mix(in srgb, var(--outline) 40%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--quiet) 22%, #ffffff);
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--outline) 28%, transparent);
+  background: color-mix(in srgb, var(--quiet) 22%, var(--surface-raised));
+  box-shadow: var(--shadow-small);
 }
 
 .wheelLink:hover,
 .wheelLink:focus-visible {
   transform: translateY(-1px);
-  box-shadow: 0 6px 0 color-mix(in srgb, var(--outline) 34%, transparent);
+  box-shadow: var(--shadow-small);
 }
 
 .wheelIcon {
@@ -110,7 +110,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: var(--space-1);
   border: 2px solid var(--outline);
   border-radius: var(--radius-lg);
   color: var(--outline);
@@ -122,7 +122,7 @@
 .altLink:hover,
 .altLink:focus-visible {
   transform: translateY(-1px);
-  background: color-mix(in srgb, #ffffff 88%, var(--secondary) 12%);
+  background: color-mix(in srgb, var(--surface-raised) 88%, var(--secondary) 12%);
 }
 
 .boardWrapper {
@@ -134,27 +134,27 @@
   padding: 1rem;
   border: 2px dashed var(--outline);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
 }
 
 @media (max-width: 640px) {
   .topline {
-    gap: 0.45rem;
+    gap: var(--space-2);
   }
 
   .action {
     padding: 0.34rem 0.52rem;
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
   }
 
   .sectionTitle {
-    font-size: clamp(1rem, 4.2vw, 1.2rem);
+    font-size: clamp(var(--text-base), 4.2vw, var(--text-lg));
   }
 
   .altLink {
     margin-left: 0;
     padding: 0.32rem 0.5rem;
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
   }
 
 }

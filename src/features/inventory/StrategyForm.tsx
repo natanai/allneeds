@@ -1,6 +1,7 @@
 import type { FormEventHandler } from 'react';
 
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
+import { SaveControl } from '../../components/forms/SaveControl';
 import type { NeedStrategyDraft } from '../../persistence/workflowDrafts';
 import { StrategySharingFields } from './StrategySharingFields';
 import styles from './StrategyForm.module.css';
@@ -59,9 +60,9 @@ export function StrategyForm({
         </label>
       </div>
       <StrategySharingFields signedIn={signedIn} />
-      <div className={styles.formActions}>
-        <button type="submit" name="save-target" value="device" className={`${styles.appAction} ${styles.primaryAction} ${styles.deviceAction}`}>Save to device</button>
-        <button type="submit" name="save-target" value="profile" className={`${styles.appAction} ${styles.secondaryAction} ${styles.profileAction}`} disabled={!signedIn}>Save to profile</button>
+      <div className={`${styles.formActions} ${signedIn ? styles.twoActions : ''}`}>
+        <SaveControl type="submit" name="save-target" value="device" target="device" />
+        <SaveControl type="submit" name="save-target" value="profile" target="profile" disabled={!signedIn} />
       </div>
     </form>
   );

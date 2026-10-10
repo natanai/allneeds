@@ -17,6 +17,7 @@ const exactRouteLabels: Record<string, string> = {
   '/inventory/journal': 'Journal history',
   '/feed': 'Shared strategies',
   '/alexithymia-support': 'Feeling word support',
+  '/design-lab/need-magnets': 'Need magnet audit',
 };
 
 const segmentLabels: Record<string, string> = {
@@ -30,6 +31,7 @@ const segmentLabels: Record<string, string> = {
   'alexithymia-support': 'Feeling word support',
   'emotions-wheel': 'Emotions wheel',
   feed: 'Shared strategies',
+  'design-lab': 'Design lab',
 };
 
 function normalizedPathname(pathname: string) {

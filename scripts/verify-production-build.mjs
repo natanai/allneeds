@@ -239,9 +239,11 @@ if (!/\.customizerButton\s*\{\s*display:\s*none;?\s*\}/.test(compactAppShellStyl
 
 const observationsSource = await readFile(resolve(root, 'src/features/observations/ObservationsPage.tsx'), 'utf8');
 const observationEditorSource = await readFile(resolve(root, 'src/features/observations/AnnotatedObservationEditor.tsx'), 'utf8');
+const disclosureSource = await readFile(resolve(root, 'src/components/disclosure/DisclosureRow.tsx'), 'utf8');
+const disclosureStyles = await readFile(resolve(root, 'src/components/disclosure/DisclosureRow.module.css'), 'utf8');
 const alexithymiaSource = await readFile(resolve(root, 'src/features/alexithymia/AlexithymiaSupportPage.tsx'), 'utf8');
 const observationFooterIndex = observationsSource.indexOf(`<footer className={styles.footer}>`);
-const observationRecipeIndex = observationsSource.indexOf(`<details className={styles.recipeDisclosure}>`);
+const observationRecipeIndex = observationsSource.indexOf(`<DisclosureRow title="Observation recipe"`);
 const observationOverviewIndex = observationsSource.indexOf(`<section className={styles.overview}>`);
 if (observationRecipeIndex < 0
   || observationFooterIndex < observationRecipeIndex
@@ -271,9 +273,10 @@ if (!observationEditorSource.includes('contentEditable')
 }
 
 const observationStyles = await readFile(resolve(root, 'src/features/observations/ObservationsPage.module.css'), 'utf8');
-if (!/<details className=\{styles\.recipeDisclosure\}>\s*<summary>/.test(observationsSource)
-  || !observationStyles.includes('.recipeDisclosure > summary')
-  || !observationStyles.includes('.recipeDisclosure[open] > summary > span:last-child')
+if (!disclosureSource.includes('<details className=')
+  || !disclosureSource.includes('<summary>')
+  || !disclosureStyles.includes('.root summary')
+  || !disclosureStyles.includes('.root[open] summary > span:last-child')
   || !/\.supportRail\s*\{[^}]*display:\s*grid;/.test(observationStyles)) {
   fail('the Observation recipe no longer uses the approved progressive-disclosure support-rail pattern.');
 }

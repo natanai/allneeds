@@ -14,8 +14,8 @@ const publicRoutes: RouteExpectation[] = [
   { path: '/', label: 'Home', title: 'allneeds.app' },
   { path: '/feelings', label: 'Feelings' },
   { path: '/feelings/hurt', label: 'Feeling: Hurt' },
-  { path: '/feelings/body-cues', label: 'Body cues', requiresHeading: false },
-  { path: '/feelings/emotions-wheel', label: 'Emotions wheel', navVisible: false },
+  { path: '/feelings/body-cues', label: 'Body cues' },
+  { path: '/feelings/emotions-wheel', label: 'Emotions wheel' },
   { path: '/needs', label: 'Needs' },
   { path: '/needs/love-caring', label: 'Need for love/caring' },
   { path: '/faux-feelings', label: 'Faux feelings' },
@@ -42,6 +42,7 @@ function collectRuntimeProblems(page: Page) {
 for (const reference of [
   { name: 'desktop', viewport: { width: 1280, height: 900 } },
   { name: 'mobile', viewport: { width: 390, height: 844 } },
+  { name: 'narrow', viewport: { width: 320, height: 720 } },
 ] as const) {
   test.describe(`${reference.name} routed shell`, () => {
     test.use({ viewport: reference.viewport });

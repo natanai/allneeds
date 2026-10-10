@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 
+import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import styles from './EmotionsWheelPage.module.css';
 
 type WheelEntry = { label: string; to: string };
@@ -11,7 +12,7 @@ type WheelGroup = WheelEntry & {
 
 const groups: WheelGroup[] = [
   {
-    label: 'Joyful', to: '/feelings/joyful', color: '#b5df8c',
+    label: 'Joyful', to: '/feelings/joyful', color: 'var(--positive)',
     ring2: [
       { label: 'Excited', to: '/feelings/excited' }, { label: 'Inspired', to: '/feelings/inspired' },
       { label: 'Calm', to: '/feelings/calm' }, { label: 'Hopeful', to: '/feelings/hopeful' },
@@ -24,7 +25,7 @@ const groups: WheelGroup[] = [
     ],
   },
   {
-    label: 'Sad', to: '/feelings/sad', color: '#b7c1f0',
+    label: 'Sad', to: '/feelings/sad', color: 'var(--selection)',
     ring2: [
       { label: 'Hurt', to: '/feelings/hurt' }, { label: 'Lonely', to: '/feelings/lonely' },
       { label: 'Powerless', to: '/feelings/powerless' }, { label: 'Disappointment', to: '/feelings/disappointment' },
@@ -37,7 +38,7 @@ const groups: WheelGroup[] = [
     ],
   },
   {
-    label: 'Angry', to: '/feelings/angry', color: '#f4a4be',
+    label: 'Angry', to: '/feelings/angry', color: 'var(--action)',
     ring2: [
       { label: 'Frustrated', to: '/feelings/frustrated' }, { label: 'Upset', to: '/feelings/upset' },
       { label: 'Irritated', to: '/feelings/irritated' }, { label: 'Enraged', to: '/feelings/enraged' },
@@ -50,7 +51,7 @@ const groups: WheelGroup[] = [
     ],
   },
   {
-    label: 'Scared', to: '/feelings/scared', color: '#f6c48f',
+    label: 'Scared', to: '/feelings/scared', color: 'var(--attention)',
     ring2: [
       { label: 'Fear', to: '/feelings/fear' }, { label: 'Anxious', to: '/feelings/anxious' },
       { label: 'Frightened', to: '/feelings/frightened' }, { label: 'Terrified', to: '/feelings/terrified' },
@@ -63,7 +64,7 @@ const groups: WheelGroup[] = [
     ],
   },
   {
-    label: 'Confused', to: '/feelings/confused', color: '#92dad3',
+    label: 'Confused', to: '/feelings/confused', color: 'color-mix(in srgb, var(--primary) 28%, var(--quiet) 72%)',
     ring2: [
       { label: 'Bewildered', to: '/feelings/bewildered' }, { label: 'Embarrassed', to: '/feelings/embarrassed' },
       { label: 'Shocked', to: '/faux-feelings/threatened' }, { label: 'Misunderstood', to: '/faux-feelings/misunderstood' },
@@ -155,6 +156,17 @@ export function EmotionsWheelPage() {
         </div>
         <p className={styles.help}>Tip: the outer ring includes a few synonyms that route to existing supported pages.</p>
       </section>
+
+      <DisclosureRow variant="card" title="Browse as a list" description="The same words in a readable layout" defaultOpen>
+        <div className={styles.listGrid}>
+          {groups.map((group) => (
+            <section key={group.label} className={styles.listGroup} style={{ '--group-color': group.color } as React.CSSProperties}>
+              <h2><Link to={group.to}>{group.label}</Link></h2>
+              <div>{[...group.ring2, ...group.ring3].map((entry) => <Link key={`${entry.label}:${entry.to}`} to={entry.to}>{entry.label}</Link>)}</div>
+            </section>
+          ))}
+        </div>
+      </DisclosureRow>
     </div>
   );
 }

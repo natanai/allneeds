@@ -10,7 +10,7 @@
   backdrop-filter: blur(6px);
   cursor: pointer;
   user-select: none;
-  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  transition: transform var(--motion-fast), box-shadow var(--motion-fast), background-color var(--motion-fast);
 }
 
 .toggle:hover,
@@ -51,7 +51,7 @@
   width: 0.72rem;
   height: 0.72rem;
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, #ffffff 88%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
   box-shadow: 0 1px 4px color-mix(in srgb, var(--outline) 20%, transparent);
   transform: translate3d(0, -50%, 0);
   transition: transform 200ms ease, box-shadow 200ms ease;

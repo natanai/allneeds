@@ -1,29 +1,29 @@
 .section {
   display: grid;
-  gap: 0.7rem;
+  gap: var(--space-3);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  gap: 0.8rem;
+  gap: var(--space-3);
   align-items: start;
 }
 
 .card {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3);
   min-width: 0;
   padding: 0.95rem;
   border: 2px solid var(--outline);
   border-radius: var(--radius-2xl);
-  background: color-mix(in srgb, var(--quiet) 78%, #fff 22%);
-  box-shadow: 0 6px 0 color-mix(in srgb, var(--outline) 16%, transparent);
+  background: color-mix(in srgb, var(--quiet) 78%, var(--surface-raised) 22%);
+  box-shadow: var(--shadow-small);
 }
 
 .cardHeader {
   display: grid;
-  gap: 0.18rem;
+  gap: var(--space-1);
 }
 
 .title,
@@ -35,24 +35,24 @@
 
 .title {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.25;
 }
 
 .cue {
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
   font-style: italic;
   color: color-mix(in srgb, var(--text) 76%, var(--secondary));
 }
 
 .summary {
-  font-size: 0.93rem;
+  font-size: var(--text-sm);
   line-height: 1.52;
 }
 
 .sourceGroup {
   display: grid;
-  gap: 0.5rem;
+  gap: var(--space-2);
   padding-top: 0.1rem;
 }
 
@@ -60,27 +60,27 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .sourceLabel {
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 @media (max-width: 640px) {
   .section {
-    gap: 0.55rem;
+    gap: var(--space-2);
   }
 
   .grid {
-    gap: 0.7rem;
+    gap: var(--space-3);
   }
 
   .card {
     padding: 0.8rem;
-    box-shadow: 0 4px 0 color-mix(in srgb, var(--outline) 14%, transparent);
+    box-shadow: var(--shadow-small);
   }
 }
