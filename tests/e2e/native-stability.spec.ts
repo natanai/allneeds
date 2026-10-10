@@ -122,21 +122,21 @@ test('saved customizer settings survive reload without opening the customizer', 
   await expect(customizer.getByRole('textbox', { name: 'Primary emphasis', exact: true })).toHaveValue('#123456');
   await expect(customizer.getByLabel('Preset', { exact: true })).toHaveValue('');
 
-  const tiltSwitch = customizer.getByRole('switch');
+  const tiltSwitch = customizer.getByRole('switch', { name: 'Device tilt access', exact: true });
   const tiltCapability = await page.evaluate(() => {
     const orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission?: unknown };
     return { available: typeof orientation !== 'undefined', permissionRequired: typeof orientation?.requestPermission === 'function' };
   });
   if (!tiltCapability.available) {
-    await expect(tiltSwitch).toHaveText('Unavailable');
+    await expect(tiltSwitch).toHaveText('—');
     await expect(tiltSwitch).toHaveAttribute('aria-checked', 'false');
     await expect(tiltSwitch).toBeDisabled();
   } else if (!tiltCapability.permissionRequired) {
-    await expect(tiltSwitch).toHaveText('On');
+    await expect(tiltSwitch).toHaveText('✓');
     await expect(tiltSwitch).toHaveAttribute('aria-checked', 'true');
     await expect(tiltSwitch).toBeDisabled();
   } else {
-    await expect(tiltSwitch).toHaveText('Request permission');
+    await expect(tiltSwitch).toHaveText('Allow');
     await expect(tiltSwitch).toHaveAttribute('aria-checked', 'false');
     await expect(tiltSwitch).toBeEnabled();
   }

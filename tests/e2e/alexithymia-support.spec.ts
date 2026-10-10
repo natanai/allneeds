@@ -12,7 +12,7 @@ async function skipObservation(page: Page) {
 }
 
 async function addTwoBodyCues(page: Page) {
-  await page.getByRole('button', { name: /^Body clues/ }).click();
+  await page.locator('section[aria-labelledby="alex-stage-two"] button').filter({ hasText: 'Body clues' }).click();
   const sheet = page.getByRole('dialog', { name: 'Body clues' });
   await sheet.getByRole('button', { name: /Tight or constricted/ }).click();
   await sheet.getByLabel('Tight or constricted intensity').fill('70');

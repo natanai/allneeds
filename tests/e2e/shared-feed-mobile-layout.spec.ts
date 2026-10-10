@@ -113,8 +113,9 @@ test('keeps signed-in Shared Strategies compact and contained on mobile', async 
       visibilityWidth: visibility?.getBoundingClientRect().width ?? Number.POSITIVE_INFINITY,
       editWidth: edit?.getBoundingClientRect().width ?? Number.POSITIVE_INFINITY,
       savedWidth: saved?.getBoundingClientRect().width ?? Number.POSITIVE_INFINITY,
-      utilityTopSpread: utilityRects.length
-        ? Math.max(...utilityRects.map((rect) => rect.top)) - Math.min(...utilityRects.map((rect) => rect.top))
+      utilityCenterSpread: utilityRects.length
+        ? Math.max(...utilityRects.map((rect) => rect.top + rect.height / 2))
+          - Math.min(...utilityRects.map((rect) => rect.top + rect.height / 2))
         : Number.POSITIVE_INFINITY,
     };
   });
@@ -128,5 +129,5 @@ test('keeps signed-in Shared Strategies compact and contained on mobile', async 
   expect(geometry.visibilityWidth).toBeLessThanOrEqual(34);
   expect(geometry.editWidth).toBeLessThanOrEqual(44);
   expect(geometry.savedWidth).toBeLessThanOrEqual(44);
-  expect(geometry.utilityTopSpread).toBeLessThanOrEqual(2);
+  expect(geometry.utilityCenterSpread).toBeLessThanOrEqual(2);
 });

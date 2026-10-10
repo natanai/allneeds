@@ -46,6 +46,8 @@ const HIGHLIGHT_NAMES: HighlightName[] = [
   'observation-active',
 ];
 
+const CARET_SENTINEL = '\u200B';
+
 function routeForEvidence(evidence: ObservationEvidence) {
   if (evidence.kind !== 'entity') return null;
   if (evidence.entityType === 'feeling') return `/feelings/${evidence.slug}`;
@@ -114,7 +116,7 @@ function selectionOffset(root: HTMLElement) {
   } catch {
     return null;
   }
-  return range.toString().length;
+  return range.toString().replaceAll(CARET_SENTINEL, '').length;
 }
 
 function restoreSelection(root: HTMLElement, offset: number) {
@@ -129,11 +131,16 @@ function restoreSelection(root: HTMLElement, offset: number) {
 }
 
 function plainText(root: HTMLElement) {
-  return (root.textContent ?? '').replace(/\r\n?/g, '\n');
+  return (root.textContent ?? '').replaceAll(CARET_SENTINEL, '').replace(/\r\n?/g, '\n');
 }
 
 function insertPlainText(root: HTMLElement, text: string, preserveUndo = true) {
   root.focus();
+  if (root.textContent?.includes(CARET_SENTINEL)) {
+    const offset = selectionOffset(root) ?? plainText(root).length;
+    root.textContent = plainText(root);
+    restoreSelection(root, offset);
+  }
   const normalized = text.replace(/\r\n?/g, '\n');
   const asHtml = normalized
     .replace(/&/g, '&amp;')
@@ -159,6 +166,10 @@ function insertPlainText(root: HTMLElement, text: string, preserveUndo = true) {
   const nextOffset = prefix.toString().length + normalized.length;
   range.insertNode(node);
   root.normalize();
+  if (normalized === '\n' && nextOffset === (root.textContent ?? '').length) {
+    root.append(document.createTextNode(CARET_SENTINEL));
+    root.normalize();
+  }
   restoreSelection(root, nextOffset);
 }
 
@@ -262,9 +273,11 @@ export function AnnotatedObservationEditor({
   const normalizeAndEmit = () => {
     const editor = editorRef.current;
     if (!editor) return;
-    if (editor.querySelector('*')) {
+    if (editor.querySelector('*') || editor.textContent?.includes(CARET_SENTINEL)) {
       const offset = selectionOffset(editor) ?? plainText(editor).length;
-      const next = editor.innerText.replace(/\r\n?/g, '\n');
+      const next = (editor.querySelector('*') ? editor.innerText : editor.textContent ?? '')
+        .replaceAll(CARET_SENTINEL, '')
+        .replace(/\r\n?/g, '\n');
       editor.textContent = next;
       restoreSelection(editor, Math.min(offset, next.length));
     }
