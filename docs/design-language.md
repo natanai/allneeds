@@ -361,7 +361,7 @@ Rules:
 - Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, the Paper Magnet app icon, and the Open Monochrome social lockup. Body Cues remains text-only and ordinary site icons remain unchanged.
 - Leveled the three framed home artworks to restore deliberate symmetry and split the introductory copy at sentence boundaries on narrow screens.
 - Renamed the public feature to `Alexithymia support` everywhere user-facing. A shared product-language constant prevents route, menu, home, page, and accessibility labels from drifting again.
-- Inventory uses one compact count pouch: the familiar circular success counter is reshaped into the pouch body and finished with a small cinched tie. It remains within the navigation magnet's standard line height and is reused at a larger size beside the Inventory page title.
+- Inventory uses one compact count pouch: the familiar circular success counter is reshaped into the pouch body and finished with a small cinched tie. It remains within the navigation magnet's standard line height and is reused at a larger size beside the Inventory page title. The count is optically aligned with adjacent text and uses the Customizer-derived Primary foreground (black or white, whichever contrasts more strongly with Primary).
 
 ### 2026-10-10
 
