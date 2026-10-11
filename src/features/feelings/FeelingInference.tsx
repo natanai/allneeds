@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
 import { OverlayShell } from '../../components/overlays/OverlayShell';
+import { ALEXITHYMIA_SUPPORT_LABEL } from '../../data/productLanguage';
 import {
   collectFeelingEvidence,
   formatZoneLabel,
@@ -90,7 +91,7 @@ export function FeelingInference({
   }
 
   return (
-    <section className={styles.wrapper} aria-label={`Feeling word support for ${feelingTitle}`}>
+    <section className={styles.wrapper} aria-label={`${ALEXITHYMIA_SUPPORT_LABEL} for ${feelingTitle}`}>
       <button
         type="button"
         className={styles.toggle}
@@ -99,7 +100,7 @@ export function FeelingInference({
         onClick={togglePanel}
       >
         <span className={styles.toggleCopy}>
-          <span className={styles.badge}>Feeling word support</span>
+          <span className={styles.badge}>{ALEXITHYMIA_SUPPORT_LABEL}</span>
           <span className={styles.toggleLabel}>How this feeling may show up</span>
         </span>
       </button>

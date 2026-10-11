@@ -256,7 +256,6 @@
 }
 
 .nav .action { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
-.nav .action { background: color-mix(in srgb, var(--action) 78%, var(--surface-raised) 22%); }
 .nav .positive { background: color-mix(in srgb, var(--positive) 78%, var(--surface-raised) 22%); }
 .nav .attention { background: color-mix(in srgb, var(--attention) 72%, var(--surface-raised) 28%); }
 
@@ -308,6 +307,12 @@
   height: 100%;
 }
 
+.nav [data-magnet-id='nav-inventory'] .icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  order: 2;
+}
+
 .label {
   position: relative;
   z-index: 1;
@@ -343,18 +348,6 @@
   font-weight: 800;
   line-height: 1;
   text-transform: uppercase;
-}
-
-.count {
-  min-width: 1.5rem;
-  padding: 0.2rem 0.45rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-pill);
-  background: var(--text);
-  color: var(--text-fg);
-  font-size: var(--text-xs);
 }
 
 /* Desktop Chromium/Edge rasterize the always-transformed nav magnets softly at

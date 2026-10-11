@@ -14,13 +14,13 @@ Zero-intensity cues are omitted. Within the reviewed candidate set, a selected c
 
 Data ownership
 
-The selectable regions, small body cues, and fixed links to possible words are owned in src/data/body-regions.json. Both Body Cues and Feeling word support use the same calculation over that source. Older reverse weights are retained only for descriptive details on Feeling pages; they are not used to rank words.
+The selectable regions, small body cues, and fixed links to possible words are owned in src/data/body-regions.json. Both Body Cues and Alexithymia support use the same calculation over that source. Older reverse weights are retained only for descriptive details on Feeling pages; they are not used to rank words.
 
 Evidence and limits
 
 Published body-map studies support the broad observation that people report partly differentiable bodily patterns after emotion prompts or stimuli. They do not directly validate this app's thirty micro-cue descriptions, exact intensity bands, exact association strengths, or the reverse question “given this sensation, which emotion is present?” The current micro-cue map is an authored editorial model undergoing a claim-level audit, not an empirically calibrated classifier.
 
-Body reports can reflect physiology, action preparation, learned concepts or metaphors, health, medication, culture, context, and individual differences. Body awareness is therefore one optional source of information. A person can use the full Body Cues page by itself, combine body clues with Overall feeling ratings in Feeling word support, or skip body clues.
+Body reports can reflect physiology, action preparation, learned concepts or metaphors, health, medication, culture, context, and individual differences. Body awareness is therefore one optional source of information. A person can use the full Body Cues page by itself, combine body clues with Overall feeling ratings in Alexithymia support, or skip body clues.
 
 Sources
 

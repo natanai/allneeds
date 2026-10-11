@@ -16,6 +16,7 @@ import {
   writeInventory,
 } from './inventoryRepository';
 import type { InventoryStrategy } from './inventoryRepository';
+import { InventoryMark } from './InventoryMark';
 import {
   downloadStrategyForNat,
   personalStrategiesEmailHref,
@@ -307,7 +308,10 @@ export function InventoryPage() {
     <article className={styles.page}>
       <header className={styles.header}>
         <div className={styles.headingCopy}>
-          <h1>Strategy inventory</h1>
+          <div className={styles.headingTitle}>
+            <InventoryMark count={inventory.length} className={styles.headingMark} />
+            <h1>Strategy inventory</h1>
+          </div>
           <p>Build a personal library of strategies that help you care for your needs. Browse by need or review everything you have saved.</p>
         </div>
         <button type="button" className={styles.addAction} onClick={() => openAddForm()}>

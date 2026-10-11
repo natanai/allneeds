@@ -10,7 +10,7 @@ function referencedStyleNames(source: string) {
   return [...source.matchAll(/styles\.([A-Za-z0-9_]+)/g)].map((match) => match[1]!);
 }
 
-describe('Feeling word support styling', () => {
+describe('Alexithymia support styling', () => {
   it('keeps every referenced style in the canonical CSS Module', () => {
     const referenced = [...new Set([
       ...referencedStyleNames(pageSource),

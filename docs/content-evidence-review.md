@@ -167,7 +167,7 @@ Remember:
 
 **Status:** complete package approved 2026-08-28 and implemented in the `test/observation-2-alexithymia` combined review branch. The fixed-catalog, present-moment, no-recommendation boundary below is the production contract; new candidate claims or catalog changes still require a separate review.
 
-**Plain-language addendum approved 2026-08-29.** The internal feature and source package may continue to use `Alexithymia Support`, `working`, and shape-dimension identifiers, but the public doorway is `Feeling word support`. Public role labels are `Feeling`, `Faux Feeling`, `Other emotion word`, and `Your word`; the public shape control is `Overall feeling`. First-use copy defines alexithymia, Need, and Faux Feeling, while preserving the person's authority. This addendum changes display language only and does not reclassify a term, alter a score, infer a Need, or add a recommendation.
+**Plain-language addendum approved 2026-08-29; public name refined 2026-10-11.** The internal feature and public doorway use `Alexithymia support`. Public role labels are `Feeling`, `Faux Feeling`, `Other emotion word`, and `Your word`; the public shape control is `Overall feeling`. First-use copy defines alexithymia, Need, and Faux Feeling, while preserving the person's authority. This display-language decision does not reclassify a term, alter a score, infer a Need, or add a recommendation.
 
 ### Audience, purpose, and product boundary
 
@@ -324,7 +324,7 @@ The check-in is a working surface rather than a lesson. A person may start it im
 
 #### Exact entry copy
 
-Public page label: `Feeling word support`
+Public page label: `Alexithymia support`
 
 Working title: `Find words for right now`
 
@@ -831,7 +831,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-08-26 | Understanding | Umbrella copy, two function lenses, nine lens-local citations, three system strategies, and two legacy association removals approved | Authorized for content implementation; magnet pending |
 | 2026-08-28 | Observation Inference 2.0 | Local deterministic exploratory-matching contract, non-probabilistic explanation copy, approved fallback safeguards, shared highlight/detector model, legacy retirement, and implementation plan approved | Implemented on combined review branch; not yet merged |
 | 2026-08-28 | Alexithymia Support | Complete present-moment lane, fixed-catalog roles, shared scoring, source package, and no-recommendation boundary approved | Implemented on combined review branch; browser/device validation pending |
-| 2026-08-29 | Observation and Feeling word support | Plain-language labels, internal-only surface terms, deliberate annotation activation, and non-invalidating guidance approved | Implemented on test branch; browser/device validation pending |
+| 2026-08-29 | Observation and Alexithymia support | Plain-language labels, internal-only surface terms, deliberate annotation activation, and non-invalidating guidance approved | Implemented on test branch; browser/device validation pending |
 
 ## Implementation notes / handoff
 

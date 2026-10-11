@@ -3,6 +3,7 @@ import type { MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useDialogFocus } from '../../app/useDialogFocus';
+import { ALEXITHYMIA_SUPPORT_LABEL } from '../../data/productLanguage';
 import { downloadBrowserBackup, restoreBrowserBackup } from '../../persistence/browserBackup';
 import {
   loadProfileIntoCurrentBrowser,
@@ -290,7 +291,7 @@ export function AppMenu({
                 <MenuLink to="/needs" label="Needs" pathname={pathname} onClose={onClose} />
                 <MenuLink to="/feelings/body-cues" label="Body cues" pathname={pathname} onClose={onClose} />
                 <MenuLink to="/faux-feelings" label="Faux feelings" pathname={pathname} onClose={onClose} />
-                <MenuLink to="/alexithymia-support" label="Feeling word support" note="Start with what you can notice" pathname={pathname} onClose={onClose} />
+                <MenuLink to="/alexithymia-support" label={ALEXITHYMIA_SUPPORT_LABEL} note="Start with what you can notice" pathname={pathname} onClose={onClose} />
               </section>
 
               <section className={styles.section} aria-labelledby="menu-practice">

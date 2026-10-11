@@ -49,7 +49,6 @@ export type MagnetBoardItem = {
   iconUrl?: string;
   active?: boolean;
   selected?: boolean;
-  count?: number;
   ariaLabel?: string;
   ariaExpanded?: boolean;
   ariaHasPopup?: AriaAttributes['aria-haspopup'];
@@ -1251,7 +1250,6 @@ export function MagnetBoard({
               {item.detail ? <span className={styles.detail}>{item.detail}</span> : null}
             </span>
             {item.badge ? <span className={styles.badge}>{item.badge}</span> : null}
-            {typeof item.count === 'number' ? <span className={styles.count}>{item.count}</span> : null}
           </>
         );
         const shared = {

@@ -5,7 +5,7 @@ test('mobile check-in opens as a focused workspace without forcing the keyboard'
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Start check-in' }).click();
 
-  const checkIn = page.locator('article[aria-label^="Feeling word support:"]');
+  const checkIn = page.locator('article[aria-label^="Alexithymia support:"]');
   const textarea = page.getByRole('textbox', { name: 'What happened?', exact: true });
   await expect(checkIn).toBeVisible();
   await expect(textarea).toBeVisible();
@@ -13,7 +13,7 @@ test('mobile check-in opens as a focused workspace without forcing the keyboard'
   expect(await textarea.evaluate((element) => document.activeElement === element)).toBe(false);
 
   const initialGeometry = await page.evaluate(() => {
-    const workspace = document.querySelector('article[aria-label^="Feeling word support:"]');
+    const workspace = document.querySelector('article[aria-label^="Alexithymia support:"]');
     const rect = workspace?.getBoundingClientRect();
     return {
       position: workspace ? getComputedStyle(workspace).position : '',

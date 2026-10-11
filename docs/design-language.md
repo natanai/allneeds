@@ -85,9 +85,9 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 
 **Accepted 2026-08-28.** Alexithymia Support is a four-stage, present-moment working surface: `What happened?`, `Clues`, `Words`, and `Your words`. It is not a lesson, detached practice mode, diagnostic test, treatment, or strategy library.
 
-**Plain-language addendum accepted 2026-08-29.** The public doorway and in-product label are `Feeling word support`; an Info disclosure defines alexithymia without requiring the user to identify with it. `Overall feeling` replaces the public label `Feeling shape`, and `Other emotion word` / `Your word` replace the internal-sounding `Working term`. These display labels do not change routes, scoring roles, fixed catalogs, or persistence values.
+**Plain-language addendum accepted 2026-08-29; naming refined 2026-10-11.** The public doorway and in-product label are `Alexithymia support`; an Info disclosure defines alexithymia without requiring the user to identify with it. `Overall feeling` replaces the public label `Feeling shape`, and `Other emotion word` / `Your word` replace the internal-sounding `Working term`. These display labels do not change routes, scoring roles, fixed catalogs, or persistence values.
 
-**Disclosure hierarchy refined 2026-08-30.** The Feeling word support landing page has one explanatory disclosure affordance: the Info button beside the primary check-in action. Do not duplicate the same safety/matching explanation in a persistent landing-page card. The Info sheet may lead to `How matching works`, and that friendly in-app explanation may then offer the deeper technical methods and sources document. Public methods documents that are intentionally served directly from `public/docs` must remain readable as raw browser text without depending on Markdown rendering; avoid Markdown heading markers, inline-code/backtick notation, Markdown link syntax, and table syntax on those public copies, and show human-reachable source URLs directly.
+**Disclosure hierarchy refined 2026-08-30.** The Alexithymia support landing page has one explanatory disclosure affordance: the Info button beside the primary check-in action. Do not duplicate the same safety/matching explanation in a persistent landing-page card. The Info sheet may lead to `How matching works`, and that friendly in-app explanation may then offer the deeper technical methods and sources document. Public methods documents that are intentionally served directly from `public/docs` must remain readable as raw browser text without depending on Markdown rendering; avoid Markdown heading markers, inline-code/backtick notation, Markdown link syntax, and table syntax on those public copies, and show human-reachable source URLs directly.
 
 - At compact widths, use a full-bleed mobile stage with a compact app bar, safe-area padding, one immediate job, and a persistent next action. Do not restore the legacy stack of outlined region cards or expand every option into the page.
 - Body and Overall feeling are optional peer clue cards. Body opens one canonical region at a time in a bottom sheet and returns selections to a compact clue tray; the full Body Cues page remains available as its own tactile experience.
@@ -183,13 +183,25 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Persist the successfully checked Public/Most recent snapshot for one hour. A full reload may satisfy the branded preload from that complete browser snapshot with no Worker request, while the page reports when it was last refreshed. This is a bounded freshness claim, not proof that the server has not changed; manual Refresh always bypasses it.
 - A recently verified account may be reused from session-scoped browser storage for the same one-hour window so repeated reloads do not call `/api/me`. Private/profile operations remain server-enforced, and a new browser-app session validates normally.
 
+## Primary feature marks
+
+**Testing on `site-test` beginning 2026-10-11.** The home threshold uses three original marks: an unframed eye for Observations, uneven signal ending in an open attention node for Feelings, and sprout for Needs.
+
+- These marks identify the app's three primary doorways. They do not create a mandate to illustrate every route or navigation magnet.
+- Each mark uses one 64 × 64 safe area and the same 2.5-unit rounded feature stroke, but is optically centered rather than forced into identical visual dimensions. The Observations eye has no viewfinder corners, and the Needs sprout has no geometric stand or decorative root base.
+- Each drawing sits in the same small framed-art composition rather than floating as a utility icon. Its ink, field, border, and background shapes are mixtures of its doorway role (`Primary`, `Action`, or `Positive`) with `Outline` and `Surface`; the assets contain no independent palette.
+- Body Cues remains text-only. Its route does not receive a new icon merely to complete a set.
+- The capture magnet is labeled `Journal`, not the ambiguous `New Entry`, and uses one filled open-book mark. The paired navigation magnet is simply `History`; its book-and-clock mark supplies the journal context while the destination page retains the explicit `Journal history` title.
+- Inventory uses a quiet outlined carry-bag whose body contains the live strategy count; do not add a separate count circle beside it.
+
 ## App identity and social sharing imagery
 
-**Accepted 2026-08-25.** The legacy three-door mark remains the canonical app/favorite/share identity.
+**Testing on `site-test` beginning 2026-10-11.** The three empty doors remain the canonical public identity; feature marks stay inside the product rather than entering the master logo.
 
-- Preserve the complete legacy favicon, Apple touch icon, Android/maskable icon, Safari pinned-tab, Windows tile, web-manifest, and social-card asset set.
+- App icons and social/header imagery use the Open Monochrome three-door mark so the public identity remains stable across personalized themes. Role-colored feature artwork remains inside the product and does not enter the master identity.
+- Keep one SVG source for the framed app icon, one small-format favicon source, and only the raster sizes required by iOS, Android/PWA, legacy browser, and Windows metadata. A single safe Android export can declare both `any` and `maskable`; Open Graph and Twitter can share one identical card.
 - The document head must advertise format fallbacks and platform-specific icons explicitly; do not rely on a browser inventing a letter tile from the page title.
-- Open Graph and Twitter sharing metadata use the legacy three-door social cards and accessible image text.
+- Open Graph and Twitter sharing metadata use the Open Monochrome social cards and accessible image text.
 
 ## Destructive / advanced actions
 
@@ -343,6 +355,14 @@ Rules:
 
 ## Decision log
 
+### 2026-10-11
+
+- Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, and the Open Monochrome identity. Body Cues remains text-only and ordinary site icons remain unchanged.
+- Consolidated public identity assets onto the monochrome three-door system and removed superseded color variants, duplicate platform exports, and unreferenced legacy artwork.
+- Leveled the three framed home artworks to restore deliberate symmetry and split the introductory copy at sentence boundaries on narrow screens.
+- Renamed the public feature to `Alexithymia support` everywhere user-facing. A shared product-language constant prevents route, menu, home, page, and accessibility labels from drifting again.
+- Inventory uses one compact count pouch: the familiar circular success counter is reshaped into the pouch body and finished with a small cinched tie. It remains within the navigation magnet's standard line height and is reused at a larger size beside the Inventory page title. The count is optically aligned with adjacent text and uses the Customizer-derived Primary foreground (black or white, whichever contrasts more strongly with Primary).
+
 ### 2026-10-10
 
 - Sign-in and `Load saved profile` inspect both copies before changing browser data. The normal case uses a compact system-style warning that the saved profile will replace browser data. Only when local Journal or Inventory records would be removed does the warning offer `Merge into profile` or `Discard local entries`. Merging uses saved profile settings, retains local-only and profile-only records, deduplicates unchanged IDs, keeps both versions of conflicting edits, and immediately saves the merged result to the profile. Existing browser drafts always survive. A device-local recovery copy of both originals is written before either replacement or merging.
@@ -354,8 +374,8 @@ Rules:
 
 ### 2026-08-30
 
-- Feeling word support uses the Info button as the sole landing-page explanatory disclosure. The previous persistent `You stay in charge` / `How matching works` card is removed as redundant; matching details remain available through Info, and deeper methods remain one disclosure level further in.
-- Public Feeling word support and Body Cues methods documents are written to remain readable when a browser serves the `.md` files as raw text rather than rendered Markdown. They use ordinary text headings/formulas/lists and direct human-reachable URLs instead of visible Markdown syntax.
+- Alexithymia support uses the Info button as the sole landing-page explanatory disclosure. The previous persistent `You stay in charge` / `How matching works` card is removed as redundant; matching details remain available through Info, and deeper methods remain one disclosure level further in.
+- Public Alexithymia support and Body Cues methods documents are written to remain readable when a browser serves the `.md` files as raw text rather than rendered Markdown. They use ordinary text headings/formulas/lists and direct human-reachable URLs instead of visible Markdown syntax.
 - Observation editing uses one compact primary `Explore` control while Clear remains a quiet maintenance action with the same accessible meaning but much less visual weight.
 - Observation results surface the actual Need and Feeling possibilities immediately after a compact results header. Met/Unmet remains fully available but belongs contextually inside the Feeling results, after the result vocabulary, rather than occupying a large explanatory block before any suggestions.
 

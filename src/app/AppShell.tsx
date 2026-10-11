@@ -17,12 +17,25 @@ import {
   type NavItemId,
 } from '../features/customizer/customizerSettings';
 import { INVENTORY_CHANGED_EVENT, readInventory } from '../features/inventory/inventoryRepository';
-import { assetPath } from '../data/catalog';
+import { InventoryMark } from '../features/inventory/InventoryMark';
 import { readMagnetPlayPreference } from '../persistence/magnetLayoutStore';
 import styles from './AppShell.module.css';
 
 function readInventoryCount() {
   return readInventory().length;
+}
+
+function JournalMark({ history = false, className }: { history?: boolean; className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3.5 6.5H12c2.2 0 4 1.8 4 4v16c0-2.2-1.8-4-4-4H3.5v-16Z" fill="var(--surface-raised)" />
+      <path d="M28.5 6.5H20c-2.2 0-4 1.8-4 4v16c0-2.2 1.8-4 4-4h8.5v-16Z" fill="color-mix(in srgb, var(--action) 32%, var(--surface-raised) 68%)" />
+      <path d="M16 10.5v16" stroke="var(--primary)" strokeWidth="2.6" />
+      <path d="M22.5 6.5v7l2-1.4 2 1.4v-7Z" fill="var(--action)" />
+      {history ? <circle cx="25" cy="7" r="5" fill="var(--surface-raised)" /> : null}
+      {history ? <path d="M25 4.5V7l2 1.4" /> : null}
+    </svg>
+  );
 }
 
 const routeScrollPositions = new Map<string, number>();
@@ -116,7 +129,7 @@ function Breadcrumbs() {
             <li key={crumb.to} aria-current={current ? 'page' : undefined}>
               {current ? (
                 <span className={styles.breadcrumbLabel}>
-                  {crumb.to === '/inventory/journal' ? <img className={styles.breadcrumbIcon} src={assetPath('icons/journal-32bit.svg')} alt="" aria-hidden="true" /> : null}
+                  {crumb.to === '/inventory/journal' ? <JournalMark className={styles.breadcrumbIcon} /> : null}
                   {crumb.label}
                 </span>
               ) : <Link to={crumb.to}>{crumb.label}</Link>}
@@ -242,15 +255,11 @@ export function AppShell() {
       {
         id: 'nav-journal',
         setting: 'journal',
-        label: 'New entry',
+        label: 'Journal',
         to: '/inventory/journal?compose=new',
         tone: 'action',
         kind: 'nav',
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 3H3v6M3 3l7 7M15 21h6v-6M21 21l-7-7M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7" />
-          </svg>
-        ),
+        icon: <JournalMark />,
       },
       {
         id: 'nav-inventory',
@@ -258,7 +267,8 @@ export function AppShell() {
         label: 'Inventory',
         to: '/inventory',
         kind: 'nav',
-        count: inventoryCount,
+        icon: <InventoryMark count={inventoryCount} />,
+        ariaLabel: `Inventory, ${inventoryCount} ${inventoryCount === 1 ? 'strategy' : 'strategies'}`,
       },
       {
         id: 'nav-observations',
@@ -298,10 +308,11 @@ export function AppShell() {
       {
         id: 'nav-journal-dashboard',
         setting: 'journalDashboard',
-        label: 'Journal history',
+        label: 'History',
         to: '/inventory/journal',
         tone: 'action',
         kind: 'nav',
+        icon: <JournalMark history />,
       },
     ];
     return items.filter((item) => !item.setting || navSettings[item.setting]);

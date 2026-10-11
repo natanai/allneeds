@@ -1,4 +1,5 @@
 import { fauxFeelingsBySlug, feelingsBySlug, needsBySlug } from '../data/catalog';
+import { ALEXITHYMIA_SUPPORT_LABEL } from '../data/productLanguage';
 
 export type RoutePresentation = {
   label: string;
@@ -16,7 +17,7 @@ const exactRouteLabels: Record<string, string> = {
   '/inventory': 'Inventory',
   '/inventory/journal': 'Journal history',
   '/feed': 'Shared strategies',
-  '/alexithymia-support': 'Feeling word support',
+  '/alexithymia-support': ALEXITHYMIA_SUPPORT_LABEL,
   '/design-lab/need-magnets': 'Need magnet audit',
 };
 
@@ -28,7 +29,7 @@ const segmentLabels: Record<string, string> = {
   inventory: 'Inventory',
   journal: 'Journal',
   'body-cues': 'Body cues',
-  'alexithymia-support': 'Feeling word support',
+  'alexithymia-support': ALEXITHYMIA_SUPPORT_LABEL,
   'emotions-wheel': 'Emotions wheel',
   feed: 'Shared strategies',
   'design-lab': 'Design lab',
