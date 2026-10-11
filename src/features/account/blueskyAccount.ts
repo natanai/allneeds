@@ -20,7 +20,9 @@ const BACKEND_SNAPSHOT_KEY = 'allneeds_export_v1';
 const LOGIN_INTENT_STORAGE_KEY = 'allneeds:bsky-login-intent';
 const SESSION_HINT_STORAGE_KEY = 'allneeds:bsky-session-hint';
 const SESSION_CACHE_STORAGE_KEY = 'allneeds:bsky-session-cache-v1';
+const HOME_SCREEN_HANDOFF_STORAGE_KEY = 'allneeds:home-screen-sign-in-v1';
 const SESSION_CACHE_FRESH_MS = 60 * 60 * 1_000;
+const HOME_SCREEN_HANDOFF_MAX_AGE_MS = 20 * 60 * 1_000;
 export const BLUESKY_SESSION_CHANGED_EVENT = 'allneeds:bsky-login-changed';
 
 export type BlueskySession = {
@@ -43,6 +45,13 @@ type ResolveHandleResponse = {
   status?: string;
   handle?: string;
   message?: string;
+};
+
+type PendingHomeScreenHandoff = {
+  version: 1;
+  handoff: string;
+  secret: string;
+  createdAt: number;
 };
 
 type ProfileSaveEvent = {
@@ -101,6 +110,9 @@ let currentSessionCheckedAt = restoredSession?.checkedAt ?? 0;
 let initializePromise: Promise<BlueskySession | null> | null = null;
 
 type ProfileReview =
+  | { phase: 'handoff-return'; did: '' }
+  | { phase: 'handoff-loading'; did: '' }
+  | { phase: 'handoff-waiting'; did: ''; message: string }
   | { phase: 'loading'; did: string }
   | { phase: 'ready'; did: string; comparison: ProfileComparison }
   | { phase: 'error'; did: string; message: string }
@@ -121,6 +133,8 @@ export function useProfileReview() {
 }
 
 export function dismissProfileReview() {
+  if (profileReview?.phase === 'handoff-return') clearVerifiedAuthReturn();
+  if (profileReview?.phase === 'handoff-loading' || profileReview?.phase === 'handoff-waiting') clearPendingHomeScreenHandoff();
   publishProfileReview(null);
 }
 
@@ -141,6 +155,68 @@ if (typeof window !== 'undefined' && currentSession) {
 function safeStorage(name: 'localStorage' | 'sessionStorage') {
   if (typeof window === 'undefined') return null;
   try { return window[name]; } catch { return null; }
+}
+
+function encodeBase64Url(bytes: Uint8Array) {
+  let binary = '';
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+  return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/u, '');
+}
+
+function randomHandoffToken() {
+  return encodeBase64Url(window.crypto.getRandomValues(new Uint8Array(32)));
+}
+
+async function handoffProof(secret: string) {
+  const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
+  return encodeBase64Url(new Uint8Array(digest));
+}
+
+export function isInstalledHomeScreenApp() {
+  if (typeof window === 'undefined') return false;
+  const standaloneNavigator = window.navigator as Navigator & { standalone?: boolean };
+  return standaloneNavigator.standalone === true
+    || window.matchMedia?.('(display-mode: standalone)').matches === true;
+}
+
+function readPendingHomeScreenHandoff(): PendingHomeScreenHandoff | null {
+  const storage = safeStorage('localStorage');
+  if (!storage) return null;
+  try {
+    const parsed: unknown = JSON.parse(storage.getItem(HOME_SCREEN_HANDOFF_STORAGE_KEY) ?? 'null');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    const pending = parsed as Partial<PendingHomeScreenHandoff>;
+    if (pending.version !== 1
+      || typeof pending.handoff !== 'string'
+      || !/^[A-Za-z0-9_-]{43}$/u.test(pending.handoff)
+      || typeof pending.secret !== 'string'
+      || !/^[A-Za-z0-9_-]{43}$/u.test(pending.secret)
+      || typeof pending.createdAt !== 'number') return null;
+    const age = Date.now() - pending.createdAt;
+    if (age < 0 || age > HOME_SCREEN_HANDOFF_MAX_AGE_MS) {
+      storage.removeItem(HOME_SCREEN_HANDOFF_STORAGE_KEY);
+      return null;
+    }
+    return pending as PendingHomeScreenHandoff;
+  } catch { return null; }
+}
+
+function clearPendingHomeScreenHandoff() {
+  try { safeStorage('localStorage')?.removeItem(HOME_SCREEN_HANDOFF_STORAGE_KEY); } catch { /* Optional cleanup. */ }
+}
+
+async function createPendingHomeScreenHandoff() {
+  const storage = safeStorage('localStorage');
+  if (!storage) throw new Error('A safe home-screen sign-in could not be prepared. Your device data is still here.');
+  const pending: PendingHomeScreenHandoff = {
+    version: 1,
+    handoff: randomHandoffToken(),
+    secret: randomHandoffToken(),
+    createdAt: Date.now(),
+  };
+  try { storage.setItem(HOME_SCREEN_HANDOFF_STORAGE_KEY, JSON.stringify(pending)); }
+  catch { throw new Error('A safe home-screen sign-in could not be prepared. Your device data is still here.'); }
+  return { ...pending, proof: await handoffProof(pending.secret) };
 }
 
 function writeSessionHint(active: boolean) {
@@ -288,12 +364,20 @@ export async function resolveBlueskyHandle(input: string) {
 export async function signInWithBluesky(input: string) {
   const handle = await resolveBlueskyHandle(input);
   safeStorage('sessionStorage')?.setItem(LOGIN_INTENT_STORAGE_KEY, '1');
-  const returnTo = typeof window === 'undefined'
-    ? '/inventory/'
-    : `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const currentUrl = typeof window === 'undefined' ? null : new URL(window.location.href);
+  currentUrl?.searchParams.delete('auth');
+  currentUrl?.searchParams.delete('authHandoff');
+  const returnTo = currentUrl
+    ? `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`
+    : '/inventory/';
   const loginUrl = new URL(`${BACKEND_BASE_URL}/auth/login`);
   loginUrl.searchParams.set('handle', handle);
   loginUrl.searchParams.set('returnTo', returnTo);
+  if (isInstalledHomeScreenApp()) {
+    const pending = await createPendingHomeScreenHandoff();
+    loginUrl.searchParams.set('handoff', pending.handoff);
+    loginUrl.searchParams.set('proof', pending.proof);
+  }
   window.location.assign(loginUrl.toString());
 }
 
@@ -474,20 +558,129 @@ export async function notifySharedStrategyAdded(strategyId: string) {
   if (!response.ok) throw new Error('Unable to update the shared add count.');
 }
 
+let handoffClaimPromise: Promise<'complete' | 'pending' | 'missing'> | null = null;
+let handoffResumeListenersInstalled = false;
+
+export function resumeHomeScreenSignIn(confirmationCode = '') {
+  if (handoffClaimPromise) return handoffClaimPromise;
+  const pending = readPendingHomeScreenHandoff();
+  if (!pending) return Promise.resolve('missing' as const);
+  const code = confirmationCode.replace(/\s+/gu, '');
+  if (!/^\d{6}$/u.test(code)) {
+    publishProfileReview({
+      phase: 'handoff-waiting',
+      did: '',
+      message: 'Enter the 6-digit code shown in Safari after Bluesky verifies your sign-in.',
+    });
+    return Promise.resolve('pending' as const);
+  }
+  publishProfileReview({ phase: 'handoff-loading', did: '' });
+  handoffClaimPromise = (async (): Promise<'complete' | 'pending' | 'missing'> => {
+    let response: Response;
+    try {
+      response = await fetch(`${BACKEND_BASE_URL}/auth/handoff/claim`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        cache: 'no-store',
+        body: JSON.stringify({ handoff: pending.handoff, secret: pending.secret, code }),
+      });
+    } catch {
+      publishProfileReview({
+        phase: 'handoff-waiting',
+        did: '',
+        message: 'The app could not check the sign-in yet. Your data is still here.',
+      });
+      return 'pending';
+    }
+    if (response.status === 202) {
+      publishProfileReview({
+        phase: 'handoff-waiting',
+        did: '',
+        message: 'Bluesky sign-in is not finished yet. Complete it in Safari, then return here.',
+      });
+      return 'pending';
+    }
+    const data: unknown = await response.json().catch(() => null);
+    const claimedSession = normalizeBackendSession(data);
+    if (!response.ok || !claimedSession) {
+      const message = data && typeof data === 'object' ? (data as { message?: unknown }).message : null;
+      if (response.status === 410) clearPendingHomeScreenHandoff();
+      publishProfileReview({
+        phase: response.status === 400 && message === 'code_mismatch' ? 'handoff-waiting' : 'error',
+        did: '',
+        message: response.status === 400 && message === 'code_mismatch'
+          ? 'That code did not match. Check the code still shown in Safari and try again.'
+          : response.status === 410
+            ? 'That sign-in handoff expired. Your home-screen app data is still here. Close this message and sign in again.'
+          : 'The app could not finish sign-in. Your home-screen app data is still here.',
+      });
+      return 'missing';
+    }
+    const confirmedSession = await readBackendSession();
+    if (!confirmedSession || confirmedSession.did !== claimedSession.did) {
+      publishProfileReview({
+        phase: 'handoff-waiting',
+        did: '',
+        message: 'The app could not attach the verified sign-in yet. Your data is still here; try checking again.',
+      });
+      return 'pending';
+    }
+    clearPendingHomeScreenHandoff();
+    try { safeStorage('sessionStorage')?.removeItem(LOGIN_INTENT_STORAGE_KEY); } catch { /* Optional cleanup. */ }
+    clearVerifiedAuthReturn();
+    publishSession(confirmedSession, 'signin');
+    initializePromise = Promise.resolve(confirmedSession);
+    await loadProfileIntoCurrentBrowser();
+    return 'complete';
+  })().finally(() => { handoffClaimPromise = null; });
+  return handoffClaimPromise;
+}
+
+function installHomeScreenHandoffResumeListeners() {
+  if (handoffResumeListenersInstalled || typeof window === 'undefined' || typeof document === 'undefined') return;
+  handoffResumeListenersInstalled = true;
+  const resume = () => {
+    if (document.visibilityState === 'visible' && readPendingHomeScreenHandoff()) {
+      void resumeHomeScreenSignIn();
+    }
+  };
+  document.addEventListener('visibilitychange', resume);
+  window.addEventListener('pageshow', resume);
+  window.addEventListener('focus', resume);
+}
+
 function isVerifiedAuthReturn() {
   if (typeof window === 'undefined') return false;
   return new URL(window.location.href).searchParams.get('auth') === 'verified';
 }
 
+function homeScreenHandoffFromUrl() {
+  if (typeof window === 'undefined') return '';
+  return new URL(window.location.href).searchParams.get('authHandoff') ?? '';
+}
+
 function clearVerifiedAuthReturn() {
-  if (typeof window === 'undefined' || !isVerifiedAuthReturn()) return;
+  if (typeof window === 'undefined' || (!isVerifiedAuthReturn() && !homeScreenHandoffFromUrl())) return;
   const url = new URL(window.location.href);
   url.searchParams.delete('auth');
+  url.searchParams.delete('authHandoff');
   window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
 export function initializeBlueskyForCurrentPage() {
   if (typeof window === 'undefined') return;
+  installHomeScreenHandoffResumeListeners();
+  const pendingHandoff = readPendingHomeScreenHandoff();
+  const returnedHandoff = homeScreenHandoffFromUrl();
+  if (returnedHandoff && pendingHandoff?.handoff !== returnedHandoff) {
+    publishProfileReview({ phase: 'handoff-return', did: '' });
+    return;
+  }
+  if (pendingHandoff) {
+    void resumeHomeScreenSignIn();
+    return;
+  }
   const hint = safeStorage('localStorage')?.getItem(SESSION_HINT_STORAGE_KEY) ?? '';
   const returningFromLogin = isVerifiedAuthReturn() || hasLoginIntent();
   const mustInitialize = returningFromLogin || hint === 'active';

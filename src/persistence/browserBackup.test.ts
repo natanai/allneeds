@@ -16,6 +16,7 @@ describe('browser backups', () => {
     const storage = memoryStorage({
       inventory: 'kept',
       'allneeds:bsky-session-hint': 'private',
+      'allneeds:home-screen-sign-in-v1': 'private-claim-secret',
       'allneeds:shared-feed:public': 'cache',
     });
 
@@ -23,6 +24,7 @@ describe('browser backups', () => {
     expect(captureBrowserStorage(storage, true)).toEqual({
       inventory: 'kept',
       'allneeds:bsky-session-hint': 'private',
+      'allneeds:home-screen-sign-in-v1': 'private-claim-secret',
       'allneeds:shared-feed:public': 'cache',
     });
     expect(createBrowserBackup(storage)).toMatchObject({

@@ -1,6 +1,12 @@
 import { NodeOAuthClient } from '@atproto/oauth-client-node';
 
 import { ALLNEEDS_SESSION_TTL_DAYS } from './session.js';
+import {
+  completeHomeScreenHandoff,
+  registerHomeScreenHandoff,
+  validHomeScreenHandoffId,
+  validHomeScreenHandoffProof,
+} from './homeScreenHandoff.js';
 
 const BACKEND_ORIGIN = 'https://backend.allneeds.app';
 const APP_ORIGIN = 'https://allneeds.app';
@@ -254,7 +260,18 @@ export async function beginVerifiedLogin(request, env) {
   if (!handle || !handle.includes('.') || !/^[a-z0-9.-]+$/.test(handle)) {
     return { error: 'valid Bluesky handle is required', status: 400 };
   }
-  const returnTo = safeReturnPath(url.searchParams.get('returnTo'));
+  const destination = new URL(safeReturnPath(url.searchParams.get('returnTo')), APP_ORIGIN);
+  const handoffId = url.searchParams.get('handoff');
+  const handoffProof = url.searchParams.get('proof');
+  if (handoffId !== null || handoffProof !== null) {
+    if (!validHomeScreenHandoffId(handoffId) || !validHomeScreenHandoffProof(handoffProof)) {
+      return { error: 'invalid home-screen sign-in handoff', status: 400 };
+    }
+    const registered = await registerHomeScreenHandoff(env, handoffId, handoffProof);
+    if (!registered) return { error: 'home-screen sign-in handoff already used', status: 409 };
+    destination.searchParams.set('authHandoff', handoffId);
+  }
+  const returnTo = `${destination.pathname}${destination.search}${destination.hash}`;
   const client = createOAuthClient(env);
   const authorizationUrl = await client.authorize(handle, {
     scope: 'atproto',
@@ -280,10 +297,23 @@ export async function finishVerifiedLogin(request, env) {
 
   const destination = new URL(safeReturnPath(state), APP_ORIGIN);
   destination.searchParams.set('auth', 'verified');
+  const handoffId = destination.searchParams.get('authHandoff');
+  let homeScreenHandoff = null;
+  if (validHomeScreenHandoffId(handoffId)) {
+    const handoff = await completeHomeScreenHandoff(env, handoffId, {
+      sessionId,
+      did,
+      handle: profile.handle,
+    });
+    homeScreenHandoff = handoff.completed
+      ? { status: 'complete', confirmationCode: handoff.confirmationCode, handle: profile.handle }
+      : { status: 'error', handle: profile.handle };
+  }
   return {
     redirect: destination.toString(),
     sessionId,
     profile,
+    homeScreenHandoff,
   };
 }
 

@@ -3,6 +3,9 @@
 .content button { min-height: var(--control-min); padding: .5rem .7rem; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: 700 var(--text-sm)/1.2 var(--font-body); cursor: pointer; }
 .content button:disabled { opacity: .65; cursor: default; }
 .content .primary { background: var(--primary); color: var(--primary-fg); }
+.codeForm { display: grid; gap: .55rem; }
+.codeForm label { font-weight: 750; }
+.codeForm input { min-height: var(--control-min); padding: .55rem .7rem; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: 750 1.35rem/1 var(--font-body); letter-spacing: .08em; font-variant-numeric: tabular-nums; }
 .summary { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
 .summary caption { text-align: left; font-weight: 800; padding-bottom: .4rem; }
 .summary th, .summary td { padding: .5rem .35rem; border-bottom: 1px solid color-mix(in srgb, var(--outline) 20%, transparent); text-align: center; }

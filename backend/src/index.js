@@ -5,6 +5,7 @@ import {
   finishVerifiedLogin,
 } from './oauth.js';
 import { sessionCookie } from './session.js';
+import { claimHomeScreenHandoff } from './homeScreenHandoff.js';
 
 const APP_ORIGIN = 'https://allneeds.app';
 
@@ -43,6 +44,27 @@ function json(request, data, status = 200, extraHeaders = {}) {
       'Cache-Control': 'no-store',
       ...corsHeaders(request),
       ...extraHeaders,
+    },
+  });
+}
+
+export function homeScreenHandoffPage(result) {
+  const completed = result.homeScreenHandoff?.status === 'complete';
+  const code = completed ? result.homeScreenHandoff.confirmationCode : '';
+  const shownCode = completed ? `${code.slice(0, 3)} ${code.slice(3)}` : '';
+  const title = completed ? 'Sign-in verified' : 'Sign-in could not be connected';
+  const instruction = completed
+    ? `<p>Return to the <strong>allneeds home-screen app</strong> and enter this code:</p><div class="code" aria-label="Confirmation code ${code}">${shownCode}</div><p class="note">Keep this Safari page open until the app finishes. Your journal stays in the home-screen app.</p>`
+    : '<p>Return to the allneeds home-screen app. Your data is still there; close its message and try signing in again.</p>';
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#7354a3"><title>${title} · allneeds.app</title><style>html{font-family:system-ui,sans-serif;background:#f7f4fb;color:#21182f}body{min-height:100svh;margin:0;display:grid;place-items:center;padding:24px;box-sizing:border-box}main{width:min(100%,32rem);background:#fff;border:2px solid #21182f;border-radius:24px;padding:28px;box-shadow:0 8px 0 #d7c7e7}h1{margin:0 0 16px;font-size:1.8rem}p{line-height:1.5}.code{margin:24px 0;padding:20px;border:2px solid #21182f;border-radius:16px;background:#eee6f6;text-align:center;font-size:clamp(2.2rem,14vw,4rem);font-weight:800;letter-spacing:.08em;font-variant-numeric:tabular-nums}.note{color:#5f526d;font-size:.95rem}</style></head><body><main><h1>${title}</h1>${instruction}</main></body></html>`;
+  return new Response(html, {
+    status: completed ? 200 : 409,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      'Referrer-Policy': 'no-referrer',
+      'X-Content-Type-Options': 'nosniff',
     },
   });
 }
@@ -246,6 +268,7 @@ export default {
 
       if (request.method === 'GET' && pathname === '/auth/callback') {
         const result = await finishVerifiedLogin(request, env);
+        if (result.homeScreenHandoff) return homeScreenHandoffPage(result);
         return new Response(null, {
           status: 302,
           headers: {
@@ -254,6 +277,34 @@ export default {
             'Cache-Control': 'no-store',
           },
         });
+      }
+
+      if (request.method === 'POST' && pathname === '/auth/handoff/claim') {
+        const payload = await request.json().catch(() => null);
+        const result = await claimHomeScreenHandoff(env, payload?.handoff, payload?.secret, payload?.code);
+        if (result.status === 'pending') {
+          return json(request, { status: 'pending' }, 202);
+        }
+        if (result.status === 'missing' || result.status === 'expired' || result.status === 'locked') {
+          return json(request, { status: 'error', message: 'handoff_expired' }, 410);
+        }
+        if (result.status === 'code-mismatch') {
+          return json(request, { status: 'error', message: 'code_mismatch', attemptsRemaining: result.attemptsRemaining }, 400);
+        }
+        if (result.status === 'retry') {
+          return json(request, { status: 'error', message: 'try_again' }, 409);
+        }
+        if (result.status !== 'complete') {
+          return json(request, { status: 'error', message: 'invalid_handoff' }, 400);
+        }
+        return json(request, {
+          status: 'ok',
+          signedIn: true,
+          did: result.did,
+          handle: result.handle,
+          verified: true,
+          admin: adminDidSet(env).has(result.did),
+        }, 200, { 'Set-Cookie': sessionCookie(result.sessionId) });
       }
 
       if (request.method === 'POST' && pathname === '/auth/session' && !legacyAuthAllowed(env)) {
