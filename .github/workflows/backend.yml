@@ -1,0 +1,60 @@
+name: Deploy backend Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: allneeds-backend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Worker build
+        run: pnpm --dir backend check
+
+      - name: Deploy Worker
+        run: pnpm --dir backend deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Verify deployed handoff route
+        run: |
+          node <<'NODE'
+          const response = await fetch('https://backend.allneeds.app/auth/handoff/claim', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Origin: 'https://allneeds.app',
+            },
+            body: JSON.stringify({ handoff: 'invalid', secret: 'invalid', code: '000000' }),
+          });
+          const body = await response.json();
+          if (response.status !== 400 || body.message !== 'invalid_handoff') {
+            throw new Error(`Unexpected production response: ${response.status} ${JSON.stringify(body)}`);
+          }
+          console.log('Production handoff route verified.');
+          NODE
