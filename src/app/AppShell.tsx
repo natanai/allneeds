@@ -24,13 +24,26 @@ function readInventoryCount() {
   return readInventory().length;
 }
 
-function JournalMark({ mode, className }: { mode?: 'new' | 'history'; className?: string }) {
+function JournalMark({ history = false, className }: { history?: boolean; className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="square" strokeLinejoin="round" aria-hidden="true">
-      <path d="M3.5 6.5H12c2.2 0 4 1.8 4 4v16c0-2.2-1.8-4-4-4H3.5v-16Zm25 0H20c-2.2 0-4 1.8-4 4v16c0-2.2 1.8-4 4-4h8.5v-16Z" />
-      {mode ? <circle cx="25" cy="7" r="5" fill="var(--surface-raised)" /> : null}
-      {mode === 'new' ? <path d="M25 4.5v5M22.5 7h5" /> : null}
-      {mode === 'history' ? <path d="M25 4.5V7l2 1.4" /> : null}
+    <svg className={className} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3.5 6.5H12c2.2 0 4 1.8 4 4v16c0-2.2-1.8-4-4-4H3.5v-16Z" fill="var(--surface-raised)" />
+      <path d="M28.5 6.5H20c-2.2 0-4 1.8-4 4v16c0-2.2 1.8-4 4-4h8.5v-16Z" fill="color-mix(in srgb, var(--action) 32%, var(--surface-raised) 68%)" />
+      <path d="M16 10.5v16" stroke="var(--primary)" strokeWidth="2.6" />
+      <path d="M22.5 6.5v7l2-1.4 2 1.4v-7Z" fill="var(--action)" />
+      {history ? <circle cx="25" cy="7" r="5" fill="var(--surface-raised)" /> : null}
+      {history ? <path d="M25 4.5V7l2 1.4" /> : null}
+    </svg>
+  );
+}
+
+function InventoryMark({ count }: { count: number }) {
+  const displayCount = count > 999 ? '999+' : String(count);
+  return (
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M8.5 10.5h15l2 17h-19l2-17Z" fill="var(--surface-raised)" />
+      <path d="M12 10.5V8a4 4 0 0 1 8 0v2.5M8 15h16" />
+      <text x="16" y="22.5" fill="currentColor" stroke="none" textAnchor="middle" fontSize={displayCount.length > 2 ? 7 : 9} fontWeight="800">{displayCount}</text>
     </svg>
   );
 }
@@ -252,11 +265,11 @@ export function AppShell() {
       {
         id: 'nav-journal',
         setting: 'journal',
-        label: 'New entry',
+        label: 'Journal',
         to: '/inventory/journal?compose=new',
         tone: 'action',
         kind: 'nav',
-        icon: <JournalMark mode="new" />,
+        icon: <JournalMark />,
       },
       {
         id: 'nav-inventory',
@@ -264,7 +277,8 @@ export function AppShell() {
         label: 'Inventory',
         to: '/inventory',
         kind: 'nav',
-        count: inventoryCount,
+        icon: <InventoryMark count={inventoryCount} />,
+        ariaLabel: `Inventory, ${inventoryCount} ${inventoryCount === 1 ? 'strategy' : 'strategies'}`,
       },
       {
         id: 'nav-observations',
@@ -308,7 +322,7 @@ export function AppShell() {
         to: '/inventory/journal',
         tone: 'action',
         kind: 'nav',
-        icon: <JournalMark mode="history" />,
+        icon: <JournalMark history />,
       },
     ];
     return items.filter((item) => !item.setting || navSettings[item.setting]);

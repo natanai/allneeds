@@ -21,10 +21,12 @@ export function HomePage() {
           <div key={doorway.to} className={`${styles.doorCard} ${styles[doorway.tone]}`}>
             <Link className={styles.doorLink} to={doorway.to}>
               <span className={styles.door} aria-hidden="true">
-                <span
-                  className={styles.icon}
-                  style={{ '--door-icon': `url("${assetPath(doorway.icon)}")` } as CSSProperties}
-                />
+                <span className={styles.artwork}>
+                  <span
+                    className={styles.icon}
+                    style={{ '--door-icon': `url("${assetPath(doorway.icon)}")` } as CSSProperties}
+                  />
+                </span>
               </span>
               <span className={styles.label}>{doorway.label}</span>
             </Link>

@@ -185,13 +185,14 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 
 ## Primary feature marks
 
-**Testing on `site-test` beginning 2026-10-11.** The home threshold uses three original monochrome marks: framed eye for Observations, uneven signal ending in an open attention node for Feelings, and sprout for Needs.
+**Testing on `site-test` beginning 2026-10-11.** The home threshold uses three original marks: an unframed eye for Observations, uneven signal ending in an open attention node for Feelings, and sprout for Needs.
 
 - These marks identify the app's three primary doorways. They do not create a mandate to illustrate every route or navigation magnet.
-- Each mark uses one 64 × 64 safe area and the same 2.5-unit rounded feature stroke, but is optically centered rather than forced into identical visual dimensions. The Needs sprout has no geometric stand or decorative root base.
-- Marks inherit `Outline`; doorway fills remain `Primary`, `Action`, and `Positive`. The assets contain no feature palette.
+- Each mark uses one 64 × 64 safe area and the same 2.5-unit rounded feature stroke, but is optically centered rather than forced into identical visual dimensions. The Observations eye has no viewfinder corners, and the Needs sprout has no geometric stand or decorative root base.
+- Each drawing sits in the same small framed-art composition rather than floating as a utility icon. Its ink, field, border, and background shapes are mixtures of its doorway role (`Primary`, `Action`, or `Positive`) with `Outline` and `Surface`; the assets contain no independent palette.
 - Body Cues remains text-only. Its route does not receive a new icon merely to complete a set.
-- Journal uses one open-book mark. New Entry and Journal History add small plus and clock modifiers rather than unrelated symbols.
+- The capture magnet is labeled `Journal`, not the ambiguous `New Entry`, and uses one filled open-book mark. Journal History reuses the book with a small clock modifier.
+- Inventory uses a quiet outlined carry-bag whose body contains the live strategy count; do not add a separate count circle beside it.
 
 ## App identity and social sharing imagery
 
@@ -357,7 +358,7 @@ Rules:
 
 ### 2026-10-11
 
-- Began live `site-test` evaluation of the three monochrome home feature marks, the shared Journal mark/modifiers, the Paper Magnet app icon, and the Open Monochrome social lockup. Body Cues remains text-only and ordinary site icons remain unchanged.
+- Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, the Paper Magnet app icon, and the Open Monochrome social lockup. Body Cues remains text-only and ordinary site icons remain unchanged.
 
 ### 2026-10-10
 
