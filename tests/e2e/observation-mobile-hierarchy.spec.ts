@@ -43,3 +43,42 @@ test('mobile keeps observation actions compact and results ahead of secondary co
 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
+
+test('Quick Check shows per-detail guidance without a duplicate recipe', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/observations');
+
+  await expect(page.getByText('Observation recipe', { exact: true })).toHaveCount(0);
+  const slots = page.getByRole('list', { name: 'Observation slots' });
+  const guidance = [
+    { label: 'When?', detail: 'Yesterday at 3 p.m.' },
+    { label: 'Where or with whom?', detail: 'In the conference room with Alex' },
+    { label: 'What did you see or hear?', detail: 'They closed the laptop.' },
+    { label: 'Number or exact words', detail: 'They called three times.' },
+  ];
+
+  for (const { label, detail } of guidance) {
+    await slots.getByRole('button', { name: `About ${label}` }).click();
+    const dialog = page.getByRole('dialog', { name: label });
+    await expect(dialog).toContainText(detail);
+    await page.getByRole('button', { name: `Close ${label}` }).click();
+    await expect(dialog).toHaveCount(0);
+  }
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+});
+
+test('observation guide citations open the source shown in the numbered library', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/observations');
+  await page.locator('#observation-guide > summary').click();
+  await page.getByText('What counts as an observation', { exact: true }).click();
+
+  const citation = page.locator('#observation-guide a[href="#observation-guide-ref-9"]').first();
+  await expect(citation).toHaveText('[1]');
+  await citation.click();
+
+  const reference = page.locator('#observation-guide-ref-9');
+  await expect(reference).toBeVisible();
+  await expect(reference).toContainText('[1] Behavioral observation reliability guidance');
+});
