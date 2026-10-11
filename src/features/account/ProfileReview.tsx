@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { OverlayShell } from '../../components/overlays/OverlayShell';
 import {
@@ -11,13 +11,8 @@ import {
   retryMergedProfileSave,
   useProfileReview,
 } from './blueskyAccount';
-import { localProfileRisk } from './profileReconciliation';
+import { requestProfileAction } from './profileConfirmation';
 import styles from './ProfileReview.module.css';
-
-function list(parts: string[]) {
-  if (parts.length < 2) return parts[0] ?? '';
-  return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
-}
 
 export function ProfileReview() {
   const review = useProfileReview();
@@ -25,9 +20,9 @@ export function ProfileReview() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [handoffCode, setHandoffCode] = useState('');
-  const comparison = review?.phase === 'ready' ? review.comparison : null;
-  const risk = comparison ? localProfileRisk(comparison) : null;
-  const hasLocalRisk = Boolean(risk && (risk.journalEntries || risk.strategies));
+  const [profileAction, setProfileAction] = useState<'merge' | 'replace' | null>(null);
+  const promptedComparison = useRef<object | null>(null);
+  const handledCompletion = useRef<object | null>(null);
 
   const close = () => {
     if (busy) return;
@@ -35,6 +30,7 @@ export function ProfileReview() {
     dismissProfileReview();
     setMessage('');
     setHandoffCode('');
+    setProfileAction(null);
     if (changed) window.location.reload();
   };
   const run = async (action: () => Promise<unknown>) => {
@@ -45,6 +41,37 @@ export function ProfileReview() {
     finally { setBusy(false); }
   };
 
+  useEffect(() => {
+    if (review?.phase !== 'ready' || promptedComparison.current === review.comparison) return;
+    promptedComparison.current = review.comparison;
+
+    const action = requestProfileAction(review.comparison, deviceLabel);
+
+    if (!action) {
+      dismissProfileReview();
+      return;
+    }
+
+    setProfileAction(action);
+    setBusy(true);
+    setMessage('');
+    const apply = action === 'merge' ? mergeReviewedProfileIntoAccount : replaceBrowserWithReviewedProfile;
+    void apply()
+      .catch((error) => setMessage(error instanceof Error ? error.message : 'Unable to finish. Your browser data is still available.'))
+      .finally(() => setBusy(false));
+  }, [deviceLabel, review]);
+
+  useEffect(() => {
+    if (review?.phase !== 'done' || handledCompletion.current === review) return;
+    handledCompletion.current = review;
+    if (review.changed) {
+      window.location.reload();
+      return;
+    }
+    window.alert(review.message);
+    dismissProfileReview();
+  }, [review]);
+
   const title = review?.phase === 'handoff-return'
     ? 'Return to the home-screen app'
     : review?.phase === 'handoff-loading' || review?.phase === 'handoff-waiting'
@@ -52,17 +79,13 @@ export function ProfileReview() {
       : review?.phase === 'loading'
         ? 'Checking saved profile'
         : review?.phase === 'ready'
-          ? hasLocalRisk ? 'Local entries found' : 'Load saved profile?'
+          ? message ? 'Couldn’t update saved data' : profileAction === 'merge' ? 'Merging local entries' : 'Loading saved profile'
           : review?.phase === 'save-error'
             ? 'Couldn’t save profile'
-            : review?.phase === 'done'
-              ? 'Finished'
-              : 'Sign-in problem';
+            : 'Sign-in problem';
 
-  const riskParts = risk ? [
-    risk.journalEntries ? `${risk.journalEntries} local journal ${risk.journalEntries === 1 ? 'entry' : 'entries'}` : '',
-    risk.strategies ? `${risk.strategies} local saved ${risk.strategies === 1 ? 'strategy' : 'strategies'}` : '',
-  ].filter(Boolean) : [];
+  if (review?.phase === 'ready' && !busy && !message) return null;
+  if (review?.phase === 'done') return null;
 
   return (
     <OverlayShell
@@ -103,20 +126,10 @@ export function ProfileReview() {
             : <p>Close this warning and start sign-in again from Account &amp; data.</p>}
         </> : null}
 
-        {comparison && hasLocalRisk ? <>
-          <p>This {deviceLabel} contains {list(riskParts)} not saved in your profile. Loading your saved profile would remove {(risk?.journalEntries ?? 0) + (risk?.strategies ?? 0) === 1 ? 'it' : 'them'}.</p>
-          <div className={styles.actions}>
-            <button type="button" className={styles.primary} disabled={busy} onClick={() => void run(mergeReviewedProfileIntoAccount)}>{busy ? 'Merging…' : 'Merge into profile'}</button>
-            <button type="button" className={styles.destructive} disabled={busy} onClick={() => void run(replaceBrowserWithReviewedProfile)}>Discard local entries</button>
-          </div>
-        </> : null}
+        {review?.phase === 'ready' && busy ? <p role="status">{profileAction === 'merge' ? 'Merging local entries into your profile…' : 'Loading your saved profile…'}</p> : null}
 
-        {comparison && !hasLocalRisk ? <>
-          <p>Your saved profile will replace data stored in this {deviceLabel}. Unfinished drafts will stay here.</p>
-          <div className={styles.actions}>
-            <button type="button" className={styles.primary} disabled={busy} onClick={() => void run(replaceBrowserWithReviewedProfile)}>{busy ? 'Loading…' : 'Load profile'}</button>
-            <button type="button" disabled={busy} onClick={close}>Cancel</button>
-          </div>
+        {review?.phase === 'ready' && message ? <>
+          <button type="button" onClick={close}>Close</button>
         </> : null}
 
         {review?.phase === 'save-error' ? <>
@@ -125,11 +138,6 @@ export function ProfileReview() {
             <button type="button" className={styles.primary} disabled={busy} onClick={() => void run(retryMergedProfileSave)}>{busy ? 'Saving…' : 'Try saving again'}</button>
             <button type="button" disabled={busy} onClick={close}>Close</button>
           </div>
-        </> : null}
-
-        {review?.phase === 'done' ? <>
-          <p role="status">{review.message}</p>
-          <button type="button" className={styles.primary} disabled={busy} onClick={close}>Continue</button>
         </> : null}
 
         {message ? <p role="alert">{message}</p> : null}
