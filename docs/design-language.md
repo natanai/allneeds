@@ -367,7 +367,7 @@ Rules:
 ### 2026-10-11 — Observation guidance consolidation
 
 - Observation Quick Check is the primary writing prompt. Its four existing detected-detail rows each have a compact Info circle with an accessible touch target and a short explanation/example. The former separate Observation recipe disclosure is retired; the example sentence and deeper research guide remain available.
-- The mobile Observation guide numbers its citations consecutively in first-appearance order and lists its reference library in the same order. Internal source anchors keep their stable identities so existing source links remain traceable.
+- One canonical Observation guide is now rendered identically on mobile and desktop, with optional expanding sections, a unified source library, and consecutively numbered first-use citations. Smaller screens stack worked examples; wide screens place pairs side by side. The old separate desktop/mobile JSON copies, repetitive writing recipe, and misidentified citations were retired after the source-to-claim review in `docs/observation-guide-evidence-review.md`.
 - `Found` describes local pattern detection, not a truth or completeness score. The additional guidance does not demand removal of feelings or interpretations.
 
 ### 2026-10-10
