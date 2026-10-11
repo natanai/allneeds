@@ -242,16 +242,20 @@ const disclosureSource = await readFile(resolve(root, 'src/components/disclosure
 const disclosureStyles = await readFile(resolve(root, 'src/components/disclosure/DisclosureRow.module.css'), 'utf8');
 const alexithymiaSource = await readFile(resolve(root, 'src/features/alexithymia/AlexithymiaSupportPage.tsx'), 'utf8');
 const observationFooterIndex = observationsSource.indexOf(`<footer className={styles.footer}>`);
-const observationRecipeIndex = observationsSource.indexOf(`<DisclosureRow title="Observation recipe"`);
+const observationQuickCheckIndex = observationsSource.indexOf(`<section className={styles.quickCheck}>`);
 const observationOverviewIndex = observationsSource.indexOf(`<section className={styles.overview}>`);
-if (observationRecipeIndex < 0
-  || observationFooterIndex < observationRecipeIndex
+if (observationQuickCheckIndex < 0
+  || observationFooterIndex < observationQuickCheckIndex
   || observationOverviewIndex < observationFooterIndex) {
-  fail('Observation recipe or secondary guidance has drifted out of the current editor-first workflow.');
+  fail('Observation Quick Check or secondary guidance has drifted out of the current editor-first workflow.');
 }
 if (!observationsSource.includes('guideOpen ? <div className={styles.guideCard}')
-  || !observationsSource.includes('<ObservationRecipe onOpenGuide={openGuide} />')) {
-  fail('the bundled Observation guide performs hidden DOM work before the user opens it.');
+  || !observationsSource.includes('guide.sections?.map')
+  || !observationsSource.includes('onClick={() => setHelpTopic(slot.id)}')
+  || !observationsSource.includes('className={styles.slotInfo}')
+  || observationsSource.includes('<ObservationRecipe')
+  || observationsSource.includes('<DisclosureRow title="Observation recipe"')) {
+  fail('Observation guidance must use one on-demand guide and contextual Quick Check help without a duplicate recipe.');
 }
 if (!observationsSource.includes('analyzeObservation(text, feelingsMode)')
   || !observationsSource.includes('<AnnotatedObservationEditor')
