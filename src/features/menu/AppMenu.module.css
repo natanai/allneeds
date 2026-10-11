@@ -343,6 +343,14 @@
   }
 }
 
+/* Safari zooms the whole page when a focused form field is under 16px.
+   The username input otherwise inherits the much smaller label size. */
+@media (any-pointer: coarse) {
+  .systemCard input[type='text'] {
+    font-size: max(16px, 1em);
+  }
+}
+
 @media (max-width: 360px) {
   .actionPair {
     grid-template-columns: 1fr;
