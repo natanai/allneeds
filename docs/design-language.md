@@ -384,6 +384,12 @@ See `docs/journal-history.md` for persistence, calculations, and review checks.
 - Inventory uses one compact count pouch: the familiar circular success counter is reshaped into the pouch body and finished with a small cinched tie. It remains within the navigation magnet's standard line height and is reused at a larger size beside the Inventory page title. The count is optically aligned with adjacent text and uses the Customizer-derived Primary foreground (black or white, whichever contrasts more strongly with Primary).
 - Profile replacement decisions use genuine browser-native `window.confirm()` dialogs, not an allneeds-styled `alertdialog`. Routine differences require one Load/Cancel confirmation. When local Journal or Inventory records would be removed, one confirmation offers merge; canceling it opens a second confirmation offering discard; canceling both changes nothing. Browser-native dialogs cannot rename their generic OK/Cancel controls, so the complete action and consequence must be stated in each prompt. The secure installed-iOS six-digit handoff remains unchanged; custom account UI remains only for its required code field, active progress, and recoverable errors.
 
+### 2026-10-11 — Observation guidance consolidation
+
+- Observation Quick Check is the primary writing prompt. Its four existing detected-detail rows each have a compact Info circle with an accessible touch target and a short explanation/example. The former separate Observation recipe disclosure is retired; the example sentence and deeper research guide remain available.
+- One canonical Observation guide is now rendered identically on mobile and desktop, with optional expanding sections, a unified source library, and consecutively numbered first-use citations. Smaller screens stack worked examples; wide screens place pairs side by side. The old separate desktop/mobile JSON copies, repetitive writing recipe, and misidentified citations were retired after the source-to-claim review in `docs/observation-guide-evidence-review.md`.
+- `Found` describes local pattern detection, not a truth or completeness score. The additional guidance does not demand removal of feelings or interpretations.
+
 ### 2026-10-10
 
 - Sign-in and `Load saved profile` inspect both copies before changing browser data. Merging uses saved profile settings, retains local-only and profile-only records, deduplicates unchanged IDs, keeps both versions of conflicting edits, and immediately saves the merged result to the profile. Existing browser drafts always survive. A device-local recovery copy of both originals is written before either replacement or merging. The warning presentation recorded here was superseded by the browser-native confirmation decision on 2026-10-11.
@@ -405,7 +411,7 @@ See `docs/journal-history.md` for persistence, calculations, and review checks.
 - Observation text uses one plain-text editing surface. CSS Custom Highlight ranges paint directly on the same DOM text that receives the caret, selection, wrapping, scrolling, and zoom. Do not restore a mirrored overlay, duplicate text renderer, scroll synchronizer, or pixel-offset positioning.
 - The Observation Quick Check, inline formula/entity/faux/guidance/cue styling, immediate detected-word links, caret explanations, and possible Feeling/Need results all consume the same analysis and exact-range ledger.
 - Formula highlights remain visually distinct from Feeling, Need, Faux Feeling, guidance, and broad cue treatments. Do not use percentages or confidence meters for Observation suggestions.
-- Detected Feeling, Need, and Faux Feeling words remain directly navigable. The page also keeps the recipe, research guide, Clear action, met/unmet choice, and Journal handoff.
+- Detected Feeling, Need, and Faux Feeling words remain directly navigable. The page also keeps the research guide, Clear action, met/unmet choice, and Journal handoff; writing guidance lives in the Quick Check Info controls.
 - On narrow screens the editor keeps a stable working height while explanations expand below it, so annotation help never overlaps the following controls.
 
 ### 2026-08-27

@@ -2,28 +2,66 @@ import { describe, expect, it } from 'vitest';
 
 import observationGuide from './observationGuide.json';
 
-describe('Observation guide public copy', () => {
-  const referenceSection = observationGuide.mobile.sections
-    .find((section) => section.id === 'observation-guide-mobile-references')!;
-  const guideWithoutReferences = {
-    intro: observationGuide.intro,
-    sections: observationGuide.mobile.sections.filter((section) => section !== referenceSection),
-  };
+function authoredStrings(value: unknown): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(authoredStrings);
+  if (value && typeof value === 'object') return Object.values(value).flatMap(authoredStrings);
+  return [];
+}
 
-  it('uses plain language in every rendered guidance section', () => {
-    const renderedCopy = JSON.stringify(guideWithoutReferences);
-    expect(renderedCopy).not.toMatch(/low-inference|camera-ready|psycholinguistics|limbic|nervous systems|observer drift|\bkappa\b/i);
-    expect(renderedCopy).not.toContain('—');
-    expect(renderedCopy).toContain('not as a test you have to pass');
+describe('Canonical Observation guide', () => {
+  const referenceSection = observationGuide.sections.find(
+    (section) => section.id === 'observation-guide-references',
+  )!;
+  const sectionsWithoutReferences = observationGuide.sections.filter(
+    (section) => section !== referenceSection,
+  );
+
+  it('uses one content collection regardless of viewport', () => {
+    expect('desktop' in observationGuide).toBe(false);
+    expect('mobile' in observationGuide).toBe(false);
+    expect(observationGuide.sections.length).toBeGreaterThan(5);
   });
 
-  it('gives every rendered citation a matching source anchor', () => {
-    const citedIds = [...JSON.stringify(guideWithoutReferences).matchAll(/observation-guide-ref-(\d+)/g)]
-      .map((match) => match[1])
-      .sort((left, right) => Number(left) - Number(right));
-    const anchorIds = [...JSON.stringify(referenceSection).matchAll(/id=\\"observation-guide-ref-(\d+)/g)]
-      .map((match) => match[1])
-      .sort((left, right) => Number(left) - Number(right));
-    expect([...new Set(anchorIds)]).toEqual([...new Set(citedIds)]);
+  it('uses plain-language guidance without deleting interpretations', () => {
+    const renderedCopy = JSON.stringify({ intro: observationGuide.intro, sections: sectionsWithoutReferences });
+    expect(renderedCopy).not.toMatch(/low-inference|camera-ready|psycholinguistics|limbic|nervous systems|observer drift|\bkappa\b/i);
+    expect(renderedCopy).not.toContain('—');
+    expect(renderedCopy).toContain('not a test of whether your experience or interpretation is true');
+    expect(renderedCopy).toContain('Both can stay.');
+  });
+
+  it('has correctly ordered citations, each pointing to exactly one source', () => {
+    const citations = authoredStrings(sectionsWithoutReferences).flatMap(
+      (value) => [...value.matchAll(/href="#observation-guide-source-([^"]+)">\[(\d+)\]/g)],
+    );
+    const firstUse = new Map<string, number>();
+    for (const match of citations) {
+      const id = match[1];
+      const label = match[2];
+      if (!id || !label) throw new Error('Citation is missing a source identifier or number');
+      if (!firstUse.has(id)) firstUse.set(id, firstUse.size + 1);
+      expect(Number(label)).toBe(firstUse.get(id));
+    }
+
+    const listed = authoredStrings(referenceSection).flatMap(
+      (value) => [...value.matchAll(/id="observation-guide-source-([^"]+)"[^>]*>\[(\d+)\]/g)],
+    );
+    expect(listed.length).toBeGreaterThan(0);
+    expect(listed.map(([, id]) => id)).toEqual([...firstUse.keys()]);
+    expect(listed.map(([, , label]) => Number(label))).toEqual([...firstUse.values()]);
+    expect(new Set(listed.map(([, id]) => id)).size).toBe(listed.length);
+
+    const sources = authoredStrings(referenceSection).filter((item) => item.includes('id="observation-guide-source-'));
+    for (const source of sources) {
+      expect(source).toMatch(/href="https:\/\//);
+      expect(source).toContain('target="_blank"');
+      expect(source).toContain('rel="noopener noreferrer"');
+    }
+  });
+
+  it('does not ship the previously misidentified citations', () => {
+    const allCopy = JSON.stringify(observationGuide);
+    expect(allCopy).not.toMatch(/PMC4766977|PMC8773921|PMC6353691|PMC4841258/);
   });
 });

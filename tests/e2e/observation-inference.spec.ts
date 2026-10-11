@@ -241,8 +241,9 @@ test('desktop uses a task-and-context workspace and mobile returns to one linear
 test('plain-language guide citations reveal their matching source', async ({ page }) => {
   await page.goto('/observations');
   await page.getByText('Observation guide', { exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Describe what happened with concrete details' })).toBeVisible();
+  await expect(page.getByText('Use the sections that help you.', { exact: false })).toBeVisible();
 
-  await page.getByRole('link', { name: '[2]' }).first().click();
-  await expect(page.getByRole('link', { name: '[2] Concreteness and comprehension' })).toBeVisible();
+  await page.getByText('What counts as an observation', { exact: true }).click();
+  await page.getByRole('link', { name: '[1]', exact: true }).first().click();
+  await expect(page.getByRole('link', { name: '[1] IRIS Center, Vanderbilt University: Defining Behavior (educator guidance)' })).toBeVisible();
 });
