@@ -75,7 +75,9 @@ test('the same complete guide is available on phone and desktop', async ({ page 
     await page.goto('/observations');
     await page.locator('#observation-guide > summary').click();
 
-    const titles = await page.locator('#observation-guide details > summary strong').allTextContents();
+    const headings = page.locator('#observation-guide details > summary strong');
+    await expect(headings).toHaveCount(7);
+    const titles = await headings.allTextContents();
     sections.push(titles);
     expect(titles).toContain('When an exact record matters');
     expect(titles).toContain('Reference library');
