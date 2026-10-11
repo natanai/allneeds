@@ -383,8 +383,7 @@
 
 .basis p,
 .termHelp,
-.example p,
-.recipe > p {
+.example p {
   margin: 0;
   color: var(--secondary);
   font-size: var(--text-sm);
@@ -497,6 +496,46 @@
   font-weight: 650;
 }
 
+.slotLabel {
+  min-width: 0;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: .1rem;
+}
+
+.slotInfo {
+  width: var(--control-min);
+  min-width: var(--control-min);
+  min-height: var(--control-min);
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--secondary);
+  cursor: pointer;
+}
+
+.slotInfo > span {
+  width: 1.2rem;
+  height: 1.2rem;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--outline) 48%, transparent);
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.slotInfo:focus-visible {
+  outline: 2px solid var(--outline);
+  outline-offset: -2px;
+}
+
 .slot small {
   margin-inline-start: auto;
   color: var(--secondary);
@@ -526,27 +565,6 @@
   color: var(--text);
   font: inherit;
   cursor: pointer;
-}
-
-.recipe ol {
-  padding-left: 1.2rem;
-  display: grid;
-  gap: var(--space-3);
-}
-
-.recipe li p {
-  margin: .2rem 0;
-  color: var(--secondary);
-  font-size: var(--text-sm);
-  line-height: 1.4;
-}
-
-.recipe li small {
-  color: color-mix(in srgb, var(--secondary) 75%, transparent);
-}
-
-.recipe a {
-  text-decoration: underline;
 }
 
 .footer {
