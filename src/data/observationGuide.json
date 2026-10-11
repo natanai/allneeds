@@ -1,394 +1,158 @@
 {
-  "summary": {
-    "eyebrow": "Examples and sources",
-    "title": "Observation guide"
-  },
   "intro": {
-    "eyebrow": "Plain-language guide",
-    "title": "Describe what happened with concrete details",
     "paragraphs": [
-      "An observation is a description of a specific event using details that someone could see, hear, quote, or count. Adding time, place, and exact words can make an account easier to understand and revisit. Research on concrete language and behavioral observation informs this guide <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-      "Concrete details do not make your feelings, interpretation, or account of harm less real. They also do not prove another person’s intent. Use them as an additional layer when useful, not as a test you have to pass."
+      "Use the sections that help you. This is a guide to describing situations, not a test of whether your experience or interpretation is true. The same material is available on phones and larger screens."
     ]
   },
-  "desktop": {
-    "sections": [
-      {
-        "id": "observation-guide-definition",
-        "label": "Definition",
-        "title": "Operational Definition & Evidence Context",
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "Recorder criterion: report only what a camera/microphone could capture (verbatim words, visible actions, measurable outcomes). Behavioral observation emphasizes observable units to aid reliability <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "Time- and context-bound: specify when/where (e.g., “On Tue 15:10 in the team room…”). Concreteness improves comprehension and reduces ambiguity <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
-              "Avoid absolutes (“always/never/constantly”): prefer frequency, duration, or counts <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>.",
-              "No mind-reading or motive attributions (e.g., “to hurt me,” “on purpose”): hostile-attribution tendencies relate to aggressive/negative responding <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-11\">[11]</a></sup>.",
-              "Quantify when feasible: counts, durations, latency, intensity (e.g., decibels). Linguistic abstraction inflates inference; measurables support shared description <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-1\">[1]</a></sup>."
-            ]
-          },
-          {
-            "type": "callout",
-            "html": "Observations describe events; other components (feelings/needs/requests) are handled elsewhere in the app. Separating description from evaluation aligns with evidence on perspective-taking/I-language <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-5\">[5]</a></sup>."
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-method",
-        "label": "Method",
-        "title": "Fill-in-the-Blank Procedure (Low-Inference Observation)",
-        "content": [
-          {
-            "type": "list",
-            "style": "ordered",
-            "items": [
-              "Anchor the scene: “On [DATE] at [TIME] in [PLACE], …”. Concreteness advantage <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
-              "Describe only what was sensed: “I saw/heard [ACTOR] [ACTION/WORDS].” Behavioral observation favors observable units <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "Quote verbatim when feasible: “[Exact words].” Wording influences blame inferences; direct quotes minimize reinterpretation <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-12\">[12]</a></sup>.",
-              "Quantify: “[N times / for M minutes / on D dates / ~latency].” Replace vague adverbs with measurable data <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>.",
-              "Remove evaluations: omit trait adjectives and “too/should” adverbs; substitute the underlying observable behavior. Language framing affects judgment <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-12\">[12]</a></sup>.",
-              "Remove intent clauses (e.g., “to annoy me”). Hostile intent attributions are linked with negative responding; keep to what occurred <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>."
-            ]
-          },
-          {
-            "type": "callout",
-            "html": "<strong>Template:</strong> “On [DATE] at [TIME] in [PLACE], I saw/heard [ACTOR] [ACTION/WORDS]. This occurred [COUNT/DURATION/LATENCY].”"
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-heuristics",
-        "label": "Heuristics",
-        "title": "Automated Flags & Coaching Prompts",
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "Absolutes: flag “always/never/constantly/every time.” Prompt for timeframe and count <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
-              "Trait labels: flag “rude, selfish, careless, disrespectful, aggressive, lazy,” etc. Prompt: “Describe the exact behavior instead” <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-12\">[12]</a></sup>.",
-              "Mind-reading: flag “on purpose,” “to hurt me,” “because you don’t care.” Prompt: “Omit intent; report the observable act” <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>.",
-              "Causation claims without evidence: flag “for no reason,” “made me,” unless tied to a measurable outcome. Encourage sticking to recorded events.",
-              "Perspective-taking for later steps: I-language and checking understanding are associated with less defensive escalation <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-5\">[5]</a></sup>."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-examples",
-        "label": "Examples",
-        "title": "Evaluation → Observation (Worked Examples)",
-        "content": [
-          {
-            "type": "examples",
-            "items": [
-              {
-                "evaluation": "“You’re always late and inconsiderate.”",
-                "observation": "“In the past two weeks, you arrived 5–15 minutes after our agreed time on three occasions.”",
-                "why": "Replaces global language with time-bound frequency; concreteness improves agreement <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>."
-              },
-              {
-                "evaluation": "“Janice works too much.”",
-                "observation": "“Janice logged 62 on-site hours this week, including Saturday.”",
-                "why": "Removes evaluative adverb; supplies measurable quantity <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>."
-              },
-              {
-                "evaluation": "“He left the party to hurt me.”",
-                "observation": "“He left the party without saying goodbye at 9:10 p.m.”",
-                "why": "Strips motive attribution; hostile-attribution research cautions against inferred intent <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>."
-              },
-              {
-                "evaluation": "“You were rude in the meeting.”",
-                "observation": "“During the 2:00–2:15 agenda item, while I was speaking, you interrupted twice (timestamps 08:12 and 09:47).”",
-                "why": "Replaces trait with event-bounded counts; wording shapes perceived blame <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-12\">[12]</a></sup>."
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-data",
-        "label": "Measurement",
-        "title": "Measurement Concepts: Operational Definitions, ABC, Agreement",
-        "content": [
-          {
-            "type": "paragraph",
-            "text": "This section summarizes commonly used measurement concepts that may inform personal or professional record-keeping in observational work."
-          },
-          {
-            "type": "list",
-            "style": "ordered",
-            "items": [
-              "Operational definitions with exemplars/non-examples <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "ABC recording with timestamps; where feasible, use continuous measures (count, duration, latency) <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-13\">[13]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-14\">[14]</a></sup>.",
-              "Inter-observer agreement (IOA) on a sample of observations; consider statistics appropriate to the data (e.g., kappa) <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[15]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-16\">[16]</a></sup>.",
-              "Audit for observer drift and recalibrate using reference clips/exemplars <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[15]</a></sup>."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-needs",
-        "label": "Needs link",
-        "title": "Context: Research on Psychological Needs",
-        "content": [
-          {
-            "type": "callout",
-            "html": "<strong>Why this tab exists.</strong> Writing low-inference observations is easier when users understand <em>why</em> neutral, time-bound description matters in relationships. This tab collates open-access research on frequently studied psychological needs. It does not prescribe which needs you have. Its purpose is to show how clear description can support later steps (like identifying feelings/needs) by creating a shared factual baseline. For related evidence on perspective-taking and language use in communication, see: https://pmc.ncbi.nlm.nih.gov/articles/PMC5961625/."
-          },
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "<strong>What you’re looking at.</strong> Short summaries plus raw-URL links to readable, evidence-based sources (open-access reviews/advisories/articles). The full URLs are included so you can verify them yourself.",
-              "<strong>How this connects to observational skill.</strong> Neutral, time-bound description can reduce ambiguity and perceived social threat, which may make collaboration on next steps easier. This general idea aligns with research on needs commonly discussed in interpersonal settings—autonomy, competence, belonging, trust, and safety. See: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5050353/; https://selfdeterminationtheory.org/topics/basic-psychological-needs/; https://www.hhs.gov/sites/default/files/surgeon-general-social-connection-advisory.pdf; https://pubmed.ncbi.nlm.nih.gov/21058850/; https://www.dignityhealth.org/articles/how-human-connection-can-relieve-stress."
-            ]
-          },
-          {
-            "type": "paragraph",
-            "text": "Autonomy & competence. Research on basic psychological needs suggests people benefit when they can make informed, self-directed choices and feel effective in their actions. Clear, low-inference description helps establish a shared situation model that can support agency and planning. Sources: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5050353/; https://selfdeterminationtheory.org/topics/basic-psychological-needs/."
-          },
-          {
-            "type": "paragraph",
-            "text": "Belonging / social connection. Neutral description can lower perceived social threat and open space for cooperation, which is relevant given public-health summaries linking social connection to well-being. Source: https://www.hhs.gov/sites/default/files/surgeon-general-social-connection-advisory.pdf."
-          },
-          {
-            "type": "paragraph",
-            "text": "Trust & safety. Language that avoids motive attributions and global labels is less likely to be received as threatening. Evidence connecting interpersonal trust with stress physiology provides useful context for why non-judging description can feel safer. Sources: https://pubmed.ncbi.nlm.nih.gov/21058850/; https://www.dignityhealth.org/articles/how-human-connection-can-relieve-stress."
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-limitations",
-        "label": "Limitations",
-        "title": "Limitations & Scope Notes",
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "Memory/measurement: observations depend on recall or recording fidelity; contemporaneous notes/quotes provide clearer records <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "Intent is not adjudicated by observation: avoid hostile attributions <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>.",
-              "Cultural/linguistic nuance: perceptions of “neutral” phrasing can vary; invite verification of wording.",
-              "Scope: this guide summarizes research and provides structured prompts; it does not determine clinical reliability or outcomes."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-references",
-        "label": "References",
-        "title": "References",
-        "content": [
-          {
-            "type": "list",
-            "style": "ordered",
-            "items": [
-              "<a id=\"observation-guide-ref-1\" href=\"https://www.uni-muenster.de/imperia/md/content/psyifp/aeechterhoff/vorlesungkommunikation/semin_fiedler_cogfunctoflingcategor_jpsp_1989.pdf\" rel=\"noopener noreferrer\" target=\"_blank\">uni-muenster.de – Linguistic abstraction and inference study (1989)</a>",
-              "<a id=\"observation-guide-ref-2\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC6353691/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC6353691 – Concreteness and comprehension research</a>",
-              "<a id=\"observation-guide-ref-3\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC8773921/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC8773921 – Measurement-focused language guidance</a>",
-              "<a id=\"observation-guide-ref-4\" href=\"https://sanlab.psych.ucla.edu/wp-content/uploads/sites/31/2015/05/Lieberman_AL-2007.pdf\" rel=\"noopener noreferrer\" target=\"_blank\">Lieberman et al. (2007) – Affect labeling reduces limbic response</a>",
-              "<a id=\"observation-guide-ref-5\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC5961625/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC5961625 – Perspective-taking and I-language outcomes</a>",
-              "<a id=\"observation-guide-ref-6\" href=\"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5050353/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC5050353 – Autonomy and competence needs review</a>",
-              "<a id=\"observation-guide-ref-7\" href=\"https://selfdeterminationtheory.org/topics/basic-psychological-needs/\" rel=\"noopener noreferrer\" target=\"_blank\">Self-Determination Theory – Basic psychological needs overview</a>",
-              "<a id=\"observation-guide-ref-8\" href=\"https://www.hhs.gov/sites/default/files/surgeon-general-social-connection-advisory.pdf\" rel=\"noopener noreferrer\" target=\"_blank\">U.S. Surgeon General – Social connection advisory</a>",
-              "<a id=\"observation-guide-ref-9\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4766977/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC4766977 – Behavioral observation reliability guidance</a>",
-              "<a id=\"observation-guide-ref-10\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4243523/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC4243523 – Hostile attribution and aggression analysis</a>",
-              "<a id=\"observation-guide-ref-11\" href=\"https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2021.778695/full\" rel=\"noopener noreferrer\" target=\"_blank\">Frontiers in Psychology – Hostile attribution coaching study</a>",
-              "<a id=\"observation-guide-ref-12\" href=\"https://doi.org/10.3758/PBR.17.5.644\" rel=\"noopener noreferrer\" target=\"_blank\">Psychonomic Bulletin &amp; Review – Language framing and blame study</a>",
-              "<a id=\"observation-guide-ref-13\" href=\"https://opentext.wsu.edu/ldaffin/chapter/module-5-determining-the-abcs-of-behavior-via-a-functional-assessment/\" rel=\"noopener noreferrer\" target=\"_blank\">opentext.wsu.edu – ABC recording overview</a>",
-              "<a id=\"observation-guide-ref-14\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4841258/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC4841258 – Functional assessment measurement research</a>",
-              "<a id=\"observation-guide-ref-15\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC10098472/\" rel=\"noopener noreferrer\" target=\"_blank\">PMC10098472 – Observer agreement calibration study</a>",
-              "<a id=\"observation-guide-ref-16\" href=\"https://edpsychassociates.com/Papers/Kappa%28JEIBI%2C2004%29.pdf\" rel=\"noopener noreferrer\" target=\"_blank\">edpsychassociates.com – Kappa statistic primer</a>",
-              "<a id=\"observation-guide-ref-17\" href=\"https://pubmed.ncbi.nlm.nih.gov/21058850/\" rel=\"noopener noreferrer\" target=\"_blank\">PubMed 21058850 – Interpersonal trust and stress pathways</a>",
-              "<a id=\"observation-guide-ref-18\" href=\"https://www.dignityhealth.org/articles/how-human-connection-can-relieve-stress\" rel=\"noopener noreferrer\" target=\"_blank\">Dignity Health – Human connection and stress relief</a>"
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "mobile": {
-    "eyebrow": "Quick mobile reference",
-    "title": "Observation mini-guide",
-    "intro": [
-      "Tap a card for research-backed pointers. The full desktop guide stays available if you rotate or switch to a larger screen."
-    ],
-    "sections": [
-      {
-        "id": "observation-guide-mobile-definition",
-        "eyebrow": "Start here",
-        "title": "What counts as an observation",
-        "description": "Describe the event before deciding what it meant.",
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "Start with visible actions, exact words, and results someone could notice <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "Add when and where it happened if those details are available <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
-              "Use a count, duration, or frequency when the amount matters. An estimate is fine <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>.",
-              "Your interpretation can stay. If it matters, also add the details that led you to it."
-            ]
-          },
-          {
-            "type": "callout",
-            "html": "This is a writing aid, not a truth test. A concrete description can sit beside your feelings and interpretation."
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-mobile-method",
-        "eyebrow": "Write it out",
-        "title": "A simple writing recipe",
-        "description": "Use as much of this structure as helps.",
-        "content": [
-          {
-            "type": "list",
-            "style": "ordered",
-            "items": [
-              "Begin with the moment: “On [DATE] at [TIME] in [PLACE]…” <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
-              "Add what you noticed: “I saw or heard [PERSON] [ACTION OR WORDS].” <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "Use the exact words when you remember them. Quotation marks show what was said directly.",
-              "Add how many times or how long when it matters <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>.",
-              "If you include a judgment or possible motive, add the details that led you there."
-            ]
-          },
-          {
-            "type": "callout",
-            "html": "<strong>Optional template:</strong> “On [DATE] at [TIME] in [PLACE], I saw or heard [PERSON] [ACTION OR WORDS] [COUNT OR DURATION].”"
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-mobile-heuristics",
-        "eyebrow": "Spot checks",
-        "title": "Why a word may be highlighted",
-        "description": "Highlights invite more detail; they do not mark your words wrong.",
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "Words such as “always” or “often” may prompt you for a timeframe, example, or count <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
-              "A label such as “rude” may prompt you to add the words or actions that led you to use it.",
-              "A possible motive such as “on purpose” may prompt you to add the evidence behind your conclusion <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>.",
-              "Words about harm, pressure, or impact are not treated as unreal. The prompt asks only whether you want to add specific events or constraints.",
-              "You can ignore a prompt that does not fit your meaning. The app cannot understand the full context."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-mobile-examples",
-        "eyebrow": "See it in action",
-        "title": "From broad wording to concrete detail",
-        "description": "The second version adds detail without claiming the first was false.",
-        "content": [
-          {
-            "type": "examples",
-            "items": [
-              {
-                "evaluation": "“You’re always late and inconsiderate.”",
-                "observation": "“In the past two weeks, you arrived 5–15 minutes after our agreed time on three occasions.”",
-                "why": "Adds a timeframe and count <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>."
-              },
-              {
-                "evaluation": "“Janice works too much.”",
-                "observation": "“Janice logged 62 on-site hours this week, including Saturday.”",
-                "why": "Adds the number of hours and the relevant timeframe <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>."
-              },
-              {
-                "evaluation": "“He left the party to hurt me.”",
-                "observation": "“He left the party without saying goodbye at 9:10 p.m.”",
-                "why": "Separates the visible action from a conclusion about motive <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>."
-              },
-              {
-                "evaluation": "“You were rude in the meeting.”",
-                "observation": "“During the 2:00–2:15 agenda item, while I was speaking, you interrupted twice (timestamps 08:12 and 09:47).”",
-                "why": "Adds the time, action, and count behind the word “rude.”"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-mobile-measurement",
-        "eyebrow": "Optional detail",
-        "title": "When an exact record matters",
-        "description": "Useful for shared records, programs, or research.",
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "Define the action you are recording and include examples of what does and does not count <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "Keep a dated log with counts, durations, and what happened immediately before and after <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-13\">[13]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-14\">[14]</a></sup>.",
-              "If more than one person is recording, compare notes to see whether you are using the same definition <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[15]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-16\">[16]</a></sup>.",
-              "Recheck the definition over time so the record stays consistent <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[15]</a></sup>."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-mobile-why",
-        "eyebrow": "Why it may help",
-        "title": "What concrete detail can and cannot do",
-        "description": "Useful information, without promises about the outcome.",
-        "content": [
-          {
-            "type": "paragraph",
-            "text": "Concrete wording can make a shared event easier to remember, compare, or discuss. It cannot guarantee that people will agree about what the event meant."
-          },
-          {
-            "type": "paragraph",
-            "text": "A person can accurately name harm with a broad word and still choose to add concrete details. The added detail does not excuse the behavior or erase its impact."
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-mobile-limitations",
-        "eyebrow": "Scope check",
-        "title": "Limits to remember",
-        "description": "Use concrete details as information, not as a verdict.",
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "Memory can change over time. Write down exact words or details soon afterward when accuracy matters <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "A concrete description does not prove another person’s intent <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>.",
-              "People may describe the same event differently because of viewpoint, language, culture, access, or missing information.",
-              "This guide is not a clinical assessment, legal standard, or requirement for being believed."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "observation-guide-mobile-references",
-        "eyebrow": "Want the studies?",
-        "title": "Reference library",
-        "description": "Tap to browse full links in a single list.",
-        "defaultOpen": false,
-        "content": [
-          {
-            "type": "list",
-            "style": "unordered",
-            "items": [
-              "<a id=\"observation-guide-ref-2\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC6353691/\" rel=\"noopener noreferrer\" target=\"_blank\">[2] Concreteness and comprehension</a>",
-              "<a id=\"observation-guide-ref-3\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC8773921/\" rel=\"noopener noreferrer\" target=\"_blank\">[3] Measurement-focused language guidance</a>",
-              "<a id=\"observation-guide-ref-9\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4766977/\" rel=\"noopener noreferrer\" target=\"_blank\">[9] Behavioral observation reliability guidance</a>",
-              "<a id=\"observation-guide-ref-10\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4243523/\" rel=\"noopener noreferrer\" target=\"_blank\">[10] Hostile attribution and aggression analysis</a>",
-              "<a id=\"observation-guide-ref-13\" href=\"https://opentext.wsu.edu/ldaffin/chapter/module-5-determining-the-abcs-of-behavior-via-a-functional-assessment/\" rel=\"noopener noreferrer\" target=\"_blank\">[13] Recording what happens before and after behavior</a>",
-              "<a id=\"observation-guide-ref-14\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4841258/\" rel=\"noopener noreferrer\" target=\"_blank\">[14] Functional assessment measurement research</a>",
-              "<a id=\"observation-guide-ref-15\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC10098472/\" rel=\"noopener noreferrer\" target=\"_blank\">[15] Observer agreement calibration study</a>",
-              "<a id=\"observation-guide-ref-16\" href=\"https://edpsychassociates.com/Papers/Kappa%28JEIBI%2C2004%29.pdf\" rel=\"noopener noreferrer\" target=\"_blank\">[16] Observer agreement statistic primer</a>"
-            ]
-          }
-        ]
-      }
-    ]
-  }
+  "sections": [
+    {
+      "id": "observation-guide-definition",
+      "eyebrow": "Start here",
+      "title": "What counts as an observation",
+      "description": "Describe the event, then add what it meant to you.",
+      "content": [
+        {
+          "type": "list",
+          "style": "unordered",
+          "items": [
+            "Describe actions, words, and outcomes you noticed. In behavioral recording, observable actions are described so another observer could recognize what happened <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-defining-behavior\">[1]</a></sup>.",
+            "Add the time, setting, or people when those details help place an event. Professional direct-observation guidance also records context alongside the specific behavior <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-nock-kurtz\">[2]</a></sup>.",
+            "A thought or feeling can belong in the same account. For example: “She closed her laptop while I was speaking. I felt dismissed and wondered if she wanted the discussion to end.”",
+            "You do not need a number or exact quote for every observation. An estimate or a note that you are unsure is better than invented precision."
+          ]
+        },
+        {
+          "type": "callout",
+          "html": "<strong>Both can stay.</strong> A description of what happened and an interpretation of what it meant are different kinds of information. One does not cancel the other."
+        }
+      ]
+    },
+    {
+      "id": "observation-guide-highlights",
+      "eyebrow": "Writing support",
+      "title": "Why a word may be highlighted",
+      "description": "An invitation to add detail, not a correction.",
+      "content": [
+        {
+          "type": "list",
+          "style": "unordered",
+          "items": [
+            "“Always” or “never” can cover many events. You might add the dates, frequency, or one example you remember.",
+            "Words like “rude,” “unfair,” or “careless” may express an important judgment. You can keep the word and describe the particular words or actions behind it.",
+            "“On purpose” describes an interpretation of intent. If helpful, name the actions or statements that led you to that interpretation.",
+            "Words about harm, coercion, or pressure are not treated as unreal. Adding context should not erase what you experienced.",
+            "You can ignore a prompt that does not fit. The app checks wording patterns locally; it cannot establish what actually happened."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-guide-examples",
+      "eyebrow": "Examples",
+      "title": "From broad wording to specific detail",
+      "description": "The second version adds context without declaring the first false.",
+      "content": [
+        {
+          "type": "examples",
+          "items": [
+            {
+              "evaluation": "“You’re always late and inconsiderate.”",
+              "observation": "“In the past two weeks, you arrived 5–15 minutes after our agreed time on three occasions.”",
+              "why": "Adds a timeframe and count. You can still explain how those occasions affected you."
+            },
+            {
+              "evaluation": "“Janice works too much.”",
+              "observation": "“Janice logged 62 on-site hours this week, including Saturday.”",
+              "why": "Names the hours and period being described. Whether that is too much remains a separate judgment."
+            },
+            {
+              "evaluation": "“He left the party to hurt me.”",
+              "observation": "“He left at 9:10 p.m. without saying goodbye. I felt hurt and wondered whether it was deliberate.”",
+              "why": "Records the action and preserves the feeling and question about intent."
+            },
+            {
+              "evaluation": "“You were rude in the meeting.”",
+              "observation": "“During the 2:00–2:15 agenda item, you spoke twice while I was talking.”",
+              "why": "Names what occurred. The speaker can still describe why those interruptions felt rude."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-guide-measurement",
+      "eyebrow": "Optional depth",
+      "title": "When an exact record matters",
+      "description": "Methods used in professional behavioral observation.",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The ideas below are mainly for ongoing records, team observations, or research. They are not requirements for a personal journal."
+        },
+        {
+          "type": "list",
+          "style": "unordered",
+          "items": [
+            "An <strong>operational definition</strong> describes a specific action so observers know what counts. Include examples and non-examples when the boundary could be unclear <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-defining-behavior\">[1]</a></sup>.",
+            "<strong>Frequency</strong> means how many times something happens; <strong>duration</strong> is how long it lasts; <strong>latency</strong> is the time between a specified event and an action. Choose a measure that fits what you are tracking <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-measuring-behavior\">[3]</a></sup>.",
+            "<strong>ABC notes</strong> record what occurred before an action (antecedent), the action (behavior), and what followed (consequence). They can help examine patterns across events, but a single ABC note does not prove what caused an action <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-abc-assessment\">[4]</a></sup>.",
+            "When multiple people record the same behavior, <strong>interobserver agreement</strong> checks how closely their records match. Agreement is a measure of consistency, not proof that every recorded judgment is correct. Research on behavioral studies also emphasizes the importance of checking whether procedures were carried out as intended <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-observer-agreement\">[5]</a></sup>."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-guide-purpose",
+      "eyebrow": "Why it may help",
+      "title": "What concrete detail can and cannot do",
+      "description": "A clearer record, not a guaranteed outcome.",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "A time, quote, count, or description of an action can help you revisit a particular event and show someone else the details you are referring to. You can add those details without giving up the words you use for its impact."
+        },
+        {
+          "type": "paragraph",
+          "text": "More details do not guarantee that two people will remember an event the same way or agree about its meaning. When you are tracking behavior repeatedly, clear descriptions can make later comparisons more consistent; they do not determine motivation on their own."
+        }
+      ]
+    },
+    {
+      "id": "observation-guide-limitations",
+      "eyebrow": "Scope check",
+      "title": "Limits to remember",
+      "description": "Use concrete details as information, not a verdict.",
+      "content": [
+        {
+          "type": "list",
+          "style": "unordered",
+          "items": [
+            "Memory is incomplete and can change. Record exact words promptly when they matter, but mark estimates or uncertainty rather than inventing precision.",
+            "Two people can notice different parts of the same situation. Context, language, culture, access, and perspective can affect the resulting accounts.",
+            "A person's intent may not be directly observable. You can describe the evidence for a conclusion without presenting that conclusion as a measured fact.",
+            "This tool is not a clinical assessment, legal standard, credibility test, or requirement for being believed."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-guide-references",
+      "eyebrow": "Want the sources?",
+      "title": "Reference library",
+      "description": "Numbered in the order they first appear above.",
+      "content": [
+        {
+          "type": "list",
+          "style": "unordered",
+          "items": [
+            "<a id=\"observation-guide-source-defining-behavior\" href=\"https://iris.peabody.vanderbilt.edu/case-study/defining-behavior/\" target=\"_blank\" rel=\"noopener noreferrer\">[1] IRIS Center, Vanderbilt University: Defining Behavior (educator guidance)</a>",
+            "<a id=\"observation-guide-source-nock-kurtz\" href=\"https://doi.org/10.1016/S1077-7229(05)80058-6\" target=\"_blank\" rel=\"noopener noreferrer\">[2] Nock &amp; Kurtz (2005): Direct behavioral observation in school settings (scholarly review)</a>",
+            "<a id=\"observation-guide-source-measuring-behavior\" href=\"https://iris.peabody.vanderbilt.edu/case-study/measuring-behavior/\" target=\"_blank\" rel=\"noopener noreferrer\">[3] IRIS Center, Vanderbilt University: Measuring Behavior (educator guidance)</a>",
+            "<a id=\"observation-guide-source-abc-assessment\" href=\"https://iris.peabody.vanderbilt.edu/module/fba-elem/cresource/q2/p06/\" target=\"_blank\" rel=\"noopener noreferrer\">[4] IRIS Center, Vanderbilt University: Descriptive Assessments and ABC recording (educator guidance)</a>",
+            "<a id=\"observation-guide-source-observer-agreement\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC10098472/\" target=\"_blank\" rel=\"noopener noreferrer\">[5] Essig, Rotta, &amp; Poling (2023): Interobserver agreement and procedural fidelity (research review)</a>"
+          ]
+        }
+      ]
+    }
+  ]
 }
