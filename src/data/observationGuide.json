@@ -227,7 +227,7 @@
             "type": "list",
             "style": "unordered",
             "items": [
-              "Start with visible actions, exact words, and results someone could notice <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
+              "Start with visible actions, exact words, and results someone could notice <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[1]</a></sup>.",
               "Add when and where it happened if those details are available <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
               "Use a count, duration, or frequency when the amount matters. An estimate is fine <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>.",
               "Your interpretation can stay. If it matters, also add the details that led you to it."
@@ -250,7 +250,7 @@
             "style": "ordered",
             "items": [
               "Begin with the moment: “On [DATE] at [TIME] in [PLACE]…” <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
-              "Add what you noticed: “I saw or heard [PERSON] [ACTION OR WORDS].” <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
+              "Add what you noticed: “I saw or heard [PERSON] [ACTION OR WORDS].” <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[1]</a></sup>.",
               "Use the exact words when you remember them. Quotation marks show what was said directly.",
               "Add how many times or how long when it matters <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-3\">[3]</a></sup>.",
               "If you include a judgment or possible motive, add the details that led you there."
@@ -274,7 +274,7 @@
             "items": [
               "Words such as “always” or “often” may prompt you for a timeframe, example, or count <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-2\">[2]</a></sup>.",
               "A label such as “rude” may prompt you to add the words or actions that led you to use it.",
-              "A possible motive such as “on purpose” may prompt you to add the evidence behind your conclusion <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>.",
+              "A possible motive such as “on purpose” may prompt you to add the evidence behind your conclusion <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[4]</a></sup>.",
               "Words about harm, pressure, or impact are not treated as unreal. The prompt asks only whether you want to add specific events or constraints.",
               "You can ignore a prompt that does not fit your meaning. The app cannot understand the full context."
             ]
@@ -303,7 +303,7 @@
               {
                 "evaluation": "“He left the party to hurt me.”",
                 "observation": "“He left the party without saying goodbye at 9:10 p.m.”",
-                "why": "Separates the visible action from a conclusion about motive <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>."
+                "why": "Separates the visible action from a conclusion about motive <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[4]</a></sup>."
               },
               {
                 "evaluation": "“You were rude in the meeting.”",
@@ -324,10 +324,10 @@
             "type": "list",
             "style": "unordered",
             "items": [
-              "Define the action you are recording and include examples of what does and does not count <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "Keep a dated log with counts, durations, and what happened immediately before and after <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-13\">[13]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-14\">[14]</a></sup>.",
-              "If more than one person is recording, compare notes to see whether you are using the same definition <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[15]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-16\">[16]</a></sup>.",
-              "Recheck the definition over time so the record stays consistent <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[15]</a></sup>."
+              "Define the action you are recording and include examples of what does and does not count <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[1]</a></sup>.",
+              "Keep a dated log with counts, durations, and what happened immediately before and after <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-13\">[5]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-14\">[6]</a></sup>.",
+              "If more than one person is recording, compare notes to see whether you are using the same definition <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[7]</a></sup>, <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-16\">[8]</a></sup>.",
+              "Recheck the definition over time so the record stays consistent <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-15\">[7]</a></sup>."
             ]
           }
         ]
@@ -358,8 +358,8 @@
             "type": "list",
             "style": "unordered",
             "items": [
-              "Memory can change over time. Write down exact words or details soon afterward when accuracy matters <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[9]</a></sup>.",
-              "A concrete description does not prove another person’s intent <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[10]</a></sup>.",
+              "Memory can change over time. Write down exact words or details soon afterward when accuracy matters <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-9\">[1]</a></sup>.",
+              "A concrete description does not prove another person’s intent <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-ref-10\">[4]</a></sup>.",
               "People may describe the same event differently because of viewpoint, language, culture, access, or missing information.",
               "This guide is not a clinical assessment, legal standard, or requirement for being believed."
             ]
@@ -377,14 +377,14 @@
             "type": "list",
             "style": "unordered",
             "items": [
+              "<a id=\"observation-guide-ref-9\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4766977/\" rel=\"noopener noreferrer\" target=\"_blank\">[1] Behavioral observation reliability guidance</a>",
               "<a id=\"observation-guide-ref-2\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC6353691/\" rel=\"noopener noreferrer\" target=\"_blank\">[2] Concreteness and comprehension</a>",
               "<a id=\"observation-guide-ref-3\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC8773921/\" rel=\"noopener noreferrer\" target=\"_blank\">[3] Measurement-focused language guidance</a>",
-              "<a id=\"observation-guide-ref-9\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4766977/\" rel=\"noopener noreferrer\" target=\"_blank\">[9] Behavioral observation reliability guidance</a>",
-              "<a id=\"observation-guide-ref-10\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4243523/\" rel=\"noopener noreferrer\" target=\"_blank\">[10] Hostile attribution and aggression analysis</a>",
-              "<a id=\"observation-guide-ref-13\" href=\"https://opentext.wsu.edu/ldaffin/chapter/module-5-determining-the-abcs-of-behavior-via-a-functional-assessment/\" rel=\"noopener noreferrer\" target=\"_blank\">[13] Recording what happens before and after behavior</a>",
-              "<a id=\"observation-guide-ref-14\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4841258/\" rel=\"noopener noreferrer\" target=\"_blank\">[14] Functional assessment measurement research</a>",
-              "<a id=\"observation-guide-ref-15\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC10098472/\" rel=\"noopener noreferrer\" target=\"_blank\">[15] Observer agreement calibration study</a>",
-              "<a id=\"observation-guide-ref-16\" href=\"https://edpsychassociates.com/Papers/Kappa%28JEIBI%2C2004%29.pdf\" rel=\"noopener noreferrer\" target=\"_blank\">[16] Observer agreement statistic primer</a>"
+              "<a id=\"observation-guide-ref-10\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4243523/\" rel=\"noopener noreferrer\" target=\"_blank\">[4] Hostile attribution and aggression analysis</a>",
+              "<a id=\"observation-guide-ref-13\" href=\"https://opentext.wsu.edu/ldaffin/chapter/module-5-determining-the-abcs-of-behavior-via-a-functional-assessment/\" rel=\"noopener noreferrer\" target=\"_blank\">[5] Recording what happens before and after behavior</a>",
+              "<a id=\"observation-guide-ref-14\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC4841258/\" rel=\"noopener noreferrer\" target=\"_blank\">[6] Functional assessment measurement research</a>",
+              "<a id=\"observation-guide-ref-15\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC10098472/\" rel=\"noopener noreferrer\" target=\"_blank\">[7] Observer agreement calibration study</a>",
+              "<a id=\"observation-guide-ref-16\" href=\"https://edpsychassociates.com/Papers/Kappa%28JEIBI%2C2004%29.pdf\" rel=\"noopener noreferrer\" target=\"_blank\">[8] Observer agreement statistic primer</a>"
             ]
           }
         ]
