@@ -5,9 +5,9 @@ import { assetPath } from '../../data/catalog';
 import styles from './HomePage.module.css';
 
 const doorways = [
-  { to: '/observations', label: 'Observations', tone: 'observations', icon: 'icons/door-observations.svg' },
-  { to: '/feelings', label: 'Feelings', tone: 'feelings', icon: 'icons/door-feelings.svg' },
-  { to: '/needs', label: 'Needs', tone: 'needs', icon: 'icons/door-needs.svg' },
+  { to: '/observations', label: 'Observations', tone: 'observations', icon: 'icons/feature-observations.svg' },
+  { to: '/feelings', label: 'Feelings', tone: 'feelings', icon: 'icons/feature-feelings.svg' },
+  { to: '/needs', label: 'Needs', tone: 'needs', icon: 'icons/feature-needs.svg' },
 ] as const;
 
 export function HomePage() {

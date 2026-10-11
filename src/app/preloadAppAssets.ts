@@ -2,9 +2,9 @@ import { assetPath, feelings, needs } from '../data/catalog';
 import { warmAppResources } from './appResources';
 
 const coreImages = [
-  'icons/door-observations.svg',
-  'icons/door-feelings.svg',
-  'icons/door-needs.svg',
+  'icons/feature-observations.svg',
+  'icons/feature-feelings.svg',
+  'icons/feature-needs.svg',
   'icons/alexithymia-8bit.svg',
   ...feelings.map((feeling) => `icons/feelings/${feeling.slug}.svg`),
   ...needs.map((need) => `icons/needs/${need.slug}.svg`),
