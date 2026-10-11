@@ -281,7 +281,7 @@ if (!disclosureSource.includes('<details className=')
   || !disclosureStyles.includes('.root summary')
   || !disclosureStyles.includes('.root[open] summary > span:last-child')
   || !/\.supportRail\s*\{[^}]*display:\s*grid;/.test(observationStyles)) {
-  fail('the Observation recipe no longer uses the approved progressive-disclosure support-rail pattern.');
+  fail('Observation support rail and shared progressive-disclosure controls no longer follow the approved layout contract.');
 }
 
 const feedSource = await readFile(resolve(root, 'src/features/feed/FeedPage.tsx'), 'utf8');
