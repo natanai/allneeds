@@ -17,6 +17,21 @@ describe('Observation guide public copy', () => {
     expect(renderedCopy).toContain('not as a test you have to pass');
   });
 
+  it('numbers citations by first appearance and lists sources in the same sequence', () => {
+    const citations = [...JSON.stringify(guideWithoutReferences).matchAll(/observation-guide-ref-(\\d+).*?\\[(\\d+)\\]/g)];
+    const seen = new Map<string, number>();
+
+    for (const [, sourceId, label] of citations) {
+      if (!seen.has(sourceId)) seen.set(sourceId, seen.size + 1);
+      expect(Number(label)).toBe(seen.get(sourceId));
+    }
+
+    const listedReferences = [...JSON.stringify(referenceSection).matchAll(/observation-guide-ref-(\\d+).*?\\[(\\d+)\\]/g)];
+    expect(listedReferences.map(([, sourceId]) => sourceId)).toEqual([...seen.keys()]);
+    expect(listedReferences.map(([, , label]) => Number(label))).toEqual([...seen.values()]);
+    expect(listedReferences.length).toBeGreaterThan(0);
+  });
+
   it('gives every rendered citation a matching source anchor', () => {
     const citedIds = [...JSON.stringify(guideWithoutReferences).matchAll(/observation-guide-ref-(\d+)/g)]
       .map((match) => match[1])
