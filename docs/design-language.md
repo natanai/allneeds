@@ -191,7 +191,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Each mark uses one 64 × 64 safe area and the same 2.5-unit rounded feature stroke, but is optically centered rather than forced into identical visual dimensions. The Observations eye has no viewfinder corners, and the Needs sprout has no geometric stand or decorative root base.
 - Each drawing sits in the same small framed-art composition rather than floating as a utility icon. Its ink, field, border, and background shapes are mixtures of its doorway role (`Primary`, `Action`, or `Positive`) with `Outline` and `Surface`; the assets contain no independent palette.
 - Body Cues remains text-only. Its route does not receive a new icon merely to complete a set.
-- The capture magnet is labeled `Journal`, not the ambiguous `New Entry`, and uses one filled open-book mark. Journal History reuses the book with a small clock modifier.
+- The capture magnet is labeled `Journal`, not the ambiguous `New Entry`, and uses one filled open-book mark. The paired navigation magnet is simply `History`; its book-and-clock mark supplies the journal context while the destination page retains the explicit `Journal history` title.
 - Inventory uses a quiet outlined carry-bag whose body contains the live strategy count; do not add a separate count circle beside it.
 
 ## App identity and social sharing imagery
@@ -361,7 +361,7 @@ Rules:
 - Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, the Paper Magnet app icon, and the Open Monochrome social lockup. Body Cues remains text-only and ordinary site icons remain unchanged.
 - Leveled the three framed home artworks to restore deliberate symmetry and split the introductory copy at sentence boundaries on narrow screens.
 - Renamed the public feature to `Alexithymia support` everywhere user-facing. A shared product-language constant prevents route, menu, home, page, and accessibility labels from drifting again.
-- Inventory uses a compact cinched resource pouch beside a separate high-contrast count medallion. The pouch supplies meaning; the medallion remains the familiar success counter, and neither may increase the navigation magnet's standard height.
+- Inventory uses one compact count pouch: the familiar circular success counter is reshaped into the pouch body and finished with a small cinched tie. It remains within the navigation magnet's standard line height and is reused at a larger size beside the Inventory page title.
 
 ### 2026-10-10
 

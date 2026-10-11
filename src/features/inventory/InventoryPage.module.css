@@ -1,6 +1,8 @@
 .page { display: grid; gap: clamp(.9rem, 2vw, 1.25rem); }
 
 .header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+.headingTitle { display: flex; align-items: center; gap: .55rem; }
+.headingMark { width: 2.65rem; height: 2.65rem; flex: 0 0 auto; }
 .headingCopy h1 { margin: 0; font-family: var(--font-body); font-size: clamp(1.55rem, 4vw, 2.4rem); font-weight: 820; line-height: 1.08; letter-spacing: -.025em; }
 .headingCopy p { max-width: 62ch; margin: .5rem 0 0; color: var(--secondary); }
 .addAction { min-height: var(--control-min); padding: .5rem .8rem; display: inline-flex; align-items: center; gap: var(--space-1); border: 2px solid var(--outline); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--action) 82%, var(--surface-raised) 18%); box-shadow: var(--shadow-small); color: var(--text); font: 750 var(--text-sm)/1 var(--font-body); cursor: pointer; white-space: nowrap; }

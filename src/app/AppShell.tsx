@@ -17,6 +17,7 @@ import {
   type NavItemId,
 } from '../features/customizer/customizerSettings';
 import { INVENTORY_CHANGED_EVENT, readInventory } from '../features/inventory/inventoryRepository';
+import { InventoryMark } from '../features/inventory/InventoryMark';
 import { readMagnetPlayPreference } from '../persistence/magnetLayoutStore';
 import styles from './AppShell.module.css';
 
@@ -33,19 +34,6 @@ function JournalMark({ history = false, className }: { history?: boolean; classN
       <path d="M22.5 6.5v7l2-1.4 2 1.4v-7Z" fill="var(--action)" />
       {history ? <circle cx="25" cy="7" r="5" fill="var(--surface-raised)" /> : null}
       {history ? <path d="M25 4.5V7l2 1.4" /> : null}
-    </svg>
-  );
-}
-
-function InventoryMark({ count }: { count: number }) {
-  const displayCount = count > 999 ? '999+' : String(count);
-  return (
-    <svg viewBox="0 0 46 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M7 2.5c1.1.8 2.2 1.2 3.5 1.2S13 3.3 14 2.5l-1.3 4H8.3L7 2.5Z" fill="color-mix(in srgb, var(--primary) 16%, var(--surface-raised) 84%)" />
-      <path d="M8.5 6.5C6.4 8.8 3.2 12 3 16.9c-.2 3.3 2.6 5 7.5 5s7.7-1.7 7.5-5c-.2-4.9-3.4-8.1-5.5-10.4h-4Z" fill="var(--surface-raised)" />
-      <path d="M6.5 6.5h8" />
-      <circle cx="33.5" cy="12" r="9" fill="var(--primary)" />
-      <text x="33.5" y="15" fill="var(--primary-fg)" stroke="none" textAnchor="middle" fontSize={displayCount.length > 2 ? 6.3 : 8} fontWeight="800">{displayCount}</text>
     </svg>
   );
 }
@@ -320,7 +308,7 @@ export function AppShell() {
       {
         id: 'nav-journal-dashboard',
         setting: 'journalDashboard',
-        label: 'Journal history',
+        label: 'History',
         to: '/inventory/journal',
         tone: 'action',
         kind: 'nav',
