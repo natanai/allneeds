@@ -85,9 +85,9 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 
 **Accepted 2026-08-28.** Alexithymia Support is a four-stage, present-moment working surface: `What happened?`, `Clues`, `Words`, and `Your words`. It is not a lesson, detached practice mode, diagnostic test, treatment, or strategy library.
 
-**Plain-language addendum accepted 2026-08-29.** The public doorway and in-product label are `Feeling word support`; an Info disclosure defines alexithymia without requiring the user to identify with it. `Overall feeling` replaces the public label `Feeling shape`, and `Other emotion word` / `Your word` replace the internal-sounding `Working term`. These display labels do not change routes, scoring roles, fixed catalogs, or persistence values.
+**Plain-language addendum accepted 2026-08-29; naming refined 2026-10-11.** The public doorway and in-product label are `Alexithymia support`; an Info disclosure defines alexithymia without requiring the user to identify with it. `Overall feeling` replaces the public label `Feeling shape`, and `Other emotion word` / `Your word` replace the internal-sounding `Working term`. These display labels do not change routes, scoring roles, fixed catalogs, or persistence values.
 
-**Disclosure hierarchy refined 2026-08-30.** The Feeling word support landing page has one explanatory disclosure affordance: the Info button beside the primary check-in action. Do not duplicate the same safety/matching explanation in a persistent landing-page card. The Info sheet may lead to `How matching works`, and that friendly in-app explanation may then offer the deeper technical methods and sources document. Public methods documents that are intentionally served directly from `public/docs` must remain readable as raw browser text without depending on Markdown rendering; avoid Markdown heading markers, inline-code/backtick notation, Markdown link syntax, and table syntax on those public copies, and show human-reachable source URLs directly.
+**Disclosure hierarchy refined 2026-08-30.** The Alexithymia support landing page has one explanatory disclosure affordance: the Info button beside the primary check-in action. Do not duplicate the same safety/matching explanation in a persistent landing-page card. The Info sheet may lead to `How matching works`, and that friendly in-app explanation may then offer the deeper technical methods and sources document. Public methods documents that are intentionally served directly from `public/docs` must remain readable as raw browser text without depending on Markdown rendering; avoid Markdown heading markers, inline-code/backtick notation, Markdown link syntax, and table syntax on those public copies, and show human-reachable source URLs directly.
 
 - At compact widths, use a full-bleed mobile stage with a compact app bar, safe-area padding, one immediate job, and a persistent next action. Do not restore the legacy stack of outlined region cards or expand every option into the page.
 - Body and Overall feeling are optional peer clue cards. Body opens one canonical region at a time in a bottom sheet and returns selections to a compact clue tray; the full Body Cues page remains available as its own tactile experience.
@@ -359,6 +359,9 @@ Rules:
 ### 2026-10-11
 
 - Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, the Paper Magnet app icon, and the Open Monochrome social lockup. Body Cues remains text-only and ordinary site icons remain unchanged.
+- Leveled the three framed home artworks to restore deliberate symmetry and split the introductory copy at sentence boundaries on narrow screens.
+- Renamed the public feature to `Alexithymia support` everywhere user-facing. A shared product-language constant prevents route, menu, home, page, and accessibility labels from drifting again.
+- Inventory uses a compact cinched resource pouch beside a separate high-contrast count medallion. The pouch supplies meaning; the medallion remains the familiar success counter, and neither may increase the navigation magnet's standard height.
 
 ### 2026-10-10
 
@@ -371,8 +374,8 @@ Rules:
 
 ### 2026-08-30
 
-- Feeling word support uses the Info button as the sole landing-page explanatory disclosure. The previous persistent `You stay in charge` / `How matching works` card is removed as redundant; matching details remain available through Info, and deeper methods remain one disclosure level further in.
-- Public Feeling word support and Body Cues methods documents are written to remain readable when a browser serves the `.md` files as raw text rather than rendered Markdown. They use ordinary text headings/formulas/lists and direct human-reachable URLs instead of visible Markdown syntax.
+- Alexithymia support uses the Info button as the sole landing-page explanatory disclosure. The previous persistent `You stay in charge` / `How matching works` card is removed as redundant; matching details remain available through Info, and deeper methods remain one disclosure level further in.
+- Public Alexithymia support and Body Cues methods documents are written to remain readable when a browser serves the `.md` files as raw text rather than rendered Markdown. They use ordinary text headings/formulas/lists and direct human-reachable URLs instead of visible Markdown syntax.
 - Observation editing uses one compact primary `Explore` control while Clear remains a quiet maintenance action with the same accessible meaning but much less visual weight.
 - Observation results surface the actual Need and Feeling possibilities immediately after a compact results header. Met/Unmet remains fully available but belongs contextually inside the Feeling results, after the result vocabulary, rather than occupying a large explanatory block before any suggestions.
 

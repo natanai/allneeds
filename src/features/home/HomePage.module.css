@@ -8,7 +8,13 @@
 .prompt {
   margin: 0;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  column-gap: 0.35em;
+}
+
+.prompt span {
+  white-space: nowrap;
 }
 
 .doorGrid {
@@ -81,7 +87,7 @@
   border-radius: calc(var(--corner-scale) * 1rem);
   background: color-mix(in srgb, var(--surface-raised) 78%, var(--door-fill) 22%);
   box-shadow: 4px 5px 0 color-mix(in srgb, var(--feature-ink) 30%, transparent);
-  transform: translate(-50%, -50%) rotate(var(--feature-tilt));
+  transform: translate(-50%, -50%);
 }
 
 .artwork::before {
@@ -140,19 +146,16 @@
 .observations {
   --door-fill: var(--primary);
   --feature-ink: color-mix(in srgb, var(--primary) 58%, var(--outline) 42%);
-  --feature-tilt: -2deg;
 }
 
 .feelings {
   --door-fill: var(--action);
   --feature-ink: color-mix(in srgb, var(--action) 58%, var(--outline) 42%);
-  --feature-tilt: 1.5deg;
 }
 
 .needs {
   --door-fill: var(--positive);
   --feature-ink: color-mix(in srgb, var(--positive) 58%, var(--outline) 42%);
-  --feature-tilt: -1deg;
 }
 
 .observations .artwork::before {
@@ -200,6 +203,8 @@
 
   .prompt {
     max-width: 34ch;
+    flex-direction: column;
+    row-gap: 0.15rem;
     font-size: var(--text-sm);
   }
 

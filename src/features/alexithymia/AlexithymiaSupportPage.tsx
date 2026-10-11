@@ -5,6 +5,7 @@ import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
 import bodyRegionsRaw from '../../data/body-regions.json';
 import { assetPath, needsBySlug } from '../../data/catalog';
+import { ALEXITHYMIA_SUPPORT_LABEL } from '../../data/productLanguage';
 import { analyzeObservation, selectExactObservationEntities } from '../../domain/observationInference';
 import {
   clearAlexithymiaDraft,
@@ -385,7 +386,7 @@ export function AlexithymiaSupportPage() {
       <article className={styles.entry} aria-labelledby="alexithymia-title">
         <div className={styles.entryMain}>
           <header>
-            <p className={styles.eyebrow}>Feeling word support</p>
+            <p className={styles.eyebrow}>{ALEXITHYMIA_SUPPORT_LABEL}</p>
             <h1 id="alexithymia-title">Find words for right now</h1>
             <p>Use any clues you can notice. The app can compare possible words, but you decide what fits.</p>
           </header>
@@ -419,7 +420,7 @@ export function AlexithymiaSupportPage() {
   }
 
   return (
-    <article className={styles.page} aria-label={`Feeling word support: ${stageTitle}`}>
+    <article className={styles.page} aria-label={`${ALEXITHYMIA_SUPPORT_LABEL}: ${stageTitle}`}>
       <header className={styles.appBar}>
         <button type="button" className={styles.iconButton} aria-label="Back" onClick={() => {
           if (draft.stage <= 1) setEntryVisible(true);

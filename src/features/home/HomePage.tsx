@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
 import { assetPath } from '../../data/catalog';
+import { ALEXITHYMIA_SUPPORT_LABEL } from '../../data/productLanguage';
 import styles from './HomePage.module.css';
 
 const doorways = [
@@ -14,7 +15,10 @@ export function HomePage() {
   return (
     <section className={styles.page} aria-labelledby="doorways-title">
       <h1 id="doorways-title" className="visually-hidden">Choose a doorway</h1>
-      <p className={styles.prompt}>Collect strategies for all your needs. Start with any door.</p>
+      <p className={styles.prompt}>
+        <span>Collect strategies for all your needs.</span>{' '}
+        <span>Start with any door.</span>
+      </p>
 
       <div className={styles.doorGrid}>
         {doorways.map((doorway) => (
@@ -31,14 +35,14 @@ export function HomePage() {
               <span className={styles.label}>{doorway.label}</span>
             </Link>
             {doorway.tone === 'feelings' ? (
-              <Link className={styles.support} to="/alexithymia-support">Feeling word support</Link>
+              <Link className={styles.support} to="/alexithymia-support">{ALEXITHYMIA_SUPPORT_LABEL}</Link>
             ) : null}
           </div>
         ))}
       </div>
 
       <p className={styles.mobileSupport}>
-        <Link to="/alexithymia-support">Feeling word support</Link>
+        <Link to="/alexithymia-support">{ALEXITHYMIA_SUPPORT_LABEL}</Link>
       </p>
     </section>
   );
