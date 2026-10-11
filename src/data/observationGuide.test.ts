@@ -36,7 +36,10 @@ describe('Canonical Observation guide', () => {
       (value) => [...value.matchAll(/href="#observation-guide-source-([^"]+)">\[(\d+)\]/g)],
     );
     const firstUse = new Map<string, number>();
-    for (const [, id, label] of citations) {
+    for (const match of citations) {
+      const id = match[1];
+      const label = match[2];
+      if (!id || !label) throw new Error('Citation is missing a source identifier or number');
       if (!firstUse.has(id)) firstUse.set(id, firstUse.size + 1);
       expect(Number(label)).toBe(firstUse.get(id));
     }
