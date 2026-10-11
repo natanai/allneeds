@@ -346,15 +346,15 @@ export function AppMenu({
               <h3 id="menu-account">Account</h3>
               <div className={styles.systemCard}>
                 <h4>Bluesky</h4>
-                <p>Sign in to back up or compare saved data across browsers and devices.</p>
+                <p>Sign in to back up or load saved data across browsers and devices.</p>
                 {session ? <p><strong>{session.handle ? `Signed in as @${session.handle.replace(/^@/, '')}` : 'Signed in with Bluesky'}</strong></p> : <label>Bluesky username<input type="text" value={handle} placeholder="yourname.bsky.social" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={(event) => { setHandle(event.target.value); setStatus(null); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); void toggleBluesky(); } }} /></label>}
                 <button type="button" disabled={accountBusy || (!session && !handle.trim())} onClick={() => void toggleBluesky()}>{accountBusy ? (session ? 'Please wait…' : 'Checking username…') : session ? 'Sign out' : 'Sign in'}</button>
                 <StatusNotice status={status} target="account" />
-                <small>Signing in lets you review differences before combining saved data.</small>
+                <small>Signing in warns you before replacing local data and offers to merge local entries when needed.</small>
               </div>
               <div className={styles.systemCard}>
                 <h4>Profile snapshot</h4>
-                <p>Save this browser’s allneeds data to your profile or review a saved profile before combining it here.</p>
+                <p>Save this browser’s allneeds data to your profile or load the profile saved to your account.</p>
                 <div className={styles.actionPair}><button type="button" disabled={!session || accountBusy} onClick={() => void saveProfile()}>Save this browser</button><button type="button" disabled={!session || accountBusy} onClick={() => void loadProfile()}>Load saved profile</button></div>
                 <StatusNotice status={status} target="profile" />
                 {!session ? <small>Sign in with Bluesky to enable profile sync.</small> : null}

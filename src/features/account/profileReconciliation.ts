@@ -26,6 +26,11 @@ export type ProfileComparison = {
   settingKeys: string[];
 };
 
+export type LocalProfileRisk = {
+  journalEntries: number;
+  strategies: number;
+};
+
 const collectionKeys = new Set<string>([
   JOURNAL_STORAGE_KEY, INVENTORY_STORAGE_KEY, LEGACY_STORAGE_KEYS.inventory,
   LEGACY_STORAGE_KEYS.journalCurrent, LEGACY_STORAGE_KEYS.journalLegacy, LEGACY_STORAGE_KEYS.alexithymiaJournal,
@@ -157,6 +162,13 @@ export function profileHasDifferences(comparison: ProfileComparison) {
     || comparison.inventory.conflicts.length);
 }
 
+export function localProfileRisk(comparison: ProfileComparison): LocalProfileRisk {
+  return {
+    journalEntries: comparison.journal.deviceOnly.length + comparison.journal.conflicts.length,
+    strategies: comparison.inventory.deviceOnly.length + comparison.inventory.conflicts.length,
+  };
+}
+
 function copyId(id: string, content: unknown) {
   let hash = 2166136261;
   for (const char of stable(content)) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
@@ -190,7 +202,7 @@ function mergeCollection<T extends { id: string }>(comparison: CollectionCompari
 
 export function combineProfileSnapshots(comparison: ProfileComparison, settings: SettingsSource): BrowserSnapshot {
   const result = settings === 'profile'
-    ? { ...comparison.device, ...comparison.profile }
+    ? { ...comparison.profile }
     : { ...comparison.profile, ...comparison.device };
   // In-progress work on this device always survives an account load.
   Object.entries(comparison.device).forEach(([key, value]) => { if (isDraft(key)) result[key] = value; });
@@ -216,6 +228,11 @@ export function applyCombinedProfile(storage: Storage, comparison: ProfileCompar
   storage.setItem(PROFILE_RECOVERY_STORAGE_KEY, recovery);
   const touched: string[] = [];
   try {
+    for (const key of Object.keys(comparison.device)) {
+      if (isTransientLocalStorageKey(key) || isDraft(key) || combined[key] !== undefined) continue;
+      touched.push(key);
+      storage.removeItem(key);
+    }
     for (const [key, value] of Object.entries(combined)) {
       if (isTransientLocalStorageKey(key) || storage.getItem(key) === value) continue;
       touched.push(key);
@@ -229,6 +246,46 @@ export function applyCombinedProfile(storage: Storage, comparison: ProfileCompar
     throw error;
   }
   return combined;
+}
+
+export function applyProfileReplacement(storage: Storage, comparison: ProfileComparison, did: string) {
+  const previous = captureBrowserStorage(storage, true);
+  const current = captureBrowserStorage(storage);
+  if (stable(current) !== stable(comparison.device)) {
+    throw new Error('Data on this device changed while you were deciding. Check the saved profile again.');
+  }
+
+  const replacement = { ...comparison.profile };
+  // Drafts belong to the browser where they were started. Never load stale
+  // profile drafts or discard current work as part of an account sign-in.
+  Object.keys(replacement).forEach((key) => { if (isDraft(key)) delete replacement[key]; });
+  Object.entries(comparison.device).forEach(([key, value]) => { if (isDraft(key)) replacement[key] = value; });
+
+  const recovery = JSON.stringify({ schemaVersion: 1, savedAt: new Date().toISOString(), data: {
+    did, device: comparison.device, profile: comparison.profile,
+  } });
+  storage.setItem(PROFILE_RECOVERY_STORAGE_KEY, recovery);
+
+  const touched = new Set<string>();
+  try {
+    for (const key of Object.keys(comparison.device)) {
+      if (isTransientLocalStorageKey(key) || isDraft(key) || replacement[key] !== undefined) continue;
+      touched.add(key);
+      storage.removeItem(key);
+    }
+    for (const [key, value] of Object.entries(replacement)) {
+      if (isTransientLocalStorageKey(key) || storage.getItem(key) === value) continue;
+      touched.add(key);
+      storage.setItem(key, value);
+    }
+  } catch (error) {
+    for (const key of [...touched].reverse()) {
+      if (previous[key] === undefined) storage.removeItem(key);
+      else storage.setItem(key, previous[key]!);
+    }
+    throw error;
+  }
+  return replacement;
 }
 
 export function readProfileRecovery(storage?: StorageDriver | null) {

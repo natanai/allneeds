@@ -10,13 +10,14 @@ type OverlayShellProps = {
   title: string;
   onClose: () => void;
   children: ReactNode;
-  variant?: 'dialog' | 'sheet' | 'fullscreen';
+  variant?: 'dialog' | 'alert' | 'sheet' | 'fullscreen';
   titleId?: string;
   id?: string;
   wide?: boolean;
   closeLabel?: string;
   closeInitialFocus?: boolean;
   bodyClassName?: string;
+  dialogRole?: 'dialog' | 'alertdialog';
 };
 
 export function OverlayShell({
@@ -31,6 +32,7 @@ export function OverlayShell({
   closeLabel = `Close ${title}`,
   closeInitialFocus = false,
   bodyClassName = '',
+  dialogRole = 'dialog',
 }: OverlayShellProps) {
   const generatedId = useId();
   const headingId = titleId ?? `overlay-title-${generatedId}`;
@@ -45,7 +47,7 @@ export function OverlayShell({
         ref={dialogRef}
         id={id}
         className={`${styles.panel} ${styles[variant]} ${wide ? styles.wide : ''}`}
-        role="dialog"
+        role={dialogRole}
         aria-modal="true"
         aria-labelledby={headingId}
         tabIndex={-1}
