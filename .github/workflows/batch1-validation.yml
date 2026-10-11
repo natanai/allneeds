@@ -45,3 +45,5 @@ jobs:
 # One-time branch validation; remove the temporary push trigger before merging.
 
 # Retry full validation after updating the approved Observation production guard.
+
+# Final complete CI run with the updated canonical guide browser regression.
