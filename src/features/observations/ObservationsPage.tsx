@@ -34,13 +34,6 @@ const slotDefinitions = [
   { id: 'measure', label: 'Number or exact words', missing: 'Optional' },
 ] as const;
 
-const recipe = [
-  ['When did it happen?', 'Add a day, date, or general time so the moment is easier to place.', 'Yesterday at 3 p.m. · On Monday around noon'],
-  ['Where were you, and who was involved?', 'Name the place or people if that helps someone picture the moment.', 'In the conference room with Alex · With my kids in the kitchen'],
-  ['What did you see or hear?', 'Describe a visible action or the words you heard. Your own feelings can stay in the text too.', 'I saw him close the laptop. · I heard “Please wrap this up.”'],
-  ['What can be counted or quoted?', 'A number, duration, or exact quote can make the moment easier to revisit.', 'They called three times. · She said “I’ll handle it tomorrow.”'],
-] as const;
-
 const guide = observationGuide as unknown as GuideData;
 
 function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
@@ -55,18 +48,12 @@ function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
   });
 }
 
-function ObservationRecipe({ onOpenGuide }: { onOpenGuide: () => void }) {
-  return (
-    <>
-      <p>These prompts can help separate what happened from what you think it meant. You can keep both; the prompts simply help you add concrete details.</p>
-      <ol>{recipe.map(([title, body, exampleText]) => <li key={title}><strong>{title}</strong><p>{body}</p><small>Try: {exampleText}</small></li>)}</ol>
-      <p>For more examples and sources, open the <a href="#observation-guide" onClick={(event) => { event.preventDefault(); onOpenGuide(); }}>observation guide</a> below.</p>
-    </>
-  );
-}
-
 function infoCopy(topic: string) {
-  if (topic === 'slots') return <><p>Quick Check shows which concrete details the app noticed. It is a writing aid, not a score.</p><ul><li><strong>When?</strong> Add a time or event, such as “yesterday” or “after lunch.”</li><li><strong>Where or with whom?</strong> Name the setting or people if they matter.</li><li><strong>What did you see or hear?</strong> Add a visible action or the words you heard.</li><li><strong>Number or exact words</strong> is optional, but a count, duration, or quote can make the moment clearer.</li></ul></>;
+  if (topic === 'slots') return <p>Quick Check shows which details the app noticed in your writing. “Found” means a pattern was detected, not that your account is correct or complete. You can keep your feelings and interpretations alongside the concrete details.</p>;
+  if (topic === 'time') return <><p>Add a day, date, or general time so the moment is easier to place.</p><p><strong>For example:</strong> Yesterday at 3 p.m. · On Monday around noon.</p></>;
+  if (topic === 'context') return <><p>Name the place or people if that helps someone picture the moment.</p><p><strong>For example:</strong> In the conference room with Alex · With my kids in the kitchen.</p></>;
+  if (topic === 'sensory') return <><p>Describe a visible action or the words you heard. Your own feelings can stay in the text too.</p><p><strong>For example:</strong> They closed the laptop. · I heard “Please wrap this up.”</p></>;
+  if (topic === 'measure') return <><p>A number, duration, or exact quote can make the moment easier to revisit. This detail is optional.</p><p><strong>For example:</strong> They called three times. · She said “I’ll handle it tomorrow.”</p></>;
   if (topic === 'matching') return <><p>This page searches a fixed local vocabulary built from the site's Feelings, Needs, Faux Feelings, and authored Observation relationships. Your text is not sent anywhere.</p><p>Words you name directly and specific event matches rank highest. Broader keyword relationships can also bring possible Needs into view, and the selected Needs are used to find Feeling words for the Met or Unmet view.</p><p>If the wording does not strongly match the index, the page still offers broader catalog starting points. These are words to consider, not conclusions about what you feel or need.</p></>;
   return <><p>An observation is a description of what happened: what someone could see, hear, quote, or count.</p><p>You can write in your own words. Quick Check only suggests details that may help another person picture the same moment. It does not decide whether your interpretation is true.</p></>;
 }
@@ -92,7 +79,6 @@ export function ObservationsPage() {
   const [feelingsMode, setFeelingsMode] = useState<'unmet' | 'met'>(initialDraft?.feelingsMode ?? 'unmet');
   const [helpTopic, setHelpTopic] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
-  const guideRef = useRef<HTMLDetailsElement>(null);
   const draftRef = useRef<ObservationDraft>({ text, feelingsMode, showSuggestions, showExample });
   draftRef.current = { text, feelingsMode, showSuggestions, showExample };
 
@@ -195,11 +181,6 @@ export function ObservationsPage() {
     navigate('/inventory/journal?from=observation');
   };
 
-  const openGuide = () => {
-    setGuideOpen(true);
-    window.requestAnimationFrame(() => guideRef.current?.scrollIntoView({ block: 'start' }));
-  };
-
   return (
     <article className={styles.page}>
       <header className={styles.header}>
@@ -294,7 +275,13 @@ export function ObservationsPage() {
                     const satisfied = analysis.slots[slot.id].satisfied;
                     return (
                       <div key={slot.id} className={styles.slot} data-complete={satisfied} role="listitem">
-                        <span aria-hidden="true" /><strong>{slot.label}</strong>
+                        <span aria-hidden="true" />
+                        <span className={styles.slotLabel}>
+                          <strong>{slot.label}</strong>
+                          <button type="button" className={styles.slotInfo} onClick={() => setHelpTopic(slot.id)} aria-label={`About ${slot.label}`}>
+                            <span aria-hidden="true">i</span>
+                          </button>
+                        </span>
                         <small>{satisfied ? 'Found' : slot.missing}</small>
                       </div>
                     );
@@ -307,9 +294,6 @@ export function ObservationsPage() {
                 {showExample ? <div><p>“{EXAMPLE}”</p><button type="button" onClick={() => updateText(EXAMPLE)}>Insert this example</button></div> : null}
               </div>
 
-              <DisclosureRow title="Observation recipe" description="Step-by-step prompts" bodyClassName={styles.recipe}>
-                <div aria-label="Observation recipe"><ObservationRecipe onOpenGuide={openGuide} /></div>
-              </DisclosureRow>
             </aside>
           </div>
 
@@ -327,7 +311,7 @@ export function ObservationsPage() {
         <DisclosureRow variant="section" title="Why add concrete details?" description="What this writing step can do" bodyClassName={styles.overviewBody}><p>Concrete details can make a specific moment easier to remember, explain, or discuss. They do not prove someone’s intent, and they do not replace your feelings or interpretation.</p><div><span>Time</span><span>Place or people</span><span>What you saw or heard</span><span>Number or exact words (optional)</span></div></DisclosureRow>
       </section>
 
-      <details ref={guideRef} id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
+      <details id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
         <summary><span><small>Examples and sources</small><strong>Observation guide</strong></span><span aria-hidden="true">›</span></summary>
         {guideOpen ? <div className={styles.guideCard} onClick={(event) => {
           const target = event.target as Element;
@@ -346,7 +330,7 @@ export function ObservationsPage() {
 
       <OverlayShell
         open={Boolean(helpTopic)}
-        title="Observation help"
+        title={slotDefinitions.find((slot) => slot.id === helpTopic)?.label ?? 'Observation help'}
         titleId="observation-help-title"
         onClose={() => setHelpTopic(null)}
         closeInitialFocus
