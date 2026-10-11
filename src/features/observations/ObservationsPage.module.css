@@ -685,6 +685,7 @@
 }
 
 .guideSections summary {
+  min-height: var(--control-min);
   padding: .8rem .1rem;
   cursor: pointer;
 }
@@ -737,6 +738,10 @@
 }
 
 @media (min-width: 900px) {
+  .guideExamples {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .editorGrid {
     grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
     gap: clamp(1.4rem, 3vw, 2.4rem);
