@@ -68,8 +68,16 @@
 .values.moving { background: color-mix(in srgb, var(--selection) 30%, var(--surface-raised)); }
 .help { display: block; text-align: center; }
 .states { display: grid; grid-template-columns: 1fr 1fr auto; gap: .45rem; }
-.states button { font-size: var(--text-xs); }
-.states button[aria-pressed='true'] { background: color-mix(in srgb, var(--selection) 38%, var(--surface-raised)); }
+.states button {
+  min-height: var(--control-min);
+  padding: .4rem .55rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  font-size: var(--text-xs);
+  font-weight: 750;
+}
+.states button[aria-pressed='true'] { border-color: var(--outline); background: color-mix(in srgb, var(--selection) 32%, var(--surface-raised)); }
 @media (max-width: 420px) {
   .axisLabel { font-size: .61rem; }
   .states { grid-template-columns: 1fr 1fr; }

@@ -10,12 +10,12 @@ describe('emotional history semantics', () => {
     expect(defaultHistorySettings([entry('b', '2026-10-01', -2)]).metric).toBe('mood');
     expect(defaultHistorySettings([]).metric).toBe('mood');
   });
-  it('keeps neutral scores and breaks lines at mixed, unscored, or missing days', () => {
+  it('keeps neutral scores and connects recorded points across unscored or missing days', () => {
     const records = [entry('a', '2026-10-01', 0), { ...entry('b', '2026-10-02'), mood: { kind: 'mixed' as const } }, entry('c', '2026-10-03', -2), entry('d', '2026-10-05', 4)];
     const settings = defaultHistorySettings(records);
     const series = buildHistorySeries(records, settings, range)[0]!;
     expect(series.points.map((point) => point.value)).toEqual([0, -2, 4]);
-    expect(series.segments.map((segment) => segment.length)).toEqual([1, 1, 1]);
+    expect(series.segments.map((segment) => segment.length)).toEqual([3]);
     expect(historySummary(records, settings, range)).toMatchObject({ entries: 4, rated: 3, median: 0, mixed: 1, loggedDays: 4 });
   });
   it('plots valence and arousal independently and leaves legacy arousal missing', () => {
@@ -25,6 +25,7 @@ describe('emotional history semantics', () => {
     expect(series.map((item) => item.name)).toEqual(['Pleasantness', 'Arousal']);
     expect(series[0]?.points.map((point) => point.value)).toEqual([2, -1, 4]);
     expect(series[1]?.points.map((point) => point.value)).toEqual([-4, 2]);
+    expect(series[1]?.segments.map((segment) => segment.length)).toEqual([2]);
     expect(historySummary(records, settings, range)).toMatchObject({ median: 2, rated: 3, arousalMedian: -1, arousalRated: 2, arousalLow: -4, arousalHigh: 2 });
   });
   it('preserves multiple same-time entries and reports daily range and rating denominator', () => {

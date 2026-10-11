@@ -62,12 +62,31 @@
   width: 100%;
   max-height: min(28rem, 56dvh);
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
   border-radius: var(--radius-lg);
   background: var(--surface-raised);
   box-shadow: 0 14px 30px color-mix(in srgb, var(--outline) 20%, transparent);
+}
+
+.instructions {
+  margin: 0;
+  color: var(--secondary);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+.popover > .instructions { padding: .55rem .55rem 0; }
+
+.sheetBody { overflow: hidden; }
+
+.sheetContent {
+  height: min(64dvh, 36rem);
+  min-height: 18rem;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: var(--space-2);
 }
 
 .toolbar {
@@ -107,7 +126,7 @@
   align-items: center;
   gap: var(--space-2);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: transparent;
   box-shadow: none;
   color: var(--text);
@@ -134,7 +153,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid color-mix(in srgb, var(--outline) 38%, transparent);
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   font-size: var(--text-xs);
 }
 
@@ -158,6 +177,10 @@
   border-top: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
 }
 
+.sheetContent .footer { padding-inline: 0; padding-bottom: 0; }
+
+.sheetContent .footer button { flex: 1; }
+
 .footer button {
   min-height: var(--control-min);
   padding: .4rem .7rem;
@@ -171,5 +194,5 @@
 }
 
 .footer button:last-child {
-  background: color-mix(in srgb, var(--action) 68%, var(--surface-raised) 32%);
+  background: color-mix(in srgb, var(--positive) 58%, var(--surface-raised));
 }

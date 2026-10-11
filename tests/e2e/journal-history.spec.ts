@@ -52,6 +52,16 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       expect(reflectionBox && pageTurnerBox && pageTurnerBox.y > reflectionBox.y).toBe(true);
       expect(await reflection.evaluate((element) => getComputedStyle(element).backgroundImage)).toBe('none');
       await expect(journal.getByTestId('valence-arousal-field')).toBeHidden();
+      await journal.getByRole('button', { name: 'Feeling', exact: true }).click();
+      const feelingSheet = page.getByRole('dialog', { name: 'Feelings', exact: true });
+      await expect(feelingSheet).toBeVisible();
+      await expect(feelingSheet.getByLabel('Search feelings')).not.toBeFocused();
+      await feelingSheet.getByRole('button', { name: 'Close Feelings' }).click();
+      await journal.getByRole('button', { name: 'Needs', exact: true }).click();
+      const needSheet = page.getByRole('dialog', { name: 'Needs', exact: true });
+      await expect(needSheet).toBeVisible();
+      await expect(needSheet.getByLabel('Search needs')).not.toBeFocused();
+      await needSheet.getByRole('button', { name: 'Done', exact: true }).click();
       await reflection.fill('My unfinished new page');
       await journal.locator('summary').filter({ hasText: 'Emotional coordinates' }).click();
       await journal.getByRole('button', { name: 'Mixed feelings', exact: true }).click();
@@ -91,6 +101,9 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       const periodBox = await page.getByLabel('Period', { exact: true }).boundingBox();
       expect(chartBox && periodBox && chartBox.y < periodBox.y).toBe(true);
       await expect(chart).toContainText('Arousal');
+      const lines = chart.getByTestId('history-series-line');
+      await expect(lines).toHaveCount(2);
+      await expect(lines.first()).toHaveAttribute('d', /L/);
       await chart.getByRole('button', { name: /^Arousal: \+4,/ }).click();
       const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
       await expect(journal.getByText('Today’s private reflection', { exact: true })).toBeVisible();

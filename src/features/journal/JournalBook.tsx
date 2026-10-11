@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { Link } from 'react-router';
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
 import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
+import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { feelings, needsBySlug } from '../../data/catalog';
 import { clearJournalDraft, readJournalDraft, writeJournalDraft, type JournalComposerDraft } from '../../persistence/workflowDrafts';
 import { createJournalRecord, journalDate, type JournalRecord } from './journalRepository';
@@ -134,21 +135,24 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
               <div className={styles.metadata}>
                 <div className={styles.metaRow}><label>Feeling</label><div className={styles.catalogControl}>
                   <button type="button" aria-label="Feeling" aria-expanded={picker} onClick={() => setPicker(!picker)}><span>{draft.feelings?.length ? draft.feelings.map((item) => item.feeling).join(', ') : 'Choose feelings'}</span><i aria-hidden="true" /></button>
-                  {picker ? <div className={styles.picker} role="dialog" aria-label="Choose one or more feelings">
-                    <input type="search" aria-label="Search feelings" placeholder="Search feelings" value={feelingSearch} onChange={(event) => setFeelingSearch(event.target.value)} />
+                  <OverlayShell open={picker} variant="sheet" title="Feelings" onClose={() => setPicker(false)} bodyClassName={styles.pickerSheetBody}>
+                    <div className={styles.pickerSheet}>
+                    <p className={styles.pickerInstructions}>Move a slider above zero to include a feeling and record its intensity.</p>
+                    <input className={styles.pickerSearch} type="search" aria-label="Search feelings" placeholder="Search feelings" value={feelingSearch} onChange={(event) => setFeelingSearch(event.target.value)} autoComplete="off" />
                     <div className={styles.feelingOptions}>
                       {catalog.filter((item) => item.title.toLowerCase().includes(feelingSearch.toLowerCase().trim())).map((item) => {
                         const rating = draft.feelings?.find((selected) => selected.feeling.toLowerCase() === item.title.toLowerCase());
-                        return <label key={item.slug} className={styles.feelingRating}><span>{item.title}</span><input type="range" min="0" max="10" step="1" value={rating?.intensity ?? 0} aria-label={`${item.title} intensity; 0 means not selected`} onChange={(event) => {
+                        return <label key={item.slug} className={styles.feelingRating} data-selected={Boolean(rating)}><span>{item.title}</span><input type="range" min="0" max="10" step="1" value={rating?.intensity ?? 0} aria-label={`${item.title} intensity; 0 means not selected`} onChange={(event) => {
                           const value = Number(event.target.value);
                           patch({ feelings: [...(draft.feelings ?? []).filter((selected) => selected.feeling.toLowerCase() !== item.title.toLowerCase()), ...(value ? [{ feeling: item.title, intensity: value }] : [])].sort((a, b) => a.feeling.localeCompare(b.feeling)) });
-                        }} /><output>{rating?.ratingSource === 'unknown' ? '?' : rating?.intensity ?? 0}</output>{rating?.ratingSource === 'unknown' ? <small className={styles.unknownRating}>Intensity was not recorded. Move the slider to rate it.</small> : null}</label>;
+                        }} /><output>{rating?.ratingSource === 'unknown' ? '?' : `${rating?.intensity ?? 0}/10`}</output>{rating?.ratingSource === 'unknown' ? <small className={styles.unknownRating}>Intensity was not recorded. Move the slider to rate it.</small> : null}</label>;
                       })}
                     </div><div className={styles.pickerActions}><button type="button" onClick={() => patch({ feelings: [] })}>Clear</button><button type="button" onClick={() => setPicker(false)}>Done</button></div>
-                  </div> : null}
+                    </div>
+                  </OverlayShell>
                 </div></div>
-                <div className={styles.metaRow}><label id="journal-needs">Needs</label><div onPointerDown={() => setPicker(false)}><NeedCatalogPicker labelId="journal-needs" selectedNeeds={draft.selectedNeeds} onChange={(selectedNeeds) => patch({ selectedNeeds })} /></div></div>
-                <div className={styles.metaRow}><label htmlFor="journal-tags">Tags</label><div><input id="journal-tags" list="journal-tag-suggestions" value={draft.tags} onChange={(event) => patch({ tags: event.target.value })} placeholder="work, weekend" /></div><datalist id="journal-tag-suggestions">{tags.map((tag) => <option key={tag} value={tag} />)}</datalist></div>
+                <div className={styles.metaRow}><label id="journal-needs">Needs</label><div onPointerDown={() => setPicker(false)}><NeedCatalogPicker labelId="journal-needs" selectedNeeds={draft.selectedNeeds} onChange={(selectedNeeds) => patch({ selectedNeeds })} presentation="sheet" /></div></div>
+                <div className={styles.metaRow}><label htmlFor="journal-tags">Tags</label><div><input id="journal-tags" list="journal-tag-suggestions" value={draft.tags} onChange={(event) => patch({ tags: event.target.value })} placeholder="Add tags" aria-description="Separate tags with commas" /></div><datalist id="journal-tag-suggestions">{tags.map((tag) => <option key={tag} value={tag} />)}</datalist></div>
               </div>
               <DisclosureRow title="Date & reflection prompts">
                 <label className={styles.dateField}>When was this moment?<input type="datetime-local" value={draft.experiencedAt ?? ''} onChange={(event) => patch({ experiencedAt: event.target.value })} /></label>

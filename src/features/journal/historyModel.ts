@@ -115,14 +115,9 @@ export function buildHistorySeries(entries: JournalRecord[], settings: HistorySe
   const grouping = settings.metric === 'frequency' && settings.grouping === 'entry' ? 'day' : settings.grouping;
   const names = settings.metric === 'mood' ? ['Pleasantness', 'Arousal'] : settings.feelings.slice(0, 3);
   return names.map((name) => {
-    const segments: HistoryPoint[][] = [];
-    let segment: HistoryPoint[] = [];
     const points: HistoryPoint[] = [];
     const append = (point: HistoryPoint | null) => {
-      if (!point) { if (segment.length) segments.push(segment); segment = []; return; }
-      const previous = segment.at(-1);
-      if (previous && point.day - previous.day > (grouping === 'week' ? 7 : 1)) { segments.push(segment); segment = []; }
-      segment.push(point); points.push(point);
+      if (point) points.push(point);
     };
     if (grouping === 'entry') {
       entries.forEach((entry) => {
@@ -145,8 +140,10 @@ export function buildHistorySeries(entries: JournalRecord[], settings: HistorySe
           label: grouping === 'week' ? `${new Date(from).toLocaleDateString()} – ${new Date(addDays(to, -1)).toLocaleDateString()}` : new Date(start).toLocaleDateString() });
       });
     }
-    if (segment.length) segments.push(segment);
-    return { name, points, segments };
+    // Connect recorded observations across elapsed time. Missing days remain
+    // visually empty; the straight segment is a guide between known points,
+    // not an inferred score for the dates between them.
+    return { name, points, segments: points.length ? [points] : [] };
   });
 }
 
