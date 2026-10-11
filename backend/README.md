@@ -114,6 +114,7 @@ The replacement flow uses the official AT Protocol OAuth client in the Worker:
 - `/auth/login` starts PKCE + DPoP OAuth and stores short-lived authorization state in D1;
 - `/auth/callback` completes the OAuth exchange and obtains the DID from the verified OAuth result;
 - the Worker creates its own secure HttpOnly `allneeds_session` with `verified_at` set; the browser cookie and D1 row share one canonical 30-day lifetime so closing Safari or an installed iOS web app does not itself sign the user out;
+- installed-iOS sign-in also registers a 15-minute proof-bound handoff in the existing `oauth_states` table. Safari completes OAuth and displays a random six-digit code, while only the originating home-screen app retains the 256-bit claim secret. `/auth/handoff/claim` requires both values, locks after five wrong codes, and then sets the verified HttpOnly session cookie in the app's isolated website-data container. The Safari callback does not compare Safari-local data;
 - the temporary Bluesky OAuth credential is immediately revoked/deleted because allneeds only needs the verified identity for its own data.
 
 Privileged ownership and moderation always require a verified allneeds session. With the cutover switch off, ordinary private profile APIs require that verified session as well.
