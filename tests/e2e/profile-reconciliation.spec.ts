@@ -52,6 +52,7 @@ test('native local-entry confirmation merges into the profile without a comparis
   const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, device, profile, '/inventory/journal', saves);
 
+  await page.getByText('Journal entries', { exact: true }).click();
   await expect(page.getByText('Written while signed out', { exact: true })).toBeVisible();
   await expect(page.getByText('Already in my account', { exact: true })).toBeVisible();
   expect(dialogs).toHaveLength(1);
@@ -70,6 +71,7 @@ test('discarding local entries loads the account copy and keeps a recovery copy'
   const device = snapshot([entry('phone', 'Discard this local entry')]);
   const dialogs = respondToDialogs(page, [false, true]);
   await signInReturn(page, device, snapshot([entry('account', 'Keep this account entry')], 'profile'));
+  await page.getByText('Journal entries', { exact: true }).click();
   await expect(page.getByText('Keep this account entry', { exact: true })).toBeVisible();
   expect(dialogs).toHaveLength(2);
   expect(dialogs[1]).toContain('Discard local entries?');
@@ -81,6 +83,7 @@ test('discarding local entries loads the account copy and keeps a recovery copy'
 test('routine profile differences use one browser-native load confirmation', async ({ page }) => {
   const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, snapshot([]), snapshot([entry('account', 'Account entry')], 'profile'));
+  await page.getByText('Journal entries', { exact: true }).click();
   await expect(page.getByText('Account entry', { exact: true })).toBeVisible();
   expect(dialogs).toHaveLength(1);
   expect(dialogs[0]).toContain('Load your saved profile?');

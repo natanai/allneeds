@@ -15,7 +15,7 @@ const exactRouteLabels: Record<string, string> = {
   '/faux-feelings': 'Faux feelings',
   '/observations': 'Observations',
   '/inventory': 'Inventory',
-  '/inventory/journal': 'Journal history',
+  '/inventory/journal': 'History',
   '/feed': 'Shared strategies',
   '/alexithymia-support': ALEXITHYMIA_SUPPORT_LABEL,
   '/design-lab/need-magnets': 'Need magnet audit',
@@ -52,6 +52,7 @@ export function titleFromSegment(segment: string) {
 }
 
 function labelForRoute(pathname: string, search: string) {
+  if (pathname === '/inventory/journal' && new URLSearchParams(search).has('entry')) return 'Journal entry';
   if (pathname === '/inventory/journal'
     && new URLSearchParams(search).get('compose') === 'new') {
     return 'New journal entry';

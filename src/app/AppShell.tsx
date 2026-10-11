@@ -152,7 +152,7 @@ export function AppShell() {
     || pathname === '/alexithymia-support';
   const journalMobile = pathname === '/inventory/journal';
   const journalComposerActive = pathname === '/inventory/journal'
-    && new URLSearchParams(search).get('compose') === 'new';
+    && (new URLSearchParams(search).get('compose') === 'new' || new URLSearchParams(search).has('entry'));
   const [navPlayMode, setNavPlayMode] = useState(() => readMagnetPlayPreference('site-nav'));
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

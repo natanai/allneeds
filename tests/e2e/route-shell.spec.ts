@@ -22,7 +22,7 @@ const publicRoutes: RouteExpectation[] = [
   { path: '/faux-feelings/abandoned', label: 'Faux feeling: Abandoned' },
   { path: '/observations', label: 'Observations' },
   { path: '/inventory', label: 'Inventory' },
-  { path: '/inventory/journal', label: 'Journal history' },
+  { path: '/inventory/journal', label: 'History' },
   { path: '/feed', label: 'Shared strategies' },
   { path: '/alexithymia-support', label: 'Alexithymia support' },
   { path: '/not-a-real-route', label: 'Page not found' },

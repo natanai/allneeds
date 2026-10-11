@@ -2,6 +2,7 @@ import { getBrowserStorage } from './storage';
 import type { StorageDriver } from './storage';
 import { VersionedStore } from './versionedStore';
 import alexithymiaSupportData from '../data/generated/alexithymiaSupport.json';
+import { normalizeJournalMood, type JournalFeelingRating, type JournalMood } from '../features/journal/journalRepository';
 
 export const JOURNAL_DRAFT_STORAGE_KEY = 'allneeds.v2.journal.draft';
 export const OBSERVATION_DRAFT_STORAGE_KEY = 'allneeds.v2.observation.draft';
@@ -14,7 +15,9 @@ export type JournalComposerDraft = {
   notes: string;
   emotion: string;
   intensity: number;
-  feelings?: Array<{ feeling: string; intensity: number }>;
+  feelings?: JournalFeelingRating[];
+  mood?: JournalMood;
+  experiencedAt?: string;
   selectedNeeds: string[];
   tags: string;
   editingId: string | null;
@@ -137,6 +140,8 @@ function isJournalDraft(value: unknown): value is JournalComposerDraft {
     && typeof value.intensity === 'number'
     && Number.isFinite(value.intensity)
     && (value.feelings === undefined || isFeelingRatings(value.feelings))
+    && (value.mood === undefined || normalizeJournalMood(value.mood) !== undefined)
+    && (value.experiencedAt === undefined || typeof value.experiencedAt === 'string')
     && isStringList(value.selectedNeeds)
     && typeof value.tags === 'string'
     && (value.editingId === null || typeof value.editingId === 'string')
@@ -236,9 +241,9 @@ function isNeedStrategyDraft(value: unknown): value is NeedStrategyDraft {
     && typeof value.location === 'string';
 }
 
-function journalStore(storage: StorageDriver | null) {
+function journalStore(storage: StorageDriver | null, editingId?: string) {
   return new VersionedStore<JournalComposerDraft>({
-    key: JOURNAL_DRAFT_STORAGE_KEY,
+    key: editingId ? `${JOURNAL_DRAFT_STORAGE_KEY}.${editingId}` : JOURNAL_DRAFT_STORAGE_KEY,
     schemaVersion: 1,
     storage,
     validate: isJournalDraft,
@@ -290,16 +295,23 @@ function needStrategyStore(needSlug: string, storage: StorageDriver | null) {
   });
 }
 
-export function readJournalDraft(storage: StorageDriver | null = getBrowserStorage()) {
-  const result = journalStore(storage).read();
+export function readJournalDraft(storage: StorageDriver | null = getBrowserStorage(), editingId?: string) {
+  const result = journalStore(storage, editingId).read();
   return result.status === 'ready' ? result.value : null;
 }
 
 export function writeJournalDraft(
   draft: JournalComposerDraft,
   storage: StorageDriver | null = getBrowserStorage(),
+  editingId?: string,
 ) {
-  const store = journalStore(storage);
+  if (!storage) throw new Error('Device storage is unavailable. The journal draft was not saved.');
+  // A former edit in the combined key must be retained before a new draft can replace it.
+  if (!editingId) {
+    const previous = readJournalDraft(storage);
+    if (previous?.editingId) journalStore(storage, previous.editingId).write(previous);
+  }
+  const store = journalStore(storage, editingId);
   const hasContent = Boolean(
     draft.notes.trim()
     || draft.emotion.trim()
@@ -307,6 +319,8 @@ export function writeJournalDraft(
     || draft.selectedNeeds.length
     || draft.tags.trim()
     || draft.editingId
+    || draft.mood
+    || draft.experiencedAt
     || draft.guidedSupport?.observation.trim()
     || draft.guidedSupport?.terms.length
     || draft.guidedSupport?.statement.trim(),
@@ -316,6 +330,7 @@ export function writeJournalDraft(
     return null;
   }
   const feelings = draft.feelings?.map((item) => ({
+    ...item,
     feeling: item.feeling.trim(),
     intensity: Math.min(10, Math.max(0, Math.round(item.intensity))),
   })).filter((item) => item.feeling && item.intensity > 0);
@@ -326,17 +341,23 @@ export function writeJournalDraft(
       .filter((term) => term.label),
     statement: draft.guidedSupport.statement.trim(),
   } : undefined;
+  const mood = normalizeJournalMood(draft.mood);
   return store.write({
     ...draft,
     intensity: Math.min(10, Math.max(0, Math.round(draft.intensity))),
     ...(feelings ? { feelings } : {}),
+    ...(mood ? { mood } : {}),
     selectedNeeds: [...new Set(draft.selectedNeeds.filter(Boolean))],
     ...(guidedSupport ? { guidedSupport } : {}),
   });
 }
 
-export function clearJournalDraft(storage: StorageDriver | null = getBrowserStorage()) {
-  journalStore(storage).clear();
+export function clearJournalDraft(storage: StorageDriver | null = getBrowserStorage(), editingId?: string) {
+  if (!editingId) {
+    const previous = readJournalDraft(storage);
+    if (previous?.editingId) journalStore(storage, previous.editingId).write(previous);
+  }
+  journalStore(storage, editingId).clear();
 }
 
 export function readObservationDraft(storage: StorageDriver | null = getBrowserStorage()) {

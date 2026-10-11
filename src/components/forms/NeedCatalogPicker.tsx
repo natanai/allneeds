@@ -1,17 +1,19 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { needs } from '../../data/catalog';
+import { OverlayShell } from '../overlays/OverlayShell';
 import styles from './NeedCatalogPicker.module.css';
 
 type NeedCatalogPickerProps = {
   labelId: string;
   selectedNeeds: string[];
   onChange: (selectedNeeds: string[]) => void;
+  presentation?: 'popover' | 'sheet';
 };
 
 const sortedNeeds = [...needs].sort((left, right) => left.title.localeCompare(right.title));
 
-export function NeedCatalogPicker({ labelId, selectedNeeds, onChange }: NeedCatalogPickerProps) {
+export function NeedCatalogPicker({ labelId, selectedNeeds, onChange, presentation = 'popover' }: NeedCatalogPickerProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const rootRef = useRef<HTMLDivElement>(null);
@@ -32,7 +34,8 @@ export function NeedCatalogPicker({ labelId, selectedNeeds, onChange }: NeedCata
 
   useEffect(() => {
     if (!open) return undefined;
-    searchRef.current?.focus();
+    if (presentation === 'popover') searchRef.current?.focus();
+    if (presentation === 'sheet') return undefined;
     const closeOnOutsidePointer = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
@@ -45,13 +48,51 @@ export function NeedCatalogPicker({ labelId, selectedNeeds, onChange }: NeedCata
       document.removeEventListener('pointerdown', closeOnOutsidePointer);
       document.removeEventListener('keydown', closeOnEscape);
     };
-  }, [open]);
+  }, [open, presentation]);
 
   const toggleNeed = (slug: string) => {
     onChange(selectedNeeds.includes(slug)
       ? selectedNeeds.filter((value) => value !== slug)
       : [...selectedNeeds, slug]);
   };
+
+  const choices = <>
+    <p className={styles.instructions}>Choose any needs that were relevant. You can select more than one.</p>
+    <div className={styles.toolbar}>
+      <input
+        ref={searchRef}
+        type="search"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        aria-label="Search needs"
+        placeholder="Search needs"
+        autoComplete="off"
+      />
+    </div>
+    <div className={styles.options} role="listbox" aria-multiselectable="true">
+      {visibleNeeds.map((need) => {
+        const selected = selectedNeeds.includes(need.slug);
+        return (
+          <button
+            key={need.slug}
+            type="button"
+            className={styles.option}
+            role="option"
+            aria-selected={selected}
+            onClick={() => toggleNeed(need.slug)}
+          >
+            <span>{need.title}</span>
+            <span className={styles.check} aria-hidden="true">{selected ? '✓' : ''}</span>
+          </button>
+        );
+      })}
+      {!visibleNeeds.length ? <p className={styles.empty}>No needs match “{query}”.</p> : null}
+    </div>
+    <div className={styles.footer}>
+      <button type="button" onClick={() => onChange([])}>Clear</button>
+      <button type="button" onClick={() => setOpen(false)}>Done</button>
+    </div>
+  </>;
 
   return (
     <div ref={rootRef} className={styles.picker}>
@@ -70,44 +111,14 @@ export function NeedCatalogPicker({ labelId, selectedNeeds, onChange }: NeedCata
         <span className={styles.chevron} aria-hidden="true" />
       </button>
 
-      {open ? (
+      {open && presentation === 'popover' ? (
         <div id={popoverId} className={styles.popover} role="dialog" aria-label="Choose one or more needs">
-          <div className={styles.toolbar}>
-            <input
-              ref={searchRef}
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              aria-label="Search needs"
-              placeholder="Search needs"
-              autoComplete="off"
-            />
-          </div>
-          <div className={styles.options} role="listbox" aria-multiselectable="true">
-            {visibleNeeds.map((need) => {
-              const selected = selectedNeeds.includes(need.slug);
-              return (
-                <button
-                  key={need.slug}
-                  type="button"
-                  className={styles.option}
-                  role="option"
-                  aria-selected={selected}
-                  onClick={() => toggleNeed(need.slug)}
-                >
-                  <span>{need.title}</span>
-                  <span className={styles.check} aria-hidden="true">{selected ? '✓' : ''}</span>
-                </button>
-              );
-            })}
-            {!visibleNeeds.length ? <p className={styles.empty}>No needs match “{query}”.</p> : null}
-          </div>
-          <div className={styles.footer}>
-            <button type="button" onClick={() => onChange([])}>Clear</button>
-            <button type="button" onClick={() => setOpen(false)}>Done</button>
-          </div>
+          {choices}
         </div>
       ) : null}
+      {presentation === 'sheet' ? <OverlayShell open={open} variant="sheet" title="Needs" onClose={() => setOpen(false)} bodyClassName={styles.sheetBody}>
+        <div id={popoverId} className={styles.sheetContent}>{choices}</div>
+      </OverlayShell> : null}
     </div>
   );
 }

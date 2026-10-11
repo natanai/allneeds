@@ -146,7 +146,6 @@ test('saved customizer settings survive reload without opening the customizer', 
 test('Journal History keeps long entries compact and puts feeling ratings first', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   const fullReflection = Array.from({ length: 90 }, (_, index) => `reflection${index + 1}`).join(' ');
-  const preview = `${Array.from({ length: 55 }, (_, index) => `reflection${index + 1}`).join(' ')}…`;
   await page.addInitScript(({ reflection }) => {
     window.localStorage.setItem('allneeds.v2.journal', JSON.stringify({
       schemaVersion: 1,
@@ -170,21 +169,24 @@ test('Journal History keeps long entries compact and puts feeling ratings first'
   }, { reflection: fullReflection });
 
   await page.goto('/inventory/journal');
-  await expect(page.getByRole('heading', { level: 3, name: 'Relieved 7/10 · Tender 4/10' })).toBeVisible();
-  await expect(page.getByText(preview, { exact: true })).toBeVisible();
-  await expect(page.getByText(fullReflection, { exact: true })).toBeHidden();
-  await expect(page.getByRole('link', { name: 'Autonomy', exact: true })).toHaveAttribute('href', '/needs/autonomy');
-  await expect(page.getByText('#weekend', { exact: true })).toBeVisible();
+  await page.getByLabel('Period', { exact: true }).selectOption('all');
+  await page.getByText('Journal entries', { exact: true }).click();
+  await expect(page.getByText('Relieved 7/10 · Tender 4/10', { exact: true })).toBeVisible();
+  const notePreview = page.getByText(fullReflection, { exact: true });
+  await expect(notePreview).toBeVisible();
+  expect(await notePreview.evaluate((note) => getComputedStyle(note).webkitLineClamp)).toBe('2');
+  await page.getByText('Focus & compare', { exact: true }).click();
   const historyFilters = page.getByLabel('Filter journal history');
-  await expect(historyFilters.getByLabel('Feeling', { exact: true })).toHaveValue('');
+  await expect(historyFilters.getByLabel('Filter feeling', { exact: true })).toHaveValue('');
   await expect(historyFilters.getByLabel('Need', { exact: true })).toHaveValue('');
   await expect(historyFilters.getByLabel('Tag', { exact: true })).toHaveValue('');
-
-  await page.getByText('Read full entry', { exact: true }).click();
-  await expect(page.getByText(fullReflection, { exact: true })).toBeVisible();
-  await expect(page.getByText('Show less', { exact: true })).toBeVisible();
-  await page.getByText('Show less', { exact: true }).click();
-  await expect(page.getByText(fullReflection, { exact: true })).toBeHidden();
+  await page.getByRole('button', { name: /Relieved 7\/10 · Tender 4\/10/ }).click();
+  const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
+  await expect(journal.getByText(fullReflection, { exact: true })).toBeVisible();
+  await expect(journal.getByRole('link', { name: 'Autonomy', exact: true })).toHaveAttribute('href', '/needs/autonomy');
+  await expect(journal.getByText('#weekend', { exact: true })).toBeVisible();
+  await journal.getByRole('button', { name: 'Close full screen journal' }).click();
+  await expect(page.getByLabel('Period', { exact: true })).toHaveValue('all');
   expect(runtimeProblems).toEqual([]);
 });
 
@@ -472,7 +474,7 @@ test('modal surfaces own keyboard focus and restore it on Escape', async ({ page
   await page.keyboard.press('Escape');
   await expect(journalDialog).toHaveCount(0);
   await expect(page).toHaveURL(/\/inventory\/journal$/);
-  await expect(page.locator('main')).toHaveAttribute('aria-label', 'Journal history');
+  await expect(page.locator('main')).toHaveAttribute('aria-label', 'History');
   expect(runtimeProblems).toEqual([]);
 });
 
@@ -721,7 +723,7 @@ test('Menu Journal opens the full-screen entry and History stays compact', async
   const menu = page.getByRole('dialog', { name: 'allneeds.app menu' });
   await expect(menu).toBeVisible();
   await expect(menu.getByRole('button', { name: 'New journal entry' })).toBeVisible();
-  await expect(menu.getByRole('link', { name: 'Journal history', exact: true })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'History', exact: true })).toBeVisible();
 
   await menu.getByRole('button', { name: 'New journal entry' }).click();
   await expect(page).toHaveURL(/\/inventory\/journal\?compose=new$/);

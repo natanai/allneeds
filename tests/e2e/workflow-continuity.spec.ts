@@ -85,9 +85,11 @@ test('Journal drafts survive close/reload and successful save or clear removes t
   await dialog.getByLabel('Reflection').fill('Saved journal continuity check.');
   await dialog.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(dialog).toHaveCount(0);
+  await page.getByText('Journal entries', { exact: true }).click();
   await expect(page.getByText('Saved journal continuity check.', { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('dialog', { name: 'Journal' })).toHaveCount(0);
+  await page.getByText('Journal entries', { exact: true }).click();
   await expect(page.getByText('Saved journal continuity check.', { exact: true })).toBeVisible();
   expect(runtimeProblems).toEqual([]);
 });
