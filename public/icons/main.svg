@@ -4,7 +4,7 @@
   <rect width="384" height="384" rx="88" fill="#F1F3F2"/>
   <rect x="50" y="54" width="292" height="292" rx="72" fill="#9DA39F"/>
   <rect x="38" y="38" width="292" height="292" rx="72" fill="#FFFEF8" stroke="#1F1230" stroke-width="10"/>
-  <g transform="translate(84 104)" stroke="#1F1230" stroke-width="7" stroke-linejoin="round">
+  <g transform="translate(76 97)" stroke="#1F1230" stroke-width="7" stroke-linejoin="round">
     <path d="M0 174V36a36 36 0 0 1 72 0v138Z" fill="#74569B"/>
     <path d="M72 174V36a36 36 0 0 1 72 0v138Z" fill="#FFB3CB"/>
     <path d="M144 174V36a36 36 0 0 1 72 0v138Z" fill="#96FBC7"/>

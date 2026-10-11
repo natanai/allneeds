@@ -119,9 +119,9 @@ for (const asset of requiredBrandAssets) {
 const requiredBrandMetadata = [
   ['PNG favicon fallback', /rel="icon"[^>]+favicon-color-32x32\.png\?v=4/],
   ['classic favicon fallback', /rel="shortcut icon"[^>]+favicon\.ico\?v=4/],
-  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png\?v=4/],
+  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png\?v=5/],
   ['Safari pinned-tab icon', /rel="mask-icon"[^>]+safari-pinned-tab\.svg\?v=4/],
-  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png\?v=4/],
+  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png\?v=5/],
   ['Open Graph image', /property="og:image"[^>]+social\/og-image-1200x630\.png\?v=4/],
   ['Twitter image', /name="twitter:image"[^>]+social\/twitter-card-1200x630\.png\?v=4/],
 ];

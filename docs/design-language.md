@@ -198,7 +198,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 
 **Testing on `site-test` beginning 2026-10-11.** The three empty doors remain the canonical public identity; feature marks stay inside the product rather than entering the master logo.
 
-- The Paper Magnet app icon uses the default `Primary`, `Action`, and `Positive` colors inside a tactile paper tile. The stored app icon is necessarily static; personalized Customizer colors remain a product behavior, not a per-user operating-system asset.
+- The Paper Magnet app icon uses the default `Primary`, `Action`, and `Positive` colors inside a tactile paper tile. Center its doorway group within the foreground paper rather than the full canvas, whose offset shadow makes geometric canvas-centering look right-heavy and low. The stored app icon is necessarily static; personalized Customizer colors remain a product behavior, not a per-user operating-system asset.
 - Social/header imagery uses the Open Monochrome three-door lockup so the public identity remains stable across personalized themes.
 - Preserve the complete favicon, Apple touch icon, Android/maskable icon, Safari pinned-tab, Windows tile, web-manifest, and social-card asset set.
 - The document head must advertise format fallbacks and platform-specific icons explicitly; do not rely on a browser inventing a letter tile from the page title.
