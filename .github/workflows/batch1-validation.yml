@@ -41,3 +41,5 @@ jobs:
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
+
+# One-time branch validation; remove the temporary push trigger before merging.
