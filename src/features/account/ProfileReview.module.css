@@ -13,7 +13,6 @@
 }
 .content button:disabled { opacity: .65; cursor: default; }
 .content .primary { background: var(--primary); color: var(--primary-fg); }
-.content .destructive { border-color: color-mix(in srgb, var(--danger, #9d1c1c) 60%, var(--outline)); }
 .actions { display: grid; gap: .55rem; }
 .codeForm { display: grid; gap: .55rem; }
 .codeForm label { font-weight: 750; }
