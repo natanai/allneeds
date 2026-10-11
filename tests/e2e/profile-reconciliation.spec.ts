@@ -12,6 +12,17 @@ function snapshot(entries: ReturnType<typeof entry>[], theme = 'device') {
   };
 }
 
+function respondToDialogs(page: Page, decisions: boolean[]) {
+  const messages: string[] = [];
+  page.on('dialog', async (dialog) => {
+    messages.push(dialog.message());
+    const accept = decisions.shift() ?? false;
+    if (accept) await dialog.accept();
+    else await dialog.dismiss();
+  });
+  return messages;
+}
+
 async function signInReturn(
   page: Page,
   device: Record<string, string>,
@@ -32,76 +43,72 @@ async function signInReturn(
     await route.fulfill({ contentType: 'application/x-ndjson', body: `${JSON.stringify({ stage: 'profile-saved', status: 'ok', savedAt: '2026-10-10T23:10:00Z', strategyCount: 0 })}\n${JSON.stringify({ stage: 'complete', status: 'ok', savedAt: '2026-10-10T23:10:00Z', syncedAt: '2026-10-10T23:10:01Z', syncedCount: 0 })}\n` });
   });
   await page.goto(`${path}${path.includes('?') ? '&' : '?'}auth=verified`);
-  await expect(page.getByRole('alertdialog')).toBeVisible();
 }
 
-test('local journal warning merges into the profile without a comparison screen or second save step', async ({ page }) => {
+test('native local-entry confirmation merges into the profile without a comparison screen or second save step', async ({ page }) => {
   const device = snapshot([entry('phone', 'Written while signed out')]);
   const profile = snapshot([entry('account', 'Already in my account')], 'profile');
   const saves: Record<string, unknown>[] = [];
+  const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, device, profile, '/inventory/journal', saves);
 
-  const warning = page.getByRole('alertdialog', { name: 'Local entries found' });
-  await expect(warning).toContainText('1 local journal entry not saved in your profile');
-  await expect(warning.getByRole('button', { name: 'Merge into profile' })).toBeVisible();
-  await expect(warning.getByRole('button', { name: 'Discard local entries' })).toBeVisible();
-  await expect(warning.getByText('Review journal differences')).toHaveCount(0);
-
-  await warning.getByRole('button', { name: 'Merge into profile' }).click();
-  const result = page.getByRole('alertdialog', { name: 'Finished' });
-  await expect(result).toContainText('merged into your saved profile');
+  await expect(page.getByText('Written while signed out', { exact: true })).toBeVisible();
+  await expect(page.getByText('Already in my account', { exact: true })).toBeVisible();
+  expect(dialogs).toHaveLength(1);
+  expect(dialogs[0]).toContain('1 local journal entry not saved in your profile');
+  expect(dialogs[0]).toContain('Merge this local entry into your profile?');
+  await expect(page.getByRole('alertdialog', { name: 'Local entries found' })).toHaveCount(0);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.map((item: { notes: string }) => item.notes).sort())).toEqual(['Already in my account', 'Written while signed out']);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('nvcApp.theme')!).preset)).toBe('profile');
   expect(saves).toHaveLength(1);
   const backup = JSON.parse(String(saves[0]?.value));
   expect(backup.journalEntries).toHaveLength(2);
   expect(backup.localStorage['allneeds:profile-recovery-v1']).toBeUndefined();
-
-  await result.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('alertdialog')).toHaveCount(0);
-  await expect(page.getByText('Written while signed out', { exact: true })).toBeVisible();
-  await expect(page.getByText('Already in my account', { exact: true })).toBeVisible();
 });
 
 test('discarding local entries loads the account copy and keeps a recovery copy', async ({ page }) => {
   const device = snapshot([entry('phone', 'Discard this local entry')]);
+  const dialogs = respondToDialogs(page, [false, true]);
   await signInReturn(page, device, snapshot([entry('account', 'Keep this account entry')], 'profile'));
-  const warning = page.getByRole('alertdialog', { name: 'Local entries found' });
-  await warning.getByRole('button', { name: 'Discard local entries' }).click();
-  await expect(page.getByRole('alertdialog', { name: 'Finished' })).toContainText('saved profile was loaded');
+  await expect(page.getByText('Keep this account entry', { exact: true })).toBeVisible();
+  expect(dialogs).toHaveLength(2);
+  expect(dialogs[1]).toContain('Discard local entries?');
+  expect(dialogs[1]).toContain('Choose Cancel to leave everything unchanged.');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.map((item: { notes: string }) => item.notes))).toEqual(['Keep this account entry']);
   expect(await page.evaluate(() => localStorage.getItem('allneeds:profile-recovery-v1'))).not.toBeNull();
 });
 
-test('routine profile differences use a lightweight load warning', async ({ page }) => {
+test('routine profile differences use one browser-native load confirmation', async ({ page }) => {
+  const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, snapshot([]), snapshot([entry('account', 'Account entry')], 'profile'));
-  const warning = page.getByRole('alertdialog', { name: 'Load saved profile?' });
-  await expect(warning).toContainText('saved profile will replace data stored in this browser');
-  await warning.getByRole('button', { name: 'Load profile' }).click();
-  await expect(page.getByRole('alertdialog', { name: 'Finished' })).toBeVisible();
+  await expect(page.getByText('Account entry', { exact: true })).toBeVisible();
+  expect(dialogs).toHaveLength(1);
+  expect(dialogs[0]).toContain('Load your saved profile?');
+  expect(dialogs[0]).toContain('replace data stored in this browser');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries[0].notes)).toBe('Account entry');
 });
 
 test('canceling the warning leaves local data unchanged', async ({ page }) => {
   const device = snapshot([entry('phone', 'Keep my phone entry')]);
+  const dialogs = respondToDialogs(page, [false, false]);
   await signInReturn(page, device, snapshot([entry('account', 'Account-only entry')]));
-  await page.getByRole('alertdialog', { name: 'Local entries found' }).getByRole('button', { name: 'Cancel' }).click();
+  await expect.poll(() => dialogs.length).toBe(2);
   await expect(page.getByRole('alertdialog')).toHaveCount(0);
   expect(await page.evaluate(() => localStorage.getItem('allneeds.v2.journal'))).toBe(device['allneeds.v2.journal']);
 });
 
 test('different edits to one entry are treated as local content at risk and preserve both when merged', async ({ page }) => {
+  const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, snapshot([entry('same-id', 'Phone edit')]), snapshot([entry('same-id', 'Account edit')]));
-  const warning = page.getByRole('alertdialog', { name: 'Local entries found' });
-  await expect(warning).toContainText('1 local journal entry');
-  await warning.getByRole('button', { name: 'Merge into profile' }).click();
+  await expect.poll(() => dialogs.length).toBe(1);
+  expect(dialogs[0]).toContain('1 local journal entry');
   const ids = await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.map((item: { id: string }) => item.id));
   expect(new Set(ids).size).toBe(2);
 });
 
 test('failed profile fetch leaves the phone entry available and offers a retry', async ({ page }) => {
+  respondToDialogs(page, [false, false]);
   await signInReturn(page, snapshot([entry('phone', 'My protected entry')]), snapshot([]));
-  await page.getByRole('alertdialog').getByRole('button', { name: 'Cancel' }).click();
   await page.route('https://backend.allneeds.app/api/user-settings', (route) => route.fulfill({ status: 503, body: '{}' }));
   await page.getByRole('button', { name: 'Open menu' }).click();
   const menu = page.getByRole('dialog', { name: 'allneeds.app menu' });
@@ -113,14 +120,11 @@ test('failed profile fetch leaves the phone entry available and offers a retry',
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries[0].notes)).toBe('My protected entry');
 });
 
-test('the warning owns keyboard focus even when the journal composer is open', async ({ page }) => {
+test('canceling both native confirmations leaves an open journal composer untouched', async ({ page }) => {
+  const dialogs = respondToDialogs(page, [false, false]);
   await signInReturn(page, snapshot([entry('phone', 'Phone entry')]), snapshot([entry('account', 'Account entry')]), '/inventory/journal?compose=new');
-  const warning = page.getByRole('alertdialog', { name: 'Local entries found' });
-  await warning.getByRole('button', { name: 'Discard local entries' }).focus();
-  await page.keyboard.press('Tab');
-  await expect(warning.getByRole('button', { name: 'Cancel' })).toBeFocused();
-  await page.keyboard.press('Escape');
-  await expect(warning).toHaveCount(0);
+  await expect.poll(() => dialogs.length).toBe(2);
+  await expect(page.getByRole('alertdialog')).toHaveCount(0);
   await expect(page.getByRole('dialog', { name: 'Journal', exact: true })).toBeVisible();
 });
 
@@ -136,6 +140,7 @@ test('installed app claims Safari verification before warning about its own loca
   }, { handoffId: handoff, handoffSecret: secret, stored: device });
   const session = { status: 'ok', signedIn: true, did: 'did:plc:installed-app', handle: 'phone.example', verified: true, admin: false };
   let claimBody: unknown = null;
+  const dialogs = respondToDialogs(page, [false, false]);
   await page.route('https://backend.allneeds.app/auth/handoff/claim', async (route) => {
     claimBody = JSON.parse(route.request().postData() ?? '{}');
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(session) });
@@ -148,8 +153,9 @@ test('installed app claims Safari verification before warning about its own loca
   await finishSignIn.getByLabel('Safari confirmation code').fill('123 456');
   await finishSignIn.getByRole('button', { name: 'Finish sign-in' }).click();
 
-  const warning = page.getByRole('alertdialog', { name: 'Local entries found' });
-  await expect(warning).toContainText('1 local journal entry');
+  await expect.poll(() => dialogs.length).toBe(2);
+  expect(dialogs[0]).toContain('1 local journal entry');
+  await expect(page.getByRole('alertdialog', { name: 'Local entries found' })).toHaveCount(0);
   expect(claimBody).toEqual({ handoff, secret, code: '123456' });
   expect(await page.evaluate(() => localStorage.getItem('allneeds:home-screen-sign-in-v1'))).toBeNull();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries)).toHaveLength(1);
