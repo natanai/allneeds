@@ -2,10 +2,6 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [fix/observation-quick-check-citations]
-    paths:
-      - '.github/workflows/batch1-validation.yml'
 
 permissions:
   contents: read
@@ -41,9 +37,3 @@ jobs:
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
-
-# One-time branch validation; remove the temporary push trigger before merging.
-
-# Retry full validation after updating the approved Observation production guard.
-
-# Final complete CI run with the updated canonical guide browser regression.
