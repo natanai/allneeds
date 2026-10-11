@@ -15,7 +15,7 @@ describe('journalRepository', () => {
     const storage = new MemoryStorage();
     storage.setItem('journal:v2', JSON.stringify([{ id: 'one', dateISO: '2026-01-01', emotion: 'sad', needs: ['support'], tags: ['work'], notes: 'A note' }]));
     expect(readJournal(storage)[0]).toMatchObject({ id: 'one', emotion: 'sad', needs: ['support'] });
-    expect(readJournal(storage)[0]?.feelings).toEqual([{ feeling: 'sad', intensity: 5 }]);
+    expect(readJournal(storage)[0]?.feelings).toEqual([{ feeling: 'sad', intensity: 5, ratingSource: 'unknown' }]);
     expect(JSON.parse(storage.getItem(JOURNAL_STORAGE_KEY) ?? '{}').schemaVersion).toBe(1);
   });
 
@@ -24,6 +24,32 @@ describe('journalRepository', () => {
     const entry = createJournalRecord({ notes: '  Reflection  ', emotion: ' hurt ', intensity: 12, needs: ['support'], tags: ['work', 'work'] });
     writeJournal([entry], storage);
     expect(readJournal(storage)[0]).toMatchObject({ notes: 'Reflection', emotion: 'hurt', intensity: 10, tags: ['work'] });
+  });
+
+  it('keeps mood, experienced time, and original creation time through normalizing', () => {
+    const storage = new MemoryStorage();
+    const entry = createJournalRecord({ notes: 'A moment last week', mood: { kind: 'rated', value: -3 }, experiencedAtISO: '2026-10-01T20:30:00Z' });
+    writeJournal([entry], storage);
+    expect(readJournal(storage)[0]).toMatchObject({ mood: { kind: 'rated', value: -3 }, experiencedAtISO: '2026-10-01T20:30:00.000Z', createdAtISO: entry.dateISO });
+    const mixed = { ...entry, mood: { kind: 'mixed' as const } };
+    writeJournal([mixed], storage);
+    expect(readJournal(storage)[0]?.mood).toEqual({ kind: 'mixed' });
+  });
+
+  it('does not promote a missing legacy intensity to a reported rating after a second save', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('journal:v2', JSON.stringify([{ id: 'old', dateISO: '2026-01-01', notes: 'old', feelings: ['Sad'] }]));
+    writeJournal(readJournal(storage), storage);
+    expect(readJournal(storage)[0]?.feelings[0]?.ratingSource).toBe('unknown');
+    expect(readJournal(storage)[0]?.mood).toBeUndefined();
+  });
+
+  it('does not report a successful save when storage is unavailable', () => {
+    expect(() => writeJournal([], null)).toThrow('not saved');
+  });
+  it('prefers a reported duplicate over an unknown legacy display fallback', () => {
+    const entry = createJournalRecord({ notes: 'A duplicate label', feelings: [{ feeling: 'Sad', intensity: 5, ratingSource: 'unknown' }, { feeling: 'sad', intensity: 3 }] });
+    expect(entry.feelings).toEqual([{ feeling: 'sad', intensity: 3 }]);
   });
 
   it('preserves an independent intensity for every selected feeling', () => {

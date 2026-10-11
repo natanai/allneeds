@@ -20,7 +20,8 @@ describe('route presentation', () => {
   });
 
   it('distinguishes the journal composer from history', () => {
-    expect(routePresentation('/inventory/journal').label).toBe('Journal history');
+    expect(routePresentation('/inventory/journal').label).toBe('History');
+    expect(routePresentation('/inventory/journal', '?entry=saved-page').label).toBe('Journal entry');
     expect(routePresentation('/inventory/journal', '?compose=new').documentTitle)
       .toBe('New journal entry • allneeds.app');
   });

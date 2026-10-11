@@ -38,6 +38,18 @@ function memoryStorage(): StorageDriver {
 }
 
 describe('workflow drafts', () => {
+  it('keeps a new journal draft independent from entry edit drafts, including unknown intensity and mood', () => {
+    const storage = memoryStorage();
+    const draft = { notes: 'New page', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: null };
+    writeJournalDraft({ ...draft, mood: { kind: 'mixed' }, experiencedAt: '2026-10-01T08:30' }, storage);
+    writeJournalDraft({ ...draft, notes: 'An edited page', editingId: 'old', feelings: [{ feeling: 'Sad', intensity: 5, ratingSource: 'unknown' }] }, storage, 'old');
+    expect(readJournalDraft(storage)?.notes).toBe('New page');
+    expect(readJournalDraft(storage)?.mood).toEqual({ kind: 'mixed' });
+    expect(readJournalDraft(storage, 'old')?.feelings?.[0]?.ratingSource).toBe('unknown');
+    clearJournalDraft(storage, 'old');
+    expect(readJournalDraft(storage, 'old')).toBeNull();
+    expect(readJournalDraft(storage)?.experiencedAt).toBe('2026-10-01T08:30');
+  });
   it('round-trips and normalizes a journal composer draft', () => {
     const storage = memoryStorage();
     writeJournalDraft({
@@ -68,6 +80,14 @@ describe('workflow drafts', () => {
     writeJournalDraft({ notes: 'temporary', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: null }, storage);
     writeJournalDraft({ notes: '', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: null }, storage);
     expect(readJournalDraft(storage)).toBeNull();
+  });
+  it('preserves a legacy edit before the former combined draft key is replaced by a new page', () => {
+    const storage = memoryStorage();
+    const draft = { notes: 'An old edit', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: 'legacy-entry' };
+    writeJournalDraft(draft, storage);
+    writeJournalDraft({ ...draft, notes: 'A new page', editingId: null }, storage);
+    expect(readJournalDraft(storage, 'legacy-entry')?.notes).toBe('An old edit');
+    expect(readJournalDraft(storage)?.notes).toBe('A new page');
   });
 
   it('round-trips and clears an observation draft', () => {

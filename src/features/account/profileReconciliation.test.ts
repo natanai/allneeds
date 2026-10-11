@@ -20,7 +20,7 @@ function storage(initial: BrowserSnapshot = {}) {
 }
 
 function journal(id: string, notes: string) {
-  return { ...createJournalRecord({ notes, feelings: [{ feeling: 'Anxiety', intensity: 3 }], needs: ['safety'], tags: ['work'] }), id, dateISO: '2026-10-10T23:00:00.000Z' };
+  return { ...createJournalRecord({ notes, feelings: [{ feeling: 'Anxiety', intensity: 3 }], needs: ['safety'], tags: ['work'] }), id, dateISO: '2026-10-10T23:00:00.000Z', createdAtISO: '2026-10-10T23:00:00.000Z' };
 }
 
 function snapshot(entries: ReturnType<typeof journal>[] = [], extras: BrowserSnapshot = {}): BrowserSnapshot {
@@ -28,6 +28,17 @@ function snapshot(entries: ReturnType<typeof journal>[] = [], extras: BrowserSna
 }
 
 describe('profile reconciliation', () => {
+  it('preserves mood, experienced dates, and independent journal drafts through merging and profile replacement', () => {
+    const record = { ...journal('phone', 'A reported moment'), mood: { kind: 'mixed' as const }, experiencedAtISO: '2026-10-03T10:30:00.000Z' };
+    const device = snapshot([record], { 'allneeds.v2.journal.draft': 'new page', 'allneeds.v2.journal.draft.phone': 'edited page' });
+    const profile = snapshot([]);
+    const combined = combineProfileSnapshots(compareProfileSnapshots(device, profile), 'profile');
+    expect(readJournal(storage(combined))[0]).toMatchObject({ mood: { kind: 'mixed' }, experiencedAtISO: record.experiencedAtISO, createdAtISO: record.createdAtISO });
+    const driver = storage(device);
+    applyProfileReplacement(driver, compareProfileSnapshots(device, profile), 'did:plc:test');
+    expect(driver.getItem('allneeds.v2.journal.draft')).toBe('new page');
+    expect(driver.getItem('allneeds.v2.journal.draft.phone')).toBe('edited page');
+  });
   it('keeps recovery lookup usable when browser storage is restricted', () => {
     vi.stubGlobal('window', Object.defineProperty({}, 'localStorage', { get() { throw new Error('Storage unavailable'); } }));
     expect(readProfileRecovery()).toBeNull();

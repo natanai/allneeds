@@ -9,7 +9,20 @@ export const JOURNAL_CHANGED_EVENT = 'allneeds:journal-changed';
 export interface JournalFeelingRating {
   feeling: string;
   intensity: number;
+  /** Legacy labels without a reported number retain their old display value only. */
+  ratingSource?: 'unknown';
 }
+
+export type JournalMood = { kind: 'rated'; value: number } | { kind: 'mixed' | 'unsure' };
+
+export function normalizeJournalMood(value: unknown): JournalMood | undefined {
+  if (!isRecord(value)) return undefined;
+  if (value.kind === 'mixed' || value.kind === 'unsure') return { kind: value.kind };
+  if (value.kind !== 'rated' || typeof value.value !== 'number' || !Number.isFinite(value.value)) return undefined;
+  return { kind: 'rated', value: Math.min(5, Math.max(-5, Math.round(value.value))) };
+}
+
+export function journalDate(entry: JournalRecord) { return entry.experiencedAtISO ?? entry.dateISO; }
 
 export interface JournalGuidedSupport {
   observation: string;
@@ -20,6 +33,9 @@ export interface JournalGuidedSupport {
 export interface JournalRecord {
   id: string;
   dateISO: string;
+  createdAtISO?: string;
+  experiencedAtISO?: string;
+  mood?: JournalMood;
   emotion: string;
   intensity?: number;
   feelings: JournalFeelingRating[];
@@ -50,6 +66,7 @@ function list(value: unknown, separator: RegExp = /[,|]/) {
 }
 
 function scale(value: unknown, fallback?: number) {
+  if (value === undefined || value === null || value === '') return fallback;
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
   return Math.min(10, Math.max(0, Math.round(number)));
@@ -59,7 +76,7 @@ function feelingRatings(value: unknown, fallbackEmotion: string, fallbackIntensi
   const fallback = scale(fallbackIntensity, 5) ?? 5;
   const raw = Array.isArray(value) && value.length
     ? value
-    : list(fallbackEmotion).map((feeling) => ({ feeling, intensity: fallback }));
+    : list(fallbackEmotion).map((feeling) => ({ feeling, intensity: fallback, ...(fallbackIntensity === undefined ? { ratingSource: 'unknown' } : {}) }));
   const normalized = new Map<string, JournalFeelingRating>();
   raw.forEach((item) => {
     const record = isRecord(item) ? item : null;
@@ -67,11 +84,16 @@ function feelingRatings(value: unknown, fallbackEmotion: string, fallbackIntensi
       ? item
       : record?.feeling ?? record?.emotion ?? record?.label ?? record?.name ?? record?.key;
     const feeling = typeof feelingValue === 'string' ? feelingValue.trim() : '';
-    const intensity = scale(record?.intensity ?? record?.level ?? record?.scale ?? record?.rating, fallback);
+    const reported = scale(record?.intensity ?? record?.level ?? record?.scale ?? record?.rating, fallbackIntensity);
+    const intensity = reported ?? fallback;
     if (!feeling || !intensity) return;
     const key = feeling.toLocaleLowerCase();
     const current = normalized.get(key);
-    if (!current || intensity > current.intensity) normalized.set(key, { feeling, intensity });
+    const unknown = record?.ratingSource === 'unknown' || reported === undefined;
+    if (!current || (current.ratingSource === 'unknown' && !unknown)
+      || ((current.ratingSource === 'unknown') === unknown && intensity > current.intensity)) normalized.set(key, { feeling, intensity,
+      ...(unknown ? { ratingSource: 'unknown' as const } : {}),
+    });
   });
   return [...normalized.values()];
 }
@@ -115,9 +137,16 @@ function normalize(value: unknown): JournalRecord | null {
   const needs = list(value.needs ?? value.need ?? value.primaryNeed);
   const tags = list(value.tags ?? value.tagList ?? value.tag).map((tag) => tag.replace(/^#/, ''));
   const supportContext = guidedSupport(value.guidedSupport);
+  const mood = normalizeJournalMood(value.mood);
+  const validDate = (date: unknown) => typeof date === 'string' && Number.isFinite(Date.parse(date)) ? new Date(date).toISOString() : undefined;
+  const createdAtISO = validDate(value.createdAtISO);
+  const experiencedAtISO = validDate(value.experiencedAtISO);
   return {
     id: typeof value.id === 'string' && value.id.trim() ? value.id.trim() : makeId(),
     dateISO: Number.isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString(),
+    ...(createdAtISO ? { createdAtISO } : {}),
+    ...(experiencedAtISO ? { experiencedAtISO } : {}),
+    ...(mood ? { mood } : {}),
     emotion,
     ...(intensity === undefined ? {} : { intensity }),
     feelings,
@@ -174,6 +203,7 @@ export function readJournal(storage: StorageDriver | null = getBrowserStorage())
 }
 
 export function writeJournal(entries: JournalRecord[], storage: StorageDriver | null = getBrowserStorage()) {
+  if (!storage) throw new Error('Device storage is unavailable. The journal was not saved.');
   const sorted = [...entries].sort((a, b) => b.dateISO.localeCompare(a.dateISO));
   store(storage).write({ entries: sorted });
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(JOURNAL_CHANGED_EVENT, { detail: { count: sorted.length } }));
@@ -191,12 +221,19 @@ export function createJournalRecord(input: {
   strategies?: string[];
   source?: JournalRecord['source'];
   guidedSupport?: JournalGuidedSupport;
+  mood?: JournalMood;
+  experiencedAtISO?: string;
 }): JournalRecord {
   const feelings = feelingRatings(input.feelings, input.emotion ?? '', input.intensity);
   const supportContext = guidedSupport(input.guidedSupport);
+  const now = new Date().toISOString();
+  const mood = normalizeJournalMood(input.mood);
   return {
     id: makeId(),
-    dateISO: new Date().toISOString(),
+    dateISO: now,
+    createdAtISO: now,
+    ...(input.experiencedAtISO && Number.isFinite(Date.parse(input.experiencedAtISO)) ? { experiencedAtISO: new Date(input.experiencedAtISO).toISOString() } : {}),
+    ...(mood ? { mood } : {}),
     emotion: feelings.length ? feelings.map((item) => item.feeling).join(', ') : input.emotion?.trim() ?? '',
     intensity: feelings.length
       ? Math.max(...feelings.map((item) => item.intensity))

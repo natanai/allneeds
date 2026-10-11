@@ -141,6 +141,8 @@ For small settings and early personal-data slices, localStorage remains reasonab
 
 Unsaved Journal, Observation, Body Cues, Inventory add/edit, per-Need personal-strategy, and Alexithymia lane work uses separate schema-versioned draft stores. Drafts are debounced during interaction, flushed on page hide/mobile backgrounding and unmount, restored on return or reload, and cleared only by the feature's explicit Clear/Reset/Cancel boundary or a successful handoff/save. Alexithymia draft schema v2 migrates compatible v1 clue and selected-word state at the persistence boundary while discarding removed breathing, care, and inferred-Need phases. Browse-page search terms use session storage so Back/Forward restores the working set without turning a temporary filter into permanent personal data.
 
+Journal new-entry and per-entry edit drafts have separate keys. History is a graph workspace over the Journal repository, with pure calendar/filter/aggregation functions and local SVG rendering. Optional reported mood, experienced time, creation time, and unknown legacy intensity provenance remain compatible fields in journal schema 1. Graph view state is session-local; dated context notes use a versioned local store. See `docs/journal-history.md` for semantics and review checks.
+
 ## Routing
 
 Use browser-history URLs and retain important route families where practical:

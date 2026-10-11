@@ -191,7 +191,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Each mark uses one 64 × 64 safe area and the same 2.5-unit rounded feature stroke, but is optically centered rather than forced into identical visual dimensions. The Observations eye has no viewfinder corners, and the Needs sprout has no geometric stand or decorative root base.
 - Each drawing sits in the same small framed-art composition rather than floating as a utility icon. Its ink, field, border, and background shapes are mixtures of its doorway role (`Primary`, `Action`, or `Positive`) with `Outline` and `Surface`; the assets contain no independent palette.
 - Body Cues remains text-only. Its route does not receive a new icon merely to complete a set.
-- The capture magnet is labeled `Journal`, not the ambiguous `New Entry`, and uses one filled open-book mark. The paired navigation magnet is simply `History`; its book-and-clock mark supplies the journal context while the destination page retains the explicit `Journal history` title.
+- The capture magnet is labeled `Journal`, not the ambiguous `New Entry`, and uses one filled open-book mark. The paired navigation magnet is simply `History`; its book-and-clock mark supplies the journal context while the destination page is titled `History` and centers on emotional history.
 - Inventory uses a quiet outlined carry-bag whose body contains the live strategy count; do not add a separate count circle beside it.
 
 ## App identity and social sharing imagery
@@ -340,7 +340,7 @@ Rules:
 | `/feelings/:slug`, `/needs/:slug`, `/faux-feelings/:slug` | Route heading precedes related content; evidence is secondary; actions use shared utilities. | Need strategy decks retain their approved direct-manipulation behavior. |
 | `/observations`, `/feelings/body-cues`, `/alexithymia-support` | One task heading, progressively disclosed guidance, and a clearly dominant next action. | Specialized editors and clue workspaces may own internal layout, while overlays and disclosures remain shared. |
 | `/inventory`, `/feed`, Need-page strategies | One strategy-card family and one save-destination language. | Feed filters, inventory editing, and deck navigation remain task-specific utilities. |
-| `/inventory/journal` | `Journal history` names the route; `New journal entry` names compose mode; Need selection, disclosures, overlays, and backup are shared. | The focused editor may use the full-screen `OverlayShell` variant. |
+| `/inventory/journal` | `History` names the graph workspace; `Journal` names the full-screen writing and reading surface. Need selection, disclosures, overlays, and backup are shared. | A tactile journal page and one configurable emotional-history chart give these two tasks distinct identities. |
 | `/feelings/emotions-wheel` | Normal app navigation plus a readable grouped list available beside the graphic. | The radial wheel is a visualization, not a replacement navigation system. |
 | App menu, Customizer, Design Lab, not-found | Shell vocabulary, functional tokens, standard targets, and explicit route names. | App menu is navigation; Customizer is nonmodal; Design Lab may expose audit-only detail without creating production patterns. |
 
@@ -353,9 +353,29 @@ Rules:
 - Choice groups use native radio semantics or an equivalent named `radiogroup`; selected state uses the shared selection roles. Do not add a component merely to hide already-readable native markup.
 - A visually unique implementation is justified only by a unique task or protected identity. Record the exception here when it is introduced.
 
+## Journal and emotional history
+
+**Approved 2026-10-11 for implementation and live `site-test` review.** The Journal remains primarily a fresh or resumed writing page. History becomes primarily one configurable time graph; its entry log is secondary.
+
+- The full-screen shared `OverlayShell` owns focus, Escape, close, and scrolling. Inside it, paper edges, a quiet binding margin, ruled writing space, and page position create a journal identity using Customizer roles and corner tokens.
+- Older, Newer, New entry, and a date jump are explicit controls. A swipe begins only at the binding edge; text selection, inputs, and vertical reading do not initiate page turns. Alt plus left/right arrows are an additional keyboard path, and reduced motion disables page arrival animation.
+- Saved pages are read only until Edit entry. New-entry drafts and per-entry edit drafts persist independently. Returning to a fresh page restores its draft. Saving an edit returns to that saved page; saving a new entry returns to History.
+- An optional overall mood rating runs from −5 (very unpleasant) to +5 (very pleasant). Neutral, Mixed feelings, Not sure, and Not rated remain distinct. Mood is never inferred from a feeling label or from its intensity.
+- The default graph covers 30 calendar days and shows reported mood when available. With feeling ratings and no numeric mood ratings, it initially shows a frequently noted feeling's intensity. The graph never invents historical mood scores.
+- Mood, feeling intensity, and feeling frequency are alternative measures on the same chart. Up to three feeling series use labels, solid/dashed/dotted strokes, and circle/square/diamond marks in addition to token-derived ink colors. Axes retain their declared domains when filters change.
+- Dates use elapsed time rather than equal spacing by entry. Multiple entries on one day survive. Coincident or nearby marks offer matching pages; daily and weekly marks offer the underlying entries. Missing ratings and missing calendar buckets break lines. Unscored pages remain reachable below the plot.
+- Daily and weekly points use reported-rating means and show the reported range and denominator. Frequency shows mentions divided by logged entries; an unmentioned feeling is not treated as proof it was absent. Weeks begin on Monday in the device time zone.
+- Period, measure, detail, and selected series remain immediately available. Text/Need/tag/feeling and intensity filters, period comparison, and context notes are progressively disclosed. Earlier-period marks are aligned by day within equal-length periods, with actual dates retained for opening entries.
+- A compact recap reports matching entries, logged days, rating counts, medians, ranges, or mention counts with explicit denominators. Context notes supply dates for discussion and do not imply causes.
+- Print/export is local and deliberate. Written reflections are excluded by default. CSV preserves the chosen period and filters; print includes the graph, recap, settings, optional context markers, and optional reflections. No account or clinician access is introduced.
+
+See `docs/journal-history.md` for persistence, calculations, and review checks.
+
 ## Decision log
 
 ### 2026-10-11
+
+- Approved the distinct page-turning Journal and graph-first History workspace, with optional direct mood ratings, independent drafts, gap-aware plotting, recurrence, comparisons, context notes, and local print/export. Built from current `main` for `site-test` phone and desktop review.
 
 - Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, and the Open Monochrome identity. Body Cues remains text-only and ordinary site icons remain unchanged.
 - Consolidated public identity assets onto the monochrome three-door system and removed superseded color variants, duplicate platform exports, and unreferenced legacy artwork.

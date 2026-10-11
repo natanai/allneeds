@@ -300,7 +300,7 @@ export function AppMenu({
                 <button type="button" className={styles.row} onClick={openJournal}>
                   <span className={styles.rowCopy}><span className={styles.rowTitle}>New journal entry</span><span className={styles.rowNote}>Check in with what is present now</span></span>
                 </button>
-                <MenuLink to="/inventory/journal" label="Journal history" pathname={pathname} onClose={onClose} />
+                <MenuLink to="/inventory/journal" label="History" pathname={pathname} onClose={onClose} />
               </section>
 
               <section className={styles.section} aria-labelledby="menu-discover">
