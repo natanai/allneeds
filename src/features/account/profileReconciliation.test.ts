@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { captureBrowserStorage, createBrowserBackup } from '../../persistence/browserBackup';
 import { createPersonalInventoryEntry, INVENTORY_STORAGE_KEY, readInventory } from '../inventory/inventoryRepository';
 import { createJournalRecord, JOURNAL_STORAGE_KEY, readJournal } from '../journal/journalRepository';
-import { applyCombinedProfile, combineProfileSnapshots, compareProfileSnapshots, PROFILE_RECOVERY_STORAGE_KEY, profileHasDifferences, readProfileRecovery, type BrowserSnapshot } from './profileReconciliation';
+import { applyCombinedProfile, applyProfileReplacement, combineProfileSnapshots, compareProfileSnapshots, localProfileRisk, PROFILE_RECOVERY_STORAGE_KEY, profileHasDifferences, readProfileRecovery, type BrowserSnapshot } from './profileReconciliation';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -54,6 +54,33 @@ describe('profile reconciliation', () => {
     expect(device).not.toEqual(combined);
   });
 
+  it('only flags local journal and strategy records that profile replacement would remove', () => {
+    const localEdit = journal('changed', 'Local edit');
+    const device = snapshot([journal('local', 'Local only'), localEdit]);
+    const profile = snapshot([journal('remote', 'Profile only'), { ...localEdit, notes: 'Profile edit' }]);
+    const comparison = compareProfileSnapshots(device, profile);
+    expect(localProfileRisk(comparison)).toEqual({ journalEntries: 2, strategies: 0 });
+  });
+
+  it('replaces browser data with the profile while preserving drafts, sign-in state, and a recovery copy', () => {
+    const device = snapshot([journal('phone', 'Phone entry')], {
+      'browser-only-setting': 'remove me',
+      'allneeds.v2.journal.draft': 'unfinished local draft',
+    });
+    const profile = snapshot([journal('account', 'Account entry')], {
+      'profile-setting': 'load me',
+      'allneeds.v2.journal.draft': 'stale account draft',
+    });
+    const driver = storage({ ...device, 'allneeds:bsky-session-hint': 'active' });
+    applyProfileReplacement(driver, compareProfileSnapshots(device, profile), 'did:plc:test');
+    expect(readJournal(driver).map((item) => item.notes)).toEqual(['Account entry']);
+    expect(driver.getItem('browser-only-setting')).toBeNull();
+    expect(driver.getItem('profile-setting')).toBe('load me');
+    expect(driver.getItem('allneeds.v2.journal.draft')).toBe('unfinished local draft');
+    expect(driver.getItem('allneeds:bsky-session-hint')).toBe('active');
+    expect(readProfileRecovery(driver)).toEqual({ device, profile });
+  });
+
   it('preserves two differently edited versions without multiplying copies on repeated loads', () => {
     const device = snapshot([journal('entry', 'Edited on the phone')]);
     const profile = snapshot([journal('entry', 'Edited on the other device')]);
@@ -92,14 +119,14 @@ describe('profile reconciliation', () => {
     expect(readJournal(storage(identicalText))).toHaveLength(2);
   });
 
-  it('lets settings come from either place and preserves device-only data and unfinished drafts', () => {
+  it('lets profile settings replace local settings while preserving unfinished local drafts', () => {
     const device = snapshot([], { 'nvcApp.theme': '{"preset":"blue"}', 'only-here': 'kept', 'allneeds.v2.journal.draft': 'device draft' });
     const profile = snapshot([], { 'nvcApp.theme': '{"preset":"default"}', 'only-profile': 'also kept', 'allneeds.v2.journal.draft': 'profile draft' });
     const review = compareProfileSnapshots(device, profile);
     expect(combineProfileSnapshots(review, 'device')['nvcApp.theme']).toBe('{"preset":"blue"}');
     const combined = combineProfileSnapshots(review, 'profile');
     expect(combined['nvcApp.theme']).toBe('{"preset":"default"}');
-    expect(combined['only-here']).toBe('kept');
+    expect(combined['only-here']).toBeUndefined();
     expect(combined['only-profile']).toBe('also kept');
     expect(combined['allneeds.v2.journal.draft']).toBe('device draft');
   });
