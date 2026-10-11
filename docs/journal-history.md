@@ -41,11 +41,11 @@ CSV exports the current matching entries with settings and provenance; reflectio
 
 ## Phone and desktop review
 
-1. Open Journal. Write a draft, choose feelings at different intensities, and optionally rate mood. Try Mixed and Not sure independently of Neutral.
-2. Turn Older and Newer, jump to a date, and return to New entry. Check that the unfinished page returns unchanged. Swipe only the narrow binding edge on a phone.
+1. Open Journal. Confirm the blank ruled page fills the available body and Entry details begins closed. Write a draft, then open Entry details to choose feelings at different intensities and optionally rate mood. Try Mixed and Not sure independently of Neutral.
+2. Use the page-turner along the bottom edge to turn Older and Newer, open its center control to jump to a date, and return to New entry. Check that the unfinished page returns unchanged. Swipe only the narrow binding edge on a phone.
 3. Edit a saved page, leave it without saving, then return and edit again. Check that this edit and the new-page draft survive independently after reload.
 4. Save a page with an earlier experienced date. Confirm its page order and graph point use that date while its original save time remains available.
-5. On History, select 7/30/90 days, all time, and custom dates. Navigate periods and zoom. Tap an individual point, overlapping points, an aggregate, and an unscored marker.
+5. On History, confirm the graph precedes its controls. Then select 7/30/90 days, all time, and custom dates. Navigate periods and zoom. Tap an individual point, overlapping points, an aggregate, and an unscored marker.
 6. Compare two or three feelings, daily/weekly averages, and frequency. Inspect counts and ranges. Filter by a tag or Need and compare with the previous period.
 7. Close Journal from a graph point. The measure, period, zoom, and filters should still be there.
 8. Add a context note. Print/export first with reflections off, then with reflections on. Verify only the intended period's entries are included.

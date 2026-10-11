@@ -74,26 +74,28 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
 
   return <section className={styles.workspace} aria-label="Emotional history">
     <div className={styles.graphCard} data-history-print>
-      <header className={styles.graphHeader}><div><h2>Your emotional history</h2><p>Small moments, seen over time.</p></div><button type="button" onClick={() => { setIncludeText(false); setExportOpen(true); }}>Print / export</button></header>
-      <form className={styles.controls} onSubmit={(event) => event.preventDefault()}>
-        <label>Period<select aria-label="Period" value={settings.period} onChange={(event) => patch({ period: event.target.value as HistorySettings['period'] })}><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="all">All time</option><option value="custom">Custom dates</option></select></label>
-        <label>Show<select aria-label="History measure" value={settings.metric} onChange={(event) => {
-          const metric = event.target.value as HistorySettings['metric'];
-          patch({ metric, feelings: settings.feelings.length ? settings.feelings : options.feelings.slice(0, 1), ...(metric === 'frequency' && settings.grouping === 'entry' ? { grouping: 'day' } : {}) });
-        }}><option value="mood">Overall mood</option><option value="intensity">Feeling intensity</option><option value="frequency">Feeling frequency</option></select></label>
-        <label>Detail<select aria-label="Graph detail" value={settings.grouping} onChange={(event) => patch({ grouping: event.target.value as HistorySettings['grouping'] })}>{settings.metric !== 'frequency' ? <option value="entry">Each entry</option> : null}<option value="day">Daily {settings.metric === 'frequency' ? 'share' : 'average'}</option><option value="week">Weekly {settings.metric === 'frequency' ? 'share' : 'average'}</option></select></label>
-      </form>
-      {settings.period === 'custom' ? <div className={styles.dateRange}><label>From<input aria-label="Start date" type="date" value={settings.from} max={settings.to || undefined} onChange={(event) => patch({ from: event.target.value })} /></label><label>Through<input aria-label="End date" type="date" min={settings.from || undefined} value={settings.to} onChange={(event) => patch({ to: event.target.value })} /></label></div> : null}
-      {settings.metric !== 'mood' ? <div className={styles.seriesControls} aria-label="Feelings on the graph">
-        {[0, 1, 2].map((index) => <label key={index}>{index === 0 ? 'Feeling' : `Compare ${index}`}<select aria-label={index === 0 ? 'Graph feeling' : `Compare feeling ${index}`} value={settings.feelings[index] ?? ''} onChange={(event) => {
-          const next = [...settings.feelings]; next[index] = event.target.value;
-          patch({ feelings: [...new Set(next.filter(Boolean))] });
-        }}><option value="">{index === 0 ? 'Choose a feeling' : 'None'}</option>{options.feelings.filter((feeling) => feeling === settings.feelings[index] || !settings.feelings.includes(feeling)).map((feeling) => <option key={feeling}>{feeling}</option>)}</select></label>)}
-      </div> : null}
-      <div className={styles.timelineNav}><button type="button" aria-label="Previous period" onClick={() => patch(shiftWindow(range, -1))}>←</button><strong>{currentDates}</strong><button type="button" aria-label="Next period" onClick={() => patch(shiftWindow(range, 1))}>→</button><button type="button" onClick={() => patch(zoomWindow(range, .5))} disabled={range.days <= 1}>Zoom in</button><button type="button" onClick={() => patch(zoomWindow(range, 2))} disabled={range.days > 36500}>Zoom out</button></div>
-      {settings.metric === 'intensity' && !entries.some((entry) => entry.mood?.kind === 'rated') ? <p className={styles.subtle}>Showing a frequently noted feeling. Overall mood appears once you choose to rate it in the Journal.</p> : null}
       <HistoryChart series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={selectPoints} />
       {selection ? <section className={styles.selection} aria-label="Selected graph entries"><header><strong>{selection.label}</strong><button type="button" onClick={() => setSelection(null)}>Dismiss</button></header><p>{selection.ids.length} {selection.ids.length === 1 ? 'page' : 'pages'} at this part of the graph.</p><div className={styles.selectionList}>{entries.filter((entry) => selection.ids.includes(entry.id)).map((entry) => entryButton(entry))}</div></section> : null}
+      <div className={styles.graphControls} aria-label="Graph controls">
+        <div className={styles.controlHeading}><strong>Change the view</strong><button type="button" onClick={() => { setIncludeText(false); setExportOpen(true); }}>Print / export</button></div>
+        <form className={styles.controls} onSubmit={(event) => event.preventDefault()}>
+          <label>Period<select aria-label="Period" value={settings.period} onChange={(event) => patch({ period: event.target.value as HistorySettings['period'] })}><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="all">All time</option><option value="custom">Custom dates</option></select></label>
+          <label>Show<select aria-label="History measure" value={settings.metric} onChange={(event) => {
+            const metric = event.target.value as HistorySettings['metric'];
+            patch({ metric, feelings: settings.feelings.length ? settings.feelings : options.feelings.slice(0, 1), ...(metric === 'frequency' && settings.grouping === 'entry' ? { grouping: 'day' } : {}) });
+          }}><option value="mood">Overall mood</option><option value="intensity">Feeling intensity</option><option value="frequency">Feeling frequency</option></select></label>
+          <label>Detail<select aria-label="Graph detail" value={settings.grouping} onChange={(event) => patch({ grouping: event.target.value as HistorySettings['grouping'] })}>{settings.metric !== 'frequency' ? <option value="entry">Each entry</option> : null}<option value="day">Daily {settings.metric === 'frequency' ? 'share' : 'average'}</option><option value="week">Weekly {settings.metric === 'frequency' ? 'share' : 'average'}</option></select></label>
+        </form>
+        {settings.period === 'custom' ? <div className={styles.dateRange}><label>From<input aria-label="Start date" type="date" value={settings.from} max={settings.to || undefined} onChange={(event) => patch({ from: event.target.value })} /></label><label>Through<input aria-label="End date" type="date" min={settings.from || undefined} value={settings.to} onChange={(event) => patch({ to: event.target.value })} /></label></div> : null}
+        {settings.metric !== 'mood' ? <div className={styles.seriesControls} aria-label="Feelings on the graph">
+          {[0, 1, 2].map((index) => <label key={index}>{index === 0 ? 'Feeling' : `Compare ${index}`}<select aria-label={index === 0 ? 'Graph feeling' : `Compare feeling ${index}`} value={settings.feelings[index] ?? ''} onChange={(event) => {
+            const next = [...settings.feelings]; next[index] = event.target.value;
+            patch({ feelings: [...new Set(next.filter(Boolean))] });
+          }}><option value="">{index === 0 ? 'Choose a feeling' : 'None'}</option>{options.feelings.filter((feeling) => feeling === settings.feelings[index] || !settings.feelings.includes(feeling)).map((feeling) => <option key={feeling}>{feeling}</option>)}</select></label>)}
+        </div> : null}
+        <div className={styles.timelineNav}><button type="button" aria-label="Previous period" onClick={() => patch(shiftWindow(range, -1))}>←</button><strong>{currentDates}</strong><button type="button" aria-label="Next period" onClick={() => patch(shiftWindow(range, 1))}>→</button><button type="button" onClick={() => patch(zoomWindow(range, .5))} disabled={range.days <= 1}>Zoom in</button><button type="button" onClick={() => patch(zoomWindow(range, 2))} disabled={range.days > 36500}>Zoom out</button></div>
+        {settings.metric === 'intensity' && !entries.some((entry) => entry.mood?.kind === 'rated') ? <p className={styles.subtle}>Showing a frequently noted feeling. Overall mood appears once you choose to rate it in the Journal.</p> : null}
+      </div>
       <div className={styles.reviewSummary} aria-label="Period summary">
         <article><strong>{summary.entries}</strong><span>matching entries</span></article><article><strong>{summary.loggedDays} / {summary.days}</strong><span>days with entries</span></article>
         {settings.metric === 'frequency' ? <><article><strong>{summary.mentioned} / {summary.entries}</strong><span>entries mention {settings.feelings[0] ?? 'a selected feeling'}</span></article><article><strong>{summary.entries ? `${Math.round(summary.mentioned / summary.entries * 100)}%` : '—'}</strong><span>share of logged entries</span></article></> : <><article><strong>{number(summary.median)}</strong><span>median {settings.metric === 'mood' ? 'mood' : settings.feelings[0] ?? 'intensity'} · {summary.rated} ratings</span></article><article><strong>{summary.low === null ? '—' : `${number(summary.low)} to ${number(summary.high)}`}</strong><span>reported range</span></article></>}
