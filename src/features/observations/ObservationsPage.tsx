@@ -24,7 +24,7 @@ type GuideBlock =
 type GuideSection = { id: string; eyebrow?: string; title: string; description?: string; defaultOpen?: boolean; content: GuideBlock[] };
 type GuideData = {
   intro?: { eyebrow?: string; title?: string; paragraphs?: string[] };
-  mobile?: { sections?: GuideSection[] };
+  sections?: GuideSection[];
 };
 
 const slotDefinitions = [
@@ -315,7 +315,7 @@ export function ObservationsPage() {
         <summary><span><small>Examples and sources</small><strong>Observation guide</strong></span><span aria-hidden="true">›</span></summary>
         {guideOpen ? <div className={styles.guideCard} onClick={(event) => {
           const target = event.target as Element;
-          const link = target.closest<HTMLAnchorElement>('a[href^="#observation-guide-ref-"]');
+          const link = target.closest<HTMLAnchorElement>('a[href^="#observation-guide-source-"]');
           if (!link) return;
           const reference = document.querySelector<HTMLElement>(link.getAttribute('href') ?? '');
           if (!reference) return;
@@ -324,7 +324,7 @@ export function ObservationsPage() {
           window.requestAnimationFrame(() => reference.scrollIntoView({ block: 'center' }));
         }}>
           {guide.intro ? <header><small>{guide.intro.eyebrow}</small><h2>{guide.intro.title}</h2>{guide.intro.paragraphs?.map((paragraph, index) => <p key={index} dangerouslySetInnerHTML={{ __html: paragraph }} />)}</header> : null}
-          <div className={styles.guideSections}>{guide.mobile?.sections?.map((section) => <details key={section.id}><summary><span><small>{section.eyebrow}</small><strong>{section.title}</strong><span>{section.description}</span></span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
+          <div className={styles.guideSections}>{guide.sections?.map((section) => <details key={section.id}><summary><span><small>{section.eyebrow}</small><strong>{section.title}</strong><span>{section.description}</span></span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
         </div> : null}
       </details>
 
