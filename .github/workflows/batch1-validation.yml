@@ -43,3 +43,5 @@ jobs:
         run: pnpm test:e2e:outage
 
 # One-time branch validation; remove the temporary push trigger before merging.
+
+# Retry full validation after updating the approved Observation production guard.
