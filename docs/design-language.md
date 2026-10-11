@@ -188,7 +188,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 **Testing on `site-test` beginning 2026-10-11.** The home threshold uses three original monochrome marks: framed eye for Observations, uneven signal ending in an open attention node for Feelings, and rooted sprout for Needs.
 
 - These marks identify the app's three primary doorways. They do not create a mandate to illustrate every route or navigation magnet.
-- Each mark uses one 64 × 64 safe area and the same feature stroke, but is optically centered rather than forced into identical visual dimensions.
+- Each mark uses one 64 × 64 safe area and the same 3-unit rounded feature stroke, but is optically centered rather than forced into identical visual dimensions. The Needs sprout ends in a soil line and curved roots, not a geometric stand.
 - Marks inherit `Outline`; doorway fills remain `Primary`, `Action`, and `Positive`. The assets contain no feature palette.
 - Body Cues remains text-only. Its route does not receive a new icon merely to complete a set.
 - Journal uses one open-book mark. New Entry and Journal History add small plus and clock modifiers rather than unrelated symbols.
