@@ -7,11 +7,11 @@ import { readJournal } from '../journal/journalRepository';
 import { profilePublishableStrategies } from './profileStrategySync';
 import {
   applyCombinedProfile,
+  applyProfileReplacement,
   compareProfileSnapshots,
   profileBrowserSnapshot,
   profileHasDifferences,
   type ProfileComparison,
-  type SettingsSource,
 } from './profileReconciliation';
 
 const BACKEND_BASE_URL = 'https://backend.allneeds.app';
@@ -116,7 +116,8 @@ type ProfileReview =
   | { phase: 'loading'; did: string }
   | { phase: 'ready'; did: string; comparison: ProfileComparison }
   | { phase: 'error'; did: string; message: string }
-  | { phase: 'done'; did: string; message: string; combined?: boolean };
+  | { phase: 'save-error'; did: string; message: string }
+  | { phase: 'done'; did: string; message: string; changed?: boolean };
 let profileReview: ProfileReview | null = null;
 const profileReviewListeners = new Set<() => void>();
 
@@ -138,13 +139,57 @@ export function dismissProfileReview() {
   publishProfileReview(null);
 }
 
-export async function combineReviewedProfile(settings: SettingsSource) {
+export async function mergeReviewedProfileIntoAccount() {
   if (profileReview?.phase !== 'ready') throw new Error('Review your saved profile first.');
   const review = profileReview;
   if (getBlueskySession()?.did !== review.did) throw new Error('Your account changed. Review the saved profile again.');
-  const combined = applyCombinedProfile(window.localStorage, review.comparison, settings, review.did);
+  const combined = applyCombinedProfile(window.localStorage, review.comparison, 'profile', review.did);
   synchronizeCustomizerMirrors(combined);
-  publishProfileReview({ phase: 'done', did: review.did, combined: true, message: 'Entries from both places are now on this device. A recovery copy of each original is available in Account & data.' });
+  try {
+    const result = await saveCurrentBrowserToProfile();
+    publishProfileReview({
+      phase: 'done',
+      did: review.did,
+      changed: true,
+      message: result.strategiesSynced
+        ? 'Local entries were merged into your saved profile.'
+        : 'Local entries were saved to your profile. Shared strategy updates did not finish.',
+    });
+  } catch {
+    publishProfileReview({
+      phase: 'save-error',
+      did: review.did,
+      message: 'Your entries were merged in this browser, but the profile could not be updated. Try saving again.',
+    });
+  }
+}
+
+export async function retryMergedProfileSave() {
+  if (profileReview?.phase !== 'save-error') throw new Error('There is no pending profile save.');
+  const review = profileReview;
+  if (getBlueskySession()?.did !== review.did) throw new Error('Your account changed. Sign in again before saving.');
+  try {
+    const result = await saveCurrentBrowserToProfile();
+    publishProfileReview({
+      phase: 'done',
+      did: review.did,
+      changed: true,
+      message: result.strategiesSynced
+        ? 'Local entries were merged into your saved profile.'
+        : 'Local entries were saved to your profile. Shared strategy updates did not finish.',
+    });
+  } catch {
+    publishProfileReview({ ...review, message: 'The profile still could not be updated. Your merged entries remain safe in this browser.' });
+  }
+}
+
+export async function replaceBrowserWithReviewedProfile() {
+  if (profileReview?.phase !== 'ready') throw new Error('Check your saved profile first.');
+  const review = profileReview;
+  if (getBlueskySession()?.did !== review.did) throw new Error('Your account changed. Check the saved profile again.');
+  const replacement = applyProfileReplacement(window.localStorage, review.comparison, review.did);
+  synchronizeCustomizerMirrors(replacement);
+  publishProfileReview({ phase: 'done', did: review.did, changed: true, message: 'Your saved profile was loaded.' });
 }
 
 if (typeof window !== 'undefined' && currentSession) {
@@ -538,7 +583,7 @@ export async function loadProfileIntoCurrentBrowser() {
     if (backup.version !== undefined && backup.version !== 1) throw new Error('The saved profile uses an unsupported format. Your device data has been left in place.');
     const comparison = compareProfileSnapshots(captureBrowserStorage(window.localStorage), profileBrowserSnapshot(backup.localStorage));
     if (!profileHasDifferences(comparison)) {
-      publishProfileReview({ phase: 'done', did: session.did, message: 'This device and your saved profile already match.' });
+      publishProfileReview(null);
       return 'matching' as const;
     }
     publishProfileReview({ phase: 'ready', did: session.did, comparison });
