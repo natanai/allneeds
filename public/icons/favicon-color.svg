@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Three colorful allneeds doorways">
-  <g transform="translate(8 11)" stroke="#1F1230" stroke-width="3.5" stroke-linejoin="round">
-    <path d="M0 42V8a8 8 0 0 1 16 0v34Z" fill="#74569B"/>
-    <path d="M16 42V8a8 8 0 0 1 16 0v34Z" fill="#FFB3CB"/>
-    <path d="M32 42V8a8 8 0 0 1 16 0v34Z" fill="#96FBC7"/>
-  </g>
-</svg>

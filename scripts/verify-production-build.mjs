@@ -91,23 +91,21 @@ if (!indexHtml.includes('__ALLNEEDS_BOOT_STARTED_MS__ = performance.now()')) {
 }
 
 const requiredBrandAssets = [
-  'icons/favicon-color.svg',
-  'icons/favicon-color-48x48.png',
-  'icons/favicon-color-32x32.png',
-  'icons/favicon-color-16x16.png',
+  'icons/app-icon.svg',
+  'icons/favicon.svg',
+  'icons/favicon-48x48.png',
+  'icons/favicon-32x32.png',
+  'icons/favicon-16x16.png',
   'icons/favicon.ico',
   'icons/apple-touch-icon.png',
   'icons/android-chrome-192x192.png',
   'icons/android-chrome-512x512.png',
-  'icons/android-chrome-maskable-192x192.png',
-  'icons/android-chrome-maskable-512x512.png',
   'icons/safari-pinned-tab.svg',
   'icons/mstile-150x150.png',
   'browserconfig.xml',
   'site.webmanifest',
   'social/og-image-1200x630.png',
   'social/social-card.svg',
-  'social/twitter-card-1200x630.png',
 ];
 for (const asset of requiredBrandAssets) {
   const assetPath = resolve(dist, asset);
@@ -117,13 +115,14 @@ for (const asset of requiredBrandAssets) {
 }
 
 const requiredBrandMetadata = [
-  ['PNG favicon fallback', /rel="icon"[^>]+favicon-color-32x32\.png\?v=4/],
-  ['classic favicon fallback', /rel="shortcut icon"[^>]+favicon\.ico\?v=4/],
-  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png\?v=5/],
-  ['Safari pinned-tab icon', /rel="mask-icon"[^>]+safari-pinned-tab\.svg\?v=4/],
-  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png\?v=5/],
+  ['SVG favicon', /rel="icon"[^>]+favicon\.svg\?v=6/],
+  ['PNG favicon fallback', /rel="icon"[^>]+favicon-32x32\.png\?v=6/],
+  ['classic favicon fallback', /rel="shortcut icon"[^>]+favicon\.ico\?v=6/],
+  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png\?v=6/],
+  ['Safari pinned-tab icon', /rel="mask-icon"[^>]+safari-pinned-tab\.svg\?v=6/],
+  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png\?v=6/],
   ['Open Graph image', /property="og:image"[^>]+social\/og-image-1200x630\.png\?v=4/],
-  ['Twitter image', /name="twitter:image"[^>]+social\/twitter-card-1200x630\.png\?v=4/],
+  ['Twitter image', /name="twitter:image"[^>]+social\/og-image-1200x630\.png\?v=4/],
 ];
 for (const [label, pattern] of requiredBrandMetadata) {
   if (!pattern.test(indexHtml)) fail(`${label} metadata is missing from index.html.`);

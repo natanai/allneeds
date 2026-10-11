@@ -198,9 +198,8 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 
 **Testing on `site-test` beginning 2026-10-11.** The three empty doors remain the canonical public identity; feature marks stay inside the product rather than entering the master logo.
 
-- The Paper Magnet app icon uses the default `Primary`, `Action`, and `Positive` colors inside a tactile paper tile. Center its doorway group within the foreground paper rather than the full canvas, whose offset shadow makes geometric canvas-centering look right-heavy and low. The stored app icon is necessarily static; personalized Customizer colors remain a product behavior, not a per-user operating-system asset.
-- Social/header imagery uses the Open Monochrome three-door lockup so the public identity remains stable across personalized themes.
-- Preserve the complete favicon, Apple touch icon, Android/maskable icon, Safari pinned-tab, Windows tile, web-manifest, and social-card asset set.
+- App icons and social/header imagery use the Open Monochrome three-door mark so the public identity remains stable across personalized themes. Role-colored feature artwork remains inside the product and does not enter the master identity.
+- Keep one SVG source for the framed app icon, one small-format favicon source, and only the raster sizes required by iOS, Android/PWA, legacy browser, and Windows metadata. A single safe Android export can declare both `any` and `maskable`; Open Graph and Twitter can share one identical card.
 - The document head must advertise format fallbacks and platform-specific icons explicitly; do not rely on a browser inventing a letter tile from the page title.
 - Open Graph and Twitter sharing metadata use the Open Monochrome social cards and accessible image text.
 
@@ -358,7 +357,8 @@ Rules:
 
 ### 2026-10-11
 
-- Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, the Paper Magnet app icon, and the Open Monochrome social lockup. Body Cues remains text-only and ordinary site icons remain unchanged.
+- Began live `site-test` evaluation of the three role-colored home feature artworks, the shared Journal mark, the Inventory count bag, and the Open Monochrome identity. Body Cues remains text-only and ordinary site icons remain unchanged.
+- Consolidated public identity assets onto the monochrome three-door system and removed superseded color variants, duplicate platform exports, and unreferenced legacy artwork.
 - Leveled the three framed home artworks to restore deliberate symmetry and split the introductory copy at sentence boundaries on narrow screens.
 - Renamed the public feature to `Alexithymia support` everywhere user-facing. A shared product-language constant prevents route, menu, home, page, and accessibility labels from drifting again.
 - Inventory uses one compact count pouch: the familiar circular success counter is reshaped into the pouch body and finished with a small cinched tie. It remains within the navigation magnet's standard line height and is reused at a larger size beside the Inventory page title. The count is optically aligned with adjacent text and uses the Customizer-derived Primary foreground (black or white, whichever contrasts more strongly with Primary).

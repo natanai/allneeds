@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="title desc">
+  <title id="title">allneeds.app icon</title>
+  <desc id="desc">Three open monochrome doorways inside a rounded frame.</desc>
+  <rect width="384" height="384" fill="#FFFEF8"/>
+  <rect x="32" y="32" width="320" height="320" rx="80" fill="none" stroke="#1F1230" stroke-width="10"/>
+  <g transform="translate(84 105)" fill="none" stroke="#1F1230" stroke-width="8" stroke-linejoin="round">
+    <path d="M0 174V36a36 36 0 0 1 72 0v138Z"/>
+    <path d="M72 174V36a36 36 0 0 1 72 0v138Z"/>
+    <path d="M144 174V36a36 36 0 0 1 72 0v138Z"/>
+  </g>
+</svg>
