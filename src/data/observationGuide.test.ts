@@ -18,7 +18,7 @@ describe('Observation guide public copy', () => {
   });
 
   it('numbers citations by first appearance and lists sources in the same sequence', () => {
-    const citations = [...JSON.stringify(guideWithoutReferences).matchAll(/observation-guide-ref-(\\d+).*?\\[(\\d+)\\]/g)];
+    const citations = [...JSON.stringify(guideWithoutReferences).matchAll(/observation-guide-ref-(\d+).*?\[(\d+)\]/g)];
     const seen = new Map<string, number>();
 
     for (const [, sourceId, label] of citations) {
@@ -26,7 +26,7 @@ describe('Observation guide public copy', () => {
       expect(Number(label)).toBe(seen.get(sourceId));
     }
 
-    const listedReferences = [...JSON.stringify(referenceSection).matchAll(/observation-guide-ref-(\\d+).*?\\[(\\d+)\\]/g)];
+    const listedReferences = [...JSON.stringify(referenceSection).matchAll(/observation-guide-ref-(\d+).*?\[(\d+)\]/g)];
     expect(listedReferences.map(([, sourceId]) => sourceId)).toEqual([...seen.keys()]);
     expect(listedReferences.map(([, , label]) => Number(label))).toEqual([...seen.values()]);
     expect(listedReferences.length).toBeGreaterThan(0);
