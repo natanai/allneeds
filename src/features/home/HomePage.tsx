@@ -5,7 +5,7 @@ import { assetPath } from '../../data/catalog';
 import styles from './HomePage.module.css';
 
 const doorways = [
-  { to: '/observations', label: 'Observations', tone: 'observations', icon: 'icons/feature-observations.svg' },
+  { to: '/observations', label: 'Observations', tone: 'observations', icon: 'icons/feature-observation-eye.svg' },
   { to: '/feelings', label: 'Feelings', tone: 'feelings', icon: 'icons/feature-feelings.svg' },
   { to: '/needs', label: 'Needs', tone: 'needs', icon: 'icons/feature-needs.svg' },
 ] as const;

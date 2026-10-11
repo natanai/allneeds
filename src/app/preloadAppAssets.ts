@@ -2,7 +2,7 @@ import { assetPath, feelings, needs } from '../data/catalog';
 import { warmAppResources } from './appResources';
 
 const coreImages = [
-  'icons/feature-observations.svg',
+  'icons/feature-observation-eye.svg',
   'icons/feature-feelings.svg',
   'icons/feature-needs.svg',
   'icons/alexithymia-8bit.svg',
