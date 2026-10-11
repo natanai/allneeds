@@ -183,13 +183,25 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 - Persist the successfully checked Public/Most recent snapshot for one hour. A full reload may satisfy the branded preload from that complete browser snapshot with no Worker request, while the page reports when it was last refreshed. This is a bounded freshness claim, not proof that the server has not changed; manual Refresh always bypasses it.
 - A recently verified account may be reused from session-scoped browser storage for the same one-hour window so repeated reloads do not call `/api/me`. Private/profile operations remain server-enforced, and a new browser-app session validates normally.
 
+## Primary feature marks
+
+**Testing on `site-test` beginning 2026-10-11.** The home threshold uses three original monochrome marks: framed eye for Observations, uneven signal ending in an open attention node for Feelings, and rooted sprout for Needs.
+
+- These marks identify the app's three primary doorways. They do not create a mandate to illustrate every route or navigation magnet.
+- Each mark uses one 64 × 64 safe area and the same feature stroke, but is optically centered rather than forced into identical visual dimensions.
+- Marks inherit `Outline`; doorway fills remain `Primary`, `Action`, and `Positive`. The assets contain no feature palette.
+- Body Cues remains text-only. Its route does not receive a new icon merely to complete a set.
+- Journal uses one open-book mark. New Entry and Journal History add small plus and clock modifiers rather than unrelated symbols.
+
 ## App identity and social sharing imagery
 
-**Accepted 2026-08-25.** The legacy three-door mark remains the canonical app/favorite/share identity.
+**Testing on `site-test` beginning 2026-10-11.** The three empty doors remain the canonical public identity; feature marks stay inside the product rather than entering the master logo.
 
-- Preserve the complete legacy favicon, Apple touch icon, Android/maskable icon, Safari pinned-tab, Windows tile, web-manifest, and social-card asset set.
+- The Paper Magnet app icon uses the default `Primary`, `Action`, and `Positive` colors inside a tactile paper tile. The stored app icon is necessarily static; personalized Customizer colors remain a product behavior, not a per-user operating-system asset.
+- Social/header imagery uses the Open Monochrome three-door lockup so the public identity remains stable across personalized themes.
+- Preserve the complete favicon, Apple touch icon, Android/maskable icon, Safari pinned-tab, Windows tile, web-manifest, and social-card asset set.
 - The document head must advertise format fallbacks and platform-specific icons explicitly; do not rely on a browser inventing a letter tile from the page title.
-- Open Graph and Twitter sharing metadata use the legacy three-door social cards and accessible image text.
+- Open Graph and Twitter sharing metadata use the Open Monochrome social cards and accessible image text.
 
 ## Destructive / advanced actions
 
@@ -342,6 +354,10 @@ Rules:
 - A visually unique implementation is justified only by a unique task or protected identity. Record the exception here when it is introduced.
 
 ## Decision log
+
+### 2026-10-11
+
+- Began live `site-test` evaluation of the three monochrome home feature marks, the shared Journal mark/modifiers, the Paper Magnet app icon, and the Open Monochrome social lockup. Body Cues remains text-only and ordinary site icons remain unchanged.
 
 ### 2026-10-10
 

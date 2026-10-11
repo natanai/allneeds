@@ -90,7 +90,7 @@ if (!indexHtml.includes('__ALLNEEDS_BOOT_STARTED_MS__ = performance.now()')) {
   fail('the navigation-wide entrance deadline is not initialized before the app module loads.');
 }
 
-const requiredLegacyBrandAssets = [
+const requiredBrandAssets = [
   'icons/favicon-color.svg',
   'icons/favicon-color-48x48.png',
   'icons/favicon-color-32x32.png',
@@ -109,21 +109,21 @@ const requiredLegacyBrandAssets = [
   'social/social-card.svg',
   'social/twitter-card-1200x630.png',
 ];
-for (const asset of requiredLegacyBrandAssets) {
+for (const asset of requiredBrandAssets) {
   const assetPath = resolve(dist, asset);
   if (!files.includes(assetPath) || (await stat(assetPath)).size === 0) {
-    fail(`legacy app/social asset ${asset} is missing or empty.`);
+    fail(`app/social asset ${asset} is missing or empty.`);
   }
 }
 
 const requiredBrandMetadata = [
-  ['PNG favicon fallback', /rel="icon"[^>]+favicon-color-32x32\.png\?v=3/],
-  ['classic favicon fallback', /rel="shortcut icon"[^>]+favicon\.ico\?v=3/],
-  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png\?v=3/],
-  ['Safari pinned-tab icon', /rel="mask-icon"[^>]+safari-pinned-tab\.svg\?v=3/],
-  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png\?v=3/],
-  ['Open Graph image', /property="og:image"[^>]+social\/og-image-1200x630\.png\?v=3/],
-  ['Twitter image', /name="twitter:image"[^>]+social\/twitter-card-1200x630\.png\?v=3/],
+  ['PNG favicon fallback', /rel="icon"[^>]+favicon-color-32x32\.png\?v=4/],
+  ['classic favicon fallback', /rel="shortcut icon"[^>]+favicon\.ico\?v=4/],
+  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png\?v=4/],
+  ['Safari pinned-tab icon', /rel="mask-icon"[^>]+safari-pinned-tab\.svg\?v=4/],
+  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png\?v=4/],
+  ['Open Graph image', /property="og:image"[^>]+social\/og-image-1200x630\.png\?v=4/],
+  ['Twitter image', /name="twitter:image"[^>]+social\/twitter-card-1200x630\.png\?v=4/],
 ];
 for (const [label, pattern] of requiredBrandMetadata) {
   if (!pattern.test(indexHtml)) fail(`${label} metadata is missing from index.html.`);

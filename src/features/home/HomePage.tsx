@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
 import { assetPath } from '../../data/catalog';
@@ -20,7 +21,10 @@ export function HomePage() {
           <div key={doorway.to} className={`${styles.doorCard} ${styles[doorway.tone]}`}>
             <Link className={styles.doorLink} to={doorway.to}>
               <span className={styles.door} aria-hidden="true">
-                <img className={styles.icon} src={assetPath(doorway.icon)} alt="" />
+                <span
+                  className={styles.icon}
+                  style={{ '--door-icon': `url("${assetPath(doorway.icon)}")` } as CSSProperties}
+                />
               </span>
               <span className={styles.label}>{doorway.label}</span>
             </Link>

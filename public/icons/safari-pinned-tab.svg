@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Three arched doors, flush">
-  <path d="M3,20 V9 A3,3 0 0 1 9,9 V20 Z" fill="#000"/>
-  <path d="M9,20 V9 A3,3 0 0 1 15,9 V20 Z" fill="#000"/>
-  <path d="M15,20 V9 A3,3 0 0 1 21,9 V20 Z" fill="#000"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Three allneeds doorways">
+  <g transform="translate(8 11)">
+    <path d="M0 42V8a8 8 0 0 1 16 0v34Z"/>
+    <path d="M16 42V8a8 8 0 0 1 16 0v34Z"/>
+    <path d="M32 42V8a8 8 0 0 1 16 0v34Z"/>
+  </g>
 </svg>

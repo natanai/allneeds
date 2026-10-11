@@ -51,6 +51,7 @@
 }
 
 .door {
+  position: relative;
   width: min(9rem, 82%);
   aspect-ratio: 3 / 5;
   padding: clamp(0.4rem, 2vw, 0.6rem);
@@ -68,9 +69,15 @@
 }
 
 .icon {
-  width: 70%;
-  height: auto;
-  image-rendering: pixelated;
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  width: 72%;
+  aspect-ratio: 1;
+  background: var(--outline);
+  -webkit-mask: var(--door-icon) center / contain no-repeat;
+  mask: var(--door-icon) center / contain no-repeat;
+  transform: translate(-50%, -50%);
 }
 
 .label {
