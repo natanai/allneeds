@@ -33,7 +33,7 @@ export function defaultHistorySettings(entries: JournalRecord[], now = new Date(
     counts.set(key, { name: item.feeling, count: (old?.count ?? 0) + 1 });
   }));
   const common = [...counts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))[0]?.name;
-  return { metric: entries.some((entry) => entry.mood?.kind === 'rated') || !common ? 'mood' : 'intensity', feelings: common ? [common] : [],
+  return { metric: 'mood', feelings: common ? [common] : [],
     period: '30', from: dateKey(addDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), -29)), to: dateKey(now),
     grouping: 'entry', query: '', feelingFilter: '', need: '', tag: '', minIntensity: 1, maxIntensity: 10, comparison: false, showAnnotations: true, sort: 'newest' };
 }
@@ -86,7 +86,9 @@ export function feelingValue(entry: JournalRecord, feeling: string) {
   return item && item.ratingSource !== 'unknown' ? item.intensity : undefined;
 }
 export function reportedValue(entry: JournalRecord, metric: HistoryMetric, feeling: string) {
-  return metric === 'mood' ? entry.mood?.kind === 'rated' ? entry.mood.value : undefined : feelingValue(entry, feeling);
+  if (metric !== 'mood') return feelingValue(entry, feeling);
+  if (entry.mood?.kind !== 'rated') return undefined;
+  return feeling === 'Arousal' ? entry.mood.arousal : entry.mood.value;
 }
 export function median(values: number[]) {
   if (!values.length) return null;
@@ -94,9 +96,13 @@ export function median(values: number[]) {
   return sorted.length % 2 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
 }
 export function historySummary(entries: JournalRecord[], settings: HistorySettings, range: DateWindow) {
-  const values = entries.map((entry) => reportedValue(entry, settings.metric, settings.feelings[0] ?? '')).filter((value): value is number => value !== undefined);
+  const values = entries.map((entry) => reportedValue(entry, settings.metric, settings.metric === 'mood' ? 'Valence' : settings.feelings[0] ?? '')).filter((value): value is number => value !== undefined);
+  const arousalValues = settings.metric === 'mood'
+    ? entries.map((entry) => reportedValue(entry, 'mood', 'Arousal')).filter((value): value is number => value !== undefined)
+    : [];
   return { entries: entries.length, loggedDays: new Set(entries.map((entry) => dateKey(journalDate(entry)))).size, days: range.days,
     rated: values.length, median: median(values), low: values.length ? Math.min(...values) : null, high: values.length ? Math.max(...values) : null,
+    arousalRated: arousalValues.length, arousalMedian: median(arousalValues), arousalLow: arousalValues.length ? Math.min(...arousalValues) : null, arousalHigh: arousalValues.length ? Math.max(...arousalValues) : null,
     mentioned: settings.feelings[0] ? entries.filter((entry) => entry.feelings.some((item) => lower(item.feeling) === lower(settings.feelings[0]!))).length : 0,
     mixed: entries.filter((entry) => entry.mood?.kind === 'mixed').length, unsure: entries.filter((entry) => entry.mood?.kind === 'unsure').length };
 }
@@ -107,7 +113,7 @@ function bucketStart(time: number, grouping: HistoryGrouping) {
 }
 export function buildHistorySeries(entries: JournalRecord[], settings: HistorySettings, range: DateWindow): HistorySeries[] {
   const grouping = settings.metric === 'frequency' && settings.grouping === 'entry' ? 'day' : settings.grouping;
-  const names = settings.metric === 'mood' ? ['Overall mood'] : settings.feelings.slice(0, 3);
+  const names = settings.metric === 'mood' ? ['Pleasantness', 'Arousal'] : settings.feelings.slice(0, 3);
   return names.map((name) => {
     const segments: HistoryPoint[][] = [];
     let segment: HistoryPoint[] = [];
@@ -148,11 +154,11 @@ export function historyCsv(entries: JournalRecord[], settings: HistorySettings, 
   // Neutralize spreadsheet formulas in user-authored text, including tags and labels.
   const cell = (value: string | number) => `"${String(typeof value === 'string' && /^[\s]*[=+@-]/.test(value) ? `'${value}` : value).replaceAll('"', '""')}"`;
   const row = (values: (string | number)[]) => values.map(cell).join(',');
-  const fields = ['Entry ID', 'Moment (ISO)', 'Originally saved (ISO)', 'Mood', 'Mood status', 'Feelings and reported intensity', 'Needs', 'Tags', ...(includeText ? ['Reflection'] : [])];
+  const fields = ['Entry ID', 'Moment (ISO)', 'Originally saved (ISO)', 'Valence', 'Arousal', 'Mood status', 'Feelings and reported intensity', 'Needs', 'Tags', ...(includeText ? ['Reflection'] : [])];
   return [row(['allneeds emotional history']), row(['Period', dateKey(range.start), dateKey(addDays(range.end, -1))]),
     row(['Measure', settings.metric, 'Grouping', settings.grouping, 'Feelings', settings.metric === 'mood' ? '' : settings.feelings.join('; ')]),
     row(['Filters', JSON.stringify({ query: settings.query, feeling: settings.feelingFilter, need: settings.need, tag: settings.tag, intensity: [settings.minIntensity, settings.maxIntensity] })]),
     row(fields), ...entries.map((entry) => row([entry.id, journalDate(entry), entry.createdAtISO ?? entry.dateISO,
-      entry.mood?.kind === 'rated' ? entry.mood.value : '', entry.mood?.kind ?? 'not rated',
+      entry.mood?.kind === 'rated' ? entry.mood.value : '', entry.mood?.kind === 'rated' ? entry.mood.arousal ?? '' : '', entry.mood?.kind ?? 'not rated',
       entry.feelings.map((item) => `${item.feeling}: ${item.ratingSource === 'unknown' ? 'not recorded' : `${item.intensity}/10`}`).join('; '), entry.needs.join('; '), entry.tags.join('; '), ...(includeText ? [entry.notes] : [])]))].join('\r\n');
 }

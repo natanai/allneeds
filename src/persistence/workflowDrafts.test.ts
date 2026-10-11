@@ -41,10 +41,10 @@ describe('workflow drafts', () => {
   it('keeps a new journal draft independent from entry edit drafts, including unknown intensity and mood', () => {
     const storage = memoryStorage();
     const draft = { notes: 'New page', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: null };
-    writeJournalDraft({ ...draft, mood: { kind: 'mixed' }, experiencedAt: '2026-10-01T08:30' }, storage);
+    writeJournalDraft({ ...draft, mood: { kind: 'rated', value: -8, arousal: 7 }, experiencedAt: '2026-10-01T08:30' }, storage);
     writeJournalDraft({ ...draft, notes: 'An edited page', editingId: 'old', feelings: [{ feeling: 'Sad', intensity: 5, ratingSource: 'unknown' }] }, storage, 'old');
     expect(readJournalDraft(storage)?.notes).toBe('New page');
-    expect(readJournalDraft(storage)?.mood).toEqual({ kind: 'mixed' });
+    expect(readJournalDraft(storage)?.mood).toEqual({ kind: 'rated', value: -5, arousal: 5 });
     expect(readJournalDraft(storage, 'old')?.feelings?.[0]?.ratingSource).toBe('unknown');
     clearJournalDraft(storage, 'old');
     expect(readJournalDraft(storage, 'old')).toBeNull();

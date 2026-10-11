@@ -13,13 +13,26 @@ export interface JournalFeelingRating {
   ratingSource?: 'unknown';
 }
 
-export type JournalMood = { kind: 'rated'; value: number } | { kind: 'mixed' | 'unsure' };
+export type JournalMood = {
+  kind: 'rated';
+  /** Valence: −5 is very unpleasant, +5 is very pleasant. */
+  value: number;
+  /** Arousal: −5 is very low activation, +5 is very high activation. */
+  arousal?: number;
+} | { kind: 'mixed' | 'unsure' };
 
 export function normalizeJournalMood(value: unknown): JournalMood | undefined {
   if (!isRecord(value)) return undefined;
   if (value.kind === 'mixed' || value.kind === 'unsure') return { kind: value.kind };
   if (value.kind !== 'rated' || typeof value.value !== 'number' || !Number.isFinite(value.value)) return undefined;
-  return { kind: 'rated', value: Math.min(5, Math.max(-5, Math.round(value.value))) };
+  const arousal = typeof value.arousal === 'number' && Number.isFinite(value.arousal)
+    ? Math.min(5, Math.max(-5, Math.round(value.arousal)))
+    : undefined;
+  return {
+    kind: 'rated',
+    value: Math.min(5, Math.max(-5, Math.round(value.value))),
+    ...(arousal === undefined ? {} : { arousal }),
+  };
 }
 
 export function journalDate(entry: JournalRecord) { return entry.experiencedAtISO ?? entry.dateISO; }

@@ -14,7 +14,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
     const observer = new ResizeObserver(([entry]) => { if (entry) setWidth(Math.max(280, entry.contentRect.width)); });
     observer.observe(ref.current); return () => observer.disconnect();
   }, [printMode]);
-  const height = width < 500 ? 310 : 350, left = 51, right = width - 20, top = 28, bottom = height - 78;
+  const height = width < 500 ? 310 : 350, left = width < 500 ? 40 : 51, right = width < 500 ? width - 8 : width - 20, top = 28, bottom = height - 78;
   const min = settings.metric === 'mood' ? -5 : 0, max = settings.metric === 'frequency' ? 100 : settings.metric === 'mood' ? 5 : 10;
   const x = (time: number) => left + (time - range.start) / (range.end - range.start) * (right - left);
   const y = (value: number) => bottom - (value - min) / (max - min) * (bottom - top);
@@ -37,8 +37,8 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
   const shape = (index: number, cx: number, cy: number) => index === 1 ? <rect x={cx - 4} y={cy - 4} width={8} height={8} /> : index === 2 ? <path d={`M${cx},${cy - 5} l5,5 -5,5 -5,-5 Z`} /> : <circle cx={cx} cy={cy} r={4.5} />;
 
   return <div ref={ref} className={styles.chart} data-testid="history-chart">
-    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-label={`${settings.metric === 'mood' ? 'Overall mood, −5 very unpleasant to +5 very pleasant' : settings.metric === 'intensity' ? 'Feeling intensity, 0 to 10' : 'Feeling mentions, percent of logged entries'} over time. Activate a point to read its journal page.`}>
-      <text className={styles.axisTitle} x={left} y={14}>{settings.metric === 'mood' ? 'Pleasantness · −5 to +5' : settings.metric === 'intensity' ? 'Intensity · 0–10' : 'Entries mentioning feeling · %'}</text>
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-label={`${settings.metric === 'mood' ? 'Valence and arousal, both minus 5 to plus 5' : settings.metric === 'intensity' ? 'Feeling intensity, 0 to 10' : 'Feeling mentions, percent of logged entries'} over time. Activate a point to read its journal page.`}>
+      <text className={styles.axisTitle} x={left} y={14}>{settings.metric === 'mood' ? 'Pleasantness / arousal · −5 to +5' : settings.metric === 'intensity' ? 'Intensity · 0–10' : 'Entries mentioning feeling · %'}</text>
       {ticks.map((value) => <g key={value}><line className={value === 0 && settings.metric === 'mood' ? styles.zeroLine : styles.gridLine} x1={left} x2={right} y1={y(value)} y2={y(value)} /><text className={styles.axisText} x={left - 9} y={y(value) + 4} textAnchor="end">{format(value)}</text></g>)}
       {dateTicks.map((time, i) => <g key={time}><line className={styles.gridLine} x1={x(time)} x2={x(time)} y1={top} y2={bottom} /><text className={styles.axisText} x={x(time)} y={bottom + 24} textAnchor={i === 0 ? 'start' : i === dateTicks.length - 1 ? 'end' : 'middle'}>{new Date(time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', ...(range.days > 365 ? { year: '2-digit' } : {}) })}</text></g>)}
       {settings.showAnnotations ? annotations.filter((annotation) => {
@@ -65,7 +65,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
       {!all.length ? <text className={styles.emptyChart} x={(left + right) / 2} y={(top + bottom) / 2} textAnchor="middle">{entries.length ? 'No numeric ratings in this view' : 'Your history will grow here'}</text> : null}
     </svg>
     <div className={styles.legend}>{currentSeries.map((item, index) => <span key={item.name}><i data-series={index} aria-hidden="true">{index === 1 ? '■ ┄' : index === 2 ? '◆ ⋯' : '● ━'}</i>{item.name}</span>)}{previousSeries.length ? <span>┄ Previous period · lighter</span> : null}{settings.grouping !== 'entry' && settings.metric !== 'frequency' ? <span>Point = mean · whisker = reported range</span> : null}</div>
-    <p className={styles.chartNote}>{settings.metric === 'frequency' ? 'Bars show the share of logged entries that mention a feeling. Not mentioned does not mean not felt.' : 'Tap a point to open the Journal. Gaps mean no recorded rating, not a neutral mood.'}{unscored.length ? ` ${unscored.length} unscored ${unscored.length === 1 ? 'page is' : 'pages are'} marked below the graph.` : ''}</p>
+    <p className={styles.chartNote}>{settings.metric === 'frequency' ? 'Bars show the share of logged entries that mention a feeling. Not mentioned does not mean not felt.' : 'Tap a point to open the Journal. Gaps mean no recorded rating, not a neutral value.'}{unscored.length ? ` ${unscored.length} unscored ${unscored.length === 1 ? 'page is' : 'pages are'} marked below the graph.` : ''}</p>
     <span className="visually-hidden">Dates are spaced by elapsed time. {range.days} calendar days, {new Set(entries.map((entry) => calendarDay(journalDate(entry)))).size} with logged entries.</span>
   </div>;
 }

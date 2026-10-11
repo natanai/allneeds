@@ -341,10 +341,12 @@ export function writeJournalDraft(
       .filter((term) => term.label),
     statement: draft.guidedSupport.statement.trim(),
   } : undefined;
+  const mood = normalizeJournalMood(draft.mood);
   return store.write({
     ...draft,
     intensity: Math.min(10, Math.max(0, Math.round(draft.intensity))),
     ...(feelings ? { feelings } : {}),
+    ...(mood ? { mood } : {}),
     selectedNeeds: [...new Set(draft.selectedNeeds.filter(Boolean))],
     ...(guidedSupport ? { guidedSupport } : {}),
   });

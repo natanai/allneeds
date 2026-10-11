@@ -28,12 +28,21 @@ describe('journalRepository', () => {
 
   it('keeps mood, experienced time, and original creation time through normalizing', () => {
     const storage = new MemoryStorage();
-    const entry = createJournalRecord({ notes: 'A moment last week', mood: { kind: 'rated', value: -3 }, experiencedAtISO: '2026-10-01T20:30:00Z' });
+    const entry = createJournalRecord({ notes: 'A moment last week', mood: { kind: 'rated', value: -3, arousal: 4 }, experiencedAtISO: '2026-10-01T20:30:00Z' });
     writeJournal([entry], storage);
-    expect(readJournal(storage)[0]).toMatchObject({ mood: { kind: 'rated', value: -3 }, experiencedAtISO: '2026-10-01T20:30:00.000Z', createdAtISO: entry.dateISO });
+    expect(readJournal(storage)[0]).toMatchObject({ mood: { kind: 'rated', value: -3, arousal: 4 }, experiencedAtISO: '2026-10-01T20:30:00.000Z', createdAtISO: entry.dateISO });
     const mixed = { ...entry, mood: { kind: 'mixed' as const } };
     writeJournal([mixed], storage);
     expect(readJournal(storage)[0]?.mood).toEqual({ kind: 'mixed' });
+  });
+
+  it('clamps both coordinates while preserving legacy valence-only ratings', () => {
+    const storage = new MemoryStorage();
+    const current = createJournalRecord({ notes: 'Both axes', mood: { kind: 'rated', value: -9, arousal: 12 } });
+    const legacy = { ...current, id: 'legacy', mood: { kind: 'rated' as const, value: 2 } };
+    writeJournal([current, legacy], storage);
+    expect(readJournal(storage).find((item) => item.id === current.id)?.mood).toEqual({ kind: 'rated', value: -5, arousal: 5 });
+    expect(readJournal(storage).find((item) => item.id === 'legacy')?.mood).toEqual({ kind: 'rated', value: 2 });
   });
 
   it('does not promote a missing legacy intensity to a reported rating after a second save', () => {

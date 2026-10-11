@@ -4,7 +4,9 @@ import type { HistorySettings } from './historyModel';
 
 export type HistoryAnnotation = { id: string; date: string; label: string };
 export const HISTORY_ANNOTATIONS_KEY = 'allneeds.v2.journal.annotations';
-const sessionKey = 'allneeds:history-view';
+// Version the transient view so the two-coordinate graph becomes the default
+// instead of inheriting the former feeling-intensity default in an open tab.
+const sessionKey = 'allneeds:history-view:2';
 function record(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
 function sessionStorage(): StorageDriver | null { try { return typeof window === 'undefined' ? null : window.sessionStorage; } catch { return null; } }
 export function readHistorySettings(defaults: HistorySettings, storage = sessionStorage()): HistorySettings {

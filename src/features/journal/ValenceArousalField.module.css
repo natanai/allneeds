@@ -1,0 +1,77 @@
+.field { min-width: 0; display: grid; gap: .55rem; }
+.plane {
+  position: relative;
+  width: min(100%, 28rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--outline) 42%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+}
+.quadrant { position: absolute; width: 50%; height: 50%; opacity: .3; pointer-events: none; }
+.lowUnpleasant { left: 0; bottom: 0; background: color-mix(in srgb, var(--quiet) 62%, var(--surface-raised)); }
+.lowPleasant { right: 0; bottom: 0; background: color-mix(in srgb, var(--selection) 52%, var(--surface-raised)); }
+.highUnpleasant { left: 0; top: 0; background: color-mix(in srgb, var(--action) 48%, var(--surface-raised)); }
+.highPleasant { right: 0; top: 0; background: color-mix(in srgb, var(--positive) 60%, var(--surface-raised)); }
+.horizontalAxis, .verticalAxis { position: absolute; z-index: 1; display: block; background: color-mix(in srgb, var(--outline) 52%, transparent); pointer-events: none; }
+.horizontalAxis { left: 0; right: 0; top: 50%; height: 1px; }
+.verticalAxis { top: 0; bottom: 0; left: 50%; width: 1px; }
+.axisLabel {
+  position: absolute;
+  z-index: 2;
+  padding: .16rem .3rem;
+  border-radius: var(--radius-sm);
+  color: color-mix(in srgb, var(--text) 78%, var(--secondary));
+  background: color-mix(in srgb, var(--surface-raised) 74%, transparent);
+  font-size: .67rem;
+  font-weight: 700;
+  line-height: 1.2;
+  pointer-events: none;
+}
+.highLabel { top: .35rem; left: 50%; transform: translateX(-50%); }
+.lowLabel { bottom: .35rem; left: 50%; transform: translateX(-50%); }
+.unpleasantLabel { left: .35rem; top: 50%; transform: translateY(-50%); }
+.pleasantLabel { right: .35rem; top: 50%; transform: translateY(-50%); }
+.plane > .point {
+  position: absolute;
+  z-index: 4;
+  width: 2.15rem;
+  min-width: 2.15rem;
+  height: 2.15rem;
+  min-height: 2.15rem;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--surface-raised);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--text), var(--shadow-small);
+  cursor: grab;
+}
+.plane > .point:active { cursor: grabbing; }
+.plane > .point:focus-visible { outline: 3px solid var(--text); outline-offset: 4px; }
+.plane > .unplaced { background: var(--surface-raised) !important; border-style: dashed; opacity: .7; box-shadow: 0 0 0 2px var(--secondary); }
+.values {
+  min-height: 2rem;
+  padding: .35rem .6rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  color: var(--text);
+  background: color-mix(in srgb, var(--selection) 13%, var(--surface-raised));
+  font-size: var(--text-sm);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.values.moving { background: color-mix(in srgb, var(--selection) 30%, var(--surface-raised)); }
+.help { display: block; text-align: center; }
+.states { display: grid; grid-template-columns: 1fr 1fr auto; gap: .45rem; }
+.states button { font-size: var(--text-xs); }
+.states button[aria-pressed='true'] { background: color-mix(in srgb, var(--selection) 38%, var(--surface-raised)); }
+@media (max-width: 420px) {
+  .axisLabel { font-size: .61rem; }
+  .states { grid-template-columns: 1fr 1fr; }
+  .states button:last-child { grid-column: 1 / -1; }
+}

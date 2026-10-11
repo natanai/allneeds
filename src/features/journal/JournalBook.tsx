@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent, PointerEvent } from 'react';
+import type { FormEvent } from 'react';
 import { Link } from 'react-router';
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
 import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { feelings, needsBySlug } from '../../data/catalog';
 import { clearJournalDraft, readJournalDraft, writeJournalDraft, type JournalComposerDraft } from '../../persistence/workflowDrafts';
 import { createJournalRecord, journalDate, type JournalRecord } from './journalRepository';
+import { ValenceArousalField } from './ValenceArousalField';
 import styles from './JournalBook.module.css';
 
 const catalog = [...feelings].sort((a, b) => a.title.localeCompare(b.title));
@@ -107,15 +108,10 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
     // Saving a new page returns to History; saving an edit stays on the saved page.
   };
   const clear = () => { const next = blank(); next.editingId = editing ? pageId : null; setDraft(next); setError(''); setDraftStatus('Saving draft…'); };
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const endSwipe = (event: PointerEvent<HTMLDivElement>) => {
-    const start = touchStart.current; touchStart.current = null;
-    if (!start || event.pointerType !== 'touch') return;
-    const dx = event.clientX - start.x, dy = event.clientY - start.y;
-    if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 2) { if (dx > 0) older(); else newer(); }
-  };
   const tags = [...new Set(entries.flatMap((item) => item.tags))].sort();
   const isForm = !pageId || editing;
+  const canTurnOlder = Boolean(pages[pageId ? pageIndex + 1 : 0]);
+  const canTurnNewer = Boolean(pageId);
 
   return <div className={styles.book} onKeyDown={(event) => {
     if (!event.altKey || (event.target as HTMLElement).closest('input, textarea, select, [contenteditable]')) return;
@@ -123,28 +119,21 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
     if (event.key === 'ArrowRight') { event.preventDefault(); newer(); }
   }}>
     <section ref={paperRef} className={styles.paper} aria-label={isForm ? 'Journal writing page' : 'Saved journal page'}>
-      <div className={styles.edge} aria-hidden="true" onPointerDown={(event) => { touchStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerUp={endSwipe} onPointerCancel={() => { touchStart.current = null; }} />
       <div className={styles.paperContent} key={`${pageId ?? 'new'}-${editing}`}>
-        <header className={styles.paperHeader}><h3>{isForm ? editing ? 'Edit entry' : 'New entry' : entry ? formatJournalDate(journalDate(entry)) : 'Page unavailable'}</h3><span>{isForm ? 'A little space for what is here' : 'Saved · read only'}</span></header>
-        {isForm ? <form onSubmit={save} className={styles.spread}>
-          <section className={styles.reflection}>
-            <label><span className="visually-hidden">Reflection</span><textarea aria-label="Reflection" data-dialog-initial-focus value={draft.notes} onChange={(event) => patch({ notes: event.target.value })} placeholder="What is on your mind?" /></label>
-          </section>
-          <DisclosureRow className={styles.entryDetails} title="Entry details" description="Mood, feelings, needs, tags and date">
-            <aside className={styles.margin}>
-              <fieldset className={styles.mood}><legend>Overall mood <small>optional</small></legend>
-                <select aria-label="Overall mood" value={draft.mood?.kind === 'rated' ? String(draft.mood.value) : draft.mood?.kind ?? ''} onChange={(event) => {
-                  const value = event.target.value;
-                  patch({ mood: value === '' ? undefined : value === 'mixed' || value === 'unsure' ? { kind: value } : { kind: 'rated', value: Number(value) } });
-                }}>
-                  <option value="">Not rated</option>
-                  {Array.from({ length: 11 }, (_, i) => i - 5).map((value) => <option key={value} value={value}>{value > 0 ? '+' : ''}{value}{value === -5 ? ' · Very unpleasant' : value === 0 ? ' · Neutral' : value === 5 ? ' · Very pleasant' : ''}</option>)}
-                  <option value="mixed">Mixed feelings</option><option value="unsure">Not sure</option>
-                </select><small>How pleasant or unpleasant did this moment feel overall? Mixed and Not sure stay separate from neutral.</small>
-              </fieldset>
+        <header className={styles.paperHeader}><h3>{isForm ? editing ? 'Edit entry' : 'New entry' : entry ? formatJournalDate(journalDate(entry)) : 'Page unavailable'}</h3></header>
+        {isForm ? <form onSubmit={save} className={styles.form}>
+          <div className={styles.formPages}>
+            <section className={styles.reflectionSheet}>
+              <label><span>Reflection</span><textarea aria-label="Reflection" data-dialog-initial-focus value={draft.notes} onChange={(event) => patch({ notes: event.target.value })} /></label>
+            </section>
+            <aside className={styles.sidebar}>
+              {error ? <p role="alert" className={styles.error}>{error}</p> : null}
+              <DisclosureRow title="Emotional coordinates" description="Optional · valence and arousal">
+                <fieldset className={styles.mood}><legend className="visually-hidden">Emotional coordinates</legend><ValenceArousalField mood={draft.mood} onChange={(mood) => patch({ mood })} /></fieldset>
+              </DisclosureRow>
               <div className={styles.metadata}>
                 <div className={styles.metaRow}><label>Feeling</label><div className={styles.catalogControl}>
-                  <button type="button" aria-label="Feeling" aria-expanded={picker} onClick={() => setPicker(!picker)}>{draft.feelings?.length ? draft.feelings.map((item) => item.feeling).join(', ') : 'Choose feelings'} <span aria-hidden="true">⌄</span></button>
+                  <button type="button" aria-label="Feeling" aria-expanded={picker} onClick={() => setPicker(!picker)}><span>{draft.feelings?.length ? draft.feelings.map((item) => item.feeling).join(', ') : 'Choose feelings'}</span><i aria-hidden="true" /></button>
                   {picker ? <div className={styles.picker} role="dialog" aria-label="Choose one or more feelings">
                     <input type="search" aria-label="Search feelings" placeholder="Search feelings" value={feelingSearch} onChange={(event) => setFeelingSearch(event.target.value)} />
                     <div className={styles.feelingOptions}>
@@ -159,8 +148,7 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
                   </div> : null}
                 </div></div>
                 <div className={styles.metaRow}><label id="journal-needs">Needs</label><div onPointerDown={() => setPicker(false)}><NeedCatalogPicker labelId="journal-needs" selectedNeeds={draft.selectedNeeds} onChange={(selectedNeeds) => patch({ selectedNeeds })} /></div></div>
-                <label className={styles.tagField}>Tags<input list="journal-tags" value={draft.tags} onChange={(event) => patch({ tags: event.target.value })} placeholder="work, weekend" /></label>
-                <datalist id="journal-tags">{tags.map((tag) => <option key={tag} value={tag} />)}</datalist>
+                <div className={styles.metaRow}><label htmlFor="journal-tags">Tags</label><div><input id="journal-tags" list="journal-tag-suggestions" value={draft.tags} onChange={(event) => patch({ tags: event.target.value })} placeholder="work, weekend" /></div><datalist id="journal-tag-suggestions">{tags.map((tag) => <option key={tag} value={tag} />)}</datalist></div>
               </div>
               <DisclosureRow title="Date & reflection prompts">
                 <label className={styles.dateField}>When was this moment?<input type="datetime-local" value={draft.experiencedAt ?? ''} onChange={(event) => patch({ experiencedAt: event.target.value })} /></label>
@@ -168,46 +156,30 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
                 <ul className={styles.prompts}><li>What did you notice in your body, thoughts, or emotions?</li><li>What was happening when you noticed it?</li><li>What would be useful to understand, request, or do next?</li></ul>
               </DisclosureRow>
               {editing ? <button type="button" onClick={() => turn(pageId)}>Back to saved page</button> : null}
+              <div className={styles.actions}><button type="button" onClick={clear}>Clear</button><button type="submit">Save</button></div>
               <small>Save keeps this entry on this device. {signedIn ? 'Signed in; use Account & data to back up to your profile.' : 'Signed out; export a backup or sign in to back up to your profile.'}</small>
+              <p className="visually-hidden" role="status">{draftStatus}</p>
             </aside>
-          </DisclosureRow>
-          {error ? <p role="alert" className={styles.error}>{error}</p> : null}
-          <div className={styles.entryFooter}><p className={styles.draftStatus} role="status">{draftStatus}</p><div className={styles.actions}><button type="button" onClick={clear}>Clear</button><button type="submit">Save</button></div></div>
-        </form> : entry ? <div className={styles.reader}>
-          <div className={styles.savedReflection}><p>{entry.notes || 'No written reflection on this page.'}</p>
-            {entry.guidedSupport ? <DisclosureRow title="Check-in context"><p>{entry.guidedSupport.observation}</p><p>{entry.guidedSupport.terms.map((term) => `${term.label} (${term.role})`).join(' · ')}</p><p>{entry.guidedSupport.statement}</p></DisclosureRow> : null}
           </div>
-          <DisclosureRow className={styles.entryDetails} title="Page details" description="Mood, feelings, needs and saved time">
-            <aside className={styles.margin}>
-              {entry.mood ? <div className={styles.savedMood}><small>Overall mood</small><strong>{entry.mood.kind === 'rated' ? `${entry.mood.value > 0 ? '+' : ''}${entry.mood.value} / −5 to +5` : entry.mood.kind === 'mixed' ? 'Mixed feelings' : 'Not sure'}</strong></div> : <small>Overall mood was not rated.</small>}
-              <div className={styles.chips}>{entry.feelings.map((item) => <span key={item.feeling}>{item.feeling} · {item.ratingSource === 'unknown' ? 'intensity not recorded' : `${item.intensity}/10`}</span>)}</div>
-              <div className={styles.chips}>{entry.needs.map((slug) => <Link key={slug} to={`/needs/${slug}`}>{needsBySlug.get(slug)?.title ?? slug}</Link>)}{entry.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>
-              {entry.sensations.length ? <p>Body sensations: {entry.sensations.join(', ')}</p> : null}
-              {entry.strategies.length ? <p>Strategies: {entry.strategies.join(', ')}</p> : null}
-              <small>Originally saved {formatJournalDate(entry.createdAtISO ?? entry.dateISO)}</small>
-              <div className={styles.actions}><button type="button" onClick={startEdit}>Edit entry</button><button type="button" onClick={() => { if (onRemove(entry)) turn(null); }}>Delete entry</button></div>
-            </aside>
-          </DisclosureRow>
-        </div> : <p>This entry is no longer on this device. Your drafts are still available under New entry.</p>}
+        </form> : entry ? <div className={styles.readerPages}>
+          <section className={`${styles.reflectionSheet} ${styles.savedSheet}`}><span className={styles.reflectionLabel}>Reflection</span><div className={styles.savedReflection}><p>{entry.notes || 'No written reflection on this page.'}</p>
+            {entry.guidedSupport ? <DisclosureRow title="Check-in context"><p>{entry.guidedSupport.observation}</p><p>{entry.guidedSupport.terms.map((term) => `${term.label} (${term.role})`).join(' · ')}</p><p>{entry.guidedSupport.statement}</p></DisclosureRow> : null}
+          </div></section>
+          <aside className={styles.sidebar}>
+            {entry.mood ? <div className={styles.savedMood}><small>Emotional coordinates</small><strong>{entry.mood.kind === 'rated' ? `Valence ${entry.mood.value > 0 ? '+' : ''}${entry.mood.value}${entry.mood.arousal === undefined ? ' · Arousal not recorded' : ` · Arousal ${entry.mood.arousal > 0 ? '+' : ''}${entry.mood.arousal}`}` : entry.mood.kind === 'mixed' ? 'Mixed feelings' : 'Not sure'}</strong></div> : <small>Emotional coordinates were not recorded.</small>}
+            <div className={styles.chips}>{entry.feelings.map((item) => <span key={item.feeling}>{item.feeling} · {item.ratingSource === 'unknown' ? 'intensity not recorded' : `${item.intensity}/10`}</span>)}</div>
+            <div className={styles.chips}>{entry.needs.map((slug) => <Link key={slug} to={`/needs/${slug}`}>{needsBySlug.get(slug)?.title ?? slug}</Link>)}{entry.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>
+            {entry.sensations.length ? <p>Body sensations: {entry.sensations.join(', ')}</p> : null}
+            {entry.strategies.length ? <p>Strategies: {entry.strategies.join(', ')}</p> : null}
+            <small>Originally saved {formatJournalDate(entry.createdAtISO ?? entry.dateISO)}</small>
+            <div className={styles.actions}><button type="button" onClick={startEdit}>Edit entry</button><button type="button" onClick={() => { if (onRemove(entry)) turn(null); }}>Delete entry</button></div>
+          </aside>
+        </div> : <p>This entry is no longer on this device. Your draft remains on the blank newest page.</p>}
       </div>
     </section>
-    <footer className={styles.pageFooter}>
-      <nav className={styles.pageNav} aria-label="Journal pages">
-        <button type="button" onClick={older} disabled={!pages.length || (Boolean(pageId) && pageIndex >= pages.length - 1)}>← <span className={styles.turnWord}>Older</span></button>
-        <details className={styles.pageTools}>
-          <summary><span className={styles.pagePosition} aria-live="polite"><strong>{isForm ? editing ? 'Editing saved page' : 'Your next page' : 'Saved page'}</strong><small>{pageId && pageIndex >= 0 ? `${pages.length - pageIndex} of ${pages.length}` : `${pages.length} saved ${pages.length === 1 ? 'page' : 'pages'}`}</small></span></summary>
-          <div className={styles.jump}>
-            <label>Jump to a date<input type="date" onChange={(event) => {
-              if (!event.target.value) return;
-              const day = new Date(`${event.target.value}T23:59:59`).getTime();
-              const match = pages.find((item) => Date.parse(journalDate(item)) <= day) ?? pages.at(-1);
-              if (match) turn(match.id);
-            }} /></label><small>Swipe the page edge, use the arrows below, or press Alt + ← / →.</small>
-          </div>
-        </details>
-        <button type="button" onClick={newer} disabled={!pageId}><span className={styles.turnWord}>Newer</span> →</button>
-        <button type="button" onClick={() => turn(null)} aria-pressed={!pageId}>New entry</button>
-      </nav>
-    </footer>
+    {canTurnOlder || canTurnNewer ? <footer className={styles.pageFooter}><nav className={styles.pageNav} aria-label="Journal pages">
+      {canTurnOlder ? <button type="button" className={styles.olderTurn} onClick={older} aria-label="Turn to older journal page">←</button> : <span />}
+      {canTurnNewer ? <button type="button" className={styles.newerTurn} onClick={newer} aria-label={pageIndex > 0 ? 'Turn to newer journal page' : 'Turn to blank new journal page'}>→</button> : null}
+    </nav></footer> : null}
   </div>;
 }

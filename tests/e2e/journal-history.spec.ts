@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { themePresets } from '../../src/features/customizer/themePresets';
 
@@ -9,17 +9,29 @@ async function seed(page: Page) {
     const date = (offset: number) => { const day = new Date(now); day.setDate(day.getDate() + offset); day.setHours(12, 0, 0, 0); return day.toISOString(); };
     const base = { emotion: 'Relieved', intensity: 8, feelings: [{ feeling: 'Relieved', intensity: 8 }, { feeling: 'Anxiety', intensity: 3 }], needs: ['support'], tags: ['work'], sensations: [], strategies: [], source: 'journal' };
     const entries = [
-      { ...base, id: 'today', notes: 'Today’s private reflection', dateISO: date(0), mood: { kind: 'rated', value: 3 } },
-      { ...base, id: 'yesterday', notes: 'Yesterday’s page', dateISO: date(-1), mood: { kind: 'rated', value: -2 }, tags: ['home'] },
+      { ...base, id: 'today', notes: 'Today’s private reflection', dateISO: date(0), mood: { kind: 'rated', value: 3, arousal: 4 } },
+      { ...base, id: 'yesterday', notes: 'Yesterday’s page', dateISO: date(-1), mood: { kind: 'rated', value: -2, arousal: 2 }, tags: ['home'] },
       { ...base, id: 'mixed', notes: 'Mixed is not neutral', dateISO: date(-2), mood: { kind: 'mixed' } },
-      { ...base, id: 'same-a', notes: 'First exact-time page', dateISO: date(-3), mood: { kind: 'rated', value: 1 } },
-      { ...base, id: 'same-b', notes: 'Second exact-time page', dateISO: date(-3), mood: { kind: 'rated', value: 1 } },
-      { ...base, id: 'before', notes: 'Earlier period page', dateISO: date(-8), mood: { kind: 'rated', value: -4 } },
-      { ...base, id: 'old', notes: 'An older page', dateISO: date(-40), mood: { kind: 'rated', value: 0 } },
+      { ...base, id: 'same-a', notes: 'First exact-time page', dateISO: date(-3), mood: { kind: 'rated', value: 1, arousal: -1 } },
+      { ...base, id: 'same-b', notes: 'Second exact-time page', dateISO: date(-3), mood: { kind: 'rated', value: 1, arousal: -1 } },
+      { ...base, id: 'before', notes: 'Earlier period page', dateISO: date(-8), mood: { kind: 'rated', value: -4, arousal: 5 } },
+      { ...base, id: 'old', notes: 'An older page', dateISO: date(-40), mood: { kind: 'rated', value: 0, arousal: 0 } },
     ];
     localStorage.setItem('allneeds.v2.journal', JSON.stringify({ schemaVersion: 1, savedAt: now.toISOString(), data: { entries } }));
     localStorage.setItem('history-test-seeded', 'yes');
   });
+}
+
+async function placeEmotionalPoint(page: Page, plane: Locator, valence: number, arousal: number) {
+  await plane.scrollIntoViewIfNeeded();
+  const box = await plane.boundingBox();
+  if (!box) throw new Error('Emotional map was not visible');
+  const x = box.x + box.width * (valence + 5) / 10;
+  const y = box.y + box.height * (5 - arousal) / 10;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(x, y, { steps: 5 });
+  await page.mouse.up();
 }
 
 for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
@@ -38,35 +50,35 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       const pageTurnerBox = await pageTurner.boundingBox();
       expect(dialogBox && paperBox && paperBox.height > dialogBox.height * .68).toBe(true);
       expect(reflectionBox && pageTurnerBox && pageTurnerBox.y > reflectionBox.y).toBe(true);
-      await expect(journal.getByLabel('Overall mood', { exact: true })).toBeHidden();
+      expect(await reflection.evaluate((element) => getComputedStyle(element).backgroundImage)).toBe('none');
+      await expect(journal.getByTestId('valence-arousal-field')).toBeHidden();
       await reflection.fill('My unfinished new page');
-      await journal.getByText('Entry details', { exact: true }).click();
-      await journal.getByLabel('Overall mood', { exact: true }).selectOption('mixed');
-      await journal.getByRole('button', { name: 'Older', exact: false }).click();
+      await journal.locator('summary').filter({ hasText: 'Emotional coordinates' }).click();
+      await journal.getByRole('button', { name: 'Mixed feelings', exact: true }).click();
+      await journal.getByRole('button', { name: 'Turn to older journal page' }).click();
       await expect(journal.getByText('Today’s private reflection', { exact: true })).toBeVisible();
       await expect(journal.getByLabel('Reflection', { exact: true })).toHaveCount(0);
-      await journal.getByText('Page details', { exact: true }).click();
       await journal.getByRole('button', { name: 'Edit entry', exact: true }).click();
       await journal.getByLabel('Reflection', { exact: true }).fill('A separately saved edit draft');
-      await journal.getByRole('button', { name: 'New entry', exact: true }).click();
+      await journal.getByRole('button', { name: 'Turn to blank new journal page' }).click();
       await expect(journal.getByLabel('Reflection', { exact: true })).toHaveValue('My unfinished new page');
-      await journal.getByText('Entry details', { exact: true }).click();
-      await expect(journal.getByLabel('Overall mood', { exact: true })).toHaveValue('mixed');
+      await journal.locator('summary').filter({ hasText: 'Emotional coordinates' }).click();
+      await expect(journal.getByRole('button', { name: 'Mixed feelings', exact: true })).toHaveAttribute('aria-pressed', 'true');
       await journal.getByRole('button', { name: 'Close full screen journal' }).click();
       await page.reload();
       journal = page.getByRole('dialog', { name: 'Journal', exact: true });
       await expect(journal.getByLabel('Reflection', { exact: true })).toHaveValue('My unfinished new page');
-      await journal.getByRole('button', { name: 'Older', exact: false }).click();
-      await journal.getByText('Page details', { exact: true }).click();
+      await journal.getByRole('button', { name: 'Turn to older journal page' }).click();
       await journal.getByRole('button', { name: 'Edit entry', exact: true }).click();
       await expect(journal.getByLabel('Reflection', { exact: true })).toHaveValue('A separately saved edit draft');
-      await journal.getByText('Entry details', { exact: true }).click();
-      await journal.getByLabel('Overall mood', { exact: true }).selectOption('-3');
+      await journal.locator('summary').filter({ hasText: 'Emotional coordinates' }).click();
+      await placeEmotionalPoint(page, journal.getByTestId('valence-arousal-field'), -3, 2);
+      await expect(journal.locator('output')).toHaveText('Valence −3 · Arousal +2');
       await journal.getByRole('button', { name: 'Save', exact: true }).click();
       await expect(journal.getByText('A separately saved edit draft', { exact: true })).toBeVisible();
-      await journal.getByRole('button', { name: 'New entry', exact: true }).click();
+      await journal.getByRole('button', { name: 'Turn to blank new journal page' }).click();
       await expect(journal.getByLabel('Reflection', { exact: true })).toHaveValue('My unfinished new page');
-      expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.find((entry: { id: string }) => entry.id === 'today').mood)).toEqual({ kind: 'rated', value: -3 });
+      expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.find((entry: { id: string }) => entry.id === 'today').mood)).toEqual({ kind: 'rated', value: -3, arousal: 2 });
       expect(await page.evaluate(() => localStorage.getItem('allneeds.v2.journal.draft.today'))).toBeNull();
       expect(await journal.evaluate((dialog) => dialog.scrollWidth <= dialog.clientWidth + 1)).toBe(true);
     });
@@ -78,12 +90,13 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       const chartBox = await chart.boundingBox();
       const periodBox = await page.getByLabel('Period', { exact: true }).boundingBox();
       expect(chartBox && periodBox && chartBox.y < periodBox.y).toBe(true);
-      await chart.getByRole('button', { name: /^Overall mood: \+3,/ }).click();
+      await expect(chart).toContainText('Arousal');
+      await chart.getByRole('button', { name: /^Arousal: \+4,/ }).click();
       const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
       await expect(journal.getByText('Today’s private reflection', { exact: true })).toBeVisible();
       await journal.getByRole('button', { name: 'Close full screen journal' }).click();
       await expect(page.getByLabel('Period', { exact: true })).toHaveValue('7');
-      await chart.getByRole('button', { name: /^Overall mood: \+1,/ }).last().click();
+      await chart.getByRole('button', { name: /^Pleasantness: \+1,/ }).last().click();
       const selected = page.getByLabel('Selected graph entries');
       await expect(selected.getByRole('button', { name: /Open journal page/ })).toHaveCount(2);
       await selected.getByRole('button', { name: /Open journal page/ }).first().click();
@@ -141,24 +154,34 @@ test('context notes and export respect the visible period and exclude reflection
 test('an optional mood-only page and an experienced date are saved without changing original creation time', async ({ page }) => {
   await seed(page); await page.goto('/inventory/journal?compose=new');
   const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
-  await journal.getByText('Entry details', { exact: true }).click();
-  await journal.getByLabel('Overall mood').selectOption('0');
+  await journal.locator('summary').filter({ hasText: 'Emotional coordinates' }).click();
+  const plane = journal.getByTestId('valence-arousal-field');
+  await placeEmotionalPoint(page, plane, -4, 4);
+  const firstColor = await plane.getByRole('button', { name: /Emotional point/ }).evaluate((element) => getComputedStyle(element).backgroundColor);
+  await placeEmotionalPoint(page, plane, 4, -4);
+  const secondColor = await plane.getByRole('button', { name: /Emotional point/ }).evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(secondColor).not.toBe(firstColor);
+  await placeEmotionalPoint(page, plane, 0, 0);
+  await expect(journal.locator('output')).toHaveText('Valence 0 · Arousal 0');
   await journal.getByText('Date & reflection prompts', { exact: true }).click();
   await journal.getByLabel('When was this moment?').fill('2026-09-14T17:30');
   await journal.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(journal).toHaveCount(0);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.find((item: { id: string }) => !['today', 'yesterday', 'mixed', 'same-a', 'same-b', 'before', 'old'].includes(item.id)));
-  expect(saved.mood).toEqual({ kind: 'rated', value: 0 });
+  expect(saved.mood).toEqual({ kind: 'rated', value: 0, arousal: 0 });
   expect(saved.feelings).toEqual([]); expect(saved.dateISO).toBe(saved.createdAtISO);
   expect(saved.experiencedAtISO).toContain('2026-09-14');
   await page.goto(`/inventory/journal?entry=${saved.id}`);
-  await journal.getByText('Page details', { exact: true }).click();
   await expect(journal.getByText(/Originally saved/)).toBeVisible();
-  await journal.getByRole('button', { name: 'New entry', exact: true }).click();
-  await journal.getByText('Your next page', { exact: true }).click();
-  await journal.getByLabel('Jump to a date').fill('2026-09-14');
-  await expect(journal.getByLabel('Saved journal page')).toBeVisible();
   await expect(journal.getByText('No written reflection on this page.', { exact: true })).toBeVisible();
+  while (await journal.getByRole('button', { name: /Turn to (newer|blank new) journal page/ }).count()) {
+    await journal.getByRole('button', { name: /Turn to (newer|blank new) journal page/ }).click();
+  }
+  await expect(journal.getByLabel('Journal writing page')).toBeVisible();
+  await expect(journal.getByRole('button', { name: /Turn to (newer|blank new) journal page/ })).toHaveCount(0);
+  await journal.getByRole('button', { name: 'Turn to older journal page' }).click();
+  await expect(journal.getByLabel('Saved journal page')).toBeVisible();
+  await expect(journal.getByText('Today’s private reflection', { exact: true })).toBeVisible();
 });
 
 test('a failed device write keeps the Journal open, preserves the original collection, and exposes a recoverable draft', async ({ page }) => {
@@ -188,8 +211,10 @@ test('History and journal inherit every preset, stay within a narrow phone, and 
     await page.reload();
     await expect(page.getByTestId('history-chart')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-    const point = page.getByTestId('history-chart').getByRole('button', { name: /^Overall mood: \+3,/ });
+    const point = page.getByTestId('history-chart').getByRole('button', { name: /^Pleasantness: \+3,/ });
     await point.focus(); await point.press('Enter');
+    const selection = page.getByLabel('Selected graph entries');
+    if (await selection.count()) await selection.getByRole('button', { name: /Valence \+3/ }).click();
     const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
     await expect(journal).toBeVisible();
     expect(await journal.evaluate((dialog) => dialog.scrollWidth <= dialog.clientWidth + 1)).toBe(true);

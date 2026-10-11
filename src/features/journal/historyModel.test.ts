@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { addDays, buildHistorySeries, dateKey, defaultHistorySettings, filterHistory, historyCsv, historySummary, historyWindow, parseDay, previousWindow, shiftWindow, zoomWindow } from './historyModel';
 import { createJournalRecord, type JournalRecord } from './journalRepository';
 
-const entry = (id: string, day: string, mood?: number, feelings: JournalRecord['feelings'] = []): JournalRecord => ({ ...createJournalRecord({ notes: id, feelings, ...(mood === undefined ? {} : { mood: { kind: 'rated', value: mood } }) }), id, dateISO: `${day}T12:00:00.000Z` });
+const entry = (id: string, day: string, mood?: number, feelings: JournalRecord['feelings'] = [], arousal?: number): JournalRecord => ({ ...createJournalRecord({ notes: id, feelings, ...(mood === undefined ? {} : { mood: { kind: 'rated', value: mood, ...(arousal === undefined ? {} : { arousal }) } }) }), id, dateISO: `${day}T12:00:00.000Z` });
 const range = { start: Date.parse('2026-10-01T00:00:00Z'), end: Date.parse('2026-10-08T00:00:00Z'), days: 7 };
 describe('emotional history semantics', () => {
-  it('chooses mood when reported, otherwise a common feeling; never derives valence from feelings', () => {
-    expect(defaultHistorySettings([entry('a', '2026-10-01', undefined, [{ feeling: 'Sad', intensity: 7 }])]).metric).toBe('intensity');
+  it('defaults to the two-coordinate view and never derives pleasantness from feelings', () => {
+    expect(defaultHistorySettings([entry('a', '2026-10-01', undefined, [{ feeling: 'Sad', intensity: 7 }])]).metric).toBe('mood');
     expect(defaultHistorySettings([entry('b', '2026-10-01', -2)]).metric).toBe('mood');
     expect(defaultHistorySettings([]).metric).toBe('mood');
   });
@@ -17,6 +17,15 @@ describe('emotional history semantics', () => {
     expect(series.points.map((point) => point.value)).toEqual([0, -2, 4]);
     expect(series.segments.map((segment) => segment.length)).toEqual([1, 1, 1]);
     expect(historySummary(records, settings, range)).toMatchObject({ entries: 4, rated: 3, median: 0, mixed: 1, loggedDays: 4 });
+  });
+  it('plots valence and arousal independently and leaves legacy arousal missing', () => {
+    const records = [entry('both', '2026-10-01', 2, [], -4), entry('legacy', '2026-10-02', -1), entry('both-again', '2026-10-03', 4, [], 2)];
+    const settings = defaultHistorySettings(records);
+    const series = buildHistorySeries(records, settings, range);
+    expect(series.map((item) => item.name)).toEqual(['Pleasantness', 'Arousal']);
+    expect(series[0]?.points.map((point) => point.value)).toEqual([2, -1, 4]);
+    expect(series[1]?.points.map((point) => point.value)).toEqual([-4, 2]);
+    expect(historySummary(records, settings, range)).toMatchObject({ median: 2, rated: 3, arousalMedian: -1, arousalRated: 2, arousalLow: -4, arousalHigh: 2 });
   });
   it('preserves multiple same-time entries and reports daily range and rating denominator', () => {
     const records = [entry('a', '2026-10-01', -5), entry('b', '2026-10-01', 5), entry('c', '2026-10-01')];
@@ -52,11 +61,12 @@ describe('emotional history semantics', () => {
     expect(dateKey(addDays(window.start, 7))).toBe('2026-10-08');
   });
   it('round-trips text safely through CSV and excludes reflections by default', () => {
-    const records = [{ ...entry('a', '2026-10-01', -1), notes: '=HYPERLINK("private")\nAnother line', tags: ['@unsafe'] }];
+    const records = [{ ...entry('a', '2026-10-01', -1, [], 3), notes: '=HYPERLINK("private")\nAnother line', tags: ['@unsafe'] }];
     const settings = defaultHistorySettings(records);
     expect(historyCsv(records, settings, range, false)).not.toContain('HYPERLINK');
     expect(historyCsv(records, settings, range, true)).toContain("'=HYPERLINK");
     expect(historyCsv(records, settings, range, true)).toContain("'@unsafe");
+    expect(historyCsv(records, settings, range, true)).toContain('"Valence","Arousal"');
   });
 
   it('counts calendar days across spring and fall DST rather than dividing elapsed hours by 24', () => {
