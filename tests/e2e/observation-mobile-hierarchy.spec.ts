@@ -77,7 +77,7 @@ test('the full research index and source library are available on mobile and des
     await expect(guide.getByRole('heading', { name: 'Research behind observations' })).toBeVisible();
 
     if (width < 760) {
-      const picker = guide.getByLabel('Research topic');
+      const picker = guide.locator('select#observation-research-topic');
       await expect(picker).toBeVisible();
       await expect(picker.locator('option')).toHaveCount(9);
       await picker.selectOption('references');
@@ -105,5 +105,5 @@ test('a study citation opens the matching reference without nested accordions', 
   await expect(source).toBeVisible();
   await expect(source).toContainText('[1] Nock & Kurtz (2005)');
   await expect(source.locator('a')).toHaveAttribute('href', 'https://doi.org/10.1016/S1077-7229(05)80058-6');
-  await expect(guide.getByLabel('Research topic')).toHaveValue('references');
+  await expect(guide.locator('select#observation-research-topic')).toHaveValue('references');
 });
