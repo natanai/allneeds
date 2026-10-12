@@ -623,14 +623,10 @@
   display: none;
 }
 
-.guide > summary span:first-child {
-  display: grid;
-  gap: var(--space-1);
-}
-
-.guide > summary small {
-  color: var(--secondary);
-  font-size: var(--text-xs);
+.guide > summary strong {
+  min-width: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
 }
 
 .guide > summary > span:last-child {
@@ -686,18 +682,34 @@
 
 .guideSections summary {
   min-height: var(--control-min);
-  padding: .8rem .1rem;
+  padding: .65rem .1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   cursor: pointer;
+  list-style: none;
 }
 
-.guideSections summary > span {
-  display: grid;
-  gap: var(--space-1);
+.guideSections summary::-webkit-details-marker {
+  display: none;
 }
 
-.guideSections summary span {
-  color: var(--secondary);
+.guideSections summary strong {
+  min-width: 0;
+  color: var(--text);
   font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.guideChevron {
+  flex: 0 0 auto;
+  color: var(--secondary);
+  transition: transform var(--motion-fast);
+}
+
+.guideSections details[open] > summary .guideChevron {
+  transform: rotate(90deg);
 }
 
 .guideSections details > div {
