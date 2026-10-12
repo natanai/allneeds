@@ -238,12 +238,11 @@ test('desktop uses a task-and-context workspace and mobile returns to one linear
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
-test('plain-language guide citations reveal their matching source', async ({ page }) => {
+test('research guide citations preserve their matching scholarly source', async ({ page }) => {
   await page.goto('/observations');
-  await page.getByText('Observation guide', { exact: true }).click();
-  await expect(page.getByText('Use the sections that help you.', { exact: false })).toBeVisible();
+  await page.locator('#observation-guide > summary').click();
+  await expect(page.getByRole('heading', { name: 'Research behind observations' })).toBeVisible();
 
-  await page.getByText('What counts as an observation', { exact: true }).click();
-  await page.getByRole('link', { name: '[1]', exact: true }).first().click();
-  await expect(page.getByRole('link', { name: '[1] IRIS Center, Vanderbilt University: Defining Behavior (educator guidance)' })).toBeVisible();
+  await page.getByRole('link', { name: 'Reference 1: Nock & Kurtz' }).click();
+  await expect(page.locator('#observation-guide-source-nock-kurtz')).toContainText('Direct behavioral observation in school settings');
 });
