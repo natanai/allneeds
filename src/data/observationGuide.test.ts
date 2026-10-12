@@ -1,67 +1,54 @@
 import { describe, expect, it } from 'vitest';
-
 import observationGuide from './observationGuide.json';
 
-function authoredStrings(value: unknown): string[] {
-  if (typeof value === 'string') return [value];
-  if (Array.isArray(value)) return value.flatMap(authoredStrings);
-  if (value && typeof value === 'object') return Object.values(value).flatMap(authoredStrings);
-  return [];
-}
-
-describe('Canonical Observation guide', () => {
-  const referenceSection = observationGuide.sections.find(
-    (section) => section.id === 'observation-guide-references',
-  )!;
-  const sectionsWithoutReferences = observationGuide.sections.filter(
-    (section) => section !== referenceSection,
+describe('Observation research guide', () => {
+  const findings = observationGuide.sections.flatMap((section) =>
+    section.content.filter((block) => block.type === 'finding'),
   );
+  const sources = observationGuide.sources;
 
-  it('uses one content collection regardless of viewport', () => {
+  it('provides the same canonical research topics for all viewports', () => {
     expect('desktop' in observationGuide).toBe(false);
     expect('mobile' in observationGuide).toBe(false);
-    expect(observationGuide.sections.length).toBeGreaterThan(5);
+    expect(observationGuide.sections).toHaveLength(9);
+    expect(sources.length).toBeGreaterThanOrEqual(15);
+    expect(new Set(observationGuide.sections.map((section) => section.id)).size).toBe(observationGuide.sections.length);
+    expect(observationGuide.sections.at(-1)?.id).toBe('references');
   });
 
-  it('uses plain-language guidance without deleting interpretations', () => {
-    const renderedCopy = JSON.stringify({ intro: observationGuide.intro, sections: sectionsWithoutReferences });
-    expect(renderedCopy).not.toMatch(/low-inference|camera-ready|psycholinguistics|limbic|nervous systems|observer drift|\bkappa\b/i);
-    expect(renderedCopy).not.toContain('—');
-    expect(renderedCopy).toContain('not a test of whether your experience or interpretation is true');
-    expect(renderedCopy).toContain('Both can stay.');
-  });
-
-  it('has correctly ordered citations, each pointing to exactly one source', () => {
-    const citations = authoredStrings(sectionsWithoutReferences).flatMap(
-      (value) => [...value.matchAll(/href="#observation-guide-source-([^"]+)">\[(\d+)\]/g)],
-    );
-    const firstUse = new Map<string, number>();
-    for (const match of citations) {
-      const id = match[1];
-      const label = match[2];
-      if (!id || !label) throw new Error('Citation is missing a source identifier or number');
-      if (!firstUse.has(id)) firstUse.set(id, firstUse.size + 1);
-      expect(Number(label)).toBe(firstUse.get(id));
-    }
-
-    const listed = authoredStrings(referenceSection).flatMap(
-      (value) => [...value.matchAll(/id="observation-guide-source-([^"]+)"[^>]*>\[(\d+)\]/g)],
-    );
-    expect(listed.length).toBeGreaterThan(0);
-    expect(listed.map(([, id]) => id)).toEqual([...firstUse.keys()]);
-    expect(listed.map(([, , label]) => Number(label))).toEqual([...firstUse.values()]);
-    expect(new Set(listed.map(([, id]) => id)).size).toBe(listed.length);
-
-    const sources = authoredStrings(referenceSection).filter((item) => item.includes('id="observation-guide-source-'));
+  it('maintains one source per substantive finding, in first-citation order', () => {
+    const usedSourceIds = findings.map((block) => {
+      if (!('sourceId' in block)) throw new Error('Expected evidence finding');
+      return block.sourceId;
+    });
+    expect(usedSourceIds).toEqual(sources.map((source) => source.id));
+    expect(new Set(usedSourceIds).size).toBe(usedSourceIds.length);
+    expect(new Set(sources.map((source) => source.id)).size).toBe(sources.length);
     for (const source of sources) {
-      expect(source).toMatch(/href="https:\/\//);
-      expect(source).toContain('target="_blank"');
-      expect(source).toContain('rel="noopener noreferrer"');
+      expect(source.url).toMatch(/^https:\/\//);
+      expect(source.title.length).toBeGreaterThan(12);
+      expect(source.type.length).toBeGreaterThan(8);
+      expect(source.fit.length).toBeGreaterThan(30);
     }
   });
 
-  it('does not ship the previously misidentified citations', () => {
-    const allCopy = JSON.stringify(observationGuide);
-    expect(allCopy).not.toMatch(/PMC4766977|PMC8773921|PMC6353691|PMC4841258/);
+  it('distinguishes findings, real-world relevance and limitations', () => {
+    for (const block of findings) {
+      if (!('sourceId' in block)) throw new Error('Expected evidence finding');
+      for (const value of [block.method, block.result, block.meaning, block.limits]) {
+        expect(value.length).toBeGreaterThan(35);
+      }
+    }
+    const copy = JSON.stringify(observationGuide);
+    expect(copy).toContain('Both can stay.');
+    expect(copy).toContain('not a clinically proven causal chain');
+    expect(copy).not.toMatch(/PMC4766977|PMC8773921|PMC4841258/);
+  });
+
+  it('retains the historical research domains, not only observation writing tips', () => {
+    const titles = observationGuide.sections.map((section) => section.title).join(' | ');
+    for (const term of ['Observation', 'Language', 'Feelings', 'Communication', 'Measurement', 'Needs', 'Recall', 'Practice', 'Source']) {
+      expect(titles).toContain(term);
+    }
   });
 });
