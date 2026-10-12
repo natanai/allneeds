@@ -36,6 +36,7 @@ describe('Observation research guide', () => {
     for (const block of findings) {
       if (!('sourceId' in block)) throw new Error('Expected evidence finding');
       for (const value of [block.method, block.result, block.meaning, block.limits]) {
+        if (typeof value !== 'string') throw new Error('Finding is missing a required evidence field');
         expect(value.length).toBeGreaterThan(35);
       }
     }
