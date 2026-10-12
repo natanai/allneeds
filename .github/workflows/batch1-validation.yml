@@ -2,10 +2,6 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [site-test]
-    paths:
-      - '.github/workflows/batch1-validation.yml'
 
 permissions:
   contents: read
@@ -37,9 +33,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run full browser regression suite serially
-        run: pnpm exec playwright test tests/e2e/observation-mobile-hierarchy.spec.ts tests/e2e/observation-inference.spec.ts --workers=1
+        run: pnpm exec playwright test --workers=1
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
-
-# Validation retry after strict typing correction in research test.
