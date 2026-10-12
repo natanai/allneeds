@@ -342,7 +342,15 @@ export function ObservationsPage() {
       </section>
 
       <section className={styles.overview}>
-        <DisclosureRow variant="section" title="Why add concrete details?" description="What this writing step can do" bodyClassName={styles.overviewBody}><p>Concrete details can make a specific moment easier to remember, explain, or discuss. They do not prove someone’s intent, and they do not replace your feelings or interpretation.</p><div><span>Time</span><span>Place or people</span><span>What you saw or heard</span><span>Number or exact words (optional)</span></div></DisclosureRow>
+        <DisclosureRow variant="section" title="Why try this?" description="Research behind the writing approach" bodyClassName={styles.overviewBody}>
+          <p>Related studies investigate how people remember concrete words, practice specific thinking, label emotions, and use inner speech. Those are four separate research questions, not four trials of this app. Explore the full research guide below for each study’s findings and limitations.</p>
+          <p className={styles.overviewSources}>
+            <a href="https://doi.org/10.3758/s13421-018-0857-x" target="_blank" rel="noopener noreferrer">Concrete-word memory</a>
+            <a href="https://doi.org/10.1037/a0013642" target="_blank" rel="noopener noreferrer">Concreteness training</a>
+            <a href="https://doi.org/10.1111/j.1467-9280.2007.01916.x" target="_blank" rel="noopener noreferrer">Affect labeling</a>
+            <a href="https://doi.org/10.1037/bul0000021" target="_blank" rel="noopener noreferrer">Inner speech review</a>
+          </p>
+        </DisclosureRow>
       </section>
 
       <details id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
