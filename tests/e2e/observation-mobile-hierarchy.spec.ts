@@ -68,39 +68,42 @@ test('Quick Check shows per-detail guidance without a duplicate recipe', async (
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
-test('the same complete guide is available on phone and desktop', async ({ page }) => {
-  const sections: string[][] = [];
+test('the full research index and source library are available on mobile and desktop', async ({ page }) => {
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/observations');
-    await page.locator('#observation-guide > summary').click();
+    const guide = page.locator('#observation-guide');
+    await guide.locator(':scope > summary').click();
+    await expect(guide.getByRole('heading', { name: 'Research behind observations' })).toBeVisible();
 
-    const headings = page.locator('#observation-guide details > summary strong');
-    await expect(headings).toHaveCount(7);
-    const titles = await headings.allTextContents();
-    sections.push(titles);
-    expect(titles).toContain('When an exact record matters');
-    expect(titles).toContain('Reference library');
+    if (width < 760) {
+      const picker = guide.getByLabel('Research topic');
+      await expect(picker).toBeVisible();
+      await expect(picker.locator('option')).toHaveCount(9);
+      await picker.selectOption('references');
+    } else {
+      const tabs = guide.getByRole('navigation', { name: 'Research topics' });
+      await expect(tabs.getByRole('button')).toHaveCount(9);
+      await tabs.getByRole('button', { name: 'Source library' }).click();
+    }
 
-    await page.getByText('Reference library', { exact: true }).click();
-    await expect(page.locator('#observation-guide a[id^="observation-guide-source-"]')).toHaveCount(5);
+    await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(15);
+    await expect(guide.getByRole('link', { name: /\[15\] Brassil/ })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
-  expect(sections[0]).toEqual(sections[1]);
 });
 
-test('observation guide citations open their matching source within the full library', async ({ page }) => {
+test('a study citation opens the matching reference without nested accordions', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/observations');
-  await page.locator('#observation-guide > summary').click();
-  await page.getByText('What counts as an observation', { exact: true }).click();
+  const guide = page.locator('#observation-guide');
+  await guide.locator(':scope > summary').click();
 
-  const citation = page.locator('#observation-guide a[href="#observation-guide-source-defining-behavior"]').first();
-  await expect(citation).toHaveText('[1]');
+  const citation = guide.getByRole('link', { name: 'Reference 1: Nock & Kurtz' });
   await citation.click();
-
-  const reference = page.locator('#observation-guide-source-defining-behavior');
-  await expect(reference).toBeVisible();
-  await expect(reference).toContainText('[1] IRIS Center, Vanderbilt University: Defining Behavior');
-  await expect(reference).toHaveAttribute('href', 'https://iris.peabody.vanderbilt.edu/case-study/defining-behavior/');
+  const source = guide.locator('#observation-guide-source-nock-kurtz');
+  await expect(source).toBeVisible();
+  await expect(source).toContainText('[1] Nock & Kurtz (2005)');
+  await expect(source.locator('a')).toHaveAttribute('href', 'https://doi.org/10.1016/S1077-7229(05)80058-6');
+  await expect(guide.getByLabel('Research topic')).toHaveValue('references');
 });
