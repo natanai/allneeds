@@ -1,6 +1,6 @@
 # CI and regression-test redundancy audit — 2026-10-12
 
-Scope: `natanai/allneeds`, `main` at `c51e171cd8a96a2dc6f5e10c127c132ffa0a8f59`; compared the `site-test` validation workflow and a recent Actions execution. This is an inventory and source-level overlap audit, **not a claim that the complete suite was rerun**.
+Scope: `natanai/allneeds` inventory begun against `main` at `c51e171cd8a96a2dc6f5e10c127c132ffa0a8f59`; the cleanup branch was created after `main` advanced to `694c3a3b0ce209470a5e0b08f0aa050bc540da2f` (PR #168). Compared the `site-test` validation workflow and a recent Actions execution. This is an inventory and source-level overlap audit, **not a claim that the complete suite was rerun**.
 
 ## What the numbers mean
 
