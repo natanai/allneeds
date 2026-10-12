@@ -1,158 +1,414 @@
 {
   "intro": {
+    "title": "Research behind observations",
     "paragraphs": [
-      "Use the sections that help you. This is a guide to describing situations, not a test of whether your experience or interpretation is true. The same material is available on phones and larger screens."
+      "This research library investigates the ideas behind specific event descriptions, emotional language and communication. It restores the scope of the earlier nvc-app guide while separating measured findings from interpretation and practical suggestions.",
+      "Evidence about related methods is not proof that this app or the full NVC-informed sequence improves clinical outcomes. The historical sources and outstanding fact-check questions are preserved separately for continuing review."
     ]
   },
   "sections": [
     {
-      "id": "observation-guide-definition",
-      "eyebrow": "Start here",
-      "title": "What counts as an observation",
-      "description": "Describe the event, then add what it meant to you.",
+      "id": "methods",
+      "title": "Observation methods",
+      "description": "What professional behavioral observation actually records.",
       "content": [
         {
-          "type": "list",
-          "style": "unordered",
-          "items": [
-            "Describe actions, words, and outcomes you noticed. In behavioral recording, observable actions are described so another observer could recognize what happened <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-defining-behavior\">[1]</a></sup>.",
-            "Add the time, setting, or people when those details help place an event. Professional direct-observation guidance also records context alongside the specific behavior <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-nock-kurtz\">[2]</a></sup>.",
-            "A thought or feeling can belong in the same account. For example: “She closed her laptop while I was speaking. I felt dismissed and wondered if she wanted the discussion to end.”",
-            "You do not need a number or exact quote for every observation. An estimate or a note that you are unsure is better than invented precision."
-          ]
+          "type": "paragraph",
+          "text": "An observation is a record of an event from a particular perspective. Research methods distinguish a description of an action from a hypothesis about its meaning. That distinction is useful for organizing a story; it does not decide whether anyone's feelings or interpretation are legitimate."
+        },
+        {
+          "type": "finding",
+          "sourceId": "nock-kurtz",
+          "title": "How direct observation is defined",
+          "method": "Clinical-practice review of school-based observation methods, including defining target behaviors and recording context.",
+          "result": "The authors describe procedures for identifying behaviors, gathering contextual information, recording observations, and synthesizing results for clinical practice.",
+          "meaning": "Time, setting, words, and actions can make a record easier to inspect or compare.",
+          "limits": "This was not an outcome trial of NVC, journaling, or this application's checklist."
+        },
+        {
+          "type": "paragraph",
+          "text": "For personal writing, names, quotations, counts and times are optional when available. Exact measurements belong to formal recording protocols, not a threshold for whether someone should be believed."
+        }
+      ]
+    },
+    {
+      "id": "language",
+      "title": "Language, memory & self-talk",
+      "description": "What research finds about concrete words and ways of thinking.",
+      "content": [
+        {
+          "type": "finding",
+          "sourceId": "taylor-francis",
+          "title": "Concrete and abstract words in memory",
+          "method": "Two laboratory experiments tested recall and recognition of words presented alone or in differing sentence contexts.",
+          "result": "Participants generally recalled and recognized concrete words better than abstract words; adding sentence context did not eliminate that pattern.",
+          "meaning": "The word-concreteness effect offers a reason to study specificity, not a universal instruction to remove abstractions.",
+          "limits": "Words in experimental memory lists are not the same as descriptions of emotionally important events."
+        },
+        {
+          "type": "finding",
+          "sourceId": "watkins",
+          "title": "Practicing concrete thinking",
+          "method": "Experimental proof-of-principle work examined repeated concrete-thinking exercises among people with dysphoria.",
+          "result": "The researchers reported reduced dysphoria after concreteness training in this research program.",
+          "meaning": "Specific ways of processing experiences may matter psychologically; the full original 'Why try this?' area was pointing toward this literature.",
+          "limits": "Training involved a defined cognitive exercise. Simply adding time or place to an Observation is not equivalent treatment."
+        },
+        {
+          "type": "finding",
+          "sourceId": "inner-speech",
+          "title": "Inner speech is more than a single voice",
+          "method": "An integrative review examined developmental, cognitive, and neurobiological approaches to internal speech.",
+          "result": "Inner speech has several proposed cognitive functions and varies among people; the scientific picture is not a single settled mechanism.",
+          "meaning": "The words we use for our experiences may matter for self-reflection, but do not all work alike.",
+          "limits": "The review does not show that this app changes self-talk, behavior, or symptoms."
+        }
+      ]
+    },
+    {
+      "id": "affect",
+      "title": "Feelings & affect labeling",
+      "description": "Emotion-labeling findings—and why they are not observation findings.",
+      "content": [
+        {
+          "type": "finding",
+          "sourceId": "lieberman",
+          "title": "Putting feelings into words",
+          "method": "An fMRI experiment compared labeling emotional images with other encoding tasks.",
+          "result": "Labeling negative emotional stimuli was associated with lower amygdala responses and greater right ventrolateral prefrontal activity in the laboratory task.",
+          "meaning": "This is relevant to a possible next step of identifying feelings; it is not evidence for removing feelings from an observation.",
+          "limits": "Brain-activity differences are not themselves evidence of clinical effectiveness or that this specific writing step produces the same effect."
+        },
+        {
+          "type": "paragraph",
+          "text": "The allneeds pathway separates Observation and Feeling as tools for exploration. That sequence is a design hypothesis informed by NVC, not a clinically proven causal chain."
+        }
+      ]
+    },
+    {
+      "id": "communication",
+      "title": "Communication & interpretation",
+      "description": "How language, expectations, and inferred intent relate to interaction.",
+      "content": [
+        {
+          "type": "finding",
+          "sourceId": "fausey",
+          "title": "Subtle wording and judgments of blame",
+          "method": "Experimental studies tested whether linguistic framing influences how people assign responsibility.",
+          "result": "Changes in phrasing affected judgments of blame and financial liability in the study context.",
+          "meaning": "The way events are described may shape listeners' inferences. It is worth making specific details available alongside conclusions.",
+          "limits": "Framing effects do not tell us which account is truthful or establish that a neutral-sounding sentence is the best response."
+        },
+        {
+          "type": "finding",
+          "sourceId": "rogers",
+          "title": "I-language and communicating perspective",
+          "method": "Participants rated hypothetical opening statements for conflict discussions with different pronouns and perspectives.",
+          "result": "Statements using I-language and communicating both perspectives were rated as less hostile than alternatives.",
+          "meaning": "There is evidence that an opening statement's style can influence perceived hostility.",
+          "limits": "These were ratings of hypothetical discussions, not measured reductions in real-world relationship conflict."
+        },
+        {
+          "type": "finding",
+          "sourceId": "sanford",
+          "title": "Appraisals during recurring conflict discussions",
+          "method": "77 recently married couples took part in four observed conflict conversations; appraisals were recorded before each conversation.",
+          "result": "Changes in expectations and attributions predicted within-person changes in communication, especially expectations about being understood.",
+          "meaning": "An interpretation and an observable event are distinct but both can matter for understanding communication.",
+          "limits": "Associations from a married-couple sample do not prove changing the observation sentence causes a better interaction."
+        },
+        {
+          "type": "finding",
+          "sourceId": "chen",
+          "title": "Hostile-attribution research",
+          "method": "Researchers examined how hostile-attribution bias and emotional responding related to forms of adult aggression.",
+          "result": "The research investigated relationships between how ambiguous acts were interpreted, negative emotions, and aggressive behavior.",
+          "meaning": "It provides context for considering uncertainty when writing about someone's intentions.",
+          "limits": "It is not a method for discounting reports of mistreatment or determining whether an attribution was justified."
         },
         {
           "type": "callout",
-          "html": "<strong>Both can stay.</strong> A description of what happened and an interpretation of what it meant are different kinds of information. One does not cancel the other."
+          "html": "<strong>Both can stay.</strong> “She ended the call while I was speaking” describes an event. “I felt dismissed and wondered if it was deliberate” preserves the experience and interpretation."
         }
       ]
     },
     {
-      "id": "observation-guide-highlights",
-      "eyebrow": "Writing support",
-      "title": "Why a word may be highlighted",
-      "description": "An invitation to add detail, not a correction.",
+      "id": "measurement",
+      "title": "Measurement & reliability",
+      "description": "What systematic reviews and recording research show about rigor.",
       "content": [
+        {
+          "type": "finding",
+          "sourceId": "essig",
+          "title": "What researchers report checking",
+          "method": "A survey examined 596 experimental articles from two behavior-analysis journals (2017–2021).",
+          "result": "96.4% reported interobserver agreement for participant behavior; 54.7% reported procedural fidelity and, among those reporting fidelity, 17.7% also reported agreement on fidelity.",
+          "meaning": "Rigor requires inspecting how observations are recorded and how consistently procedures are followed.",
+          "limits": "Reporting rates are not measures of accuracy, nor validation of a personal journal or allneeds."
+        },
+        {
+          "type": "finding",
+          "sourceId": "padilla",
+          "title": "Are assessments reliable and valid?",
+          "method": "A systematic review identified 46 studies reporting reliability or validity for six criterion-referenced ABA assessments.",
+          "result": "The evidence gave conflicting support; the authors highlighted measurement terminology and methodological limitations.",
+          "meaning": "Even established observational assessments need direct validation rather than assuming that observable wording ensures scientific reliability.",
+          "limits": "These six tools are not the allneeds Observation tool."
+        },
+        {
+          "type": "finding",
+          "sourceId": "iris-abc",
+          "title": "ABC recording as a method",
+          "method": "An educational methods resource describes recording antecedents, a specified behavior, and what followed.",
+          "result": "ABC notes can organize repeated event data and help investigators examine recurring patterns.",
+          "meaning": "Optional counts, duration, latency and context can be useful in systematic observations.",
+          "limits": "This resource explains a recording procedure; a single ABC record does not establish causation, intention, or clinical benefit."
+        },
+        {
+          "type": "paragraph",
+          "text": "A personal observation does not require interobserver agreement, a standardized instrument, or exact measurement. These concepts explain what formal measurement rigor involves, not a standard that users must meet."
+        }
+      ]
+    },
+    {
+      "id": "needs",
+      "title": "Needs & social connection",
+      "description": "What the broader psychology establishes—and what is only an analogy.",
+      "content": [
+        {
+          "type": "finding",
+          "sourceId": "sdt",
+          "title": "Autonomy, competence and relatedness",
+          "method": "An integrative theoretical and empirical review summarizes Self-Determination Theory and another personality-systems framework.",
+          "result": "The review discusses autonomy, competence and relatedness in human motivation, development and wellbeing.",
+          "meaning": "Studying motivations and needs is reasonable; the site's Need vocabulary can be compared with such constructs.",
+          "limits": "SDT's three needs are not a validation of all NVC or allneeds Need labels, or proof that observation writing satisfies them."
+        },
+        {
+          "type": "finding",
+          "sourceId": "osg",
+          "title": "Evidence about human connection",
+          "method": "The U.S. Surgeon General's 2023 advisory synthesizes public-health evidence about social connection.",
+          "result": "The advisory documents meaningful associations between social connection and health across populations.",
+          "meaning": "Connection is an important topic to consider when describing interpersonal events and possible needs.",
+          "limits": "Public-health evidence about relationships does not establish that an observation sentence improves connection."
+        },
+        {
+          "type": "paragraph",
+          "text": "The link from an event to a Feeling, Need or Strategy is a reflective prompt. The research above supplies context for those subjects; it does not show that software can infer a particular person's Needs from wording."
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "title": "Recall, certainty & limitations",
+      "description": "When a record is helpful, and when it cannot settle a dispute.",
+      "content": [
+        {
+          "type": "finding",
+          "sourceId": "brassil",
+          "title": "Memory and later information",
+          "method": "A systematic review examined nine studies on cognitive abilities and misinformation susceptibility in eyewitness tasks.",
+          "result": "The review found varied evidence about susceptibility; stronger cognitive ability did not eliminate the possibility of misinformation effects.",
+          "meaning": "It helps explain why timestamps, contemporaneous notes and marked uncertainty may be valuable when precision matters.",
+          "limits": "Eyewitness tasks do not validate this app as a credibility checker, and memory uncertainty does not negate a person's experience."
+        },
         {
           "type": "list",
           "style": "unordered",
           "items": [
-            "“Always” or “never” can cover many events. You might add the dates, frequency, or one example you remember.",
-            "Words like “rude,” “unfair,” or “careless” may express an important judgment. You can keep the word and describe the particular words or actions behind it.",
-            "“On purpose” describes an interpretation of intent. If helpful, name the actions or statements that led you to that interpretation.",
-            "Words about harm, coercion, or pressure are not treated as unreal. Adding context should not erase what you experienced.",
-            "You can ignore a prompt that does not fit. The app checks wording patterns locally; it cannot establish what actually happened."
+            "Someone's intent is not directly measurable from a written description alone.",
+            "Details added after an event can be approximate. Mark uncertainty rather than inventing precision.",
+            "Different observers can encounter different parts of a situation. Context and cultural or linguistic conventions affect interpretations.",
+            "The detector only matches local word patterns. A green Quick Check result is not a research-based truth, reliability, or completeness score.",
+            "Nothing here is a diagnosis, legal standard, clinical assessment or replacement for professional care."
           ]
         }
       ]
     },
     {
-      "id": "observation-guide-examples",
-      "eyebrow": "Examples",
-      "title": "From broad wording to specific detail",
-      "description": "The second version adds context without declaring the first false.",
+      "id": "examples",
+      "title": "Practice & examples",
+      "description": "Turn broad wording into an event description without deleting meaning.",
       "content": [
         {
           "type": "examples",
           "items": [
             {
-              "evaluation": "“You’re always late and inconsiderate.”",
-              "observation": "“In the past two weeks, you arrived 5–15 minutes after our agreed time on three occasions.”",
-              "why": "Adds a timeframe and count. You can still explain how those occasions affected you."
+              "evaluation": "“You never listen to me.”",
+              "observation": "“During our conversation on Tuesday, I finished two sentences after you began speaking.”",
+              "why": "This names one event. A person can still explain that they felt unheard."
             },
             {
-              "evaluation": "“Janice works too much.”",
-              "observation": "“Janice logged 62 on-site hours this week, including Saturday.”",
-              "why": "Names the hours and period being described. Whether that is too much remains a separate judgment."
+              "evaluation": "“They deliberately excluded me.”",
+              "observation": "“The meeting invitation listed everyone on my team except me. I wondered whether that was intentional.”",
+              "why": "The omission and the interpretation are recorded separately; neither is erased."
             },
             {
-              "evaluation": "“He left the party to hurt me.”",
-              "observation": "“He left at 9:10 p.m. without saying goodbye. I felt hurt and wondered whether it was deliberate.”",
-              "why": "Records the action and preserves the feeling and question about intent."
+              "evaluation": "“He was rude.”",
+              "observation": "“When I asked a question, he said, ‘Read the email,’ and ended the conversation.”",
+              "why": "The quotation is usable detail. It does not require withdrawing the judgment about rudeness."
             },
             {
-              "evaluation": "“You were rude in the meeting.”",
-              "observation": "“During the 2:00–2:15 agenda item, you spoke twice while I was talking.”",
-              "why": "Names what occurred. The speaker can still describe why those interruptions felt rude."
+              "evaluation": "“She works too much.”",
+              "observation": "“She recorded 62 work hours over the previous seven days.”",
+              "why": "The count describes the schedule; whether it is excessive remains a meaningful appraisal."
             }
           ]
-        }
-      ]
-    },
-    {
-      "id": "observation-guide-measurement",
-      "eyebrow": "Optional depth",
-      "title": "When an exact record matters",
-      "description": "Methods used in professional behavioral observation.",
-      "content": [
-        {
-          "type": "paragraph",
-          "text": "The ideas below are mainly for ongoing records, team observations, or research. They are not requirements for a personal journal."
-        },
-        {
-          "type": "list",
-          "style": "unordered",
-          "items": [
-            "An <strong>operational definition</strong> describes a specific action so observers know what counts. Include examples and non-examples when the boundary could be unclear <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-defining-behavior\">[1]</a></sup>.",
-            "<strong>Frequency</strong> means how many times something happens; <strong>duration</strong> is how long it lasts; <strong>latency</strong> is the time between a specified event and an action. Choose a measure that fits what you are tracking <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-measuring-behavior\">[3]</a></sup>.",
-            "<strong>ABC notes</strong> record what occurred before an action (antecedent), the action (behavior), and what followed (consequence). They can help examine patterns across events, but a single ABC note does not prove what caused an action <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-abc-assessment\">[4]</a></sup>.",
-            "When multiple people record the same behavior, <strong>interobserver agreement</strong> checks how closely their records match. Agreement is a measure of consistency, not proof that every recorded judgment is correct. Research on behavioral studies also emphasizes the importance of checking whether procedures were carried out as intended <sup class=\"observation-guide__citation\"><a href=\"#observation-guide-source-observer-agreement\">[5]</a></sup>."
-          ]
-        }
-      ]
-    },
-    {
-      "id": "observation-guide-purpose",
-      "eyebrow": "Why it may help",
-      "title": "What concrete detail can and cannot do",
-      "description": "A clearer record, not a guaranteed outcome.",
-      "content": [
-        {
-          "type": "paragraph",
-          "text": "A time, quote, count, or description of an action can help you revisit a particular event and show someone else the details you are referring to. You can add those details without giving up the words you use for its impact."
         },
         {
           "type": "paragraph",
-          "text": "More details do not guarantee that two people will remember an event the same way or agree about its meaning. When you are tracking behavior repeatedly, clear descriptions can make later comparisons more consistent; they do not determine motivation on their own."
+          "text": "These are examples of a writing convention, not outputs of a validated clinical intervention. You may choose to leave a personal journal entry in your own words."
         }
       ]
     },
     {
-      "id": "observation-guide-limitations",
-      "eyebrow": "Scope check",
-      "title": "Limits to remember",
-      "description": "Use concrete details as information, not a verdict.",
+      "id": "references",
+      "title": "Source library",
+      "description": "Full references and claim-specific limitations in one place.",
       "content": [
         {
-          "type": "list",
-          "style": "unordered",
-          "items": [
-            "Memory is incomplete and can change. Record exact words promptly when they matter, but mark estimates or uncertainty rather than inventing precision.",
-            "Two people can notice different parts of the same situation. Context, language, culture, access, and perspective can affect the resulting accounts.",
-            "A person's intent may not be directly observable. You can describe the evidence for a conclusion without presenting that conclusion as a measured fact.",
-            "This tool is not a clinical assessment, legal standard, credibility test, or requirement for being believed."
-          ]
+          "type": "paragraph",
+          "text": "Sources are ordered by their first appearance in this guide. Each link opens a publication record or official resource. Some findings are experimental, others correlational, integrative, methodological, or public-health guidance. None directly validates the allneeds Observation tool."
         }
       ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "nock-kurtz",
+      "authors": "Nock & Kurtz",
+      "year": 2005,
+      "title": "Direct behavioral observation in school settings: Bringing science to practice",
+      "type": "Clinical methods review",
+      "url": "https://doi.org/10.1016/S1077-7229(05)80058-6",
+      "fit": "School-based observational coding, definitions, context, and reporting; not a study of this app."
     },
     {
-      "id": "observation-guide-references",
-      "eyebrow": "Want the sources?",
-      "title": "Reference library",
-      "description": "Numbered in the order they first appear above.",
-      "content": [
-        {
-          "type": "list",
-          "style": "unordered",
-          "items": [
-            "<a id=\"observation-guide-source-defining-behavior\" href=\"https://iris.peabody.vanderbilt.edu/case-study/defining-behavior/\" target=\"_blank\" rel=\"noopener noreferrer\">[1] IRIS Center, Vanderbilt University: Defining Behavior (educator guidance)</a>",
-            "<a id=\"observation-guide-source-nock-kurtz\" href=\"https://doi.org/10.1016/S1077-7229(05)80058-6\" target=\"_blank\" rel=\"noopener noreferrer\">[2] Nock &amp; Kurtz (2005): Direct behavioral observation in school settings (scholarly review)</a>",
-            "<a id=\"observation-guide-source-measuring-behavior\" href=\"https://iris.peabody.vanderbilt.edu/case-study/measuring-behavior/\" target=\"_blank\" rel=\"noopener noreferrer\">[3] IRIS Center, Vanderbilt University: Measuring Behavior (educator guidance)</a>",
-            "<a id=\"observation-guide-source-abc-assessment\" href=\"https://iris.peabody.vanderbilt.edu/module/fba-elem/cresource/q2/p06/\" target=\"_blank\" rel=\"noopener noreferrer\">[4] IRIS Center, Vanderbilt University: Descriptive Assessments and ABC recording (educator guidance)</a>",
-            "<a id=\"observation-guide-source-observer-agreement\" href=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC10098472/\" target=\"_blank\" rel=\"noopener noreferrer\">[5] Essig, Rotta, &amp; Poling (2023): Interobserver agreement and procedural fidelity (research review)</a>"
-          ]
-        }
-      ]
+      "id": "taylor-francis",
+      "authors": "Taylor and colleagues",
+      "year": 2019,
+      "title": "Mechanisms of word concreteness effects in explicit memory: Does context availability play a role?",
+      "type": "Two experimental memory studies",
+      "url": "https://doi.org/10.3758/s13421-018-0857-x",
+      "fit": "Concrete versus abstract words in laboratory recall and recognition, not personal event narratives."
+    },
+    {
+      "id": "watkins",
+      "authors": "Watkins, Baeyens & Read",
+      "year": 2009,
+      "title": "Concreteness training reduces dysphoria: Proof-of-principle for repeated cognitive bias modification in depression",
+      "type": "Experimental proof-of-principle",
+      "url": "https://doi.org/10.1037/a0013642",
+      "fit": "Repeated concrete-thinking training for dysphoric participants, not NVC observation writing."
+    },
+    {
+      "id": "inner-speech",
+      "authors": "Alderson-Day & Fernyhough",
+      "year": 2015,
+      "title": "Inner speech: Development, cognitive functions, phenomenology, and neurobiology",
+      "type": "Integrative scientific review",
+      "url": "https://doi.org/10.1037/bul0000021",
+      "fit": "Reviews what is known and uncertain about inner speech; no observation-checklist intervention."
+    },
+    {
+      "id": "lieberman",
+      "authors": "Lieberman and colleagues",
+      "year": 2007,
+      "title": "Putting feelings into words: Affect labeling disrupts amygdala activity in response to affective stimuli",
+      "type": "Experimental fMRI study",
+      "url": "https://doi.org/10.1111/j.1467-9280.2007.01916.x",
+      "fit": "Emotion labeling in a laboratory image task, not writing neutral observations or clinical outcomes."
+    },
+    {
+      "id": "fausey",
+      "authors": "Fausey & Boroditsky",
+      "year": 2010,
+      "title": "Subtle linguistic cues influence perceived blame and financial liability",
+      "type": "Experimental language-framing research",
+      "url": "https://doi.org/10.3758/PBR.17.5.644",
+      "fit": "Linguistic framing of events affected blame judgments in experiments, not the efficacy of avoiding evaluations."
+    },
+    {
+      "id": "rogers",
+      "authors": "Rogers, Howieson & Neame",
+      "year": 2018,
+      "title": "I understand you feel that way, but I feel this way: The benefits of I-language and communicating perspective during conflict",
+      "type": "Hypothetical-scenario experiments",
+      "url": "https://doi.org/10.7717/peerj.4831",
+      "fit": "Participants rated likely hostility and defensiveness to hypothetical conflict openers; actual conflict outcomes not measured."
+    },
+    {
+      "id": "sanford",
+      "authors": "Sanford",
+      "year": 2006,
+      "title": "Communication during marital conflict: When couples alter their appraisal, they change their behavior",
+      "type": "Repeated-measures couple observation",
+      "url": "https://doi.org/10.1037/0893-3200.20.2.256",
+      "fit": "77 married couples across four conversations; observed association, not randomized NVC treatment."
+    },
+    {
+      "id": "chen",
+      "authors": "Chen, Coccaro & Jacobson",
+      "year": 2012,
+      "title": "Hostile attributional bias, negative emotional responding, and aggression in adults: Moderating effects of gender and impulsivity",
+      "type": "Adult correlational study",
+      "url": "https://doi.org/10.1002/ab.21407",
+      "fit": "Attributional bias and aggression associations, not proof that a user's account is inaccurate."
+    },
+    {
+      "id": "essig",
+      "authors": "Essig, Rotta & Poling",
+      "year": 2023,
+      "title": "Interobserver agreement and procedural fidelity: An odd asymmetry",
+      "type": "Research-reporting survey (596 articles)",
+      "url": "https://doi.org/10.1002/jaba.961",
+      "fit": "How researchers report agreement and intervention fidelity; does not measure this site's reliability."
+    },
+    {
+      "id": "padilla",
+      "authors": "Padilla and colleagues",
+      "year": 2023,
+      "title": "Validity and reliability evidence for assessments based in applied behavior analysis: A systematic review",
+      "type": "Systematic review (46 studies)",
+      "url": "https://doi.org/10.1177/01454455221098151",
+      "fit": "Six established ABA assessments, not validity of allneeds Observation or a personal journal."
+    },
+    {
+      "id": "iris-abc",
+      "authors": "IRIS Center, Vanderbilt University",
+      "year": null,
+      "title": "Descriptive assessments and ABC recording",
+      "type": "Educational methods resource",
+      "url": "https://iris.peabody.vanderbilt.edu/module/fba-elem/cresource/q2/p06/",
+      "fit": "Explains antecedent-behavior-consequence data collection; practice resource, not original experimental evidence."
+    },
+    {
+      "id": "sdt",
+      "authors": "Ryan and colleagues",
+      "year": 2019,
+      "title": "Becoming who you are: An integrative review of self-determination theory and personality systems interactions theory",
+      "type": "Integrative motivation review",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6378399/",
+      "fit": "Context for autonomy, competence and relatedness; does not validate allneeds' wider NVC-inspired Need list."
+    },
+    {
+      "id": "osg",
+      "authors": "U.S. Office of the Surgeon General",
+      "year": 2023,
+      "title": "Our epidemic of loneliness and isolation: The healing effects of social connection and community",
+      "type": "Public-health evidence advisory",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK595227/",
+      "fit": "Public health and relationships; not evidence that writing observations improves connection."
+    },
+    {
+      "id": "brassil",
+      "authors": "Brassil, O’Mahony & Greene",
+      "year": 2024,
+      "title": "Do cognitive abilities reduce eyewitness susceptibility to the misinformation effect? A systematic review",
+      "type": "Systematic review (9 studies)",
+      "url": "https://doi.org/10.3758/s13423-024-02512-5",
+      "fit": "Eyewitness misinformation paradigms, not an accuracy or credibility test for personal narratives."
     }
   ]
 }
