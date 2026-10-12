@@ -20,11 +20,14 @@ type GuideBlock =
   | { type: 'list'; style: 'ordered' | 'unordered'; items: string[] }
   | { type: 'callout'; html: string }
   | { type: 'paragraph'; text: string }
+  | { type: 'finding'; sourceId: string; title: string; method: string; result: string; meaning: string; limits: string }
   | { type: 'examples'; items: Array<{ evaluation: string; observation: string; why: string }> };
-type GuideSection = { id: string; eyebrow?: string; title: string; description?: string; defaultOpen?: boolean; content: GuideBlock[] };
+type GuideSection = { id: string; title: string; description?: string; content: GuideBlock[] };
+type GuideSource = { id: string; authors: string; year: number | null; title: string; type: string; url: string; fit: string };
 type GuideData = {
-  intro?: { eyebrow?: string; title?: string; paragraphs?: string[] };
-  sections?: GuideSection[];
+  intro: { title: string; paragraphs: string[] };
+  sections: GuideSection[];
+  sources: GuideSource[];
 };
 
 const slotDefinitions = [
@@ -44,6 +47,23 @@ function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
     }
     if (block.type === 'callout') return <aside key={blockIndex} className={styles.guideCallout} dangerouslySetInnerHTML={{ __html: block.html }} />;
     if (block.type === 'paragraph') return <p key={blockIndex} dangerouslySetInnerHTML={{ __html: block.text }} />;
+    if (block.type === 'finding') {
+      const sourceIndex = guide.sources.findIndex((entry) => entry.id === block.sourceId);
+      const source = guide.sources[sourceIndex];
+      if (sourceIndex < 0 || !source) return null;
+      return (
+        <article key={blockIndex} className={styles.guideFinding}>
+          <div className={styles.guideFindingTitle}>
+            <h4>{block.title}</h4>
+            <a href={`#observation-guide-source-${source.id}`} aria-label={`Reference ${sourceIndex + 1}: ${source.authors}`}>[{sourceIndex + 1}]</a>
+          </div>
+          <p><strong>Research method.</strong> {block.method}</p>
+          <p><strong>Finding.</strong> {block.result}</p>
+          <p><strong>Relevance.</strong> {block.meaning}</p>
+          <p className={styles.guideFindingLimit}><strong>Limit.</strong> {block.limits}</p>
+        </article>
+      );
+    }
     return <div key={blockIndex} className={styles.guideExamples}>{block.items.map((item, itemIndex) => <article key={itemIndex}><p><strong>Broad wording:</strong> <span dangerouslySetInnerHTML={{ __html: item.evaluation }} /></p><p><strong>More concrete:</strong> <span dangerouslySetInnerHTML={{ __html: item.observation }} /></p><p dangerouslySetInnerHTML={{ __html: item.why }} /></article>)}</div>;
   });
 }
@@ -79,8 +99,22 @@ export function ObservationsPage() {
   const [feelingsMode, setFeelingsMode] = useState<'unmet' | 'met'>(initialDraft?.feelingsMode ?? 'unmet');
   const [helpTopic, setHelpTopic] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [guideSection, setGuideSection] = useState(guide.sections[0]?.id ?? 'methods');
+  const pendingSourceRef = useRef<string | null>(null);
   const draftRef = useRef<ObservationDraft>({ text, feelingsMode, showSuggestions, showExample });
   draftRef.current = { text, feelingsMode, showSuggestions, showExample };
+
+  const activeGuideSection = guide.sections.find((entry) => entry.id === guideSection) ?? guide.sections[0];
+
+  useEffect(() => {
+    if (!guideOpen || guideSection !== 'references' || !pendingSourceRef.current) return;
+    const targetId = pendingSourceRef.current;
+    pendingSourceRef.current = null;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ block: 'nearest' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [guideOpen, guideSection]);
 
   const analysis = useMemo(() => analyzeObservation(text, feelingsMode), [feelingsMode, text]);
   const canLoad = Boolean(text.trim());
@@ -312,19 +346,49 @@ export function ObservationsPage() {
       </section>
 
       <details id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
-        <summary><span><small>Examples and sources</small><strong>Observation guide</strong></span><span aria-hidden="true">›</span></summary>
+        <summary><strong>Research behind observations</strong><span aria-hidden="true">›</span></summary>
         {guideOpen ? <div className={styles.guideCard} onClick={(event) => {
           const target = event.target as Element;
           const link = target.closest<HTMLAnchorElement>('a[href^="#observation-guide-source-"]');
           if (!link) return;
-          const reference = document.querySelector<HTMLElement>(link.getAttribute('href') ?? '');
-          if (!reference) return;
+          const sourceId = link.getAttribute('href')?.slice(1);
+          if (!sourceId) return;
           event.preventDefault();
-          reference.closest('details')?.setAttribute('open', '');
-          window.requestAnimationFrame(() => reference.scrollIntoView({ block: 'center' }));
+          pendingSourceRef.current = sourceId;
+          setGuideSection('references');
+          if (guideSection === 'references') {
+            window.requestAnimationFrame(() => document.getElementById(sourceId)?.scrollIntoView({ block: 'nearest' }));
+          }
         }}>
-          {guide.intro ? <header>{guide.intro.eyebrow ? <small>{guide.intro.eyebrow}</small> : null}{guide.intro.title ? <h2>{guide.intro.title}</h2> : null}{guide.intro.paragraphs?.map((paragraph, index) => <p key={index} dangerouslySetInnerHTML={{ __html: paragraph }} />)}</header> : null}
-          <div className={styles.guideSections}>{guide.sections?.map((section) => <details key={section.id}><summary><span><small>{section.eyebrow}</small><strong>{section.title}</strong><span>{section.description}</span></span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
+          <header className={styles.guideIntro}>
+            <h2>{guide.intro.title}</h2>
+            {guide.intro.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+          </header>
+          <div className={styles.guideNavigation}>
+            <label htmlFor="observation-research-topic">Research topic</label>
+            <select id="observation-research-topic" className={styles.guideSelect} value={guideSection} onChange={(event) => setGuideSection(event.target.value)}>
+              {guide.sections.map((section) => <option key={section.id} value={section.id}>{section.title}</option>)}
+            </select>
+            <nav className={styles.guideTabs} aria-label="Research topics">
+              {guide.sections.map((section) => (
+                <button key={section.id} type="button" aria-pressed={guideSection === section.id} aria-controls="observation-guide-panel" onClick={() => setGuideSection(section.id)}>{section.title}</button>
+              ))}
+            </nav>
+          </div>
+          {activeGuideSection ? <section id="observation-guide-panel" className={styles.guidePanel} aria-label={activeGuideSection.title}>
+            <div className={styles.guidePanelHeading}>
+              <h3>{activeGuideSection.title}</h3>
+              {activeGuideSection.description ? <p>{activeGuideSection.description}</p> : null}
+            </div>
+            <GuideContent blocks={activeGuideSection.content} />
+            {activeGuideSection.id === 'references' ? <ol className={styles.guideSources}>
+              {guide.sources.map((source, index) => <li key={source.id} id={`observation-guide-source-${source.id}`}>
+                <a href={source.url} target="_blank" rel="noopener noreferrer">[{index + 1}] {source.authors}{source.year ? ` (${source.year})` : ''}. {source.title}</a>
+                <small>{source.type}</small>
+                <p>{source.fit}</p>
+              </li>)}
+            </ol> : null}
+          </section> : null}
         </div> : null}
       </details>
 
