@@ -4,8 +4,9 @@ import { useLocation, useNavigate } from 'react-router';
 import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { downloadBrowserBackup, restoreBrowserBackup } from '../../persistence/browserBackup';
-import { clearJournalDraft, readJournalDraft } from '../../persistence/workflowDrafts';
+import { clearAlexithymiaDraft, clearJournalDraft, readAlexithymiaDraft, readJournalDraft } from '../../persistence/workflowDrafts';
 import { useBlueskySession } from '../account/blueskyAccount';
+import { supportTermIndex } from '../alexithymia/alexithymiaTerms';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { HistoryWorkspace } from './HistoryWorkspace';
 import { JournalBook } from './JournalBook';
@@ -13,6 +14,27 @@ import { JOURNAL_CHANGED_EVENT, JOURNAL_STORAGE_KEY, readJournal, writeJournal, 
 import styles from './JournalPage.module.css';
 
 type Feedback = { kind: 'success' | 'error' | 'warning'; message: string } | null;
+
+// A saved Journal entry completes only the check-in it came from; another tab may
+// already have started a different check-in while this Journal draft was open.
+function clearCompletedAlexithymiaCheckIn(entry: JournalRecord) {
+  const context = entry.guidedSupport;
+  const current = readAlexithymiaDraft();
+  if (!context || !current) return;
+  const terms = supportTermIndex(current.customTerms);
+  const selected = current.termOrder.map((id) => terms.get(id)).filter((term) => (
+    term && (current.decisions[term.id] === 'fits' || current.decisions[term.id] === 'maybe')
+  ));
+  if (
+    current.observation.trim() !== context.observation
+    || current.statement.trim() !== context.statement
+    || current.selectedNeeds.length !== entry.needs.length
+    || current.selectedNeeds.some((need, index) => need !== entry.needs[index])
+    || selected.length !== context.terms.length
+    || selected.some((term, index) => term?.label !== context.terms[index]?.label || term?.role !== context.terms[index]?.role)
+  ) return;
+  clearAlexithymiaDraft();
+}
 export function JournalPage() {
   const session = useBlueskySession();
   const { search } = useLocation();
@@ -50,6 +72,10 @@ export function JournalPage() {
       const current = readJournal();
       if (editing && !current.some((item) => item.id === entry.id)) { setFeedback({ kind: 'error', message: 'This entry was removed elsewhere. Your edit draft is still on this device.' }); return false; }
       setEntries(writeJournal(editing ? current.map((item) => item.id === entry.id ? entry : item) : [...current, entry]));
+      if (!editing && entry.guidedSupport) {
+        try { clearCompletedAlexithymiaCheckIn(entry); }
+        catch { /* The Journal entry was saved; an unfinished check-in can still be cleared manually. */ }
+      }
       setFeedback({ kind: 'success', message: editing ? 'Journal entry updated.' : 'Journal entry saved to this device.' });
       if (!editing) closeJournal();
       return true;
