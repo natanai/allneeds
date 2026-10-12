@@ -2,10 +2,6 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [review/observation-research-evidence-ui]
-    paths:
-      - '.github/workflows/batch1-validation.yml'
 
 permissions:
   contents: read
