@@ -224,7 +224,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.waitForTimeout(250);
 
   await page.reload();
-  await page.getByRole('button', { name: 'Continue check-in' }).click();
+  await page.getByRole('button', { name: 'Continue previous check-in' }).click();
   await expect(page.getByRole('heading', { name: 'Possible words' })).toBeVisible();
   await expect(page.getByText('Anxiety').first()).toBeVisible();
   await page.getByRole('button', { name: 'Use these words' }).click();
@@ -233,5 +233,58 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Start check-in' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Possible words' })).toHaveCount(0);
+  expect(runtimeProblems).toEqual([]);
+});
+
+test('Alexithymia can start fresh without accidentally losing a saved check-in', async ({ page }) => {
+  const runtimeProblems = collectRuntimeProblems(page);
+  await page.goto('/alexithymia-support');
+  await page.getByRole('button', { name: 'Start check-in' }).click();
+  const observation = page.getByRole('textbox', { name: 'What happened?', exact: true });
+  await observation.fill('I waited outside the door.');
+  await page.reload();
+
+  await expect(page.getByRole('button', { name: 'Start new check-in' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Continue previous check-in' })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue previous check-in' }).click();
+  await expect(observation).toHaveValue('I waited outside the door.');
+  await page.reload();
+
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.getByRole('button', { name: 'Start new check-in' }).click();
+  await expect(page.getByRole('button', { name: 'Continue previous check-in' })).toBeVisible();
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Start new check-in' }).click();
+  await expect(observation).toHaveValue('');
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue previous check-in' }).click();
+  await expect(observation).toHaveValue('');
+  expect(runtimeProblems).toEqual([]);
+});
+
+test('A Journal save completes the matching Alexithymia check-in, not the unfinished Journal draft', async ({ page }) => {
+  const runtimeProblems = collectRuntimeProblems(page);
+  await page.goto('/alexithymia-support');
+  await page.getByRole('button', { name: 'Start check-in' }).click();
+  await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('I heard the meeting move to tomorrow.');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Browse all feelings' }).click();
+  await page.getByRole('button', { name: 'No word yet', exact: true }).click();
+  await page.getByRole('button', { name: 'Use these words' }).click();
+  await page.getByRole('button', { name: 'Build sentence' }).click();
+  await page.getByRole('button', { name: 'Add to Journal' }).click();
+  const journalDialog = page.getByRole('dialog', { name: 'Journal' });
+  await expect(journalDialog.getByLabel('Reflection')).toHaveValue(/I heard the meeting move to tomorrow/);
+
+  // An unsaved Journal handoff must still be resumable.
+  await journalDialog.getByRole('button', { name: 'Close full screen journal' }).click();
+  await page.goto('/alexithymia-support');
+  await expect(page.getByRole('button', { name: 'Continue previous check-in' })).toBeVisible();
+
+  await page.goto('/inventory/journal?compose=new');
+  await page.getByRole('dialog', { name: 'Journal' }).getByRole('button', { name: 'Save', exact: true }).click();
+  await page.goto('/alexithymia-support');
+  await expect(page.getByRole('button', { name: 'Start check-in', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Continue previous check-in' })).toHaveCount(0);
   expect(runtimeProblems).toEqual([]);
 });

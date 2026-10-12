@@ -363,19 +363,22 @@ export function AlexithymiaSupportPage() {
     void navigate('/inventory/journal?compose=new');
   }
 
-  function resetCheckIn() {
-    if (!window.confirm('Start over and clear this check-in?')) return;
-    const next = emptyDraft();
+  function resetCheckIn(startImmediately = false) {
+    if (draft.stage > 0 && !window.confirm(
+      'Start a new check-in? This clears the previous check-in on this device. Saved Journal entries will not change.',
+    )) return;
+    const next = { ...emptyDraft(), stage: startImmediately ? 1 : 0 };
     draftRef.current = next;
     clearAlexithymiaDraft();
     setDraft(next);
-    setEntryVisible(true);
+    setEntryVisible(!startImmediately);
     setSheet(null);
     setActiveTermId(null);
     setWordFilter('matches');
     setWordQuery('');
     setNeedQuery('');
     setStatus('');
+    if (startImmediately) window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   const stageTitle = ['What happened?', 'Clues', 'Words', 'Your words'][Math.max(0, draft.stage - 1)] ?? 'Check in';
@@ -398,13 +401,21 @@ export function AlexithymiaSupportPage() {
               </li>
             ))}
           </ol>
+          {hasDraft ? (
+            <p className={styles.savedCheckInNote}>A previous check-in is saved on this device. You can begin fresh or continue it.</p>
+          ) : null}
           <div className={styles.entryActions}>
             <button type="button" className={styles.primaryButton} onClick={() => {
-              if (hasDraft) setEntryVisible(false);
+              if (hasDraft) resetCheckIn(true);
               else goToStage(1);
             }}>
-              {hasDraft ? 'Continue check-in' : 'Start check-in'}
+              {hasDraft ? 'Start new check-in' : 'Start check-in'}
             </button>
+            {hasDraft ? (
+              <button type="button" className={styles.textButton} onClick={() => setEntryVisible(false)}>
+                Continue previous check-in
+              </button>
+            ) : null}
             <button type="button" className={styles.iconButton} aria-label="About this feeling check-in" onClick={() => setSheet('info')}><InfoIcon /></button>
           </div>
         </div>
@@ -720,7 +731,7 @@ export function AlexithymiaSupportPage() {
                     setStatus('Reading your statement aloud.');
                   }} disabled={!draft.statement.trim()}><SpeakIcon /><span>Read aloud</span></button>
                   <button type="button" onClick={addToJournal} disabled={!draft.statement.trim() && !draft.observation.trim() && !selectedTerms.length && !draft.selectedNeeds.length}><JournalIcon /><span>Add to Journal</span></button>
-                  <button type="button" onClick={resetCheckIn}><ResetIcon /><span>Start over</span></button>
+                  <button type="button" onClick={() => resetCheckIn()}><ResetIcon /><span>Start over</span></button>
                 </div>
                 <p className={styles.liveStatus} role="status">{status}</p>
               </section>
