@@ -41,3 +41,5 @@ jobs:
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
+
+# Validation retry after strict typing correction in research test.
