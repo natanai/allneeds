@@ -312,7 +312,7 @@ export function ObservationsPage() {
       </section>
 
       <details id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
-        <summary><span><small>Examples and sources</small><strong>Observation guide</strong></span><span aria-hidden="true">›</span></summary>
+        <summary><strong>Observation guide</strong><span aria-hidden="true">›</span></summary>
         {guideOpen ? <div className={styles.guideCard} onClick={(event) => {
           const target = event.target as Element;
           const link = target.closest<HTMLAnchorElement>('a[href^="#observation-guide-source-"]');
@@ -324,7 +324,7 @@ export function ObservationsPage() {
           window.requestAnimationFrame(() => reference.scrollIntoView({ block: 'center' }));
         }}>
           {guide.intro ? <header>{guide.intro.eyebrow ? <small>{guide.intro.eyebrow}</small> : null}{guide.intro.title ? <h2>{guide.intro.title}</h2> : null}{guide.intro.paragraphs?.map((paragraph, index) => <p key={index} dangerouslySetInnerHTML={{ __html: paragraph }} />)}</header> : null}
-          <div className={styles.guideSections}>{guide.sections?.map((section) => <details key={section.id}><summary><span><small>{section.eyebrow}</small><strong>{section.title}</strong><span>{section.description}</span></span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
+          <div className={styles.guideSections}>{guide.sections?.map((section) => <details key={section.id}><summary><strong>{section.title}</strong><span className={styles.guideChevron} aria-hidden="true">›</span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
         </div> : null}
       </details>
 
