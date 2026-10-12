@@ -66,6 +66,33 @@ describe('Alexithymia Support statement builder', () => {
     expect(buildSupportStatement({ observation: '', terms: [], needSlugs: [], noWordYet: false })).toBe('');
   });
 
+  it('puts the full support-lane sentence in Reflection exactly once and preserves the original observation as context', () => {
+    const observation = 'My colleague closed the door before I finished speaking.';
+    const statement = 'When my colleague closed the door before I finished speaking, I feel uneasy because I need understanding.';
+    const draft = createSupportJournalDraft({
+      observation, terms: [customWorkingTerm('uneasy')], needSlugs: ['understanding'], statement,
+    });
+    expect(draft.notes).toBe(statement);
+    expect(draft.guidedSupport?.observation).toBe(observation);
+    expect(draft.guidedSupport?.statement).toBe(statement);
+  });
+
+  it('respects a manually edited sentence without appending observation text', () => {
+    const draft = createSupportJournalDraft({
+      observation: 'The meeting went longer than expected.',
+      terms: [], needSlugs: [], statement: 'I need time to think about this.',
+    });
+    expect(draft.notes).toBe('I need time to think about this.');
+    expect(draft.guidedSupport?.observation).toBe('The meeting went longer than expected.');
+  });
+
+  it('uses the observation by itself when no completed sentence exists', () => {
+    const draft = createSupportJournalDraft({
+      observation: 'The phone rang.', terms: [], needSlugs: [], statement: '',
+    });
+    expect(draft.notes).toBe('The phone rang.');
+  });
+
   it('preserves all chosen roles in Journal without classifying working or Faux terms as Feelings', () => {
     const feeling = candidateTerm(alexithymiaCandidates.find((candidate) => candidate.key === 'anxiety')!);
     const working = candidateTerm(alexithymiaCandidates.find((candidate) => candidate.key === 'guilt')!);
