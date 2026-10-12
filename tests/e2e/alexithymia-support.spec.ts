@@ -87,13 +87,21 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   const statement = page.getByLabel('Your statement');
   await expect(statement).toHaveValue(/I feel anxiety, I feel guilt, and I feel blamed because I need understanding/);
   await expect(statement).not.toHaveValue(/request|should/i);
+  const finishedStatement = await statement.inputValue();
   await page.getByRole('button', { name: /Add to Journal/ }).click();
 
   const journal = page.getByRole('dialog', { name: 'Journal' });
-  await expect(journal.getByLabel('Reflection')).toHaveValue(/guilt.*blamed.*understanding/i);
+  await expect(journal.getByLabel('Reflection')).toHaveValue(finishedStatement);
   await expect(journal.getByRole('button', { name: 'Feeling' })).toContainText('Anxiety');
   await expect(journal.getByRole('button', { name: 'Feeling' })).not.toContainText(/Guilt|Blamed/);
   await expectNoHorizontalOverflow(page);
+  await journal.getByRole('button', { name: 'Save', exact: true }).click();
+  const saved = await page.evaluate(() => {
+    const journal = JSON.parse(localStorage.getItem('allneeds.v2.journal') ?? 'null');
+    return journal?.data?.entries?.find((entry: { tags: string[] }) => entry.tags.includes('alexithymia-check-in'));
+  });
+  expect(saved.notes).toBe(finishedStatement);
+  expect(saved.guidedSupport.observation).toBe('I felt blamed and wanted understanding when we stopped talking.');
 });
 
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
