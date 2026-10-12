@@ -274,7 +274,7 @@ test('A Journal save completes the matching Alexithymia check-in, not the unfini
   await page.getByRole('button', { name: 'Build sentence' }).click();
   await page.getByRole('button', { name: 'Add to Journal' }).click();
   const journalDialog = page.getByRole('dialog', { name: 'Journal' });
-  await expect(journalDialog.getByLabel('Reflection')).toContainText('I heard the meeting move to tomorrow.');
+  await expect(journalDialog.getByLabel('Reflection')).toHaveValue(/I heard the meeting move to tomorrow/);
 
   // An unsaved Journal handoff must still be resumable.
   await journalDialog.getByRole('button', { name: 'Close full screen journal' }).click();
