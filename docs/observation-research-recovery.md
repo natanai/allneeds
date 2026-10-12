@@ -3,6 +3,10 @@
 Date: 2026-10-11 (restoration staging)  
 Target: `site-test` **only**. This file is a review ledger, not approval to deploy or a completed systematic review.
 
+## Round 1 ongoing evidence review (2026-10-12)
+
+A separate **31-source approval queue** is maintained at [Observation source approval register](./observation-source-approval-queue-2026-10-12.md). Entries N01–N12 directly investigate NVC; M01–M17 investigate relevant adjacent mechanisms, observational methods and needs theory; X01–X02 are exploratory preprints held for possible design research. All **31 remain pending user approval**. Their DOI/arXiv URLs contain no tracking or ChatGPT referral parameters. This register extends, rather than replaces, the 20-link historical inventory below. The public Observation source catalog is **not** updated by this research-only record.
+
 ## Why this is being restored
 
 The earlier `natanai/nvc-app` Observation guide combined an academic-style abstract, **eight desktop sections and 18 linked references** with an additional short “Why try this?” explanation that linked references **[19] and [20]**. The React rebuild (2026-08-24) switched all viewports to the shorter mobile guidance and removed the four linked introductory research sources. The 2026-10-11 consolidation eliminated the unused desktop guide data and reduced public references to five.
