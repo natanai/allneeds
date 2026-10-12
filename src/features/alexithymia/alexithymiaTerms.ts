@@ -157,13 +157,9 @@ export function createSupportJournalDraft({
   const canonicalFeelings = terms.filter((term) => term.role === 'feeling');
   const cleanObservation = observation.trim();
   const cleanStatement = statement.trim();
-  const assembledNotes = [
-    cleanStatement,
-    cleanObservation && !cleanStatement.includes(cleanObservation)
-      ? `What happened: ${cleanObservation}`
-      : '',
-  ].filter(Boolean).join('\n\n');
-  const notes = assembledNotes || (terms.length
+  // The finished statement is the person's Reflection. Keep the original
+  // observation in guidedSupport without appending a second copy to their text.
+  const notes = cleanStatement || cleanObservation || (terms.length
     ? `Words you chose: ${terms.map((term) => `${term.label} (${term.roleLabel})`).join(', ')}`
     : '');
   return {
