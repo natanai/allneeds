@@ -623,21 +623,18 @@
   display: none;
 }
 
-.guide > summary span:first-child {
-  display: grid;
-  gap: var(--space-1);
-}
-
-.guide > summary small {
-  color: var(--secondary);
-  font-size: var(--text-xs);
+.guide > summary strong {
+  min-width: 0;
+  font-size: var(--text-base);
+  font-weight: 750;
 }
 
 .guide > summary > span:last-child {
+  flex: 0 0 auto;
   transition: transform var(--motion-fast);
 }
 
-.guide[open] > summary span:last-child {
+.guide[open] > summary > span:last-child {
   transform: rotate(90deg);
 }
 
@@ -661,56 +658,136 @@
 }
 
 .guideCard {
-  padding: 0 .2rem 1rem;
+  min-width: 0;
+  padding: .25rem .2rem 1.2rem;
 }
 
-.guideCard header {
-  max-width: 76ch;
-  padding: .7rem 0;
+.guideIntro {
+  max-width: 83ch;
+  padding: .55rem 0 .9rem;
 }
 
-.guideCard h2 {
-  margin: .2rem 0 .6rem;
+.guideIntro h2 {
+  margin: .1rem 0 .5rem;
   font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.5vw, 1.4rem);
 }
 
-.guideSections {
-  display: grid;
-  gap: 0;
-  border-top: 1px solid color-mix(in srgb, var(--outline) 10%, transparent);
+.guideIntro p {
+  margin: .4rem 0;
+  color: var(--secondary);
+  line-height: 1.5;
 }
 
-.guideSections details {
-  border-bottom: 1px solid color-mix(in srgb, var(--outline) 10%, transparent);
+.guideNavigation {
+  min-width: 0;
+  margin-bottom: .9rem;
 }
 
-.guideSections summary {
+.guideNavigation > label {
+  display: block;
+  margin-bottom: .35rem;
+  color: var(--secondary);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.guideSelect {
+  width: 100%;
+  max-width: 100%;
   min-height: var(--control-min);
-  padding: .8rem .1rem;
-  cursor: pointer;
+  padding: .6rem .85rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--quiet);
+  color: var(--text);
+  font: inherit;
 }
 
-.guideSections summary > span {
-  display: grid;
-  gap: var(--space-1);
+.guideTabs {
+  display: none;
 }
 
-.guideSections summary span {
+.guidePanel {
+  min-width: 0;
+  padding-block: .7rem;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.guidePanelHeading h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+}
+
+.guidePanelHeading > p {
+  margin: .25rem 0 .85rem;
   color: var(--secondary);
   font-size: var(--text-sm);
 }
 
-.guideSections details > div {
+.guidePanel > p {
   max-width: 82ch;
-  padding: 0 .1rem .9rem;
-  overflow-wrap: anywhere;
+  line-height: 1.52;
 }
 
-.guideSections li + li {
-  margin-top: .42rem;
+.guidePanel li + li {
+  margin-top: .5rem;
+}
+
+.guideFinding {
+  min-width: 0;
+  margin-block: .95rem;
+  padding: .6rem 0 .6rem .75rem;
+  border-inline-start: 2px solid color-mix(in srgb, var(--outline) 35%, transparent);
+}
+
+.guideFinding + .guideFinding {
+  border-top: 1px solid color-mix(in srgb, var(--outline) 9%, transparent);
+}
+
+.guideFindingTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.guideFindingTitle h4 {
+  min-width: 0;
+  margin: 0 0 .4rem;
+  font-size: var(--text-base);
+}
+
+.guideFindingTitle a {
+  flex: 0 0 auto;
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  display: inline-grid;
+  place-items: center;
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: 750;
+}
+
+.guideFinding p {
+  max-width: 84ch;
+  margin: .34rem 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.guideFinding p strong {
+  color: var(--text);
+}
+
+.guideFindingLimit {
+  color: var(--secondary);
 }
 
 .guideCallout {
+  margin-block: .8rem;
   padding: .7rem;
   border-inline-start: 4px solid var(--outline);
   border-radius: var(--radius-md);
@@ -730,6 +807,88 @@
 
 .guideExamples p {
   margin: .3rem 0;
+}
+
+.guideSources {
+  margin: .8rem 0;
+  padding-inline-start: 1.2rem;
+  list-style: none;
+  counter-reset: none;
+}
+
+.guideSources li {
+  padding: .45rem 0 .55rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 10%, transparent);
+  scroll-margin: 7rem;
+}
+
+.guideSources li > a {
+  display: inline-block;
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.guideSources li > small {
+  display: block;
+  margin-top: .25rem;
+  color: var(--secondary);
+  font-size: var(--text-xs);
+}
+
+.guideSources li > p {
+  max-width: 82ch;
+  margin: .3rem 0 0;
+  color: var(--secondary);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.guideSources li:target {
+  background: color-mix(in srgb, var(--selection) 12%, transparent);
+}
+
+@media (min-width: 760px) {
+  .guideNavigation > label,
+  .guideSelect {
+    display: none;
+  }
+
+  .guideTabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid color-mix(in srgb, var(--outline) 14%, transparent);
+    background: color-mix(in srgb, var(--outline) 14%, transparent);
+  }
+
+  .guideTabs button {
+    min-width: 0;
+    min-height: var(--control-min);
+    padding: .55rem .6rem;
+    border: 0;
+    border-radius: 0;
+    background: var(--quiet);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--text-sm);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .guideTabs button[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--selection) 25%, var(--quiet));
+    font-weight: 800;
+    box-shadow: inset 0 -2px var(--outline);
+  }
+
+  .guideTabs button:focus-visible,
+  .guideSelect:focus-visible {
+    outline: 2px solid var(--outline);
+    outline-offset: -2px;
+  }
 }
 
 .dialogBody {
