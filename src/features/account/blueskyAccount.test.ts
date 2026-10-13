@@ -220,4 +220,63 @@ describe('Bluesky account compatibility', () => {
     const profileSnapshot = JSON.parse(requestBody.value) as { localStorage: Record<string, string> };
     expect(profileSnapshot.localStorage).toEqual({ 'kept-profile-setting': 'kept' });
   });
+  it('automatically backs up a journal change without discarding cloud-only entries or settings', async () => {
+    const journal = (entries: Array<{ id: string; notes: string }>) => JSON.stringify({
+      schemaVersion: 1, savedAt: '2026-10-13T16:00:00Z', data: {
+        entries: entries.map((entry) => ({ ...entry, dateISO: '2026-10-13T16:00:00Z' })),
+      },
+    });
+    const values = new Map<string, string>([
+      ['allneeds.v2.journal', journal([{ id: 'local-entry', notes: 'Saved locally' }])],
+      ['nvcApp.theme', '{"version":"newer-local-change"}'],
+    ]);
+    const localStorage = {
+      get length() { return values.size; },
+      key: (index: number) => [...values.keys()][index] ?? null,
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value); },
+      removeItem: (key: string) => { values.delete(key); },
+      clear: () => values.clear(),
+    };
+    vi.stubGlobal('window', { localStorage, sessionStorage: localStorage, allneedsSession: {
+      did: 'did:plc:journal-auto-test', handle: 'journal.example', verified: true, admin: false,
+    } });
+    const existing = { version: 1, localStorage: {
+      'allneeds.v2.journal': journal([{ id: 'cloud-entry', notes: 'Saved on another device' }]),
+      'nvcApp.theme': '{"version":"cloud-preference"}',
+    } };
+    let upload: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith('/user-settings')) {
+        return new Response(JSON.stringify({
+          status: 'ok', settings: [{ key: 'allneeds_export_v1', value: JSON.stringify(existing) }],
+        }), { status: 200 });
+      }
+      if (String(url).endsWith('/profile/save')) {
+        upload = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        return new Response([
+          JSON.stringify({ stage: 'profile-saved', status: 'ok', savedAt: '2026-10-13T16:31:00Z', strategyCount: 0 }),
+          JSON.stringify({ stage: 'complete', status: 'ok', savedAt: '2026-10-13T16:31:00Z', syncedAt: '2026-10-13T16:31:01Z', syncedCount: 0, changedCount: 0, unchangedCount: 0, unpublished: 0 }),
+          '',
+        ].join('\\n'), { status: 200 });
+      }
+      throw new Error('Unexpected request');
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    await saveCurrentBrowserToProfile(undefined, 'journal-auto');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(upload).not.toBeNull();
+    const saved = JSON.parse(String(upload!.value)) as { localStorage: Record<string, string> };
+    const record = JSON.parse(saved.localStorage['allneeds.v2.journal']!) as { data: { entries: Array<{ id: string }> } };
+    expect(record.data.entries.map((entry) => entry.id).sort()).toEqual(['cloud-entry', 'local-entry']);
+    expect(saved.localStorage['nvcApp.theme']).toBe('{"version":"cloud-preference"}');
+    expect(values.get('nvcApp.theme')).toBe('{"version":"newer-local-change"}');
+
+    const { readProfileBackupView } = await import('./profileBackupStatus');
+    const status = readProfileBackupView('did:plc:journal-auto-test', localStorage as Storage);
+    expect(status.receipt?.journalCount).toBe(1);
+    expect(status.pending.journal).toBe(false);
+    expect(status.pending.settings).toBe(true);
+  });
+
 });
