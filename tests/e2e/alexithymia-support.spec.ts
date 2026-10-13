@@ -59,7 +59,9 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet.getByText(/^Body clues$/)).toBeVisible();
   await expect(sheet.getByText(/^Overall feeling$/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(sheet.getByRole('group', { name: 'Anxiety intensity, 1 to 10' })).toBeVisible();
+  await sheet.getByRole('button', { name: 'Anxiety intensity 8 of 10' }).click();
+  await expect(sheet).toHaveCount(0);
 
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
   await search.fill('Guilt');
@@ -68,7 +70,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet.getByText('Other emotion word')).toBeVisible();
   await expect(sheet.getByRole('link', { name: /Open Other emotion word page/ })).toHaveCount(0);
   await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
 
   await search.fill('Blamed');
   await page.getByRole('button', { name: /^Blamed, Faux Feeling/ }).click();
@@ -76,7 +78,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet.getByText(/Faux Feelings are not compared with clues/)).toBeVisible();
   await expect(sheet.getByText(/That label does not mean the event was unreal/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
 
   await expect(page.getByText('My words').first()).toBeVisible();
   await page.getByRole('button', { name: 'Use these words' }).click();
@@ -113,9 +115,14 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   expect(saved.guidedSupport.overallRatings).toMatchObject({
     pleasantness: 0.2, energy: 0.8, power: 0.25,
   });
-  expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety').ratingSource).toBe('unknown');
+  expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety')).toMatchObject({ intensity: 8 });
+  expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety').ratingSource).toBeUndefined();
+  expect(saved.intensity).toBe(8);
   await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Pleasantness: -3,/ })).toBeVisible();
   await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Arousal: \+3,/ })).toBeVisible();
+  await page.getByRole('combobox', { name: 'History measure' }).selectOption('intensity');
+  await page.getByRole('combobox', { name: 'Graph feeling' }).selectOption('Anxiety');
+  await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Anxiety: 8,/ })).toBeVisible();
 });
 
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
