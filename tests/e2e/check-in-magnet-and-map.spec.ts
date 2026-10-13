@@ -37,6 +37,13 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
   expect((iconSource.match(/<path\b/g) ?? [])).toHaveLength(1);
   expect(iconSource).not.toMatch(/<(?:circle|ellipse|rect|polygon|polyline)\b/);
   expect(iconSource).toContain('stroke-linecap="round"');
+  // The thin-line Feelings mark must match the eye and sprout at the source,
+  // while both Feelings consumers continue to share that single asset.
+  for (const iconName of ['feature-feelings', 'feature-observation-eye', 'feature-needs']) {
+    const icon = await page.request.get(`/icons/${iconName}.svg`);
+    expect(icon.ok()).toBe(true);
+    expect(await icon.text()).toContain('stroke-width="2.5"');
+  }
   await expect(checkIn.locator('svg')).toHaveCount(0);
   const iconWidth = await magnetPulse.evaluate((element) => element.getBoundingClientRect().width);
   expect(iconWidth).toBeGreaterThanOrEqual(16);
