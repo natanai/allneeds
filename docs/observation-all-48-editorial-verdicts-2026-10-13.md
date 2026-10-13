@@ -281,7 +281,7 @@ All sources assessed for bibliographic plausibility, population, design, causal 
 
 ### M05 — RETAIN
 
-- **Original journal/article or verifiable academic-host link:** https://www.cambridge.org/core/journals/psychological-medicine/article/guided-selfhelp-concreteness-training-as-an-intervention-for-major-depression-in-primary-care-a-phase-ii-randomized-controlled-trial/
+- **Original journal/article or verifiable academic-host link:** https://www.cambridge.org/core/journals/psychological-medicine/article/guided-selfhelp-concreteness-training-as-an-intervention-for-major-depression-in-primary-care-a-phase-ii-randomized-controlled-trial/571A1B5745948C25280FDB600DF58A01
 - **Guide location:** Language / wider concreteness practices (qualified)
 - **Support and value:** Three-arm depression trial: concreteness-guided exercises outperformed usual care but were NOT statistically superior to active relaxation for depression symptoms.
 - **Why it does or does not satisfy clinical-academic scrutiny:** Guided repeated cognitive training, participants with depression, possible attrition, lack of superiority over active alternative; not app writing efficacy.
