@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { needsBySlug } from '../../data/catalog';
 import { formatJournalDate } from './JournalBook';
 import { HistoryChart } from './HistoryChart';
-import { addDays, buildHistorySeries, dateKey, defaultHistorySettings, filterHistory, historyCsv, historyGrouping, historySummary, historyWindow, previousWindow, reportedValue, shiftWindow, zoomWindow, type HistorySettings } from './historyModel';
+import { addDays, buildHistorySeries, dateKey, defaultHistorySettings, filterHistory, historyCsv, historyGrouping, historySummary, historyWindow, previousWindow, reportedValue, shiftWindow, type DateWindow, type HistorySettings } from './historyModel';
 import { readHistoryAnnotations, readHistorySettings, writeHistoryAnnotations, writeHistorySettings } from './historyRepository';
 import { journalDate, type JournalRecord } from './journalRepository';
+import { MAX_VISIBLE_MS, MIN_VISIBLE_MS, panHistory, visibleWindow, zoomHistory } from './historyViewport';
 import styles from './HistoryWorkspace.module.css';
 
 type Props = { entries: JournalRecord[]; onOpenEntry: (id: string) => void };
@@ -18,33 +19,39 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
   const [annotationLabel, setAnnotationLabel] = useState('');
   const [annotationError, setAnnotationError] = useState('');
   const [selection, setSelection] = useState<{ ids: string[]; label: string } | null>(null);
-  const [returnView, setReturnView] = useState<Pick<HistorySettings, 'period' | 'from' | 'to'> | null>(null);
+  const [returnView, setReturnView] = useState<(Pick<HistorySettings, 'period' | 'from' | 'to'> & { viewport: DateWindow | null }) | null>(null);
+  const [viewport, setViewport] = useState<DateWindow | null>(null);
+  const changeViewport = useCallback((next: DateWindow) => setViewport(next), []);
   const [exportOpen, setExportOpen] = useState(false);
   const [includeText, setIncludeText] = useState(false);
   const [feedback, setFeedback] = useState('');
   useEffect(() => { writeHistorySettings(settings); setSelection(null); }, [settings]);
   const patch = (value: Partial<HistorySettings>) => setSettings((current) => ({ ...current, ...value }));
-  const changePeriod = (value: Partial<HistorySettings>) => { setReturnView(null); patch(value); };
-  const range = useMemo(() => historyWindow(settings, entries), [entries, settings]);
-  const isSingleDay = range.days === 1;
+  const changePeriod = (value: Partial<HistorySettings>) => { setReturnView(null); setViewport(null); patch(value); };
+  const savedRange = useMemo(() => historyWindow(settings, entries), [entries, settings]);
+  const range = viewport ?? savedRange;
+  const isSingleDay = historyGrouping(settings, range) === 'entry' || range.days === 1 || range.end - range.start <= 86400000;
+  const gestureZoom = (factor: number) => setViewport(zoomHistory(range, factor, .75));
   const drillIntoDay = (day: string) => {
     if (isSingleDay) return;
-    setReturnView({ period: settings.period, from: settings.from, to: settings.to });
+    setReturnView({ period: settings.period, from: settings.from, to: settings.to, viewport });
+    setViewport(null);
     patch({ period: 'custom', from: day, to: day });
   };
   const backToPeriod = () => {
     if (!returnView) return;
-    patch(returnView);
+    patch({ period: returnView.period, from: returnView.from, to: returnView.to });
+    setViewport(returnView.viewport);
     setReturnView(null);
   };
-  const previousRange = useMemo(() => previousWindow(range), [range]);
+  const previousRange = useMemo(() => viewport ? visibleWindow(range.start - (range.end - range.start), range.start) : previousWindow(range), [range, viewport]);
   const matching = useMemo(() => filterHistory(entries, settings, range), [entries, range, settings]);
   const previous = useMemo(() => filterHistory(entries, settings, previousRange), [entries, previousRange, settings]);
   const series = useMemo(() => buildHistorySeries(matching, settings, range), [matching, range, settings]);
   const previousSeries = useMemo(() => settings.comparison ? buildHistorySeries(previous, settings, previousRange).map((item) => ({ ...item, previous: true,
-    points: item.points.map((point) => ({ ...point, time: addDays(point.time, range.days), day: point.day + range.days })),
-    segments: item.segments.map((segment) => segment.map((point) => ({ ...point, time: addDays(point.time, range.days), day: point.day + range.days }))),
-  })) : [], [previous, previousRange, range.days, settings]);
+    points: item.points.map((point) => ({ ...point, time: viewport ? point.time + range.end - range.start : addDays(point.time, range.days), day: point.day + range.days })),
+    segments: item.segments.map((segment) => segment.map((point) => ({ ...point, time: viewport ? point.time + range.end - range.start : addDays(point.time, range.days), day: point.day + range.days }))),
+  })) : [], [previous, previousRange, range.days, range.end, range.start, settings, viewport]);
   const summary = historySummary(matching, settings, range), priorSummary = historySummary(previous, settings, previousRange);
   const options = useMemo(() => ({
     feelings: [...new Map(entries.flatMap((entry) => entry.feelings.map((item) => [item.feeling.toLocaleLowerCase(), item.feeling] as const))).values()].sort((a, b) => a.localeCompare(b)),
@@ -59,7 +66,10 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
     return (settings.sort === 'oldest' ? 1 : -1) * journalDate(a).localeCompare(journalDate(b));
   });
   const focusCount = [settings.query, settings.feelingFilter, settings.need, settings.tag, settings.minIntensity !== 1 || settings.maxIntensity !== 10].filter(Boolean).length;
-  const currentDates = isSingleDay ? new Date(range.start).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : `${new Date(range.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} – ${new Date(addDays(range.end, -1)).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  const currentDates = viewport && range.end - range.start < 36 * 3600000
+    ? `${new Date(range.start).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} – ${new Date(range.end).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`
+    : isSingleDay ? new Date(range.start).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+    : `${new Date(range.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} – ${new Date(range.end - 1).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
   const priorDates = `${dateKey(previousRange.start)} – ${dateKey(addDays(previousRange.end, -1))}`;
   const selectPoints = (ids: string[], label: string, aggregate: boolean) => {
     if (!aggregate && ids.length === 1) onOpenEntry(ids[0]!); else setSelection({ ids, label });
@@ -87,29 +97,29 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
 
   return <section className={styles.workspace} aria-label="Emotional history">
     <div className={styles.graphCard} data-history-print>
-      {isSingleDay && returnView ? <div className={styles.dayNavigation}><button type="button" aria-label="Back to all days" onClick={backToPeriod}>← All days</button><span>{currentDates}</span></div> : null}
-      <HistoryChart series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={selectPoints} onSelectDay={drillIntoDay} />
-      {isSingleDay ? <section className={styles.dayEntries} aria-label="Entries on selected day"><header><strong>{matching.length} {matching.length === 1 ? 'entry' : 'entries'} · {currentDates}</strong><span>Open any entry to read its journal page</span></header><div className={styles.entryList}>{visibleEntries.map((entry) => entryButton(entry, true))}</div>{!matching.length ? <p className={styles.subtle}>No entries match these filters on this day.</p> : null}</section> : null}
+      {returnView ? <div className={styles.dayNavigation}><button type="button" aria-label="Back to all days" onClick={backToPeriod}>← All days</button><span>{currentDates}</span></div> : null}
+      <HistoryChart series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={selectPoints} onSelectDay={drillIntoDay} onViewChange={changeViewport} />
+      {isSingleDay ? <section className={styles.dayEntries} aria-label="Entries on selected day"><header><strong>{matching.length} {matching.length === 1 ? 'entry' : 'entries'} · {currentDates}</strong><span>Open any entry to read its journal page</span></header><div className={styles.entryList}>{visibleEntries.map((entry) => entryButton(entry, true))}</div>{!matching.length ? <p className={styles.subtle}>No entries match these filters in this time window.</p> : null}</section> : null}
       {selection ? <section className={styles.selection} aria-label="Selected graph entries"><header><strong>{selection.label}</strong><button type="button" onClick={() => setSelection(null)}>Dismiss</button></header><p>{selection.ids.length} {selection.ids.length === 1 ? 'page' : 'pages'} at this part of the graph.</p><div className={styles.selectionList}>{entries.filter((entry) => selection.ids.includes(entry.id)).map((entry) => entryButton(entry))}</div></section> : null}
       <div className={styles.graphControls} aria-label="Graph controls">
         <div className={styles.controlHeading}><strong>Change the view</strong><button type="button" onClick={() => { setIncludeText(false); setExportOpen(true); }}>Print / export</button></div>
         <form className={styles.controls} onSubmit={(event) => event.preventDefault()}>
-          <label>Period<select aria-label="Period" value={settings.period} onChange={(event) => changePeriod({ period: event.target.value as HistorySettings['period'] })}><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="all">All time</option><option value="custom">Custom dates</option></select></label>
+          <label>Period<select aria-label="Period" value={viewport ? 'exploring' : settings.period} onChange={(event) => changePeriod({ period: event.target.value as HistorySettings['period'] })}>{viewport ? <option value="exploring">Exploring</option> : null}<option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="all">All time</option><option value="custom">Custom dates</option></select></label>
           <label>Show<select aria-label="History measure" value={settings.metric} onChange={(event) => {
             const metric = event.target.value as HistorySettings['metric'];
             patch({ metric, feelings: settings.feelings.length ? settings.feelings : options.feelings.slice(0, 1) });
           }}><option value="mood">Pleasantness &amp; arousal</option><option value="intensity">Feeling intensity</option><option value="frequency">Feeling frequency</option></select></label>
           
         </form>
-        <p className={styles.detailHint}>{isSingleDay ? settings.metric === 'frequency' ? 'One day · frequency across logged entries' : 'One day · individual recorded moments' : settings.metric === 'frequency' ? 'Daily share · select a day to see its entries' : 'Daily averages · select a day to see each recorded moment'}</p>
-        {settings.period === 'custom' ? <div className={styles.dateRange}><label>From<input aria-label="Start date" type="date" value={settings.from} max={settings.to || undefined} onChange={(event) => changePeriod({ from: event.target.value })} /></label><label>Through<input aria-label="End date" type="date" min={settings.from || undefined} value={settings.to} onChange={(event) => changePeriod({ to: event.target.value })} /></label></div> : null}
+        <p className={styles.detailHint}>{isSingleDay ? settings.metric === 'frequency' ? 'Frequency among recorded entries · zoom or drag to explore time' : 'Individual recorded moments · zoom or drag to explore time' : settings.metric === 'frequency' ? 'Daily share · pinch or drag the graph to explore time' : 'Daily averages · pinch or drag the graph to explore time'}</p>
+        {!viewport && settings.period === 'custom' ? <div className={styles.dateRange}><label>From<input aria-label="Start date" type="date" value={settings.from} max={settings.to || undefined} onChange={(event) => changePeriod({ from: event.target.value })} /></label><label>Through<input aria-label="End date" type="date" min={settings.from || undefined} value={settings.to} onChange={(event) => changePeriod({ to: event.target.value })} /></label></div> : null}
         {settings.metric !== 'mood' ? <div className={styles.seriesControls} aria-label="Feelings on the graph">
           {[0, 1, 2].map((index) => <label key={index}>{index === 0 ? 'Feeling' : `Compare ${index}`}<select aria-label={index === 0 ? 'Graph feeling' : `Compare feeling ${index}`} value={settings.feelings[index] ?? ''} onChange={(event) => {
             const next = [...settings.feelings]; next[index] = event.target.value;
             patch({ feelings: [...new Set(next.filter(Boolean))] });
           }}><option value="">{index === 0 ? 'Choose a feeling' : 'None'}</option>{options.feelings.filter((feeling) => feeling === settings.feelings[index] || !settings.feelings.includes(feeling)).map((feeling) => <option key={feeling}>{feeling}</option>)}</select></label>)}
         </div> : null}
-        <div className={styles.timelineNav}><button type="button" aria-label="Previous period" onClick={() => patch(shiftWindow(range, -1))}>←</button><strong>{currentDates}</strong><button type="button" aria-label="Next period" onClick={() => patch(shiftWindow(range, 1))}>→</button><button type="button" onClick={() => changePeriod(zoomWindow(range, .5))} disabled={range.days <= 1}>Zoom in</button><button type="button" onClick={() => changePeriod(zoomWindow(range, 2))} disabled={range.days > 36500}>Zoom out</button></div>
+        <div className={styles.timelineNav}><button type="button" aria-label="Previous period" onClick={() => viewport ? setViewport(panHistory(range, -1)) : patch(shiftWindow(range, -1))}>←</button><strong>{currentDates}</strong><button type="button" aria-label="Next period" onClick={() => viewport ? setViewport(panHistory(range, 1)) : patch(shiftWindow(range, 1))}>→</button><button type="button" onClick={() => gestureZoom(.5)} disabled={range.end - range.start <= MIN_VISIBLE_MS}>Zoom in</button><button type="button" onClick={() => gestureZoom(2)} disabled={range.end - range.start >= MAX_VISIBLE_MS}>Zoom out</button>{viewport ? <button type="button" onClick={() => { setViewport(null); setReturnView(null); }}>Reset zoom</button> : null}</div>
         {settings.metric === 'mood' && !entries.some((entry) => entry.mood?.kind === 'rated') ? <p className={styles.subtle}>Place a point in the Journal to begin the pleasantness and arousal lines.</p> : null}
       </div>
       <div className={styles.reviewSummary} aria-label="Period summary">

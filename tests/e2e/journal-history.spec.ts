@@ -173,6 +173,51 @@ test('daily badges include unrated pages and selecting a day preserves history f
   await expect(page.getByLabel('Entries on selected day')).toHaveCount(0);
 });
 
+test('mobile history displays dated entry counts and allows drag and zoom without opening pages', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seed(page); await page.goto('/inventory/journal');
+  const chart = page.getByTestId('history-chart');
+  const dated = chart.getByText(/ · 2 entries/);
+  await expect(dated).toBeVisible();
+  const badge = chart.getByRole('button', { name: /2 journal entries on .* View day/ });
+  await expect(badge).toBeVisible();
+  await badge.click();
+  await expect(page.getByLabel('Entries on selected day').getByRole('button', { name: /Open journal page/ })).toHaveCount(2);
+  await page.getByRole('button', { name: 'Back to all days' }).click();
+  const plot = chart.locator('svg');
+  await expect(plot).toHaveCSS('touch-action', 'pan-y');
+  const box = await plot.boundingBox();
+  if (!box) throw new Error('History plot is missing');
+  await page.mouse.move(box.x + box.width * .55, box.y + box.height * .55);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * .28, box.y + box.height * .55, { steps: 6 });
+  await page.mouse.up();
+  await expect(page.getByLabel('Period', { exact: true })).toHaveValue('exploring');
+  await expect(page.getByRole('dialog', { name: 'Journal', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Zoom in' }).click();
+  await expect(page.getByRole('button', { name: 'Reset zoom' })).toBeVisible();
+  await page.getByRole('button', { name: 'Reset zoom' }).click();
+  await expect(page.getByLabel('Period', { exact: true })).toHaveValue('30');
+  await expect(chart.getByText(/ · 2 entries/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});
+
+test('desktop trackpad-style zoom changes the history window without scaling its mood axis', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await seed(page); await page.goto('/inventory/journal');
+  const chart = page.getByTestId('history-chart');
+  const plot = chart.locator('svg');
+  const box = await plot.boundingBox();
+  if (!box) throw new Error('History plot is missing');
+  await page.mouse.move(box.x + box.width * .8, box.y + box.height * .5);
+  await page.keyboard.down('Control');
+  await page.mouse.wheel(0, -200);
+  await page.keyboard.up('Control');
+  await expect(page.getByLabel('Period', { exact: true })).toHaveValue('exploring');
+  await expect(chart).toContainText('−5 to +5');
+  await expect(page.getByRole('button', { name: 'Reset zoom' })).toBeVisible();
+});
+
 test('context notes and export respect the visible period and exclude reflections until opted in', async ({ page }) => {
   await seed(page); await page.goto('/inventory/journal');
   await page.getByText('Context notes', { exact: true }).click();
