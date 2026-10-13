@@ -3,14 +3,17 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { captureBrowserStorage } from '../../persistence/browserBackup';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
-import { readJournal } from '../journal/journalRepository';
+import { readJournal, JOURNAL_STORAGE_KEY } from '../journal/journalRepository';
+import { markProfileBackedUp, readProfileBackupReceipt } from './profileBackupStatus';
 import { profilePublishableStrategies } from './profileStrategySync';
 import {
   applyCombinedProfile,
   applyProfileReplacement,
+  combineProfileSnapshots,
   compareProfileSnapshots,
   profileBrowserSnapshot,
   profileHasDifferences,
+  snapshotStorage,
   type ProfileComparison,
 } from './profileReconciliation';
 
@@ -440,6 +443,10 @@ export async function signOutFromBluesky() {
 }
 
 async function buildCurrentBrowserBackup() {
+  // The canonical repositories may migrate older records when read. Capture storage
+  // afterwards so the backup includes the migrated journal and inventory keys.
+  const inventory = readInventory();
+  const journalEntries = readJournal();
   const storage = safeStorage('localStorage');
   const localStorage = storage ? captureBrowserStorage(storage) : {};
   const parse = (key: string) => {
@@ -448,13 +455,66 @@ async function buildCurrentBrowserBackup() {
   return {
     version: 1,
     exportedAt: new Date().toISOString(),
-    inventory: readInventory(),
-    journalEntries: readJournal(),
+    inventory,
+    journalEntries,
     customizer: {
       theme: parse('nvcApp.theme'),
       navSettings: parse('nvcApp.navSettings'),
     },
     localStorage,
+  };
+}
+
+type CurrentBrowserBackup = Awaited<ReturnType<typeof buildCurrentBrowserBackup>>;
+
+// Automatic journal backups may not replace cloud-only data (including strategies,
+// settings, and entries saved on another device). Merge with the current profile first.
+async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: string): Promise<CurrentBrowserBackup> {
+  const response = await fetch(`${BACKEND_API_URL}/user-settings`, {
+    credentials: 'include', cache: 'no-store',
+  });
+  const data: unknown = await response.json().catch(() => null);
+  if (!response.ok || !data || typeof data !== 'object' || (data as { status?: string }).status !== 'ok') {
+    throw new Error('Could not check the latest profile before backing up the journal. Your entry is still saved on this device.');
+  }
+  const profile = extractProfileSnapshot(data);
+  if (!profile) {
+    const settings = (data as { settings?: unknown }).settings;
+    if (!Array.isArray(settings) || settings.some((setting) => setting && typeof setting === 'object'
+      && (setting as { key?: unknown }).key === BACKEND_SNAPSHOT_KEY)) {
+      throw new Error('Saved profile is unreadable; automatic backup stopped to protect existing data.');
+    }
+    return device;
+  }
+  const comparison = compareProfileSnapshots(device.localStorage, profileBrowserSnapshot(profile.localStorage));
+  const combined = combineProfileSnapshots(comparison, 'profile');
+
+  // A deliberate local deletion may be propagated only when this device has a
+  // confirmed prior copy of that entry. Missing cloud-only IDs are not deletions.
+  const receipt = readProfileBackupReceipt(did);
+  const localIds = new Set(device.journalEntries.map((entry) => entry.id));
+  const removed = new Set(Object.keys(receipt?.journalIds ?? {}).filter((id) => !localIds.has(id)));
+  if (removed.size) {
+    const journal = JSON.parse(combined[JOURNAL_STORAGE_KEY]!) as {
+      schemaVersion: number; savedAt: string; data: { entries: Array<{ id: string }> };
+    };
+    journal.data.entries = journal.data.entries.filter((entry) => !removed.has(entry.id));
+    combined[JOURNAL_STORAGE_KEY] = JSON.stringify(journal);
+  }
+
+  const mergedStorage = snapshotStorage(combined);
+  const parse = (key: string) => {
+    try { return JSON.parse(combined[key] ?? 'null') as unknown; } catch { return null; }
+  };
+  return {
+    ...device,
+    localStorage: combined,
+    journalEntries: readJournal(mergedStorage),
+    inventory: readInventory(mergedStorage),
+    customizer: {
+      theme: parse('nvcApp.theme'),
+      navSettings: parse('nvcApp.navSettings'),
+    },
   };
 }
 
@@ -464,11 +524,27 @@ async function requireBackendSession() {
   return session;
 }
 
-export async function saveCurrentBrowserToProfile(
+let profileSaveTail: Promise<void> = Promise.resolve();
+
+export function saveCurrentBrowserToProfile(
   onProgress?: (progress: ProfileSaveProgress) => void,
+  mode: 'manual' | 'journal-auto' = 'manual',
 ): Promise<ProfileSaveResult> {
-  await requireBackendSession();
-  const snapshot = await buildCurrentBrowserBackup();
+  // Serializing also prevents a journal autosave racing a manual full backup.
+  const task = profileSaveTail.then(() => performProfileSave(onProgress, mode));
+  profileSaveTail = task.then(() => {}, () => {});
+  return task;
+}
+
+async function performProfileSave(
+  onProgress: ((progress: ProfileSaveProgress) => void) | undefined,
+  mode: 'manual' | 'journal-auto',
+): Promise<ProfileSaveResult> {
+  const session = await requireBackendSession();
+  const deviceSnapshot = await buildCurrentBrowserBackup();
+  const snapshot = mode === 'journal-auto'
+    ? await reconcileJournalAutoBackup(deviceSnapshot, session.did)
+    : deviceSnapshot;
   const strategies = profilePublishableStrategies(snapshot.inventory);
   const response = await fetch(`${BACKEND_API_URL}/profile/save`, {
     method: 'POST',
@@ -497,6 +573,9 @@ export async function saveCurrentBrowserToProfile(
     try { event = JSON.parse(line) as ProfileSaveEvent; } catch { return; }
     if (event.stage === 'profile-saved' && typeof event.savedAt === 'string' && !Number.isNaN(Date.parse(event.savedAt))) {
       saveState.profileSavedAt = event.savedAt;
+      if (getBlueskySession()?.did === session.did) {
+        markProfileBackedUp(session.did, event.savedAt, deviceSnapshot.localStorage);
+      }
       onProgress?.({
         stage: 'syncing-strategies',
         profileSavedAt: saveState.profileSavedAt,
@@ -528,6 +607,9 @@ export async function saveCurrentBrowserToProfile(
 
   if (!saveState.profileSavedAt && typeof saveState.syncData?.savedAt === 'string' && !Number.isNaN(Date.parse(saveState.syncData.savedAt))) {
     saveState.profileSavedAt = saveState.syncData.savedAt;
+    if (getBlueskySession()?.did === session.did) {
+      markProfileBackedUp(session.did, saveState.profileSavedAt, deviceSnapshot.localStorage);
+    }
   }
   if (!saveState.profileSavedAt) throw new Error('Unable to confirm when this browser was saved to your profile.');
 
