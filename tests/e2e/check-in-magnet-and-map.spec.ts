@@ -86,7 +86,7 @@ test('sending a check-in to Journal never overwrites an unfinished writing page'
   await page.getByRole('button', { name: 'Use these words' }).click();
   await page.getByRole('button', { name: 'Build sentence' }).click();
   await page.getByRole('button', { name: 'Add to Journal' }).click();
-  await expect(page).toHaveURL(/\\/alexithymia-support$/);
+  await expect(page).toHaveURL(/\/alexithymia-support$/);
   await expect(page.getByText(/Journal has an unfinished page/)).toBeVisible();
 
   await page.goto('/inventory/journal?compose=new');
