@@ -95,6 +95,9 @@ describe('journalRepository', () => {
           { label: 'Blamed', role: 'faux-feeling' },
         ],
         statement: 'I feel anxious and guilt.',
+        bodyClues: [{ id: 'tight', label: 'Tight chest', intensity: 75 }],
+        overallRatings: { pleasantness: 0.2, energy: 0.8, power: 0.25 },
+        noWordYet: true,
       },
     });
     writeJournal([entry], storage);
