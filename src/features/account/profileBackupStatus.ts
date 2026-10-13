@@ -147,6 +147,8 @@ export function markProfileBackedUp(did: string, savedAt: string, snapshot: Brow
   const receipt = createProfileBackupReceipt(did, savedAt, snapshot, readProfileBackupReceipt(did, storage));
   // This is a display receipt, not the backup itself. A quota error must not undo a server save.
   try { storage.setItem(PROFILE_BACKUP_STATUS_KEY, JSON.stringify(receipt)); } catch { /* The profile is already durable. */ }
-  if (typeof window !== 'undefined') window.dispatchEvent(new Event(PROFILE_BACKUP_STATUS_CHANGED_EVENT));
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    window.dispatchEvent(new Event(PROFILE_BACKUP_STATUS_CHANGED_EVENT));
+  }
   return receipt;
 }
