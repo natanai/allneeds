@@ -104,12 +104,15 @@ function summaryFor(snapshot: BrowserSnapshot, previous: ProfileBackupReceipt | 
   return previous ? 'profile backup refreshed' : 'initial profile backup';
 }
 
-export function createProfileBackupReceipt(did: string, savedAt: string, snapshot: BrowserSnapshot, previous: ProfileBackupReceipt | null): ProfileBackupReceipt {
+export function createProfileBackupReceipt(
+  did: string, savedAt: string, snapshot: BrowserSnapshot, previous: ProfileBackupReceipt | null,
+  confirmedTotals?: { journalCount: number; strategyCount: number },
+): ProfileBackupReceipt {
   const sig = signatures(snapshot);
   return {
     version: 1, did, savedAt,
-    journalCount: entriesFromSnapshot(snapshot).length,
-    strategyCount: itemsFromSnapshot(snapshot).length,
+    journalCount: confirmedTotals?.journalCount ?? entriesFromSnapshot(snapshot).length,
+    strategyCount: confirmedTotals?.strategyCount ?? itemsFromSnapshot(snapshot).length,
     journalDigest: sig.journal,
     inventoryDigest: sig.inventory,
     settingsDigest: sig.settings,
@@ -146,9 +149,12 @@ export function readProfileBackupView(did: string, storage: Storage = window.loc
   };
 }
 
-export function markProfileBackedUp(did: string, savedAt: string, snapshot: BrowserSnapshot, storage: Storage = window.localStorage) {
+export function markProfileBackedUp(
+  did: string, savedAt: string, snapshot: BrowserSnapshot, storage: Storage = window.localStorage,
+  confirmedTotals?: { journalCount: number; strategyCount: number },
+) {
   if (!did) return;
-  const receipt = createProfileBackupReceipt(did, savedAt, snapshot, readProfileBackupReceipt(did, storage));
+  const receipt = createProfileBackupReceipt(did, savedAt, snapshot, readProfileBackupReceipt(did, storage), confirmedTotals);
   // This is a display receipt, not the backup itself. A quota error must not undo a server save.
   try { storage.setItem(PROFILE_BACKUP_STATUS_KEY, JSON.stringify(receipt)); } catch { /* The profile is already durable. */ }
   if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
