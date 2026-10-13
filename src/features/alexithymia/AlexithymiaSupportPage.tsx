@@ -692,7 +692,7 @@ export function AlexithymiaSupportPage() {
               setStatus(decision === 'not-this-time'
                 ? 'Marked “Not this time” for this check-in.'
                 : `${activeTerm?.label ?? 'Word'} added to Your words${intensity === undefined ? '' : ` · intensity ${intensity}/10`}.`);
-            }
+            }}
             onClose={() => setSheet(null)}
           />
         </section>
