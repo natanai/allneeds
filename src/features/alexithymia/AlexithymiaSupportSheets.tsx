@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
@@ -311,6 +311,11 @@ export function CandidateSheet({
   onClose: () => void;
 }) {
   const [ratingOpen, setRatingOpen] = useState(false);
+  const ratingRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ratingOpen) return;
+    ratingRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [ratingOpen]);
   const close = () => { setRatingOpen(false); onClose(); };
   const decideAndClose = (choice: 'fits' | 'maybe' | 'not-this-time', rating?: number) => {
     onDecision(choice, rating);
@@ -377,7 +382,7 @@ export function CandidateSheet({
                 <strong>How intense is this feeling?</strong>
                 <small>{intensity === undefined ? 'Optional · no rating yet' : `Previously rated ${intensity}/10`}</small>
               </div>
-              <div className={styles.feelingIntensityScale} role="group" aria-label={`${term.label} intensity, 1 to 10`}>
+              <div ref={ratingRef} className={styles.feelingIntensityScale} role="group" aria-label={`${term.label} intensity, 1 to 10`}>
                 {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
                   <button key={value} type="button" aria-label={`${term.label} intensity ${value} of 10`}
                     aria-pressed={intensity === value} onClick={() => decideAndClose('fits', value)}>
