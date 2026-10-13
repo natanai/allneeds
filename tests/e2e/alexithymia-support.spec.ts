@@ -139,7 +139,6 @@ test('candidate decisions close immediately, while Fits offers optional intensit
   await expect(sheet.getByRole('button', { name: 'Done', exact: true })).toHaveCount(0);
   await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
   await expect(sheet).toHaveCount(0);
-  await expect(page.getByText('Anxiety').filter({ visible: true })).toHaveCount(0).catch(() => {});
 
   await open();
   sheet = page.getByRole('dialog', { name: 'Anxiety' });
@@ -159,6 +158,9 @@ test('candidate decisions close immediately, while Fits offers optional intensit
     return raw && JSON.parse(raw).data.decisions['candidate:anxiety'];
   })).toBe('fits');
   await page.reload();
+  await page.getByRole('button', { name: 'Continue previous check-in' }).click();
+  await page.getByRole('radio', { name: 'All feelings' }).click();
+  await search.fill('Anxiety');
   await open();
   sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
