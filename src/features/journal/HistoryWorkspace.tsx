@@ -31,7 +31,7 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
   const savedRange = useMemo(() => historyWindow(settings, entries), [entries, settings]);
   const range = viewport ?? savedRange;
   const isSingleDay = historyGrouping(settings, range) === 'entry' || range.days === 1;
-  const gestureZoom = (factor: number) => setViewport(zoomHistory(range, factor));
+  const gestureZoom = (factor: number) => setViewport(zoomHistory(range, factor, .75));
   const drillIntoDay = (day: string) => {
     if (isSingleDay) return;
     setReturnView({ period: settings.period, from: settings.from, to: settings.to, viewport });
@@ -97,9 +97,9 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
 
   return <section className={styles.workspace} aria-label="Emotional history">
     <div className={styles.graphCard} data-history-print>
-      {isSingleDay && returnView ? <div className={styles.dayNavigation}><button type="button" aria-label="Back to all days" onClick={backToPeriod}>← All days</button><span>{currentDates}</span></div> : null}
+      {returnView ? <div className={styles.dayNavigation}><button type="button" aria-label="Back to all days" onClick={backToPeriod}>← All days</button><span>{currentDates}</span></div> : null}
       <HistoryChart series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={selectPoints} onSelectDay={drillIntoDay} onViewChange={changeViewport} />
-      {isSingleDay ? <section className={styles.dayEntries} aria-label="Entries on selected day"><header><strong>{matching.length} {matching.length === 1 ? 'entry' : 'entries'} · {currentDates}</strong><span>Open any entry to read its journal page</span></header><div className={styles.entryList}>{visibleEntries.map((entry) => entryButton(entry, true))}</div>{!matching.length ? <p className={styles.subtle}>No entries match these filters on this day.</p> : null}</section> : null}
+      {isSingleDay ? <section className={styles.dayEntries} aria-label="Entries on selected day"><header><strong>{matching.length} {matching.length === 1 ? 'entry' : 'entries'} · {currentDates}</strong><span>Open any entry to read its journal page</span></header><div className={styles.entryList}>{visibleEntries.map((entry) => entryButton(entry, true))}</div>{!matching.length ? <p className={styles.subtle}>No entries match these filters in this time window.</p> : null}</section> : null}
       {selection ? <section className={styles.selection} aria-label="Selected graph entries"><header><strong>{selection.label}</strong><button type="button" onClick={() => setSelection(null)}>Dismiss</button></header><p>{selection.ids.length} {selection.ids.length === 1 ? 'page' : 'pages'} at this part of the graph.</p><div className={styles.selectionList}>{entries.filter((entry) => selection.ids.includes(entry.id)).map((entry) => entryButton(entry))}</div></section> : null}
       <div className={styles.graphControls} aria-label="Graph controls">
         <div className={styles.controlHeading}><strong>Change the view</strong><button type="button" onClick={() => { setIncludeText(false); setExportOpen(true); }}>Print / export</button></div>
