@@ -192,7 +192,7 @@ test('mobile history displays dated entry counts and allows drag and zoom withou
   const guide = chart.locator(`[data-testid="history-day-guide"][data-day="${realDay}"]`);
   await expect(guide).toHaveCount(1);
   const guideX = Number(await guide.getAttribute('data-anchor-x'));
-  const markX = Number(await chart.getByRole('button', { name: /^Pleasantness: \\+1,/ }).first().getAttribute('x')) + 22;
+  const markX = Number(await chart.getByRole('button', { name: /^Pleasantness: \+1,/ }).first().getAttribute('x')) + 22;
   expect(guideX).toBeCloseTo(markX, 1);
   const badge = chart.getByRole('button', { name: /2 journal entries on .* View day/ });
   await expect(badge).toBeVisible();
