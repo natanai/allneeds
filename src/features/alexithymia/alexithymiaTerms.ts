@@ -170,7 +170,9 @@ export function createSupportJournalDraft({
     ...(mood ? { mood } : {}),
     emotion: canonicalFeelings.map((term) => term.label).join(', '),
     intensity: 5,
-    feelings: canonicalFeelings.map((term) => ({ feeling: term.label, intensity: 5 })),
+    // The lane never asks for per-feeling intensity. Preserve the historical
+    // display fallback without treating 5/10 as a user-reported rating.
+    feelings: canonicalFeelings.map((term) => ({ feeling: term.label, intensity: 5, ratingSource: 'unknown' as const })),
     selectedNeeds: needSlugs,
     tags: 'alexithymia-check-in',
     editingId: null,
