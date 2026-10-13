@@ -51,6 +51,23 @@ describe('emotional history semantics', () => {
     const settings = { ...defaultHistorySettings(records), metric: 'intensity' as const, feelings: ['Sad'], query: 'outside', need: 'support', tag: 'WORK', minIntensity: 7 };
     expect(filterHistory(records, settings, range).map((item) => item.id)).toEqual(['outside save date']);
   });
+  it('finds selected support-lane clues without plotting them as invented mood', () => {
+    const record = {
+      ...entry('entry', '2026-10-02'),
+      guidedSupport: {
+        observation: 'A difficult meeting',
+        statement: 'I needed a pause',
+        terms: [{ label: 'Blamed', role: 'faux-feeling' as const }],
+        bodyClues: [{ id: 'chest-tight', label: 'Tight chest', intensity: 70 }],
+        overallRatings: { power: 0.25 },
+      },
+    };
+    const settings = defaultHistorySettings([record]);
+    expect(filterHistory([record], { ...settings, query: 'tight chest' }, range)).toHaveLength(1);
+    expect(filterHistory([record], { ...settings, query: 'blamed' }, range)).toHaveLength(1);
+    expect(buildHistorySeries([record], settings, range).every((series) => series.points.length === 0)).toBe(true);
+  });
+
   it('uses inclusive local calendar dates, supports previous periods, zoom, and invalid input fallback', () => {
     const settings = { ...defaultHistorySettings([]), period: 'custom' as const, from: '2026-10-01', to: '2026-10-07' };
     const window = historyWindow(settings, []);
