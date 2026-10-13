@@ -47,6 +47,7 @@ import {
   supportTermIndex,
   type SupportTerm,
 } from './alexithymiaTerms';
+import { shapeToJournalMood, shapeWithJournalMood } from './shapeCoordinates';
 import styles from './AlexithymiaSupportPage.module.css';
 
 type SheetKind = 'info' | 'matching' | 'body' | 'shape' | 'candidate' | 'needs' | null;
@@ -90,7 +91,9 @@ function shapeClueLabel(dimension: string, value: number) {
     power: 'Ability to influence what happens',
     expectedness: 'Familiar or surprising',
   };
-  return `${labels[dimension] ?? dimension}: ${Math.round(value * 4) + 1}/5`;
+  return dimension === 'pleasantness' || dimension === 'energy'
+    ? `${labels[dimension]}: ${Math.round(value * 10 - 5) > 0 ? '+' : ''}${Math.round(value * 10 - 5)}`
+    : `${labels[dimension] ?? dimension}: ${Math.round(value * 4) + 1}/5`;
 }
 
 function roleTone(term: SupportTerm, decision?: AlexithymiaDraft['decisions'][string]) {
@@ -181,6 +184,7 @@ export function AlexithymiaSupportPage() {
   const clueTray = [
     ...bodySelections.map(({ option, intensity }) => ({ id: `body:${option.id}`, label: `${option.title} · ${Math.round(intensity)}%` })),
     ...shapeDimensionList.map((dimension) => ({ id: `shape:${dimension}`, label: shapeClueLabel(dimension, draft.shape[dimension] ?? 0) })),
+    ...(draft.overallMood ? [{ id: 'shape:other', label: draft.overallMood === 'mixed' ? 'Mixed feelings' : 'Overall feeling: not sure' }] : []),
   ];
   const canCompare = bodySelections.length > 0 || shapeDimensionList.length >= 2;
 
@@ -359,6 +363,7 @@ export function AlexithymiaSupportPage() {
       terms: selectedTerms,
       needSlugs: draft.selectedNeeds,
       statement: draft.statement,
+      mood: shapeToJournalMood(draft.shape, draft.overallMood),
     }));
     void navigate('/inventory/journal?compose=new');
   }
@@ -529,7 +534,7 @@ export function AlexithymiaSupportPage() {
                 </button>
                 <button type="button" onClick={() => setSheet('shape')}>
                   <span className={styles.clueIcon}><ShapeIcon /></span>
-                  <span><strong>Overall feeling</strong><small>{shapeDimensionList.length ? `${shapeDimensionList.length} of 4 ratings chosen.` : 'Rate any parts you can tell.'}</small></span>
+                  <span><strong>Overall feeling</strong><small>{draft.overallMood ? (draft.overallMood === 'mixed' ? 'Mixed feelings selected.' : 'Not sure selected.') : shapeDimensionList.length ? `${shapeDimensionList.length} of 4 ratings chosen.` : 'Place a point for pleasantness and energy.'}</small></span>
                   <span className={styles.cardArrow} aria-hidden="true">›</span>
                 </button>
               </div>
@@ -569,7 +574,13 @@ export function AlexithymiaSupportPage() {
           <FeelingShapeSheet
             open={sheet === 'shape'}
             shape={draft.shape}
+            overallMood={draft.overallMood}
             onChange={(shape) => updateDraft((current) => ({ ...current, shape }))}
+            onOverallChange={(mood) => updateDraft((current) => ({
+              ...current,
+              shape: shapeWithJournalMood(current.shape, mood),
+              overallMood: mood?.kind === 'mixed' || mood?.kind === 'unsure' ? mood.kind : undefined,
+            }))}
             onClose={() => setSheet(null)}
           />
         </section>
