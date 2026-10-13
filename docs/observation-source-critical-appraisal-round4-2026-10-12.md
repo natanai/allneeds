@@ -6,7 +6,7 @@
 
 **Question:** What evidence examines independent steps or interactions relevant to `Observation → Feeling → Need → Strategy`, as distinct from evidence for a longer NVC training program? The NVC framework remains an intentional design vocabulary, not an empirically validated clinical pathway.
 
-**Search approach (targeted discovery, NOT a systematic literature review):** On 2026-10-12, search public academic article databases, journals and institutional repositories for "nonviolent communication component dismantling / factorial / four components", "affect labeling reappraisal naming effects", "emotion differentiation systematic review", "expressive writing / emotional disclosure meta-analysis", "SDT health intervention meta-analysis", "linguistic abstraction concrete criticism experiment", and "implementation intentions goal attainment meta-analysis"; follow publisher/DOI/PubMed and open article records, with contrary-result retrieval rather than only favorable studies. Record canonical DOI routes without ChatGPT redirects or tracking parameters. No reliable randomized dismantling trial that directly isolated each of NVC's four components was located in **these searches**; that is **not evidence none exists**. Further database-specific and citation-chaining search remains necessary.
+**Search approach (targeted discovery, NOT a systematic literature review):** On 2026-10-12, search public academic article databases, journals and institutional repositories for "nonviolent communication component dismantling / factorial / four components", "affect labeling reappraisal naming effects", "emotion differentiation systematic review", "expressive writing / emotional disclosure meta-analysis", "SDT health intervention meta-analysis", "linguistic abstraction concrete criticism experiment", and "implementation intentions goal attainment meta-analysis"; follow publisher/DOI/PubMed and open article records, with contrary-result retrieval rather than only favorable studies. Record original source-host article URLs without ChatGPT redirects or tracking parameters; retain DOI as unlinked bibliographic metadata. No reliable randomized dismantling trial that directly isolated each of NVC's four components was located in **these searches**; that is **not evidence none exists**. Further database-specific and citation-chaining search remains necessary.
 
 **Access status:** Complete original article (where stated) or publisher/PubMed abstract/record. Do NOT conflate abstract review with systematic full-text bias review. Entries below are candidate-level. Publication dates and review styles differ; syntheses may reuse primary trials and MUST NOT be treated as independent counts.
 
@@ -21,11 +21,20 @@
 | Journal/disclosure | Experimental expressive-disclosure protocols and meta-analyses. | Benefits generally small/inconsistent across outcomes and not direct evidence about AllNeeds journal or valence/arousal tracking. |
 | Whole sequence | NVC workshops and education packages documented in N-series sources. | Effects can't be attributed to the four steps, their order or the AllNeeds interface absent suitable component comparisons. |
 
+
+## Source URL policy — user clarification (2026-10-12)
+
+**Use the original journal publisher's article webpage URL as the primary raw citation** (for example, `https://link.springer.com/article/10.1007/s10560-018-0584-y`), not the generic DOI redirect `https://doi.org/...`. Retain the bare DOI as *metadata only*. Where a manuscript is unpublished or the publisher page cannot be independently viewed, use the actual source host, e.g. a university lab record, with the access caveat. Strip search parameters, `utm_` tracking, `chatgpt.com` referral URLs and scholarly-proxy domains. Do not invent an article landing page.
+
+C04/C07 publisher PsycNet pages, C06 publisher Taylor & Francis page and C08 ScienceDirect page currently have access restrictions or automated-fetch denials, though their publisher-host patterns and matching article metadata were checked through indexed catalog records. Their URL and full-text reachability should be manually reverified before public integration. C13 uses Princeton's original author-lab publication record because the paper remains submitted; it is not yet a journal publisher article.
+
 ## New candidate source cards (ALL decisions pending)
 
 ### C01 — Nook, Satpute & Ochsner (2021), Emotion Naming Impedes Both Cognitive Reappraisal and Mindful Acceptance Strategies of Emotion Regulation
 
-**Original publisher/DOI URL:** https://doi.org/10.1007/s42761-021-00036-y
+**Source article page:** https://link.springer.com/article/10.1007/s42761-021-00036-y
+
+**DOI identifier (not citation link):** 10.1007/s42761-021-00036-y
 
 **Domain:** Feeling step / sequencing
 
@@ -43,7 +52,9 @@
 
 ### C02 — Ariely, Mokady, Reggev & Anholt (2026), Affect Labeling and Reappraisal as an Emotion Regulation Strategy
 
-**Original publisher/DOI URL:** https://doi.org/10.1007/s42761-026-00362-z
+**Source article page:** https://link.springer.com/article/10.1007/s42761-026-00362-z
+
+**DOI identifier (not citation link):** 10.1007/s42761-026-00362-z
 
 **Domain:** Feeling step / sequencing
 
@@ -61,7 +72,9 @@
 
 ### C03 — Jang, Hwang & Shin (2026), A Systematic Review of the Effectiveness of Affect Labeling: Is Affect Labeling Effective for Emotion Regulation?
 
-**Original publisher/DOI URL:** https://doi.org/10.17315/kjhp.2026.31.4.009
+**Source article page:** https://www.accesson.kr/healthpsy/v.31/4/1147/59715
+
+**DOI identifier (not citation link):** 10.17315/kjhp.2026.31.4.009
 
 **Domain:** Feeling step / systematic review
 
@@ -79,7 +92,9 @@
 
 ### C04 — Frattaroli (2006), Experimental Disclosure and Its Moderators: A Meta-Analysis
 
-**Original publisher/DOI URL:** https://doi.org/10.1037/0033-2909.132.6.823
+**Source article page:** https://psycnet.apa.org/doiLanding?doi=10.1037%2F0033-2909.132.6.823
+
+**DOI identifier (not citation link):** 10.1037/0033-2909.132.6.823
 
 **Domain:** Journal writing / meta-analysis
 
@@ -97,7 +112,9 @@
 
 ### C05 — Meads & Nouwen (2005), Does Emotional Disclosure Have Any Effects? A Systematic Review of the Literature with Meta-Analyses
 
-**Original publisher/DOI URL:** https://doi.org/10.1017/S026646230505021X
+**Source article page:** https://www.cambridge.org/core/journals/international-journal-of-technology-assessment-in-health-care/article/abs/does-emotional-disclosure-have-any-effects-a-systematic-review-of-the-literature-with-metaanalyses/BFF4DC16E4F96A94DCD8D4B7ED15F7B6
+
+**DOI identifier (not citation link):** 10.1017/S026646230505021X
 
 **Domain:** Journal writing / opposing synthesis
 
@@ -115,7 +132,9 @@
 
 ### C06 — Ntoumanis et al. (2021), A Meta-Analysis of Self-Determination Theory-Informed Intervention Studies in the Health Domain
 
-**Original publisher/DOI URL:** https://doi.org/10.1080/17437199.2020.1718529
+**Source article page:** https://www.tandfonline.com/doi/abs/10.1080/17437199.2020.1718529
+
+**DOI identifier (not citation link):** 10.1080/17437199.2020.1718529
 
 **Domain:** Needs / intervention meta-analysis
 
@@ -133,7 +152,9 @@
 
 ### C07 — Self-Determination Theory Interventions for Health Behavior Change: Meta-Analysis and Meta-Analytic Structural Equation Modeling of Randomized Controlled Trials (2020)
 
-**Original publisher/DOI URL:** https://doi.org/10.1037/ccp0000501
+**Source article page:** https://psycnet.apa.org/doiLanding?doi=10.1037%2Fccp0000501
+
+**DOI identifier (not citation link):** 10.1037/ccp0000501
 
 **Domain:** Needs / randomized trial synthesis
 
@@ -151,7 +172,9 @@
 
 ### C08 — Gollwitzer & Sheeran (2006), Implementation Intentions and Goal Achievement: A Meta-Analysis of Effects and Processes
 
-**Original publisher/DOI URL:** https://doi.org/10.1016/S0065-2601(06)38002-1
+**Source article page:** https://www.sciencedirect.com/science/article/pii/S0065260106380021
+
+**DOI identifier (not citation link):** 10.1016/S0065-2601(06)38002-1
 
 **Domain:** Strategies / specific action plans
 
@@ -169,7 +192,9 @@
 
 ### C09 — Kim, Johnson, Ahn & Knobe (2017), The Effect of Abstract Versus Concrete Framing on Judgments of Biological and Psychological Bases of Behavior
 
-**Original publisher/DOI URL:** https://doi.org/10.1186/s41235-017-0056-5
+**Source article page:** https://link.springer.com/article/10.1186/s41235-017-0056-5
+
+**DOI identifier (not citation link):** 10.1186/s41235-017-0056-5
 
 **Domain:** Observation / framing experiments
 
@@ -187,7 +212,9 @@
 
 ### C10 — Moscatelli, Prati & Rubini (2019), If You Criticize Us, Do It in Concrete Terms
 
-**Original publisher/DOI URL:** https://doi.org/10.1177/0261927X19864686
+**Source article page:** https://journals.sagepub.com/doi/10.1177/0261927X19864686
+
+**DOI identifier (not citation link):** 10.1177/0261927X19864686
 
 **Domain:** Observation / criticism reception
 
@@ -205,7 +232,9 @@
 
 ### C11 — Dunning et al. (2025), What Role Does Emotional Granularity Play in Adolescent Depression and Anxiety? A Scoping Review
 
-**Original publisher/DOI URL:** https://doi.org/10.1002/jad.70028
+**Source article page:** https://onlinelibrary.wiley.com/doi/10.1002/jad.70028
+
+**DOI identifier (not citation link):** 10.1002/jad.70028
 
 **Domain:** Feeling precision / adolescent synthesis
 
@@ -223,7 +252,9 @@
 
 ### C12 — Ozomaro et al. (2025), Emotional Granularity in Health and Psychopathology: A Scoping Review
 
-**Original publisher/DOI URL:** https://doi.org/10.1016/j.jpsychires.2025.08.008
+**Source article page:** https://linkinghub.elsevier.com/retrieve/pii/S0022395625004881
+
+**DOI identifier (not citation link):** 10.1016/j.jpsychires.2025.08.008
 
 **Domain:** Feeling precision / transdiagnostic synthesis
 
@@ -241,7 +272,9 @@
 
 ### C13 — Whiting & Nook (undated submitted preprint), A Systematic Review of Research on Emotion Differentiation and Emotion Regulation
 
-**Original publisher/DOI URL:** https://doi.org/10.31234/osf.io/5uwx7_v1
+**Source article page:** https://lemolab.princeton.edu/publications/systematic-review-research-emotion-differentiation-and-emotion-regulation
+
+**DOI identifier (not citation link):** 10.31234/osf.io/5uwx7_v1
 
 **Domain:** Feeling precision / contrary synthesis
 
@@ -259,7 +292,9 @@
 
 ### C14 — Gross (2015), Emotion Regulation: Current Status and Future Prospects
 
-**Original publisher/DOI URL:** https://doi.org/10.1080/1047840X.2014.940781
+**Source article page:** https://www.tandfonline.com/doi/abs/10.1080/1047840X.2014.940781
+
+**DOI identifier (not citation link):** 10.1080/1047840X.2014.940781
 
 **Domain:** Feeling / scientific conceptual model
 
