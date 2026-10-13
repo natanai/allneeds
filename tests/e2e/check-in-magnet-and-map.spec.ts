@@ -28,7 +28,8 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
 
   await board.getByRole('button', { name: 'Customizer' }).click();
   panel = page.getByRole('dialog', { name: 'Customizer' });
-  await panel.getByRole('switch', { name: 'Check-In' }).uncheck();
+  await panel.getByText('Check-In', { exact: true }).click();
+  await expect(panel.getByRole('switch', { name: 'Check-In' })).not.toBeChecked();
   await panel.getByRole('button', { name: 'Close customizer' }).click();
   await expect(board.getByRole('link', { name: 'Feeling check-in' })).toHaveCount(0);
   // A persistence write while hidden must not erase the last known position.
