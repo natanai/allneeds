@@ -167,7 +167,8 @@ function normalize(value: unknown): JournalRecord | null {
   const fallbackEmotion = typeof emotionValue === 'string' ? emotionValue.trim() : '';
   const feelings = feelingRatings(value.feelings, fallbackEmotion, rawIntensity);
   const emotion = feelings.length ? feelings.map((item) => item.feeling).join(', ') : fallbackEmotion;
-  const intensity = feelings.length ? Math.max(...feelings.map((item) => item.intensity)) : rawIntensity;
+  const reportedFeelings = feelings.filter((item) => item.ratingSource !== 'unknown');
+  const intensity = reportedFeelings.length ? Math.max(...reportedFeelings.map((item) => item.intensity)) : rawIntensity;
   const needs = list(value.needs ?? value.need ?? value.primaryNeed);
   const tags = list(value.tags ?? value.tagList ?? value.tag).map((tag) => tag.replace(/^#/, ''));
   const supportContext = guidedSupport(value.guidedSupport);
@@ -262,6 +263,10 @@ export function createJournalRecord(input: {
   const supportContext = guidedSupport(input.guidedSupport);
   const now = new Date().toISOString();
   const mood = normalizeJournalMood(input.mood);
+  const reportedFeelings = feelings.filter((item) => item.ratingSource !== 'unknown');
+  const recordedIntensity = reportedFeelings.length
+    ? Math.max(...reportedFeelings.map((item) => item.intensity))
+    : input.intensity === undefined ? undefined : Math.min(10, Math.max(0, Math.round(input.intensity)));
   return {
     id: makeId(),
     dateISO: now,
@@ -269,9 +274,7 @@ export function createJournalRecord(input: {
     ...(input.experiencedAtISO && Number.isFinite(Date.parse(input.experiencedAtISO)) ? { experiencedAtISO: new Date(input.experiencedAtISO).toISOString() } : {}),
     ...(mood ? { mood } : {}),
     emotion: feelings.length ? feelings.map((item) => item.feeling).join(', ') : input.emotion?.trim() ?? '',
-    intensity: feelings.length
-      ? Math.max(...feelings.map((item) => item.intensity))
-      : Math.min(10, Math.max(0, Math.round(input.intensity ?? 5))),
+    ...(recordedIntensity === undefined ? {} : { intensity: recordedIntensity }),
     feelings,
     needs: list(input.needs),
     tags: list(input.tags),
