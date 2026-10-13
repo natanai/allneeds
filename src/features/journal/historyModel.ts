@@ -117,7 +117,8 @@ export function historySummary(entries: JournalRecord[], settings: HistorySettin
 }
 /** Wider periods show one observation per logged day; a single calendar day shows its original moments. */
 export function historyGrouping(settings: HistorySettings, range: DateWindow): HistoryGrouping {
-  return range.days === 1 && settings.metric !== 'frequency' ? 'entry' : 'day';
+  // A sub-day viewport can straddle midnight. Use actual elapsed time for detail.
+  return (range.days === 1 || range.end - range.start <= 86400000) && settings.metric !== 'frequency' ? 'entry' : 'day';
 }
 function bucketStart(time: number, grouping: HistoryGrouping) {
   const date = new Date(time); date.setHours(0, 0, 0, 0);
