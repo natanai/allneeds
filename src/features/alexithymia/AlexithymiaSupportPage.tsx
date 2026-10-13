@@ -555,7 +555,7 @@ export function AlexithymiaSupportPage() {
                 </button>
                 <button type="button" onClick={() => setSheet('shape')}>
                   <span className={styles.clueIcon}><ShapeIcon /></span>
-                  <span><strong>Overall feeling</strong><small>{draft.overallMood ? (draft.overallMood === 'mixed' ? 'Mixed feelings selected.' : 'Not sure selected.') : shapeDimensionList.length ? `${shapeDimensionList.length} of 4 ratings chosen.` : 'Place a point for pleasantness and energy.'}</small></span>
+                  <span><strong>Overall feeling</strong><small>{draft.overallMood ? (draft.overallMood === 'mixed' ? 'Mixed feelings selected.' : 'Not sure selected.') : shapeDimensionList.length ? `${shapeDimensionList.length} of 4 ratings chosen.` : 'Rate pleasantness and energy.'}</small></span>
                   <span className={styles.cardArrow} aria-hidden="true">›</span>
                 </button>
               </div>
