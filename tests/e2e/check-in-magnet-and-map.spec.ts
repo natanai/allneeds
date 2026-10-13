@@ -29,6 +29,14 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
   const magnetSize = await magnetPulse.evaluate((element) => getComputedStyle(element).maskSize);
   expect(doorwaySize).toBe('contain');
   expect(magnetSize).toBe(doorwaySize);
+  // Both surfaces share one continuous, unobstructed signal trace. The former
+  // detached end-circle must not return at small navigation-icon sizes.
+  const iconResponse = await page.request.get('/icons/feature-feelings.svg');
+  expect(iconResponse.ok()).toBe(true);
+  const iconSource = await iconResponse.text();
+  expect((iconSource.match(/<path\b/g) ?? [])).toHaveLength(1);
+  expect(iconSource).not.toMatch(/<(?:circle|ellipse|rect|polygon|polyline)\b/);
+  expect(iconSource).toContain('stroke-linecap="round"');
   await expect(checkIn.locator('svg')).toHaveCount(0);
   const iconWidth = await magnetPulse.evaluate((element) => element.getBoundingClientRect().width);
   expect(iconWidth).toBeGreaterThanOrEqual(16);
