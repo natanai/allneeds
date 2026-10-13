@@ -316,6 +316,7 @@ export function MagnetBoard({
       'nav-home',
       'nav-customizer',
       'nav-journal',
+      'nav-check-in',
       'nav-observations',
       'nav-faux-feelings',
       'nav-feelings',
