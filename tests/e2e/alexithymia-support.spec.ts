@@ -24,8 +24,11 @@ async function addTwoBodyCues(page: Page) {
 async function addFeelingShape(page: Page) {
   await page.getByRole('button', { name: /^Overall feeling/ }).click();
   const sheet = page.getByRole('dialog', { name: 'Overall feeling' });
-  await sheet.locator('input[name="alex-shape-pleasantness"][value="0"]').check();
-  await sheet.locator('input[name="alex-shape-energy"][value="1"]').check();
+  const plane = sheet.getByTestId('valence-arousal-field');
+  const box = await plane.boundingBox();
+  if (!box) throw new Error('Overall feeling map is not visible');
+  await page.mouse.click(box.x + box.width * 0.2, box.y + box.height * 0.2);
+  await expect(sheet.locator('output')).toHaveText('Valence −3 · Arousal +3');
   await sheet.locator('input[name="alex-shape-power"][value="0.25"]').check();
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
 }
@@ -102,6 +105,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   });
   expect(saved.notes).toBe(finishedStatement);
   expect(saved.guidedSupport.observation).toBe('I felt blamed and wanted understanding when we stopped talking.');
+  expect(saved.mood).toEqual({ kind: 'rated', value: -3, arousal: 3 });
 });
 
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
