@@ -235,6 +235,27 @@ test('mobile history displays dated entry counts and allows drag and zoom withou
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
 
+test('backdated journal experiences keep their plotted day while showing the original saved date', async ({ page }) => {
+  await seed(page); await page.goto('/inventory/journal');
+  const day = await page.evaluate(() => {
+    const key = 'allneeds.v2.journal';
+    const envelope = JSON.parse(localStorage.getItem(key)!);
+    const today = envelope.data.entries.find((entry: { id: string }) => entry.id === 'today');
+    const experience = new Date(today.dateISO);
+    experience.setDate(experience.getDate() - 3);
+    envelope.data.entries.push({ ...today, id: 'backdated-save', notes: 'Recorded later about an earlier moment', experiencedAtISO: experience.toISOString(), createdAtISO: today.dateISO });
+    localStorage.setItem(key, JSON.stringify(envelope));
+    const two = (value: number) => String(value).padStart(2, '0');
+    return `${experience.getFullYear()}-${two(experience.getMonth() + 1)}-${two(experience.getDate())}`;
+  });
+  await page.reload();
+  await page.getByTestId('history-chart').getByRole('button', { name: `3 journal entries on ${day}. View day` }).click();
+  const dayList = page.getByLabel('Entries on selected day');
+  await expect(dayList).toContainText('Recorded later about an earlier moment');
+  await expect(dayList).toContainText('Plotted by experienced date · originally saved');
+  await expect(dayList.getByRole('button', { name: /Open journal page/ })).toHaveCount(3);
+});
+
 test('desktop trackpad-style zoom changes the history window without scaling its mood axis', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await seed(page); await page.goto('/inventory/journal');
