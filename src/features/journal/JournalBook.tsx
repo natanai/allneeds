@@ -100,7 +100,9 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
     if (editing && !entry) { setError('This entry is no longer here. Your edit draft is still saved on this device.'); return; }
     const record = editing && entry ? {
       ...entry, ...data, notes: data.notes.trim(), emotion: data.feelings.map((item) => item.feeling).join(', '),
-      intensity: data.feelings.length ? Math.max(...data.feelings.map((item) => item.intensity)) : undefined,
+      intensity: data.feelings.some((item) => item.ratingSource !== 'unknown')
+        ? Math.max(...data.feelings.filter((item) => item.ratingSource !== 'unknown').map((item) => item.intensity))
+        : undefined,
     } : createJournalRecord({ ...data, source: draft.guidedSupport ? 'lane' : 'journal' });
     if (!onSave(record, editing)) return;
     activeRef.current.enabled = false;
