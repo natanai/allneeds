@@ -546,6 +546,13 @@ async function performProfileSave(
     ? await reconcileJournalAutoBackup(deviceSnapshot, session.did)
     : deviceSnapshot;
   const strategies = profilePublishableStrategies(snapshot.inventory);
+  // Automatic backups may deliberately retain newer cloud settings. The
+  // receipt must not claim this device's divergent settings were uploaded.
+  // Its journal baseline, however, represents the local entries now contained
+  // in the merged cloud journal rather than any cloud-only records.
+  const receiptSnapshot = mode === 'journal-auto'
+    ? { ...snapshot.localStorage, [JOURNAL_STORAGE_KEY]: deviceSnapshot.localStorage[JOURNAL_STORAGE_KEY] ?? '' }
+    : deviceSnapshot.localStorage;
   const response = await fetch(`${BACKEND_API_URL}/profile/save`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -574,7 +581,7 @@ async function performProfileSave(
     if (event.stage === 'profile-saved' && typeof event.savedAt === 'string' && !Number.isNaN(Date.parse(event.savedAt))) {
       saveState.profileSavedAt = event.savedAt;
       if (getBlueskySession()?.did === session.did) {
-        markProfileBackedUp(session.did, event.savedAt, deviceSnapshot.localStorage);
+        markProfileBackedUp(session.did, event.savedAt, receiptSnapshot);
       }
       onProgress?.({
         stage: 'syncing-strategies',
@@ -608,7 +615,7 @@ async function performProfileSave(
   if (!saveState.profileSavedAt && typeof saveState.syncData?.savedAt === 'string' && !Number.isNaN(Date.parse(saveState.syncData.savedAt))) {
     saveState.profileSavedAt = saveState.syncData.savedAt;
     if (getBlueskySession()?.did === session.did) {
-      markProfileBackedUp(session.did, saveState.profileSavedAt, deviceSnapshot.localStorage);
+      markProfileBackedUp(session.did, saveState.profileSavedAt, receiptSnapshot);
     }
   }
   if (!saveState.profileSavedAt) throw new Error('Unable to confirm when this browser was saved to your profile.');
