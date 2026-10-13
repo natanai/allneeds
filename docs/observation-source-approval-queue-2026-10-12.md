@@ -12,6 +12,12 @@
 
 The ten priority papers N01–N06 and M05/M08/M13/M14 have a [deeper critical appraisal](./observation-source-critical-appraisal-2026-10-12.md), including source-specific methodology and important corrections. **All user decisions remain PENDING.** Only documentation has changed; no public source or claim is approved for integration. Especially important: N02's matched follow-up n=153 rather than allocated n=312, N06's final comparison n=29 versus 27 with high attrition and group imbalances, and M13's study-subset denominator for the 96.4% agreement reporting result. Source content must be quoted with these corrections, not earlier shorthand.
 
+## Round 3 continued critical appraisal — 2026-10-12
+
+The six remaining direct-intervention studies N07–N12, original social-cognition research M02 and three **new** direct-NVC sources N13–N15 have [source-by-source Round 3 appraisals](./observation-source-critical-appraisal-round3-2026-10-12.md). This brings the queue to **34 candidate sources: 15 direct NVC, 17 related scientific, 2 exploratory technology preprints**. The source approval for every entry remains PENDING. No published website content has been changed.
+
+Especially important: N11's full report describes a 62-person pilot with six 2-hour sessions, self-report outcomes and no long-term follow-up; N12's 'young women' title describes participants ages ~11–18, not adults; N13 recovers a 2016 Korean-database review of 12 intervention studies; and N15 is a new 2026 single-center active-controlled medical training trial with impressive immediate effects but unusually large standardized effect size, unregistered primary outcome, and more deliberate practice in the NVC arm than control.
+
 ## Candidate source index
 
 | ID | Candidate citation and original URL | Suggested research priority |
@@ -45,6 +51,9 @@ The ten priority papers N01–N06 and M05/M08/M13/M14 have a [deeper critical ap
 | M15 | [Brassil, O'Mahony & Greene 2024 — Eyewitness misinformation systematic review](https://doi.org/10.3758/s13423-024-02512-5) | High |
 | M16 | [Vansteenkiste, Ryan & Soenens 2020 — Basic psychological needs theory](https://doi.org/10.1007/s11031-019-09818-1) | High |
 | M17 | [Tang et al. 2020 — Need satisfaction and wellbeing in later life: meta-analysis](https://doi.org/10.1002/pchj.293) | High |
+| N13 | [Yang & Kim 2016 — Integrative review of NVC intervention studies in Korean databases](https://doi.org/10.16952/pns.2016.13.1.36) | High; syntheses / language bias |
+| N14 | [Nosek, Gifford & Kober 2014 — NVC nursing-student empathy education, single-arm mixed methods](https://doi.org/10.5430/jnep.v4n10p1) | Contextual; uncontrolled pre/post |
+| N15 | [Jiang et al. 2026 — NVC randomized active-controlled education trial in emergency medicine](https://doi.org/10.1186/s12909-026-09621-w) | Very high; strong methods scrutiny required |
 | X01 | [Wolfe et al. 2025 — Needs-Conscious Design / NVC-inspired AI communication](https://arxiv.org/abs/2508.11149) | Hold: UX research only |
 | X02 | [Chan et al. 2026 — SpeakSoftly, NVC-powered conversational scaffolding](https://arxiv.org/abs/2604.05382) | Hold: UX research only |
 
@@ -298,6 +307,30 @@ The ten priority papers N01–N06 and M05/M08/M13/M14 have a [deeper critical ap
 **What it does NOT justify:** Preprint, small sample, different LLM technology, no established durable clinical outcomes.  
 **Editorial priority:** Hold: UX research only. **User decision: PENDING.**
 
+### N13 — Yang & Kim 2016 — Integrative review of NVC intervention studies
+
+**Original:** https://doi.org/10.16952/pns.2016.13.1.36
+**Research:** Five Korean databases, 2005-2015; 12 studies, of which nine were quasi-experimental, alongside one each qualitative, mixed and case-report design. Authors called for stronger trials and noted multi-session group training.
+**Why it belongs in review:** Finds otherwise missed non-English literature and provides evidence-map context that complicates reliance on the later 2024 healthcare review.
+**What it does NOT justify:** Counts are not additive to the 2024 review, or proof of intervention efficacy.
+**Editorial priority:** High. **User decision: PENDING.**
+
+### N14 — Nosek, Gifford & Kober 2014 — NVC education in nursing students
+
+**Original:** https://doi.org/10.5430/jnep.v4n10p1
+**Research:** Single-group pre/post mixed methods; IRI empathy score changed from mean 69.1 to 71.4, p=.037, plus qualitative diaries and focus groups.
+**Why it belongs in review:** Original training study and a caution about what an uncontrolled quantitative change establishes.
+**What it does NOT justify:** No untreated comparison, no demonstration NVC caused the change, and two-year qualitative follow-up is not measured long-term quantitative benefit.
+**Editorial priority:** Supplemental. **User decision: PENDING.**
+
+### N15 — Jiang et al. 2026 — NVC randomized educational trial
+
+**Original:** https://doi.org/10.1186/s12909-026-09621-w
+**Research:** 198 fourth-year students randomized 100 vs 98; five 2-hour sessions; no missing outcomes. Full 20-item self-rated empathy improved relative to a time-matched standard course by 16.95 points (95% CI 15.40–18.50, g=3.02); a study-shortened eight-item observer-scored role-play communication checklist improved by 4.44 points (95% CI 3.41–5.47, g=1.19). Raters masked to group allocation but not pre/post.
+**Why it belongs in review:** Direct NVC-trained communication performance and active time-matched comparator — a rare advance over prior studies.
+**What it does NOT justify:** No preregistration, only short-term one-center simulated outcomes, unusually large empathy effect requiring replication, control lacked equally intensive deliberate-practice/feedback method, study-specific abbreviated observation checklist, no real clinical outcome or isolated Observation effect.
+**Editorial priority:** High, pending complete supplementary material and risk-of-bias audit. **User decision: PENDING.**
+
 ## Material checks and conflicts to preserve
 
 - N02 randomized NVC training: reported self-rated empathy advantage of 0.95 points at three months; do not inflate to clinical behavioral improvement. Objective tasks did not establish equivalent changes.
@@ -312,7 +345,7 @@ The ten priority papers N01–N06 and M05/M08/M13/M14 have a [deeper critical ap
 
 ## Preservation, approval and next steps
 
-The full historical 20-link bibliography is preserved in docs/observation-research-recovery.md. IDs N01–N12 are **direct NVC** research; M01–M17 are **adjacent scientific domains**; X01–X02 are **provisional technology research**. Do not conflate them.
+The full historical 20-link bibliography is preserved in docs/observation-research-recovery.md. IDs N01–N15 are **direct NVC** research; M01–M17 are **adjacent scientific domains**; X01–X02 are **provisional technology research**. Do not conflate them.
 
 For source-by-source full critical review, extract sample, population, design, comparator, randomization, risk of bias, attrition, outcome operationalization, statistics/effect sizes/confidence intervals, open data/preregistration and funding/conflicts, contrary results, directness to AllNeeds and an exact defensible site sentence.
 
