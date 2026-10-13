@@ -2,7 +2,7 @@ import { getBrowserStorage } from './storage';
 import type { StorageDriver } from './storage';
 import { VersionedStore } from './versionedStore';
 import alexithymiaSupportData from '../data/generated/alexithymiaSupport.json';
-import { normalizeJournalMood, type JournalFeelingRating, type JournalMood } from '../features/journal/journalRepository';
+import { normalizeJournalMood, type JournalFeelingRating, type JournalMood, type JournalGuidedSupport } from '../features/journal/journalRepository';
 
 export const JOURNAL_DRAFT_STORAGE_KEY = 'allneeds.v2.journal.draft';
 export const OBSERVATION_DRAFT_STORAGE_KEY = 'allneeds.v2.observation.draft';
@@ -21,11 +21,7 @@ export type JournalComposerDraft = {
   selectedNeeds: string[];
   tags: string;
   editingId: string | null;
-  guidedSupport?: {
-    observation: string;
-    terms: Array<{ label: string; role: 'feeling' | 'faux-feeling' | 'working' }>;
-    statement: string;
-  };
+  guidedSupport?: JournalGuidedSupport;
 };
 
 export type ObservationDraft = {
@@ -131,7 +127,16 @@ function isGuidedSupportDraft(value: unknown) {
     && Array.isArray(value.terms)
     && value.terms.every((term) => isRecord(term)
       && typeof term.label === 'string'
-      && (term.role === 'feeling' || term.role === 'faux-feeling' || term.role === 'working'));
+      && (term.role === 'feeling' || term.role === 'faux-feeling' || term.role === 'working'))
+    && (value.bodyClues === undefined || (Array.isArray(value.bodyClues) && value.bodyClues.every((clue) =>
+      isRecord(clue) && typeof clue.id === 'string' && typeof clue.label === 'string'
+      && typeof clue.intensity === 'number' && Number.isFinite(clue.intensity))))
+    && (value.overallRatings === undefined || (isRecord(value.overallRatings)
+      && Object.entries(value.overallRatings).every(([key, rating]) => (
+        ['pleasantness', 'energy', 'power', 'expectedness'].includes(key)
+        && typeof rating === 'number' && Number.isFinite(rating)))))
+    && (value.bodyClear === undefined || typeof value.bodyClear === 'boolean')
+    && (value.noWordYet === undefined || typeof value.noWordYet === 'boolean');
 }
 
 function isJournalDraft(value: unknown): value is JournalComposerDraft {
@@ -337,6 +342,7 @@ export function writeJournalDraft(
     intensity: Math.min(10, Math.max(0, Math.round(item.intensity))),
   })).filter((item) => item.feeling && item.intensity > 0);
   const guidedSupport = draft.guidedSupport ? {
+    ...draft.guidedSupport,
     observation: draft.guidedSupport.observation.trim(),
     terms: draft.guidedSupport.terms
       .map((term) => ({ ...term, label: term.label.trim() }))
