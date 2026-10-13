@@ -70,3 +70,26 @@ test('both emotional maps repaint their whole surface while selecting and draggi
   await sheet.getByRole('button', { name: 'Clear' }).click();
   await expect(sheet.locator('output')).toHaveText('No point placed yet');
 });
+
+test('sending a check-in to Journal never overwrites an unfinished writing page', async ({ page }) => {
+  await page.goto('/inventory/journal?compose=new');
+  const journal = page.getByRole('dialog', { name: 'Journal' });
+  await journal.getByLabel('Reflection').fill('Keep this unfinished reflection');
+  await journal.getByRole('button', { name: 'Close full screen journal' }).click();
+
+  await page.goto('/alexithymia-support');
+  await page.getByRole('button', { name: 'Start check-in' }).click();
+  await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('Something difficult happened.');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Browse all feelings' }).click();
+  await page.getByRole('button', { name: 'No word yet' }).click();
+  await page.getByRole('button', { name: 'Use these words' }).click();
+  await page.getByRole('button', { name: 'Build sentence' }).click();
+  await page.getByRole('button', { name: 'Add to Journal' }).click();
+  await expect(page).toHaveURL(/\\/alexithymia-support$/);
+  await expect(page.getByText(/Journal has an unfinished page/)).toBeVisible();
+
+  await page.goto('/inventory/journal?compose=new');
+  await expect(page.getByRole('dialog', { name: 'Journal' }).getByLabel('Reflection'))
+    .toHaveValue('Keep this unfinished reflection');
+});
