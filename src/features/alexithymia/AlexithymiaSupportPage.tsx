@@ -10,6 +10,7 @@ import { analyzeObservation, selectExactObservationEntities } from '../../domain
 import {
   clearAlexithymiaDraft,
   readAlexithymiaDraft,
+  readJournalDraft,
   writeAlexithymiaDraft,
   writeJournalDraft,
 } from '../../persistence/workflowDrafts';
@@ -358,6 +359,10 @@ export function AlexithymiaSupportPage() {
   }
 
   function addToJournal() {
+    if (readJournalDraft()) {
+      setStatus('Your Journal has an unfinished page. Save or clear that page first, then return here to add this check-in. Your check-in is preserved.');
+      return;
+    }
     writeJournalDraft(createSupportJournalDraft({
       observation: draft.observation,
       terms: selectedTerms,
