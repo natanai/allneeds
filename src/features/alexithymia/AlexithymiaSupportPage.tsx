@@ -364,6 +364,12 @@ export function AlexithymiaSupportPage() {
       needSlugs: draft.selectedNeeds,
       statement: draft.statement,
       mood: shapeToJournalMood(draft.shape, draft.overallMood),
+      bodyClues: bodySelections.map(({ option, intensity }) => ({
+        id: option.id, label: option.title, intensity,
+      })),
+      overallRatings: draft.shape,
+      bodyClear: draft.bodyClear,
+      noWordYet: draft.noWordYet,
     }));
     void navigate('/inventory/journal?compose=new');
   }
