@@ -295,26 +295,7 @@ export function AlexithymiaSupportPage() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
-  function decideTerm(term: SupportTerm, decision: AlexithymiaDraft['decisions'][string]) {
-    updateDraft((current) => {
-      const decisions = { ...current.decisions, [term.id]: decision };
-      const selected = decision === 'fits' || decision === 'maybe';
-      const termOrder = selected
-        ? current.termOrder.includes(term.id) ? current.termOrder : [...current.termOrder, term.id]
-        : current.termOrder.filter((id) => id !== term.id);
-      const feelingIntensities = { ...current.feelingIntensities };
-      if (decision !== 'fits') delete feelingIntensities[term.id];
-      return {
-        ...current,
-        decisions,
-        termOrder,
-        feelingIntensities,
-        noWordYet: selected ? false : current.noWordYet,
-      };
-    });
-  }
-
-  function rateTerm(term: SupportTerm, decision: AlexithymiaDraft['decisions'][string], intensity?: number) {
+  function decideTerm(term: SupportTerm, decision: AlexithymiaDraft['decisions'][string], intensity?: number) {
     updateDraft((current) => {
       const decisions = { ...current.decisions, [term.id]: decision };
       const selected = decision === 'fits' || decision === 'maybe';
@@ -329,7 +310,10 @@ export function AlexithymiaSupportPage() {
         delete feelingIntensities[term.id];
       }
       return {
-        ...current, decisions, termOrder, feelingIntensities,
+        ...current,
+        decisions,
+        termOrder,
+        feelingIntensities,
         noWordYet: selected ? false : current.noWordYet,
       };
     });
@@ -704,7 +688,7 @@ export function AlexithymiaSupportPage() {
             intensity={activeTerm ? draft.feelingIntensities?.[activeTerm.id] : undefined}
             cueLabels={cueLabels}
             onDecision={(decision, intensity) => {
-              if (activeTerm) rateTerm(activeTerm, decision, intensity);
+              if (activeTerm) decideTerm(activeTerm, decision, intensity);
               setStatus(decision === 'not-this-time'
                 ? 'Marked “Not this time” for this check-in.'
                 : `${activeTerm?.label ?? 'Word'} added to Your words${intensity === undefined ? '' : ` · intensity ${intensity}/10`}.`);
