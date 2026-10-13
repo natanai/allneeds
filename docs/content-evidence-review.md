@@ -38,6 +38,14 @@ Approval must cover:
 
 The one preapproval production-repo exception is this document, `docs/content-evidence-review.md`, which may be updated as the review evolves.
 
+### Academic source URL formatting (2026-10-12 clarification)
+
+- Display and copy the original publisher's or scholarly society's **article landing-page URL** (for example, `https://link.springer.com/article/10.1007/s10560-018-0584-y`), **not** a generic `https://doi.org/...` redirect as the visible/raw citation.
+- Keep the bare DOI identifier (for example, `10.1007/s10560-018-0584-y`) as separate bibliographic metadata when useful. DOI-based discovery can still support title and version verification.
+- Strip ChatGPT referral domains, `utm_*` and other tracking/referral parameters; preserve only genuine publisher-required query parameters (such as APA's `doiLanding?doi=...`).
+- If an article is not yet published, use the actual author/preprint repository page and clearly mark peer-review status. If there is no verifiable publisher article page, use a verified scholarly record and state that limitation; **never fabricate a publisher URL**.
+- Historical citation inventories may preserve original links for provenance. New proposals and copy should follow this rule, and older approved source links should be converted only after independently confirming the publisher matches the article.
+
 ## Need-description authoring method: evolutionary function first, therapeutic meaning second
 
 Evolutionary framing is part of the reasoning process, not a decorative paragraph added after modern psychological copy is written.
