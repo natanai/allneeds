@@ -33,8 +33,16 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
   const unscored = entries.filter((entry) => !plotted.has(entry.id));
   const missingGroups = new Map<string, JournalRecord[]>();
   unscored.forEach((entry) => { const day = dateKey(journalDate(entry)); missingGroups.set(day, [...(missingGroups.get(day) ?? []), entry]); });
-  const choose = (point: HistoryPoint, name: string) => {
-    if (range.days > 1) { onSelectDay(dateKey(point.time)); return; }
+  const choose = (point: HistoryPoint, name: string, clientX?: number) => {
+    if (range.days > 1) {
+      // Wide touch targets may overlap on compact 30/90-day charts. Use the tapped
+      // horizontal position to resolve the nearest *logged day*, not DOM paint order.
+      const bounds = ref.current?.getBoundingClientRect();
+      const svgX = clientX === undefined || !bounds?.width ? x(point.time) : (clientX - bounds.left) / bounds.width * width;
+      const days = [...dailyCounts.keys()];
+      const selected = days.reduce((best, day) => Math.abs(x(new Date(`${day}T12:00:00`).getTime()) - svgX) < Math.abs(x(new Date(`${best}T12:00:00`).getTime()) - svgX) ? day : best, dateKey(point.time));
+      onSelectDay(selected); return;
+    }
     // Exact timestamps and nearby marks can coincide. Offer all nearby pages rather than conceal one.
     const neighbors = all.filter((item) => Math.abs(x(item.point.time) - x(point.time)) <= 22 && Math.abs(y(item.point.value) - y(point.value)) <= 22);
     const ids = [...new Set(neighbors.flatMap((item) => item.point.entryIds))];
@@ -63,7 +71,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
             {range.days > 1 && point.low !== point.high ? <path className={styles.rangeLine} d={`M${x(point.time)},${y(point.low)} V${y(point.high)} M${x(point.time) - 4},${y(point.low)} h8 M${x(point.time) - 4},${y(point.high)} h8`} fill="none" /> : null}
             {shape(index % Math.max(1, currentSeries.length), x(point.time), y(point.value))}
           </>}
-          {index < currentSeries.length && !printMode ? <rect className={styles.pointTarget} role="button" tabIndex={0} aria-label={`${item.name}: ${format(point.value)}, ${point.label}. ${range.days === 1 && settings.metric !== 'frequency' ? 'Open journal entry' : `${point.total} entries; view day`}`} x={x(point.time) - 22} y={y(point.value) - 22} width={44} height={44} onClick={() => choose(point, item.name)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(point, item.name); } }}><title>{item.name}: {format(point.value)} · {point.label} · ${point.count}/${point.total} ${settings.metric === 'frequency' ? 'mention' : 'rating'} count</title></rect> : null}
+          {index < currentSeries.length && !printMode ? <rect className={styles.pointTarget} role="button" tabIndex={0} aria-label={`${item.name}: ${format(point.value)}, ${point.label}. ${range.days === 1 && settings.metric !== 'frequency' ? 'Open journal entry' : `${point.total} entries; view day`}`} x={x(point.time) - 22} y={y(point.value) - 22} width={44} height={44} onClick={(event) => choose(point, item.name, event.clientX)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(point, item.name); } }}><title>{item.name}: {format(point.value)} · {point.label} · ${point.count}/${point.total} ${settings.metric === 'frequency' ? 'mention' : 'rating'} count</title></rect> : null}
         </g>)}
       </g>)}
       {missingGroups.size ? <>
