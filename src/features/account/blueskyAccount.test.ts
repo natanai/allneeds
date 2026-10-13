@@ -267,6 +267,7 @@ describe('Bluesky account compatibility', () => {
     await saveCurrentBrowserToProfile(undefined, 'journal-auto');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(upload).not.toBeNull();
+    expect(upload!.ifMatchValue).toBe(JSON.stringify(existing));
     const saved = JSON.parse(String(upload!.value)) as { localStorage: Record<string, string> };
     const record = JSON.parse(saved.localStorage['allneeds.v2.journal']!) as { data: { entries: Array<{ id: string }> } };
     expect(record.data.entries.map((entry) => entry.id).sort()).toEqual(['cloud-entry', 'local-entry']);
