@@ -332,7 +332,7 @@ export function AppMenu({
               <section className={styles.section} aria-labelledby="menu-settings">
                 <h3 id="menu-settings">Settings</h3>
                 <button type="button" className={styles.row} onClick={() => setView('account-data')}>
-                  <span className={styles.rowCopy}><span className={styles.rowTitle}>Account &amp; data</span><span className={styles.rowNote}>{session ? 'Signed in · data stored on this device' : 'Signed out · data stored on this device'}</span></span>
+                  <span className={styles.rowCopy}><span className={styles.rowTitle}>Account &amp; data</span><span className={styles.rowNote}>{session ? 'Signed in · journal auto backup enabled' : 'Signed out · data stored on this device'}</span></span>
                   <span className={styles.disclosure} aria-hidden="true">›</span>
                 </button>
                 <button type="button" className={styles.row} onClick={openCustomizer}>
@@ -361,7 +361,7 @@ export function AppMenu({
             <div className={styles.accountHeading}>
               <p className={styles.eyebrow}>Settings</p>
               <h2>Account &amp; data</h2>
-              <p>Your data stays on this device unless you choose to back it up.</p>
+              <p>Your data is saved on this device. {session ? 'Saved journal entries also back up automatically when online.' : 'Sign in to back it up to your profile.'}</p>
             </div>
 
             <section className={styles.systemSection} aria-labelledby="menu-account">
