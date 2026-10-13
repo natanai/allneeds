@@ -12,11 +12,6 @@
   user-select: none;
   cursor: crosshair;
 }
-.quadrant { position: absolute; width: 50%; height: 50%; opacity: .3; pointer-events: none; }
-.lowUnpleasant { left: 0; bottom: 0; background: color-mix(in srgb, var(--quiet) 62%, var(--surface-raised)); }
-.lowPleasant { right: 0; bottom: 0; background: color-mix(in srgb, var(--selection) 52%, var(--surface-raised)); }
-.highUnpleasant { left: 0; top: 0; background: color-mix(in srgb, var(--action) 48%, var(--surface-raised)); }
-.highPleasant { right: 0; top: 0; background: color-mix(in srgb, var(--positive) 60%, var(--surface-raised)); }
 .horizontalAxis, .verticalAxis { position: absolute; z-index: 1; display: block; background: color-mix(in srgb, var(--outline) 52%, transparent); pointer-events: none; }
 .horizontalAxis { left: 0; right: 0; top: 50%; height: 1px; }
 .verticalAxis { top: 0; bottom: 0; left: 50%; width: 1px; }
