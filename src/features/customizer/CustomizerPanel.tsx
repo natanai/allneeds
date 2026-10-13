@@ -19,7 +19,7 @@ import styles from './CustomizerPanel.module.css';
 
 const navLabels: Array<[NavItemId, string]> = [
   ['home', 'Home'], ['customizer', 'Customizer'],
-  ['journal', 'Journal'], ['inventory', 'Inventory'], ['observations', 'Observations'],
+  ['journal', 'Journal'], ['checkIn', 'Check-In'], ['inventory', 'Inventory'], ['observations', 'Observations'],
   ['fauxFeelings', 'Faux feelings'], ['feelings', 'Feelings'], ['needs', 'Needs'],
   ['bodyCues', 'Body cues'], ['journalDashboard', 'History'],
 ];
