@@ -745,7 +745,7 @@ async function handleGetUserSettings(request, env) {
   const result = await env.DB.prepare(
     'SELECT key, value, updated_at FROM user_settings WHERE did = ? ORDER BY key;',
   ).bind(session.did).all();
-  return jsonResponse(request, { status: 'ok', did: session.did, settings: result.results || [] });
+  return jsonResponse(request, { status: 'ok', did: session.did, settings: result.results || [], supportsConditionalProfileSave: true });
 }
 
 async function writeUserSetting(env, session, key, value) {
@@ -756,6 +756,21 @@ async function writeUserSetting(env, session, key, value) {
      ON CONFLICT(did, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at;`,
   ).bind(session.did, String(key), String(value), savedAt).run();
   return savedAt;
+}
+
+// For automatic journal backups, reject a stale full-profile snapshot before
+// it can replace data another device has saved. The comparison and write are
+// one atomic SQLite operation; no separate read-then-write race.
+async function writeUserSettingIfUnchanged(env, session, key, value, expectedValue) {
+  const savedAt = new Date().toISOString();
+  const result = expectedValue === null
+    ? await env.DB.prepare(
+      'INSERT OR IGNORE INTO user_settings (did, key, value, updated_at) VALUES (?, ?, ?, ?);',
+    ).bind(session.did, String(key), String(value), savedAt).run()
+    : await env.DB.prepare(
+      'UPDATE user_settings SET value = ?, updated_at = ? WHERE did = ? AND key = ? AND value = ?;',
+    ).bind(String(value), savedAt, session.did, String(key), expectedValue).run();
+  return result?.meta?.changes === 1 ? savedAt : null;
 }
 
 async function handlePostUserSettings(request, env) {
@@ -773,10 +788,18 @@ async function handleSaveProfile(request, env) {
   const body = await request.json().catch(() => null);
   if (!body?.key || body.value === undefined) return errorResponse(request, 'key and value are required', 400);
   if (!Array.isArray(body.strategies)) return errorResponse(request, 'strategies array is required', 400);
+  const conditional = Object.prototype.hasOwnProperty.call(body, 'ifMatchValue');
+  if (conditional && body.ifMatchValue !== null && typeof body.ifMatchValue !== 'string') {
+    return errorResponse(request, 'ifMatchValue must be a prior profile value or null', 400);
+  }
 
-  // Keep the snapshot durable before strategy work begins. The streamed first event lets
-  // the browser report that exact fact while the same Worker request reconciles the delta.
-  const savedAt = await writeUserSetting(env, session, body.key, body.value);
+  // Keep the snapshot durable before strategy work begins. A conditional save is
+  // atomic with its version check, preventing a stale automatic backup from
+  // clobbering another device's just-saved journal or settings.
+  const savedAt = conditional
+    ? await writeUserSettingIfUnchanged(env, session, body.key, body.value, body.ifMatchValue)
+    : await writeUserSetting(env, session, body.key, body.value);
+  if (!savedAt) return errorResponse(request, 'Profile changed since the last check. Refresh and retry.', 409);
   const encoder = new TextEncoder();
   const encodeEvent = (event) => encoder.encode(`${JSON.stringify(event)}\n`);
   const stream = new ReadableStream({

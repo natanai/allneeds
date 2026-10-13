@@ -62,7 +62,7 @@ function isDraft(key: string) {
   return key.startsWith('allneeds.v2.') && (key.endsWith('.draft') || key.includes('.draft.'));
 }
 
-function snapshotStorage(snapshot: BrowserSnapshot): StorageDriver {
+export function snapshotStorage(snapshot: BrowserSnapshot): StorageDriver {
   const values = { ...snapshot };
   for (const key of collectionKeys) {
     if (key === JOURNAL_STORAGE_KEY || key === INVENTORY_STORAGE_KEY || values[key] === undefined) continue;

@@ -14,6 +14,10 @@ import {
 } from '../account/blueskyAccount';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readProfileRecovery } from '../account/profileReconciliation';
+import { PROFILE_BACKUP_STATUS_CHANGED_EVENT, readProfileBackupView, type ProfileBackupView } from '../account/profileBackupStatus';
+import { JOURNAL_CHANGED_EVENT } from '../journal/journalRepository';
+import { INVENTORY_CHANGED_EVENT } from '../inventory/inventoryRepository';
+import { NAV_SETTINGS_CHANGED_EVENT, THEME_CHANGED_EVENT } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
 import {
   downloadPersonalStrategiesExport,
@@ -82,6 +86,12 @@ function StatusNotice({ status, target }: { status: MenuStatus | null; target: M
   );
 }
 
+function localDateTime(isoTime: string) {
+  const date = new Date(isoTime);
+  if (Number.isNaN(date.getTime())) return 'unknown';
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+}
+
 function localTime(isoTime: string) {
   const date = new Date(isoTime);
   if (Number.isNaN(date.getTime())) return 'just now';
@@ -105,6 +115,7 @@ export function AppMenu({
   const [shareEmailReady, setShareEmailReady] = useState(false);
   const [handle, setHandle] = useState('');
   const [accountBusy, setAccountBusy] = useState(false);
+  const [backupView, setBackupView] = useState<ProfileBackupView | null>(null);
   const session = useBlueskySession();
   const recovery = open ? readProfileRecovery() : null;
   const importRef = useRef<HTMLInputElement>(null);
@@ -122,6 +133,16 @@ export function AppMenu({
     if (!open) return;
     window.requestAnimationFrame(() => dialogRef.current?.scrollTo({ top: 0, behavior: 'auto' }));
   }, [dialogRef, open, view]);
+
+  useEffect(() => {
+    if (!open || !session?.did) { setBackupView(null); return; }
+    const refresh = () => setBackupView(readProfileBackupView(session.did));
+    refresh();
+    const events = [PROFILE_BACKUP_STATUS_CHANGED_EVENT, JOURNAL_CHANGED_EVENT, INVENTORY_CHANGED_EVENT,
+      THEME_CHANGED_EVENT, NAV_SETTINGS_CHANGED_EVENT, 'storage'];
+    events.forEach((name) => window.addEventListener(name, refresh));
+    return () => events.forEach((name) => window.removeEventListener(name, refresh));
+  }, [open, session?.did]);
 
   if (!open) return null;
 
@@ -182,13 +203,13 @@ export function AppMenu({
 
   const saveProfile = async () => {
     setAccountBusy(true);
-    setStatus({ target: 'profile', message: 'Saving this browser to your profile…' });
+    setStatus({ target: 'profile', message: 'Backing up profile…' });
     try {
       const result = await saveCurrentBrowserToProfile((progress) => {
         setStatus({
           target: 'profile',
           message: progress.strategyCount > 0
-            ? `Profile saved at ${localTime(progress.profileSavedAt)}. Checking ${progress.strategyCount} shared ${progress.strategyCount === 1 ? 'strategy' : 'strategies'} for changes…`
+            ? `Profile backed up at ${localTime(progress.profileSavedAt)}. Checking ${progress.strategyCount} shared ${progress.strategyCount === 1 ? 'strategy' : 'strategies'} for changes…`
             : `Profile saved at ${localTime(progress.profileSavedAt)}. Checking shared strategy changes…`,
         });
       });
@@ -197,11 +218,11 @@ export function AppMenu({
         : 'just now';
       let message: string;
       if (!result.strategiesSynced) {
-        message = `Profile saved at ${localTime(result.profileSavedAt)}. Shared strategy sync did not finish; you can try Save this browser again.`;
+        message = `Profile backed up at ${localTime(result.profileSavedAt)}. Shared strategy sync did not finish; try Back up profile again.`;
       } else if (result.strategyCount === 0 && !result.unpublishedStrategyCount) {
-        message = `Profile saved at ${localTime(result.profileSavedAt)}. Shared strategies checked at ${strategySyncTime}; there were no shared strategies to sync.`;
+        message = `Profile backed up at ${localTime(result.profileSavedAt)}. Shared strategies checked at ${strategySyncTime}; there were no shared strategies to sync.`;
       } else if (result.changedStrategyCount === 0 && !result.unpublishedStrategyCount) {
-        message = `Profile saved at ${localTime(result.profileSavedAt)}. All ${result.strategyCount} shared ${result.strategyCount === 1 ? 'strategy was' : 'strategies were'} already up to date when checked at ${strategySyncTime}.`;
+        message = `Profile backed up at ${localTime(result.profileSavedAt)}. All ${result.strategyCount} shared ${result.strategyCount === 1 ? 'strategy was' : 'strategies were'} already up to date when checked at ${strategySyncTime}.`;
       } else {
         const changes = result.changedStrategyCount ?? result.strategyCount;
         const parts = [
@@ -209,7 +230,7 @@ export function AppMenu({
           result.unchangedStrategyCount ? `${result.unchangedStrategyCount} already up to date` : '',
           result.unpublishedStrategyCount ? `${result.unpublishedStrategyCount} removed from sharing` : '',
         ].filter(Boolean);
-        message = `Profile saved at ${localTime(result.profileSavedAt)}. Checked at ${strategySyncTime}: ${parts.join(', ')}.`;
+        message = `Profile backed up at ${localTime(result.profileSavedAt)}. Checked at ${strategySyncTime}: ${parts.join(', ')}.`;
       }
       setStatus({
         target: 'profile',
@@ -311,7 +332,7 @@ export function AppMenu({
               <section className={styles.section} aria-labelledby="menu-settings">
                 <h3 id="menu-settings">Settings</h3>
                 <button type="button" className={styles.row} onClick={() => setView('account-data')}>
-                  <span className={styles.rowCopy}><span className={styles.rowTitle}>Account &amp; data</span><span className={styles.rowNote}>{session ? 'Signed in · data stored on this device' : 'Signed out · data stored on this device'}</span></span>
+                  <span className={styles.rowCopy}><span className={styles.rowTitle}>Account &amp; data</span><span className={styles.rowNote}>{session ? 'Signed in · journal auto backup enabled' : 'Signed out · data stored on this device'}</span></span>
                   <span className={styles.disclosure} aria-hidden="true">›</span>
                 </button>
                 <button type="button" className={styles.row} onClick={openCustomizer}>
@@ -340,7 +361,7 @@ export function AppMenu({
             <div className={styles.accountHeading}>
               <p className={styles.eyebrow}>Settings</p>
               <h2>Account &amp; data</h2>
-              <p>Your data stays on this device unless you choose to back it up.</p>
+              <p>Your data is saved on this device. {session ? 'Saved journal entries also back up automatically when online.' : 'Sign in to back it up to your profile.'}</p>
             </div>
 
             <section className={styles.systemSection} aria-labelledby="menu-account">
@@ -354,11 +375,20 @@ export function AppMenu({
                 <small>Signing in warns you before replacing local data and offers to merge local entries when needed.</small>
               </div>
               <div className={styles.systemCard}>
-                <h4>Profile snapshot</h4>
-                <p>Save this browser’s allneeds data to your profile or load the profile saved to your account.</p>
-                <div className={styles.actionPair}><button type="button" disabled={!session || accountBusy} onClick={() => void saveProfile()}>Save this browser</button><button type="button" disabled={!session || accountBusy} onClick={() => void loadProfile()}>Load saved profile</button></div>
+                <h4>Profile backup</h4>
+                <p>Back up journal entries, personal strategies, and settings to your account. Saved journal entries back up automatically when you're signed in and online.</p>
+                <div className={styles.actionPair}><button type="button" disabled={!session || accountBusy} onClick={() => void saveProfile()}>Back up profile</button><button type="button" disabled={!session || accountBusy} onClick={() => void loadProfile()}>Load saved profile</button></div>
                 <StatusNotice status={status} target="profile" />
-                {!session ? <small>Sign in with Bluesky to enable profile sync.</small> : null}
+                {session ? backupView?.receipt ? <>
+                  <p role="status"><strong>Last backed up: {localDateTime(backupView.receipt.savedAt)}</strong></p>
+                  <small>Latest backup: {backupView.receipt.summary}. Includes {backupView.receipt.journalCount} journal {backupView.receipt.journalCount === 1 ? 'entry' : 'entries'}, {backupView.receipt.strategyCount} personal {backupView.receipt.strategyCount === 1 ? 'strategy' : 'strategies'}, and profile settings.</small>
+                  {Object.values(backupView.pending).some(Boolean) ? <small role="status">Not yet backed up from this device: {[
+                    backupView.pending.journal ? 'journal changes' : '',
+                    backupView.pending.inventory ? 'strategy changes' : '',
+                    backupView.pending.settings ? 'settings changes' : '',
+                  ].filter(Boolean).join(', ')}. Use Back up profile to save everything now.</small> : <small>This device has no newer changes in the tracked profile data.</small>}
+                </> : <small role="status">No confirmed backup recorded from this device yet. Choose Back up profile to save your data.</small>
+                  : <small>Sign in with Bluesky to enable profile backups.</small>}
               </div>
             </section>
 

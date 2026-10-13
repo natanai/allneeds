@@ -93,6 +93,62 @@ function createSyncDatabase(initialRows) {
 }
 
 describe('profile persistence', () => {
+  it('rejects an automatic save when another device has replaced the expected snapshot', async () => {
+    const calls = [];
+    const db = {
+      prepare: vi.fn((sql) => ({
+        bind(...values) {
+          calls.push({ sql, values });
+          return {
+            async first() {
+              if (sql.includes('FROM sessions')) return {
+                id: 'session-1', did: 'did:plc:profile-sync-test',
+                expires_at: '2099-01-01T00:00:00.000Z',
+                verified_at: '2026-08-25T12:00:00.000Z',
+              };
+              return null;
+            },
+            async run() { return { meta: { changes: 0 } }; },
+          };
+        },
+      })),
+    };
+    const response = await worker.fetch(new Request('https://backend.allneeds.app/api/profile/save', {
+      method: 'POST',
+      headers: { Cookie: 'allneeds_session=session-1', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'allneeds_export_v1', value: '{"new":true}', strategies: [], ifMatchValue: '{"old":true}' }),
+    }), { DB: db }, {});
+    expect(response.status).toBe(409);
+    expect(calls.some((item) => item.sql.includes('UPDATE user_settings SET value'))).toBe(true);
+    expect(calls.some((item) => item.sql.includes('FROM strategies'))).toBe(false);
+  });
+
+  it('advertises conditional snapshot support on profile reads', async () => {
+    const db = {
+      prepare: vi.fn((sql) => ({
+        bind() {
+          return {
+            async first() {
+              if (sql.includes('FROM sessions')) return {
+                id: 'session-1', did: 'did:plc:profile-sync-test',
+                expires_at: '2099-01-01T00:00:00.000Z',
+                verified_at: '2026-08-25T12:00:00.000Z',
+              };
+              return null;
+            },
+            async all() { return { results: [] }; },
+          };
+        },
+      })),
+    };
+    const response = await worker.fetch(new Request('https://backend.allneeds.app/api/user-settings', {
+      headers: { Cookie: 'allneeds_session=session-1' },
+    }), { DB: db }, {});
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      did: 'did:plc:profile-sync-test', supportsConditionalProfileSave: true,
+    });
+  });
   it('returns the authoritative profile snapshot save time', async () => {
     const savedValues = [];
     const env = {
