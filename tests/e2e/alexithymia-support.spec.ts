@@ -106,6 +106,13 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   expect(saved.notes).toBe(finishedStatement);
   expect(saved.guidedSupport.observation).toBe('I felt blamed and wanted understanding when we stopped talking.');
   expect(saved.mood).toEqual({ kind: 'rated', value: -3, arousal: 3 });
+  expect(saved.source).toBe('lane');
+  expect(saved.guidedSupport.bodyClues).toMatchObject([
+    { intensity: 70 }, { intensity: 70 },
+  ]);
+  expect(saved.guidedSupport.overallRatings).toMatchObject({
+    pleasantness: 0.2, energy: 0.8, power: 0.25,
+  });
   expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety').ratingSource).toBe('unknown');
 });
 
