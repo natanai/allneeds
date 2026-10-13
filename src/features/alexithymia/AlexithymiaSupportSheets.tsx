@@ -9,6 +9,9 @@ import type { CandidateClueScore, ShapeSelections } from './alexithymiaMath';
 import { roundedMatchPercent } from './alexithymiaMath';
 import type { ShapeDimension } from './alexithymiaData';
 import type { SupportTerm } from './alexithymiaTerms';
+import { ValenceArousalField } from '../journal/ValenceArousalField';
+import type { JournalMood } from '../journal/journalRepository';
+import { shapeToJournalMood, type OverallMoodChoice } from './shapeCoordinates';
 import styles from './AlexithymiaSupportPage.module.css';
 
 export type BodyOption = {
@@ -220,37 +223,32 @@ export function FeelingShapeSheet({
   open,
   shape,
   onChange,
+  onOverallChange,
+  overallMood,
   onClose,
 }: {
   open: boolean;
   shape: ShapeSelections;
+  overallMood?: OverallMoodChoice;
   onChange: (shape: ShapeSelections) => void;
+  onOverallChange: (mood: JournalMood | undefined) => void;
   onClose: () => void;
 }) {
   return (
     <SupportSheet open={open} title="Overall feeling" titleId="alex-shape-sheet-title" onClose={onClose} wide>
-      <p className={styles.sheetIntro}>Rate any parts you can tell. Skip anything that is unclear.</p>
+      <p className={styles.sheetIntro}>Place a point for pleasantness and energy, or choose another mood option. Skip anything unclear.</p>
       <div className={styles.shapeGroups}>
         <section className={styles.shapeGroup} aria-labelledby="alex-shape-core-title">
           <header>
             <p>Start here</p>
             <h3 id="alex-shape-core-title">General feeling</h3>
-            <span>Two ratings are enough to compare words.</span>
+            <span>One point supplies both ratings for comparison.</span>
           </header>
-          <div className={styles.shapeScales}>
-            {shapeControls.slice(0, 2).map((control) => (
-              <ShapeScale
-                key={control.dimension}
-                {...control}
-                value={shape[control.dimension]}
-                onChange={(value) => {
-                  const next = { ...shape };
-                  if (value === undefined) delete next[control.dimension];
-                  else next[control.dimension] = value;
-                  onChange(next);
-                }}
-              />
-            ))}
+          <div className={styles.shapeMap}>
+            <ValenceArousalField
+              mood={shapeToJournalMood(shape, overallMood)}
+              onChange={onOverallChange}
+            />
           </div>
         </section>
         <section className={`${styles.shapeGroup} ${styles.shapeGroupSecondary}`} aria-labelledby="alex-shape-context-title">
