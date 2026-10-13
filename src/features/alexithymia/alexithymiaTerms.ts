@@ -9,6 +9,7 @@ import {
   type AlexithymiaCandidate,
 } from './alexithymiaData';
 import type { JournalComposerDraft } from '../../persistence/workflowDrafts';
+import type { JournalMood } from '../journal/journalRepository';
 
 export type SupportTermRole = 'feeling' | 'faux-feeling' | 'working';
 
@@ -148,11 +149,13 @@ export function createSupportJournalDraft({
   terms,
   needSlugs,
   statement,
+  mood,
 }: {
   observation: string;
   terms: SupportTerm[];
   needSlugs: string[];
   statement: string;
+  mood?: JournalMood;
 }): JournalComposerDraft {
   const canonicalFeelings = terms.filter((term) => term.role === 'feeling');
   const cleanObservation = observation.trim();
@@ -164,6 +167,7 @@ export function createSupportJournalDraft({
     : '');
   return {
     notes,
+    ...(mood ? { mood } : {}),
     emotion: canonicalFeelings.map((term) => term.label).join(', '),
     intensity: 5,
     feelings: canonicalFeelings.map((term) => ({ feeling: term.label, intensity: 5 })),
