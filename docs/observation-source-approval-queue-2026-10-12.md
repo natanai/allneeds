@@ -34,6 +34,14 @@ The master table below has been refreshed to use **source-host publisher article
 
 **Read the [all-48 editorial verdicts, direct article URLs, study-design rationale, and proposed guide placement](./observation-all-48-editorial-verdicts-2026-10-13.md).** The editor recommends **26 RETAIN, 13 HOLD, and 9 EXCLUDE from the public guide**. These are research recommendations, NOT user approval decisions. All 48 user approvals in this queue remain PENDING, and all final site-facing claim packages still require user approval. Retained sources may still need additional full-text statistical inspection and exact claim matching before publication. Four other sources in the current preview but outside this 48-source queue are identified separately in the verdict document. No deployment authorized.
 
+## Round 5 scholarly follow-up and decisions — 2026-10-13
+
+[**Read the ten previously held sources' detailed reappraisal**](./observation-held-sources-critical-appraisal-round5-2026-10-13.md). Newly accessible full articles justify cautious reclassification: **N13, M04 and M11 narrowly RETAIN**; **M17, C10 and C13 EXCLUDE from this user-facing Observation guide**; **N03, N08, N09, N12 remain HOLD** for access or methods concerns. Across all 48, the **current editorial recommendations are 32 RETAIN / 4 HOLD / 12 EXCLUDE**.
+
+The 2016 Korean NVC review N13 is now **fully accessible** with original tables, 120-to-33-to-12 selection flow, 9 quasi-experimental and 11 group-program sources. The Watkins et al. M04 three-arm experiment is also accessible and shows matched training controls and differential missing outcomes. These details are recorded in Round 5 without presenting either study as efficacy evidence for AllNeeds.
+
+**All source and claim decisions by the user remain PENDING.** This is editorial research staging only and does not permit additions to `src/data/observationGuide.json`, merges to main or a Pages deployment.
+
 ## Candidate source index
 
 | ID | Candidate citation and original URL | Suggested research priority |
@@ -46,7 +54,7 @@ The master table below has been refreshed to use **source-host publisher article
 | N06 | [Wacker & Dziobek 2018 — NVC workplace training](https://psycnet.apa.org/doiLanding?doi=10.1037%2Focp0000058) | High |
 | N07 | [Museux et al. 2016 — NVC and interprofessional teamwork](https://www.tandfonline.com/doi/full/10.1080/00981389.2016.1164270) | Supplemental |
 | N08 | [Kim & Kim 2022 — NVC anger management for psychiatric inpatients](https://www.sciencedirect.com/science/article/abs/pii/S0883941722000772) | Hold |
-| N09 | [Yang & Kim 2021 — NVC training in inpatient alcohol care](https://onlinelibrary.wiley.com/doi/full/10.1111/ppc.12673) | Supplemental |
+| N09 | [Yang & Kim 2021 — NVC training in inpatient alcohol care](https://onlinelibrary.wiley.com/doi/abs/10.1111/ppc.12673) | Supplemental |
 | N10 | [Nosek & Durán 2017 — Community NVC training with Latino adults and youth](https://repository.usfca.edu/nursing_fac/120/) | Supplemental |
 | N11 | [Sung & Kweon 2022 — NVC empathy education nursing pilot](https://www.mdpi.com/2039-4403/12/4/80) | Hold |
 | N12 | [Zandkarimi et al. 2019 — NVC training and stress/anxiety/depression](https://link.springer.com/article/10.1007/s10560-018-0584-y) | Hold |
@@ -67,7 +75,7 @@ The master table below has been refreshed to use **source-host publisher article
 | M15 | [Brassil, O'Mahony & Greene 2024 — Eyewitness misinformation systematic review](https://link.springer.com/article/10.3758/s13423-024-02512-5) | High |
 | M16 | [Vansteenkiste, Ryan & Soenens 2020 — Basic psychological needs theory](https://link.springer.com/article/10.1007/s11031-019-09818-1) | High |
 | M17 | [Tang et al. 2020 — Need satisfaction and wellbeing in later life: meta-analysis](https://onlinelibrary.wiley.com/doi/10.1002/pchj.293) | High |
-| N13 | [Yang & Kim 2016 — Integrative review of NVC intervention studies in Korean databases](https://www.riss.kr/link?id=A101862489) | High; syntheses / language bias |
+| N13 | [Yang & Kim 2016 — Integrative review of NVC intervention studies in Korean databases](https://kiss.kstudy.com/Detail/Ar?key=3429800) | High; syntheses / language bias |
 | N14 | [Nosek, Gifford & Kober 2014 — NVC nursing-student empathy education, single-arm mixed methods](https://www.sciedu.ca/journal/index.php/jnep/article/view/4222/0) | Contextual; uncontrolled pre/post |
 | N15 | [Jiang et al. 2026 — NVC randomized active-controlled education trial in emergency medicine](https://link.springer.com/article/10.1186/s12909-026-09621-w) | Very high; strong methods scrutiny required |
 | C01 | [Nook et al. 2021 — Emotion naming before reappraisal/acceptance](https://link.springer.com/article/10.1007/s42761-021-00036-y) | High: potentially adverse sequence interactions |
