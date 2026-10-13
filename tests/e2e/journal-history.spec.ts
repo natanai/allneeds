@@ -179,6 +179,21 @@ test('mobile history displays dated entry counts and allows drag and zoom withou
   const chart = page.getByTestId('history-chart');
   const dated = chart.getByText(/ · 2 entries/);
   await expect(dated).toBeVisible();
+  // The count must belong to the entries' actual local date, even when the
+  // date label must move left to stay inside a narrow mobile SVG.
+  const realDay = await page.evaluate(() => {
+    const records = JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries;
+    const recorded = new Date(records.find((entry: { id: string }) => entry.id === 'same-a').dateISO);
+    const two = (value: number) => String(value).padStart(2, '0');
+    return `${recorded.getFullYear()}-${two(recorded.getMonth() + 1)}-${two(recorded.getDate())}`;
+  });
+  const labelDate = await page.evaluate((day) => new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), realDay);
+  await expect(chart.getByText(`${labelDate} · 2 entries`, { exact: true })).toBeVisible();
+  const guide = chart.locator(`[data-testid="history-day-guide"][data-day="${realDay}"]`);
+  await expect(guide).toHaveCount(1);
+  const guideX = Number(await guide.getAttribute('data-anchor-x'));
+  const markX = Number(await chart.getByRole('button', { name: /^Pleasantness: \\+1,/ }).first().getAttribute('x')) + 22;
+  expect(guideX).toBeCloseTo(markX, 1);
   const badge = chart.getByRole('button', { name: /2 journal entries on .* View day/ });
   await expect(badge).toBeVisible();
   await badge.click();
@@ -186,6 +201,24 @@ test('mobile history displays dated entry counts and allows drag and zoom withou
   await page.getByRole('button', { name: 'Back to all days' }).click();
   const plot = chart.locator('svg');
   await expect(plot).toHaveCSS('touch-action', 'pan-y');
+  // Safari's native page-pinch must only be cancelled within the chart.
+  // A one-finger vertical swipe must remain available to scroll the page.
+  const nativeGestures = await plot.evaluate((svg) => {
+    const dispatch = (target: EventTarget, type: string, fingers?: number) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      if (fingers !== undefined) Object.defineProperty(event, 'touches', { value: { length: fingers } });
+      target.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    return {
+      pinchStart: dispatch(svg, 'gesturestart'),
+      pinchMove: dispatch(svg, 'gesturechange'),
+      twoFingers: dispatch(svg, 'touchmove', 2),
+      oneFinger: dispatch(svg, 'touchmove', 1),
+      outsideGraph: dispatch(document.body, 'gesturestart'),
+    };
+  });
+  expect(nativeGestures).toEqual({ pinchStart: true, pinchMove: true, twoFingers: true, oneFinger: false, outsideGraph: false });
   const box = await plot.boundingBox();
   if (!box) throw new Error('History plot is missing');
   await page.mouse.move(box.x + box.width * .55, box.y + box.height * .55);
