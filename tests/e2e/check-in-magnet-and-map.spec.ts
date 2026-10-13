@@ -23,6 +23,12 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
   const magnetMask = await magnetPulse.evaluate((element) => getComputedStyle(element).maskImage);
   expect(doorwayMask).toContain('feature-feelings.svg');
   expect(magnetMask).toBe(doorwayMask);
+  // Oversizing the mask (formerly 116%) clips the SVG's end circle.
+  // Both presentations must fit the full artwork into their icon slots.
+  const doorwaySize = await doorwayPulse.evaluate((element) => getComputedStyle(element).maskSize);
+  const magnetSize = await magnetPulse.evaluate((element) => getComputedStyle(element).maskSize);
+  expect(doorwaySize).toBe('contain');
+  expect(magnetSize).toBe(doorwaySize);
   await expect(checkIn.locator('svg')).toHaveCount(0);
   const iconWidth = await magnetPulse.evaluate((element) => element.getBoundingClientRect().width);
   expect(iconWidth).toBeGreaterThanOrEqual(16);
