@@ -53,12 +53,16 @@ function itemsFromSnapshot(snapshot: BrowserSnapshot) {
   } catch { return []; }
 }
 
+export function journalEntryDigest(entry: unknown) {
+  return digest(JSON.stringify(entry));
+}
+
 function journalIds(snapshot: BrowserSnapshot): Record<string, string> {
   const ids: Record<string, string> = {};
   for (const item of entriesFromSnapshot(snapshot)) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
     const id = (item as { id?: unknown }).id;
-    if (typeof id === 'string' && id) ids[id] = digest(JSON.stringify(item));
+    if (typeof id === 'string' && id) ids[id] = journalEntryDigest(item);
   }
   return ids;
 }
