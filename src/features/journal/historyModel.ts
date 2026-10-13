@@ -35,7 +35,7 @@ export function defaultHistorySettings(entries: JournalRecord[], now = new Date(
   const common = [...counts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))[0]?.name;
   return { metric: 'mood', feelings: common ? [common] : [],
     period: '30', from: dateKey(addDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), -29)), to: dateKey(now),
-    grouping: 'entry', query: '', feelingFilter: '', need: '', tag: '', minIntensity: 1, maxIntensity: 10, comparison: false, showAnnotations: true, sort: 'newest' };
+    grouping: 'day', query: '', feelingFilter: '', need: '', tag: '', minIntensity: 1, maxIntensity: 10, comparison: false, showAnnotations: true, sort: 'newest' };
 }
 export function historyWindow(settings: HistorySettings, entries: JournalRecord[], now = new Date()): DateWindow {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -115,13 +115,17 @@ export function historySummary(entries: JournalRecord[], settings: HistorySettin
     mentioned: settings.feelings[0] ? entries.filter((entry) => entry.feelings.some((item) => lower(item.feeling) === lower(settings.feelings[0]!))).length : 0,
     mixed: entries.filter((entry) => entry.mood?.kind === 'mixed').length, unsure: entries.filter((entry) => entry.mood?.kind === 'unsure').length };
 }
+/** Wider periods show one observation per logged day; a single calendar day shows its original moments. */
+export function historyGrouping(settings: HistorySettings, range: DateWindow): HistoryGrouping {
+  return range.days === 1 && settings.metric !== 'frequency' ? 'entry' : 'day';
+}
 function bucketStart(time: number, grouping: HistoryGrouping) {
   const date = new Date(time); date.setHours(0, 0, 0, 0);
   if (grouping === 'week') date.setDate(date.getDate() - (date.getDay() + 6) % 7);
   return date.getTime();
 }
 export function buildHistorySeries(entries: JournalRecord[], settings: HistorySettings, range: DateWindow): HistorySeries[] {
-  const grouping = settings.metric === 'frequency' && settings.grouping === 'entry' ? 'day' : settings.grouping;
+  const grouping = historyGrouping(settings, range);
   const names = settings.metric === 'mood' ? ['Pleasantness', 'Arousal'] : settings.feelings.slice(0, 3);
   return names.map((name) => {
     const points: HistoryPoint[] = [];
@@ -162,7 +166,7 @@ export function historyCsv(entries: JournalRecord[], settings: HistorySettings, 
   const row = (values: (string | number)[]) => values.map(cell).join(',');
   const fields = ['Entry ID', 'Moment (ISO)', 'Originally saved (ISO)', 'Valence', 'Arousal', 'Mood status', 'Feelings and reported intensity', 'Needs', 'Tags', ...(includeText ? ['Reflection'] : [])];
   return [row(['allneeds emotional history']), row(['Period', dateKey(range.start), dateKey(addDays(range.end, -1))]),
-    row(['Measure', settings.metric, 'Grouping', settings.grouping, 'Feelings', settings.metric === 'mood' ? '' : settings.feelings.join('; ')]),
+    row(['Measure', settings.metric, 'Grouping', historyGrouping(settings, range), 'Feelings', settings.metric === 'mood' ? '' : settings.feelings.join('; ')]),
     row(['Filters', JSON.stringify({ query: settings.query, feeling: settings.feelingFilter, need: settings.need, tag: settings.tag, intensity: [settings.minIntensity, settings.maxIntensity] })]),
     row(fields), ...entries.map((entry) => row([entry.id, journalDate(entry), entry.createdAtISO ?? entry.dateISO,
       entry.mood?.kind === 'rated' ? entry.mood.value : '', entry.mood?.kind === 'rated' ? entry.mood.arousal ?? '' : '', entry.mood?.kind ?? 'not rated',
