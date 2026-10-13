@@ -68,15 +68,15 @@
 }
 
 .breadcrumbLabel { display: inline-flex; align-items: center; gap: var(--space-1); }
-/* The Check-In magnet uses the exact Feelings doorway SVG as a theme-colored
-   mask. Enlarge its glyph within the standard nav icon slot, not the magnet. */
+/* Match the Feelings doorway's containment so the pulse's final circle
+   never clips against the navigation icon slot. */
 .checkInPulse {
   display: block;
   width: 100%;
   height: 100%;
   background: color-mix(in srgb, var(--action) 58%, var(--outline) 42%);
-  -webkit-mask: var(--magnet-icon) center / 116% no-repeat;
-  mask: var(--magnet-icon) center / 116% no-repeat;
+  -webkit-mask: var(--magnet-icon) center / contain no-repeat;
+  mask: var(--magnet-icon) center / contain no-repeat;
 }
 
 .breadcrumbIcon { width: 1.05rem; height: 1.05rem; object-fit: contain; }
