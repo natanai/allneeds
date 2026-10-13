@@ -4,7 +4,7 @@ import { captureBrowserStorage } from '../../persistence/browserBackup';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { readInventory } from '../inventory/inventoryRepository';
 import { readJournal, JOURNAL_STORAGE_KEY } from '../journal/journalRepository';
-import { markProfileBackedUp, readProfileBackupReceipt } from './profileBackupStatus';
+import { journalEntryDigest, markProfileBackedUp, readProfileBackupReceipt } from './profileBackupStatus';
 import { profilePublishableStrategies } from './profileStrategySync';
 import {
   applyCombinedProfile,
@@ -497,7 +497,8 @@ async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: str
     return { snapshot: device, ifMatchValue: null };
   }
   if (typeof stored?.value !== 'string') throw new Error('The profile changed while checking; automatic backup stopped.');
-  const comparison = compareProfileSnapshots(device.localStorage, profileBrowserSnapshot(profile.localStorage));
+  const profileStorage = profileBrowserSnapshot(profile.localStorage);
+  const comparison = compareProfileSnapshots(device.localStorage, profileStorage);
   const combined = combineProfileSnapshots(comparison, 'profile');
 
   // A deliberate local deletion may be propagated only when this device has a
@@ -506,6 +507,17 @@ async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: str
   const localIds = new Set(device.journalEntries.map((entry) => entry.id));
   const removed = new Set(Object.keys(receipt?.journalIds ?? {}).filter((id) => !localIds.has(id)));
   if (removed.size) {
+    // A different device may have edited an entry since this device last backed
+    // it up. Do not silently delete that newer remote version.
+    const remoteWire = JSON.parse(profileStorage[JOURNAL_STORAGE_KEY] ?? 'null') as {
+      data?: { entries?: Array<{ id: string }> };
+    } | null;
+    const remoteEntries = Array.isArray(remoteWire?.data?.entries) ? remoteWire.data.entries : [];
+    const editedRemotely = remoteEntries.some((entry) => removed.has(entry.id)
+      && journalEntryDigest(entry) !== receipt?.journalIds[entry.id]);
+    if (editedRemotely) {
+      throw new Error('A journal entry deleted on this device was changed elsewhere. Automatic backup stopped to protect the other copy.');
+    }
     const journal = JSON.parse(combined[JOURNAL_STORAGE_KEY]!) as {
       schemaVersion: number; savedAt: string; data: { entries: Array<{ id: string }> };
     };
