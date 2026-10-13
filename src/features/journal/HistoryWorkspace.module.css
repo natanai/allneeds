@@ -28,7 +28,7 @@
 .timelineNav strong { flex: 1; text-align: center; font-size: var(--text-sm); }
 .timelineNav button { font-size: var(--text-xs); }
 .timelineNav button[aria-label] { min-width: 44px; font-size: var(--text-base); }
-.chart { min-width: 0; width: 100%; }
+.chart { min-width: 0; width: 100%; touch-action: pan-y; }
 .chart svg { display: block; max-width: 100%; overflow: visible; }
 .chart .interactivePlot { touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
 .chart .interactivePlot:active { cursor: grabbing; }
