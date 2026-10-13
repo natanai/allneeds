@@ -181,6 +181,15 @@ test('candidate decisions close immediately, while Fits offers optional intensit
     return data?.decisions?.['candidate:anxiety'] === 'maybe'
       && data?.feelingIntensities?.['candidate:anxiety'] === undefined;
   })).toBe(true);
+
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Not this time', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    return raw && JSON.parse(raw).data.decisions['candidate:anxiety'];
+  })).toBe('not-this-time');
 });
 
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
