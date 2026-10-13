@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addDays, buildHistorySeries, dateKey, defaultHistorySettings, filterHistory, historyCsv, historySummary, historyWindow, parseDay, previousWindow, shiftWindow, zoomWindow } from './historyModel';
+import { addDays, buildHistorySeries, dateKey, defaultHistorySettings, filterHistory, historyCsv, historySummary, historyWindow, historyGrouping, parseDay, previousWindow, shiftWindow, zoomWindow } from './historyModel';
 import { createJournalRecord, type JournalRecord } from './journalRepository';
 
 const entry = (id: string, day: string, mood?: number, feelings: JournalRecord['feelings'] = [], arousal?: number): JournalRecord => ({ ...createJournalRecord({ notes: id, feelings, ...(mood === undefined ? {} : { mood: { kind: 'rated', value: mood, ...(arousal === undefined ? {} : { arousal }) } }) }), id, dateISO: `${day}T12:00:00.000Z` });
@@ -31,8 +31,23 @@ describe('emotional history semantics', () => {
   it('preserves multiple same-time entries and reports daily range and rating denominator', () => {
     const records = [entry('a', '2026-10-01', -5), entry('b', '2026-10-01', 5), entry('c', '2026-10-01')];
     const settings = defaultHistorySettings(records);
-    expect(buildHistorySeries(records, settings, range)[0]?.points).toHaveLength(2);
-    expect(buildHistorySeries(records, { ...settings, grouping: 'day' }, range)[0]?.points[0]).toMatchObject({ value: 0, low: -5, high: 5, count: 2, total: 3, entryIds: ['a', 'b', 'c'] });
+    expect(buildHistorySeries(records, settings, range)[0]?.points).toHaveLength(1);
+    expect(buildHistorySeries(records, settings, range)[0]?.points[0]).toMatchObject({ value: 0, low: -5, high: 5, count: 2, total: 3, entryIds: ['a', 'b', 'c'] });
+    const start = parseDay('2026-10-01')!;
+    const oneDay = { start, end: addDays(start, 1), days: 1 };
+    expect(historyGrouping(settings, range)).toBe('day');
+    expect(historyGrouping(settings, oneDay)).toBe('entry');
+    expect(buildHistorySeries(records, settings, oneDay)[0]?.points).toMatchObject([
+      { value: -5, entryIds: ['a'] }, { value: 5, entryIds: ['b'] },
+    ]);
+    // A stale weekly or entry preference cannot conceal individual days in broader history.
+    expect(buildHistorySeries(records, { ...settings, grouping: 'week' }, range)[0]?.points).toHaveLength(1);
+  });
+  it('uses independent daily means and counts every page even when a coordinate is absent', () => {
+    const records = [entry('a', '2026-10-01', -5, [], 5), entry('b', '2026-10-01', 5), entry('c', '2026-10-01')];
+    const series = buildHistorySeries(records, defaultHistorySettings(records), range);
+    expect(series[0]?.points[0]).toMatchObject({ value: 0, low: -5, high: 5, count: 2, total: 3 });
+    expect(series[1]?.points[0]).toMatchObject({ value: 5, low: 5, high: 5, count: 1, total: 3 });
   });
   it('excludes unknown intensity and treats an unmentioned feeling as missing, not zero', () => {
     const records = [entry('a', '2026-10-01', undefined, [{ feeling: 'Sad', intensity: 9 }]), entry('b', '2026-10-02', undefined, [{ feeling: 'Calm', intensity: 5 }]), entry('c', '2026-10-03', undefined, [{ feeling: 'Sad', intensity: 5, ratingSource: 'unknown' }])];
