@@ -125,6 +125,62 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Anxiety: 8,/ })).toBeVisible();
 });
 
+test('candidate decisions close immediately, while Fits offers optional intensity without a Done button', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await startCheckIn(page);
+  await skipObservation(page);
+  await page.getByRole('button', { name: 'Compare words' }).click();
+  const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
+  await search.fill('Anxiety');
+
+  const open = () => page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
+  await open();
+  let sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await expect(sheet.getByRole('button', { name: 'Done', exact: true })).toHaveCount(0);
+  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect(page.getByText('Anxiety').filter({ visible: true })).toHaveCount(0).catch(() => {});
+
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
+  await expect(sheet.getByRole('group', { name: 'Anxiety intensity, 1 to 10' })).toBeVisible();
+  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
+  await expect(sheet).toHaveCount(0);
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await expect(sheet.getByRole('button', { name: 'Fits', exact: true })).toHaveAttribute('aria-pressed', 'false');
+  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Leave intensity unrated' }).click();
+  await expect(sheet).toHaveCount(0);
+
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    return raw && JSON.parse(raw).data.decisions['candidate:anxiety'];
+  })).toBe('fits');
+  await page.reload();
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Anxiety intensity 4 of 10' }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    return raw && JSON.parse(raw).data.feelingIntensities?.['candidate:anxiety'];
+  })).toBe(4);
+
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    const data = raw && JSON.parse(raw).data;
+    return data?.decisions?.['candidate:anxiety'] === 'maybe'
+      && data?.feelingIntensities?.['candidate:anxiety'] === undefined;
+  })).toBe(true);
+});
+
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await startCheckIn(page);
