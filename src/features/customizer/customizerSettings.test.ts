@@ -97,6 +97,7 @@ describe('saved customizer settings', () => {
   it('keeps Home and Customizer on by default while restoring explicit opt-outs', () => {
     expect(defaultNavSettings.home).toBe(true);
     expect(defaultNavSettings.customizer).toBe(true);
+    expect(defaultNavSettings.checkIn).toBe(false);
 
     const local = memoryStorage({
       [NAV_SETTINGS_KEY]: JSON.stringify({ enabled: { feelings: false }, updatedAt: 1 }),
