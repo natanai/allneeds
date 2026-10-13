@@ -66,6 +66,8 @@ export type AlexithymiaDraft = {
   shape: Partial<Record<'pleasantness' | 'energy' | 'power' | 'expectedness', number>>;
   overallMood?: 'mixed' | 'unsure';
   decisions: Record<string, 'fits' | 'maybe' | 'not-this-time'>;
+  /** Optional explicitly reported 1–10 intensity for a selected Feeling. */
+  feelingIntensities?: Record<string, number>;
   termOrder: string[];
   customTerms: string[];
   noWordYet: boolean;
@@ -212,6 +214,9 @@ function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
     && Object.values(value.decisions).every((decision) => (
       decision === 'fits' || decision === 'maybe' || decision === 'not-this-time'
     ))
+    && (value.feelingIntensities === undefined || (isRecord(value.feelingIntensities)
+      && Object.values(value.feelingIntensities).every((rating) =>
+        typeof rating === 'number' && Number.isInteger(rating) && rating >= 1 && rating <= 10)))
     && isStringList(value.termOrder)
     && isStringList(value.customTerms)
     && typeof value.noWordYet === 'boolean'
@@ -531,8 +536,12 @@ export function writeAlexithymiaDraft(
     ...draft.termOrder.filter((id) => selectedDecisionIds.includes(id)),
     ...selectedDecisionIds,
   ])];
+  const feelingIntensities = Object.fromEntries(Object.entries(draft.feelingIntensities ?? {})
+    .filter(([id, rating]) => draft.decisions[id] === 'fits'
+      && Number.isInteger(rating) && rating >= 1 && rating <= 10));
   const normalized: AlexithymiaDraft = {
     ...draft,
+    ...(draft.feelingIntensities !== undefined ? { feelingIntensities } : {}),
     stage: Math.min(4, Math.max(0, Math.round(draft.stage))),
     observation: draft.observation.trimStart(),
     openRegion: draft.openRegion || null,
