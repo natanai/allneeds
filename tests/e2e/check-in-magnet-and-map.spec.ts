@@ -18,7 +18,8 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
   await page.reload();
   await expect(board.getByRole('link', { name: 'Feeling check-in' })).toBeVisible();
   // Persist the visible position before hiding the magnet.
-  await board.getByRole('switch').uncheck();
+  await board.getByRole('switch').press('Space');
+  await expect(board.getByRole('switch')).not.toBeChecked();
   const storedPosition = await page.evaluate(() => {
     const raw = localStorage.getItem('magnetPositions:site-nav');
     const state = raw ? JSON.parse(raw) : null;
@@ -33,8 +34,10 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
   await panel.getByRole('button', { name: 'Close customizer' }).click();
   await expect(board.getByRole('link', { name: 'Feeling check-in' })).toHaveCount(0);
   // A persistence write while hidden must not erase the last known position.
-  await board.getByRole('switch').check();
-  await board.getByRole('switch').uncheck();
+  await board.getByRole('switch').press('Space');
+  await expect(board.getByRole('switch')).toBeChecked();
+  await board.getByRole('switch').press('Space');
+  await expect(board.getByRole('switch')).not.toBeChecked();
   const afterHidden = await page.evaluate(() => {
     const raw = localStorage.getItem('magnetPositions:site-nav');
     const state = raw ? JSON.parse(raw) : null;
