@@ -12,8 +12,23 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
   await expect(panel.getByRole('switch', { name: 'Check-In' })).toBeChecked();
   await panel.getByRole('button', { name: 'Close customizer' }).click();
 
-  await expect(board.getByRole('link', { name: 'Feeling check-in' })).toHaveAttribute('href', '/alexithymia-support');
-  await board.getByRole('link', { name: 'Feeling check-in' }).click();
+  const checkIn = board.getByRole('link', { name: 'Feeling check-in' });
+  await expect(checkIn).toHaveAttribute('href', '/alexithymia-support');
+  const doorwayPulse = page.locator('a[class*="doorLink"][href="/feelings"] span[class*="icon"]');
+  const magnetPulse = checkIn.locator('span[class*="checkInPulse"]');
+  await expect(doorwayPulse).toBeVisible();
+  await expect(magnetPulse).toBeVisible();
+  // Both masks must resolve to the same canonical SVG.
+  const doorwayMask = await doorwayPulse.evaluate((element) => getComputedStyle(element).maskImage);
+  const magnetMask = await magnetPulse.evaluate((element) => getComputedStyle(element).maskImage);
+  expect(doorwayMask).toContain('feature-feelings.svg');
+  expect(magnetMask).toBe(doorwayMask);
+  await expect(checkIn.locator('svg')).toHaveCount(0);
+  const iconWidth = await magnetPulse.evaluate((element) => element.getBoundingClientRect().width);
+  expect(iconWidth).toBeGreaterThanOrEqual(16);
+  expect(iconWidth).toBeLessThanOrEqual(24);
+
+  await checkIn.click();
   await expect(page).toHaveURL(/\/alexithymia-support$/);
   await page.reload();
   await expect(board.getByRole('link', { name: 'Feeling check-in' })).toBeVisible();
