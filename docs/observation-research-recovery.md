@@ -27,6 +27,10 @@ The [master 48-source approval index](./observation-source-approval-queue-2026-1
 
 This evidence audit especially flags **M03, M12, M14 and M15** as not sufficiently direct to justify the current Observation guide despite being in its staged preapproval bibliography; keep site-test content unchanged while source and wording revisions await separate user authorization. N01/N02/N11/N15 describe *training packages* not the exact AllNeeds interface; no clinical-efficacy finding for the full four-step process has been established.
 
+## Clinician-style and academic screening completed — 2026-10-13
+
+**Read the [all-48 editorial verdicts, direct article URLs, study-design rationale, and proposed guide placement](./observation-all-48-editorial-verdicts-2026-10-13.md).** The editor recommends **26 RETAIN, 13 HOLD, and 9 EXCLUDE from the public guide**. These are research recommendations, NOT user approval decisions. All 48 user approvals in this queue remain PENDING, and all final site-facing claim packages still require user approval. Retained sources may still need additional full-text statistical inspection and exact claim matching before publication. Four other sources in the current preview but outside this 48-source queue are identified separately in the verdict document. No deployment authorized.
+
 ## Why this is being restored
 
 The earlier `natanai/nvc-app` Observation guide combined an academic-style abstract, **eight desktop sections and 18 linked references** with an additional short “Why try this?” explanation that linked references **[19] and [20]**. The React rebuild (2026-08-24) switched all viewports to the shorter mobile guidance and removed the four linked introductory research sources. The 2026-10-11 consolidation eliminated the unused desktop guide data and reduced public references to five.
