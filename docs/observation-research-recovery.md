@@ -11,6 +11,14 @@ A separate **31-source approval queue** is maintained at [Observation source app
 
 The [Round 3 appraisal](./observation-source-critical-appraisal-round3-2026-10-12.md) audits N07–N12 and M02, and adds N13 (2016 Korean integrative review), N14 (2014 nursing-student single-group study), and N15 (2026 randomized active-controlled medical education trial). The [master approval register](./observation-source-approval-queue-2026-10-12.md) now contains **34 candidate sources**, **none approved for public use**. The additional papers correct language/period coverage and identify evidence not previously considered in the older NVC guide. They do not validate the exact AllNeeds Observation sequence. Three paywalled full texts are flagged for optional authorized free user-provided copies (N08, N09, N12). This is a documentation-only record.
 
+## Round 4 component-level research and source URL rule (2026-10-12)
+
+A [14-source component-level appraisal](./observation-source-critical-appraisal-round4-2026-10-12.md) now covers naming vs reappraisal, emotion granularity, contradictory disclosure reviews, SDT intervention meta-analyses, goal-action planning, and framing research. The [master pending approval queue](./observation-source-approval-queue-2026-10-12.md) contains **48 candidate sources**: 15 direct NVC, 31 related/component-domain academic sources, and 2 exploratory technology sources. **None are approved.** No NVC four-step dismantling trial was located during targeted search; this is not proof none exists.
+
+Per user correction, all **new** citations must link to the original publisher/article webpage (e.g. `https://link.springer.com/article/10.1007/s10560-018-0584-y`) rather than `doi.org` redirects. Bare DOI numbers are only metadata. For submitted preprints use the verified manuscript/original author institution page and identify publication status. Keep the earlier 20-item historical reference inventory unchanged for provenance; legacy Round 1–3 DOI entries await a verified publisher-link retrofit.
+
+A specific corrected study outcome matters: Springer original abstract for N12 reports reduced anxiety and stress **but no effect on depression**, in 50 girls aged 11–18 after eight NVC group sessions compared to no intervention. Full tables remain restricted, so further causal appraisal is pending.
+
 ## Why this is being restored
 
 The earlier `natanai/nvc-app` Observation guide combined an academic-style abstract, **eight desktop sections and 18 linked references** with an additional short “Why try this?” explanation that linked references **[19] and [20]**. The React rebuild (2026-08-24) switched all viewports to the shorter mobile guidance and removed the four linked introductory research sources. The 2026-10-11 consolidation eliminated the unused desktop guide data and reduced public references to five.
