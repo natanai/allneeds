@@ -8,7 +8,8 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
 
   await board.getByRole('button', { name: 'Customizer' }).click();
   let panel = page.getByRole('dialog', { name: 'Customizer' });
-  await panel.getByRole('switch', { name: 'Check-In' }).check();
+  await panel.getByText('Check-In', { exact: true }).click();
+  await expect(panel.getByRole('switch', { name: 'Check-In' })).toBeChecked();
   await panel.getByRole('button', { name: 'Close customizer' }).click();
 
   await expect(board.getByRole('link', { name: 'Feeling check-in' })).toHaveAttribute('href', '/alexithymia-support');
