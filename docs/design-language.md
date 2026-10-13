@@ -110,7 +110,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Do not box every element. Use spacing, dividers, type scale, restrained surface color, and one clearly emphasized action to distinguish primary work from reference material.
 - Generated statements repeat the grammatical frame for each selected term (`I feel anxiety and I feel overwhelmed`) so official Feelings, Faux Feelings, and working terms can coexist without silently renaming or reclassifying any word.
 
-**Navigation refinement 2026-10-12.** `Check-In` is an optional Customizer navigation magnet, off by default, that leads directly to `/alexithymia-support`. The icon reuses the exact homepage Feelings doorway pulse asset (`public/icons/feature-feelings.svg`) as a Customizer-colored mask using the doorway's `contain` sizing inside the existing magnet icon slot (never oversized or clipped at the end circle); no heart artwork or separate pulse SVG is maintained. Its accessible name remains `Feeling check-in`. It uses the normal physical navigation board and preserves independent compact/wide layouts. Overall-feeling coordinates selected in the support lane transfer to the Journal's optional `mood` field, without inventing unselected ratings or claiming to identify a feeling.
+**Navigation refinement 2026-10-12.** `Check-In` is an optional Customizer navigation magnet, off by default, that leads directly to `/alexithymia-support`. The icon reuses the exact homepage Feelings doorway pulse asset (`public/icons/feature-feelings.svg`) as a Customizer-colored mask using the doorway's `contain` sizing inside the existing magnet icon slot; no separate pulse SVG is maintained. The approved shared mark is a single continuous, gently balanced signal trace with a central high peak, smaller neighboring deviations, rounded stroke joins, and flat lead-in/out. It has no detached circle, heart, or endpoint ornament, and is legible at approximately 20–22px. Its accessible name remains `Feeling check-in`. It uses the normal physical navigation board and preserves independent compact/wide layouts. Overall-feeling coordinates selected in the support lane transfer to the Journal's optional `mood` field, without inventing unselected ratings or claiming to identify a feeling.
 
 ## Canonical utility controls
 
@@ -191,7 +191,7 @@ The visible swatch itself is the native `input[type=color]`; do not replace it w
 
 ## Primary feature marks
 
-**Testing on `site-test` beginning 2026-10-11.** The home threshold uses three original marks: an unframed eye for Observations, uneven signal ending in an open attention node for Feelings, and sprout for Needs.
+**Testing on `site-test` beginning 2026-10-11.** The home threshold uses three original marks: an unframed eye for Observations, the approved uninterrupted signal trace for Feelings (superseding its former ending node), and sprout for Needs.
 
 - These marks identify the app's three primary doorways. They do not create a mandate to illustrate every route or navigation magnet.
 - Each mark uses one 64 × 64 safe area and the same 2.5-unit rounded feature stroke, but is optically centered rather than forced into identical visual dimensions. The Observations eye has no viewfinder corners, and the Needs sprout has no geometric stand or decorative root base.
