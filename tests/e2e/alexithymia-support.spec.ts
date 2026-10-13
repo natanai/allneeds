@@ -129,7 +129,7 @@ test('candidate decisions close immediately, while Fits offers optional intensit
   await page.setViewportSize({ width: 390, height: 844 });
   await startCheckIn(page);
   await skipObservation(page);
-  await page.getByRole('button', { name: 'Compare words' }).click();
+  await page.getByRole('button', { name: 'Browse all feelings' }).click();
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
   await search.fill('Anxiety');
 
