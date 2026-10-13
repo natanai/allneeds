@@ -97,6 +97,7 @@ Canonical visual implementation: `src/components/magnets/MagnetBoard.module.css`
 - Layout measurement and packing happen at the component/lifecycle source; do not patch first paint with runtime-injected CSS.
 - Saved magnet layouts are viewport-class specific. Compact/mobile and wide/desktop coordinates remain independent.
 - Saved positions restore inside the current board bounds. Navigation also persists/restores its visual order where applicable.
+- Turning off an optional navigation magnet must not erase its saved compact/wide coordinates or its place in the order. Hidden magnets are not part of physics/layout measurement but keep their last persisted positions for when enabled again; any restored position is still clamped to the live board bounds.
 - Semantic/presentation changes such as active route, ARIA state, menu state, or callback identity must not repack navigation when geometry did not change.
 - Long need labels must remain inside the board and may wrap; do not restore global `white-space: nowrap` behavior that lets a long need overflow its container.
 
