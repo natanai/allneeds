@@ -235,7 +235,7 @@ test('body-only and shape-only candidates name the channel used', async ({ page 
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   let sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await expect(sheet.getByText(/% body clue match/)).toBeVisible();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'No word yet' }).click();
