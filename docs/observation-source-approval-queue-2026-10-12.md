@@ -8,6 +8,10 @@
 
 **Approval contract:** Every candidate below is **PENDING USER DECISION**. The priority label is an editorial research suggestion, not approval. User may respond APPROVE, DENY, HOLD, or REQUEST MORE REVIEW for any IDs. Even approval of a source does not approve a specific site-facing claim; that will need separate claim-level review. Do not change src/data/observationGuide.json based on this document alone.
 
+## Round 2 critical appraisal — 2026-10-12
+
+The ten priority papers N01–N06 and M05/M08/M13/M14 have a [deeper critical appraisal](./observation-source-critical-appraisal-2026-10-12.md), including source-specific methodology and important corrections. **All user decisions remain PENDING.** Only documentation has changed; no public source or claim is approved for integration. Especially important: N02's matched follow-up n=153 rather than allocated n=312, N06's final comparison n=29 versus 27 with high attrition and group imbalances, and M13's study-subset denominator for the 96.4% agreement reporting result. Source content must be quoted with these corrections, not earlier shorthand.
+
 ## Candidate source index
 
 | ID | Candidate citation and original URL | Suggested research priority |
