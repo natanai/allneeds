@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigationType } from 'react-router';
 
+import { assetPath } from '../data/catalog';
 import { MagnetBoard } from '../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../components/magnets/MagnetBoard';
 import { CustomizerPanel } from '../features/customizer/CustomizerPanel';
@@ -269,12 +270,9 @@ export function AppShell() {
         tone: 'action',
         kind: 'nav',
         ariaLabel: 'Feeling check-in',
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M20.5 8.5c0 4.6-8.5 10.5-8.5 10.5S3.5 13.1 3.5 8.5a4.4 4.4 0 0 1 8.5-1.5 4.4 4.4 0 0 1 8.5 1.5Z" />
-            <path d="M7 12h2.5l1.5-2.4 2.1 4.8 1.4-2.4H17" />
-          </svg>
-        ),
+        // Reuse the exact homepage Feelings doorway SVG, not a separate glyph.
+        iconUrl: assetPath('icons/feature-feelings.svg'),
+        icon: <span className={styles.checkInPulse} />,
       },
       {
         id: 'nav-inventory',
