@@ -196,7 +196,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
         const text = `${date} · ${count} ${count === 1 ? 'entry' : 'entries'}`;
         const labelX = Math.max(left + 59, Math.min(right - 59, center));
         return <g key={`count-${day}`}>
-          <path className={styles.dayCountStem} data-testid="history-day-guide" data-day={day} d={`M${labelX},52 V${top - 6} H${center} V${bottom}`} />
+          <path className={styles.dayCountStem} data-testid="history-day-guide" data-day={day} data-anchor-x={center} d={`M${labelX},52 V${top - 6} H${center} V${bottom}`} />
           <circle className={styles.dayCountAnchor} cx={center} cy={bottom} r={2.5} />
           <rect className={styles.dayCountBadge} x={labelX - 59} y={22} width={118} height={30} rx={5} />
           <text className={styles.dayCountText} x={labelX} y={41} textAnchor="middle">{text}</text>
