@@ -30,6 +30,10 @@ A [new 14-source component-level ledger](./observation-source-critical-appraisal
 
 The master table below has been refreshed to use **source-host publisher article URLs**, or an original academic/author host when a journal URL is not verified, rather than generic `doi.org` redirect links. The historical DOIs in prior narrative/source cards remain bibliographic provenance only, not the preferred raw citation URL. Preprint papers are explicitly identified as such and excluded from clinical claims.
 
+## Clinician-style and academic screening completed — 2026-10-13
+
+**Read the [all-48 editorial verdicts, direct article URLs, study-design rationale, and proposed guide placement](./observation-all-48-editorial-verdicts-2026-10-13.md).** The editor recommends **26 RETAIN, 13 HOLD, and 9 EXCLUDE from the public guide**. These are research recommendations, NOT user approval decisions. All 48 user approvals in this queue remain PENDING, and all final site-facing claim packages still require user approval. Retained sources may still need additional full-text statistical inspection and exact claim matching before publication. Four other sources in the current preview but outside this 48-source queue are identified separately in the verdict document. No deployment authorized.
+
 ## Candidate source index
 
 | ID | Candidate citation and original URL | Suggested research priority |
