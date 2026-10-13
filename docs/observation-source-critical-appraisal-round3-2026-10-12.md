@@ -90,17 +90,19 @@ Causal inference distinctions: single-arm before/after ≠ controlled trial; unc
 
 ## N12 — Zandkarimi, Kamelifar & Heshmati-Molaee (2019), Nonviolence communication to reduce stress, anxiety and depression in young Iranian women
 
-**Canonical source:** https://doi.org/10.1007/s10560-018-0584-y
+**Original publisher article URL:** https://link.springer.com/article/10.1007/s10560-018-0584-y
 
-**Verified access:** Original bibliographic/publisher abstract mirrored through academic indexing and author research page; trial tables/methods not verified from final publisher full text
+**DOI (metadata only):** 10.1007/s10560-018-0584-y
 
-**Design / outcomes extracted:** N=50 girls aged approximately 11-18 recruited from charity centers around Tehran, randomly divided n=25/n=25, intervention versus no-training control, baseline/post/follow-up assessments. Study reports mental-distress changes; detailed outcome-specific p values, follow-up time and analyses not yet independently verified.
+**Verified access:** Full original publisher landing page and abstract, including intervention, eligibility, instrument, follow-up and outcome-specific conclusion. Detailed tables and full paper remain subscription-restricted.
 
-**Risk of bias / applicability:** The phrase 'young women' in title conceals that inclusion targeted adolescents; avoid presenting as adult clinical evidence. Randomization, baseline equivalence, intervention sessions, attrition, measures and multiple-comparison handling require actual final paper. Do not claim improved depression unless outcome-specific evidence confirmed.
+**Design / outcomes extracted:** Fifty girls aged 11–18 from charity centers around Tehran were randomly allocated equally (25/25) to eight NVC group training sessions or a no-intervention control. Participants completed DASS-21 pre-/post-assessments and a one-month follow-up. The Springer abstract reports a between-group difference (p<.001) and explicitly states **stress and anxiety decreased, but depression did not improve**. Exact domain-specific effect sizes, interval estimates, allocation concealment, and missing-data handling are not visible in the abstract.
 
-**Editorial recommendation:** High priority to obtain an authorized free PDF from author/institution, otherwise HOLD.
+**Risk of bias / applicability:** The title's 'young women' population actually includes children/adolescents, not adults. No-treatment control may not control for group attention, social support or expectation. The null depression finding must never be hidden behind generic 'mental health improved' claims. Need full-text table check before interpreting outcome-specific p-values, attrition and bias.
 
-**Candidate public claim (NOT APPROVED):** A small randomized study investigated group NVC training and stress, anxiety and depression among socioeconomically vulnerable adolescent girls in Iran, but the magnitude and robustness of each reported effect still need full-text verification.
+**Editorial recommendation:** Relevant randomized adolescent study; retain in research queue, **hold effectiveness claim** until full-text assessment.
+
+**Candidate public claim (NOT APPROVED):** 'A small randomized study among economically vulnerable Iranian adolescent girls reported lower stress and anxiety after eight NVC group sessions compared with a no-intervention group, but not improved depression; precise effects and study quality require full-text review.'
 
 **User source decision:** PENDING. **User claim decision:** NOT PRESENTED FOR PUBLICATION.
 
