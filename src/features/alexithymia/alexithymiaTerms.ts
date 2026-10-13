@@ -9,7 +9,7 @@ import {
   type AlexithymiaCandidate,
 } from './alexithymiaData';
 import type { JournalComposerDraft } from '../../persistence/workflowDrafts';
-import type { JournalMood } from '../journal/journalRepository';
+import type { JournalMood, JournalGuidedSupport } from '../journal/journalRepository';
 
 export type SupportTermRole = 'feeling' | 'faux-feeling' | 'working';
 
@@ -150,12 +150,20 @@ export function createSupportJournalDraft({
   needSlugs,
   statement,
   mood,
+  bodyClues,
+  overallRatings,
+  bodyClear,
+  noWordYet,
 }: {
   observation: string;
   terms: SupportTerm[];
   needSlugs: string[];
   statement: string;
   mood?: JournalMood;
+  bodyClues?: JournalGuidedSupport['bodyClues'];
+  overallRatings?: JournalGuidedSupport['overallRatings'];
+  bodyClear?: boolean;
+  noWordYet?: boolean;
 }): JournalComposerDraft {
   const canonicalFeelings = terms.filter((term) => term.role === 'feeling');
   const cleanObservation = observation.trim();
@@ -180,6 +188,10 @@ export function createSupportJournalDraft({
       observation: cleanObservation,
       terms: terms.map((term) => ({ label: term.label, role: term.role })),
       statement: cleanStatement,
+      ...(bodyClues?.length ? { bodyClues } : {}),
+      ...(overallRatings && Object.keys(overallRatings).length ? { overallRatings } : {}),
+      ...(bodyClear ? { bodyClear: true } : {}),
+      ...(noWordYet ? { noWordYet: true } : {}),
     },
   };
 }
