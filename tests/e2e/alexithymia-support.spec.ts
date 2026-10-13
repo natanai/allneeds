@@ -106,6 +106,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   expect(saved.notes).toBe(finishedStatement);
   expect(saved.guidedSupport.observation).toBe('I felt blamed and wanted understanding when we stopped talking.');
   expect(saved.mood).toEqual({ kind: 'rated', value: -3, arousal: 3 });
+  expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety').ratingSource).toBe('unknown');
 });
 
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
