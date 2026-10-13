@@ -153,8 +153,6 @@ const shapeControls: Array<{
   high: string;
   disclosure?: string;
 }> = [
-  { dimension: 'pleasantness', label: 'Pleasant or unpleasant', low: 'Unpleasant', high: 'Pleasant' },
-  { dimension: 'energy', label: 'Energy', low: 'Low', high: 'High' },
   {
     dimension: 'power',
     label: 'Ability to influence what happens',
@@ -258,7 +256,7 @@ export function FeelingShapeSheet({
             <span>These ratings can make the comparison more specific.</span>
           </header>
           <div className={styles.shapeScales}>
-            {shapeControls.slice(2).map((control) => (
+            {shapeControls.map((control) => (
               <ShapeScale
                 key={control.dimension}
                 {...control}
