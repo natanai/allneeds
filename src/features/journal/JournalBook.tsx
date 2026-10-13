@@ -163,7 +163,7 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
               </DisclosureRow>
               {editing ? <button type="button" onClick={() => turn(pageId)}>Back to saved page</button> : null}
               <div className={styles.actions}><button type="button" onClick={clear}>Clear</button><button type="submit">Save</button></div>
-              <small>Save keeps this entry on this device. {signedIn ? 'Signed in; use Account & data to back up to your profile.' : 'Signed out; export a backup or sign in to back up to your profile.'}</small>
+              <small>Save keeps this entry on this device. {signedIn ? 'When online, saved entries are also backed up to your profile automatically. Check Account & data for the confirmed time.' : 'Signed out; export a backup or sign in to back up to your profile.'}</small>
               <p className="visually-hidden" role="status">{draftStatus}</p>
             </aside>
           </div>
