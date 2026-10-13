@@ -276,7 +276,7 @@ describe('Bluesky account compatibility', () => {
 
     const { readProfileBackupView } = await import('./profileBackupStatus');
     const status = readProfileBackupView('did:plc:journal-auto-test', localStorage as Storage);
-    expect(status.receipt?.journalCount).toBe(1);
+    expect(status.receipt?.journalCount).toBe(2);
     expect(status.pending.journal).toBe(false);
     expect(status.pending.settings).toBe(true);
   });
