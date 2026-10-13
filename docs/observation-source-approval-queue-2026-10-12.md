@@ -24,54 +24,60 @@ A [new 14-source component-level ledger](./observation-source-critical-appraisal
 
 **User's clarified citation-link rule:** use the original **publisher article webpage** URL, not `doi.org` redirects, for all new source links and future public citations. The DOI itself is bibliographic metadata, not the raw source URL. For preprints use the author's original institutional or preprint host and label the publication status. The older N/M entries still contain original historical DOI links pending a separate verified publisher-link pass; Round 4 entries and the specifically verified N12 Springer article now follow the new rule. Do not invent unverified journal URLs or imply a paywall is a full-text examination.
 
+## Clinical-style academic appraisal of all 48 candidates (2026-10-13)
+
+[**Open the full 48-source adjudication, decisions and study-by-study justifications**](./observation-candidate-source-academic-adjudication-2026-10-13.md). Expert-style preliminary editorial recommendations: **29 narrowly RETAIN**, **10 HOLD for additional methods/full-text scrutiny**, **9 EXCLUDE from the public Observation guide**. Every individual **user decision remains PENDING**; recommendations do not authorize publication.
+
+The master table below has been refreshed to use **source-host publisher article URLs**, or an original academic/author host when a journal URL is not verified, rather than generic `doi.org` redirect links. The historical DOIs in prior narrative/source cards remain bibliographic provenance only, not the preferred raw citation URL. Preprint papers are explicitly identified as such and excluded from clinical claims.
+
 ## Candidate source index
 
 | ID | Candidate citation and original URL | Suggested research priority |
 | --- | --- | --- |
-| N01 | [Adriani et al. 2024 — NVC in healthcare: scoping review](https://doi.org/10.1186/s12913-024-10753-2) | High |
-| N02 | [Epinat-Duclos et al. 2021 — NVC education and empathy in medical students](https://doi.org/10.5116/ijme.615e.c507) | High |
-| N03 | [Foncelle et al. 2026 — NVC expertise and social cognition](https://doi.org/10.1177/00221678251412476) | High |
-| N04 | [Cheung et al. 2023 — Validation of Nonviolent Communication Behaviors Scale](https://doi.org/10.1177/10497315221128595) | High |
-| N05 | [Fung et al. 2025 — Cross-cultural NVC Behaviors Scale validity](https://doi.org/10.1177/10497315231221969) | High |
-| N06 | [Wacker & Dziobek 2018 — NVC workplace training](https://doi.org/10.1037/ocp0000058) | High |
-| N07 | [Museux et al. 2016 — NVC and interprofessional teamwork](https://doi.org/10.1080/00981389.2016.1164270) | Supplemental |
-| N08 | [Kim & Kim 2022 — NVC anger management for psychiatric inpatients](https://doi.org/10.1016/j.apnu.2022.07.004) | Hold |
-| N09 | [Yang & Kim 2021 — NVC training in inpatient alcohol care](https://doi.org/10.1111/ppc.12673) | Supplemental |
-| N10 | [Nosek & Durán 2017 — Community NVC training with Latino adults and youth](https://doi.org/10.1353/cpr.2017.0032) | Supplemental |
-| N11 | [Sung & Kweon 2022 — NVC empathy education nursing pilot](https://doi.org/10.3390/nursrep12040080) | Hold |
+| N01 | [Adriani et al. 2024 — NVC in healthcare: scoping review](https://link.springer.com/article/10.1186/s12913-024-10753-2) | High |
+| N02 | [Epinat-Duclos et al. 2021 — NVC education and empathy in medical students](https://www.ijme.net/archive/12/training-empathy-in-medical-students/) | High |
+| N03 | [Foncelle et al. 2026 — NVC expertise and social cognition](https://journals.sagepub.com/doi/10.1177/00221678251412476) | High |
+| N04 | [Cheung et al. 2023 — Validation of Nonviolent Communication Behaviors Scale](https://journals.sagepub.com/doi/10.1177/10497315221128595) | High |
+| N05 | [Fung et al. 2025 — Cross-cultural NVC Behaviors Scale validity](https://journals.sagepub.com/doi/10.1177/10497315231221969) | High |
+| N06 | [Wacker & Dziobek 2018 — NVC workplace training](https://psycnet.apa.org/doiLanding?doi=10.1037%2Focp0000058) | High |
+| N07 | [Museux et al. 2016 — NVC and interprofessional teamwork](https://www.tandfonline.com/doi/full/10.1080/00981389.2016.1164270) | Supplemental |
+| N08 | [Kim & Kim 2022 — NVC anger management for psychiatric inpatients](https://www.sciencedirect.com/science/article/abs/pii/S0883941722000772) | Hold |
+| N09 | [Yang & Kim 2021 — NVC training in inpatient alcohol care](https://onlinelibrary.wiley.com/doi/full/10.1111/ppc.12673) | Supplemental |
+| N10 | [Nosek & Durán 2017 — Community NVC training with Latino adults and youth](https://repository.usfca.edu/nursing_fac/120/) | Supplemental |
+| N11 | [Sung & Kweon 2022 — NVC empathy education nursing pilot](https://www.mdpi.com/2039-4403/12/4/80) | Hold |
 | N12 | [Zandkarimi et al. 2019 — NVC training and stress/anxiety/depression](https://link.springer.com/article/10.1007/s10560-018-0584-y) | Hold |
-| M01 | [Nock & Kurtz 2005 — Direct behavioral observation in school settings](https://doi.org/10.1016/S1077-7229(05)80058-6) | High |
-| M02 | [Fiedler, Semin & Bolten 1989 — Language and reification of social information](https://doi.org/10.1002/ejsp.2420190403) | High |
-| M03 | [Taylor et al. 2019 — Concrete vs abstract words in explicit memory](https://doi.org/10.3758/s13421-018-0857-x) | High |
-| M04 | [Watkins, Baeyens & Read 2009 — Concreteness training reduces dysphoria](https://doi.org/10.1037/a0013642) | High |
-| M05 | [Watkins et al. 2012 — Guided concreteness training, 3-arm RCT](https://doi.org/10.1017/S0033291711002480) | High |
-| M06 | [Lieberman et al. 2007 — Putting feelings into words and amygdala](https://doi.org/10.1111/j.1467-9280.2007.01916.x) | High |
-| M07 | [Torre & Lieberman 2018 — Affect labeling as implicit regulation](https://doi.org/10.1177/1754073917742706) | High |
-| M08 | [Kircanski, Lieberman & Craske 2012 — Affect labels during spider exposure](https://doi.org/10.1177/0956797612443830) | High |
-| M09 | [Rogers, Howieson & Neame 2018 — I-language and perspective during conflict](https://doi.org/10.7717/peerj.4831) | High |
-| M10 | [Fausey & Boroditsky 2010 — Language cues and blame](https://doi.org/10.3758/PBR.17.5.644) | High |
-| M11 | [Sanford 2006 — Appraisals and behavior in couples' conflicts](https://doi.org/10.1037/0893-3200.20.2.256) | High |
-| M12 | [Alderson-Day & Fernyhough 2015 — Inner speech: review](https://doi.org/10.1037/bul0000021) | High |
-| M13 | [Essig, Rotta & Poling 2023 — Observer agreement and fidelity](https://doi.org/10.1002/jaba.961) | High |
-| M14 | [Padilla et al. 2023 — ABA assessment reliability/validity systematic review](https://doi.org/10.1177/01454455221098151) | High |
-| M15 | [Brassil, O'Mahony & Greene 2024 — Eyewitness misinformation systematic review](https://doi.org/10.3758/s13423-024-02512-5) | High |
-| M16 | [Vansteenkiste, Ryan & Soenens 2020 — Basic psychological needs theory](https://doi.org/10.1007/s11031-019-09818-1) | High |
-| M17 | [Tang et al. 2020 — Need satisfaction and wellbeing in later life: meta-analysis](https://doi.org/10.1002/pchj.293) | High |
-| N13 | [Yang & Kim 2016 — Integrative review of NVC intervention studies in Korean databases](https://doi.org/10.16952/pns.2016.13.1.36) | High; syntheses / language bias |
-| N14 | [Nosek, Gifford & Kober 2014 — NVC nursing-student empathy education, single-arm mixed methods](https://doi.org/10.5430/jnep.v4n10p1) | Contextual; uncontrolled pre/post |
-| N15 | [Jiang et al. 2026 — NVC randomized active-controlled education trial in emergency medicine](https://doi.org/10.1186/s12909-026-09621-w) | Very high; strong methods scrutiny required |
+| M01 | [Nock & Kurtz 2005 — Direct behavioral observation in school settings](https://www.sciencedirect.com/science/article/pii/S1077722905800586) | High |
+| M02 | [Fiedler, Semin & Bolten 1989 — Language and reification of social information](https://onlinelibrary.wiley.com/doi/10.1002/ejsp.2420190403) | High |
+| M03 | [Taylor et al. 2019 — Concrete vs abstract words in explicit memory](https://link.springer.com/article/10.3758/s13421-018-0857-x) | High |
+| M04 | [Watkins, Baeyens & Read 2009 — Concreteness training reduces dysphoria](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fa0013642) | High |
+| M05 | [Watkins et al. 2012 — Guided concreteness training, 3-arm RCT](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/S0033291711002480) | High |
+| M06 | [Lieberman et al. 2007 — Putting feelings into words and amygdala](https://sanlab.psych.ucla.edu/wp-content/uploads/sites/31/2015/05/Lieberman_AL-2007.pdf) | High |
+| M07 | [Torre & Lieberman 2018 — Affect labeling as implicit regulation](https://journals.sagepub.com/doi/10.1177/1754073917742706) | High |
+| M08 | [Kircanski, Lieberman & Craske 2012 — Affect labels during spider exposure](https://journals.sagepub.com/doi/10.1177/0956797612443830) | High |
+| M09 | [Rogers, Howieson & Neame 2018 — I-language and perspective during conflict](https://peerj.com/articles/4831/) | High |
+| M10 | [Fausey & Boroditsky 2010 — Language cues and blame](https://link.springer.com/article/10.3758/PBR.17.5.644) | High |
+| M11 | [Sanford 2006 — Appraisals and behavior in couples' conflicts](https://psycnet.apa.org/doiLanding?doi=10.1037%2F0893-3200.20.2.256) | High |
+| M12 | [Alderson-Day & Fernyhough 2015 — Inner speech: review](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fbul0000021) | High |
+| M13 | [Essig, Rotta & Poling 2023 — Observer agreement and fidelity](https://onlinelibrary.wiley.com/doi/10.1002/jaba.961) | High |
+| M14 | [Padilla et al. 2023 — ABA assessment reliability/validity systematic review](https://journals.sagepub.com/doi/10.1177/01454455221098151) | High |
+| M15 | [Brassil, O'Mahony & Greene 2024 — Eyewitness misinformation systematic review](https://link.springer.com/article/10.3758/s13423-024-02512-5) | High |
+| M16 | [Vansteenkiste, Ryan & Soenens 2020 — Basic psychological needs theory](https://link.springer.com/article/10.1007/s11031-019-09818-1) | High |
+| M17 | [Tang et al. 2020 — Need satisfaction and wellbeing in later life: meta-analysis](https://onlinelibrary.wiley.com/doi/10.1002/pchj.293) | High |
+| N13 | [Yang & Kim 2016 — Integrative review of NVC intervention studies in Korean databases](https://www.riss.kr/link?id=A101862489) | High; syntheses / language bias |
+| N14 | [Nosek, Gifford & Kober 2014 — NVC nursing-student empathy education, single-arm mixed methods](https://www.sciedu.ca/journal/index.php/jnep/article/view/4222/0) | Contextual; uncontrolled pre/post |
+| N15 | [Jiang et al. 2026 — NVC randomized active-controlled education trial in emergency medicine](https://link.springer.com/article/10.1186/s12909-026-09621-w) | Very high; strong methods scrutiny required |
 | C01 | [Nook et al. 2021 — Emotion naming before reappraisal/acceptance](https://link.springer.com/article/10.1007/s42761-021-00036-y) | High: potentially adverse sequence interactions |
 | C02 | [Ariely et al. 2026 — Affect labeling before reappraisal replication](https://link.springer.com/article/10.1007/s42761-026-00362-z) | High: replicated sequential interference |
 | C03 | [Jang et al. 2026 — Korean systematic affect-labeling review](https://www.accesson.kr/healthpsy/v.31/4/1147/59715) | High: mixed outcomes and language coverage |
 | C04 | [Frattaroli 2006 — Experimental disclosure meta-analysis](https://psycnet.apa.org/doiLanding?doi=10.1037%2F0033-2909.132.6.823) | High: small average benefit; full paper needed |
 | C05 | [Meads & Nouwen 2005 — Disclosure systematic review and meta-analyses](https://www.cambridge.org/core/journals/international-journal-of-technology-assessment-in-health-care/article/abs/does-emotional-disclosure-have-any-effects-a-systematic-review-of-the-literature-with-metaanalyses/BFF4DC16E4F96A94DCD8D4B7ED15F7B6) | High: negative efficacy counterweight |
-| C06 | [Ntoumanis et al. 2021 — SDT health intervention meta-analysis](https://www.tandfonline.com/doi/abs/10.1080/17437199.2020.1718529) | High: needs-support interventions, NOT naming Needs |
+| C06 | [Ntoumanis et al. 2021 — SDT health intervention meta-analysis](https://www.tandfonline.com/doi/10.1080/17437199.2020.1718529) | High: needs-support interventions, NOT naming Needs |
 | C07 | [Sheeran et al. 2020 — SDT randomized-trial meta-analysis](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fccp0000501) | High: trial-only quantified outcomes |
 | C08 | [Gollwitzer & Sheeran 2006 — If-then planning meta-analysis](https://www.sciencedirect.com/science/article/pii/S0065260106380021) | High: Strategy component context; access restriction |
 | C09 | [Kim et al. 2017 — Abstract/concrete framing and explanations](https://link.springer.com/article/10.1186/s41235-017-0056-5) | High: concrete description can increase inference |
 | C10 | [Moscatelli et al. 2019 — Concrete criticism and intergroup reception](https://journals.sagepub.com/doi/10.1177/0261927X19864686) | High: context-moderated communication outcome |
 | C11 | [Dunning et al. 2025 — Emotional granularity in youth scoping review](https://onlinelibrary.wiley.com/doi/10.1002/jad.70028) | High: association, not vocabulary treatment |
-| C12 | [Ozomaro et al. 2025 — Granularity in health and psychopathology review](https://linkinghub.elsevier.com/retrieve/pii/S0022395625004881) | High: mental-health association, not efficacy |
+| C12 | [Ozomaro et al. 2025 — Granularity in health and psychopathology review](https://www.sciencedirect.com/science/article/pii/S0022395625004881) | High: mental-health association, not efficacy |
 | C13 | [Whiting & Nook — Differentiation and regulation systematic-review preprint](https://lemolab.princeton.edu/publications/systematic-review-research-emotion-differentiation-and-emotion-regulation) | Hold: submitted preprint; null/mixed outcomes |
 | C14 | [Gross 2015 — Emotion regulation process model](https://www.tandfonline.com/doi/abs/10.1080/1047840X.2014.940781) | High: framework, not intervention proof |
 | X01 | [Wolfe et al. 2025 — Needs-Conscious Design / NVC-inspired AI communication](https://arxiv.org/abs/2508.11149) | Hold: UX research only |
