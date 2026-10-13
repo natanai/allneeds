@@ -16,9 +16,13 @@
 
 **Important caveat:** This was a targeted multi-round literature search, not a complete systematic review. A source marked RETAIN is never called clinically validated. Publisher-host links were independently checked where obtainable; some editorial entries point to the known journal landing route, and entries without a verified original publisher page (N10, N13, M06) explicitly use the author/institutional source rather than fabricating a publisher page.
 
+## Round 5 completed review of all ten former HOLD candidates
+
+Read the [full Round 5 ten-source appraisal](./observation-held-sources-critical-appraisal-round5-2026-10-13.md). Decisions changed after inspecting the complete 2016 Korean literature review N13, the complete active-controlled 2009 concreteness-training trial M04, and sources for M11/M17/C10/C13: **N13, M04, M11 → narrowly RETAIN; M17, C10, C13 → EXCLUDE; N03, N08, N09, N12 → HOLD pending full text.** These supersede their individual earlier HOLD entries and update the totals below. No user has approved any inclusion or public claim.
+
 ## Decisions at a glance
 
-**29 retain for narrow guide/research-library use; 10 hold for more scrutiny; 9 exclude from this public guide.** All decisions await the user's actual approval or rejection.
+**32 retain for narrow guide/research-library use; 4 hold for more scrutiny; 12 exclude from this public guide.** All decisions await the user's actual approval or rejection.
 
 | ID | Source on original host | Appraisal | Proposed guide role |
 | --- | --- | --- | --- |
@@ -34,26 +38,26 @@
 | N10 | [Nosek & Durán, 2017 — Latino community NVC](https://repository.usfca.edu/nursing_fac/120/) | **EXCLUDE** | Research appendix: culture/implementation |
 | N11 | [Sung & Kweon, 2022 — nursing empathy training pilot](https://www.mdpi.com/2039-4403/12/4/80) | **RETAIN** | Direct NVC: training outcomes |
 | N12 | [Zandkarimi et al., 2019 — Iranian adolescents](https://link.springer.com/article/10.1007/s10560-018-0584-y) | **HOLD** | Direct NVC: population-limited distress study |
-| N13 | [Yang & Kim, 2016 — Korean integrative review](https://www.riss.kr/link?id=A101862489) | **HOLD** | Direct NVC: evidence map with language coverage |
+| N13 | [Yang & Kim, 2016 — Korean integrative review](https://www.riss.kr/link?id=A101862489) | **RETAIN** | Direct NVC: evidence map with language coverage |
 | N14 | [Nosek, Gifford & Kober, 2014 — nursing single-arm study](https://www.sciedu.ca/journal/index.php/jnep/article/view/4222/0) | **EXCLUDE** | Research appendix only |
 | N15 | [Jiang et al., 2026 — controlled medical education trial](https://link.springer.com/article/10.1186/s12909-026-09621-w) | **RETAIN** | Direct NVC: newest educational trial |
 | M01 | [Nock & Kurtz, 2005 — school behavioral observation](https://www.sciencedirect.com/science/article/pii/S1077722905800586) | **RETAIN** | Observation methods |
 | M02 | [Fiedler, Semin & Bolten, 1989 — linguistic abstraction](https://onlinelibrary.wiley.com/doi/10.1002/ejsp.2420190403) | **RETAIN** | Language, communication and interpretation |
 | M03 | [Taylor et al., 2019 — word concreteness and memory](https://link.springer.com/article/10.3758/s13421-018-0857-x) | **EXCLUDE** | Background/archive, not Observation explanation |
-| M04 | [Watkins et al., 2009 — concreteness training for dysphoria](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fa0013642) | **HOLD** | Language: auxiliary process-oriented evidence |
+| M04 | [Watkins et al., 2009 — concreteness training for dysphoria](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fa0013642) | **RETAIN** | Language: auxiliary process-oriented evidence |
 | M05 | [Watkins et al., 2012 — concreteness vs relaxation RCT](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/S0033291711002480) | **RETAIN** | Language: what concreteness training can/cannot establish |
 | M06 | [Lieberman et al., 2007 — affect labels and neural activity](https://sanlab.psych.ucla.edu/wp-content/uploads/sites/31/2015/05/Lieberman_AL-2007.pdf) | **RETAIN** | Feelings and affect labeling |
 | M07 | [Torre & Lieberman, 2018 — affect-labeling review](https://journals.sagepub.com/doi/10.1177/1754073917742706) | **RETAIN** | Feelings and affect labeling |
 | M08 | [Kircanski et al., 2012 — affect labels during spider exposure](https://journals.sagepub.com/doi/10.1177/0956797612443830) | **RETAIN** | Feelings: physiological vs subjective outcomes |
 | M09 | [Rogers, Howieson & Neame, 2018 — I-language/conflict](https://peerj.com/articles/4831/) | **RETAIN** | Communication and interpretation |
 | M10 | [Fausey & Boroditsky, 2010 — grammatical agency/blame](https://link.springer.com/article/10.3758/PBR.17.5.644) | **RETAIN** | Language and attribution |
-| M11 | [Sanford, 2006 — couples' appraisals and interaction](https://psycnet.apa.org/doiLanding?doi=10.1037%2F0893-3200.20.2.256) | **HOLD** | Communication: interpretive processes |
+| M11 | [Sanford, 2006 — couples' appraisals and interaction](https://psycnet.apa.org/doiLanding?doi=10.1037%2F0893-3200.20.2.256) | **RETAIN** | Communication: interpretive processes |
 | M12 | [Alderson-Day & Fernyhough, 2015 — inner speech review](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fbul0000021) | **EXCLUDE** | Background/archive only |
 | M13 | [Essig et al., 2023 — observer agreement and fidelity](https://onlinelibrary.wiley.com/doi/10.1002/jaba.961) | **RETAIN** | Measurement and reliability: method-specific footnote |
 | M14 | [Padilla et al., 2023 — ABA validity systematic review](https://journals.sagepub.com/doi/10.1177/01454455221098151) | **EXCLUDE** | Internal research standards appendix |
 | M15 | [Brassil et al., 2024 — eyewitness misinformation review](https://link.springer.com/article/10.3758/s13423-024-02512-5) | **EXCLUDE** | Background/archive, not user-facing guide |
 | M16 | [Vansteenkiste, Ryan & Soenens, 2020 — psychological need theory](https://link.springer.com/article/10.1007/s11031-019-09818-1) | **RETAIN** | Needs: conceptual comparison |
-| M17 | [Tang, Wang & Guerrien, 2020 — SDT and older adult wellbeing](https://onlinelibrary.wiley.com/doi/10.1002/pchj.293) | **HOLD** | Needs: population-specific support |
+| M17 | [Tang, Wang & Guerrien, 2020 — SDT and older adult wellbeing](https://onlinelibrary.wiley.com/doi/10.1002/pchj.293) | **EXCLUDE** | Needs: population-specific support |
 | C01 | [Nook, Satpute & Ochsner, 2021 — naming interferes with regulation](https://link.springer.com/article/10.1007/s42761-021-00036-y) | **RETAIN** | Feelings: essential contradictory experiment |
 | C02 | [Ariely et al., 2026 — replicated affect labeling/reappraisal interaction](https://link.springer.com/article/10.1007/s42761-026-00362-z) | **RETAIN** | Feelings: sequence interaction and null delayed findings |
 | C03 | [Jang, Hwang & Shin, 2026 — affect-labeling systematic review](https://www.accesson.kr/healthpsy/v.31/4/1147/59715) | **RETAIN** | Feelings: cross-literature synthesis |
@@ -63,10 +67,10 @@
 | C07 | [Sheeran et al., 2020 — SDT randomized trial synthesis](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fccp0000501) | **RETAIN** | Needs: independent trial-focused context |
 | C08 | [Gollwitzer & Sheeran, 2006 — if-then action planning](https://www.sciencedirect.com/science/article/pii/S0065260106380021) | **RETAIN** | Strategies: concrete action planning |
 | C09 | [Kim et al., 2017 — concrete frames and causal attribution](https://link.springer.com/article/10.1186/s41235-017-0056-5) | **RETAIN** | Observation/communication: counterintuitive framing findings |
-| C10 | [Moscatelli et al., 2019 — concrete criticism from outsiders](https://journals.sagepub.com/doi/10.1177/0261927X19864686) | **HOLD** | Communication: highly conditional feedback effects |
+| C10 | [Moscatelli et al., 2019 — concrete criticism from outsiders](https://journals.sagepub.com/doi/10.1177/0261927X19864686) | **EXCLUDE** | Communication: highly conditional feedback effects |
 | C11 | [Dunning et al., 2025 — granularity in adolescents](https://onlinelibrary.wiley.com/doi/10.1002/jad.70028) | **RETAIN** | Feelings: differentiated vocabulary and cautions |
 | C12 | [Ozomaro et al., 2025 — granularity and psychopathology](https://www.sciencedirect.com/science/article/pii/S0022395625004881) | **RETAIN** | Feelings: broader association literature |
-| C13 | [Whiting & Nook — emotion differentiation regulation review preprint](https://lemolab.princeton.edu/publications/systematic-review-research-emotion-differentiation-and-emotion-regulation) | **HOLD** | Internal contradiction watch |
+| C13 | [Whiting & Nook — emotion differentiation regulation review preprint](https://lemolab.princeton.edu/publications/systematic-review-research-emotion-differentiation-and-emotion-regulation) | **EXCLUDE** | Internal contradiction watch |
 | C14 | [Gross, 2015 — emotion regulation framework](https://www.tandfonline.com/doi/abs/10.1080/1047840X.2014.940781) | **RETAIN** | Feelings: conceptual distinction only |
 | X01 | [Wolfe et al., 2025 — needs-conscious AI communication design](https://arxiv.org/abs/2508.11149) | **EXCLUDE** | Internal UX and ethics research, separate from Observation evidence |
 | X02 | [Chan et al., 2026 — SpeakSoftly NVC and LLM support](https://arxiv.org/abs/2604.05382) | **EXCLUDE** | Internal HCI research, separate from Observation evidence |
@@ -183,8 +187,8 @@
 
 ### N13 — Yang & Kim, 2016 — Korean integrative review
 
-**Source:** https://www.riss.kr/link?id=A101862489  
-**Editorial recommendation:** **HOLD**; **user decision:** PENDING.  
+**Source:** https://kiss.kstudy.com/Detail/Ar?key=3429800  
+**Editorial recommendation:** **RETAIN**; **user decision:** PENDING.  
 **Placement:** Direct NVC: evidence map with language coverage.  
 **Why it does / does not satisfy scrutiny:** Search across Korean databases found 12 studies, mostly nine quasi-experiments; vital correction to English-language evidence selection.  
 **Crucial restriction / inference not licensed:** Integrative narrative review, no pooled causal effect; translate/inventory full primary trials and overlap with N01 before public claims. Original journal landing page not yet confirmed.  
@@ -238,7 +242,7 @@
 ### M04 — Watkins et al., 2009 — concreteness training for dysphoria
 
 **Source:** https://psycnet.apa.org/doiLanding?doi=10.1037%2Fa0013642  
-**Editorial recommendation:** **HOLD**; **user decision:** PENDING.  
+**Editorial recommendation:** **RETAIN**; **user decision:** PENDING.  
 **Placement:** Language: auxiliary process-oriented evidence.  
 **Why it does / does not satisfy scrutiny:** Repeated concrete-processing exercises may modify dysphoria/rumination in experimental tasks and deserve follow-up.  
 **Crucial restriction / inference not licensed:** Not a test of factual observation, and later better-controlled trial M05 undermines attributing benefit specifically to concreteness.  
@@ -301,7 +305,7 @@
 ### M11 — Sanford, 2006 — couples' appraisals and interaction
 
 **Source:** https://psycnet.apa.org/doiLanding?doi=10.1037%2F0893-3200.20.2.256  
-**Editorial recommendation:** **HOLD**; **user decision:** PENDING.  
+**Editorial recommendation:** **RETAIN**; **user decision:** PENDING.  
 **Placement:** Communication: interpretive processes.  
 **Why it does / does not satisfy scrutiny:** Four observed conversations in 77 married couples; associations between appraisal and communication provide ecological context.  
 **Crucial restriction / inference not licensed:** Within-couple association not evidence that changing wording causes conflict improvement; population narrow, redundant with more direct M09/M10.  
@@ -355,7 +359,7 @@
 ### M17 — Tang, Wang & Guerrien, 2020 — SDT and older adult wellbeing
 
 **Source:** https://onlinelibrary.wiley.com/doi/10.1002/pchj.293  
-**Editorial recommendation:** **HOLD**; **user decision:** PENDING.  
+**Editorial recommendation:** **EXCLUDE**; **user decision:** PENDING.  
 **Placement:** Needs: population-specific support.  
 **Why it does / does not satisfy scrutiny:** Systematic review of 23 studies, 17 meta-analytic, relates basic need satisfaction to wellbeing in later life.  
 **Crucial restriction / inference not licensed:** Largely association and older adult population; duplicates broader needs context; not evidence that labeling needs is therapeutic.  
@@ -445,7 +449,7 @@
 ### C10 — Moscatelli et al., 2019 — concrete criticism from outsiders
 
 **Source:** https://journals.sagepub.com/doi/10.1177/0261927X19864686  
-**Editorial recommendation:** **HOLD**; **user decision:** PENDING.  
+**Editorial recommendation:** **EXCLUDE**; **user decision:** PENDING.  
 **Placement:** Communication: highly conditional feedback effects.  
 **Why it does / does not satisfy scrutiny:** Two experiments suggest concrete out-group criticism sometimes evokes less negative reaction than abstract criticism.  
 **Crucial restriction / inference not licensed:** In-group versus out-group moderation; not generic interpersonal NVC conversations; full tables/instruments needed.  
@@ -472,7 +476,7 @@
 ### C13 — Whiting & Nook — emotion differentiation regulation review preprint
 
 **Source:** https://lemolab.princeton.edu/publications/systematic-review-research-emotion-differentiation-and-emotion-regulation  
-**Editorial recommendation:** **HOLD**; **user decision:** PENDING.  
+**Editorial recommendation:** **EXCLUDE**; **user decision:** PENDING.  
 **Placement:** Internal contradiction watch.  
 **Why it does / does not satisfy scrutiny:** Submitted systematic review reports mixed/null/opposite associations across 31 studies. Useful for detecting publication cherry-picking.  
 **Crucial restriction / inference not licensed:** Not peer-reviewed; methods, database capture and synthesis should be checked before citing it as authoritative.  
@@ -534,7 +538,7 @@
 - N09 full publisher article (https://onlinelibrary.wiley.com/doi/full/10.1111/ppc.12673) to analyze true group contrast and follow-up rather than only abstinence self-efficacy.
 - N12 full original Springer article (https://link.springer.com/article/10.1007/s10560-018-0584-y) to inspect allocation, attrition and confirm no depression benefit.
 - N03 full publisher article (https://journals.sagepub.com/doi/10.1177/00221678251412476), especially age/confound adjustment and null performance outcomes.
-- N13 complete Korean original and references (academic record https://www.riss.kr/link?id=A101862489), best with qualified bilingual review before translating quality judgments.
+- N13 full original Korean/English article **located and reviewed** (journal index https://kiss.kstudy.com/Detail/Ar?key=3429800; university archive linked in Round 5). Independent specialist-quality Korean language check remains valuable but is **not** required to state the verified English tables and study counts.
 - C04 full review (APA publisher https://psycnet.apa.org/doiLanding?doi=10.1037%2F0033-2909.132.6.823) and C05 full Cambridge review (publisher as linked above) if available; compare outcome families, not just averaged effect signs.
 
 No need to buy any paper; hold where inaccessible.
