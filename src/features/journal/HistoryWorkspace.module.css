@@ -9,7 +9,17 @@
 .controlHeading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .controlHeading strong { font-size: var(--text-sm); }
 .controlHeading button { flex: 0 0 auto; font-size: var(--text-xs); }
-.controls, .seriesControls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.controls, .seriesControls { display: grid; gap: var(--space-2); }
+.controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.seriesControls { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.detailHint { margin: -.15rem 0 .2rem; color: var(--secondary); font-size: var(--text-xs); }
+.dayNavigation { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
+.dayNavigation button { flex: 0 0 auto; font-size: var(--text-xs); }
+.dayNavigation span { min-width: 0; font-size: var(--text-sm); font-weight: 700; text-align: right; }
+.dayEntries { display: grid; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid color-mix(in srgb, var(--outline) 20%, transparent); }
+.dayEntries header { display: grid; gap: .2rem; }
+.dayEntries header strong { font-size: var(--text-sm); }
+.dayEntries header span { font-size: var(--text-xs); color: var(--secondary); }
 .workspace label { min-width: 0; display: grid; gap: .3rem; font-size: var(--text-xs); font-weight: 700; }
 .workspace :is(select, input) { width: 100%; min-width: 0; }
 .controls select, .seriesControls select { font-size: var(--text-sm); }
@@ -31,6 +41,8 @@
 .series[data-previous='true'] { opacity: .45; }
 .seriesLine { stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
 .rangeLine { stroke-width: 1.5; stroke-opacity: .5; }
+.dayCountBadge { fill: var(--surface-raised); stroke: var(--text); stroke-width: 1.2; pointer-events: none; }
+.dayCountText { fill: var(--text); font: 700 11px var(--font-body); pointer-events: none; }
 .pointTarget { fill: transparent; stroke: none; cursor: pointer; }
 .pointTarget:focus-visible { outline: none; stroke: var(--text); stroke-width: 2; fill: color-mix(in srgb, var(--selection) 28%, transparent); }
 .pointTarget:hover { fill: color-mix(in srgb, var(--selection) 25%, transparent); }
@@ -86,7 +98,7 @@
 .printReflection { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 600px) {
   .controls, .seriesControls { gap: .35rem; }
-  .controls { grid-template-columns: minmax(0, .75fr) minmax(0, 1.3fr) minmax(0, .95fr); }
+  .controls { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); }
   .controls select, .seriesControls select { padding-inline: .3rem; font-size: var(--text-xs); }
   .timelineNav strong { flex-basis: calc(100% - 100px); font-size: var(--text-xs); }
   .timelineNav button:not([aria-label]) { flex: 1; }

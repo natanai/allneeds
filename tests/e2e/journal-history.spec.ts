@@ -105,16 +105,24 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await expect(lines).toHaveCount(2);
       await expect(lines.first()).toHaveAttribute('d', /L/);
       await chart.getByRole('button', { name: /^Arousal: \+4,/ }).click();
+      await expect(page.getByRole('button', { name: 'Back to all days' })).toBeVisible();
+      await expect(page.getByLabel('Entries on selected day')).toContainText('Today’s private reflection');
+      await chart.getByRole('button', { name: /^Arousal: \+4,/ }).click();
       const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
       await expect(journal.getByText('Today’s private reflection', { exact: true })).toBeVisible();
       await journal.getByRole('button', { name: 'Close full screen journal' }).click();
+      await expect(page.getByLabel('Period', { exact: true })).toHaveValue('custom');
+      await page.getByRole('button', { name: 'Back to all days' }).click();
       await expect(page.getByLabel('Period', { exact: true })).toHaveValue('7');
+      await chart.getByRole('button', { name: /^Pleasantness: \+1,/ }).last().click();
+      await expect(page.getByLabel('Entries on selected day').getByRole('button', { name: /Open journal page/ })).toHaveCount(2);
       await chart.getByRole('button', { name: /^Pleasantness: \+1,/ }).last().click();
       const selected = page.getByLabel('Selected graph entries');
       await expect(selected.getByRole('button', { name: /Open journal page/ })).toHaveCount(2);
       await selected.getByRole('button', { name: /Open journal page/ }).first().click();
       await expect(journal).toBeVisible();
       await journal.getByRole('button', { name: 'Close full screen journal' }).click();
+      await page.getByRole('button', { name: 'Back to all days' }).click();
       await page.getByText('Focus & compare', { exact: true }).click();
       await page.getByLabel('Compare with the previous equal-length period').check();
       await expect(page.getByLabel('Period comparison')).toContainText('Previous');
@@ -122,8 +130,8 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await page.getByLabel('Graph feeling').selectOption('Relieved');
       await page.getByLabel('Tag', { exact: true }).selectOption('work');
       await chart.getByRole('button', { name: /^Relieved: 100%/ }).first().click();
-      await expect(page.getByLabel('Selected graph entries')).toBeVisible();
-      await page.getByLabel('Selected graph entries').getByRole('button', { name: /Open journal page/ }).first().click();
+      await expect(page.getByLabel('Entries on selected day')).toBeVisible();
+      await page.getByLabel('Entries on selected day').getByRole('button', { name: /Open journal page/ }).first().click();
       await journal.getByRole('button', { name: 'Close full screen journal' }).click();
       await expect(page.getByLabel('History measure')).toHaveValue('frequency');
       await expect(page.getByLabel('Tag', { exact: true })).toHaveValue('work');
@@ -133,6 +141,37 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     });
   });
 }
+
+test('daily badges include unrated pages and selecting a day preserves history filters on return', async ({ page }) => {
+  await seed(page);
+  await page.goto('/inventory/journal');
+  const day = await page.evaluate(() => {
+    const key = 'allneeds.v2.journal';
+    const envelope = JSON.parse(localStorage.getItem(key)!);
+    const today = envelope.data.entries.find((entry: { id: string }) => entry.id === 'today');
+    envelope.data.entries.push({ ...today, id: 'today-unrated', notes: 'Second reflection without ratings', mood: { kind: 'unsure' } });
+    localStorage.setItem(key, JSON.stringify(envelope));
+    const date = new Date(today.dateISO);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  });
+  await page.reload();
+  await page.getByLabel('Period', { exact: true }).selectOption('7');
+  await page.getByText('Focus & compare', { exact: true }).click();
+  await page.getByLabel('Tag', { exact: true }).selectOption('work');
+  const chart = page.getByTestId('history-chart');
+  await expect(chart.getByRole('button', { name: `2 journal entries on ${day}. View day` })).toBeVisible();
+  await chart.getByRole('button', { name: `2 journal entries on ${day}. View day` }).click();
+  const dayEntries = page.getByLabel('Entries on selected day');
+  await expect(dayEntries.getByRole('button', { name: /Open journal page/ })).toHaveCount(2);
+  await expect(dayEntries).toContainText('Second reflection without ratings');
+  await expect(chart.getByRole('button', { name: /^Pleasantness: \+3,/ })).toHaveCount(1);
+  await expect(page.getByLabel('Start date')).toHaveValue(day);
+  await expect(page.getByLabel('End date')).toHaveValue(day);
+  await page.getByRole('button', { name: 'Back to all days' }).click();
+  await expect(page.getByLabel('Period', { exact: true })).toHaveValue('7');
+  await expect(page.getByLabel('Tag', { exact: true })).toHaveValue('work');
+  await expect(page.getByLabel('Entries on selected day')).toHaveCount(0);
+});
 
 test('context notes and export respect the visible period and exclude reflections until opted in', async ({ page }) => {
   await seed(page); await page.goto('/inventory/journal');
@@ -226,8 +265,9 @@ test('History and journal inherit every preset, stay within a narrow phone, and 
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     const point = page.getByTestId('history-chart').getByRole('button', { name: /^Pleasantness: \+3,/ });
     await point.focus(); await point.press('Enter');
-    const selection = page.getByLabel('Selected graph entries');
-    if (await selection.count()) await selection.getByRole('button', { name: /Valence \+3/ }).click();
+    const dayEntries = page.getByLabel('Entries on selected day');
+    await expect(dayEntries).toBeVisible();
+    await dayEntries.getByRole('button', { name: /Valence \+3/ }).click();
     const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
     await expect(journal).toBeVisible();
     expect(await journal.evaluate((dialog) => dialog.scrollWidth <= dialog.clientWidth + 1)).toBe(true);
