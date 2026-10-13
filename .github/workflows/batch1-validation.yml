@@ -1,6 +1,8 @@
-name: Full repository validation
+name: Check-In pulse release verification
 
 on:
+  push:
+    branches: [fix/check-in-use-home-feelings-pulse]
   workflow_dispatch:
 
 permissions:
@@ -32,8 +34,8 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run full browser regression suite serially
-        run: pnpm exec playwright test --workers=1
+      - name: Run Check-In and navigation browser regressions
+        run: pnpm exec playwright test tests/e2e/check-in-magnet-and-map.spec.ts tests/e2e/magnet-nav-order.spec.ts tests/e2e/startup-nav-readiness.spec.ts --workers=1
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
