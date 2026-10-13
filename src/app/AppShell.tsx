@@ -6,6 +6,7 @@ import { MagnetBoard } from '../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../components/magnets/MagnetBoard';
 import { CustomizerPanel } from '../features/customizer/CustomizerPanel';
 import { ProfileReview } from '../features/account/ProfileReview';
+import { JournalAutoBackup } from '../features/account/JournalAutoBackup';
 import { useProfileReview } from '../features/account/blueskyAccount';
 import { AppMenu } from '../features/menu/AppMenu';
 import { UxDiagnostics } from './UxDiagnostics';
@@ -376,6 +377,7 @@ export function AppShell() {
   return (
     <div className={`${styles.app} ${fullBleedMobile ? styles.compactMobileFlow : ''} ${wheelRoute ? styles.wheelApp : ''}`}>
       <ScrollAndFocusManager />
+      <JournalAutoBackup />
       <a className="skip-link" href="#main-content">Skip to content</a>
 
       <nav className={styles.nav} aria-label="Primary">
