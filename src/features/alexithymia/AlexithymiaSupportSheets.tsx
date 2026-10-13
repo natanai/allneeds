@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
@@ -9,6 +10,9 @@ import type { CandidateClueScore, ShapeSelections } from './alexithymiaMath';
 import { roundedMatchPercent } from './alexithymiaMath';
 import type { ShapeDimension } from './alexithymiaData';
 import type { SupportTerm } from './alexithymiaTerms';
+import { ValenceArousalField } from '../journal/ValenceArousalField';
+import type { JournalMood } from '../journal/journalRepository';
+import { shapeToJournalMood, type OverallMoodChoice } from './shapeCoordinates';
 import styles from './AlexithymiaSupportPage.module.css';
 
 export type BodyOption = {
@@ -150,8 +154,6 @@ const shapeControls: Array<{
   high: string;
   disclosure?: string;
 }> = [
-  { dimension: 'pleasantness', label: 'Pleasant or unpleasant', low: 'Unpleasant', high: 'Pleasant' },
-  { dimension: 'energy', label: 'Energy', low: 'Low', high: 'High' },
   {
     dimension: 'power',
     label: 'Ability to influence what happens',
@@ -220,37 +222,32 @@ export function FeelingShapeSheet({
   open,
   shape,
   onChange,
+  onOverallChange,
+  overallMood,
   onClose,
 }: {
   open: boolean;
   shape: ShapeSelections;
+  overallMood?: OverallMoodChoice;
   onChange: (shape: ShapeSelections) => void;
+  onOverallChange: (mood: JournalMood | undefined) => void;
   onClose: () => void;
 }) {
   return (
     <SupportSheet open={open} title="Overall feeling" titleId="alex-shape-sheet-title" onClose={onClose} wide>
-      <p className={styles.sheetIntro}>Rate any parts you can tell. Skip anything that is unclear.</p>
+      <p className={styles.sheetIntro}>Place a point for pleasantness and energy, or choose another mood option. Skip anything unclear.</p>
       <div className={styles.shapeGroups}>
         <section className={styles.shapeGroup} aria-labelledby="alex-shape-core-title">
           <header>
             <p>Start here</p>
             <h3 id="alex-shape-core-title">General feeling</h3>
-            <span>Two ratings are enough to compare words.</span>
+            <span>One point supplies both ratings for comparison.</span>
           </header>
-          <div className={styles.shapeScales}>
-            {shapeControls.slice(0, 2).map((control) => (
-              <ShapeScale
-                key={control.dimension}
-                {...control}
-                value={shape[control.dimension]}
-                onChange={(value) => {
-                  const next = { ...shape };
-                  if (value === undefined) delete next[control.dimension];
-                  else next[control.dimension] = value;
-                  onChange(next);
-                }}
-              />
-            ))}
+          <div className={styles.shapeMap}>
+            <ValenceArousalField
+              mood={shapeToJournalMood(shape, overallMood)}
+              onChange={onOverallChange}
+            />
           </div>
         </section>
         <section className={`${styles.shapeGroup} ${styles.shapeGroupSecondary}`} aria-labelledby="alex-shape-context-title">
@@ -260,7 +257,7 @@ export function FeelingShapeSheet({
             <span>These ratings can make the comparison more specific.</span>
           </header>
           <div className={styles.shapeScales}>
-            {shapeControls.slice(2).map((control) => (
+            {shapeControls.map((control) => (
               <ShapeScale
                 key={control.dimension}
                 {...control}
@@ -300,6 +297,7 @@ export function CandidateSheet({
   term,
   score,
   decision,
+  intensity,
   cueLabels,
   onDecision,
   onClose,
@@ -307,10 +305,22 @@ export function CandidateSheet({
   term: SupportTerm | null;
   score: CandidateClueScore | null;
   decision?: 'fits' | 'maybe' | 'not-this-time';
+  intensity?: number;
   cueLabels: string[];
-  onDecision: (decision: 'fits' | 'maybe' | 'not-this-time') => void;
+  onDecision: (decision: 'fits' | 'maybe' | 'not-this-time', intensity?: number) => void;
   onClose: () => void;
 }) {
+  const [ratingOpen, setRatingOpen] = useState(false);
+  const ratingRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ratingOpen) return;
+    ratingRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [ratingOpen]);
+  const close = () => { setRatingOpen(false); onClose(); };
+  const decideAndClose = (choice: 'fits' | 'maybe' | 'not-this-time', rating?: number) => {
+    onDecision(choice, rating);
+    close();
+  };
   const match = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
   const singleChannel = score?.complete && score.usedChannels.length === 1
     ? score.usedChannels[0]
@@ -322,7 +332,7 @@ export function CandidateSheet({
       : 'Clue match';
   const hasReviewedScore = Boolean(score?.usedChannels.length);
   return (
-    <SupportSheet open={Boolean(term)} title={term?.label ?? 'Word details'} titleId="alex-candidate-sheet-title" onClose={onClose}>
+    <SupportSheet open={Boolean(term)} title={term?.label ?? 'Word details'} titleId="alex-candidate-sheet-title" onClose={close}>
       {term ? (
         <>
           <div className={styles.termHeading}>
@@ -358,18 +368,43 @@ export function CandidateSheet({
           )}
 
           <div className={styles.decisionButtons} role="group" aria-label={`Does ${term.label} fit?`}>
-            <button type="button" aria-pressed={decision === 'fits'} onClick={() => onDecision('fits')}>Fits</button>
-            <button type="button" aria-pressed={decision === 'maybe'} onClick={() => onDecision('maybe')}>Maybe</button>
-            <button type="button" aria-pressed={decision === 'not-this-time'} onClick={() => onDecision('not-this-time')}>Not this time</button>
+            <button type="button" aria-pressed={decision === 'fits'} onClick={() => {
+              if (term.role === 'feeling') setRatingOpen(true);
+              else decideAndClose('fits');
+            }}>Fits</button>
+            <button type="button" aria-pressed={decision === 'maybe'} onClick={() => decideAndClose('maybe')}>Maybe</button>
+            <button type="button" aria-pressed={decision === 'not-this-time'} onClick={() => decideAndClose('not-this-time')}>Not this time</button>
           </div>
 
-          <div className={styles.sheetFooterSplit}>
-            {term.route ? <Link to={term.route}>Open {term.roleLabel} page</Link> : null}
-            {term.definitionSource?.startsWith('https://') ? (
-              <a href={term.definitionSource} target="_blank" rel="noopener noreferrer">Where this definition comes from</a>
-            ) : null}
-            <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
-          </div>
+          {term.role === 'feeling' && ratingOpen ? (
+            <section className={styles.feelingIntensity} aria-label={`Rate ${term.label}`}>
+              <div className={styles.feelingIntensityHeading}>
+                <strong>How intense is this feeling?</strong>
+                <small>{intensity === undefined ? 'Optional · no rating yet' : `Previously rated ${intensity}/10`}</small>
+              </div>
+              <div ref={ratingRef} className={styles.feelingIntensityScale} role="group" aria-label={`${term.label} intensity, 1 to 10`}>
+                {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
+                  <button key={value} type="button" aria-label={`${term.label} intensity ${value} of 10`}
+                    aria-pressed={intensity === value} onClick={() => decideAndClose('fits', value)}>
+                    {value}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.feelingIntensityEndpoints}><span>1 · Slight</span><span>10 · Very strong</span></div>
+              <button type="button" className={styles.intensitySkip} onClick={() => decideAndClose('fits')}>
+                Leave intensity unrated
+              </button>
+            </section>
+          ) : null}
+
+          {term.route || term.definitionSource?.startsWith('https://') ? (
+            <div className={styles.sheetFooterSplit}>
+              {term.route ? <Link to={term.route}>Open {term.roleLabel} page</Link> : null}
+              {term.definitionSource?.startsWith('https://') ? (
+                <a href={term.definitionSource} target="_blank" rel="noopener noreferrer">Where this definition comes from</a>
+              ) : null}
+            </div>
+          ) : null}
         </>
       ) : null}
     </SupportSheet>

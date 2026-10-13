@@ -17,7 +17,7 @@ export type ThemeState = {
   preset: string;
   updatedAt: number;
 };
-export type NavItemId = 'home' | 'customizer' | 'journal' | 'inventory' | 'observations' | 'fauxFeelings' | 'feelings' | 'needs' | 'bodyCues' | 'journalDashboard';
+export type NavItemId = 'home' | 'customizer' | 'journal' | 'checkIn' | 'inventory' | 'observations' | 'fauxFeelings' | 'feelings' | 'needs' | 'bodyCues' | 'journalDashboard';
 export type NavSettings = Record<NavItemId, boolean>;
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
@@ -61,7 +61,7 @@ const legacyThemeValueKeys: Record<keyof ThemeValues, string> = {
 
 export const defaultNavSettings: NavSettings = {
   home: true, customizer: true,
-  journal: false, inventory: true, observations: true, fauxFeelings: false,
+  journal: false, checkIn: false, inventory: true, observations: true, fauxFeelings: false,
   feelings: true, needs: true, bodyCues: false, journalDashboard: false,
 };
 

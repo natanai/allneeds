@@ -23,16 +23,25 @@ export function ValenceArousalField({ mood, onChange }: Props) {
   const planeRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const [moving, setMoving] = useState(false);
+  const [preview, setPreview] = useState<{ valence: number; arousal: number } | null>(null);
   const rated = mood?.kind === 'rated' ? mood : undefined;
   const valence = rated?.value ?? 0;
   const arousal = rated?.arousal ?? 0;
   const hasPoint = rated?.arousal !== undefined;
-  const left = (valence + 5) * 10;
-  const top = (5 - arousal) * 10;
+  const visualValence = preview?.valence ?? valence;
+  const visualArousal = preview?.arousal ?? arousal;
+  const liveColor = pointColor(visualValence, visualArousal);
+  const left = (visualValence + 5) * 10;
+  const top = (5 - visualArousal) * 10;
   const pointStyle: CSSProperties = {
     left: `${left}%`,
     top: `${top}%`,
-    background: pointColor(valence, arousal),
+    background: hasPoint || preview ? liveColor : 'var(--surface-raised)',
+  };
+  // The whole map responds to the chosen coordinates, rather than leaving
+  // four static swatches beneath a moving point.
+  const planeStyle: CSSProperties = {
+    background: hasPoint || preview ? liveColor : 'var(--surface-raised)',
   };
 
   const setPoint = (nextValence: number, nextArousal: number) => {
@@ -45,7 +54,9 @@ export function ValenceArousalField({ mood, onChange }: Props) {
     if (!rect?.width || !rect.height) return;
     const x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
     const y = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
-    setPoint(x * 10 - 5, 5 - y * 10);
+    const next = { valence: x * 10 - 5, arousal: 5 - y * 10 };
+    setPreview(next);
+    setPoint(next.valence, next.arousal);
   };
   const moveWithKeyboard = (event: KeyboardEvent<HTMLButtonElement>) => {
     const change = event.shiftKey ? 2 : 1;
@@ -74,6 +85,7 @@ export function ValenceArousalField({ mood, onChange }: Props) {
     <div
       ref={planeRef}
       className={styles.plane}
+      style={planeStyle}
       data-testid="valence-arousal-field"
       aria-label="Valence and arousal emotional map"
       onPointerDown={(event) => {
@@ -89,15 +101,12 @@ export function ValenceArousalField({ mood, onChange }: Props) {
         if (!dragging.current) return;
         updateFromPointer(event);
         dragging.current = false;
+        setPreview(null);
         setMoving(false);
         event.currentTarget.releasePointerCapture(event.pointerId);
       }}
-      onPointerCancel={() => { dragging.current = false; setMoving(false); }}
+      onPointerCancel={() => { dragging.current = false; setPreview(null); setMoving(false); }}
     >
-      <span className={`${styles.quadrant} ${styles.lowUnpleasant}`} aria-hidden="true" />
-      <span className={`${styles.quadrant} ${styles.lowPleasant}`} aria-hidden="true" />
-      <span className={`${styles.quadrant} ${styles.highUnpleasant}`} aria-hidden="true" />
-      <span className={`${styles.quadrant} ${styles.highPleasant}`} aria-hidden="true" />
       <span className={styles.horizontalAxis} aria-hidden="true" />
       <span className={styles.verticalAxis} aria-hidden="true" />
       <span className={`${styles.axisLabel} ${styles.highLabel}`} aria-hidden="true">High activation</span>

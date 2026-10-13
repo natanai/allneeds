@@ -52,11 +52,15 @@ test('Journal drafts survive close/reload and successful save or clear removes t
   let dialog = page.getByRole('dialog', { name: 'Journal' });
   await dialog.getByLabel('Reflection').fill('I noticed relief after asking for help.');
   await dialog.getByRole('button', { name: 'Feeling', exact: true }).click();
-  let feelingPicker = dialog.getByRole('dialog', { name: 'Choose one or more feelings' });
-  await feelingPicker.getByLabel('Relieved intensity; 0 means not selected').fill('8');
+  let feelingPicker = page.getByRole('dialog', { name: 'Feelings' });
+  const relieved = feelingPicker.getByLabel('Relieved intensity; 0 means not selected');
+  await relieved.press('End');
+  await relieved.press('ArrowLeft');
+  await relieved.press('ArrowLeft');
+  await expect(relieved).toHaveValue('8');
   await feelingPicker.getByRole('button', { name: 'Done', exact: true }).click();
   await dialog.getByRole('button', { name: 'Needs', exact: true }).click();
-  const needsPicker = dialog.getByRole('dialog', { name: 'Choose one or more needs' });
+  const needsPicker = page.getByRole('dialog', { name: 'Needs' });
   await needsPicker.getByRole('option', { name: 'Support', exact: true }).click();
   await needsPicker.getByRole('button', { name: 'Done', exact: true }).click();
   await dialog.getByLabel('Tags', { exact: true }).fill('work, support');
@@ -71,7 +75,7 @@ test('Journal drafts survive close/reload and successful save or clear removes t
   await expect(dialog.getByRole('button', { name: 'Needs', exact: true })).toContainText('Support');
   await expect(dialog.getByLabel('Tags', { exact: true })).toHaveValue('work, support');
   await dialog.getByRole('button', { name: 'Feeling', exact: true }).click();
-  feelingPicker = dialog.getByRole('dialog', { name: 'Choose one or more feelings' });
+  feelingPicker = page.getByRole('dialog', { name: 'Feelings' });
   await expect(feelingPicker.getByLabel('Relieved intensity; 0 means not selected')).toHaveValue('8');
   await feelingPicker.getByRole('button', { name: 'Done', exact: true }).click();
 
@@ -220,7 +224,8 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   const candidateSheet = page.getByRole('dialog', { name: 'Anxiety' });
   await candidateSheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await candidateSheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await candidateSheet.getByRole('button', { name: 'Leave intensity unrated' }).click();
+  await expect(candidateSheet).toHaveCount(0);
   await page.waitForTimeout(250);
 
   await page.reload();

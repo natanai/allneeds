@@ -100,8 +100,10 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
     if (editing && !entry) { setError('This entry is no longer here. Your edit draft is still saved on this device.'); return; }
     const record = editing && entry ? {
       ...entry, ...data, notes: data.notes.trim(), emotion: data.feelings.map((item) => item.feeling).join(', '),
-      intensity: data.feelings.length ? Math.max(...data.feelings.map((item) => item.intensity)) : undefined,
-    } : createJournalRecord(data);
+      intensity: data.feelings.some((item) => item.ratingSource !== 'unknown')
+        ? Math.max(...data.feelings.filter((item) => item.ratingSource !== 'unknown').map((item) => item.intensity))
+        : undefined,
+    } : createJournalRecord({ ...data, source: draft.guidedSupport ? 'lane' : 'journal' });
     if (!onSave(record, editing)) return;
     activeRef.current.enabled = false;
     try { clearJournalDraft(undefined, editing ? pageId ?? undefined : undefined); } catch { /* The saved record is durable; retain the draft if its cleanup is blocked. */ }
@@ -167,7 +169,14 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
           </div>
         </form> : entry ? <div className={styles.readerPages}>
           <section className={`${styles.reflectionSheet} ${styles.savedSheet}`}><span className={styles.reflectionLabel}>Reflection</span><div className={styles.savedReflection}><p>{entry.notes || 'No written reflection on this page.'}</p>
-            {entry.guidedSupport ? <DisclosureRow title="Check-in context"><p>{entry.guidedSupport.observation}</p><p>{entry.guidedSupport.terms.map((term) => `${term.label} (${term.role})`).join(' · ')}</p><p>{entry.guidedSupport.statement}</p></DisclosureRow> : null}
+            {entry.guidedSupport ? <DisclosureRow title="Check-in context">
+              {entry.guidedSupport.observation && !entry.notes.includes(entry.guidedSupport.observation) ? <p>Situation: {entry.guidedSupport.observation}</p> : null}
+              {entry.guidedSupport.terms.length ? <p>Chosen words: {entry.guidedSupport.terms.map((term) => `${term.label} (${term.role})`).join(' · ')}</p> : null}
+              {entry.guidedSupport.noWordYet ? <p>No emotion word felt clear yet.</p> : null}
+              {entry.guidedSupport.bodyClues?.length ? <p>Body clues: {entry.guidedSupport.bodyClues.map((clue) => `${clue.label} (${clue.intensity}%)`).join(' · ')}</p> : entry.guidedSupport.bodyClear ? <p>No clear body clues were reported.</p> : null}
+              {entry.guidedSupport.overallRatings && Object.keys(entry.guidedSupport.overallRatings).length ? <p>Overall-feeling clues: {Object.entries(entry.guidedSupport.overallRatings).map(([dimension, value]) => `${dimension === 'power' ? 'Ability to influence' : dimension === 'expectedness' ? 'Familiar or surprising' : dimension === 'pleasantness' ? 'Pleasantness' : 'Energy'} ${Math.round(value * 4) + 1}/5`).join(' · ')}</p> : null}
+              {entry.guidedSupport.statement && entry.guidedSupport.statement !== entry.notes ? <p>Original check-in statement: {entry.guidedSupport.statement}</p> : null}
+            </DisclosureRow> : null}
           </div></section>
           <aside className={styles.sidebar}>
             {entry.mood ? <div className={styles.savedMood}><small>Emotional coordinates</small><strong>{entry.mood.kind === 'rated' ? `Valence ${entry.mood.value > 0 ? '+' : ''}${entry.mood.value}${entry.mood.arousal === undefined ? ' · Arousal not recorded' : ` · Arousal ${entry.mood.arousal > 0 ? '+' : ''}${entry.mood.arousal}`}` : entry.mood.kind === 'mixed' ? 'Mixed feelings' : 'Not sure'}</strong></div> : <small>Emotional coordinates were not recorded.</small>}

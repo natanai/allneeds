@@ -82,6 +82,21 @@ describe('journalRepository', () => {
     });
   });
 
+  it('leaves unasked check-in feeling intensity unreported after save and reload', () => {
+    const storage = new MemoryStorage();
+    const entry = createJournalRecord({
+      notes: 'I feel anxious.',
+      feelings: [{ feeling: 'Anxiety', intensity: 5, ratingSource: 'unknown' }],
+      source: 'lane',
+    });
+    expect(entry.intensity).toBeUndefined();
+    writeJournal([entry], storage);
+    expect(readJournal(storage)[0]?.intensity).toBeUndefined();
+    expect(readJournal(storage)[0]?.feelings).toEqual([
+      { feeling: 'Anxiety', intensity: 5, ratingSource: 'unknown' },
+    ]);
+  });
+
   it('round-trips structured guided-support word roles without promoting them to journal Feelings', () => {
     const storage = new MemoryStorage();
     const entry = createJournalRecord({
@@ -95,6 +110,9 @@ describe('journalRepository', () => {
           { label: 'Blamed', role: 'faux-feeling' },
         ],
         statement: 'I feel anxious and guilt.',
+        bodyClues: [{ id: 'tight', label: 'Tight chest', intensity: 75 }],
+        overallRatings: { pleasantness: 0.2, energy: 0.8, power: 0.25 },
+        noWordYet: true,
       },
     });
     writeJournal([entry], storage);
@@ -107,6 +125,9 @@ describe('journalRepository', () => {
           { label: 'Guilt', role: 'working' },
           { label: 'Blamed', role: 'faux-feeling' },
         ],
+        bodyClues: [{ id: 'tight', label: 'Tight chest', intensity: 75 }],
+        overallRatings: { pleasantness: 0.2, energy: 0.8, power: 0.25 },
+        noWordYet: true,
       },
     });
   });

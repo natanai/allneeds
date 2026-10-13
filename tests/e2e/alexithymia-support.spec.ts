@@ -24,8 +24,11 @@ async function addTwoBodyCues(page: Page) {
 async function addFeelingShape(page: Page) {
   await page.getByRole('button', { name: /^Overall feeling/ }).click();
   const sheet = page.getByRole('dialog', { name: 'Overall feeling' });
-  await sheet.locator('input[name="alex-shape-pleasantness"][value="0"]').check();
-  await sheet.locator('input[name="alex-shape-energy"][value="1"]').check();
+  const plane = sheet.getByTestId('valence-arousal-field');
+  const box = await plane.boundingBox();
+  if (!box) throw new Error('Overall feeling map is not visible');
+  await page.mouse.click(box.x + box.width * 0.2, box.y + box.height * 0.2);
+  await expect(sheet.locator('output')).toHaveText('Valence −3 · Arousal +3');
   await sheet.locator('input[name="alex-shape-power"][value="0.25"]').check();
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
 }
@@ -56,7 +59,9 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet.getByText(/^Body clues$/)).toBeVisible();
   await expect(sheet.getByText(/^Overall feeling$/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(sheet.getByRole('group', { name: 'Anxiety intensity, 1 to 10' })).toBeVisible();
+  await sheet.getByRole('button', { name: 'Anxiety intensity 8 of 10' }).click();
+  await expect(sheet).toHaveCount(0);
 
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
   await search.fill('Guilt');
@@ -65,7 +70,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet.getByText('Other emotion word')).toBeVisible();
   await expect(sheet.getByRole('link', { name: /Open Other emotion word page/ })).toHaveCount(0);
   await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
 
   await search.fill('Blamed');
   await page.getByRole('button', { name: /^Blamed, Faux Feeling/ }).click();
@@ -73,7 +78,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet.getByText(/Faux Feelings are not compared with clues/)).toBeVisible();
   await expect(sheet.getByText(/That label does not mean the event was unreal/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
 
   await expect(page.getByText('My words').first()).toBeVisible();
   await page.getByRole('button', { name: 'Use these words' }).click();
@@ -102,6 +107,89 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   });
   expect(saved.notes).toBe(finishedStatement);
   expect(saved.guidedSupport.observation).toBe('I felt blamed and wanted understanding when we stopped talking.');
+  expect(saved.mood).toEqual({ kind: 'rated', value: -3, arousal: 3 });
+  expect(saved.source).toBe('lane');
+  expect(saved.guidedSupport.bodyClues).toMatchObject([
+    { intensity: 70 }, { intensity: 70 },
+  ]);
+  expect(saved.guidedSupport.overallRatings).toMatchObject({
+    pleasantness: 0.2, energy: 0.8, power: 0.25,
+  });
+  expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety')).toMatchObject({ intensity: 8 });
+  expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety').ratingSource).toBeUndefined();
+  expect(saved.intensity).toBe(8);
+  await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Pleasantness: -3,/ })).toBeVisible();
+  await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Arousal: \+3,/ })).toBeVisible();
+  await page.getByRole('combobox', { name: 'History measure' }).selectOption('intensity');
+  await page.getByRole('combobox', { name: 'Graph feeling' }).selectOption('Anxiety');
+  await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Anxiety: 8,/ })).toBeVisible();
+});
+
+test('candidate decisions close immediately, while Fits offers optional intensity without a Done button', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await startCheckIn(page);
+  await skipObservation(page);
+  await page.getByRole('button', { name: 'Browse all feelings' }).click();
+  const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
+  await search.fill('Anxiety');
+
+  const open = () => page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
+  await open();
+  let sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await expect(sheet.getByRole('button', { name: 'Done', exact: true })).toHaveCount(0);
+  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
+  await expect(sheet).toHaveCount(0);
+
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
+  await expect(sheet.getByRole('group', { name: 'Anxiety intensity, 1 to 10' })).toBeVisible();
+  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
+  await expect(sheet).toHaveCount(0);
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await expect(sheet.getByRole('button', { name: 'Fits', exact: true })).toHaveAttribute('aria-pressed', 'false');
+  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Leave intensity unrated' }).click();
+  await expect(sheet).toHaveCount(0);
+
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    return raw && JSON.parse(raw).data.decisions['candidate:anxiety'];
+  })).toBe('fits');
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue previous check-in' }).click();
+  await page.getByRole('radio', { name: 'All feelings' }).click();
+  await search.fill('Anxiety');
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Anxiety intensity 4 of 10' }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    return raw && JSON.parse(raw).data.feelingIntensities?.['candidate:anxiety'];
+  })).toBe(4);
+
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    const data = raw && JSON.parse(raw).data;
+    return data?.decisions?.['candidate:anxiety'] === 'maybe'
+      && data?.feelingIntensities?.['candidate:anxiety'] === undefined;
+  })).toBe(true);
+
+  await open();
+  sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByRole('button', { name: 'Not this time', exact: true }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
+    return raw && JSON.parse(raw).data.decisions['candidate:anxiety'];
+  })).toBe('not-this-time');
 });
 
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
@@ -147,7 +235,7 @@ test('body-only and shape-only candidates name the channel used', async ({ page 
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   let sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await expect(sheet.getByText(/% body clue match/)).toBeVisible();
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'No word yet' }).click();

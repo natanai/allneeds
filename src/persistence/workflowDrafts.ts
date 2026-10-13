@@ -2,7 +2,7 @@ import { getBrowserStorage } from './storage';
 import type { StorageDriver } from './storage';
 import { VersionedStore } from './versionedStore';
 import alexithymiaSupportData from '../data/generated/alexithymiaSupport.json';
-import { normalizeJournalMood, type JournalFeelingRating, type JournalMood } from '../features/journal/journalRepository';
+import { normalizeJournalMood, type JournalFeelingRating, type JournalMood, type JournalGuidedSupport } from '../features/journal/journalRepository';
 
 export const JOURNAL_DRAFT_STORAGE_KEY = 'allneeds.v2.journal.draft';
 export const OBSERVATION_DRAFT_STORAGE_KEY = 'allneeds.v2.observation.draft';
@@ -21,11 +21,7 @@ export type JournalComposerDraft = {
   selectedNeeds: string[];
   tags: string;
   editingId: string | null;
-  guidedSupport?: {
-    observation: string;
-    terms: Array<{ label: string; role: 'feeling' | 'faux-feeling' | 'working' }>;
-    statement: string;
-  };
+  guidedSupport?: JournalGuidedSupport;
 };
 
 export type ObservationDraft = {
@@ -68,7 +64,10 @@ export type AlexithymiaDraft = {
   selectedCues: Record<string, number>;
   bodyClear: boolean;
   shape: Partial<Record<'pleasantness' | 'energy' | 'power' | 'expectedness', number>>;
+  overallMood?: 'mixed' | 'unsure';
   decisions: Record<string, 'fits' | 'maybe' | 'not-this-time'>;
+  /** Optional explicitly reported 1–10 intensity for a selected Feeling. */
+  feelingIntensities?: Record<string, number>;
   termOrder: string[];
   customTerms: string[];
   noWordYet: boolean;
@@ -130,7 +129,16 @@ function isGuidedSupportDraft(value: unknown) {
     && Array.isArray(value.terms)
     && value.terms.every((term) => isRecord(term)
       && typeof term.label === 'string'
-      && (term.role === 'feeling' || term.role === 'faux-feeling' || term.role === 'working'));
+      && (term.role === 'feeling' || term.role === 'faux-feeling' || term.role === 'working'))
+    && (value.bodyClues === undefined || (Array.isArray(value.bodyClues) && value.bodyClues.every((clue) =>
+      isRecord(clue) && typeof clue.id === 'string' && typeof clue.label === 'string'
+      && typeof clue.intensity === 'number' && Number.isFinite(clue.intensity))))
+    && (value.overallRatings === undefined || (isRecord(value.overallRatings)
+      && Object.entries(value.overallRatings).every(([key, rating]) => (
+        ['pleasantness', 'energy', 'power', 'expectedness'].includes(key)
+        && typeof rating === 'number' && Number.isFinite(rating)))))
+    && (value.bodyClear === undefined || typeof value.bodyClear === 'boolean')
+    && (value.noWordYet === undefined || typeof value.noWordYet === 'boolean');
 }
 
 function isJournalDraft(value: unknown): value is JournalComposerDraft {
@@ -195,6 +203,7 @@ function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
     && (value.openRegion === null || typeof value.openRegion === 'string')
     && isNumberRecord(value.selectedCues)
     && typeof value.bodyClear === 'boolean'
+    && (value.overallMood === undefined || value.overallMood === 'mixed' || value.overallMood === 'unsure')
     && isRecord(value.shape)
     && Object.entries(value.shape).every(([key, item]) => (
       (key === 'pleasantness' || key === 'energy' || key === 'power' || key === 'expectedness')
@@ -205,6 +214,9 @@ function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
     && Object.values(value.decisions).every((decision) => (
       decision === 'fits' || decision === 'maybe' || decision === 'not-this-time'
     ))
+    && (value.feelingIntensities === undefined || (isRecord(value.feelingIntensities)
+      && Object.values(value.feelingIntensities).every((rating) =>
+        typeof rating === 'number' && Number.isInteger(rating) && rating >= 1 && rating <= 10)))
     && isStringList(value.termOrder)
     && isStringList(value.customTerms)
     && typeof value.noWordYet === 'boolean'
@@ -335,6 +347,7 @@ export function writeJournalDraft(
     intensity: Math.min(10, Math.max(0, Math.round(item.intensity))),
   })).filter((item) => item.feeling && item.intensity > 0);
   const guidedSupport = draft.guidedSupport ? {
+    ...draft.guidedSupport,
     observation: draft.guidedSupport.observation.trim(),
     terms: draft.guidedSupport.terms
       .map((term) => ({ ...term, label: term.label.trim() }))
@@ -523,8 +536,12 @@ export function writeAlexithymiaDraft(
     ...draft.termOrder.filter((id) => selectedDecisionIds.includes(id)),
     ...selectedDecisionIds,
   ])];
+  const feelingIntensities = Object.fromEntries(Object.entries(draft.feelingIntensities ?? {})
+    .filter(([id, rating]) => draft.decisions[id] === 'fits'
+      && Number.isInteger(rating) && rating >= 1 && rating <= 10));
   const normalized: AlexithymiaDraft = {
     ...draft,
+    ...(draft.feelingIntensities !== undefined ? { feelingIntensities } : {}),
     stage: Math.min(4, Math.max(0, Math.round(draft.stage))),
     observation: draft.observation.trimStart(),
     openRegion: draft.openRegion || null,

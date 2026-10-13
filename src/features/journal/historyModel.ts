@@ -73,7 +73,16 @@ export function filterHistory(entries: JournalRecord[], settings: HistorySetting
     if (settings.need && !entry.needs.includes(settings.need)) return false;
     if (settings.tag && !entry.tags.some((tag) => lower(tag) === lower(settings.tag))) return false;
     if (settings.feelingFilter && !entry.feelings.some((item) => lower(item.feeling) === lower(settings.feelingFilter))) return false;
-    if (query && !lower([entry.notes, ...entry.feelings.map((item) => item.feeling), ...entry.needs, ...entry.tags].join(' ')).includes(query)) return false;
+    if (query && !lower([
+      entry.notes,
+      entry.guidedSupport?.observation ?? '',
+      entry.guidedSupport?.statement ?? '',
+      ...(entry.guidedSupport?.terms.map((term) => term.label) ?? []),
+      ...(entry.guidedSupport?.bodyClues?.map((clue) => clue.label) ?? []),
+      ...entry.feelings.map((item) => item.feeling),
+      ...entry.needs,
+      ...entry.tags,
+    ].join(' ')).includes(query)) return false;
     if (settings.minIntensity !== 1 || settings.maxIntensity !== 10) {
       const selected = settings.metric === 'mood' ? [] : settings.feelings.map(lower);
       if (!entry.feelings.some((item) => item.ratingSource !== 'unknown' && (!selected.length || selected.includes(lower(item.feeling))) && item.intensity >= settings.minIntensity && item.intensity <= settings.maxIntensity)) return false;

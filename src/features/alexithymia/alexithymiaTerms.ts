@@ -9,6 +9,7 @@ import {
   type AlexithymiaCandidate,
 } from './alexithymiaData';
 import type { JournalComposerDraft } from '../../persistence/workflowDrafts';
+import type { JournalMood, JournalGuidedSupport } from '../journal/journalRepository';
 
 export type SupportTermRole = 'feeling' | 'faux-feeling' | 'working';
 
@@ -148,11 +149,23 @@ export function createSupportJournalDraft({
   terms,
   needSlugs,
   statement,
+  mood,
+  bodyClues,
+  overallRatings,
+  bodyClear,
+  noWordYet,
+  feelingIntensities,
 }: {
   observation: string;
   terms: SupportTerm[];
   needSlugs: string[];
   statement: string;
+  mood?: JournalMood;
+  bodyClues?: JournalGuidedSupport['bodyClues'];
+  overallRatings?: JournalGuidedSupport['overallRatings'];
+  bodyClear?: boolean;
+  noWordYet?: boolean;
+  feelingIntensities?: Record<string, number>;
 }): JournalComposerDraft {
   const canonicalFeelings = terms.filter((term) => term.role === 'feeling');
   const cleanObservation = observation.trim();
@@ -164,9 +177,17 @@ export function createSupportJournalDraft({
     : '');
   return {
     notes,
+    ...(mood ? { mood } : {}),
     emotion: canonicalFeelings.map((term) => term.label).join(', '),
     intensity: 5,
-    feelings: canonicalFeelings.map((term) => ({ feeling: term.label, intensity: 5 })),
+    // Only an explicit 1–10 selection is a reported rating. Unrated legacy
+    // check-ins keep the unknown provenance rather than acquiring fake 5/10s.
+    feelings: canonicalFeelings.map((term) => {
+      const rating = feelingIntensities?.[term.id];
+      return rating !== undefined && Number.isInteger(rating) && rating >= 1 && rating <= 10
+        ? { feeling: term.label, intensity: rating }
+        : { feeling: term.label, intensity: 5, ratingSource: 'unknown' as const };
+    }),
     selectedNeeds: needSlugs,
     tags: 'alexithymia-check-in',
     editingId: null,
@@ -174,6 +195,10 @@ export function createSupportJournalDraft({
       observation: cleanObservation,
       terms: terms.map((term) => ({ label: term.label, role: term.role })),
       statement: cleanStatement,
+      ...(bodyClues?.length ? { bodyClues } : {}),
+      ...(overallRatings && Object.keys(overallRatings).length ? { overallRatings } : {}),
+      ...(bodyClear ? { bodyClear: true } : {}),
+      ...(noWordYet ? { noWordYet: true } : {}),
     },
   };
 }

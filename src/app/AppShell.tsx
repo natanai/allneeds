@@ -262,6 +262,21 @@ export function AppShell() {
         icon: <JournalMark />,
       },
       {
+        id: 'nav-check-in',
+        setting: 'checkIn',
+        label: 'Check-In',
+        to: '/alexithymia-support',
+        tone: 'action',
+        kind: 'nav',
+        ariaLabel: 'Feeling check-in',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20.5 8.5c0 4.6-8.5 10.5-8.5 10.5S3.5 13.1 3.5 8.5a4.4 4.4 0 0 1 8.5-1.5 4.4 4.4 0 0 1 8.5 1.5Z" />
+            <path d="M7 12h2.5l1.5-2.4 2.1 4.8 1.4-2.4H17" />
+          </svg>
+        ),
+      },
+      {
         id: 'nav-inventory',
         setting: 'inventory',
         label: 'Inventory',
@@ -330,6 +345,9 @@ export function AppShell() {
         break;
       case 'nav-journal':
         item.active = journalComposerActive;
+        break;
+      case 'nav-check-in':
+        item.active = pathname === '/alexithymia-support';
         break;
       case 'nav-inventory':
         item.active = pathname === '/inventory' || pathname === '/feed';

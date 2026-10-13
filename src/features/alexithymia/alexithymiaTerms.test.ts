@@ -93,6 +93,23 @@ describe('Alexithymia Support statement builder', () => {
     expect(draft.notes).toBe('The phone rang.');
   });
 
+  it('transfers only explicitly rated canonical Feelings to History-compatible Journal ratings', () => {
+    const anxiety = candidateTerm(alexithymiaCandidates.find((candidate) => candidate.key === 'anxiety')!);
+    const working = candidateTerm(alexithymiaCandidates.find((candidate) => candidate.key === 'guilt')!);
+    const context = { observation: 'The door closed.', terms: [anxiety, working], needSlugs: [], statement: 'I feel anxiety.' };
+    const rated = createSupportJournalDraft({
+      ...context,
+      feelingIntensities: { [anxiety.id]: 8, [working.id]: 7 },
+    });
+    expect(rated.feelings).toEqual([{ feeling: 'Anxiety', intensity: 8 }]);
+    expect(rated.emotion).toBe('Anxiety');
+
+    const unrated = createSupportJournalDraft(context);
+    expect(unrated.feelings).toEqual([{ feeling: 'Anxiety', intensity: 5, ratingSource: 'unknown' }]);
+    const invalid = createSupportJournalDraft({ ...context, feelingIntensities: { [anxiety.id]: 0 } });
+    expect(invalid.feelings).toEqual([{ feeling: 'Anxiety', intensity: 5, ratingSource: 'unknown' }]);
+  });
+
   it('preserves all chosen roles in Journal without classifying working or Faux terms as Feelings', () => {
     const feeling = candidateTerm(alexithymiaCandidates.find((candidate) => candidate.key === 'anxiety')!);
     const working = candidateTerm(alexithymiaCandidates.find((candidate) => candidate.key === 'guilt')!);
@@ -103,7 +120,7 @@ describe('Alexithymia Support statement builder', () => {
       needSlugs: ['understanding'],
       statement: `I feel anxious, guilt, and ${faux.label.toLocaleLowerCase()} because I need understanding.`,
     });
-    expect(draft.feelings).toEqual([{ feeling: 'Anxiety', intensity: 5 }]);
+    expect(draft.feelings).toEqual([{ feeling: 'Anxiety', intensity: 5, ratingSource: 'unknown' }]);
     expect(draft.selectedNeeds).toEqual(['understanding']);
     expect(draft.guidedSupport?.terms).toEqual([
       { label: 'Anxiety', role: 'feeling' },

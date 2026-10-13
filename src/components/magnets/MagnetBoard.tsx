@@ -282,8 +282,9 @@ export function MagnetBoard({
     }
 
     try {
+      const storedPositions = variant === 'nav' ? readMagnetViewportLayout(storageKey, width)?.magnets : undefined;
       writeMagnetViewportLayout(storageKey, {
-        magnets,
+        magnets: storedPositions ? { ...storedPositions, ...magnets } : magnets,
         boardWidth: Number(width.toFixed(2)),
         boardHeight: Number(height.toFixed(2)),
         ...(order ? { order } : {}),
@@ -316,6 +317,7 @@ export function MagnetBoard({
       'nav-home',
       'nav-customizer',
       'nav-journal',
+      'nav-check-in',
       'nav-observations',
       'nav-faux-feelings',
       'nav-feelings',
