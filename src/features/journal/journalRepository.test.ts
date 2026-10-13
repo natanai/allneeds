@@ -82,6 +82,21 @@ describe('journalRepository', () => {
     });
   });
 
+  it('leaves unasked check-in feeling intensity unreported after save and reload', () => {
+    const storage = new MemoryStorage();
+    const entry = createJournalRecord({
+      notes: 'I feel anxious.',
+      feelings: [{ feeling: 'Anxiety', intensity: 5, ratingSource: 'unknown' }],
+      source: 'lane',
+    });
+    expect(entry.intensity).toBeUndefined();
+    writeJournal([entry], storage);
+    expect(readJournal(storage)[0]?.intensity).toBeUndefined();
+    expect(readJournal(storage)[0]?.feelings).toEqual([
+      { feeling: 'Anxiety', intensity: 5, ratingSource: 'unknown' },
+    ]);
+  });
+
   it('round-trips structured guided-support word roles without promoting them to journal Feelings', () => {
     const storage = new MemoryStorage();
     const entry = createJournalRecord({
