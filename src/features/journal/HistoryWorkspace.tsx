@@ -30,7 +30,7 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
   const changePeriod = (value: Partial<HistorySettings>) => { setReturnView(null); setViewport(null); patch(value); };
   const savedRange = useMemo(() => historyWindow(settings, entries), [entries, settings]);
   const range = viewport ?? savedRange;
-  const isSingleDay = historyGrouping(settings, range) === 'entry' || range.days === 1;
+  const isSingleDay = historyGrouping(settings, range) === 'entry' || range.days === 1 || range.end - range.start <= 86400000;
   const gestureZoom = (factor: number) => setViewport(zoomHistory(range, factor, .75));
   const drillIntoDay = (day: string) => {
     if (isSingleDay) return;
