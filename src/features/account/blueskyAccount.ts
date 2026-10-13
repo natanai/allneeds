@@ -469,7 +469,9 @@ type CurrentBrowserBackup = Awaited<ReturnType<typeof buildCurrentBrowserBackup>
 
 // Automatic journal backups may not replace cloud-only data (including strategies,
 // settings, and entries saved on another device). Merge with the current profile first.
-async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: string): Promise<CurrentBrowserBackup> {
+async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: string): Promise<{
+  snapshot: CurrentBrowserBackup; ifMatchValue: string | null;
+}> {
   const response = await fetch(`${BACKEND_API_URL}/user-settings`, {
     credentials: 'include', cache: 'no-store',
   });
@@ -477,6 +479,14 @@ async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: str
   if (!response.ok || !data || typeof data !== 'object' || (data as { status?: string }).status !== 'ok') {
     throw new Error('Could not check the latest profile before backing up the journal. Your entry is still saved on this device.');
   }
+  const server = data as { did?: unknown; supportsConditionalProfileSave?: unknown; settings?: unknown };
+  if (server.did !== did) throw new Error('Account identity changed. Journal backup stopped without replacing profile data.');
+  if (server.supportsConditionalProfileSave !== true) {
+    throw new Error('Automatic journal backup requires a newer profile server. Your entry is saved on this device.');
+  }
+  const stored = Array.isArray(server.settings) ? server.settings.find((setting: unknown) =>
+    setting && typeof setting === 'object' && (setting as { key?: unknown }).key === BACKEND_SNAPSHOT_KEY,
+  ) as { value?: unknown } | undefined : undefined;
   const profile = extractProfileSnapshot(data);
   if (!profile) {
     const settings = (data as { settings?: unknown }).settings;
@@ -484,8 +494,9 @@ async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: str
       && (setting as { key?: unknown }).key === BACKEND_SNAPSHOT_KEY)) {
       throw new Error('Saved profile is unreadable; automatic backup stopped to protect existing data.');
     }
-    return device;
+    return { snapshot: device, ifMatchValue: null };
   }
+  if (typeof stored?.value !== 'string') throw new Error('The profile changed while checking; automatic backup stopped.');
   const comparison = compareProfileSnapshots(device.localStorage, profileBrowserSnapshot(profile.localStorage));
   const combined = combineProfileSnapshots(comparison, 'profile');
 
@@ -507,13 +518,16 @@ async function reconcileJournalAutoBackup(device: CurrentBrowserBackup, did: str
     try { return JSON.parse(combined[key] ?? 'null') as unknown; } catch { return null; }
   };
   return {
-    ...device,
-    localStorage: combined,
-    journalEntries: readJournal(mergedStorage),
-    inventory: readInventory(mergedStorage),
-    customizer: {
-      theme: parse('nvcApp.theme'),
-      navSettings: parse('nvcApp.navSettings'),
+    ifMatchValue: stored.value,
+    snapshot: {
+      ...device,
+      localStorage: combined,
+      journalEntries: readJournal(mergedStorage),
+      inventory: readInventory(mergedStorage),
+      customizer: {
+        theme: parse('nvcApp.theme'),
+        navSettings: parse('nvcApp.navSettings'),
+      },
     },
   };
 }
@@ -542,29 +556,44 @@ async function performProfileSave(
 ): Promise<ProfileSaveResult> {
   const session = await requireBackendSession();
   const deviceSnapshot = await buildCurrentBrowserBackup();
-  const snapshot = mode === 'journal-auto'
-    ? await reconcileJournalAutoBackup(deviceSnapshot, session.did)
-    : deviceSnapshot;
-  const strategies = profilePublishableStrategies(snapshot.inventory);
-  // Automatic backups may deliberately retain newer cloud settings. The
-  // receipt must not claim this device's divergent settings were uploaded.
-  // Its journal baseline, however, represents the local entries now contained
-  // in the merged cloud journal rather than any cloud-only records.
-  const receiptSnapshot = mode === 'journal-auto'
-    ? { ...snapshot.localStorage, [JOURNAL_STORAGE_KEY]: deviceSnapshot.localStorage[JOURNAL_STORAGE_KEY] ?? '' }
-    : deviceSnapshot.localStorage;
-  const response = await fetch(`${BACKEND_API_URL}/profile/save`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({
-      key: BACKEND_SNAPSHOT_KEY,
-      value: JSON.stringify(snapshot),
-      strategies,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error('Unable to save this browser to your profile.');
+  let strategies = profilePublishableStrategies(deviceSnapshot.inventory);
+  let receiptSnapshot = deviceSnapshot.localStorage;
+  let response: Response | null = null;
+
+  // A second device may save after our read. Retry its newly stored version
+  // rather than writing the obsolete snapshot. No retry can exceed three checks.
+  for (let attempt = 0; attempt < (mode === 'journal-auto' ? 3 : 1); attempt += 1) {
+    const prepared = mode === 'journal-auto'
+      ? await reconcileJournalAutoBackup(deviceSnapshot, session.did)
+      : { snapshot: deviceSnapshot, ifMatchValue: undefined };
+    const snapshot = prepared.snapshot;
+    strategies = profilePublishableStrategies(snapshot.inventory);
+    // Remote settings can be newer. Only report the device's current settings
+    // as backed up if the server copy actually contains them.
+    receiptSnapshot = mode === 'journal-auto'
+      ? { ...snapshot.localStorage, [JOURNAL_STORAGE_KEY]: deviceSnapshot.localStorage[JOURNAL_STORAGE_KEY] ?? '' }
+      : deviceSnapshot.localStorage;
+
+    if (getBlueskySession()?.did !== session.did) {
+      throw new Error('Account changed while backing up. Your device data is unchanged.');
+    }
+    response = await fetch(`${BACKEND_API_URL}/profile/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        key: BACKEND_SNAPSHOT_KEY,
+        value: JSON.stringify(snapshot),
+        strategies,
+        ...(prepared.ifMatchValue === undefined ? {} : { ifMatchValue: prepared.ifMatchValue }),
+      }),
+    });
+    if (mode !== 'journal-auto' || response.status !== 409) break;
+  }
+  if (!response?.ok) {
+    throw new Error(response?.status === 409
+      ? 'Your profile changed on another device. Automatic backup did not overwrite it; retry when ready.'
+      : 'Unable to back up this device to your profile.');
   }
 
   const decoder = new TextDecoder();
