@@ -132,9 +132,15 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
   const duration = range.end - range.start;
   const showHour = duration <= 36 * 3600000;
   const dateTicks = Array.from({ length: tickCount }, (_, i) => range.start + duration * i / (tickCount - 1));
-  const dateLabel = (time: number) => showHour
-    ? new Date(time).toLocaleTimeString(undefined, { hour: 'numeric', ...(dateKey(range.start) !== dateKey(range.end - 1) ? { month: 'short', day: 'numeric' } : {}) })
-    : new Date(time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', ...(range.days > 365 ? { year: '2-digit' } : {}) });
+  const dateLabel = (time: number) => {
+    const date = new Date(time);
+    if (showHour) return dateKey(range.start) !== dateKey(range.end - 1)
+      ? date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric' })
+      : date.toLocaleTimeString(undefined, { hour: 'numeric' });
+    return range.days > 365
+      ? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' })
+      : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
   const barWidth = Math.max(3, Math.min(42, (right - left) / Math.max(1, range.days) * .65 / Math.max(1, series.length)));
   const shape = (index: number, cx: number, cy: number) => index === 1 ? <rect x={cx - 4} y={cy - 4} width={8} height={8} /> : index === 2 ? <path d={`M${cx},${cy - 5} l5,5 -5,5 -5,-5 Z`} /> : <circle cx={cx} cy={cy} r={4.5} />;
 
