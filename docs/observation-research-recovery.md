@@ -5,7 +5,7 @@ Target: `site-test` **only**. This file is a review ledger, not approval to depl
 
 ## Round 1 ongoing evidence review (2026-10-12)
 
-A separate **31-source approval queue** is maintained at [Observation source approval register](./observation-source-approval-queue-2026-10-12.md). Entries N01–N12 directly investigate NVC; M01–M17 investigate relevant adjacent mechanisms, observational methods and needs theory; X01–X02 are exploratory preprints held for possible design research. All **31 remain pending user approval**. Their DOI/arXiv URLs contain no tracking or ChatGPT referral parameters. This register extends, rather than replaces, the 20-link historical inventory below. The public Observation source catalog is **not** updated by this research-only record.
+A separate **31-source approval queue** is maintained at [Observation source approval register](./observation-source-approval-queue-2026-10-12.md) and its [Round 2 critical-appraisal addendum](./observation-source-critical-appraisal-2026-10-12.md). Entries N01–N12 directly investigate NVC; M01–M17 investigate relevant adjacent mechanisms, observational methods and needs theory; X01–X02 are exploratory preprints held for possible design research. All **31 remain pending user approval**. Their DOI/arXiv URLs contain no tracking or ChatGPT referral parameters. This register extends, rather than replaces, the 20-link historical inventory below. The public Observation source catalog is **not** updated by this research-only record.
 
 ## Why this is being restored
 
