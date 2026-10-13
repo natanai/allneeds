@@ -154,6 +154,7 @@ export function createSupportJournalDraft({
   overallRatings,
   bodyClear,
   noWordYet,
+  feelingIntensities,
 }: {
   observation: string;
   terms: SupportTerm[];
@@ -164,6 +165,7 @@ export function createSupportJournalDraft({
   overallRatings?: JournalGuidedSupport['overallRatings'];
   bodyClear?: boolean;
   noWordYet?: boolean;
+  feelingIntensities?: Record<string, number>;
 }): JournalComposerDraft {
   const canonicalFeelings = terms.filter((term) => term.role === 'feeling');
   const cleanObservation = observation.trim();
@@ -178,9 +180,14 @@ export function createSupportJournalDraft({
     ...(mood ? { mood } : {}),
     emotion: canonicalFeelings.map((term) => term.label).join(', '),
     intensity: 5,
-    // The lane never asks for per-feeling intensity. Preserve the historical
-    // display fallback without treating 5/10 as a user-reported rating.
-    feelings: canonicalFeelings.map((term) => ({ feeling: term.label, intensity: 5, ratingSource: 'unknown' as const })),
+    // Only an explicit 1–10 selection is a reported rating. Unrated legacy
+    // check-ins keep the unknown provenance rather than acquiring fake 5/10s.
+    feelings: canonicalFeelings.map((term) => {
+      const rating = feelingIntensities?.[term.id];
+      return rating !== undefined && Number.isInteger(rating) && rating >= 1 && rating <= 10
+        ? { feeling: term.label, intensity: rating }
+        : { feeling: term.label, intensity: 5, ratingSource: 'unknown' as const };
+    }),
     selectedNeeds: needSlugs,
     tags: 'alexithymia-check-in',
     editingId: null,
