@@ -68,6 +68,7 @@ export type AlexithymiaDraft = {
   selectedCues: Record<string, number>;
   bodyClear: boolean;
   shape: Partial<Record<'pleasantness' | 'energy' | 'power' | 'expectedness', number>>;
+  overallMood?: 'mixed' | 'unsure';
   decisions: Record<string, 'fits' | 'maybe' | 'not-this-time'>;
   termOrder: string[];
   customTerms: string[];
@@ -195,6 +196,7 @@ function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
     && (value.openRegion === null || typeof value.openRegion === 'string')
     && isNumberRecord(value.selectedCues)
     && typeof value.bodyClear === 'boolean'
+    && (value.overallMood === undefined || value.overallMood === 'mixed' || value.overallMood === 'unsure')
     && isRecord(value.shape)
     && Object.entries(value.shape).every(([key, item]) => (
       (key === 'pleasantness' || key === 'energy' || key === 'power' || key === 'expectedness')
