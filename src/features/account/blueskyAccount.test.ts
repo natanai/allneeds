@@ -249,7 +249,8 @@ describe('Bluesky account compatibility', () => {
     const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
       if (String(url).endsWith('/user-settings')) {
         return new Response(JSON.stringify({
-          status: 'ok', settings: [{ key: 'allneeds_export_v1', value: JSON.stringify(existing) }],
+          status: 'ok', did: 'did:plc:journal-auto-test', supportsConditionalProfileSave: true,
+          settings: [{ key: 'allneeds_export_v1', value: JSON.stringify(existing) }],
         }), { status: 200 });
       }
       if (String(url).endsWith('/profile/save')) {
