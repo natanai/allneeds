@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { addDays, calendarDay, dateKey, historyGrouping, type DateWindow, type HistoryPoint, type HistorySeries, type HistorySettings } from './historyModel';
 import { journalDate, type JournalRecord } from './journalRepository';
-import { gestureHistory, panHistory, zoomHistory } from './historyViewport';
+import { fingerSeparation, gestureHistory, panHistory, zoomHistory } from './historyViewport';
 import type { HistoryAnnotation } from './historyRepository';
 import styles from './HistoryWorkspace.module.css';
 
@@ -36,7 +36,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
   const contactSnapshot = () => {
     const points = [...contacts.current.values()];
     const center = points.reduce((sum, point) => sum + relativeX(point.x), 0) / (points.length || 1);
-    const distance = points.length > 1 ? Math.abs(points[0]!.x - points[1]!.x) : 0;
+    const distance = points.length > 1 ? fingerSeparation(points[0]!, points[1]!) : 0;
     gesture.current = { window: latestWindow.current, startCenter: center, distance };
     points.forEach((point) => { point.startX = point.x; point.startY = point.y; });
   };
@@ -63,7 +63,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
       if (!event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.setPointerCapture(event.pointerId);
       suppressPointerClick.current = true;
       const center = points.reduce((sum, item) => sum + relativeX(item.x), 0) / points.length;
-      const distance = Math.abs(points[0]!.x - points[1]!.x);
+      const distance = fingerSeparation(points[0]!, points[1]!);
       applyView(gestureHistory(gesture.current.window, gesture.current.startCenter, center, gesture.current.distance, distance, plotWidth));
     }
   };
@@ -90,8 +90,28 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
         applyView(panHistory(old, (event.shiftKey ? event.deltaY : event.deltaX) / plotWidth));
       }
     };
+    // iOS Safari can interpret two fingers with vertical movement as page zoom,
+    // even while our pointer handlers are calculating the chart's pinch.
+    // Block native zoom only for gestures originating inside this chart.
+    // Single-finger vertical scrolling remains native and is never cancelled.
+    const stopNativePinch = (event: Event) => {
+      if (event.cancelable) event.preventDefault();
+    };
+    const stopMultiTouch = (event: TouchEvent) => {
+      if (event.touches.length >= 2 && event.cancelable) event.preventDefault();
+    };
     svg.addEventListener('wheel', handleWheel, { passive: false });
-    return () => svg.removeEventListener('wheel', handleWheel);
+    svg.addEventListener('touchstart', stopMultiTouch, { passive: false });
+    svg.addEventListener('touchmove', stopMultiTouch, { passive: false });
+    svg.addEventListener('gesturestart', stopNativePinch, { passive: false });
+    svg.addEventListener('gesturechange', stopNativePinch, { passive: false });
+    return () => {
+      svg.removeEventListener('wheel', handleWheel);
+      svg.removeEventListener('touchstart', stopMultiTouch);
+      svg.removeEventListener('touchmove', stopMultiTouch);
+      svg.removeEventListener('gesturestart', stopNativePinch);
+      svg.removeEventListener('gesturechange', stopNativePinch);
+    };
   }, [onViewChange, printMode, width, plotWidth, left]);
   const format = (value: number) => settings.metric === 'frequency' ? `${Math.round(value)}%` : `${settings.metric === 'mood' && value > 0 ? '+' : ''}${Math.round(value * 10) / 10}`;
   // Earlier-period overlays are visual context, never shortcuts to pages outside this day.
@@ -176,7 +196,8 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
         const text = `${date} · ${count} ${count === 1 ? 'entry' : 'entries'}`;
         const labelX = Math.max(left + 59, Math.min(right - 59, center));
         return <g key={`count-${day}`}>
-          <path className={styles.dayCountStem} d={`M${center},${top} V55 H${labelX}`} />
+          <path className={styles.dayCountStem} data-testid="history-day-guide" data-day={day} data-anchor-x={center} d={`M${labelX},52 V${top - 6} H${center} V${bottom}`} />
+          <circle className={styles.dayCountAnchor} cx={center} cy={bottom} r={2.5} />
           <rect className={styles.dayCountBadge} x={labelX - 59} y={22} width={118} height={30} rx={5} />
           <text className={styles.dayCountText} x={labelX} y={41} textAnchor="middle">{text}</text>
           {!printMode ? <rect className={styles.pointTarget} x={labelX - 59} y={16} width={118} height={42} role="button" tabIndex={0} aria-label={`${count} journal entries on ${day}. View day`} onClick={() => onSelectDay(day)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectDay(day); } }} /> : null}

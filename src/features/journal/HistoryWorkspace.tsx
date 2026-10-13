@@ -89,6 +89,7 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
   };
   const entryButton = (entry: JournalRecord, showNote = false) => <button type="button" className={styles.entryButton} key={entry.id} onClick={() => onOpenEntry(entry.id)}>
     <time dateTime={journalDate(entry)}>{formatJournalDate(journalDate(entry))}</time>
+    {entry.experiencedAtISO && dateKey(entry.experiencedAtISO) !== dateKey(entry.createdAtISO ?? entry.dateISO) ? <small>Plotted by experienced date · originally saved {formatJournalDate(entry.createdAtISO ?? entry.dateISO)}</small> : null}
     <strong>{entry.feelings.map((item) => `${item.feeling}${item.ratingSource === 'unknown' ? ' · not rated' : ` ${item.intensity}/10`}`).join(' · ') || 'Reflection'}</strong>
     <small>{entry.mood?.kind === 'rated' ? `Valence ${entry.mood.value > 0 ? '+' : ''}${entry.mood.value}${entry.mood.arousal === undefined ? ' · arousal not recorded' : ` · Arousal ${entry.mood.arousal > 0 ? '+' : ''}${entry.mood.arousal}`}` : entry.mood?.kind === 'mixed' ? 'Mixed feelings' : entry.mood?.kind === 'unsure' ? 'Emotional coordinates: not sure' : 'Emotional coordinates not recorded'}{entry.tags.length ? ` · ${entry.tags.map((tag) => `#${tag}`).join(' ')}` : ''}</small>
     {showNote && entry.notes ? <span className={styles.notePreview}>{entry.notes}</span> : null}

@@ -21,6 +21,11 @@ export function zoomHistory(range: DateWindow, factor: number, anchor = .5): Dat
   const start = range.start + oldSpan * position - span * position;
   return visibleWindow(start, start + span);
 }
+/** A pinch can be diagonal or vertical, not just horizontal. */
+export function fingerSeparation(a: { x: number; y: number }, b: { x: number; y: number }): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
 /** Pinch and pan in one calculation so the instant under the fingers stays in place. */
 export function gestureHistory(range: DateWindow, startCenter: number, currentCenter: number, startDistance: number, currentDistance: number, plotWidth: number): DateWindow {
   if (!(plotWidth > 0)) return range;

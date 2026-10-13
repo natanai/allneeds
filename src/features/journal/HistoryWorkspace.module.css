@@ -28,7 +28,7 @@
 .timelineNav strong { flex: 1; text-align: center; font-size: var(--text-sm); }
 .timelineNav button { font-size: var(--text-xs); }
 .timelineNav button[aria-label] { min-width: 44px; font-size: var(--text-base); }
-.chart { min-width: 0; width: 100%; }
+.chart { min-width: 0; width: 100%; touch-action: pan-y; }
 .chart svg { display: block; max-width: 100%; overflow: visible; }
 .chart .interactivePlot { touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
 .chart .interactivePlot:active { cursor: grabbing; }
@@ -44,7 +44,8 @@
 .series[data-previous='true'] { opacity: .45; }
 .seriesLine { stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
 .rangeLine { stroke-width: 1.5; stroke-opacity: .5; }
-.dayCountStem { fill: none; stroke: var(--outline); stroke-opacity: .55; stroke-width: 1; pointer-events: none; }
+.dayCountStem { fill: none; stroke: var(--outline); stroke-opacity: .65; stroke-width: 1.2; stroke-dasharray: 3 4; pointer-events: none; }
+.dayCountAnchor { fill: var(--text); pointer-events: none; }
 .dayCountBadge { fill: var(--surface-raised); stroke: var(--outline); stroke-width: 1.25; pointer-events: none; }
 .dayCountText { fill: var(--text); font: 700 11px var(--font-body); pointer-events: none; }
 .pointTarget { fill: transparent; stroke: none; cursor: pointer; }
