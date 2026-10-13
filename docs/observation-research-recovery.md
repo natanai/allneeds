@@ -31,6 +31,12 @@ This evidence audit especially flags **M03, M12, M14 and M15** as not sufficient
 
 **Read the [all-48 editorial verdicts, direct article URLs, study-design rationale, and proposed guide placement](./observation-all-48-editorial-verdicts-2026-10-13.md).** The editor recommends **26 RETAIN, 13 HOLD, and 9 EXCLUDE from the public guide**. These are research recommendations, NOT user approval decisions. All 48 user approvals in this queue remain PENDING, and all final site-facing claim packages still require user approval. Retained sources may still need additional full-text statistical inspection and exact claim matching before publication. Four other sources in the current preview but outside this 48-source queue are identified separately in the verdict document. No deployment authorized.
 
+## Round 5: appraisal of all ten formerly held sources (2026-10-13)
+
+The [ten-source reappraisal](./observation-held-sources-critical-appraisal-round5-2026-10-13.md) has been completed, including original N13 Korean full text and original M04 matched-control trial. The [complete academic adjudication](./observation-candidate-source-academic-adjudication-2026-10-13.md) now reflects **32 narrow RETAIN, four HOLD (N03/N08/N09/N12), and 12 EXCLUDE from the visible Observation guide**. This supersedes the earlier 29/10/9 editorial recommendation totals, but **does not approve any source for public publication**. User decisions on all 48 remain PENDING.
+
+The four remaining HOLDs include two accessible publisher abstracts and two additional studies with inaccessible full statistical tables; users need not pay for materials. Sources N13 and M04 do not need user PDF copies. All claims require individual approval and a complete editorial package before site changes.
+
 ## Why this is being restored
 
 The earlier `natanai/nvc-app` Observation guide combined an academic-style abstract, **eight desktop sections and 18 linked references** with an additional short “Why try this?” explanation that linked references **[19] and [20]**. The React rebuild (2026-08-24) switched all viewports to the shorter mobile guidance and removed the four linked introductory research sources. The 2026-10-11 consolidation eliminated the unused desktop guide data and reduced public references to five.
