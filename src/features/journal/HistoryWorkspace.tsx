@@ -4,7 +4,7 @@ import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { needsBySlug } from '../../data/catalog';
 import { formatJournalDate } from './JournalBook';
 import { HistoryChart } from './HistoryChart';
-import { addDays, buildHistorySeries, dateKey, defaultHistorySettings, filterHistory, historyCsv, historySummary, historyWindow, previousWindow, reportedValue, shiftWindow, zoomWindow, type HistorySettings } from './historyModel';
+import { addDays, buildHistorySeries, dateKey, defaultHistorySettings, filterHistory, historyCsv, historyGrouping, historySummary, historyWindow, previousWindow, reportedValue, shiftWindow, zoomWindow, type HistorySettings } from './historyModel';
 import { readHistoryAnnotations, readHistorySettings, writeHistoryAnnotations, writeHistorySettings } from './historyRepository';
 import { journalDate, type JournalRecord } from './journalRepository';
 import styles from './HistoryWorkspace.module.css';
@@ -18,12 +18,25 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
   const [annotationLabel, setAnnotationLabel] = useState('');
   const [annotationError, setAnnotationError] = useState('');
   const [selection, setSelection] = useState<{ ids: string[]; label: string } | null>(null);
+  const [returnView, setReturnView] = useState<Pick<HistorySettings, 'period' | 'from' | 'to'> | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [includeText, setIncludeText] = useState(false);
   const [feedback, setFeedback] = useState('');
   useEffect(() => { writeHistorySettings(settings); setSelection(null); }, [settings]);
   const patch = (value: Partial<HistorySettings>) => setSettings((current) => ({ ...current, ...value }));
+  const changePeriod = (value: Partial<HistorySettings>) => { setReturnView(null); patch(value); };
   const range = useMemo(() => historyWindow(settings, entries), [entries, settings]);
+  const isSingleDay = range.days === 1;
+  const drillIntoDay = (day: string) => {
+    if (isSingleDay) return;
+    setReturnView({ period: settings.period, from: settings.from, to: settings.to });
+    patch({ period: 'custom', from: day, to: day });
+  };
+  const backToPeriod = () => {
+    if (!returnView) return;
+    patch(returnView);
+    setReturnView(null);
+  };
   const previousRange = useMemo(() => previousWindow(range), [range]);
   const matching = useMemo(() => filterHistory(entries, settings, range), [entries, range, settings]);
   const previous = useMemo(() => filterHistory(entries, settings, previousRange), [entries, previousRange, settings]);
@@ -46,7 +59,7 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
     return (settings.sort === 'oldest' ? 1 : -1) * journalDate(a).localeCompare(journalDate(b));
   });
   const focusCount = [settings.query, settings.feelingFilter, settings.need, settings.tag, settings.minIntensity !== 1 || settings.maxIntensity !== 10].filter(Boolean).length;
-  const currentDates = `${new Date(range.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} – ${new Date(addDays(range.end, -1)).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  const currentDates = isSingleDay ? new Date(range.start).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : `${new Date(range.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} – ${new Date(addDays(range.end, -1)).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
   const priorDates = `${dateKey(previousRange.start)} – ${dateKey(addDays(previousRange.end, -1))}`;
   const selectPoints = (ids: string[], label: string, aggregate: boolean) => {
     if (!aggregate && ids.length === 1) onOpenEntry(ids[0]!); else setSelection({ ids, label });
@@ -74,26 +87,29 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
 
   return <section className={styles.workspace} aria-label="Emotional history">
     <div className={styles.graphCard} data-history-print>
-      <HistoryChart series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={selectPoints} />
+      {isSingleDay && returnView ? <div className={styles.dayNavigation}><button type="button" aria-label="Back to all days" onClick={backToPeriod}>← All days</button><span>{currentDates}</span></div> : null}
+      <HistoryChart series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={selectPoints} onSelectDay={drillIntoDay} />
+      {isSingleDay ? <section className={styles.dayEntries} aria-label="Entries on selected day"><header><strong>{matching.length} {matching.length === 1 ? 'entry' : 'entries'} · {currentDates}</strong><span>Open any entry to read its journal page</span></header><div className={styles.entryList}>{visibleEntries.map((entry) => entryButton(entry, true))}</div>{!matching.length ? <p className={styles.subtle}>No entries match these filters on this day.</p> : null}</section> : null}
       {selection ? <section className={styles.selection} aria-label="Selected graph entries"><header><strong>{selection.label}</strong><button type="button" onClick={() => setSelection(null)}>Dismiss</button></header><p>{selection.ids.length} {selection.ids.length === 1 ? 'page' : 'pages'} at this part of the graph.</p><div className={styles.selectionList}>{entries.filter((entry) => selection.ids.includes(entry.id)).map((entry) => entryButton(entry))}</div></section> : null}
       <div className={styles.graphControls} aria-label="Graph controls">
         <div className={styles.controlHeading}><strong>Change the view</strong><button type="button" onClick={() => { setIncludeText(false); setExportOpen(true); }}>Print / export</button></div>
         <form className={styles.controls} onSubmit={(event) => event.preventDefault()}>
-          <label>Period<select aria-label="Period" value={settings.period} onChange={(event) => patch({ period: event.target.value as HistorySettings['period'] })}><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="all">All time</option><option value="custom">Custom dates</option></select></label>
+          <label>Period<select aria-label="Period" value={settings.period} onChange={(event) => changePeriod({ period: event.target.value as HistorySettings['period'] })}><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="all">All time</option><option value="custom">Custom dates</option></select></label>
           <label>Show<select aria-label="History measure" value={settings.metric} onChange={(event) => {
             const metric = event.target.value as HistorySettings['metric'];
-            patch({ metric, feelings: settings.feelings.length ? settings.feelings : options.feelings.slice(0, 1), ...(metric === 'frequency' && settings.grouping === 'entry' ? { grouping: 'day' } : {}) });
+            patch({ metric, feelings: settings.feelings.length ? settings.feelings : options.feelings.slice(0, 1) });
           }}><option value="mood">Pleasantness &amp; arousal</option><option value="intensity">Feeling intensity</option><option value="frequency">Feeling frequency</option></select></label>
-          <label>Detail<select aria-label="Graph detail" value={settings.grouping} onChange={(event) => patch({ grouping: event.target.value as HistorySettings['grouping'] })}>{settings.metric !== 'frequency' ? <option value="entry">Each entry</option> : null}<option value="day">Daily {settings.metric === 'frequency' ? 'share' : 'average'}</option><option value="week">Weekly {settings.metric === 'frequency' ? 'share' : 'average'}</option></select></label>
+          
         </form>
-        {settings.period === 'custom' ? <div className={styles.dateRange}><label>From<input aria-label="Start date" type="date" value={settings.from} max={settings.to || undefined} onChange={(event) => patch({ from: event.target.value })} /></label><label>Through<input aria-label="End date" type="date" min={settings.from || undefined} value={settings.to} onChange={(event) => patch({ to: event.target.value })} /></label></div> : null}
+        <p className={styles.detailHint}>{isSingleDay ? settings.metric === 'frequency' ? 'One day · frequency across logged entries' : 'One day · individual recorded moments' : settings.metric === 'frequency' ? 'Daily share · select a day to see its entries' : 'Daily averages · select a day to see each recorded moment'}</p>
+        {settings.period === 'custom' ? <div className={styles.dateRange}><label>From<input aria-label="Start date" type="date" value={settings.from} max={settings.to || undefined} onChange={(event) => changePeriod({ from: event.target.value })} /></label><label>Through<input aria-label="End date" type="date" min={settings.from || undefined} value={settings.to} onChange={(event) => changePeriod({ to: event.target.value })} /></label></div> : null}
         {settings.metric !== 'mood' ? <div className={styles.seriesControls} aria-label="Feelings on the graph">
           {[0, 1, 2].map((index) => <label key={index}>{index === 0 ? 'Feeling' : `Compare ${index}`}<select aria-label={index === 0 ? 'Graph feeling' : `Compare feeling ${index}`} value={settings.feelings[index] ?? ''} onChange={(event) => {
             const next = [...settings.feelings]; next[index] = event.target.value;
             patch({ feelings: [...new Set(next.filter(Boolean))] });
           }}><option value="">{index === 0 ? 'Choose a feeling' : 'None'}</option>{options.feelings.filter((feeling) => feeling === settings.feelings[index] || !settings.feelings.includes(feeling)).map((feeling) => <option key={feeling}>{feeling}</option>)}</select></label>)}
         </div> : null}
-        <div className={styles.timelineNav}><button type="button" aria-label="Previous period" onClick={() => patch(shiftWindow(range, -1))}>←</button><strong>{currentDates}</strong><button type="button" aria-label="Next period" onClick={() => patch(shiftWindow(range, 1))}>→</button><button type="button" onClick={() => patch(zoomWindow(range, .5))} disabled={range.days <= 1}>Zoom in</button><button type="button" onClick={() => patch(zoomWindow(range, 2))} disabled={range.days > 36500}>Zoom out</button></div>
+        <div className={styles.timelineNav}><button type="button" aria-label="Previous period" onClick={() => patch(shiftWindow(range, -1))}>←</button><strong>{currentDates}</strong><button type="button" aria-label="Next period" onClick={() => patch(shiftWindow(range, 1))}>→</button><button type="button" onClick={() => changePeriod(zoomWindow(range, .5))} disabled={range.days <= 1}>Zoom in</button><button type="button" onClick={() => changePeriod(zoomWindow(range, 2))} disabled={range.days > 36500}>Zoom out</button></div>
         {settings.metric === 'mood' && !entries.some((entry) => entry.mood?.kind === 'rated') ? <p className={styles.subtle}>Place a point in the Journal to begin the pleasantness and arousal lines.</p> : null}
       </div>
       <div className={styles.reviewSummary} aria-label="Period summary">
@@ -112,7 +128,7 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
           <label>Maximum intensity<select aria-label="Maximum intensity" value={settings.maxIntensity} onChange={(event) => patch({ maxIntensity: Number(event.target.value), minIntensity: Math.min(settings.minIntensity, Number(event.target.value)) })}>{Array.from({ length: 10 }, (_, i) => <option key={i + 1}>{i + 1}</option>)}</select></label>
           <p className={styles.subtle}>Intensity filters keep entries with a reported rating in this range for a plotted feeling, or any feeling in the mood view.</p>
           <label className={styles.check}><input type="checkbox" checked={settings.comparison} onChange={(event) => patch({ comparison: event.target.checked })} />Compare with the previous equal-length period</label>
-          <button type="button" onClick={() => { setSettings(defaultHistorySettings(entries)); setFeedback('View reset to the default 30 days.'); }}>Reset view</button>
+          <button type="button" onClick={() => { setReturnView(null); setSettings(defaultHistorySettings(entries)); setFeedback('View reset to the default 30 days.'); }}>Reset view</button>
         </form>
       </DisclosureRow>
       {focusCount ? <div className={styles.activeFilters} aria-label="Active history filters">{settings.query ? <span>Search: {settings.query}</span> : null}{settings.feelingFilter ? <span>Feeling: {settings.feelingFilter}</span> : null}{settings.need ? <span>Need: {needsBySlug.get(settings.need)?.title ?? settings.need}</span> : null}{settings.tag ? <span>Tag: #{settings.tag}</span> : null}{settings.minIntensity !== 1 || settings.maxIntensity !== 10 ? <span>Intensity: {settings.minIntensity}–{settings.maxIntensity}</span> : null}<button type="button" onClick={() => patch({ query: '', feelingFilter: '', need: '', tag: '', minIntensity: 1, maxIntensity: 10 })}>Clear filters</button></div> : null}
@@ -121,11 +137,11 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
         {settings.metric === 'frequency' ? <tr><th scope="row">Mentions / entries</th><td>{summary.mentioned} / {summary.entries}</td><td>{priorSummary.mentioned} / {priorSummary.entries}</td></tr> : settings.metric === 'mood' ? <><tr><th scope="row">Median pleasantness</th><td>{number(summary.median)} · {summary.rated} ratings</td><td>{number(priorSummary.median)} · {priorSummary.rated} ratings</td></tr><tr><th scope="row">Median arousal</th><td>{number(summary.arousalMedian)} · {summary.arousalRated} ratings</td><td>{number(priorSummary.arousalMedian)} · {priorSummary.arousalRated} ratings</td></tr></> : <><tr><th scope="row">Median · first series</th><td>{number(summary.median)} · {summary.rated} ratings</td><td>{number(priorSummary.median)} · {priorSummary.rated} ratings</td></tr><tr><th scope="row">Reported range</th><td>{summary.low === null ? '—' : `${number(summary.low)} to ${number(summary.high)}`}</td><td>{priorSummary.low === null ? '—' : `${number(priorSummary.low)} to ${number(priorSummary.high)}`}</td></tr></>}
       </tbody></table></div></section> : null}
     </div>
-    <DisclosureRow variant="card" title="Journal entries" description={`${matching.length} pages in this view · open a page in the Journal`} defaultOpen={!entries.length}>
+    {!isSingleDay ? <DisclosureRow variant="card" title="Journal entries" description={`${matching.length} pages in this view · open a page in the Journal`} defaultOpen={!entries.length}>
       <label className={styles.sort}>Sort<select aria-label="Sort" value={settings.sort} onChange={(event) => patch({ sort: event.target.value as HistorySettings['sort'] })}><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="highest">Highest plotted rating</option><option value="lowest">Lowest plotted rating</option></select></label>
       <div className={styles.entryList}>{visibleEntries.map((entry) => entryButton(entry, true))}</div>
       {!visibleEntries.length ? <p className={styles.subtle}>{entries.length ? 'No matching entries.' : 'No entries yet.'}</p> : null}
-    </DisclosureRow>
+    </DisclosureRow> : null}
     <DisclosureRow variant="card" title="Context notes" description="Mark dates you want to remember">
       <label className={styles.check}><input type="checkbox" checked={settings.showAnnotations} onChange={(event) => patch({ showAnnotations: event.target.checked })} />Show context markers on the graph</label>
       <form className={styles.annotationForm} onSubmit={(event) => { event.preventDefault(); addAnnotation(); }}><label>Date<input type="date" required value={annotationDate} onChange={(event) => setAnnotationDate(event.target.value)} /></label><label>Note<input aria-label="Context note" required maxLength={160} placeholder="A change, event, or session" value={annotationLabel} onChange={(event) => setAnnotationLabel(event.target.value)} /></label><button type="submit">Add note</button></form>
@@ -134,13 +150,13 @@ export function HistoryWorkspace({ entries, onOpenEntry }: Props) {
       <ul className={styles.annotations}>{[...annotations].sort((a, b) => a.date.localeCompare(b.date)).map((annotation) => <li key={annotation.id}><span><time>{annotation.date}</time> · {annotation.label}</span><button type="button" aria-label={`Remove context note: ${annotation.label}`} onClick={() => { try { setAnnotations(writeHistoryAnnotations(annotations.filter((item) => item.id !== annotation.id))); } catch { setAnnotationError('The note could not be removed.'); } }}>Remove</button></li>)}</ul>
     </DisclosureRow>
     <DisclosureRow variant="card" title="How to read this history" description="Scales, gaps, and recorded moments">
-      <div className={styles.methods}><p>Valence describes how unpleasant (−5) or pleasant (+5) a moment felt. Arousal describes activation or energy, from very low (−5) to very high (+5). They are separate from the strength of a named feeling. Mixed feelings and Not sure do not become neutral scores.</p><p>The two lines share the same −5 to +5 scale. Older pages may have valence without arousal; those pages remain valid and contribute no arousal point.</p><p>Feeling intensity uses the 1–10 ratings you entered for each feeling. A feeling that was not selected has no intensity measurement. Older labels without a recorded intensity stay visible as unscored pages.</p><p>Feeling frequency counts mentions in the entries that match your filters. Daily and weekly percentages use each bucket’s logged entries as their denominator. No entries means no measurement.</p><p>Each-entry view keeps individual moments. Daily and weekly views use the mean of available ratings, with a whisker showing the lowest and highest. Weeks begin on Monday in your device’s time zone. Lines connect recorded points in chronological order; they do not estimate ratings for the dates between them.</p><p>These are recorded moments, not a continuous measure of your life. More or fewer entries, missing dates, and changing what you choose to write can affect a comparison.</p></div>
+      <div className={styles.methods}><p>Valence describes how unpleasant (−5) or pleasant (+5) a moment felt. Arousal describes activation or energy, from very low (−5) to very high (+5). They are separate from the strength of a named feeling. Mixed feelings and Not sure do not become neutral scores.</p><p>The two lines share the same −5 to +5 scale. Older pages may have valence without arousal; those pages remain valid and contribute no arousal point.</p><p>Feeling intensity uses the 1–10 ratings you entered for each feeling. A feeling that was not selected has no intensity measurement. Older labels without a recorded intensity stay visible as unscored pages.</p><p>Feeling frequency counts mentions in the entries that match your filters. Daily percentages use each day’s logged entries as their denominator. No entries means no measurement.</p><p>Periods longer than one day show daily means of available ratings with a whisker for the lowest and highest; the day badge counts all entries, including unrated ones. Select a day to see individual recorded moments and open each journal page. A one-day view plots those moments separately. Lines connect recorded points in chronological order; they do not estimate ratings between them.</p><p>These are recorded moments, not a continuous measure of your life. More or fewer entries, missing dates, and changing what you choose to write can affect a comparison.</p></div>
     </DisclosureRow>
     {feedback ? <p role="status" className={styles.subtle}>{feedback}</p> : null}
     <OverlayShell open={exportOpen} variant="sheet" title="Print or export history" onClose={() => setExportOpen(false)}>
-      <div className={styles.exportBody}><p>{currentDates} · {matching.length} matching entries. The current measure, detail, and filters are included.</p><label className={styles.check}><input type="checkbox" checked={includeText} onChange={(event) => setIncludeText(event.target.checked)} />Include written reflections</label><small>Off by default. Choose what you want to bring to a session or keep for yourself.</small><div className={styles.exportActions}><button type="button" onClick={exportCsv}>Download CSV</button><button type="button" onClick={() => window.print()}>Print graph & recap</button></div><div className={styles.printReport} data-history-print>
-        <h2>allneeds · Emotional history</h2><p>{currentDates}</p><p>{settings.metric === 'mood' ? 'Pleasantness & arousal' : settings.metric === 'intensity' ? 'Feeling intensity' : 'Feeling frequency'} · {settings.grouping === 'entry' ? 'Each entry' : settings.grouping === 'day' ? 'Daily' : 'Weekly'}{settings.metric !== 'mood' ? ` · ${settings.feelings.join(', ')}` : ''} · {matching.length} entries · {summary.loggedDays}/{range.days} days with entries</p>
-        <HistoryChart printMode series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={() => {}} />
+      <div className={styles.exportBody}><p>{currentDates} · {matching.length} matching entries. The current measure, date range, and filters are included.</p><label className={styles.check}><input type="checkbox" checked={includeText} onChange={(event) => setIncludeText(event.target.checked)} />Include written reflections</label><small>Off by default. Choose what you want to bring to a session or keep for yourself.</small><div className={styles.exportActions}><button type="button" onClick={exportCsv}>Download CSV</button><button type="button" onClick={() => window.print()}>Print graph & recap</button></div><div className={styles.printReport} data-history-print>
+        <h2>allneeds · Emotional history</h2><p>{currentDates}</p><p>{settings.metric === 'mood' ? 'Pleasantness & arousal' : settings.metric === 'intensity' ? 'Feeling intensity' : 'Feeling frequency'} · {historyGrouping(settings, range) === 'entry' ? 'Each entry' : 'Daily'}{settings.metric !== 'mood' ? ` · ${settings.feelings.join(', ')}` : ''} · {matching.length} entries · {summary.loggedDays}/{range.days} days with entries</p>
+        <HistoryChart printMode series={series} previousSeries={previousSeries} entries={matching} settings={settings} range={range} annotations={annotations} onSelect={() => {}} onSelectDay={() => {}} />
         <p>{settings.metric === 'frequency' ? `${summary.mentioned}/${summary.entries} entries mention ${settings.feelings[0] ?? 'the selected feeling'}.` : settings.metric === 'mood' ? `Median pleasantness ${number(summary.median)} · ${summary.rated} ratings; median arousal ${number(summary.arousalMedian)} · ${summary.arousalRated} ratings.` : `Median ${number(summary.median)} · ${summary.rated} ratings · range ${number(summary.low)} to ${number(summary.high)}.`}</p>
         <p>Filters: {settings.query || 'no text filter'}; feeling {settings.feelingFilter || 'any'}; need {settings.need || 'any'}; tag {settings.tag || 'any'}; intensity {settings.minIntensity}–{settings.maxIntensity}.</p>
         {settings.comparison ? <p>Previous {priorDates}: {priorSummary.entries} entries; {priorSummary.loggedDays}/{range.days} days; {settings.metric === 'frequency' ? `${priorSummary.mentioned}/${priorSummary.entries} mentions.` : settings.metric === 'mood' ? `median pleasantness ${number(priorSummary.median)}; median arousal ${number(priorSummary.arousalMedian)}.` : `median ${number(priorSummary.median)}, ${priorSummary.rated} ratings.`}</p> : null}
