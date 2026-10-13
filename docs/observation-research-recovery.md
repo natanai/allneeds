@@ -7,6 +7,10 @@ Target: `site-test` **only**. This file is a review ledger, not approval to depl
 
 A separate **31-source approval queue** is maintained at [Observation source approval register](./observation-source-approval-queue-2026-10-12.md) and its [Round 2 critical-appraisal addendum](./observation-source-critical-appraisal-2026-10-12.md). Entries N01–N12 directly investigate NVC; M01–M17 investigate relevant adjacent mechanisms, observational methods and needs theory; X01–X02 are exploratory preprints held for possible design research. All **31 remain pending user approval**. Their DOI/arXiv URLs contain no tracking or ChatGPT referral parameters. This register extends, rather than replaces, the 20-link historical inventory below. The public Observation source catalog is **not** updated by this research-only record.
 
+## Round 3 expansion — 2026-10-12
+
+The [Round 3 appraisal](./observation-source-critical-appraisal-round3-2026-10-12.md) audits N07–N12 and M02, and adds N13 (2016 Korean integrative review), N14 (2014 nursing-student single-group study), and N15 (2026 randomized active-controlled medical education trial). The [master approval register](./observation-source-approval-queue-2026-10-12.md) now contains **34 candidate sources**, **none approved for public use**. The additional papers correct language/period coverage and identify evidence not previously considered in the older NVC guide. They do not validate the exact AllNeeds Observation sequence. Three paywalled full texts are flagged for optional authorized free user-provided copies (N08, N09, N12). This is a documentation-only record.
+
 ## Why this is being restored
 
 The earlier `natanai/nvc-app` Observation guide combined an academic-style abstract, **eight desktop sections and 18 linked references** with an additional short “Why try this?” explanation that linked references **[19] and [20]**. The React rebuild (2026-08-24) switched all viewports to the shorter mobile guidance and removed the four linked introductory research sources. The 2026-10-11 consolidation eliminated the unused desktop guide data and reduced public references to five.
