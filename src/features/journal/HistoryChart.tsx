@@ -98,7 +98,11 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
   const all = currentSeries.flatMap((item, index) => item.points.map((point) => ({ point, index, name: item.name })));
   const dailyCounts = new Map<string, number>();
   entries.forEach((entry) => { const day = dateKey(journalDate(entry)); dailyCounts.set(day, (dailyCounts.get(day) ?? 0) + 1); });
-  const countCandidates = [...dailyCounts].filter(([, count]) => count > 1).map(([day, count]) => ({ day, count, center: x(new Date(`${day}T12:00:00`).getTime()) })).sort((a, b) => b.count - a.count || a.day.localeCompare(b.day));
+  const countCandidates = [...dailyCounts].filter(([, count]) => count > 1).map(([day, count]) => {
+    const midnight = new Date(`${day}T00:00:00`).getTime();
+    const from = Math.max(midnight, range.start), to = Math.min(addDays(midnight, 1), range.end);
+    return { day, count, center: x((from + to) / 2) };
+  }).sort((a, b) => b.count - a.count || a.day.localeCompare(b.day));
   const shownCountCenters: number[] = [];
   const countBadges = countCandidates.filter(({ center }) => {
     if (center < left || center > right || shownCountCenters.some((placed) => Math.abs(center - placed) < 122)) return false;
@@ -121,7 +125,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
     // Exact timestamps and nearby marks can coincide. Offer all nearby pages rather than conceal one.
     const neighbors = all.filter((item) => Math.abs(x(item.point.time) - x(point.time)) <= 22 && Math.abs(y(item.point.value) - y(point.value)) <= 22);
     const ids = [...new Set(neighbors.flatMap((item) => item.point.entryIds))];
-    onSelect(ids, `${name} · ${point.label} · ${format(point.value)}${range.days > 1 && settings.metric !== 'frequency' ? ` mean (${point.count}/${point.total} rated; range ${format(point.low)} to ${format(point.high)})` : settings.metric === 'frequency' ? ` (${point.count}/${point.total} entries mention it)` : ''}`, range.days > 1 || settings.metric === 'frequency' || ids.length > 1);
+    onSelect(ids, `${name} · ${point.label} · ${format(point.value)}${settings.metric === 'frequency' ? ` (${point.count}/${point.total} entries mention it)` : ''}`, settings.metric === 'frequency' || ids.length > 1);
   };
   const ticks = Array.from({ length: 5 }, (_, i) => min + (max - min) * i / 4);
   const tickCount = width < 500 ? 3 : 5;
@@ -156,7 +160,8 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
         <line className={styles.gridLine} x1={left} x2={right} y1={height - 29} y2={height - 29} />
         <text className={styles.axisText} x={left} y={height - 42}>Unscored pages</text>
         {[...missingGroups].map(([day, records]) => {
-          const cx = x(detail ? Date.parse(journalDate(records[0]!)) : new Date(`${day}T12:00:00`).getTime()), cy = height - 29;
+          const anchor = detail ? Date.parse(journalDate(records[0]!)) : new Date(`${day}T12:00:00`).getTime();
+          const cx = x(Math.max(range.start, Math.min(range.end - 1, anchor))), cy = height - 29;
           return <g key={day}><path className={styles.missingMark} d={`M${cx - 4},${cy - 4} l8,8 M${cx - 4},${cy + 4} l8,-8`} /><rect className={styles.pointTarget} x={cx - 22} y={cy - 22} width={44} height={44} role="button" tabIndex={0} aria-label={`${records.length} unscored ${records.length === 1 ? 'page' : 'pages'} on ${day}. ${!detail ? 'View day' : 'Open journal'}`} onClick={() => !detail ? onSelectDay(day) : onSelect(records.map((entry) => entry.id), `Unscored pages · ${day}`, records.length > 1)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); if (!detail) onSelectDay(day); else onSelect(records.map((entry) => entry.id), `Unscored pages · ${day}`, records.length > 1); } }} /></g>;
         })}
       </> : null}
