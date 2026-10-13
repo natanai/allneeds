@@ -32,7 +32,12 @@ export function ValenceArousalField({ mood, onChange }: Props) {
   const pointStyle: CSSProperties = {
     left: `${left}%`,
     top: `${top}%`,
-    background: pointColor(valence, arousal),
+    background: hasPoint ? pointColor(valence, arousal) : 'var(--surface-raised)',
+  };
+  // The whole map responds to the chosen coordinates, rather than leaving
+  // four static swatches beneath a moving point.
+  const planeStyle: CSSProperties = {
+    background: hasPoint ? pointColor(valence, arousal) : 'var(--surface-raised)',
   };
 
   const setPoint = (nextValence: number, nextArousal: number) => {
@@ -74,6 +79,7 @@ export function ValenceArousalField({ mood, onChange }: Props) {
     <div
       ref={planeRef}
       className={styles.plane}
+      style={planeStyle}
       data-testid="valence-arousal-field"
       aria-label="Valence and arousal emotional map"
       onPointerDown={(event) => {
@@ -94,10 +100,6 @@ export function ValenceArousalField({ mood, onChange }: Props) {
       }}
       onPointerCancel={() => { dragging.current = false; setMoving(false); }}
     >
-      <span className={`${styles.quadrant} ${styles.lowUnpleasant}`} aria-hidden="true" />
-      <span className={`${styles.quadrant} ${styles.lowPleasant}`} aria-hidden="true" />
-      <span className={`${styles.quadrant} ${styles.highUnpleasant}`} aria-hidden="true" />
-      <span className={`${styles.quadrant} ${styles.highPleasant}`} aria-hidden="true" />
       <span className={styles.horizontalAxis} aria-hidden="true" />
       <span className={styles.verticalAxis} aria-hidden="true" />
       <span className={`${styles.axisLabel} ${styles.highLabel}`} aria-hidden="true">High activation</span>
