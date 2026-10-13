@@ -14,9 +14,15 @@ The ten priority papers N01–N06 and M05/M08/M13/M14 have a [deeper critical ap
 
 ## Round 3 continued critical appraisal — 2026-10-12
 
-The six remaining direct-intervention studies N07–N12, original social-cognition research M02 and three **new** direct-NVC sources N13–N15 have [source-by-source Round 3 appraisals](./observation-source-critical-appraisal-round3-2026-10-12.md). This brings the queue to **34 candidate sources: 15 direct NVC, 17 related scientific, 2 exploratory technology preprints**. The source approval for every entry remains PENDING. No published website content has been changed.
+The six remaining direct-intervention studies N07–N12, original social-cognition research M02 and three **new** direct-NVC sources N13–N15 have [source-by-source Round 3 appraisals](./observation-source-critical-appraisal-round3-2026-10-12.md). This brings the queue to **48 candidate sources: 15 direct NVC, 31 related/component scientific sources, 2 exploratory technology preprints**. The source approval for every entry remains PENDING. No published website content has been changed.
 
 Especially important: N11's full report describes a 62-person pilot with six 2-hour sessions, self-report outcomes and no long-term follow-up; N12's 'young women' title describes participants ages ~11–18, not adults; N13 recovers a 2016 Korean-database review of 12 intervention studies; and N15 is a new 2026 single-center active-controlled medical training trial with impressive immediate effects but unusually large standardized effect size, unregistered primary outcome, and more deliberate practice in the NVC arm than control.
+
+## Round 4 — Component-level evidence, 2026-10-12
+
+A [new 14-source component-level ledger](./observation-source-critical-appraisal-round4-2026-10-12.md) evaluates whether the Observation, Feeling, Need, and Strategy components have been independently tested. **There is still no identified randomized NVC four-component dismantling experiment in our targeted searches** (not proof that none exists). Especially important contrary evidence: the effect of emotion naming on later reappraisal can be unfavorable in controlled image tasks; two emotional-disclosure meta-analyses differed in outcome patterns; and some concrete framing increases attribution rather than eliminating it.
+
+**User's clarified citation-link rule:** use the original **publisher article webpage** URL, not `doi.org` redirects, for all new source links and future public citations. The DOI itself is bibliographic metadata, not the raw source URL. For preprints use the author's original institutional or preprint host and label the publication status. The older N/M entries still contain original historical DOI links pending a separate verified publisher-link pass; Round 4 entries and the specifically verified N12 Springer article now follow the new rule. Do not invent unverified journal URLs or imply a paywall is a full-text examination.
 
 ## Candidate source index
 
@@ -33,7 +39,7 @@ Especially important: N11's full report describes a 62-person pilot with six 2-h
 | N09 | [Yang & Kim 2021 — NVC training in inpatient alcohol care](https://doi.org/10.1111/ppc.12673) | Supplemental |
 | N10 | [Nosek & Durán 2017 — Community NVC training with Latino adults and youth](https://doi.org/10.1353/cpr.2017.0032) | Supplemental |
 | N11 | [Sung & Kweon 2022 — NVC empathy education nursing pilot](https://doi.org/10.3390/nursrep12040080) | Hold |
-| N12 | [Zandkarimi et al. 2019 — NVC training and stress/anxiety/depression](https://doi.org/10.1007/s10560-018-0584-y) | Hold |
+| N12 | [Zandkarimi et al. 2019 — NVC training and stress/anxiety/depression](https://link.springer.com/article/10.1007/s10560-018-0584-y) | Hold |
 | M01 | [Nock & Kurtz 2005 — Direct behavioral observation in school settings](https://doi.org/10.1016/S1077-7229(05)80058-6) | High |
 | M02 | [Fiedler, Semin & Bolten 1989 — Language and reification of social information](https://doi.org/10.1002/ejsp.2420190403) | High |
 | M03 | [Taylor et al. 2019 — Concrete vs abstract words in explicit memory](https://doi.org/10.3758/s13421-018-0857-x) | High |
@@ -54,6 +60,20 @@ Especially important: N11's full report describes a 62-person pilot with six 2-h
 | N13 | [Yang & Kim 2016 — Integrative review of NVC intervention studies in Korean databases](https://doi.org/10.16952/pns.2016.13.1.36) | High; syntheses / language bias |
 | N14 | [Nosek, Gifford & Kober 2014 — NVC nursing-student empathy education, single-arm mixed methods](https://doi.org/10.5430/jnep.v4n10p1) | Contextual; uncontrolled pre/post |
 | N15 | [Jiang et al. 2026 — NVC randomized active-controlled education trial in emergency medicine](https://doi.org/10.1186/s12909-026-09621-w) | Very high; strong methods scrutiny required |
+| C01 | [Nook et al. 2021 — Emotion naming before reappraisal/acceptance](https://link.springer.com/article/10.1007/s42761-021-00036-y) | High: potentially adverse sequence interactions |
+| C02 | [Ariely et al. 2026 — Affect labeling before reappraisal replication](https://link.springer.com/article/10.1007/s42761-026-00362-z) | High: replicated sequential interference |
+| C03 | [Jang et al. 2026 — Korean systematic affect-labeling review](https://www.accesson.kr/healthpsy/v.31/4/1147/59715) | High: mixed outcomes and language coverage |
+| C04 | [Frattaroli 2006 — Experimental disclosure meta-analysis](https://psycnet.apa.org/doiLanding?doi=10.1037%2F0033-2909.132.6.823) | High: small average benefit; full paper needed |
+| C05 | [Meads & Nouwen 2005 — Disclosure systematic review and meta-analyses](https://www.cambridge.org/core/journals/international-journal-of-technology-assessment-in-health-care/article/abs/does-emotional-disclosure-have-any-effects-a-systematic-review-of-the-literature-with-metaanalyses/BFF4DC16E4F96A94DCD8D4B7ED15F7B6) | High: negative efficacy counterweight |
+| C06 | [Ntoumanis et al. 2021 — SDT health intervention meta-analysis](https://www.tandfonline.com/doi/abs/10.1080/17437199.2020.1718529) | High: needs-support interventions, NOT naming Needs |
+| C07 | [Sheeran et al. 2020 — SDT randomized-trial meta-analysis](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fccp0000501) | High: trial-only quantified outcomes |
+| C08 | [Gollwitzer & Sheeran 2006 — If-then planning meta-analysis](https://www.sciencedirect.com/science/article/pii/S0065260106380021) | High: Strategy component context; access restriction |
+| C09 | [Kim et al. 2017 — Abstract/concrete framing and explanations](https://link.springer.com/article/10.1186/s41235-017-0056-5) | High: concrete description can increase inference |
+| C10 | [Moscatelli et al. 2019 — Concrete criticism and intergroup reception](https://journals.sagepub.com/doi/10.1177/0261927X19864686) | High: context-moderated communication outcome |
+| C11 | [Dunning et al. 2025 — Emotional granularity in youth scoping review](https://onlinelibrary.wiley.com/doi/10.1002/jad.70028) | High: association, not vocabulary treatment |
+| C12 | [Ozomaro et al. 2025 — Granularity in health and psychopathology review](https://linkinghub.elsevier.com/retrieve/pii/S0022395625004881) | High: mental-health association, not efficacy |
+| C13 | [Whiting & Nook — Differentiation and regulation systematic-review preprint](https://lemolab.princeton.edu/publications/systematic-review-research-emotion-differentiation-and-emotion-regulation) | Hold: submitted preprint; null/mixed outcomes |
+| C14 | [Gross 2015 — Emotion regulation process model](https://www.tandfonline.com/doi/abs/10.1080/1047840X.2014.940781) | High: framework, not intervention proof |
 | X01 | [Wolfe et al. 2025 — Needs-Conscious Design / NVC-inspired AI communication](https://arxiv.org/abs/2508.11149) | Hold: UX research only |
 | X02 | [Chan et al. 2026 — SpeakSoftly, NVC-powered conversational scaffolding](https://arxiv.org/abs/2604.05382) | Hold: UX research only |
 
@@ -149,10 +169,10 @@ Especially important: N11's full report describes a 62-person pilot with six 2-h
 
 ### N12 — Zandkarimi et al. 2019 — NVC training and stress/anxiety/depression
 
-**Original:** https://doi.org/10.1007/s10560-018-0584-y  
-**Research:** Random assignment of 50 participants from community charity centers in suburban Tehran reported; outcomes included stress, anxiety and depression.  
-**Why it belongs in review:** A relevant randomized NVC program study in a new population.  
-**What it does NOT justify:** Need full-text statistics, baseline comparisons and attrition; do not infer effect magnitude.  
+**Original publisher article page:** https://link.springer.com/article/10.1007/s10560-018-0584-y  
+**Research:** Springer’s original abstract specifies 50 participants aged 11–18, randomly allocated 25/25 from charity centers in Tehran, eight sessions of NVC training, a no-treatment control, DASS-21 outcomes, and one-month follow-up. It reports significant reductions in **stress and anxiety, but NOT depression**. The detailed statistical analysis is still behind access restrictions.  
+**Why it belongs in review:** A randomized study in a distinct adolescent population, with an explicitly null depression outcome.  
+**What it does NOT justify:** Treating adolescents as adults, attributing improvement to NVC-specific components rather than attention/group support, inferring antidepressant efficacy or claiming precise effects without full methods.  
 **Editorial priority:** Hold. **User decision: PENDING.**
 
 ### M01 — Nock & Kurtz 2005 — Direct behavioral observation in school settings
@@ -331,6 +351,10 @@ Especially important: N11's full report describes a 62-person pilot with six 2-h
 **What it does NOT justify:** No preregistration, only short-term one-center simulated outcomes, unusually large empathy effect requiring replication, control lacked equally intensive deliberate-practice/feedback method, study-specific abbreviated observation checklist, no real clinical outcome or isolated Observation effect.
 **Editorial priority:** High, pending complete supplementary material and risk-of-bias audit. **User decision: PENDING.**
 
+## Round 4 source approval cards
+
+For all C01–C14 papers, methods and claim-specific limitations appear in [the Round 4 component audit](./observation-source-critical-appraisal-round4-2026-10-12.md), not summarized as treatment evidence. **All fourteen are PENDING.** C04/C07 publisher APA landing pages and C08 publisher Elsevier article address may reject automated access; source identity has supporting publisher/PubMed records. C13 is a Princeton laboratory page for a submitted preprint, not a peer-reviewed publisher article.
+
 ## Material checks and conflicts to preserve
 
 - N02 randomized NVC training: reported self-rated empathy advantage of 0.95 points at three months; do not inflate to clinical behavioral improvement. Objective tasks did not establish equivalent changes.
@@ -345,7 +369,7 @@ Especially important: N11's full report describes a 62-person pilot with six 2-h
 
 ## Preservation, approval and next steps
 
-The full historical 20-link bibliography is preserved in docs/observation-research-recovery.md. IDs N01–N15 are **direct NVC** research; M01–M17 are **adjacent scientific domains**; X01–X02 are **provisional technology research**. Do not conflate them.
+The 48-source candidate queue adds C01–C14 to 15 direct NVC, 17 related scientific, and 2 exploratory technology candidates. The full historical 20-link bibliography is preserved in docs/observation-research-recovery.md. IDs N01–N15 are **direct NVC** research; M01–M17 are **adjacent scientific domains**; X01–X02 are **provisional technology research**. Do not conflate them.
 
 For source-by-source full critical review, extract sample, population, design, comparator, randomization, risk of bias, attrition, outcome operationalization, statistics/effect sizes/confidence intervals, open data/preregistration and funding/conflicts, contrary results, directness to AllNeeds and an exact defensible site sentence.
 
