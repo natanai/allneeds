@@ -1,8 +1,6 @@
 name: Full repository validation
 
 on:
-  push:
-    branches: [feat/check-in-magnet-shared-mood-map]
   workflow_dispatch:
 
 permissions:
