@@ -302,10 +302,34 @@ export function AlexithymiaSupportPage() {
       const termOrder = selected
         ? current.termOrder.includes(term.id) ? current.termOrder : [...current.termOrder, term.id]
         : current.termOrder.filter((id) => id !== term.id);
+      const feelingIntensities = { ...current.feelingIntensities };
+      if (decision !== 'fits') delete feelingIntensities[term.id];
       return {
         ...current,
         decisions,
         termOrder,
+        feelingIntensities,
+        noWordYet: selected ? false : current.noWordYet,
+      };
+    });
+  }
+
+  function rateTerm(term: SupportTerm, decision: AlexithymiaDraft['decisions'][string], intensity?: number) {
+    updateDraft((current) => {
+      const decisions = { ...current.decisions, [term.id]: decision };
+      const selected = decision === 'fits' || decision === 'maybe';
+      const termOrder = selected
+        ? current.termOrder.includes(term.id) ? current.termOrder : [...current.termOrder, term.id]
+        : current.termOrder.filter((id) => id !== term.id);
+      const feelingIntensities = { ...current.feelingIntensities };
+      if (decision === 'fits' && term.role === 'feeling' && intensity !== undefined
+        && Number.isInteger(intensity) && intensity >= 1 && intensity <= 10) {
+        feelingIntensities[term.id] = intensity;
+      } else {
+        delete feelingIntensities[term.id];
+      }
+      return {
+        ...current, decisions, termOrder, feelingIntensities,
         noWordYet: selected ? false : current.noWordYet,
       };
     });
@@ -331,6 +355,7 @@ export function AlexithymiaSupportPage() {
       decisions: Object.fromEntries(Object.entries(current.decisions)
         .filter(([, decision]) => decision === 'not-this-time')),
       termOrder: [],
+      feelingIntensities: {},
       noWordYet: true,
     }));
     setStatus('No word yet selected.');
@@ -375,6 +400,7 @@ export function AlexithymiaSupportPage() {
       overallRatings: draft.shape,
       bodyClear: draft.bodyClear,
       noWordYet: draft.noWordYet,
+      feelingIntensities: draft.feelingIntensities,
     }));
     void navigate('/inventory/journal?compose=new');
   }
@@ -655,7 +681,7 @@ export function AlexithymiaSupportPage() {
               <section className={styles.wordTray} aria-label="Your current words">
                 <h2>Your words</h2>
                 {selectedTerms.length || draft.noWordYet ? (
-                  <div>{selectedTerms.map((term) => <span key={term.id}>{term.label}<small>{draft.decisions[term.id] === 'fits' ? 'Fits' : 'Maybe'}</small></span>)}{draft.noWordYet ? <span>No word yet</span> : null}</div>
+                  <div>{selectedTerms.map((term) => <span key={term.id}>{term.label}<small>{draft.decisions[term.id] === 'fits' ? `Fits${draft.feelingIntensities?.[term.id] ? ` · ${draft.feelingIntensities[term.id]}/10` : ''}` : 'Maybe'}</small></span>)}{draft.noWordYet ? <span>No word yet</span> : null}</div>
                 ) : <p>Open a word to mark it Fits or Maybe.</p>}
               </section>
               <div className={styles.wordAlternatives}>
@@ -675,11 +701,14 @@ export function AlexithymiaSupportPage() {
             term={sheet === 'candidate' ? activeTerm : null}
             score={activeScore}
             decision={activeTerm ? draft.decisions[activeTerm.id] : undefined}
+            intensity={activeTerm ? draft.feelingIntensities?.[activeTerm.id] : undefined}
             cueLabels={cueLabels}
-            onDecision={(decision) => {
-              if (activeTerm) decideTerm(activeTerm, decision);
-              setStatus(decision === 'not-this-time' ? 'Marked “Not this time” for this check-in.' : `${activeTerm?.label ?? 'Word'} added to Your words.`);
-            }}
+            onDecision={(decision, intensity) => {
+              if (activeTerm) rateTerm(activeTerm, decision, intensity);
+              setStatus(decision === 'not-this-time'
+                ? 'Marked “Not this time” for this check-in.'
+                : `${activeTerm?.label ?? 'Word'} added to Your words${intensity === undefined ? '' : ` · intensity ${intensity}/10`}.`);
+            }
             onClose={() => setSheet(null)}
           />
         </section>
@@ -699,7 +728,7 @@ export function AlexithymiaSupportPage() {
                   <ol className={styles.selectedTermList}>
                     {selectedTerms.map((term, index) => (
                       <li key={term.id}>
-                        <span><strong>{term.label}</strong><small>{term.roleLabel} · {draft.decisions[term.id] === 'fits' ? 'Fits' : 'Maybe'}</small></span>
+                        <span><strong>{term.label}</strong><small>{term.roleLabel} · {draft.decisions[term.id] === 'fits' ? `Fits${draft.feelingIntensities?.[term.id] ? ` · Intensity ${draft.feelingIntensities[term.id]}/10` : ''}` : 'Maybe'}</small></span>
                         <span className={styles.reorderActions}>
                           <button type="button" disabled={index === 0} aria-label={`Move ${term.label} earlier`} onClick={() => moveTerm(term.id, -1)}>←</button>
                           <button type="button" disabled={index === selectedTerms.length - 1} aria-label={`Move ${term.label} later`} onClick={() => moveTerm(term.id, 1)}>→</button>
