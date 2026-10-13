@@ -114,6 +114,8 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
     pleasantness: 0.2, energy: 0.8, power: 0.25,
   });
   expect(saved.feelings.find((item: { feeling: string }) => item.feeling === 'Anxiety').ratingSource).toBe('unknown');
+  await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Pleasantness: -3,/ })).toBeVisible();
+  await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Arousal: \+3,/ })).toBeVisible();
 });
 
 test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
