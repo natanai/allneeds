@@ -41,6 +41,12 @@ export interface JournalGuidedSupport {
   observation: string;
   terms: Array<{ label: string; role: 'feeling' | 'faux-feeling' | 'working' }>;
   statement: string;
+  /** User-selected somatic clues, including their explicitly chosen intensity. */
+  bodyClues?: Array<{ id: string; label: string; intensity: number }>;
+  /** Original 0–1 support-lane clues; optional, independent of Journal mood. */
+  overallRatings?: Partial<Record<'pleasantness' | 'energy' | 'power' | 'expectedness', number>>;
+  bodyClear?: boolean;
+  noWordYet?: boolean;
 }
 
 export interface JournalRecord {
@@ -123,10 +129,25 @@ function guidedSupport(value: unknown): JournalGuidedSupport | undefined {
     const label = term.label.trim();
     return label ? [{ label, role }] : [];
   });
+  const bodyClues = Array.isArray(value.bodyClues) ? value.bodyClues.flatMap((clue) => {
+    if (!isRecord(clue) || typeof clue.id !== 'string' || typeof clue.label !== 'string'
+      || typeof clue.intensity !== 'number' || !Number.isFinite(clue.intensity)) return [];
+    return [{ id: clue.id.trim(), label: clue.label.trim(), intensity: Math.min(100, Math.max(0, clue.intensity)) }];
+  }).filter((clue) => clue.id && clue.label && clue.intensity > 0) : [];
+  const dimensionKeys = ['pleasantness', 'energy', 'power', 'expectedness'];
+  const overallRatings = isRecord(value.overallRatings) ? Object.fromEntries(
+    Object.entries(value.overallRatings).filter(([key, rating]) =>
+      dimensionKeys.includes(key) && typeof rating === 'number' && Number.isFinite(rating),
+    ).map(([key, rating]) => [key, Math.min(1, Math.max(0, rating as number))]),
+  ) as NonNullable<JournalGuidedSupport['overallRatings']> : {};
   return {
     observation: value.observation.trim(),
     terms,
     statement: value.statement.trim(),
+    ...(bodyClues.length ? { bodyClues } : {}),
+    ...(Object.keys(overallRatings).length ? { overallRatings } : {}),
+    ...(value.bodyClear === true ? { bodyClear: true } : {}),
+    ...(value.noWordYet === true ? { noWordYet: true } : {}),
   };
 }
 
