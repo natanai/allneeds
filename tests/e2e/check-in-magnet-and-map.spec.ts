@@ -16,12 +16,26 @@ test('Check-In is an opt-in navigation magnet with persistent direct routing', a
   await expect(page).toHaveURL(/\/alexithymia-support$/);
   await page.reload();
   await expect(board.getByRole('link', { name: 'Feeling check-in' })).toBeVisible();
+  // Persist the visible position before hiding the magnet.
+  await board.getByRole('switch').uncheck();
+  const storedPosition = await page.evaluate(() => {
+    const raw = localStorage.getItem('magnetPositions:site-nav');
+    const state = raw ? JSON.parse(raw) : null;
+    return state?.layouts?.compact?.magnets?.['nav-check-in'] ?? null;
+  });
+  expect(storedPosition).not.toBeNull();
 
   await board.getByRole('button', { name: 'Customizer' }).click();
   panel = page.getByRole('dialog', { name: 'Customizer' });
   await panel.getByRole('switch', { name: 'Check-In' }).uncheck();
   await panel.getByRole('button', { name: 'Close customizer' }).click();
   await expect(board.getByRole('link', { name: 'Feeling check-in' })).toHaveCount(0);
+  const afterHidden = await page.evaluate(() => {
+    const raw = localStorage.getItem('magnetPositions:site-nav');
+    const state = raw ? JSON.parse(raw) : null;
+    return state?.layouts?.compact?.magnets?.['nav-check-in'] ?? null;
+  });
+  expect(afterHidden).toEqual(storedPosition);
 });
 
 test('both emotional maps repaint their whole surface while selecting and dragging', async ({ page }) => {
