@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gestureHistory, MAX_VISIBLE_MS, MIN_VISIBLE_MS, panHistory, visibleWindow, zoomHistory } from './historyViewport';
+import { fingerSeparation, gestureHistory, MAX_VISIBLE_MS, MIN_VISIBLE_MS, panHistory, visibleWindow, zoomHistory } from './historyViewport';
 
 const day = 86400000;
 const range = visibleWindow(Date.parse('2026-10-01T00:00:00Z'), Date.parse('2026-10-31T00:00:00Z'));
@@ -13,6 +13,14 @@ describe('continuous history viewport', () => {
     const moved = panHistory(range, -.25);
     expect(moved.end - moved.start).toBe(range.end - range.start);
     expect(moved.start).toBe(range.start - 7.5 * day);
+  });
+  it('measures pinch distance geometrically, including vertical and diagonal motion', () => {
+    expect(fingerSeparation({ x: 0, y: 0 }, { x: 100, y: 0 })).toBe(100);
+    expect(fingerSeparation({ x: 0, y: 0 }, { x: 0, y: 100 })).toBe(100);
+    expect(fingerSeparation({ x: 0, y: 0 }, { x: 60, y: 80 })).toBe(100);
+    const original = visibleWindow(0, 30 * day);
+    const zoomed = gestureHistory(original, 160, 160, fingerSeparation({ x: 0, y: 0 }, { x: 60, y: 80 }), fingerSeparation({ x: 0, y: 0 }, { x: 120, y: 160 }), 320);
+    expect(zoomed.end - zoomed.start).toBe(15 * day);
   });
   it('pins the point under a stationary pinch and combines a simultaneous horizontal move', () => {
     const pinch = gestureHistory(range, 200, 200, 100, 200, 400);
