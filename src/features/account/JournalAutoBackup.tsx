@@ -15,6 +15,7 @@ export function JournalAutoBackup() {
     let timeout = 0;
     let busy = false;
     let disposed = false;
+    let succeeded = false;
 
     const needsBackup = () => {
       const state = readProfileBackupView(did);
@@ -24,18 +25,18 @@ export function JournalAutoBackup() {
     const run = async () => {
       if (disposed || busy || !needsBackup() || !navigator.onLine) return;
       busy = true;
+      succeeded = false;
       try {
         await saveCurrentBrowserToProfile(undefined, 'journal-auto');
+        succeeded = true;
       } catch {
         // The journal remains durable locally. The persistent status continues
         // to report pending changes, and online/focus/next save offers a retry.
       } finally {
         busy = false;
-        if (!disposed && needsBackup() && navigator.onLine) {
-          // If another entry was written while a save was in flight, send it next.
-          // Avoid a retry loop on server failures: only follow a confirmed save.
-          // See the completion flag below.
-        }
+        // A new entry saved during the request needs a second snapshot.
+        // Failures wait for the next save, focus, or connectivity event.
+        if (!disposed && succeeded && needsBackup() && navigator.onLine) schedule();
       }
     };
 
