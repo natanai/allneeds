@@ -1,0 +1,34 @@
+name: One-time profile backup validation
+
+on:
+  push:
+    branches:
+      - fix/profile-save-journal-confirmation-20261013
+    paths:
+      - '.github/workflows/agent-profile-backup-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-profile-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v6
+      - name: Setup Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Enable pnpm
+        run: corepack enable
+      - name: Install lockfile dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run repository typecheck unit tests and build
+        run: pnpm check
+      - name: Dry-run Worker build
+        run: pnpm --dir backend check
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Account and journal browser regression
+        run: pnpm exec playwright test tests/e2e/profile-reconciliation.spec.ts tests/e2e/journal-history.spec.ts --workers=1
