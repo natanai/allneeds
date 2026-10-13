@@ -38,7 +38,7 @@ export function HistoryChart({ series: currentSeries, previousSeries = [], entri
     // Exact timestamps and nearby marks can coincide. Offer all nearby pages rather than conceal one.
     const neighbors = all.filter((item) => Math.abs(x(item.point.time) - x(point.time)) <= 22 && Math.abs(y(item.point.value) - y(point.value)) <= 22);
     const ids = [...new Set(neighbors.flatMap((item) => item.point.entryIds))];
-    onSelect(ids, `${name} · ${point.label} · ${format(point.value)}${settings.grouping !== 'entry' && settings.metric !== 'frequency' ? ` mean (${point.count}/${point.total} rated; range ${format(point.low)} to ${format(point.high)})` : settings.metric === 'frequency' ? ` (${point.count}/${point.total} entries mention it)` : ''}`, settings.grouping !== 'entry' || settings.metric === 'frequency' || ids.length > 1);
+    onSelect(ids, `${name} · ${point.label} · ${format(point.value)}${range.days > 1 && settings.metric !== 'frequency' ? ` mean (${point.count}/${point.total} rated; range ${format(point.low)} to ${format(point.high)})` : settings.metric === 'frequency' ? ` (${point.count}/${point.total} entries mention it)` : ''}`, range.days > 1 || settings.metric === 'frequency' || ids.length > 1);
   };
   const ticks = Array.from({ length: 5 }, (_, i) => min + (max - min) * i / 4);
   const tickCount = width < 500 ? 3 : 5;
