@@ -258,7 +258,7 @@ describe('Bluesky account compatibility', () => {
           JSON.stringify({ stage: 'profile-saved', status: 'ok', savedAt: '2026-10-13T16:31:00Z', strategyCount: 0 }),
           JSON.stringify({ stage: 'complete', status: 'ok', savedAt: '2026-10-13T16:31:00Z', syncedAt: '2026-10-13T16:31:01Z', syncedCount: 0, changedCount: 0, unchangedCount: 0, unpublished: 0 }),
           '',
-        ].join('\\n'), { status: 200 });
+        ].join('\n'), { status: 200 });
       }
       throw new Error('Unexpected request');
     });
