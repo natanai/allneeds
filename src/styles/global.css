@@ -39,6 +39,11 @@ textarea {
   font: inherit;
 }
 
+html[data-theme-appearance='refrigerator'] :is(input, textarea)::placeholder {
+  color: var(--secondary);
+  opacity: 1;
+}
+
 button,
 a {
   -webkit-tap-highlight-color: transparent;

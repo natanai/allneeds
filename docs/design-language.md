@@ -41,6 +41,7 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - The untouched former green Refrigerator palette migrates to the replacement at the saved-theme read boundary, including first paint. Individually edited palettes and their timestamps are preserved. The runtime and embedded prepaint data consume one canonical `refrigeratorTheme.json`.
 - Cutout labels stay readable over artwork; active navigation remains dimension-neutral. Dark boards retain visible keyboard focus and a contrasting, 44px physics control. Play, drag, fling, touch scrolling, saved layouts, and all route functions remain the existing shared behavior.
 - Mobile History keeps a paper reading surface around its graph and controls. Full-screen Journal, sheets, account/settings controls, graph labels, and strategy cards use the same palette rather than inheriting dark text onto the enamel canvas.
+- Field placeholders retain readable printed ink. Browser/PWA theme-color metadata follows the enamel Primary color during first paint and live edits; switching to a standard preset restores the existing white browser-chrome fallback.
 
 ## Need magnet identities
 

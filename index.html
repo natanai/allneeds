@@ -139,6 +139,10 @@
           ? quiet : 'color-mix(in srgb, ' + quiet + ' 12%, #FFFFFF 88%)') : '';
         if (surface) root.style.setProperty('--surface-raised', surface);
         if (resolved.primary) root.style.setProperty('--primary-fg', foreground(resolved.primary));
+        var browserTheme = document.querySelector('meta[name="theme-color"]');
+        if (browserTheme && appearance === 'refrigerator' && resolved.primary) {
+          browserTheme.setAttribute('content', resolved.primary);
+        }
         if (resolved.text) root.style.setProperty('--text-fg', foreground(resolved.text));
         if (action) root.style.setProperty('--btn-bg', action);
         if (action) root.style.setProperty('--btn-fg', foreground(action));

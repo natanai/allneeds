@@ -223,6 +223,9 @@ export function applyThemeToRoot(
   const css = themeCssValues(theme);
   Object.entries(css).forEach(([property, value]) => root.style.setProperty(property, value));
   root.dataset.themeAppearance = themeAppearance(theme);
+  root.ownerDocument?.querySelector('meta[name="theme-color"]')?.setAttribute(
+    'content', themeAppearance(theme) === 'refrigerator' ? css['--primary']! : '#FFFFFF',
+  );
   root.dataset.themePreapplied = 'true';
 }
 

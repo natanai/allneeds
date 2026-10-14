@@ -37,7 +37,9 @@ async function lowContrastText(page: Page) {
     const base = rgba(getComputedStyle(document.documentElement).getPropertyValue('--primary').trim());
     const failures: string[] = [];
     for (const element of document.querySelectorAll<HTMLElement>('main *, nav *, [role="dialog"] *')) {
-      const text = Array.from(element.childNodes).filter((n) => n.nodeType === Node.TEXT_NODE).map((n) => n.textContent).join('').trim();
+      const placeholder = element.matches('input, textarea') && !(element as HTMLInputElement).value
+        ? element.getAttribute('placeholder') : null;
+      const text = placeholder || Array.from(element.childNodes).filter((n) => n.nodeType === Node.TEXT_NODE).map((n) => n.textContent).join('').trim();
       if (!text || element.matches('option, script, style, svg *:not(text), .visually-hidden')) continue;
       if (element.closest('svg[aria-hidden="true"]')) continue;
       const box = element.getBoundingClientRect();
@@ -52,7 +54,9 @@ async function lowContrastText(page: Page) {
       if (hidden) continue;
       let bg = base;
       for (const parent of chain.reverse()) bg = over(rgba(getComputedStyle(parent).backgroundColor), bg);
-      const fg = over(rgba(element.tagName.toLowerCase() === 'text' ? style.fill : style.color), bg);
+      const textColor = placeholder ? getComputedStyle(element, '::placeholder').color
+        : element.tagName.toLowerCase() === 'text' ? style.fill : style.color;
+      const fg = over(rgba(textColor), bg);
       const [light, dark] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
       const ratio = (light! + .05) / (dark! + .05);
       const large = parseFloat(style.fontSize) >= 24 || (parseFloat(style.fontSize) >= 18.66 && parseFloat(style.fontWeight) >= 700);
@@ -112,6 +116,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 900 
       await customizer.getByLabel('Preset', { exact: true }).selectOption('Default');
       await customizer.getByRole('button', { name: 'Close customizer' }).click();
       await expect(page.locator('html')).toHaveAttribute('data-theme-appearance', 'standard');
+      await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#FFFFFF');
       await expect(nav.locator('[data-magnet-id="nav-needs"]')).toHaveCSS('text-transform', 'uppercase');
     });
 
@@ -148,6 +153,7 @@ test('migrates the old saved preset before the React bundle can paint', async ({
   await page.route('**/assets/index-*.js', (route) => route.abort());
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('html')).toHaveAttribute('data-theme-appearance', 'refrigerator');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', refrigeratorTheme.values.primary);
   expect(await page.locator('html').evaluate((root) => ({
     primary: (root as HTMLElement).style.getPropertyValue('--primary'),
     paper: (root as HTMLElement).style.getPropertyValue('--surface-raised'),
