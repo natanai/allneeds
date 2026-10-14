@@ -840,6 +840,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-08-28 | Observation Inference 2.0 | Local deterministic exploratory-matching contract, non-probabilistic explanation copy, approved fallback safeguards, shared highlight/detector model, legacy retirement, and implementation plan approved | Implemented on combined review branch; not yet merged |
 | 2026-08-28 | Alexithymia Support | Complete present-moment lane, fixed-catalog roles, shared scoring, source package, and no-recommendation boundary approved | Implemented on combined review branch; browser/device validation pending |
 | 2026-08-29 | Observation and Alexithymia support | Plain-language labels, internal-only surface terms, deliberate annotation activation, and non-invalidating guidance approved | Implemented on test branch; browser/device validation pending |
+| 2026-10-14 | Observation research continuation | [52-record source register](./observation-research-current-decisions.md), four preview-source appraisals, and [complete 18-reference copy proposal](./observation-research-guide-proposal-2026-10-14.md) prepared; source and exact-copy decisions PENDING | Research documentation only; no public implementation or deployment approval |
 
 ## Implementation notes / handoff
 

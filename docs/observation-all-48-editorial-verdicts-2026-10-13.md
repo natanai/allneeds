@@ -1,5 +1,7 @@
 # AllNeeds Observation — clinician-style and academic editorial screening of all 48 research candidates
 
+> Historical screening snapshot. The source cards and 26/13/9 summary below preserve this earlier pass. Read [current decisions](./observation-research-current-decisions.md) for the latest recommendations and [Round 6](./observation-research-round6-2026-10-14.md) for how the disagreements were reconciled. No recommendation here or in the later record is user approval.
+
 **Date:** 2026-10-13  
 **Branch:** `site-test` — evidence-review DOCUMENTATION ONLY  
 **User approval:** **PENDING for all 48**  
