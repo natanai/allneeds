@@ -240,10 +240,11 @@ test('desktop uses a task-and-context workspace and mobile returns to one linear
 
 test('plain-language guide citations reveal their matching source', async ({ page }) => {
   await page.goto('/observations');
-  await page.getByText('Observation guide', { exact: true }).click();
-  await expect(page.getByText('Use the sections that help you.', { exact: false })).toBeVisible();
-
-  await page.getByText('What counts as an observation', { exact: true }).click();
-  await page.getByRole('link', { name: '[1]', exact: true }).first().click();
-  await expect(page.getByRole('link', { name: '[1] IRIS Center, Vanderbilt University: Defining Behavior (educator guidance)' })).toBeVisible();
+  const guide = page.locator('#observation-guide');
+  await guide.locator(':scope > summary').click();
+  await expect(guide.getByRole('heading', { name: 'Research behind observations' })).toBeVisible();
+  await guide.getByRole('link', { name: 'Reference 1: Nock & Kurtz' }).first().click();
+  const source = guide.locator('#observation-guide-source-nock-kurtz');
+  await expect(source).toBeFocused();
+  await expect(source.getByRole('link')).toHaveAttribute('href', 'https://www.sciencedirect.com/science/article/pii/S1077722905800586');
 });

@@ -272,6 +272,8 @@ test('the full Body Cues handoff applies explicitly and leaves the independent t
   await body.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('70');
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
   await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await expect(page).toHaveURL(/\/feelings\/body-cues$/);
+  await expect(body).toHaveCount(0);
   await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('70');
   await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('80');
   await page.getByRole('button', { name: 'Use these clues in check-in', exact: true }).click();
@@ -281,18 +283,25 @@ test('the full Body Cues handoff applies explicitly and leaves the independent t
   body = page.getByRole('dialog', { name: 'Body clues', exact: true });
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
   await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await expect(page).toHaveURL(/\/feelings\/body-cues$/);
+  await expect(body).toHaveCount(0);
   await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('85');
   await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
   await expect(page.getByText('Tight or constricted · 80%', { exact: true })).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(0);
   await page.getByRole('button', { name: /^Body clues/ }).click();
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
   await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await expect(page).toHaveURL(/\/feelings\/body-cues$/);
+  await expect(body).toHaveCount(0);
   await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('85');
   await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
   await page.getByRole('button', { name: /^Body clues/ }).click();
   await body.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('95');
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
   await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await expect(page).toHaveURL(/\/feelings\/body-cues$/);
+  await expect(body).toHaveCount(0);
   await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('95');
 });
 

@@ -250,7 +250,8 @@ if (observationQuickCheckIndex < 0
   fail('Observation Quick Check or secondary guidance has drifted out of the current editor-first workflow.');
 }
 if (!observationsSource.includes('guideOpen ? <div className={styles.guideCard}')
-  || !observationsSource.includes('guide.sections?.map')
+  || !observationsSource.includes('guide.sections.map')
+  || !observationsSource.includes('guide.sources.map')
   || !observationsSource.includes('onClick={() => setHelpTopic(slot.id)}')
   || !observationsSource.includes('className={styles.slotInfo}')
   || observationsSource.includes('<ObservationRecipe')

@@ -2,7 +2,7 @@
 
 > Status: living document. Start here before changing explanatory, psychological, behavioral, health, strategy, or research-facing copy in allneeds.
 >
-> Last updated: 2026-08-28.
+> Last updated: 2026-10-14.
 
 ## Purpose
 
@@ -37,6 +37,14 @@ Approval must cover:
 - intended implementation scope.
 
 The one preapproval production-repo exception is this document, `docs/content-evidence-review.md`, which may be updated as the review evolves.
+
+### Academic source URL formatting (2026-10-12 clarification)
+
+- Display and copy the original publisher's or scholarly society's **article landing-page URL** (for example, `https://link.springer.com/article/10.1007/s10560-018-0584-y`), **not** a generic `https://doi.org/...` redirect as the visible/raw citation.
+- Keep the bare DOI identifier (for example, `10.1007/s10560-018-0584-y`) as separate bibliographic metadata when useful. DOI-based discovery can still support title and version verification.
+- Strip ChatGPT referral domains, `utm_*` and other tracking/referral parameters; preserve only genuine publisher-required query parameters (such as APA's `doiLanding?doi=...`).
+- If an article is not yet published, use the actual author/preprint repository page and clearly mark peer-review status. If there is no verifiable publisher article page, use a verified scholarly record and state that limitation; **never fabricate a publisher URL**.
+- Historical citation inventories may preserve original links for provenance. New proposals and copy should follow this rule, and older approved source links should be converted only after independently confirming the publisher matches the article.
 
 ## Need-description authoring method: evolutionary function first, therapeutic meaning second
 
@@ -837,6 +845,10 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-10-14 | Check-in map and Read aloud | User phone feedback authorizes a selected-point state, clearly alternative Mixed feelings/Not sure choices, a separate quieter Clear action, and a working Stop reading toggle. Mood meanings, coordinates, matching, and the device-provided voice remain unchanged. | Follow-up implementation and regression verification |
 | 2026-10-14 | Compact writing tips | User authorizes a fresh follow-up after the accidental PR #184 merge and PR #185 rollback: one compact Writing tips dialog, one existing example, one Close control, and an Observations guide link labeled Leaves check-in. Existing approved concrete-writing guidance is retained without new research claims; the Observations research branch is untouched. | Dedicated review branch; leave unmerged for user review |
 | 2026-10-14 | Observations, check-in, and Journal continuity | User approves the existing Alexithymia support lane as the guided Journal creation path, prefilled Observation handoff, preserved unselected suggestions with source labels, direct-writing alternative, explicit remembered entry preference, and protected unfinished drafts. User authorizes main merge and live deployment after verification. No catalog, detector, association, score, treatment claim, or strategy change. | Implemented on dedicated main-based branch; verification recorded in `docs/observation-check-in-journal.md` |
+| 2026-10-14 | Observation research continuation | [52-record source register](./observation-research-current-decisions.md), four preview-source appraisals, and [complete 18-reference copy proposal](./observation-research-guide-proposal-2026-10-14.md) prepared; source and exact-copy decisions PENDING | Research documentation only; no public implementation or deployment approval |
+| 2026-10-14 | Observation source and copy approval | User delegated the review/approval decision; [corrected complete 18-source package](./observation-research-guide-proposal-2026-10-14.md) approved for its exact educational claims after clinical-evidence and academic editorial review. [Approval record](./observation-research-editorial-approval-2026-10-14.md) documents corrections, source access and scope; other 34 records remain pending | Authorized for educational implementation on site-test; not yet implemented. No main merge or deployment authorization; no independent licensed-clinician sign-off or app clinical validation |
+| 2026-10-14 | Observation approved-guide integration | User authorized implementation and continuation on site-test; exact approved copy, examples and 18 citation uses integrated into the canonical guide and renderer. [Implementation record](./observation-research-implementation-2026-10-14.md) documents completed validation and limits | Validated for site-test through PR #183: 330 tests, production build and six scoped Chromium cases pass. Final captures reviewed; enlarged-text overflow repaired. No production publication |
+| 2026-10-14 | Observation guide production release | User subsequently authorizes integration against newer main, completion checks, merge and live deployment for phone review. Exact approved copy, 18 source uses and review limits remain unchanged. | Main-based PR #190: 366 unit tests pass; browser sweep, corrected test readiness boundaries, repeated handoff, offline checks and visual review are recorded in the [implementation record](./observation-research-implementation-2026-10-14.md). No independent licensed-clinician certification or app-effectiveness claim. |
 
 ## Implementation notes / handoff
 

@@ -26,14 +26,15 @@ import styles from './ObservationsPage.module.css';
 const EXAMPLE = "Last Thursday, two days after my partner and I had agreed to have dinner together at home at 7 p.m., I arrived back at the apartment at 6:50 p.m. and started setting the table. At 7:15 p.m. my partner was not home yet, and at 7:20 p.m. I saw a message on my phone sent at 6:55 p.m. that said, 'I decided to stay late at work and will eat here tonight.'";
 
 type GuideBlock =
-  | { type: 'list'; style: 'ordered' | 'unordered'; items: string[] }
-  | { type: 'callout'; html: string }
   | { type: 'paragraph'; text: string }
-  | { type: 'examples'; items: Array<{ evaluation: string; observation: string; why: string }> };
-type GuideSection = { id: string; eyebrow?: string; title: string; description?: string; defaultOpen?: boolean; content: GuideBlock[] };
+  | { type: 'examples'; items: Array<{ evaluation: string; observation: string }> };
+type GuideSection = { id: string; title: string; content: GuideBlock[] };
+type GuideSource = { id: string; authors: string; citation: string; url: string };
 type GuideData = {
-  intro?: { eyebrow?: string; title?: string; paragraphs?: string[] };
-  sections?: GuideSection[];
+  overview: { title: string; paragraphs: string[] };
+  intro: { title: string; paragraphs: string[] };
+  sections: GuideSection[];
+  sources: GuideSource[];
 };
 
 const slotDefinitions = [
@@ -45,15 +46,29 @@ const slotDefinitions = [
 
 const guide = observationGuide as unknown as GuideData;
 
-function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
+function focusGuideSource(sourceId: string) {
+  const source = document.getElementById(sourceId);
+  source?.focus({ preventScroll: true });
+  source?.scrollIntoView({ block: 'nearest' });
+}
+
+export function GuideText({ text }: { text: string }) {
+  return text.split(/(\[\d+(?:,\d+)*\])/g).map((part, index) => {
+    const match = /^\[(\d+(?:,\d+)*)\]$/.exec(part);
+    const numbers = match?.[1];
+    if (!numbers) return part;
+    return <span key={index} className={styles.guideCitations}>{numbers.split(',').map((number) => {
+      const source = guide.sources[Number(number) - 1];
+      if (!source) throw new Error(`Unknown Observation guide reference: ${number}`);
+      return <a key={number} href={`#observation-guide-source-${source.id}`} aria-label={`Reference ${number}: ${source.authors}`}>[{number}]</a>;
+    })}</span>;
+  });
+}
+
+export function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
   return blocks.map((block, blockIndex) => {
-    if (block.type === 'list') {
-      const List = block.style === 'ordered' ? 'ol' : 'ul';
-      return <List key={blockIndex}>{block.items.map((item, itemIndex) => <li key={itemIndex} dangerouslySetInnerHTML={{ __html: item }} />)}</List>;
-    }
-    if (block.type === 'callout') return <aside key={blockIndex} className={styles.guideCallout} dangerouslySetInnerHTML={{ __html: block.html }} />;
-    if (block.type === 'paragraph') return <p key={blockIndex} dangerouslySetInnerHTML={{ __html: block.text }} />;
-    return <div key={blockIndex} className={styles.guideExamples}>{block.items.map((item, itemIndex) => <article key={itemIndex}><p><strong>Broad wording:</strong> <span dangerouslySetInnerHTML={{ __html: item.evaluation }} /></p><p><strong>More concrete:</strong> <span dangerouslySetInnerHTML={{ __html: item.observation }} /></p><p dangerouslySetInnerHTML={{ __html: item.why }} /></article>)}</div>;
+    if (block.type === 'paragraph') return <p key={blockIndex}><GuideText text={block.text} /></p>;
+    return <div key={blockIndex} className={styles.guideExamples}>{block.items.map((item, itemIndex) => <article key={itemIndex}><p><strong>Starting wording:</strong> {item.evaluation}</p><p><strong>Added event detail:</strong> {item.observation}</p></article>)}</div>;
   });
 }
 
@@ -92,11 +107,25 @@ export function ObservationsPage() {
   const [feelingsMode, setFeelingsMode] = useState<'unmet' | 'met'>(initialDraft?.feelingsMode ?? 'unmet');
   const [helpTopic, setHelpTopic] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [guideSection, setGuideSection] = useState(guide.sections[0]?.id ?? 'methods');
+  const pendingSourceRef = useRef<string | null>(null);
   const [handoffConflict, setHandoffConflict] = useState<{ checkIn: AlexithymiaDraft } | 'journal' | null>(null);
   const [storageError, setStorageError] = useState('');
   const [draftError, setDraftError] = useState('');
   const draftRef = useRef<ObservationDraft>({ text, feelingsMode, showSuggestions, showExample });
   draftRef.current = { text, feelingsMode, showSuggestions, showExample };
+
+  const activeGuideSection = guide.sections.find((entry) => entry.id === guideSection) ?? guide.sections[0];
+
+  useEffect(() => {
+    if (!guideOpen || guideSection !== 'references' || !pendingSourceRef.current) return;
+    const targetId = pendingSourceRef.current;
+    pendingSourceRef.current = null;
+    const frame = window.requestAnimationFrame(() => {
+      focusGuideSource(targetId);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [guideOpen, guideSection]);
 
   const analysis = useMemo(() => analyzeObservation(text, feelingsMode), [feelingsMode, text]);
   const canLoad = Boolean(text.trim());
@@ -377,23 +406,55 @@ export function ObservationsPage() {
       </section>
 
       <section className={styles.overview}>
-        <DisclosureRow variant="section" title="Why add concrete details?" description="What this writing step can do" bodyClassName={styles.overviewBody}><p>Concrete details can make a specific moment easier to remember, explain, or discuss. They do not prove someone’s intent, and they do not replace your feelings or interpretation.</p><div><span>Time</span><span>Place or people</span><span>What you saw or heard</span><span>Number or exact words (optional)</span></div></DisclosureRow>
+        <DisclosureRow variant="section" title={guide.overview.title} description="Research behind the writing approach" bodyClassName={styles.overviewBody}>
+          {guide.overview.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+        </DisclosureRow>
       </section>
 
       <details id="observation-guide" className={styles.guide} open={guideOpen} onToggle={(event) => setGuideOpen(event.currentTarget.open)}>
-        <summary><span><small>Examples and sources</small><strong>Observation guide</strong></span><span aria-hidden="true">›</span></summary>
+        <summary><strong>Research behind observations</strong><span aria-hidden="true">›</span></summary>
         {guideOpen ? <div className={styles.guideCard} onClick={(event) => {
           const target = event.target as Element;
           const link = target.closest<HTMLAnchorElement>('a[href^="#observation-guide-source-"]');
           if (!link) return;
-          const reference = document.querySelector<HTMLElement>(link.getAttribute('href') ?? '');
-          if (!reference) return;
+          const sourceId = link.getAttribute('href')?.slice(1);
+          if (!sourceId) return;
           event.preventDefault();
-          reference.closest('details')?.setAttribute('open', '');
-          window.requestAnimationFrame(() => reference.scrollIntoView({ block: 'center' }));
+          if (guideSection === 'references') {
+            pendingSourceRef.current = null;
+            window.requestAnimationFrame(() => focusGuideSource(sourceId));
+          } else {
+            pendingSourceRef.current = sourceId;
+            setGuideSection('references');
+          }
         }}>
-          {guide.intro ? <header>{guide.intro.eyebrow ? <small>{guide.intro.eyebrow}</small> : null}{guide.intro.title ? <h2>{guide.intro.title}</h2> : null}{guide.intro.paragraphs?.map((paragraph, index) => <p key={index} dangerouslySetInnerHTML={{ __html: paragraph }} />)}</header> : null}
-          <div className={styles.guideSections}>{guide.sections?.map((section) => <details key={section.id}><summary><span><small>{section.eyebrow}</small><strong>{section.title}</strong><span>{section.description}</span></span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
+          <header className={styles.guideIntro}>
+            <h2>{guide.intro.title}</h2>
+            {guide.intro.paragraphs.map((paragraph, index) => <p key={index}><GuideText text={paragraph} /></p>)}
+          </header>
+          <div className={styles.guideNavigation}>
+            <label htmlFor="observation-research-topic">Research topic</label>
+            <select id="observation-research-topic" className={styles.guideSelect} value={guideSection} onChange={(event) => setGuideSection(event.target.value)}>
+              {guide.sections.map((section) => <option key={section.id} value={section.id}>{section.title}</option>)}
+            </select>
+            <nav className={styles.guideTabs} aria-label="Research topics">
+              {guide.sections.map((section) => (
+                <button key={section.id} type="button" aria-pressed={guideSection === section.id} aria-controls="observation-guide-panel" onClick={() => setGuideSection(section.id)}>{section.title}</button>
+              ))}
+            </nav>
+          </div>
+          {activeGuideSection ? <section id="observation-guide-panel" className={styles.guidePanel} aria-label={activeGuideSection.title}>
+            <div className={styles.guidePanelHeading}>
+              <h3>{activeGuideSection.title}</h3>
+            </div>
+            <GuideContent blocks={activeGuideSection.content} />
+            {activeGuideSection.id === 'references' ? <ol className={styles.guideSources}>
+              {guide.sources.map((source, index) => <li key={source.id} id={`observation-guide-source-${source.id}`} tabIndex={-1}>
+                <p>[{index + 1}] {source.citation}</p>
+                <a href={source.url} target="_blank" rel="noopener noreferrer">{source.url}</a>
+              </li>)}
+            </ol> : null}
+          </section> : null}
         </div> : null}
       </details>
 

@@ -1,4 +1,6 @@
 import { expect, test } from './fixtures';
+import observationGuide from '../../src/data/observationGuide.json' with { type: 'json' };
+import refrigeratorTheme from '../../src/features/customizer/refrigeratorTheme.json' with { type: 'json' };
 
 test('mobile keeps observation actions compact and results ahead of secondary controls', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -68,39 +70,157 @@ test('Quick Check shows per-detail guidance without a duplicate recipe', async (
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
-test('the same complete guide is available on phone and desktop', async ({ page }) => {
-  const sections: string[][] = [];
+test('the full research index and source library are available on mobile and desktop', async ({ page }) => {
+  const withoutCitations = (text: string) => text.replace(/\[\d+(?:,\d+)*\]/g, '').trim();
+  for (const width of [320, 390, 759, 760, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/observations');
+    const guide = page.locator('#observation-guide');
+    await guide.locator(':scope > summary').click();
+    await expect(guide.getByRole('heading', { name: 'Research behind observations' })).toBeVisible();
+
+    const picker = guide.locator('select#observation-research-topic');
+    const tabs = guide.getByRole('navigation', { name: 'Research topics', includeHidden: true });
+    await expect(picker.locator('option')).toHaveCount(9);
+    await expect(tabs.locator('button')).toHaveCount(9);
+    if (width < 760) {
+      await expect(picker).toBeVisible();
+      await expect(tabs).toBeHidden();
+    } else {
+      await expect(tabs).toBeVisible();
+      await expect(picker).toBeHidden();
+    }
+    if (width === 390 || width === 1280) {
+      await guide.screenshot({ path: `test-results/observation-guide-${width}.png` });
+    }
+
+    for (const topic of observationGuide.sections) {
+      if (width < 760) await picker.selectOption(topic.id);
+      else await tabs.getByRole('button', { name: topic.title, exact: true }).click();
+      const panel = guide.locator('#observation-guide-panel');
+      await expect(panel.getByRole('heading', { name: topic.title, exact: true })).toBeVisible();
+      const paragraphs = await panel.locator(':scope > p').allTextContents();
+      expect(paragraphs.map(withoutCitations)).toEqual(topic.content.flatMap((block) => 'text' in block && typeof block.text === 'string' ? [withoutCitations(block.text)] : []));
+      await expect(panel.locator('details')).toHaveCount(0);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+      if (topic.id === 'examples' && (width === 390 || width === 1280)) {
+        await panel.screenshot({ path: `test-results/observation-guide-examples-${width}.png` });
+      }
+    }
+
+    await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
+    await expect(guide.locator('#observation-guide-source-gollwitzer-sheeran')).toContainText('[18] Gollwitzer');
+    for (const source of observationGuide.sources) {
+      const link = guide.locator(`#observation-guide-source-${source.id}`).getByRole('link');
+      await expect(link).toHaveText(source.url);
+      await expect(link).toHaveAttribute('href', source.url);
+    }
+    if (width === 390 || width === 1280) {
+      await guide.locator('#observation-guide-source-nock-kurtz').scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `test-results/observation-guide-sources-${width}.png` });
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  }
+});
+
+test('research topics and reference URLs remain contained with doubled phone text', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/observations');
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await page.getByRole('heading', { name: 'Observations', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'test-results/observation-page-large-text-320.png' });
+  const guide = page.locator('#observation-guide');
+  await guide.locator(':scope > summary').click();
+  const picker = guide.getByRole('combobox', { name: 'Research topic', exact: true });
+  await expect(picker).toBeVisible();
+  await picker.selectOption('references');
+  await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
+  const layout = await page.evaluate(() => ({
+    viewport: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+    overflow: [...document.querySelectorAll<HTMLElement>('body *')].flatMap((element) => {
+      const box = element.getBoundingClientRect();
+      if (!box.width || box.right <= document.documentElement.clientWidth) return [];
+      const style = getComputedStyle(element);
+      return [{ tag: element.tagName, class: element.className, text: element.textContent?.trim().slice(0, 50),
+        left: box.left, right: box.right, width: box.width, minWidth: style.minWidth, display: style.display }];
+    }).slice(0, 18),
+  }));
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    { message: JSON.stringify(layout) }).toBe(true);
+  for (const source of observationGuide.sources) {
+    const link = guide.locator(`#observation-guide-source-${source.id}`).getByRole('link');
+    await link.scrollIntoViewIfNeeded();
+    const box = await link.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x, source.id).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width, source.id).toBeLessThanOrEqual(320);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/observation-guide-sources-large-text-320.png' });
+});
+
+test('a study citation opens the matching reference without nested accordions', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/observations');
+  const guide = page.locator('#observation-guide');
+  await guide.locator(':scope > summary').click();
+
+  const citation = guide.getByRole('link', { name: 'Reference 1: Nock & Kurtz' }).first();
+  await citation.click();
+  const source = guide.locator('#observation-guide-source-nock-kurtz');
+  await expect(source).toBeVisible();
+  await expect(source).toContainText('[1] Nock, M. K., & Kurtz, S. M. S. (2005)');
+  await expect(source).toBeFocused();
+  await expect(source.locator('a')).toHaveAttribute('href', 'https://www.sciencedirect.com/science/article/pii/S1077722905800586');
+  await expect(guide.locator('select#observation-research-topic')).toHaveValue('references');
+});
+
+test('grouped introduction references open and focus each matching source repeatedly', async ({ page }) => {
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/observations');
-    await page.locator('#observation-guide > summary').click();
-
-    const headings = page.locator('#observation-guide details > summary strong');
-    await expect(headings).toHaveCount(7);
-    const titles = await headings.allTextContents();
-    sections.push(titles);
-    expect(titles).toContain('When an exact record matters');
-    expect(titles).toContain('Reference library');
-
-    await page.getByText('Reference library', { exact: true }).click();
-    await expect(page.locator('#observation-guide a[id^="observation-guide-source-"]')).toHaveCount(5);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    const guide = page.locator('#observation-guide');
+    await guide.locator(':scope > summary').click();
+    for (const [number, sourceId] of [[5, 'adriani'], [6, 'epinat-duclos'], [5, 'adriani']] as const) {
+      const citation = guide.getByRole('link', { name: new RegExp(`^Reference ${number}:`) }).first();
+      await citation.focus();
+      await page.keyboard.press('Enter');
+      const source = guide.locator(`#observation-guide-source-${sourceId}`);
+      await expect(source).toBeFocused();
+      await expect(source).toBeInViewport();
+      await expect(guide.locator('select#observation-research-topic')).toHaveValue('references');
+    }
   }
-  expect(sections[0]).toEqual(sections[1]);
 });
 
-test('observation guide citations open their matching source within the full library', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/observations');
-  await page.locator('#observation-guide > summary').click();
-  await page.getByText('What counts as an observation', { exact: true }).click();
-
-  const citation = page.locator('#observation-guide a[href="#observation-guide-source-defining-behavior"]').first();
-  await expect(citation).toHaveText('[1]');
-  await citation.click();
-
-  const reference = page.locator('#observation-guide-source-defining-behavior');
-  await expect(reference).toBeVisible();
-  await expect(reference).toContainText('[1] IRIS Center, Vanderbilt University: Defining Behavior');
-  await expect(reference).toHaveAttribute('href', 'https://iris.peabody.vanderbilt.edu/case-study/defining-behavior/');
+test('the approved guide remains usable with the current Refrigerator material', async ({ page }) => {
+  await page.addInitScript((theme) => {
+    localStorage.setItem('nvcApp.theme', JSON.stringify({
+      values: theme.values, preset: theme.name, appearance: theme.appearance, roundness: 0, updatedAt: 123,
+    }));
+  }, refrigeratorTheme);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/observations');
+    await expect(page.locator('html')).toHaveAttribute('data-theme-appearance', 'refrigerator');
+    const guide = page.locator('#observation-guide');
+    await guide.locator(':scope > summary').click();
+    const picker = guide.getByRole('combobox', { name: 'Research topic', exact: true });
+    const tabs = guide.getByRole('navigation', { name: 'Research topics' });
+    const examples = observationGuide.sections.find((section) => section.id === 'examples')!;
+    if (width < 760) await picker.selectOption('examples');
+    else await tabs.getByRole('button', { name: examples.title, exact: true }).click();
+    await expect(guide.locator('#observation-guide-panel article')).toHaveCount(4);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    if (width !== 320) await guide.screenshot({ path: `test-results/observation-guide-refrigerator-${width}.png` });
+    await guide.getByRole('link', { name: 'Reference 1: Nock & Kurtz' }).first().click();
+    const source = guide.locator('#observation-guide-source-nock-kurtz');
+    await expect(source).toBeFocused();
+    await expect(source).toBeInViewport();
+    await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    if (width !== 320) await page.screenshot({ path: `test-results/observation-guide-refrigerator-sources-${width}.png` });
+  }
 });
