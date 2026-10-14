@@ -25,15 +25,17 @@ test('observation help and word previews stay in the check-in; Skip preserves wr
   await start(page, observation);
   await expect(page.getByRole('heading', { name: 'Keep it concrete', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Get help describing what happened' }).click();
-  const help = page.getByRole('dialog', { name: 'Describe what happened' });
+  const help = page.getByRole('dialog', { name: 'Writing tips', exact: true });
   await expect(help).toBeVisible();
-  await expect(help.getByRole('heading', { name: 'Keep it concrete', exact: true })).toBeVisible();
+  await expect(help.getByRole('heading')).toHaveCount(1);
+  await expect(help.getByRole('button')).toHaveCount(1);
+  await expect(help.getByRole('link', { name: 'Observations guide', exact: true })).toBeVisible();
   await expect(help).toContainText('They closed the laptop.');
   await expect(help).toContainText('Your own feelings can stay in the text too.');
-  await expect(help).toContainText('This leaves the check-in');
+  await expect(help).toContainText('Leaves check-in');
   await expect(help).not.toContainText('Quick Check only suggests details');
   await expect(page).toHaveURL(/alexithymia-support$/);
-  await page.getByRole('button', { name: 'Back to my check-in' }).click();
+  await help.getByRole('button', { name: 'Close Writing tips', exact: true }).click();
   await page.getByRole('button', { name: /^Anxiety\s*Feeling$/ }).click();
   const preview = page.getByRole('dialog', { name: 'Anxiety', exact: true });
   await expect(preview.getByRole('button', { name: 'Fits', exact: true })).toHaveCount(0);
@@ -49,6 +51,66 @@ test('observation help and word previews stay in the check-in; Skip preserves wr
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'What happened?', exact: true })).toHaveValue(observation);
 });
+
+for (const viewport of [
+  { width: 320, height: 568 },
+  { width: 390, height: 844 },
+  { width: 1280, height: 900 },
+  { width: 320, height: 568, largeText: true },
+]) {
+  test(`compact observation help contains focus and dismisses without leaving at ${viewport.width}px${viewport.largeText ? ' with doubled text' : ''}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    const observation = 'They closed the laptop.';
+    await start(page, observation);
+    if (viewport.largeText) await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+
+    const trigger = page.getByRole('button', { name: 'Get help describing what happened', exact: true });
+    await trigger.focus();
+    await trigger.press('Enter');
+    const help = page.getByRole('dialog', { name: 'Writing tips', exact: true });
+    const close = help.getByRole('button', { name: 'Close Writing tips', exact: true });
+    const reference = help.getByRole('link', { name: 'Observations guide', exact: true });
+    await expect(close).toBeFocused();
+    await expect(reference).toHaveAttribute('href', '/observations');
+    await expect(reference).toHaveAccessibleDescription('Leaves check-in');
+    await expect(help.getByRole('heading')).toHaveCount(1);
+    await expect(help.getByRole('button')).toHaveCount(1);
+    await expect(help.getByRole('link')).toHaveCount(1);
+    await expect(help.locator('[class*="handle"]')).toHaveCount(0);
+
+    await page.keyboard.press('Tab');
+    await expect(reference).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(close).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(reference).toBeFocused();
+
+    const panel = await help.boundingBox();
+    const link = await reference.boundingBox();
+    expect(panel).not.toBeNull();
+    expect(panel!.x).toBeGreaterThanOrEqual(0);
+    expect(panel!.x + panel!.width).toBeLessThanOrEqual(viewport.width);
+    expect(panel!.y).toBeGreaterThan(0);
+    expect(panel!.y + panel!.height).toBeLessThan(viewport.height);
+    expect(link!.height).toBeGreaterThanOrEqual(44);
+    expect(link!.x + link!.width).toBeLessThanOrEqual(viewport.width);
+    await page.screenshot({ path: `test-results/compact-observation-help-${viewport.width}${viewport.largeText ? '-large-text' : ''}.png` });
+
+    await page.keyboard.press('Escape');
+    await expect(help).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await trigger.press('Enter');
+    await close.click();
+    await expect(trigger).toBeFocused();
+    await trigger.press('Enter');
+    await expect(help).toBeVisible();
+    await page.mouse.click(1, 1);
+    await expect(help).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await expect(page).toHaveURL(/alexithymia-support$/);
+    await expect(page.getByRole('textbox', { name: 'What happened?', exact: true })).toHaveValue(observation);
+  });
+}
 
 for (const viewport of [{ width: 320, height: 568 }, { width: 1280, height: 900 }]) {
   test(`explicit Observations exit preserves both drafts and returns to the same check-in at ${viewport.width}px`, async ({ page }) => {
@@ -66,11 +128,10 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 1280, height: 900 
       return getComputedStyle(workspace).position === 'fixed' ? workspace.scrollTop : window.scrollY;
     });
     await helpButton.click();
-    const help = page.getByRole('dialog', { name: 'Describe what happened' });
-    await expect(help).toContainText('This leaves the check-in');
-    await expect(help).toContainText('use Return to check-in to come back');
+    const help = page.getByRole('dialog', { name: 'Writing tips', exact: true });
+    await expect(help).toContainText('Leaves check-in');
     const originalScroll = await scrollPosition();
-    await help.getByRole('button', { name: 'Open Observations page', exact: true }).click();
+    await help.getByRole('link', { name: 'Observations guide', exact: true }).click();
     await expect(page).toHaveURL(/\/observations$/);
     await expect(page.getByRole('textbox', { name: 'What did you notice?' })).toHaveText(separateObservation);
     await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
@@ -281,10 +342,10 @@ test('unavailable draft storage is reported and reference navigation cannot disc
   await start(page, 'Keep this in-memory observation.');
   await expect(page.getByRole('alert')).toContainText('could not be kept');
   await page.getByRole('button', { name: 'Get help describing what happened' }).click();
-  const help = page.getByRole('dialog', { name: 'Describe what happened' });
-  await help.getByRole('button', { name: 'Open Observations page', exact: true }).click();
+  const help = page.getByRole('dialog', { name: 'Writing tips', exact: true });
+  await help.getByRole('link', { name: 'Observations guide', exact: true }).click();
   await expect(page).toHaveURL(/alexithymia-support$/);
-  await help.getByRole('button', { name: 'Back to my check-in', exact: true }).click();
+  await help.getByRole('button', { name: 'Close Writing tips', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'What happened?', exact: true })).toHaveValue('Keep this in-memory observation.');
   await page.getByRole('button', { name: 'Close check-in', exact: true }).click();
   await expect(page).toHaveURL(/alexithymia-support$/);
