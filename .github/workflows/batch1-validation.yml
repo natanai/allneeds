@@ -1,10 +1,6 @@
-name: Observation guide one-time browser validation
-# Approved application tree: 7deaf8165391fabf8f24c446b03a5ad99ae35a42
+name: Full repository validation
 
 on:
-  push:
-    branches: [agent/observation-guide-validation-2026-10-14]
-    paths: ['.github/workflows/batch1-validation.yml']
   workflow_dispatch:
 
 permissions:
@@ -12,34 +8,32 @@ permissions:
 
 jobs:
   validate:
-    if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'Validate approved Observation guide once (2026-10-14)'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: 24
+
       - name: Enable pnpm
         run: corepack enable
+
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Run foundation checks
         run: pnpm check
         env:
           VITE_BASE_PATH: /
+
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
-      - name: Run Observation guide browser checks
-        run: pnpm exec playwright test tests/e2e/observation-mobile-hierarchy.spec.ts --workers=1
-      - name: Save browser report and visual captures
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: observation-guide-browser-validation
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 3
+
+      - name: Run full browser regression suite serially
+        run: pnpm exec playwright test --workers=1
+
+      - name: Run offline/reconnect verification
+        run: pnpm test:e2e:outage
