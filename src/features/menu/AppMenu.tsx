@@ -148,7 +148,7 @@ export function AppMenu({
 
   const openJournal = () => {
     onClose();
-    void navigate('/inventory/journal?compose=new');
+    void navigate('/inventory/journal?start=new');
   };
 
   const openCustomizer = () => {

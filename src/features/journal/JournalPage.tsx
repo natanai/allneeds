@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { downloadBrowserBackup, restoreBrowserBackup } from '../../persistence/browserBackup';
-import { clearAlexithymiaDraft, clearJournalDraft, readAlexithymiaDraft, readJournalDraft } from '../../persistence/workflowDrafts';
+import { clearAlexithymiaDraft, clearJournalDraft, readAlexithymiaDraft, readJournalDraft, writeAlexithymiaDraftAgainst } from '../../persistence/workflowDrafts';
+import { readJournalEntryPreference, writeJournalEntryPreference, type JournalEntryPreference } from '../../persistence/journalEntryPreference';
 import { useBlueskySession } from '../account/blueskyAccount';
 import { CheckInReturn, type CheckInLocationState, checkInVisit, useCheckInReturnContext } from '../alexithymia/checkInNavigation';
 import { supportTermIndex } from '../alexithymia/alexithymiaTerms';
 import { shapeToJournalMood } from '../alexithymia/shapeCoordinates';
+import { createCheckInDraft } from '../alexithymia/checkInDraft';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { HistoryWorkspace } from './HistoryWorkspace';
 import { JournalBook } from './JournalBook';
@@ -47,7 +49,7 @@ function clearCompletedAlexithymiaCheckIn(entry: JournalRecord) {
 }
 export function JournalPage() {
   const session = useBlueskySession();
-  const { search } = useLocation();
+  const { search, key: locationKey } = useLocation();
   const context = useCheckInReturnContext();
   const navigate = useNavigate();
   const params = new URLSearchParams(search);
@@ -55,15 +57,22 @@ export function JournalPage() {
   const [initialEntryId, setInitialEntryId] = useState(params.get('entry'));
   const [open, setOpen] = useState(() => Boolean(params.get('entry') || params.get('compose') === 'new' || params.get('from') === 'observation' || readJournalDraft() || window.sessionStorage.getItem('allneeds.v2.journal.observationDraft')));
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [entryChoice, setEntryChoice] = useState(false);
+  const [rememberChoice, setRememberChoice] = useState(false);
+  const [entryPreference, setEntryPreference] = useState(readJournalEntryPreference);
   const importRef = useRef<HTMLInputElement>(null);
-  const firstSearch = useRef(true);
-  useEffect(() => {
-    if (firstSearch.current) { firstSearch.current = false; return; }
+  const syncedLocation = useRef(locationKey);
+  const handledStart = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    if (syncedLocation.current === locationKey) return;
+    syncedLocation.current = locationKey;
     const next = new URLSearchParams(search);
+    if (next.get('start') === 'new') return;
     const entryId = next.get('entry');
+    setEntryChoice(false);
     setInitialEntryId(entryId);
     setOpen(Boolean(entryId || next.get('compose') === 'new' || next.get('from') === 'observation'));
-  }, [search]);
+  }, [search, locationKey]);
   useEffect(() => {
     const refresh = () => setEntries(readJournal());
     const storage = (event: StorageEvent) => { if (event.key === JOURNAL_STORAGE_KEY || event.key === null) refresh(); };
@@ -80,10 +89,44 @@ export function JournalPage() {
       } } satisfies CheckInLocationState });
       return;
     }
-    const next = new URLSearchParams(search); next.delete('compose'); next.delete('entry'); next.delete('from');
+    const next = new URLSearchParams(search); next.delete('compose'); next.delete('entry'); next.delete('from'); next.delete('start');
     void navigate(`/inventory/journal${next.size ? `?${next}` : ''}`, { replace: true });
   };
-  const openNew = () => { setInitialEntryId(null); setOpen(true); void navigate('/inventory/journal?compose=new'); };
+  const openNew = () => { setInitialEntryId(null); setOpen(true); void navigate('/inventory/journal?compose=new', { replace: params.get('start') === 'new' }); };
+  const startEntry = (method: Exclude<JournalEntryPreference, 'ask'>, remember = false) => {
+    try {
+      if (remember) { writeJournalEntryPreference(method); setEntryPreference(method); }
+      if (method === 'writing') { setEntryChoice(false); openNew(); return; }
+      const saved = readAlexithymiaDraft();
+      if (saved) {
+        // The existing lane owns resume/discard. A new-entry action never clears it.
+        void navigate('/alexithymia-support', { replace: params.get('start') === 'new' });
+      } else {
+        const draft = { ...createCheckInDraft(), stage: 1 };
+        writeAlexithymiaDraftAgainst(draft, null);
+        void navigate('/alexithymia-support', { replace: params.get('start') === 'new', state: { checkIn: {
+          visit: checkInVisit, id: draft.checkInId!, stage: 1,
+        } } satisfies CheckInLocationState });
+      }
+    } catch { setFeedback({ kind: 'error', message: 'The entry could not be opened. Check available device storage and try again.' }); }
+  };
+  const newEntry = () => {
+    if (readJournalDraft()) { openNew(); return; }
+    const preference = readJournalEntryPreference();
+    setEntryPreference(preference);
+    if (preference !== 'ask') startEntry(preference);
+    else { setOpen(false); setRememberChoice(false); setEntryChoice(true); }
+  };
+  const closeEntryChoice = () => {
+    setEntryChoice(false);
+    if (params.get('start') === 'new') void navigate('/inventory/journal', { replace: true });
+  };
+  useLayoutEffect(() => {
+    if (new URLSearchParams(search).get('start') !== 'new') { handledStart.current = null; return; }
+    if (handledStart.current === locationKey) return;
+    handledStart.current = locationKey;
+    newEntry();
+  }, [search, locationKey]);
   const openEntry = (id: string) => { setInitialEntryId(id); setOpen(true); void navigate(`/inventory/journal?entry=${encodeURIComponent(id)}`); };
   const save = (entry: JournalRecord, editing: boolean) => {
     try {
@@ -113,10 +156,29 @@ export function JournalPage() {
     } catch { setFeedback({ kind: 'error', message: 'Import failed. Choose an allneeds.app backup.' }); }
   };
   return <article className={styles.page}>
-    <header className={styles.header}><h1>History</h1><button type="button" className={styles.newEntry} onClick={openNew} aria-expanded={open} aria-controls="journal-layer">New entry</button></header>
-    <HistoryWorkspace entries={entries} onOpenEntry={openEntry} />
+    <header className={styles.header}><h1>History</h1><div className={styles.entryActions}>
+      <button type="button" className={styles.newEntry} onClick={newEntry} aria-expanded={open || entryChoice} aria-controls={entryChoice ? 'journal-entry-choice' : 'journal-layer'}>New entry</button>
+      {entryPreference !== 'ask' ? <button type="button" className={styles.entryAlternative} onClick={() => startEntry(entryPreference === 'check-in' ? 'writing' : 'check-in')}>{entryPreference === 'check-in' ? 'Write directly' : 'Guided check-in'}</button> : null}
+    </div></header>
     {feedback ? <p className={`${styles.feedback} ${styles[feedback.kind]}`} role="status">{feedback.message}</p> : null}
+    <HistoryWorkspace entries={entries} onOpenEntry={openEntry} />
+    <DisclosureRow title="New entry preference" description={entryPreference === 'check-in' ? 'Guided check-in · This device' : entryPreference === 'writing' ? 'Direct writing · This device' : 'Choose each time'}>
+      <div className={styles.entryPreference}><label htmlFor="journal-entry-start">Start new entries with</label><select id="journal-entry-start" value={entryPreference} onChange={(event) => {
+        const value = event.target.value as JournalEntryPreference;
+        try { writeJournalEntryPreference(value); setEntryPreference(value); }
+        catch { setFeedback({ kind: 'error', message: 'Your starting preference could not be saved on this device.' }); }
+      }}><option value="ask">Choose each time</option><option value="check-in">Guided check-in</option><option value="writing">Direct writing</option></select></div>
+    </DisclosureRow>
     <DisclosureRow variant="card" title="Backup & restore"><p className={styles.localNote}>Journal entries are saved on this device. {session ? 'Saved entries also back up to your profile automatically when online; Account & data shows the last confirmed backup.' : 'Signed out; your entries stay here when you sign in.'} Export or import your journal, inventory, and customizer settings.</p><div className={styles.backupActions}><button type="button" onClick={() => { downloadBrowserBackup(); setFeedback({ kind: 'success', message: `Exported a backup with ${entries.length} journal entries.` }); }}>Export</button><button type="button" onClick={() => importRef.current?.click()}>Import</button><input ref={importRef} type="file" accept="application/json,.json" className="visually-hidden" onChange={importAll} /></div></DisclosureRow>
+    <OverlayShell open={entryChoice} id="journal-entry-choice" variant="dialog" title="New entry" onClose={closeEntryChoice} closeInitialFocus>
+      <div className={styles.entryChoices}>
+        <p>Start with a guided check-in, or write in your own way.</p>
+        <button type="button" className={styles.guidedEntry} onClick={() => startEntry('check-in', rememberChoice)}><strong>Guided check-in</strong><span>Notice body clues, find words, and explore Needs.</span></button>
+        <button type="button" className={styles.directEntry} onClick={() => startEntry('writing', rememberChoice)}>Write directly in Journal</button>
+        <label className={styles.rememberChoice}><input type="checkbox" checked={rememberChoice} onChange={(event) => setRememberChoice(event.target.checked)} />Use this as my starting preference</label>
+        {feedback?.kind === 'error' ? <p role="alert">{feedback.message}</p> : null}
+      </div>
+    </OverlayShell>
     <OverlayShell open={open} id="journal-layer" variant="fullscreen" title="Journal" onClose={closeJournal} closeLabel="Close full screen journal" bodyClassName={styles.modalBody}>
       <div><CheckInReturn /></div>
       {open ? <JournalBook key={initialEntryId ?? 'new'} entries={entries} initialEntryId={initialEntryId} signedIn={Boolean(session)} onSave={save} onRemove={remove} /> : null}

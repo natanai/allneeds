@@ -43,7 +43,6 @@ import {
   statementFromDraft,
   supportStatementBasis,
   catalogOnlyTerms,
-  createSupportJournalDraft,
   customTermId,
   customWorkingTerm,
   fauxFeelingTerms,
@@ -52,7 +51,8 @@ import {
   type SupportTerm,
 } from './alexithymiaTerms';
 import { checkInVisit, type CheckInLocationState } from './checkInNavigation';
-import { shapeToJournalMood, shapeWithJournalMood } from './shapeCoordinates';
+import { createCheckInDraft as emptyDraft, journalDraftFromCheckIn } from './checkInDraft';
+import { shapeWithJournalMood } from './shapeCoordinates';
 import styles from './AlexithymiaSupportPage.module.css';
 
 type SheetKind = 'info' | 'matching' | 'body' | 'shape' | 'candidate' | 'needs' | 'observation' | 'need-preview' | 'replace-statement' | null;
@@ -70,26 +70,6 @@ const bodyOptionById = new Map(bodyRegions.flatMap((region) => region.options.ma
   ...option,
   regionLabel: region.label,
 }])));
-
-function emptyDraft(): AlexithymiaDraft {
-  return {
-    checkInId: crypto.randomUUID(),
-    updatedAt: new Date().toISOString(),
-    stage: 0,
-    observation: '',
-    openRegion: bodyRegions[0]?.id ?? null,
-    selectedCues: {},
-    bodyClear: false,
-    shape: {},
-    decisions: {},
-    termOrder: [],
-    customTerms: [],
-    noWordYet: false,
-    selectedNeeds: [],
-    statement: '',
-    statementEdited: false,
-  };
-}
 
 function shapeClueLabel(dimension: string, value: number) {
   const labels: Record<string, string> = {
@@ -143,7 +123,8 @@ function MatchingSheet({ open, onClose }: { open: boolean; onClose: () => void }
         <h2>A percentage is similarity, not certainty</h2>
         <p><strong>86% match</strong> means that word’s fixed profile is similar to the clues you chose. It does not mean there is an 86% chance that this is what you feel.</p>
       </section>
-      <p>The event text you type is not scored. The app does not infer a Need, diagnose anything, or send the check-in to a language model.</p>
+      <p>Clue-match percentages do not use your observation text. Possibilities brought from Observations are labeled separately; you choose which words and Needs to keep.</p>
+      <p>The app does not diagnose anything or send the check-in to a language model.</p>
       <p className={styles.helperLink}><a href={assetPath('docs/alexithymia-support-methods.md')} target="_blank" rel="noreferrer">Full technical methods &amp; sources ↗</a></p>
     </SupportSheet>
   );
@@ -249,6 +230,20 @@ export function AlexithymiaSupportPage() {
     () => selectExactObservationEntities(analyzeObservation(draft.observation)),
     [draft.observation],
   );
+  const observationTermIds = new Set(draft.observationSuggestions?.termIds ?? []);
+  const observationTerms = [...observationTermIds].flatMap((id) => {
+    const term = termIndex.get(id);
+    return term && draft.decisions[id] !== 'not-this-time' ? [term] : [];
+  });
+  const observationSource = draft.observationSuggestions?.text === draft.observation.trim()
+    ? 'From your observation' : 'From your earlier observation';
+  const observationNeeds = [...new Set([
+    ...(draft.observationSuggestions?.needSlugs ?? []),
+    ...observationMatches.needs.map((need) => need.slug),
+  ])].flatMap((slug) => {
+    const need = needsBySlug.get(slug);
+    return need && !draft.selectedNeeds.includes(slug) ? [need] : [];
+  });
   const cueLabels = bodySelections.map(({ option }) => option.title);
   const clueTray = [
     ...bodySelections.map(({ option, intensity }) => ({ id: `body:${option.id}`, label: `${option.title} · ${Math.round(intensity)}%` })),
@@ -287,16 +282,20 @@ export function AlexithymiaSupportPage() {
   const normalizedWordQuery = wordQuery.trim().toLocaleLowerCase();
   const visibleTerms = useMemo(() => {
     const scope = wordFilter === 'mine' ? selectedTerms
-      : wordFilter === 'all' ? allSearchTerms : completeMatches.map(({ term }) => term);
+      : wordFilter === 'all' ? allSearchTerms : [...new Map([
+        ...observationTerms, ...completeMatches.map(({ term }) => term),
+      ].map((term) => [term.id, term])).values()];
     return scope.filter((term) => !normalizedWordQuery || term.label.toLocaleLowerCase().includes(normalizedWordQuery))
       .sort((left, right) => wordFilter === 'matches' ? 0 : left.label.localeCompare(right.label));
-  }, [allSearchTerms, completeMatches, normalizedWordQuery, selectedTerms, wordFilter]);
+  }, [allSearchTerms, completeMatches, normalizedWordQuery, selectedTerms, wordFilter, observationTerms]);
 
   const visibleWordItems: MagnetBoardItem[] = visibleTerms.map((term) => {
     const score = term.candidate ? scoreByCandidateKey.get(term.candidate.key) : null;
     const percent = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
     const decision = draft.decisions[term.id];
-    const detail = normalizedWordQuery || wordFilter !== 'matches'
+    const detail = observationTermIds.has(term.id)
+      ? `${decision === 'fits' ? 'Fits · ' : decision === 'maybe' ? 'Maybe · ' : ''}${observationSource}`
+      : normalizedWordQuery || wordFilter !== 'matches'
       ? decision === 'fits' ? 'Fits' : decision === 'maybe' ? 'Maybe' : percent === null ? undefined : `${percent}% clue match`
       : percent === null ? undefined : `${percent}% clue match`;
     return {
@@ -312,7 +311,7 @@ export function AlexithymiaSupportPage() {
       },
     };
   });
-  const partialWordItems: MagnetBoardItem[] = partialMatches.map(({ term }) => ({
+  const partialWordItems: MagnetBoardItem[] = partialMatches.filter(({ term }) => !observationTermIds.has(term.id)).map(({ term }) => ({
     id: `alex-partial-${term.id}`,
     label: term.label,
     detail: 'Some clues cannot be compared',
@@ -499,22 +498,7 @@ export function AlexithymiaSupportPage() {
     }
     try {
       persistDraft(draftRef.current);
-      writeJournalDraft(createSupportJournalDraft({
-      observation: draft.observation,
-      terms: selectedTerms,
-      needSlugs: draft.selectedNeeds,
-      statement: draft.statement,
-      mood: shapeToJournalMood(draft.shape, draft.overallMood),
-      bodyClues: bodySelections.map(({ option, intensity }) => ({
-        id: option.id, label: option.title, intensity,
-      })),
-      overallRatings: draft.shape,
-      bodyClear: draft.bodyClear,
-      noWordYet: draft.noWordYet,
-      feelingIntensities: draft.feelingIntensities,
-      decisions: draft.decisions,
-      checkInId: draft.checkInId,
-    }));
+      writeJournalDraft(journalDraftFromCheckIn(draftRef.current));
       openReference('/inventory/journal?compose=new');
     } catch (error) { setStorageError(error instanceof CheckInDraftConflict ? error.message : 'The Journal draft could not be saved. Keep this check-in open and check available device storage.'); }
 
@@ -708,7 +692,7 @@ export function AlexithymiaSupportPage() {
               </section>
               <div className={styles.stickyActions}>
                 <button type="button" className={styles.primaryButton} onClick={() => {
-                  setWordFilter(canCompare ? 'matches' : 'all');
+                  setWordFilter(canCompare || observationTerms.length ? 'matches' : 'all');
                   goToStage(3);
                 }}>Continue to words</button>
               </div>
@@ -753,7 +737,9 @@ export function AlexithymiaSupportPage() {
           <header className={styles.stageHeader}>
             <p>3 of 4 · Words</p>
             <h1 tabIndex={-1} id="alex-stage-three">Possible words</h1>
-            <p>These are words to consider, not answers. More than one may fit, or none yet.</p>
+            <p>{draft.observationSuggestions
+              ? `These are possibilities from your ${draft.observationSuggestions.text === draft.observation.trim() ? 'observation' : 'earlier observation'} and any clues you chose. More than one may fit, or none yet.`
+              : 'These are words to consider, not answers. More than one may fit, or none yet.'}</p>
           </header>
           <div className={styles.wordWorkspace}>
             <div className={styles.wordMain}>
@@ -862,8 +848,8 @@ export function AlexithymiaSupportPage() {
 
               <section className={styles.selectionSection} aria-labelledby="selected-needs-title">
                 <header><div><h2 id="selected-needs-title">What matters to you here?</h2><p>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p></div><button type="button" className={styles.smallAction} onClick={() => setSheet('needs')}>{draft.selectedNeeds.length ? 'Edit Needs' : 'Add Needs'}</button></header>
-                {observationMatches.needs.some((need) => !draft.selectedNeeds.includes(need.slug)) ? (
-                  <div className={styles.wordsAlreadyUsed}><strong>Words you already used</strong>{observationMatches.needs.filter((need) => !draft.selectedNeeds.includes(need.slug)).map((need) => <button key={need.slug} type="button" onClick={() => updateDraft((current) => ({ ...current, selectedNeeds: [...current.selectedNeeds, need.slug] }))}>{need.title}<span aria-hidden="true">+</span></button>)}</div>
+                {observationNeeds.length ? (
+                  <div className={styles.wordsAlreadyUsed} aria-label="Needs from your observation"><strong>{draft.observationSuggestions ? observationSource : 'Words you already used'}</strong>{observationNeeds.map((need) => <button key={need.slug} type="button" aria-label={`Add ${need.title}`} onClick={() => updateDraft((current) => current.selectedNeeds.includes(need.slug) ? current : ({ ...current, selectedNeeds: [...current.selectedNeeds, need.slug] }))}>{need.title}<span aria-hidden="true">+</span></button>)}</div>
                 ) : null}
                 {draft.selectedNeeds.length ? (
                   <MagnetBoard

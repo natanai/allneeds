@@ -26,6 +26,7 @@ import {
   writeBodyCuesDraft,
   writeInventoryDraft,
   writeJournalDraft,
+  writeJournalDraftAgainst,
   writeNeedStrategyDraft,
   writeObservationDraft,
 } from './workflowDrafts';
@@ -40,6 +41,14 @@ function memoryStorage(): StorageDriver {
 }
 
 describe('workflow drafts', () => {
+  it('does not overwrite a Journal draft that appeared after an incoming handoff was prepared', () => {
+    const storage = memoryStorage();
+    const draft = { notes: 'Incoming observation.', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: null };
+    writeJournalDraft({ ...draft, notes: 'Writing from another tab.' }, storage);
+    expect(() => writeJournalDraftAgainst(draft, null, storage)).toThrow(/another tab/);
+    expect(readJournalDraft(storage)?.notes).toBe('Writing from another tab.');
+    expect(() => writeJournalDraftAgainst(draft, null, null)).toThrow(/unavailable/);
+  });
   it('keeps a new journal draft independent from entry edit drafts, including unknown intensity and mood', () => {
     const storage = memoryStorage();
     const draft = { notes: 'New page', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: null };
