@@ -1,39 +1,45 @@
-name: Full repository validation
+name: Observation guide release validation
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [agent/observation-guide-main-validation-2026-10-14]
+    paths: ['.github/workflows/batch1-validation.yml']
 
 permissions:
   contents: read
 
 jobs:
   validate:
+    if: github.ref == 'refs/heads/agent/observation-guide-main-validation-2026-10-14' && github.event.head_commit.message == 'Validate approved Observation guide on current main once (2026-10-14)'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: 24
-
       - name: Enable pnpm
         run: corepack enable
-
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Run foundation checks
         run: pnpm check
         env:
           VITE_BASE_PATH: /
-
-      - name: Install Playwright Chromium
+      - name: Install pinned Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
-
-      - name: Run full browser regression suite serially
-        run: pnpm exec playwright test --workers=1
-
-      - name: Run offline/reconnect verification
+      - name: Run complete browser suite without retries
+        run: pnpm exec playwright test --workers=1 --retries=0
+      - name: Verify offline and reconnect
         run: pnpm test:e2e:outage
+      - name: Preserve browser verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: observation-guide-release-validation
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 3
