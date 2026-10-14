@@ -374,6 +374,14 @@ See `docs/journal-history.md` for persistence, calculations, and review checks.
 
 ## Decision log
 
+### 2026-10-14 — Approved Observation guide integration (validated for site-test; not published)
+
+- The approved short introduction, research introduction, eight guide topics and 18-reference library supersede the earlier preview copy and source set. The [approved package](./observation-research-guide-proposal-2026-10-14.md) owns the wording; the [implementation record](./observation-research-implementation-2026-10-14.md) records foundation, browser and visual verification.
+- Preserve one topic at a time, the existing three-column desktop topic index and native mobile Research topic picker. All screen sizes read one complete canonical dataset.
+- Research reads as the approved explanatory paragraphs with inline numbered citations, rather than separate method/finding/relevance/limit cards. Source-library entries show bibliographic wording and raw publisher or official-resource URLs; internal appraisal notes remain outside the UI.
+- Reference activation selects the library and focuses the matching source. Plain text rendering, Customizer-owned citation targets, focus treatment and wrapping preserve readable, accessible research without introducing a separate control language.
+- Page and Quick Check grids must not impose a wider minimum than the available phone width. Let titles, guide words and Quick Check status rows reflow with enlarged text, preserving labels and Info targets. The strict 320-pixel doubled-text regression covers document and reference-link containment.
+
 ### 2026-10-11
 
 - Approved the distinct page-turning Journal and graph-first History workspace, with a Customizer-colored valence–arousal map in the restored full-screen composer, independent drafts, two default coordinate lines, gap-aware plotting, recurrence, comparisons, context notes, and local print/export. Built from current `main` for `site-test` phone and desktop review.
@@ -386,6 +394,8 @@ See `docs/journal-history.md` for persistence, calculations, and review checks.
 - Profile replacement decisions use genuine browser-native `window.confirm()` dialogs, not an allneeds-styled `alertdialog`. Routine differences require one Load/Cancel confirmation. When local Journal or Inventory records would be removed, one confirmation offers merge; canceling it opens a second confirmation offering discard; canceling both changes nothing. Browser-native dialogs cannot rename their generic OK/Cancel controls, so the complete action and consequence must be stated in each prompt. The secure installed-iOS six-digit handoff remains unchanged; custom account UI remains only for its required code field, active progress, and recoverable errors.
 
 ### 2026-10-11 — Restored Observation research preview (site-test; pending publishing approval)
+
+Historical preview: its copy, evidence-card format and 15-source set are superseded by the approved 2026-10-14 package. The topic-navigation pattern remains current. The earlier source and copy identities below are provenance, not a second active guide.
 
 - Site-test only: return to the original `nvc-app` breadth across methods, concrete language, affect labeling, conflict communication, measurement, needs, and memory limitations. Source evidence is grouped by study method, actual reported result, relevance and limitations, without presenting NVC or the Quick Check as clinically validated.
 - The research area now uses **one topic at a time**, following the older desktop's topic-navigation concept. Wide screens use a compact three-column topic index. Narrow screens use a native Research topic picker. **Content and 15 identified source records are identical at all viewport sizes.** No nested stack of three-line disclosure cards.

@@ -1,5 +1,6 @@
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
@@ -11,12 +12,14 @@
 }
 
 .header > div {
+  min-width: 0;
   display: grid;
   gap: var(--space-1);
 }
 
 .header h1 {
   margin: 0;
+  overflow-wrap: anywhere;
   font-family: var(--font-display);
   font-size: clamp(1.45rem, 4vw, 2.25rem);
   letter-spacing: .01em;
@@ -442,12 +445,14 @@
 .supportRail {
   min-width: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--space-3);
 }
 
 .quickCheck {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-1);
 }
 
@@ -466,6 +471,7 @@
 
 .slots {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   border-block: 1px solid color-mix(in srgb, var(--outline) 13%, transparent);
 }
 
@@ -474,6 +480,7 @@
   padding: .48rem .12rem;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
   color: var(--secondary);
   font-size: var(--text-sm);
@@ -498,7 +505,8 @@
 
 .slotLabel {
   min-width: 0;
-  flex: 1;
+  flex: 1 1 10ch;
+  max-width: calc(100% - .72rem - var(--space-2));
   display: inline-flex;
   align-items: center;
   gap: .1rem;
@@ -605,6 +613,7 @@
 
 .guide {
   overflow: hidden;
+  overflow-wrap: anywhere;
   border-block: 1px solid color-mix(in srgb, var(--outline) 14%, transparent);
 }
 
@@ -655,21 +664,6 @@
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--selection) 15%, var(--quiet));
   font-size: var(--text-sm);
-}
-
-.overviewSources {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .25rem .9rem;
-}
-
-.overviewSources a {
-  min-height: 2rem;
-  display: inline-flex;
-  align-items: center;
-  color: var(--text);
-  font-size: var(--text-sm);
-  text-underline-offset: .14rem;
 }
 
 .guideCard {
@@ -736,12 +730,6 @@
   font-size: var(--text-lg);
 }
 
-.guidePanelHeading > p {
-  margin: .25rem 0 .85rem;
-  color: var(--secondary);
-  font-size: var(--text-sm);
-}
-
 .guidePanel > p {
   max-width: 82ch;
   line-height: 1.52;
@@ -751,62 +739,21 @@
   margin-top: .5rem;
 }
 
-.guideFinding {
-  min-width: 0;
-  margin-block: .95rem;
-  padding: .6rem 0 .6rem .75rem;
-  border-inline-start: 2px solid color-mix(in srgb, var(--outline) 35%, transparent);
-}
-
-.guideFinding + .guideFinding {
-  border-top: 1px solid color-mix(in srgb, var(--outline) 9%, transparent);
-}
-
-.guideFindingTitle {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.guideFindingTitle h4 {
-  min-width: 0;
-  margin: 0 0 .4rem;
-  font-size: var(--text-base);
-}
-
-.guideFindingTitle a {
-  flex: 0 0 auto;
-  min-width: 2.2rem;
-  min-height: 2.2rem;
-  display: inline-grid;
-  place-items: center;
+.guideCitations a {
+  min-width: var(--control-min);
+  min-height: var(--control-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text);
   font-size: var(--text-sm);
   font-weight: 750;
+  text-underline-offset: .14rem;
 }
 
-.guideFinding p {
-  max-width: 84ch;
-  margin: .34rem 0;
-  font-size: var(--text-sm);
-  line-height: 1.5;
-}
-
-.guideFinding p strong {
-  color: var(--text);
-}
-
-.guideFindingLimit {
-  color: var(--secondary);
-}
-
-.guideCallout {
-  margin-block: .8rem;
-  padding: .7rem;
-  border-inline-start: 4px solid var(--outline);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--action) 14%, var(--quiet));
+.guideCitations a:focus-visible {
+  outline: 2px solid var(--outline);
+  outline-offset: 2px;
 }
 
 .guideExamples {
@@ -839,30 +786,30 @@
 
 .guideSources li > a {
   display: inline-block;
+  max-width: 100%;
+  min-height: var(--control-min);
   color: var(--text);
   font-size: var(--text-sm);
-  font-weight: 700;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
 
-.guideSources li > small {
-  display: block;
-  margin-top: .25rem;
-  color: var(--secondary);
-  font-size: var(--text-xs);
-}
-
 .guideSources li > p {
   max-width: 82ch;
-  margin: .3rem 0 0;
-  color: var(--secondary);
+  margin: .3rem 0 .25rem;
+  color: var(--text);
   font-size: var(--text-sm);
   line-height: 1.45;
 }
 
-.guideSources li:target {
+.guideSources li:target,
+.guideSources li:focus {
   background: color-mix(in srgb, var(--selection) 12%, transparent);
+}
+
+.guideSources li:focus-visible {
+  outline: 2px solid var(--outline);
+  outline-offset: 2px;
 }
 
 @media (min-width: 760px) {

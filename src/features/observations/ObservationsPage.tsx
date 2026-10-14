@@ -17,14 +17,12 @@ import styles from './ObservationsPage.module.css';
 const EXAMPLE = "Last Thursday, two days after my partner and I had agreed to have dinner together at home at 7 p.m., I arrived back at the apartment at 6:50 p.m. and started setting the table. At 7:15 p.m. my partner was not home yet, and at 7:20 p.m. I saw a message on my phone sent at 6:55 p.m. that said, 'I decided to stay late at work and will eat here tonight.'";
 
 type GuideBlock =
-  | { type: 'list'; style: 'ordered' | 'unordered'; items: string[] }
-  | { type: 'callout'; html: string }
   | { type: 'paragraph'; text: string }
-  | { type: 'finding'; sourceId: string; title: string; method: string; result: string; meaning: string; limits: string }
-  | { type: 'examples'; items: Array<{ evaluation: string; observation: string; why: string }> };
-type GuideSection = { id: string; title: string; description?: string; content: GuideBlock[] };
-type GuideSource = { id: string; authors: string; year: number | null; title: string; type: string; url: string; fit: string };
+  | { type: 'examples'; items: Array<{ evaluation: string; observation: string }> };
+type GuideSection = { id: string; title: string; content: GuideBlock[] };
+type GuideSource = { id: string; authors: string; citation: string; url: string };
 type GuideData = {
+  overview: { title: string; paragraphs: string[] };
   intro: { title: string; paragraphs: string[] };
   sections: GuideSection[];
   sources: GuideSource[];
@@ -39,32 +37,29 @@ const slotDefinitions = [
 
 const guide = observationGuide as unknown as GuideData;
 
-function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
+function focusGuideSource(sourceId: string) {
+  const source = document.getElementById(sourceId);
+  source?.focus({ preventScroll: true });
+  source?.scrollIntoView({ block: 'nearest' });
+}
+
+export function GuideText({ text }: { text: string }) {
+  return text.split(/(\[\d+(?:,\d+)*\])/g).map((part, index) => {
+    const match = /^\[(\d+(?:,\d+)*)\]$/.exec(part);
+    const numbers = match?.[1];
+    if (!numbers) return part;
+    return <span key={index} className={styles.guideCitations}>{numbers.split(',').map((number) => {
+      const source = guide.sources[Number(number) - 1];
+      if (!source) throw new Error(`Unknown Observation guide reference: ${number}`);
+      return <a key={number} href={`#observation-guide-source-${source.id}`} aria-label={`Reference ${number}: ${source.authors}`}>[{number}]</a>;
+    })}</span>;
+  });
+}
+
+export function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
   return blocks.map((block, blockIndex) => {
-    if (block.type === 'list') {
-      const List = block.style === 'ordered' ? 'ol' : 'ul';
-      return <List key={blockIndex}>{block.items.map((item, itemIndex) => <li key={itemIndex} dangerouslySetInnerHTML={{ __html: item }} />)}</List>;
-    }
-    if (block.type === 'callout') return <aside key={blockIndex} className={styles.guideCallout} dangerouslySetInnerHTML={{ __html: block.html }} />;
-    if (block.type === 'paragraph') return <p key={blockIndex} dangerouslySetInnerHTML={{ __html: block.text }} />;
-    if (block.type === 'finding') {
-      const sourceIndex = guide.sources.findIndex((entry) => entry.id === block.sourceId);
-      const source = guide.sources[sourceIndex];
-      if (sourceIndex < 0 || !source) return null;
-      return (
-        <article key={blockIndex} className={styles.guideFinding}>
-          <div className={styles.guideFindingTitle}>
-            <h4>{block.title}</h4>
-            <a href={`#observation-guide-source-${source.id}`} aria-label={`Reference ${sourceIndex + 1}: ${source.authors}`}>[{sourceIndex + 1}]</a>
-          </div>
-          <p><strong>Research method.</strong> {block.method}</p>
-          <p><strong>Finding.</strong> {block.result}</p>
-          <p><strong>Relevance.</strong> {block.meaning}</p>
-          <p className={styles.guideFindingLimit}><strong>Limit.</strong> {block.limits}</p>
-        </article>
-      );
-    }
-    return <div key={blockIndex} className={styles.guideExamples}>{block.items.map((item, itemIndex) => <article key={itemIndex}><p><strong>Broad wording:</strong> <span dangerouslySetInnerHTML={{ __html: item.evaluation }} /></p><p><strong>More concrete:</strong> <span dangerouslySetInnerHTML={{ __html: item.observation }} /></p><p dangerouslySetInnerHTML={{ __html: item.why }} /></article>)}</div>;
+    if (block.type === 'paragraph') return <p key={blockIndex}><GuideText text={block.text} /></p>;
+    return <div key={blockIndex} className={styles.guideExamples}>{block.items.map((item, itemIndex) => <article key={itemIndex}><p><strong>Starting wording:</strong> {item.evaluation}</p><p><strong>Added event detail:</strong> {item.observation}</p></article>)}</div>;
   });
 }
 
@@ -111,7 +106,7 @@ export function ObservationsPage() {
     const targetId = pendingSourceRef.current;
     pendingSourceRef.current = null;
     const frame = window.requestAnimationFrame(() => {
-      document.getElementById(targetId)?.scrollIntoView({ block: 'nearest' });
+      focusGuideSource(targetId);
     });
     return () => window.cancelAnimationFrame(frame);
   }, [guideOpen, guideSection]);
@@ -342,14 +337,8 @@ export function ObservationsPage() {
       </section>
 
       <section className={styles.overview}>
-        <DisclosureRow variant="section" title="Why try this?" description="Research behind the writing approach" bodyClassName={styles.overviewBody}>
-          <p>Related studies investigate how people remember concrete words, practice specific thinking, label emotions, and use inner speech. Those are four separate research questions, not four trials of this app. Explore the full research guide below for each study’s findings and limitations.</p>
-          <p className={styles.overviewSources}>
-            <a href="https://doi.org/10.3758/s13421-018-0857-x" target="_blank" rel="noopener noreferrer">Concrete-word memory</a>
-            <a href="https://doi.org/10.1037/a0013642" target="_blank" rel="noopener noreferrer">Concreteness training</a>
-            <a href="https://doi.org/10.1111/j.1467-9280.2007.01916.x" target="_blank" rel="noopener noreferrer">Affect labeling</a>
-            <a href="https://doi.org/10.1037/bul0000021" target="_blank" rel="noopener noreferrer">Inner speech review</a>
-          </p>
+        <DisclosureRow variant="section" title={guide.overview.title} description="Research behind the writing approach" bodyClassName={styles.overviewBody}>
+          {guide.overview.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
         </DisclosureRow>
       </section>
 
@@ -362,15 +351,17 @@ export function ObservationsPage() {
           const sourceId = link.getAttribute('href')?.slice(1);
           if (!sourceId) return;
           event.preventDefault();
-          pendingSourceRef.current = sourceId;
-          setGuideSection('references');
           if (guideSection === 'references') {
-            window.requestAnimationFrame(() => document.getElementById(sourceId)?.scrollIntoView({ block: 'nearest' }));
+            pendingSourceRef.current = null;
+            window.requestAnimationFrame(() => focusGuideSource(sourceId));
+          } else {
+            pendingSourceRef.current = sourceId;
+            setGuideSection('references');
           }
         }}>
           <header className={styles.guideIntro}>
             <h2>{guide.intro.title}</h2>
-            {guide.intro.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+            {guide.intro.paragraphs.map((paragraph, index) => <p key={index}><GuideText text={paragraph} /></p>)}
           </header>
           <div className={styles.guideNavigation}>
             <label htmlFor="observation-research-topic">Research topic</label>
@@ -386,14 +377,12 @@ export function ObservationsPage() {
           {activeGuideSection ? <section id="observation-guide-panel" className={styles.guidePanel} aria-label={activeGuideSection.title}>
             <div className={styles.guidePanelHeading}>
               <h3>{activeGuideSection.title}</h3>
-              {activeGuideSection.description ? <p>{activeGuideSection.description}</p> : null}
             </div>
             <GuideContent blocks={activeGuideSection.content} />
             {activeGuideSection.id === 'references' ? <ol className={styles.guideSources}>
-              {guide.sources.map((source, index) => <li key={source.id} id={`observation-guide-source-${source.id}`}>
-                <a href={source.url} target="_blank" rel="noopener noreferrer">[{index + 1}] {source.authors}{source.year ? ` (${source.year})` : ''}. {source.title}</a>
-                <small>{source.type}</small>
-                <p>{source.fit}</p>
+              {guide.sources.map((source, index) => <li key={source.id} id={`observation-guide-source-${source.id}`} tabIndex={-1}>
+                <p>[{index + 1}] {source.citation}</p>
+                <a href={source.url} target="_blank" rel="noopener noreferrer">{source.url}</a>
               </li>)}
             </ol> : null}
           </section> : null}
