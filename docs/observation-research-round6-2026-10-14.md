@@ -2,6 +2,8 @@
 
 Date: 2026-10-14. Base: `site-test` commit `43dd6fa5ba0b389b6d298976aeb6ffb0e7eb06ad`.
 
+**Later same-day decision:** The user delegated source-and-copy approval. The [corrected package](./observation-research-guide-proposal-2026-10-14.md) is approved for educational implementation; the [approval record](./observation-research-editorial-approval-2026-10-14.md) is authoritative for the 18 approved uses and review limits. This Round 6 narrative preserves its preapproval state and access findings.
+
 This pass continues the existing review rather than replacing it. It adds four preview-only sources to the register, separates candidate retention from claim readiness, and prepares an exact guide-copy proposal. User decisions remain **PENDING**. This is a targeted editorial appraisal, not a registered systematic review or an independent clinical validation.
 
 ## Current authoritative record

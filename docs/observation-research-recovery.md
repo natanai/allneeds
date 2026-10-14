@@ -2,7 +2,9 @@
 
 ## Current handoff: 2026-10-14
 
-[Current decisions](./observation-research-current-decisions.md) consolidate the 48 candidates and the four previously unaudited preview references. [Round 6](./observation-research-round6-2026-10-14.md) records source-fit corrections and the difference between retaining background literature and clearing a public claim. A [complete 18-reference copy proposal](./observation-research-guide-proposal-2026-10-14.md) is ready for source and copy review, with **approval PENDING**. Current recommendations: 34 RETAIN, 4 HOLD, 14 EXCLUDE across 52 unique source records. Application data and deployment are not changed by this documentation pass.
+[Current decisions](./observation-research-current-decisions.md) consolidate the 48 candidates and four previously unaudited preview references. The [corrected 18-reference copy package](./observation-research-guide-proposal-2026-10-14.md) is now **APPROVED for educational implementation** under the user's delegated review. The [approval record](./observation-research-editorial-approval-2026-10-14.md) specifies each approved source use and access limitation. Current recommendations remain 34 RETAIN, 4 HOLD, 14 EXCLUDE across 52 records; the other 34 inclusion decisions remain pending. Application data and deployment have not changed.
+
+All dated review sections below preserve their historical approval state. Earlier statements that no sources were approved are superseded only for the 18 uses listed in the current approval record.
 
 Date: 2026-10-11 (restoration staging)  
 Target: `site-test` **only**. This file is a review ledger, not approval to deploy or a completed systematic review.
