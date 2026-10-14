@@ -89,6 +89,9 @@ test('the full research index and source library are available on mobile and des
       await expect(tabs).toBeVisible();
       await expect(picker).toBeHidden();
     }
+    if (width === 390 || width === 1280) {
+      await guide.screenshot({ path: `test-results/observation-guide-${width}.png` });
+    }
 
     for (const topic of observationGuide.sections) {
       if (width < 760) await picker.selectOption(topic.id);
@@ -99,6 +102,9 @@ test('the full research index and source library are available on mobile and des
       expect(paragraphs.map(withoutCitations)).toEqual(topic.content.flatMap((block) => 'text' in block && typeof block.text === 'string' ? [withoutCitations(block.text)] : []));
       await expect(panel.locator('details')).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+      if (topic.id === 'examples' && (width === 390 || width === 1280)) {
+        await panel.screenshot({ path: `test-results/observation-guide-examples-${width}.png` });
+      }
     }
 
     await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
@@ -108,8 +114,34 @@ test('the full research index and source library are available on mobile and des
       await expect(link).toHaveText(source.url);
       await expect(link).toHaveAttribute('href', source.url);
     }
+    if (width === 390 || width === 1280) {
+      await guide.locator('#observation-guide-source-nock-kurtz').scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `test-results/observation-guide-sources-${width}.png` });
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
+});
+
+test('research topics and reference URLs remain contained with doubled phone text', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/observations');
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  const guide = page.locator('#observation-guide');
+  await guide.locator(':scope > summary').click();
+  const picker = guide.getByRole('combobox', { name: 'Research topic', exact: true });
+  await expect(picker).toBeVisible();
+  await picker.selectOption('references');
+  await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
+  for (const source of observationGuide.sources) {
+    const link = guide.locator(`#observation-guide-source-${source.id}`).getByRole('link');
+    await link.scrollIntoViewIfNeeded();
+    const box = await link.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/observation-guide-sources-large-text-320.png' });
 });
 
 test('a study citation opens the matching reference without nested accordions', async ({ page }) => {
