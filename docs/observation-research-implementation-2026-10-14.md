@@ -2,9 +2,9 @@
 
 Date: 2026-10-14. Base: `site-test` commit `3653152cbf1bb5517d681467bae96a68d30e3d8c`.
 
-Status: **PRODUCTION RELEASE AUTHORIZED; COMBINED VERIFICATION IN PROGRESS.** The user authorized preparing the completed guide against their newer `main`, merging, and live deployment on 2026-10-14. This supersedes the original site-test-only publication boundary. [PR #183](https://github.com/natanai/allneeds/pull/183) preserves the reviewed staging integration and its completed checks below.
+Status: **VERIFIED FOR THE AUTHORIZED PRODUCTION RELEASE.** The user authorized preparing the completed guide against their newer `main`, merging, and live deployment on 2026-10-14. This supersedes the original site-test-only publication boundary. [PR #190](https://github.com/natanai/allneeds/pull/190) contains the main-based release. [PR #183](https://github.com/natanai/allneeds/pull/183) preserves the reviewed staging integration and its completed checks below.
 
-Branch: `agent/observation-approved-guide-2026-10-14`.
+Staging branch: `agent/observation-approved-guide-2026-10-14`.
 
 Production integration: `agent/observation-guide-release-2026-10-14`, based on main `82099c28fe8859da4a9e6c1bff3a62df6d4bb4b6`. Carry over the approved guide and research records while retaining current main's check-in handoff, independent drafts, Journal, profile backup, theme, and navigation implementation. The new `ObservationHelpContent` export remains the owner used by check-in help. No site-test branch merge is used to replace newer application files.
 
@@ -47,7 +47,7 @@ The responsive regression covers all nine topics and all source URLs at 320, 390
 
 The ordinary dependency installation encountered a host package-manager error. The supported Sites installer subsequently installed the unchanged locked dependencies successfully and passed the 272-entry supply-chain policy check. No policy bypass, dependency change, lockfile change or new validation workflow was used. The production build completed with its non-failing large-chunk warning; no unrelated bundling changes were made.
 
-## Completed browser gate and next handoff
+## Completed site-test browser gate
 
 The managed workspace still does not expose `control-browser`, so no local preview server or substitute browser was started. Browser checks were completed in GitHub Actions using the repository's existing validation pipeline on an isolated branch. Its temporary push trigger was limited to that branch, the validation file and an explicit validation commit message; it was removed afterward by restoring the original manual-only workflow. Neither the review branch nor `site-test` gains an automatic validation or publishing trigger.
 
@@ -55,4 +55,17 @@ The [final CI run](https://github.com/natanai/allneeds/actions/runs/38605325735)
 
 Physical iPhone Safari, Home Screen, VoiceOver and actual device text-size checks are not certified by this Chromium run. The 200% root-font case is a reflow simulation. It confirms guide and URL containment; it does not certify every shared navigation magnet's enlarged label.
 
-The validated integration is ready for `site-test` review. Publication or merging application changes to `main` still needs separate authorization. No renewed source-and-copy approval is needed unless the approved wording or source uses change.
+The original staging handoff required separate publication authorization; the subsequent user instruction authorizes the production release below. No renewed source-and-copy approval is needed unless the approved wording or source uses change.
+
+## Main-based release verification
+
+The integration retains main's current check-in handoff and shared `ObservationHelpContent` export, Journal entry doorway, profile backup, Refrigerator material, navigation and persistence logic. The only changed runtime files are the guide data, Observation page and its CSS Module. The approved copy and source URLs remain byte-for-byte identical to the staged guide. All 65 relative links in the carried-over research records resolve.
+
+- Foundation checks passed locally and in GitHub Actions: 366 unit tests in 66 files, typecheck, both compiled-data freshness checks, production build, and verification of 151 runtime assets and two local fonts.
+- The [complete browser sweep](https://github.com/natanai/allneeds/actions/runs/38650512626) completed 171 cases without retries: 169 passed, including all seven guide cases, native layout checks, the current Refrigerator material, and the Observation-to-check-in flows. Two existing check-in fixtures acted during route transitions. The trace showed the Body Cues test editing the closing sheet's slider, and the Journal test pressing Escape before its destination dialog opened.
+- Explicit destination readiness checks retain the original assertions rather than adding delays or weakening expected data. The [49-case follow-up](https://github.com/natanai/allneeds/actions/runs/38652098124) passed 48 cases, including Journal dismissal and every guide case. One later Body Cues excursion exposed the same old-sheet race, so all four excursions now wait for the full tool and the closing sheet's removal.
+- The [final validation](https://github.com/natanai/allneeds/actions/runs/38652725037) passed foundation checks, the complete Body Cues handoff three times without retries, and offline/reconnect verification. It preserves the applied 80% clue, the separate 15% tool draft, unapplied 85% edits, subsequent 95% edits, and the absence of a stale-draft alert. Offline coverage includes version-safe cache-first upgrade, a fresh offline client, cached deep routes, same-port restart and cache-miss reconnect.
+- Application bytes were unchanged after the complete sweep; the follow-ups changed only two test fixtures. Final application/test source is `01d75c78e84f31c82ff7164ba05ae3f61d83197d`. Its isolated validation snapshot differs only in the temporary workflow. Subsequent release-record changes are documentation only. These results cover the 171 distinct browser cases across runs; they are not a claim that one uninterrupted full-suite run was green.
+- Phone/desktop guide, examples, bibliography, doubled-text and Refrigerator captures were inspected. All nine topics and 18 raw source links remain contained and accessible. Physical iPhone Safari, Home Screen and VoiceOver evaluation remains the user's device-review step.
+
+The temporary validation trigger was restored to the original manual-only workflow after completion (`705dbcdd26c4435fe4f339ca9a3e3013224fcb8d`). PR #190 contains no workflow change. The existing main Pages pipeline owns publication after merge.

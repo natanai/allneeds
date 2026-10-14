@@ -1,12 +1,12 @@
 # Observation research: current source decisions
 
-Updated: 2026-10-14. Research target: `site-test`. **The corrected 18-source core package is APPROVED for educational implementation through delegated editorial review.** The other 34 records retain pending inclusion decisions. See the [approval record](./observation-research-editorial-approval-2026-10-14.md) for the exact claims, review basis and limits.
+Updated: 2026-10-14. Research review began on `site-test`; the user subsequently authorized the main-based production release. **The corrected 18-source core package is APPROVED for educational implementation through delegated editorial review.** The other 34 records retain pending inclusion decisions. See the [approval record](./observation-research-editorial-approval-2026-10-14.md) for the exact claims, review basis and limits.
 
 This is the current navigation and decision record. It preserves the latest 48-source recommendations and adds four sources already present in the preview but previously outside that audit. Earlier source cards remain historical assessments; their different counts and recommendations are not the current register.
 
 Implementation status: the [exact approved guide is validated for site-test review](./observation-research-implementation-2026-10-14.md) through [PR #183](https://github.com/natanai/allneeds/pull/183). Foundation checks pass, including 330 tests; all six scoped Chromium cases pass, covering topics, references, focus and enlarged-text containment. This does not alter the 18 core approvals or authorize production deployment.
 
-Release update, 2026-10-14: the user subsequently authorized preparation against current `main`, completion checks, merge, and live deployment for phone review. The [implementation record](./observation-research-implementation-2026-10-14.md) tracks this production integration. This release authorization leaves the approved educational wording and source-to-claim decisions unchanged.
+Release update, 2026-10-14: the user authorized preparation against current `main`, completion checks, merge, and live deployment for phone review. [PR #190](https://github.com/natanai/allneeds/pull/190) preserves main's newer workflows and integrates only the approved guide and its records. The [implementation record](./observation-research-implementation-2026-10-14.md) records 366 passing unit tests, browser sweep and fixture corrections, final repeated handoff and offline/reconnect checks, and visual review. This release authorization leaves the approved educational wording and source-to-claim decisions unchanged.
 
 ## What a recommendation means
 
