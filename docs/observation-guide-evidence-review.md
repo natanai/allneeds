@@ -3,6 +3,8 @@
 Date: 2026-10-11  
 Scope: `src/data/observationGuide.json` and its React renderer on `/observations`.
 
+Status, 2026-10-14: **HISTORICAL FIVE-SOURCE REVIEW, SUPERSEDED.** Its citation numbers and source set describe the October 11 consolidation, not the current approved guide. Use the [approved 18-reference package](./observation-research-guide-proposal-2026-10-14.md), [source-to-claim approval](./observation-research-editorial-approval-2026-10-14.md), [current decisions](./observation-research-current-decisions.md), and [implementation/validation record](./observation-research-implementation-2026-10-14.md) for current work. The historical findings below remain as provenance.
+
 ## Ownership and reader experience
 
 The former `desktop.sections` and `mobile.sections` were independently authored sets of guidance. The production React page rendered only `mobile.sections` at every viewport, so the longer legacy guide was retained as unused content rather than providing desktop users with more information.

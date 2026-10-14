@@ -594,7 +594,7 @@ test.describe('mobile native-shell contracts', () => {
     await expect(page.getByRole('button', { name: 'Open customizer' })).toBeHidden();
 
     const editorBox = await page.getByLabel('What did you notice?').boundingBox();
-    const guidanceBox = await page.locator('details').filter({ hasText: 'Why add concrete details?' }).boundingBox();
+    const guidanceBox = await page.locator('details').filter({ hasText: 'Why try this?' }).boundingBox();
     expect(editorBox).not.toBeNull();
     expect(guidanceBox).not.toBeNull();
     expect(editorBox!.y).toBeLessThan(guidanceBox!.y);

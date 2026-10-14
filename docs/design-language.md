@@ -420,6 +420,14 @@ See `docs/journal-history.md` for persistence, calculations, and review checks.
 
 ## Decision log
 
+### 2026-10-14 — Approved Observation guide integration (production release authorized)
+
+- The approved short introduction, research introduction, eight guide topics and 18-reference library supersede the earlier preview copy and source set. The [approved package](./observation-research-guide-proposal-2026-10-14.md) owns the wording; the [implementation record](./observation-research-implementation-2026-10-14.md) records foundation, browser and visual verification.
+- Preserve one topic at a time, the existing three-column desktop topic index and native mobile Research topic picker. All screen sizes read one complete canonical dataset.
+- Research reads as the approved explanatory paragraphs with inline numbered citations, rather than separate method/finding/relevance/limit cards. Source-library entries show bibliographic wording and raw publisher or official-resource URLs; internal appraisal notes remain outside the UI.
+- Reference activation selects the library and focuses the matching source. Plain text rendering, Customizer-owned citation targets, focus treatment and wrapping preserve readable, accessible research without introducing a separate control language.
+- Page and Quick Check grids must not impose a wider minimum than the available phone width. Let titles, guide words and Quick Check status rows reflow with enlarged text, preserving labels and Info targets. The strict 320-pixel doubled-text regression covers document and reference-link containment.
+
 ### 2026-10-11
 
 - Approved the distinct page-turning Journal and graph-first History workspace, with a Customizer-colored valence–arousal map in the restored full-screen composer, independent drafts, two default coordinate lines, gap-aware plotting, recurrence, comparisons, context notes, and local print/export. Built from current `main` for `site-test` phone and desktop review.
@@ -434,7 +442,7 @@ See `docs/journal-history.md` for persistence, calculations, and review checks.
 ### 2026-10-11 — Observation guidance consolidation
 
 - Observation Quick Check is the primary writing prompt. Its four existing detected-detail rows each have a compact Info circle with an accessible touch target and a short explanation/example. The former separate Observation recipe disclosure is retired; the example sentence and deeper research guide remain available.
-- One canonical Observation guide is now rendered identically on mobile and desktop, with optional expanding sections, a unified source library, and consecutively numbered first-use citations. Smaller screens stack worked examples; wide screens place pairs side by side. The old separate desktop/mobile JSON copies, repetitive writing recipe, and misidentified citations were retired after the source-to-claim review in `docs/observation-guide-evidence-review.md`.
+- One canonical Observation guide is rendered identically on mobile and desktop, with one active research topic, a unified source library, and consecutively numbered first-use citations. Smaller screens stack worked examples; wide screens place pairs side by side. The old separate desktop/mobile JSON copies, repetitive writing recipe, and misidentified citations were retired after the source-to-claim review in `docs/observation-guide-evidence-review.md`.
 - `Found` describes local pattern detection, not a truth or completeness score. The additional guidance does not demand removal of feelings or interpretations.
 
 ### 2026-10-10
