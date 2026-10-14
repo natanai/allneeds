@@ -2,7 +2,7 @@
 
 > Status: living document. Start here before changing explanatory, psychological, behavioral, health, strategy, or research-facing copy in allneeds.
 >
-> Last updated: 2026-08-28.
+> Last updated: 2026-10-14.
 
 ## Purpose
 
@@ -841,6 +841,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-08-28 | Alexithymia Support | Complete present-moment lane, fixed-catalog roles, shared scoring, source package, and no-recommendation boundary approved | Implemented on combined review branch; browser/device validation pending |
 | 2026-08-29 | Observation and Alexithymia support | Plain-language labels, internal-only surface terms, deliberate annotation activation, and non-invalidating guidance approved | Implemented on test branch; browser/device validation pending |
 | 2026-10-14 | Observation research continuation | [52-record source register](./observation-research-current-decisions.md), four preview-source appraisals, and [complete 18-reference copy proposal](./observation-research-guide-proposal-2026-10-14.md) prepared; source and exact-copy decisions PENDING | Research documentation only; no public implementation or deployment approval |
+| 2026-10-14 | Observation source and copy approval | User delegated the review/approval decision; [corrected complete 18-source package](./observation-research-guide-proposal-2026-10-14.md) approved for its exact educational claims after clinical-evidence and academic editorial review. [Approval record](./observation-research-editorial-approval-2026-10-14.md) documents corrections, source access and scope; other 34 records remain pending | Authorized for educational implementation on site-test; not yet implemented. No main merge or deployment authorization; no independent licensed-clinician sign-off or app clinical validation |
 
 ## Implementation notes / handoff
 

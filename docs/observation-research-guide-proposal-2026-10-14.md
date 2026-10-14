@@ -1,16 +1,16 @@
-# Observation research guide: complete copy proposal
+# Observation research guide: approved source and copy package
 
-Status: **PENDING USER APPROVAL**. This document proposes exact public copy and 18 references. It does not authorize implementation or deployment.
+Status: **APPROVED FOR EDUCATIONAL IMPLEMENTATION, 2026-10-14**, through the user's delegated clinical-evidence and academic editorial review. Approval covers the exact copy and 18 source-to-claim uses below. It is an AI-assisted editorial decision, not independent licensed-clinician sign-off or clinical validation of allneeds. See the [approval record](./observation-research-editorial-approval-2026-10-14.md) for the review, access limits and version fingerprint. Application implementation and deployment have not occurred in this documentation pass.
 
-Scope: replace the staged research introduction and guide copy together. Retain the existing desktop topic index, native mobile topic picker, citation navigation, contextual Quick Check help and one canonical dataset for all screen sizes. The broader 52-source review remains in the research record. Source roles and appraisal limits are mapped in [Round 6](./observation-research-round6-2026-10-14.md); candidate retention is not source or copy approval.
+Scope: replace the staged research introduction and guide copy together. Retain the existing desktop topic index, native mobile topic picker, citation navigation, contextual Quick Check help and one canonical dataset for all screen sizes. The broader 52-source review remains in the research record. The [current source register](./observation-research-current-decisions.md) distinguishes these 18 approved uses from optional or held sources. Approval permits implementation of this package on `site-test`; publishing or merging application changes to `main` requires separate authorization.
 
-## Proposed short introduction: Why try this?
+## Approved short introduction: Why try this?
 
 Start with the event you are responding to, then explore how you feel and what matters to you. The research guide below explains what related studies have tested and found.
 
-## Proposed research introduction: Research behind observations
+## Approved research introduction: Research behind observations
 
-Professional observation methods record particular actions and their context.[1] Related intervention studies give a mixed picture. A depression trial found improvement with concrete-thinking training compared with usual care, without a clear symptom advantage over relaxation.[2] An emotion-labeling exposure experiment found a physiological benefit, while other experiments found naming could impede subsequent regulation.[3,4] Research on Nonviolent Communication (NVC) training examines selected outcomes in specific settings.[5,6]
+Professional observation methods record particular actions and their context.[1] Related intervention studies give a mixed picture. A depression trial found improvement with concrete-thinking training compared with usual care, without a clear symptom advantage over relaxation.[2] In a spider-exposure experiment, emotion labeling produced a larger reduction in a physiological response than the other conditions.[3] In other laboratory tasks, naming emotions reduced the immediate effects of later regulation strategies.[4] Research on Nonviolent Communication (NVC) training examines selected outcomes in specific settings.[5,6]
 
 The findings below belong to the particular tasks and training programs that were studied. These sources do not establish the clinical effectiveness of the allneeds app.
 
@@ -34,29 +34,29 @@ Fausey and Boroditsky varied whether descriptions of accidents named an agent or
 
 ## Concrete reflection and writing
 
-Watkins and colleagues studied repeated guided concrete-thinking exercises in 121 people with major depression. Adding training to usual care improved depressive symptoms compared with usual care alone. Symptoms were not significantly different from the relaxation-training comparison, although rumination and overgeneralization differed after treatment.[2] Repeated therapeutic exercises are a larger intervention than adding a date or count to one observation.
+Watkins and colleagues studied repeated guided concrete-thinking exercises in 121 people with major depression. Adding training to usual care improved depressive symptoms compared with usual care alone. The trial did not find a statistically significant symptom advantage over relaxation training. Concrete-thinking training reduced rumination, or repetitive negative thinking, and the tendency to draw broad conclusions from particular experiences more than relaxation after treatment.[2] Repeated therapeutic exercises are a larger intervention than adding a date or count to one observation.
 
-Studies of emotional disclosure investigate another kind of writing. Frattaroli's synthesis of 146 randomized studies reported a small positive average effect.[12] Meads and Nouwen's review of 61 trials found no clear improvement in objectively measured physical health and most other outcomes.[13] The reviews used different inclusion criteria and outcomes, so their estimates should not be treated as analyses of an identical set of trials. They do not establish that a particular journaling format improves health.
+Studies of emotional disclosure investigate another kind of writing. Frattaroli's 2006 synthesis of 146 randomized studies reported a small positive average effect across the outcomes it examined.[12] Meads and Nouwen's 2005 review of 61 trials found no clear improvement in objectively measured physical health and most other outcomes.[13] The reviews used different inclusion criteria and outcomes, so their estimates should not be treated as analyses of an identical set of trials. These historical syntheses do not establish that a particular journaling format improves health.
 
 ## Feelings and naming
 
-In an experiment with 88 people afraid of spiders, Kircanski and colleagues combined exposure with different verbal tasks. At a one-week test, the emotion-labeling group had lower skin-conductance responses than the other groups, but did not report less fear.[3] A physiological difference and feeling better are different outcomes.
+In an experiment with 88 people afraid of spiders, Kircanski and colleagues combined exposure with different verbal tasks or exposure alone. At a one-week test, the emotion-labeling group showed a greater reduction in skin conductance, a physiological response measure, than the other groups. There was no statistically significant group difference in self-reported fear.[3] A physiological difference and feeling better are different outcomes.
 
-Naming is also sensitive to what happens next. In two aversive-image experiments, Nook and colleagues found that naming emotions before reappraisal or mindful acceptance reduced those strategies' immediate effectiveness.[4] Reappraisal means reconsidering a situation's meaning. A 2026 study with 226 participants replicated interference with reappraisal and did not find a delayed benefit one to two days later.[14]
+Naming is also sensitive to what happens next. In two experiments using unpleasant images, Nook and colleagues found that naming emotions before reappraisal or mindful acceptance reduced those strategies' immediate effects on reported negative emotion.[4] Reappraisal means reconsidering a situation's meaning; mindful acceptance means allowing an emotion to be present without trying to change it. A 2026 paper reporting two experiments with 226 participants replicated interference with reappraisal and did not find a delayed benefit one to two days later.[14]
 
 These experiments give reasons to avoid promising that naming a feeling will always reduce distress. Here, Feeling words are possibilities to consider in describing your experience. You can choose several, use your own wording or leave that step open.
 
 ## Communication
 
-Rogers and colleagues asked participants to evaluate hypothetical conflict openings. Statements using I-language and communicating perspective were rated as less likely to evoke hostility or defensiveness.[15] These were judgments about imagined exchanges, rather than observations of conflicts being resolved.
+Rogers and colleagues asked participants to evaluate hypothetical conflict openings. They varied “I” versus “you” wording and whether a statement acknowledged the speaker's or other person's perspective. Using “I” wording and acknowledging perspective each received lower ratings of likely hostility or defensiveness.[15] These were judgments about imagined exchanges, rather than observations of conflicts being resolved.
 
-Sanford studied 77 couples across repeated conflict discussions. Changes in appraisals were associated with changes in observed communication.[16] Because appraisals were not experimentally assigned, that association does not establish that revising a sentence causes a better conversation.
+Sanford studied 77 recently married couples across repeated conflict discussions. Changes in appraisals, their interpretations and expectations about the interaction, were associated with changes in observed communication.[16] Because appraisals were not experimentally assigned, that association does not establish that revising a sentence causes a better conversation.
 
 You can describe what happened and why it mattered without requiring the other person to agree with your interpretation.
 
 ## Needs and motivation
 
-Basic Psychological Need Theory, within Self-Determination Theory, examines autonomy, competence and relatedness. Vansteenkiste and colleagues review research and criteria used to study those constructs.[17] The broader Need vocabulary used here belongs to an NVC-informed framework. Research on three particular constructs does not validate every label in that vocabulary or identify your Need from a Feeling.
+Basic Psychological Need Theory, within Self-Determination Theory, examines autonomy, competence and relatedness. These concern acting with a sense of choice, feeling capable and experiencing connection with others. Vansteenkiste and colleagues review research and criteria used to study those constructs.[17] The broader Need vocabulary used here belongs to an NVC-informed framework. Research on three particular constructs does not validate every label in that vocabulary or identify your Need from a Feeling.
 
 Research on action planning asks a different question. Gollwitzer and Sheeran synthesized 94 tests of plans linking a specified situation to an intended action, often called if–then plans, and reported benefits for goal attainment.[18] Those planned cue–action links are a distinct intervention from browsing a strategy list. Their results should not be assigned to the app's strategy collection.
 
@@ -66,13 +66,13 @@ The practical pathway here is Observation or situation → Feeling → Need or v
 
 Adriani and colleagues' 2024 healthcare scoping review included seven heterogeneous publications, two of which were experimental. Other included work comprised reflections, a review, mixed methods and an experience report.[5] This maps a small literature with varied methods; it does not provide a pooled estimate of clinical effectiveness.
 
-A French medical-student study randomly allocated 312 students to NVC training or a control group. Only 153 completed both assessment points. After 2.5 days of training, the researchers reported a small improvement on selected physician-empathy self-rating questions at three months, without equivalent benefits established across the performance tasks.[6] This concerns an educational training package and selected measures. It does not demonstrate improved patient care or the effect of the app's brief Observation step.
+A French medical-student study randomly allocated 312 students to NVC training or a control group. Only 153 completed both assessment points. After 2.5 days of training, the researchers reported an increase on selected physician-empathy self-rating questions at three months. The cognitive performance tasks did not show statistically significant training effects.[6] This concerns an educational training package and selected measures. It does not demonstrate improved patient care or the effect of the app's brief Observation step.
 
 Studies of separate components and training packages cannot establish whether combining them in this interface produces the same outcomes. The source list keeps those research questions distinguishable.
 
 ## Practice and limits
 
-The following are writing examples, not treatment protocols or judgments about whether the original statement is true.
+The following are fictional writing examples, not treatment protocols or judgments about whether the starting statement is true.
 
 | Starting wording | Added event detail |
 | --- | --- |
@@ -81,7 +81,7 @@ The following are writing examples, not treatment protocols or judgments about w
 | “He left to hurt me.” | “He left at 9:10 p.m. without saying goodbye. I felt hurt and wondered whether it was deliberate.” |
 | “You were rude in the meeting.” | “During the 2:00–2:15 agenda item, you spoke twice while I was talking. Those interruptions felt rude to me.” |
 
-Use a time, quotation or count when you have it and it helps describe the event. Mark estimates or uncertainty rather than inventing precision. An interpretation, including a description of harm or coercion, can remain alongside the actions or words behind it.
+Use a time, quotation or count when you have it and it helps describe the event. Mark estimates or uncertainty rather than inventing precision. Your feelings and interpretation can remain alongside the event details. If you are describing harm or coercion, keep that information; adding detail should not soften or erase it.
 
 The page's highlights and Quick Check match local wording patterns. They cannot determine what happened, someone else's intent or whether an account deserves belief. You can ignore a prompt that does not fit.
 
@@ -91,7 +91,7 @@ The page's highlights and Quick Check match local wording patterns. They cannot 
 https://www.sciencedirect.com/science/article/pii/S1077722905800586
 
 [2] Watkins and colleagues (2012). *Guided self-help concreteness training as an intervention for major depression in primary care: a Phase II randomized controlled trial*. Psychological Medicine. Randomized intervention trial.
-https://pubmed.ncbi.nlm.nih.gov/22085757/
+https://www.cambridge.org/core/journals/psychological-medicine/article/guided-selfhelp-concreteness-training-as-an-intervention-for-major-depression-in-primary-care-a-phase-ii-randomized-controlled-trial/571A1B5745948C25280FDB600DF58A01
 
 [3] Kircanski, K., Lieberman, M. D., & Craske, M. G. (2012). *Feelings Into Words: Contributions of Language to Exposure Therapy*. Psychological Science. Exposure experiment.
 https://journals.sagepub.com/doi/10.1177/0956797612443830

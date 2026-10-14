@@ -2,9 +2,11 @@
 
 ## Current handoff: 2026-10-14
 
-Use [current source decisions](./observation-research-current-decisions.md) for the consolidated 52-record register and [the complete proposed guide copy](./observation-research-guide-proposal-2026-10-14.md) for the 18 proposed core references. Current recommendations: **34 RETAIN / 4 HOLD / 14 EXCLUDE**; all user decisions remain PENDING. The discovery-round counts below are historical. Source retention and approval of exact public claims are separate decisions.
+Use [current source decisions](./observation-research-current-decisions.md) for the consolidated 52-record register. The [corrected guide copy and its 18 core sources](./observation-research-guide-proposal-2026-10-14.md) are **APPROVED for educational implementation** through delegated editorial review; see the [source-to-claim approval record](./observation-research-editorial-approval-2026-10-14.md). Recommendations remain **34 RETAIN / 4 HOLD / 14 EXCLUDE**, with 18 approved core uses and 34 pending inclusion decisions. App implementation and deployment have not occurred.
 
-**Scope:** Candidate research for the fuller Observation study guide in natanai/allneeds. Documentation on site-test only. No source is approved yet. No changes to public site copy, main, or deployment.
+The sections and source cards below are historical discovery-round records, including their original PENDING statements. The current register and approval record supersede those statements only for the selected 18 uses. Candidate retention alone never approves a public claim.
+
+**Historical Round 1 scope:** Candidate research for the fuller Observation study guide in natanai/allneeds. Documentation on site-test only. No source is approved yet. No changes to public site copy, main, or deployment.
 
 **What was done:** Targeted discovery from academic journal publishers, PubMed, PMC, scholarly institutional records and DOI identifiers. Initial checks of study design, results and claim fit; not an exhaustive systematic review or independent scholarly peer review. Some publications were accessible in full; some were checked at abstract/metadata level only. Each candidate needs a complete methods/results/bias review before a claim is published.
 
