@@ -24,6 +24,7 @@ describe('route presentation', () => {
     expect(routePresentation('/inventory/journal', '?entry=saved-page').label).toBe('Journal entry');
     expect(routePresentation('/inventory/journal', '?compose=new').documentTitle)
       .toBe('New journal entry • allneeds.app');
+    expect(routePresentation('/inventory/journal', '?start=new').label).toBe('New journal entry');
   });
 
   it('uses catalog labels for detail routes and explicit not-found titles', () => {

@@ -1,6 +1,7 @@
 How feeling-word matching works
 
 Last reviewed: 2026-08-30
+Workflow notes updated: 2026-10-14
 
 Plain-language summary
 
@@ -8,7 +9,9 @@ This check-in helps when feelings are hard to identify or describe. That difficu
 
 You can choose body sensations, rate a few parts of the overall feeling, or browse without choosing clues. The app compares only the clues you choose with fixed descriptions of emotion words. A displayed percentage means “similar to these clues,” not “this is probably what you feel.” More than one word can fit, and you make the final choice.
 
-The app does not score what you wrote about the event. It does not infer a Need, select a word for you, diagnose anything, or send the check-in to a language model.
+Clue-match percentages do not use what you wrote about the event. The app does not select a word or Need for you, diagnose anything, or send the check-in to a language model.
+
+When you continue from Observations, its possible Feeling and Need words remain available with a source label. Those possibilities come from the separate local Observation vocabulary and relationships, not from the body/overall clue comparison. Changing body clues does not erase them. If you revise your check-in text, the earlier possibilities are labeled as coming from your earlier observation. They remain suggestions until you choose what to keep.
 
 Body clues
 
@@ -74,7 +77,7 @@ The app does not assign a percentage to:
 - Needs you choose
 - your Fits, Maybe, or Not this time decisions
 
-Recognized Feeling, Need, and Faux Feeling words in the event text become reference links only. The app does not select or insert them.
+Recognized Feeling and Faux Feeling words in the event text can open previews. Recognized Need words can be offered for you to add. The app does not select or insert them automatically. Only the words and Needs you keep are transferred as choices into Journal.
 
 What the word labels mean
 

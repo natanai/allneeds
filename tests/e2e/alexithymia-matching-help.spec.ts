@@ -22,7 +22,7 @@ test('matching help stays behind the Info disclosure before the technical method
   await expect(sheet).toBeVisible();
   await expect(sheet.getByText('A percentage is similarity, not certainty')).toBeVisible();
   await expect(sheet.getByText(/does not mean there is an 86% chance/i)).toBeVisible();
-  await expect(sheet.getByText(/event text you type is not scored/i)).toBeVisible();
+  await expect(sheet.getByText(/clue-match percentages do not use your observation text/i)).toBeVisible();
 
   const technical = sheet.getByRole('link', { name: /Full technical methods & sources/i });
   await expect(technical).toHaveAttribute('href', /docs\/alexithymia-support-methods\.md$/);

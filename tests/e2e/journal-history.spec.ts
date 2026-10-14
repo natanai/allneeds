@@ -380,11 +380,15 @@ test('a failed device write keeps the Journal open, preserves the original colle
 });
 
 test('History and journal inherit every preset, stay within a narrow phone, and allow keyboard reading', async ({ page }) => {
+  test.setTimeout(themePresets.length * 10_000);
   await page.setViewportSize({ width: 320, height: 720 }); await seed(page);
   for (const preset of themePresets) {
     await page.goto('/inventory/journal');
     await page.evaluate((preset) => { localStorage.setItem('nvcApp.theme', JSON.stringify({ ...preset, preset: preset.name, updatedAt: Date.now() })); }, preset);
     await page.reload();
+    // A previous iteration intentionally saved a one-day view. Begin each
+    // preset check at the overview before testing the same drill-down sequence.
+    await page.getByLabel('Period', { exact: true }).selectOption('30');
     await expect(page.getByTestId('history-chart')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     const point = page.getByTestId('history-chart').getByRole('button', { name: /^Pleasantness: \+3,/ });

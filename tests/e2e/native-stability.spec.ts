@@ -228,7 +228,7 @@ test('Bluesky account and profile paths are actionable instead of placeholder co
 
   await handle.fill('nathanael.ink');
   await expect(signIn).toBeEnabled();
-  await expect(menu.getByRole('button', { name: 'Save this browser' })).toBeDisabled();
+  await expect(menu.getByRole('button', { name: 'Back up profile' })).toBeDisabled();
   await expect(menu.getByRole('button', { name: 'Load saved profile' })).toBeDisabled();
   expect(runtimeProblems.filter((problem) => (
     !problem.includes('Failed to load resource: the server responded with a status of 404')
@@ -716,7 +716,7 @@ test.describe('mobile native-shell contracts', () => {
   });
 });
 
-test('Menu Journal opens the full-screen entry and History stays compact', async ({ page }) => {
+test('Menu Journal offers guided entry and direct full-screen writing while History stays compact', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   await page.goto('/');
   await page.getByRole('button', { name: 'Open menu' }).click();
@@ -726,6 +726,10 @@ test('Menu Journal opens the full-screen entry and History stays compact', async
   await expect(menu.getByRole('link', { name: 'History', exact: true })).toBeVisible();
 
   await menu.getByRole('button', { name: 'New journal entry' }).click();
+  await expect(page).toHaveURL(/\/inventory\/journal\?start=new$/);
+  const start = page.getByRole('dialog', { name: 'New entry', exact: true });
+  await expect(start.getByRole('button', { name: /^Guided check-in/ })).toBeVisible();
+  await start.getByRole('button', { name: 'Write directly in Journal', exact: true }).click();
   await expect(page).toHaveURL(/\/inventory\/journal\?compose=new$/);
   const journal = page.getByRole('dialog', { name: 'Journal' });
   await expect(journal).toBeVisible();

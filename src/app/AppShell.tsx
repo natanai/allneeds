@@ -94,7 +94,10 @@ function ScrollAndFocusManager() {
     }
     restore();
     markRouteReady();
-    if (navigationType !== 'POP') {
+    // A query change can finish after a dialog has opened. Its focus owner
+    // must not be replaced by the route's background landmark.
+    if (navigationType !== 'POP'
+      && !document.querySelector('[role="dialog"][aria-modal="true"], [role="alertdialog"][aria-modal="true"]')) {
       document.getElementById('main-content')?.focus({ preventScroll: true });
     }
 
@@ -269,7 +272,7 @@ function AppShellContent() {
         id: 'nav-journal',
         setting: 'journal',
         label: 'Journal',
-        to: '/inventory/journal?compose=new',
+        to: '/inventory/journal?start=new',
         tone: 'action',
         kind: 'nav',
         icon: <JournalMark />,

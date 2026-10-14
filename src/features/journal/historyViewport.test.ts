@@ -32,7 +32,7 @@ describe('continuous history viewport', () => {
   it('keeps zoom bounded and preserves local calendar-day counting at small spans', () => {
     expect(zoomHistory(range, 0).end - zoomHistory(range, 0).start).toBe(MIN_VISIBLE_MS);
     expect(zoomHistory(range, 1e9).end - zoomHistory(range, 1e9).start).toBe(MAX_VISIBLE_MS);
-    const small = visibleWindow(Date.parse('2026-10-13T23:00:00Z'), Date.parse('2026-10-14T02:00:00Z'));
+    const small = visibleWindow(new Date(2026, 9, 13, 23).getTime(), new Date(2026, 9, 14, 2).getTime());
     expect(small.days).toBe(2); // An hourly viewport may straddle local midnight.
   });
 });

@@ -6,11 +6,20 @@ import { OverlayShell } from '../../components/overlays/OverlayShell';
 import observationGuide from '../../data/observationGuide.json';
 import { analyzeObservation, suggestionBasisSummary } from '../../domain/observationInference';
 import type { ObservationDraft } from '../../persistence/workflowDrafts';
+import type { AlexithymiaDraft } from '../../persistence/workflowDrafts';
 import {
+  CheckInDraftConflict,
+  JournalDraftConflict,
   clearObservationDraft,
   readObservationDraft,
   writeObservationDraft,
+  readAlexithymiaDraft,
+  writeAlexithymiaDraftAgainst,
+  readJournalDraft,
+  writeJournalDraftAgainst,
 } from '../../persistence/workflowDrafts';
+import { checkInWithObservation, journalDraftFromCheckIn } from '../alexithymia/checkInDraft';
+import { checkInVisit, useCheckInReturnContext, type CheckInLocationState } from '../alexithymia/checkInNavigation';
 import { AnnotatedObservationEditor } from './AnnotatedObservationEditor';
 import styles from './ObservationsPage.module.css';
 
@@ -72,6 +81,10 @@ function entityTypeLabel(entityType: 'feeling' | 'need' | 'fauxFeeling') {
 
 export function ObservationsPage() {
   const navigate = useNavigate();
+  const checkInContext = useCheckInReturnContext();
+  const [checkInAtEntry] = useState(readAlexithymiaDraft);
+  const expectedCheckIn = useRef(checkInAtEntry);
+  const updatingCheckIn = Boolean(checkInContext?.id && checkInAtEntry?.checkInId === checkInContext.id);
   const [initialDraft] = useState(readObservationDraft);
   const [text, setText] = useState(initialDraft?.text ?? '');
   const [showSuggestions, setShowSuggestions] = useState(initialDraft?.showSuggestions ?? false);
@@ -79,6 +92,9 @@ export function ObservationsPage() {
   const [feelingsMode, setFeelingsMode] = useState<'unmet' | 'met'>(initialDraft?.feelingsMode ?? 'unmet');
   const [helpTopic, setHelpTopic] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [handoffConflict, setHandoffConflict] = useState<{ checkIn: AlexithymiaDraft } | 'journal' | null>(null);
+  const [storageError, setStorageError] = useState('');
+  const [draftError, setDraftError] = useState('');
   const draftRef = useRef<ObservationDraft>({ text, feelingsMode, showSuggestions, showExample });
   draftRef.current = { text, feelingsMode, showSuggestions, showExample };
 
@@ -121,7 +137,8 @@ export function ObservationsPage() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      try { writeObservationDraft(draftRef.current); } catch { /* The editor remains usable without persistence. */ }
+      try { writeObservationDraft(draftRef.current); setDraftError(''); }
+      catch { setDraftError('Your observation could not be saved on this device. Keep this page open and check available storage.'); }
     }, 180);
     return () => window.clearTimeout(timer);
   }, [feelingsMode, showExample, showSuggestions, text]);
@@ -174,11 +191,59 @@ export function ObservationsPage() {
     if (showSuggestions) setShowSuggestions(false);
   };
 
+  const openCheckIn = (current: AlexithymiaDraft) => {
+    try {
+      // An older saved draft may predate visit identities. Assign one on its
+      // explicit resume so Continue opens its step without another entry screen.
+      const next = current.checkInId ? current : { ...current, checkInId: crypto.randomUUID() };
+      if (next !== current) writeAlexithymiaDraftAgainst(next, current);
+      void navigate('/alexithymia-support', { state: { checkIn: {
+        visit: checkInVisit, id: next.checkInId!, stage: next.stage, restoreScroll: true,
+      } } satisfies CheckInLocationState });
+    } catch { setStorageError('The saved check-in could not be opened. Your observation stays here. Reload this page and try again.'); }
+  };
+  const transferToCheckIn = (expected: AlexithymiaDraft | null, keepCurrent: boolean) => {
+    try {
+      writeObservationDraft(draftRef.current);
+      const next = checkInWithObservation(text, feelingsMode, keepCurrent && expected ? expected : undefined);
+      const saved = writeAlexithymiaDraftAgainst(next, expected);
+      expectedCheckIn.current = saved?.data ?? null;
+      openCheckIn(next);
+    } catch (error) { setStorageError(error instanceof CheckInDraftConflict
+      ? 'The saved check-in changed in another tab. Your observation is still here. Reload this page before trying again.'
+      : 'The check-in could not be saved on this device. Keep this page open and check available storage.'); }
+  };
+  const continueCheckIn = () => {
+    setStorageError('');
+    if (updatingCheckIn) { transferToCheckIn(expectedCheckIn.current, true); return; }
+    const current = readAlexithymiaDraft();
+    if (current) {
+      setHandoffConflict({ checkIn: current });
+      return;
+    }
+    transferToCheckIn(current, true);
+  };
   const convertToJournal = () => {
-    window.sessionStorage.setItem('allneeds.v2.journal.observationDraft', text.trim());
-    draftRef.current = { ...draftRef.current, text: '' };
-    try { clearObservationDraft(); } catch { /* The handoff remains available in session storage. */ }
-    navigate('/inventory/journal?from=observation');
+    setStorageError('');
+    try {
+      if (readJournalDraft()) { setHandoffConflict('journal'); return; }
+      writeObservationDraft(draftRef.current);
+      if (updatingCheckIn && expectedCheckIn.current) {
+        const next = checkInWithObservation(text, feelingsMode, expectedCheckIn.current);
+        const saved = writeAlexithymiaDraftAgainst(next, expectedCheckIn.current);
+        expectedCheckIn.current = saved?.data ?? null;
+        writeJournalDraftAgainst(journalDraftFromCheckIn(next), null);
+      } else {
+        writeJournalDraftAgainst({
+          notes: text.trim(), emotion: '', intensity: 5, feelings: [],
+          selectedNeeds: [], tags: '', editingId: null,
+        }, null);
+      }
+      void navigate('/inventory/journal?compose=new');
+    } catch (error) { setStorageError(error instanceof CheckInDraftConflict
+      ? 'The saved check-in changed in another tab. Your observation is still here. Reload this page before trying again.'
+      : error instanceof JournalDraftConflict ? error.message
+        : 'The Journal draft could not be saved on this device. Keep this page open and check available storage.'); }
   };
 
   return (
@@ -299,9 +364,13 @@ export function ObservationsPage() {
 
           <footer className={styles.footer}>
             <span className="visually-hidden" aria-live="polite">{resultsOpen ? hasSuggestions ? 'Possibilities loaded and updating.' : 'No specific Feeling or Need matches are available from this wording yet.' : canLoad ? 'Ready to explore feelings and needs.' : 'Enter an observation to explore feelings and needs.'}</span>
-            {resultsOpen ? <section className={styles.journalHandoff} aria-labelledby="journal-handoff-title">
-              <span><small>Continue your reflection</small><strong id="journal-handoff-title">Bring this observation into Journal</strong><span>Journal will open with your observation already filled in.</span></span>
-              <button type="button" onClick={convertToJournal}>Open in Journal</button>
+            {storageError || draftError ? <p role="alert" className={styles.handoffError}>{storageError || draftError}</p> : null}
+            {canLoad ? <section className={styles.journalHandoff} aria-labelledby="journal-handoff-title">
+              <span><strong id="journal-handoff-title">Continue your reflection</strong><span>Take this observation and its possibilities into the check-in, then review and save in Journal.</span></span>
+              <div className={styles.handoffActions}>
+                <button type="button" onClick={continueCheckIn}>{updatingCheckIn ? 'Use in this check-in' : 'Continue with check-in'}</button>
+                <button type="button" className={styles.directWriting} onClick={convertToJournal}>Write directly in Journal</button>
+              </div>
             </section> : null}
           </footer>
         </div>
@@ -327,6 +396,25 @@ export function ObservationsPage() {
           <div className={styles.guideSections}>{guide.sections?.map((section) => <details key={section.id}><summary><span><small>{section.eyebrow}</small><strong>{section.title}</strong><span>{section.description}</span></span></summary><div><GuideContent blocks={section.content} /></div></details>)}</div>
         </div> : null}
       </details>
+
+      <OverlayShell open={Boolean(handoffConflict)} variant="dialog" title={handoffConflict === 'journal' ? 'Unfinished Journal entry' : 'Unfinished check-in'} onClose={() => setHandoffConflict(null)} closeInitialFocus>
+        <div className={styles.handoffDialog}>
+          {handoffConflict === 'journal' ? <>
+            <p>Journal already has an unfinished entry. Your observation stays on this page while you save or clear that entry.</p>
+            <button type="button" onClick={() => void navigate('/inventory/journal?compose=new')}>Open unfinished Journal</button>
+          </> : handoffConflict ? <>
+            <p>A previous check-in is saved{handoffConflict.checkIn.updatedAt ? ` from ${new Date(handoffConflict.checkIn.updatedAt).toLocaleString()}` : ''}. Continue it, or replace its unfinished work with a new check-in using this observation.</p>
+            {handoffConflict.checkIn.observation ? <blockquote>{handoffConflict.checkIn.observation}</blockquote> : null}
+            <button type="button" onClick={() => {
+              const current = readAlexithymiaDraft();
+              if (current) openCheckIn(current);
+              else setHandoffConflict(null);
+            }}>Continue saved check-in</button>
+            <button type="button" onClick={() => transferToCheckIn(handoffConflict.checkIn, false)}>Replace with new check-in</button>
+          </> : null}
+          {storageError ? <p role="alert">{storageError}</p> : null}
+        </div>
+      </OverlayShell>
 
       <OverlayShell
         open={Boolean(helpTopic)}

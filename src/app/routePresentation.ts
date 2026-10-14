@@ -54,7 +54,8 @@ export function titleFromSegment(segment: string) {
 function labelForRoute(pathname: string, search: string) {
   if (pathname === '/inventory/journal' && new URLSearchParams(search).has('entry')) return 'Journal entry';
   if (pathname === '/inventory/journal'
-    && new URLSearchParams(search).get('compose') === 'new') {
+    && (new URLSearchParams(search).get('compose') === 'new'
+      || new URLSearchParams(search).get('start') === 'new')) {
     return 'New journal entry';
   }
 

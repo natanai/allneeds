@@ -13,7 +13,7 @@ function collectRuntimeProblems(page: Page) {
   return problems;
 }
 
-test('an Observation draft survives routes and reload, then hands off exactly once', async ({ page }) => {
+test('an Observation draft survives routes and reload, then copies safely into direct writing', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   const observation = 'Tuesday at 3 p.m. in the kitchen, I heard “Please wait” twice.';
   await page.goto('/observations');
@@ -34,7 +34,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await page.reload();
   await expect(editor).toHaveText(observation);
   await expect(page.getByRole('radio', { name: 'Met', exact: true })).toHaveAttribute('aria-checked', 'true');
-  await page.getByRole('button', { name: 'Open in Journal', exact: true }).click();
+  await page.getByRole('button', { name: 'Write directly in Journal', exact: true }).click();
 
   const journalDialog = page.getByRole('dialog', { name: 'Journal' });
   await expect(journalDialog).toBeVisible();
@@ -42,7 +42,7 @@ test('an Observation draft survives routes and reload, then hands off exactly on
   await journalDialog.getByRole('button', { name: 'Clear', exact: true }).click();
   await journalDialog.getByRole('button', { name: 'Close full screen journal' }).click();
   await nav.getByRole('link', { name: 'Observations', exact: true }).click();
-  await expect(editor).toHaveText('');
+  await expect(editor).toHaveText(observation);
   expect(runtimeProblems).toEqual([]);
 });
 
@@ -85,6 +85,7 @@ test('Journal drafts survive close/reload and successful save or clear removes t
   await expect(page.getByRole('dialog', { name: 'Journal' })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'New entry', exact: true }).click();
+  await page.getByRole('dialog', { name: 'New entry', exact: true }).getByRole('button', { name: 'Write directly in Journal', exact: true }).click();
   dialog = page.getByRole('dialog', { name: 'Journal' });
   await dialog.getByLabel('Reflection').fill('Saved journal continuity check.');
   await dialog.getByRole('button', { name: 'Save', exact: true }).click();

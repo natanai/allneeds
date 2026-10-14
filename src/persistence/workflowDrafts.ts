@@ -60,6 +60,12 @@ export type InventoryDraft = {
 
 export type AlexithymiaDraft = {
   checkInId?: string;
+  /** Possibilities offered by Observations, never the person's selections. */
+  observationSuggestions?: {
+    text: string;
+    termIds: string[];
+    needSlugs: string[];
+  };
   bodyTool?: BodyCuesDraft;
   updatedAt?: string;
   wordFilter?: 'matches' | 'all' | 'mine';
@@ -235,6 +241,10 @@ function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
     && typeof value.statement === 'string'
     && typeof value.statementEdited === 'boolean'
     && (value.checkInId === undefined || typeof value.checkInId === 'string')
+    && (value.observationSuggestions === undefined || (isRecord(value.observationSuggestions)
+      && typeof value.observationSuggestions.text === 'string'
+      && isStringList(value.observationSuggestions.termIds)
+      && isStringList(value.observationSuggestions.needSlugs)))
     && (value.bodyTool === undefined || isBodyCuesDraft(value.bodyTool))
     && (value.wordFilter === undefined || ['matches', 'all', 'mine'].includes(String(value.wordFilter)))
     && (value.wordQuery === undefined || typeof value.wordQuery === 'string')
@@ -390,6 +400,24 @@ export function clearJournalDraft(storage: StorageDriver | null = getBrowserStor
   journalStore(storage, editingId).clear();
 }
 
+export class JournalDraftConflict extends Error {
+  constructor() {
+    super('The Journal draft changed in another tab. Open the unfinished Journal before continuing.');
+  }
+}
+
+export function writeJournalDraftAgainst(
+  draft: JournalComposerDraft,
+  expected: JournalComposerDraft | null,
+  storage: StorageDriver | null = getBrowserStorage(),
+) {
+  if (!storage) throw new Error('Device storage is unavailable. The Journal draft was not saved.');
+  if (JSON.stringify(readJournalDraft(storage)) !== JSON.stringify(expected)) {
+    throw new JournalDraftConflict();
+  }
+  return writeJournalDraft(draft, storage);
+}
+
 export function readObservationDraft(storage: StorageDriver | null = getBrowserStorage()) {
   const result = observationStore(storage).read();
   return result.status === 'ready' ? result.value : null;
@@ -399,6 +427,7 @@ export function writeObservationDraft(
   draft: ObservationDraft,
   storage: StorageDriver | null = getBrowserStorage(),
 ) {
+  if (!storage) throw new Error('Device storage is unavailable. The observation was not saved.');
   const store = observationStore(storage);
   if (!draft.text.trim()) {
     store.clear();
