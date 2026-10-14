@@ -8,6 +8,7 @@ const focusableSelector = [
   'input:not([disabled])',
   'select:not([disabled])',
   'textarea:not([disabled])',
+  'summary',
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
@@ -21,9 +22,13 @@ type DialogFocusOptions = {
 };
 
 function focusableElements(container: HTMLElement) {
+  const closedDisclosures = [...container.querySelectorAll('details:not([open])')]
+    .map((details) => ({ details, summary: details.querySelector(':scope > summary') }));
   return [...container.querySelectorAll<HTMLElement>(focusableSelector)]
     .filter((element) => !element.hidden
       && element.getAttribute('aria-hidden') !== 'true'
+      && element.tabIndex >= 0
+      && !closedDisclosures.some(({ details, summary }) => details.contains(element) && !summary?.contains(element))
       && element.getClientRects().length > 0);
 }
 

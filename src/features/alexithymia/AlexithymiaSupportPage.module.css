@@ -199,7 +199,7 @@
 .iconButton {
   width: var(--control-min);
   height: var(--control-min);
-  padding: .62rem;
+  padding: calc(var(--control-min) * .22);
   display: inline-grid;
   place-items: center;
   flex: 0 0 auto;
@@ -243,6 +243,7 @@
 
 .appBarTitle {
   display: none;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
   gap: var(--space-2);
@@ -250,7 +251,7 @@
 }
 
 .appBarTitle strong { font: 800 var(--text-sm) / 1 var(--font-display); }
-.appBarTitle small { color: var(--secondary); font-size: var(--text-xs); }
+.appBarTitle small { color: var(--secondary); font-size: var(--text-xs); white-space: nowrap; }
 
 .progress {
   width: min(30rem, 100%);
@@ -596,7 +597,7 @@
   min-width: 0;
   padding: .16rem;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(5rem, 100%), 1fr));
   gap: var(--space-1);
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--outline) 9%, var(--quiet) 91%);
@@ -606,15 +607,13 @@
   min-width: 0;
   min-height: var(--control-min);
   padding: .38rem .24rem;
-  overflow: hidden;
   border: 0;
   border-radius: calc(var(--radius-lg) * .78);
   background: transparent;
   color: var(--text);
   font-size: var(--text-xs);
   font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
@@ -1264,9 +1263,6 @@
   .wordTray { padding: .6rem; }
 
   .wordToolbar {
-    position: sticky;
-    z-index: 8;
-    top: calc(3.45rem + env(safe-area-inset-top));
     padding: .35rem 0;
     background: color-mix(in srgb, var(--quiet) 42%, var(--surface-raised) 58%);
   }

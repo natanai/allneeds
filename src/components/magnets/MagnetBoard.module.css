@@ -318,14 +318,24 @@
   z-index: 1;
 }
 
-.hasDetail {
-  min-width: 6.75rem;
+.hasDetail,
+.magnet:has(> .badge) {
+  min-width: min(6.75rem, calc(100% - 24px));
   padding-block: 0.42rem;
+  flex-wrap: wrap;
   white-space: normal;
+}
+
+.hasDetail .label,
+.magnet:has(> .badge) .label {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
 }
 
 .hasDetail .label {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-1);
   text-align: left;
 }
@@ -340,6 +350,8 @@
 .badge {
   position: relative;
   z-index: 1;
+  flex: 0 0 auto;
+  max-width: 100%;
   padding: 0.18rem 0.36rem;
   border: 1px solid color-mix(in srgb, var(--outline) 46%, transparent);
   border-radius: var(--radius-pill);
@@ -347,6 +359,8 @@
   font-size: var(--text-xs);
   font-weight: 800;
   line-height: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
   text-transform: uppercase;
 }
 

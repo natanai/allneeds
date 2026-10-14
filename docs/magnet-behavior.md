@@ -100,6 +100,8 @@ Canonical visual implementation: `src/components/magnets/MagnetBoard.module.css`
 - Turning off an optional navigation magnet must not erase its saved compact/wide coordinates or its place in the order. Hidden magnets are not part of physics/layout measurement but keep their last persisted positions for when enabled again; any restored position is still clamped to the live board bounds.
 - Semantic/presentation changes such as active route, ARIA state, menu state, or callback identity must not repack navigation when geometry did not change.
 - Long need labels must remain inside the board and may wrap; do not restore global `white-space: nowrap` behavior that lets a long need overflow its container.
+- Magnets with action/detail text or role badges cap their minimum width at the available surface width. Their label, icon and role badge can wrap onto separate rows as text grows; badges must not cover the detail text or disappear to make the magnet fit. Layout measures that resulting geometry normally.
+- Initial packing measures the physics control's live bounds. A first magnet too wide to share that row starts below the control, and a wrapped row clears its full measured height. If a restored layout intersects the control, use the board's packed placements together so recovery cannot stack a repaired magnet on another restored magnet. Valid saved layouts retain their positions. This preserves the control when text enlargement changes its size, without changing forces or direct manipulation.
 
 ## Accessibility and gesture ownership
 

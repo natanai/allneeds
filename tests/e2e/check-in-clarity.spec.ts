@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 
 async function start(page: Page, observation = '') {
@@ -341,4 +341,147 @@ test('an older tab cannot overwrite edits or a new check-in from another tab', a
   await expect(page).toHaveURL(/alexithymia-support$/);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.alexithymia.draft') ?? 'null')?.data?.observation)).toBe('A separate new check-in.');
   await other.close();
+});
+
+test('doubling the base text size keeps narrow-phone choices and the Journal handoff usable', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/alexithymia-support');
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await page.getByRole('button', { name: 'Start check-in', exact: true }).click();
+  const noOverflow = async () => {
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
+    const workspace = page.locator('article[aria-label^="Alexithymia support:"]');
+    expect(await workspace.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+    const appBar = workspace.locator(':scope > header');
+    expect(await appBar.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+    for (const icon of await appBar.locator('button svg').all()) {
+      expect((await icon.boundingBox())?.width).toBeGreaterThanOrEqual(20);
+    }
+  };
+  await noOverflow();
+  await clues(page);
+  await page.getByRole('button', { name: /^Body clues/ }).click();
+  const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
+  const chooser = body.getByRole('combobox', { name: 'Body area', exact: true });
+  await chooser.selectOption('overall');
+  await body.getByRole('button', { name: /^Muted or numb/ }).click();
+  await body.getByRole('button', { name: 'All body cues', exact: true }).click();
+  expect(await body.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  await body.getByRole('button', { name: 'Done', exact: true }).click();
+  await noOverflow();
+  await words(page);
+  for (const view of await page.getByRole('radio').all()) {
+    expect(await view.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  }
+  await maybeFear(page);
+  await noOverflow();
+  await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill('Guilt');
+  const otherWord = page.getByRole('button', { name: /^Guilt, Other emotion word/ });
+  await otherWord.scrollIntoViewIfNeeded();
+  const otherBadge = await otherWord.getByText('Other emotion word', { exact: true }).boundingBox();
+  const otherFace = await otherWord.boundingBox();
+  expect(otherBadge).not.toBeNull();
+  expect(otherFace).not.toBeNull();
+  expect(otherBadge!.x).toBeGreaterThanOrEqual(otherFace!.x - 1);
+  expect(otherBadge!.x + otherBadge!.width).toBeLessThanOrEqual(otherFace!.x + otherFace!.width + 1);
+  await otherWord.click();
+  await page.getByRole('dialog', { name: 'Guilt', exact: true }).getByRole('button', { name: 'Maybe', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
+  const needs = page.getByRole('dialog', { name: 'What matters to you here?', exact: true });
+  await needs.getByRole('searchbox').fill('Safety');
+  await needs.getByRole('button', { name: 'Safety', exact: true }).click();
+  await needs.getByRole('button', { name: 'Done', exact: true }).click();
+  await noOverflow();
+  const selectedNeed = page.getByRole('button', { name: 'Safety, selected Need, open ways to support it', exact: true });
+  await selectedNeed.scrollIntoViewIfNeeded();
+  await expect.poll(() => selectedNeed.evaluate((element) => {
+    const toggle = element.parentElement?.querySelector('[role="switch"]')?.closest('label');
+    if (!toggle) throw new Error('The selected Need board must retain its physics control.');
+    const magnet = element.getBoundingClientRect();
+    const control = toggle.getBoundingClientRect();
+    return magnet.left < control.right && magnet.right > control.left && magnet.top < control.bottom && magnet.bottom > control.top;
+  })).toBe(false);
+  await selectedNeed.click();
+  await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
+  await expect(selectedNeed).toBeVisible();
+  await noOverflow();
+  const actionText = await selectedNeed.getByText('Open ways to support this Need', { exact: true }).boundingBox();
+  const roleBadge = await selectedNeed.getByText('Need', { exact: true }).boundingBox();
+  expect(actionText).not.toBeNull();
+  expect(roleBadge).not.toBeNull();
+  expect(actionText!.x < roleBadge!.x + roleBadge!.width && actionText!.x + actionText!.width > roleBadge!.x
+    && actionText!.y < roleBadge!.y + roleBadge!.height && actionText!.y + actionText!.height > roleBadge!.y).toBe(false);
+  await expect(page.getByRole('button', { name: 'Continue in Journal', exact: true })).toBeInViewport();
+  await page.screenshot({ path: 'test-results/check-in-large-base-text.png' });
+  await page.getByRole('button', { name: 'Continue in Journal', exact: true }).click();
+  const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
+  await expect(journal).toBeVisible();
+  await journal.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Journal entry saved to this device.', { exact: true })).toBeVisible();
+});
+
+test('keyboard-only completion keeps sheet focus contained and returns to the opening control', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/alexithymia-support');
+  const tabTo = async (target: Locator) => {
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      if (await target.evaluate((element) => element === document.activeElement)) return;
+      await page.keyboard.press('Tab');
+    }
+    await expect(target).toBeFocused();
+  };
+  await tabTo(page.getByRole('button', { name: 'Start check-in', exact: true }));
+  await page.keyboard.press('Enter');
+  await tabTo(page.getByRole('textbox', { name: 'What happened?', exact: true }));
+  await page.keyboard.type('I want to keep this observation.');
+  await tabTo(page.getByRole('button', { name: 'Continue', exact: true }));
+  await page.keyboard.press('Enter');
+  const bodyTrigger = page.getByRole('button', { name: /^Body clues/ });
+  await tabTo(bodyTrigger);
+  await page.keyboard.press('Enter');
+  const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
+  await tabTo(body.getByRole('combobox', { name: 'Body area', exact: true }));
+  await page.keyboard.press('End');
+  await expect(body.getByRole('heading', { name: 'Whole-body sense', exact: true })).toBeVisible();
+  await tabTo(body.getByRole('button', { name: /^Muted or numb/ }));
+  await page.keyboard.press('Space');
+  const separateTool = body.locator('summary').filter({ hasText: 'Separate Body Cues tool' });
+  await tabTo(separateTool);
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    await page.keyboard.press('Tab');
+    expect(await body.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  }
+  await tabTo(separateTool);
+  await page.keyboard.press('Enter');
+  await tabTo(body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }));
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    await page.keyboard.press('Shift+Tab');
+    expect(await body.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  }
+  await page.keyboard.press('Escape');
+  await expect(bodyTrigger).toBeFocused();
+  await expect(bodyTrigger).toHaveAccessibleName('Body clues 1 cue selected.');
+  await tabTo(page.getByRole('button', { name: 'Continue to words', exact: true }));
+  await page.keyboard.press('Enter');
+  await tabTo(page.getByRole('button', { name: 'Continue without a word', exact: true }));
+  await page.keyboard.press('Enter');
+  const needsTrigger = page.getByRole('button', { name: 'Add Needs', exact: true });
+  await tabTo(needsTrigger);
+  await page.keyboard.press('Enter');
+  const needs = page.getByRole('dialog', { name: 'What matters to you here?', exact: true });
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    await page.keyboard.press('Tab');
+    expect(await needs.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  }
+  await page.keyboard.press('Escape');
+  await expect(needsTrigger).toBeFocused();
+  await tabTo(page.getByRole('button', { name: 'Continue in Journal', exact: true }));
+  await page.keyboard.press('Enter');
+  const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
+  await tabTo(journal.getByRole('button', { name: 'Save', exact: true }));
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Journal entry saved to this device.', { exact: true })).toBeVisible();
 });
