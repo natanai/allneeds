@@ -1,9 +1,8 @@
 import { type MouseEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
-import { OverlayShell } from '../../components/overlays/OverlayShell';
 import bodyRegionsRaw from '../../data/body-regions.json';
 import { assetPath, needsBySlug } from '../../data/catalog';
 import { ALEXITHYMIA_SUPPORT_LABEL } from '../../data/productLanguage';
@@ -944,20 +943,21 @@ export function AlexithymiaSupportPage() {
             }}
             onClose={() => setSheet(null)}
           />
-      <OverlayShell open={sheet === 'observation'} variant="dialog" title="Writing tips" titleId="alex-observation-help" onClose={() => setSheet(null)}>
+      <SupportSheet open={sheet === 'observation'} title="Describe what happened" titleId="alex-observation-help" onClose={() => setSheet(null)}>
         <div className={styles.observationHelp}>
-          <ObservationHelpContent topic="sensory" />
-          <p className={styles.observationOptional}>You can skip this step if nothing is clear.</p>
-          <div className={styles.observationReference}>
-            <p id="alex-observation-reference-note">More examples are on the Observations page. You can return to your saved check-in.</p>
-            <Link to="/observations" aria-describedby="alex-observation-reference-note" onClick={(event) => {
-              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-              event.preventDefault();
-              openReference('/observations');
-            }}>Open Observations</Link>
-          </div>
+          <section aria-labelledby="alex-observation-writing-tips">
+            <h3 id="alex-observation-writing-tips">Keep it concrete</h3>
+            <ObservationHelpContent topic="sensory" />
+            <p>You can skip this step if nothing is clear.</p>
+          </section>
+          <section aria-labelledby="alex-observation-full-page">
+            <h3 id="alex-observation-full-page">Full Observations page</h3>
+            <p>This leaves the check-in to open Quick Check, examples, and the full guide. Your check-in stays saved; use Return to check-in to come back.</p>
+            <button type="button" className={styles.textButton} onClick={() => openReference('/observations')}>Open Observations page</button>
+          </section>
         </div>
-      </OverlayShell>
+        <div className={styles.sheetFooter}><button type="button" className={styles.primaryButton} onClick={() => setSheet(null)}>Back to my check-in</button></div>
+      </SupportSheet>
       <SupportSheet open={sheet === 'need-preview'} title={needsBySlug.get(previewNeed ?? '')?.title ?? 'Need'} titleId="alex-need-preview" onClose={() => setSheet(null)}>
         <p>{needsBySlug.get(previewNeed ?? '')?.summary}</p>
         <p className={styles.helperLink}>The full Need page has its evidence and ways to support it. You can return to this check-in.</p>
