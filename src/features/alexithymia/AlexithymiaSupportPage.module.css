@@ -156,7 +156,6 @@
 
 .methodsLink,
 .helperLink a,
-.observationHelp a,
 .sheet a,
 .sheetFooterSplit a,
 .guideRail > a {
@@ -464,23 +463,9 @@
 .helperLink { margin: 0; font-size: var(--text-xs); }
 
 .observationHelp { display: grid; gap: var(--space-3); }
-.observationHelp p { margin: 0; font-size: var(--text-sm); line-height: 1.4; }
-.observationOptional,
-.observationReference p { color: var(--secondary); }
-.observationReference {
-  padding-top: var(--space-3);
-  display: grid;
-  gap: var(--space-1);
-  border-top: 1px solid color-mix(in srgb, var(--outline) 13%, transparent);
-}
-.observationHelp a {
-  min-height: var(--control-min);
-  max-width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-self: start;
-  font-size: var(--text-sm);
-}
+.observationHelp h3 { margin: 0; font: 800 var(--text-base) / 1.15 var(--font-display); }
+.observationHelp p { margin: .5rem 0; font-size: var(--text-sm); line-height: 1.4; }
+.observationHelp > section + section { padding-top: var(--space-3); border-top: 1px solid color-mix(in srgb, var(--outline) 13%, transparent); }
 
 .stickyActions {
   position: fixed;
