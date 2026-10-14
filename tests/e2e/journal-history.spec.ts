@@ -158,7 +158,7 @@ test('daily means omit unexplained whiskers but day detail spells out genuine ra
   const chart = page.getByTestId('history-chart');
   await expect(chart.locator('[class*="rangeLine"]')).toHaveCount(0);
   await expect(chart).toContainText('Points = daily averages');
-  await expect(chart.getByRole('button', { name: /Pleasantness: -1, .*Reported range -3 to \\+1 across 2 ratings/ })).toHaveCount(1);
+  await expect(chart.getByRole('button', { name: /Pleasantness: -1, .*Reported range -3 to [+]1 across 2 ratings/ })).toHaveCount(1);
   await chart.getByRole('button', { name: `2 journal entries on ${day}. View day` }).click();
   const ranges = page.getByLabel('Recorded rating ranges');
   await expect(ranges).toContainText('Pleasantness: -3 to +1 across 2 recorded ratings');
