@@ -8,6 +8,7 @@ import { CustomizerPanel } from '../features/customizer/CustomizerPanel';
 import { ProfileReview } from '../features/account/ProfileReview';
 import { JournalAutoBackup } from '../features/account/JournalAutoBackup';
 import { useProfileReview } from '../features/account/blueskyAccount';
+import { CheckInNavigationProvider, CheckInReturn } from '../features/alexithymia/checkInNavigation';
 import { AppMenu } from '../features/menu/AppMenu';
 import { UxDiagnostics } from './UxDiagnostics';
 import { markAppShellVisualReady } from './bootReadiness';
@@ -15,10 +16,11 @@ import { markRouteReady } from './uxMetrics';
 import { routePresentation, titleFromSegment } from './routePresentation';
 import {
   NAV_SETTINGS_CHANGED_EVENT,
+  NAV_SETTINGS_KEY,
   readNavSettings,
   type NavItemId,
 } from '../features/customizer/customizerSettings';
-import { INVENTORY_CHANGED_EVENT, readInventory } from '../features/inventory/inventoryRepository';
+import { INVENTORY_CHANGED_EVENT, INVENTORY_STORAGE_KEY, readInventory } from '../features/inventory/inventoryRepository';
 import { InventoryMark } from '../features/inventory/InventoryMark';
 import { readMagnetPlayPreference } from '../persistence/magnetLayoutStore';
 import styles from './AppShell.module.css';
@@ -144,6 +146,10 @@ function Breadcrumbs() {
 }
 
 export function AppShell() {
+  return <CheckInNavigationProvider><AppShellContent /></CheckInNavigationProvider>;
+}
+
+function AppShellContent() {
   const { pathname, search } = useLocation();
   const presentation = routePresentation(pathname, search);
   const wheelRoute = pathname === '/feelings/emotions-wheel';
@@ -175,21 +181,26 @@ export function AppShell() {
 
   useEffect(() => {
     const updateCount = () => setInventoryCount(readInventoryCount());
+    const onStorage = (event: StorageEvent) => { if (event.key === INVENTORY_STORAGE_KEY || event.key === null) updateCount(); };
     window.addEventListener(INVENTORY_CHANGED_EVENT, updateCount);
-    window.addEventListener('storage', updateCount);
+    window.addEventListener('storage', onStorage);
     return () => {
       window.removeEventListener(INVENTORY_CHANGED_EVENT, updateCount);
-      window.removeEventListener('storage', updateCount);
+      window.removeEventListener('storage', onStorage);
     };
   }, []);
 
   useEffect(() => {
-    const update = () => setNavSettings(readNavSettings());
+    const update = () => setNavSettings((current) => {
+      const next = readNavSettings();
+      return (Object.keys(next) as NavItemId[]).every((id) => next[id] === current[id]) ? current : next;
+    });
+    const onStorage = (event: StorageEvent) => { if (event.key === NAV_SETTINGS_KEY || event.key === null) update(); };
     window.addEventListener(NAV_SETTINGS_CHANGED_EVENT, update);
-    window.addEventListener('storage', update);
+    window.addEventListener('storage', onStorage);
     return () => {
       window.removeEventListener(NAV_SETTINGS_CHANGED_EVENT, update);
-      window.removeEventListener('storage', update);
+      window.removeEventListener('storage', onStorage);
     };
   }, []);
 
@@ -401,7 +412,8 @@ export function AppShell() {
         tabIndex={-1}
         aria-label={presentation.label}
       >
-        <div key={pathname} className={styles.pageStage}>
+        <div key={pathname} className={`${styles.pageStage} ${pathname === '/alexithymia-support' ? styles.checkInStage : ''}`}>
+          {!journalComposerActive && pathname !== '/alexithymia-support' ? <CheckInReturn /> : null}
           <Outlet />
         </div>
       </main>

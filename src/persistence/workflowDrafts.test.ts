@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { customTermId } from '../features/alexithymia/customWordIdentity';
 import type { StorageDriver } from './storage';
 import {
   ALEXITHYMIA_DRAFT_STORAGE_KEY,
@@ -21,6 +22,7 @@ import {
   readNeedStrategyDraft,
   readObservationDraft,
   writeAlexithymiaDraft,
+  writeAlexithymiaDraftAgainst,
   writeBodyCuesDraft,
   writeInventoryDraft,
   writeJournalDraft,
@@ -208,6 +210,48 @@ describe('workflow drafts', () => {
     }, storage);
     expect(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY)).toBeNull();
     clearAlexithymiaDraft(storage);
+  });
+
+  it('migrates old custom-word identities once and keeps new punctuation identities independent', () => {
+    const storage = memoryStorage();
+    const base = { stage: 3, observation: '', openRegion: null, selectedCues: {}, bodyClear: false,
+      shape: {}, noWordYet: false, selectedNeeds: [], statement: '', statementEdited: false };
+    writeAlexithymiaDraft({ ...base, customTerms: ['mixed up'], decisions: { 'working:mixed-up': 'maybe' }, termOrder: ['working:mixed-up'] }, storage);
+    const migrated = readAlexithymiaDraft(storage)!;
+    expect(migrated.termOrder).toEqual([customTermId('mixed up')]);
+    expect(migrated.decisions[customTermId('mixed up')]).toBe('maybe');
+    const next = { ...migrated, customTerms: ['mixed up', 'mixed-up'],
+      decisions: { [customTermId('mixed up')]: 'maybe' as const, [customTermId('mixed-up')]: 'fits' as const },
+      termOrder: [customTermId('mixed-up'), customTermId('mixed up')], wordFilter: 'mine' as const, wordQuery: 'mixed' };
+    writeAlexithymiaDraft(next, storage);
+    expect(readAlexithymiaDraft(storage)).toEqual(next);
+  });
+
+  it('round-trips uncertainty-only Journal context and rejects unavailable check-in storage', () => {
+    const storage = memoryStorage();
+    writeJournalDraft({ notes: '', emotion: '', intensity: 5, selectedNeeds: [], tags: '', editingId: null,
+      guidedSupport: { observation: '', statement: '', terms: [], noWordYet: true } }, storage);
+    expect(readJournalDraft(storage)?.guidedSupport?.noWordYet).toBe(true);
+    const draft = { stage: 1, observation: '', openRegion: null, selectedCues: {}, bodyClear: false,
+      shape: {}, decisions: {}, termOrder: [], customTerms: [], noWordYet: false, selectedNeeds: [], statement: '', statementEdited: false };
+    expect(() => writeAlexithymiaDraft(draft, null)).toThrow('not saved');
+  });
+
+  it('rejects stale check-in writes after another tab edits, replaces, or completes the draft', () => {
+    const storage = memoryStorage();
+    const base = { checkInId: 'first', stage: 1, observation: 'Original', openRegion: null, selectedCues: {}, bodyClear: false,
+      shape: {}, decisions: {}, termOrder: [], customTerms: [], noWordYet: false, selectedNeeds: [], statement: '', statementEdited: false };
+    const first = writeAlexithymiaDraftAgainst(base, null, storage)!.data;
+    const current = writeAlexithymiaDraftAgainst({ ...first, observation: 'My next edit' }, first, storage)!.data;
+    writeAlexithymiaDraft({ ...current, observation: 'A second tab edited this' }, storage);
+    expect(() => writeAlexithymiaDraftAgainst({ ...current, observation: 'A stale edit' }, current, storage)).toThrow('another tab');
+    expect(readAlexithymiaDraft(storage)?.observation).toBe('A second tab edited this');
+    writeAlexithymiaDraft({ ...base, checkInId: 'second', observation: 'A new check-in' }, storage);
+    expect(() => writeAlexithymiaDraftAgainst(current, current, storage)).toThrow('another tab');
+    expect(readAlexithymiaDraft(storage)?.checkInId).toBe('second');
+    clearAlexithymiaDraft(storage);
+    expect(() => writeAlexithymiaDraftAgainst(current, current, storage)).toThrow('another tab');
+    expect(readAlexithymiaDraft(storage)).toBeNull();
   });
 
   it('migrates compatible v1 clues and one recognized word at the persistence boundary', () => {

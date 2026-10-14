@@ -832,6 +832,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-08-28 | Observation Inference 2.0 | Local deterministic exploratory-matching contract, non-probabilistic explanation copy, approved fallback safeguards, shared highlight/detector model, legacy retirement, and implementation plan approved | Implemented on combined review branch; not yet merged |
 | 2026-08-28 | Alexithymia Support | Complete present-moment lane, fixed-catalog roles, shared scoring, source package, and no-recommendation boundary approved | Implemented on combined review branch; browser/device validation pending |
 | 2026-08-29 | Observation and Alexithymia support | Plain-language labels, internal-only surface terms, deliberate annotation activation, and non-invalidating guidance approved | Implemented on test branch; browser/device validation pending |
+| 2026-10-13 | Check-in UX audit repairs | User approved the audit repair plan: explicit navigation/clearing, in-flow help and body-area discovery, tentative sentence/Journal provenance, protected personal edits, uncertainty-only handoff, recovery, search/focus, and regression coverage. No catalog, association, scoring, clinical claim, or Need-strategy changes authorized or included. | Implemented on dedicated review branch; physical iOS and first-use validation pending |
 
 ## Implementation notes / handoff
 

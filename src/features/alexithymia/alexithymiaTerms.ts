@@ -1,3 +1,6 @@
+import { customTermId } from './customWordIdentity';
+export { customTermId } from './customWordIdentity';
+
 import {
   fauxFeelings,
   feelings,
@@ -71,10 +74,6 @@ export const fauxFeelingTerms: SupportTerm[] = fauxFeelings.map((feeling) => ({
   candidate: null,
 }));
 
-export function customTermId(label: string) {
-  return `working:${label.trim().toLocaleLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
-}
-
 export function customWorkingTerm(label: string): SupportTerm {
   return {
     id: customTermId(label),
@@ -114,11 +113,13 @@ export function buildSupportStatement({
   terms,
   needSlugs,
   noWordYet,
+  decisions,
 }: {
   observation: string;
   terms: SupportTerm[];
   needSlugs: string[];
   noWordYet: boolean;
+  decisions?: Record<string, string>;
 }) {
   const cleanObservation = observation.trim().replace(/[.!?]+$/, '');
   const observationClause = cleanObservation
@@ -127,7 +128,7 @@ export function buildSupportStatement({
       : `When ${sentenceCase(cleanObservation)}`
     : '';
   const feelingsClause = terms.length
-    ? joinWords(terms.map((term) => `I feel ${term.label.toLocaleLowerCase()}`))
+    ? joinWords(terms.map((term) => `${decisions?.[term.id] === 'maybe' ? 'I might feel' : 'I feel'} ${term.label.toLocaleLowerCase()}`))
     : noWordYet
       ? 'I’m not sure what I feel yet'
       : '';
@@ -155,6 +156,8 @@ export function createSupportJournalDraft({
   bodyClear,
   noWordYet,
   feelingIntensities,
+  decisions,
+  checkInId,
 }: {
   observation: string;
   terms: SupportTerm[];
@@ -166,6 +169,8 @@ export function createSupportJournalDraft({
   bodyClear?: boolean;
   noWordYet?: boolean;
   feelingIntensities?: Record<string, number>;
+  decisions?: Record<string, string>;
+  checkInId?: string;
 }): JournalComposerDraft {
   const canonicalFeelings = terms.filter((term) => term.role === 'feeling');
   const cleanObservation = observation.trim();
@@ -193,7 +198,11 @@ export function createSupportJournalDraft({
     editingId: null,
     guidedSupport: {
       observation: cleanObservation,
-      terms: terms.map((term) => ({ label: term.label, role: term.role })),
+      terms: terms.map((term) => ({ label: term.label, role: term.role,
+        ...(decisions?.[term.id] === 'fits' || decisions?.[term.id] === 'maybe'
+          ? { decision: decisions[term.id] as 'fits' | 'maybe' } : {}),
+      })),
+      ...(checkInId ? { checkInId } : {}),
       statement: cleanStatement,
       ...(bodyClues?.length ? { bodyClues } : {}),
       ...(overallRatings && Object.keys(overallRatings).length ? { overallRatings } : {}),
@@ -201,4 +210,28 @@ export function createSupportJournalDraft({
       ...(noWordYet ? { noWordYet: true } : {}),
     },
   };
+}
+
+/** The generated sentence is derived from these choices, never from a score. */
+export function supportStatementBasis(draft: Pick<import('../../persistence/workflowDrafts').AlexithymiaDraft,
+  'observation' | 'termOrder' | 'customTerms' | 'decisions' | 'selectedNeeds' | 'noWordYet'>) {
+  const index = supportTermIndex(draft.customTerms);
+  return JSON.stringify([
+    draft.observation, draft.termOrder.filter((id) => index.has(id))
+      .filter((id) => draft.decisions[id] === 'fits' || draft.decisions[id] === 'maybe')
+      .map((id) => [id, draft.decisions[id]]),
+    draft.selectedNeeds, draft.noWordYet,
+  ]);
+}
+
+export function statementFromDraft(draft: import('../../persistence/workflowDrafts').AlexithymiaDraft) {
+  const index = supportTermIndex(draft.customTerms);
+  return buildSupportStatement({
+    observation: draft.observation,
+    terms: draft.termOrder.flatMap((id) => {
+      const term = index.get(id);
+      return term && (draft.decisions[id] === 'fits' || draft.decisions[id] === 'maybe') ? [term] : [];
+    }),
+    needSlugs: draft.selectedNeeds, noWordYet: draft.noWordYet, decisions: draft.decisions,
+  });
 }

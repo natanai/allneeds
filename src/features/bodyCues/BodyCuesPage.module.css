@@ -113,3 +113,7 @@
 @media (prefers-reduced-motion: reduce) {
   .match, .cue { transition: none; }
 }
+
+.checkInHandoff { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); padding: .6rem; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); }
+.checkInHandoff p { margin: 0; font-size: var(--text-sm); }
+.checkInHandoff button { min-height: var(--control-min); padding: .5rem .7rem; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--action); color: var(--text); font: inherit; font-weight: 750; cursor: pointer; }

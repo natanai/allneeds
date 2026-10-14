@@ -131,4 +131,31 @@ describe('journalRepository', () => {
       },
     });
   });
+
+  it('preserves check-in identity and tentative choices without inventing decisions for older entries', () => {
+    const storage = new MemoryStorage();
+    const entry = createJournalRecord({
+      notes: 'My own wording.',
+      guidedSupport: {
+        checkInId: 'current-check-in',
+        observation: '',
+        terms: [
+          { label: 'Fear', role: 'feeling', decision: 'maybe' },
+          { label: 'Sadness', role: 'feeling', decision: 'fits' },
+          { label: 'Guilt', role: 'working' },
+        ],
+        statement: 'My own wording.',
+      },
+    });
+    writeJournal([entry], storage);
+    expect(readJournal(storage)[0]?.guidedSupport).toMatchObject({
+      checkInId: 'current-check-in',
+      terms: [
+        { label: 'Fear', role: 'feeling', decision: 'maybe' },
+        { label: 'Sadness', role: 'feeling', decision: 'fits' },
+        { label: 'Guilt', role: 'working' },
+      ],
+    });
+    expect(readJournal(storage)[0]?.guidedSupport?.terms[2]).not.toHaveProperty('decision');
+  });
 });

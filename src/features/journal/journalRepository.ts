@@ -39,7 +39,8 @@ export function journalDate(entry: JournalRecord) { return entry.experiencedAtIS
 
 export interface JournalGuidedSupport {
   observation: string;
-  terms: Array<{ label: string; role: 'feeling' | 'faux-feeling' | 'working' }>;
+  terms: Array<{ label: string; role: 'feeling' | 'faux-feeling' | 'working'; decision?: 'fits' | 'maybe' }>;
+  checkInId?: string;
   statement: string;
   /** User-selected somatic clues, including their explicitly chosen intensity. */
   bodyClues?: Array<{ id: string; label: string; intensity: number }>;
@@ -47,6 +48,12 @@ export interface JournalGuidedSupport {
   overallRatings?: Partial<Record<'pleasantness' | 'energy' | 'power' | 'expectedness', number>>;
   bodyClear?: boolean;
   noWordYet?: boolean;
+}
+
+export function hasGuidedSupportContent(context?: JournalGuidedSupport) {
+  return Boolean(context && (context.observation.trim() || context.statement.trim() || context.terms.length
+    || context.bodyClues?.length || Object.keys(context.overallRatings ?? {}).length
+    || context.bodyClear || context.noWordYet));
 }
 
 export interface JournalRecord {
@@ -127,7 +134,7 @@ function guidedSupport(value: unknown): JournalGuidedSupport | undefined {
     const role = term.role;
     if (role !== 'feeling' && role !== 'faux-feeling' && role !== 'working') return [];
     const label = term.label.trim();
-    return label ? [{ label, role }] : [];
+    return label ? [{ label, role, ...(term.decision === 'fits' || term.decision === 'maybe' ? { decision: term.decision } : {}) }] : [];
   });
   const bodyClues = Array.isArray(value.bodyClues) ? value.bodyClues.flatMap((clue) => {
     if (!isRecord(clue) || typeof clue.id !== 'string' || typeof clue.label !== 'string'
@@ -142,6 +149,7 @@ function guidedSupport(value: unknown): JournalGuidedSupport | undefined {
   ) as NonNullable<JournalGuidedSupport['overallRatings']> : {};
   return {
     observation: value.observation.trim(),
+    ...(typeof value.checkInId === 'string' ? { checkInId: value.checkInId } : {}),
     terms,
     statement: value.statement.trim(),
     ...(bodyClues.length ? { bodyClues } : {}),

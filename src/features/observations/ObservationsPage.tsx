@@ -48,7 +48,7 @@ function GuideContent({ blocks }: { blocks: GuideBlock[] }) {
   });
 }
 
-function infoCopy(topic: string) {
+export function ObservationHelpContent({ topic }: { topic: string }) {
   if (topic === 'slots') return <p>Quick Check shows which details the app noticed in your writing. “Found” means a pattern was detected, not that your account is correct or complete. You can keep your feelings and interpretations alongside the concrete details.</p>;
   if (topic === 'time') return <><p>Add a day, date, or general time so the moment is easier to place.</p><p><strong>For example:</strong> Yesterday at 3 p.m. · On Monday around noon.</p></>;
   if (topic === 'context') return <><p>Name the place or people if that helps someone picture the moment.</p><p><strong>For example:</strong> In the conference room with Alex · With my kids in the kitchen.</p></>;
@@ -336,7 +336,7 @@ export function ObservationsPage() {
         closeInitialFocus
         bodyClassName={styles.dialogBody}
       >
-        <div>{helpTopic ? infoCopy(helpTopic) : null}</div>
+        <div>{helpTopic ? <ObservationHelpContent topic={helpTopic} /> : null}</div>
       </OverlayShell>
     </article>
   );

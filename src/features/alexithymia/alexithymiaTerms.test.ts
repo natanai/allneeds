@@ -6,10 +6,36 @@ import {
   candidateTerm,
   createSupportJournalDraft,
   customWorkingTerm,
+  customTermId,
   fauxFeelingTerms,
 } from './alexithymiaTerms';
 
 describe('Alexithymia Support statement builder', () => {
+  it('keeps tentative choices tentative and preserves their provenance in Journal', () => {
+    const fear = candidateTerm(alexithymiaCandidates.find((candidate) => candidate.key === 'fear')!);
+    const decisions = { [fear.id]: 'maybe' };
+    const statement = buildSupportStatement({ observation: '', terms: [fear], needSlugs: [], noWordYet: false, decisions });
+    expect(statement).toBe('I might feel fear.');
+    const draft = createSupportJournalDraft({ observation: '', terms: [fear], needSlugs: [], statement, decisions });
+    expect(draft.guidedSupport?.terms).toEqual([{ label: 'Fear', role: 'feeling', decision: 'maybe' }]);
+    expect(draft.feelings?.[0]?.ratingSource).toBe('unknown');
+  });
+
+  it('keeps different Unicode and punctuation words distinct without losing equivalent spellings', () => {
+    const words = ['😶', '😕', '不安', '安心', 'mixed up', 'mixed-up', 'a/b', 'a b', '\ud800'];
+    expect(new Set(words.map(customTermId)).size).toBe(words.length);
+    expect(customTermId(' É ')).toBe(customTermId('e\u0301'));
+    expect(customTermId('Mixed up')).toBe(customTermId('mixed up'));
+  });
+
+  it('allows an explicitly uncertain check-in to keep context without generating prose or a rating', () => {
+    const draft = createSupportJournalDraft({ observation: '', terms: [], needSlugs: [], statement: '', noWordYet: true, bodyClear: true, checkInId: 'one-check-in' });
+    expect(draft.notes).toBe('');
+    expect(draft.feelings).toEqual([]);
+    expect(draft.mood).toBeUndefined();
+    expect(draft.guidedSupport).toMatchObject({ noWordYet: true, bodyClear: true, checkInId: 'one-check-in' });
+  });
+
   it('uses only the observation, terms, and Needs the person selected', () => {
     expect(buildSupportStatement({
       observation: 'We stopped talking after dinner.',
