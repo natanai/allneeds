@@ -104,3 +104,23 @@ test('observation guide citations open their matching source within the full lib
   await expect(reference).toContainText('[1] IRIS Center, Vanderbilt University: Defining Behavior');
   await expect(reference).toHaveAttribute('href', 'https://iris.peabody.vanderbilt.edu/case-study/defining-behavior/');
 });
+
+test('observation research guide uses a single-line disclosure hierarchy on phone and desktop', async ({ page }) => {
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/observations');
+    const parent = page.locator('#observation-guide');
+    await parent.locator(':scope > summary').click();
+    // Verify each row contains only the title and one disclosure chevron.
+    const rows = parent.locator('details > summary');
+    await expect(rows).toHaveCount(7);
+    for (const row of await rows.all()) {
+      await expect(row.locator(':scope > strong')).toHaveCount(1);
+      await expect(row.locator(':scope > span[aria-hidden="true"]')).toHaveCount(1);
+      await expect(row.locator('small')).toHaveCount(0);
+    }
+    await rows.first().click();
+    await expect(parent.getByText('Both can stay.', { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  }
+});
