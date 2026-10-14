@@ -6,7 +6,9 @@ import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { downloadBrowserBackup, restoreBrowserBackup } from '../../persistence/browserBackup';
 import { clearAlexithymiaDraft, clearJournalDraft, readAlexithymiaDraft, readJournalDraft } from '../../persistence/workflowDrafts';
 import { useBlueskySession } from '../account/blueskyAccount';
+import { CheckInReturn, type CheckInLocationState, checkInVisit, useCheckInReturnContext } from '../alexithymia/checkInNavigation';
 import { supportTermIndex } from '../alexithymia/alexithymiaTerms';
+import { shapeToJournalMood } from '../alexithymia/shapeCoordinates';
 import { synchronizeCustomizerMirrors } from '../customizer/customizerSettings';
 import { HistoryWorkspace } from './HistoryWorkspace';
 import { JournalBook } from './JournalBook';
@@ -26,18 +28,27 @@ function clearCompletedAlexithymiaCheckIn(entry: JournalRecord) {
     term && (current.decisions[term.id] === 'fits' || current.decisions[term.id] === 'maybe')
   ));
   if (
-    current.observation.trim() !== context.observation
+    (context.checkInId !== undefined && current.checkInId !== context.checkInId)
+    || current.observation.trim() !== context.observation
     || current.statement.trim() !== context.statement
     || current.selectedNeeds.length !== entry.needs.length
     || current.selectedNeeds.some((need, index) => need !== entry.needs[index])
     || selected.length !== context.terms.length
-    || selected.some((term, index) => term?.label !== context.terms[index]?.label || term?.role !== context.terms[index]?.role)
+    || selected.some((term, index) => term?.label !== context.terms[index]?.label || term?.role !== context.terms[index]?.role
+      || (context.terms[index]?.decision !== undefined && current.decisions[term!.id] !== context.terms[index]?.decision))
+    || Boolean(current.bodyClear) !== Boolean(context.bodyClear)
+    || Boolean(current.noWordYet) !== Boolean(context.noWordYet)
+    || JSON.stringify(Object.entries(current.selectedCues).filter(([, value]) => value > 0).sort())
+      !== JSON.stringify((context.bodyClues ?? []).map((clue) => [clue.id, clue.intensity]).sort())
+    || JSON.stringify(Object.entries(current.shape).sort()) !== JSON.stringify(Object.entries(context.overallRatings ?? {}).sort())
+    || JSON.stringify(shapeToJournalMood(current.shape, current.overallMood)) !== JSON.stringify(entry.mood)
   ) return;
   clearAlexithymiaDraft();
 }
 export function JournalPage() {
   const session = useBlueskySession();
   const { search } = useLocation();
+  const context = useCheckInReturnContext();
   const navigate = useNavigate();
   const params = new URLSearchParams(search);
   const [entries, setEntries] = useState(readJournal);
@@ -62,6 +73,13 @@ export function JournalPage() {
   }, []);
   const closeJournal = () => {
     setOpen(false);
+    const draft = context ? readAlexithymiaDraft() : null;
+    if (context && draft && draft.checkInId === context.id) {
+      void navigate('/alexithymia-support', { replace: true, state: { checkIn: {
+        visit: checkInVisit, id: context.id, stage: draft.stage, restoreScroll: true,
+      } } satisfies CheckInLocationState });
+      return;
+    }
     const next = new URLSearchParams(search); next.delete('compose'); next.delete('entry'); next.delete('from');
     void navigate(`/inventory/journal${next.size ? `?${next}` : ''}`, { replace: true });
   };
@@ -100,6 +118,7 @@ export function JournalPage() {
     {feedback ? <p className={`${styles.feedback} ${styles[feedback.kind]}`} role="status">{feedback.message}</p> : null}
     <DisclosureRow variant="card" title="Backup & restore"><p className={styles.localNote}>Journal entries are saved on this device. {session ? 'Saved entries also back up to your profile automatically when online; Account & data shows the last confirmed backup.' : 'Signed out; your entries stay here when you sign in.'} Export or import your journal, inventory, and customizer settings.</p><div className={styles.backupActions}><button type="button" onClick={() => { downloadBrowserBackup(); setFeedback({ kind: 'success', message: `Exported a backup with ${entries.length} journal entries.` }); }}>Export</button><button type="button" onClick={() => importRef.current?.click()}>Import</button><input ref={importRef} type="file" accept="application/json,.json" className="visually-hidden" onChange={importAll} /></div></DisclosureRow>
     <OverlayShell open={open} id="journal-layer" variant="fullscreen" title="Journal" onClose={closeJournal} closeLabel="Close full screen journal" bodyClassName={styles.modalBody}>
+      <div><CheckInReturn /></div>
       {open ? <JournalBook key={initialEntryId ?? 'new'} entries={entries} initialEntryId={initialEntryId} signedIn={Boolean(session)} onSave={save} onRemove={remove} /> : null}
       {feedback?.kind === 'error' ? <p role="alert" className={styles.feedback}>{feedback.message}</p> : null}
     </OverlayShell>

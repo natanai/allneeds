@@ -1,0 +1,98 @@
+# Check-in UX audit repairs
+
+The October 13, 2026 audit examined the live four-stage support lane and source at `36525b56413224777f8c0f70ff69532864c60686`. The user approved proceeding with the repair plan. This record describes the implementation and verification; it does not replace the original audit's observations with claims about user-study outcomes.
+
+## Findings and resulting behavior
+
+| Audit finding | Resulting behavior | Main regression coverage |
+| --- | --- | --- |
+| F01: Help detours break continuity | Observation help and recognized-word previews stay in sheets. Full canonical references have a dedicated return that survives further reference navigation in the same visit. The full Body Cues tool has a check-in working copy and explicit apply action; its independent draft remains separate. | `check-in-clarity.spec.ts`: observation help, nested reference return, Body Cues handoff |
+| F02: No word yet clears choices | Words has one continuation: Continue with kept words, or Continue without a word when none are kept. Clearing is a separate reversible action. | `check-in-clarity.spec.ts`: clear words/undo, uncertainty-only handoff |
+| F03: Skip erases observation | Skip advances and retains writing. Clear observation offers Undo. | `check-in-clarity.spec.ts`: observation/history/undo |
+| F04: Body uncertainty erases cues | Existing clues show Clear body clues with Undo. Nothing clear in my body is offered when there are no selected clues. Done preserves choices. | `check-in-clarity.spec.ts`: mobile area chooser/clear/undo |
+| F05: Need uncertainty has conflicting meanings | Add/Edit Needs opens browsing; Done preserves; Leave without choosing closes an empty picker; Clear selected Needs explicitly clears with Undo. | `check-in-clarity.spec.ts`: sentence/Need changes, viewport matrix |
+| F06: Generated statements become stale | Untouched generated text updates with its source choices. Edited text stays intact and signals when choices have changed. | `check-in-clarity.spec.ts`: sentence updates and personal edits |
+| F07: Rebuild destroys personal edits | Updating edited wording opens a replacement preview. Keep my wording cancels; replacing offers Undo. | `check-in-clarity.spec.ts`: replacement/undo |
+| F08: Maybe becomes a stronger assertion | Generated wording uses “I might feel”; Journal context retains Fits/Maybe. Older entries keep missing decisions unknown. History graph semantics are unchanged. | `alexithymiaTerms.test.ts`, `journalRepository.test.ts`, `check-in-clarity.spec.ts` |
+| F09: Uncertainty-only check-ins cannot finish | Body, mood, and uncertainty context can reach Journal and satisfy save validation without invented prose, labels, Needs, or ratings. | `workflowDrafts.test.ts`, `alexithymiaTerms.test.ts`, `check-in-clarity.spec.ts` |
+| F10: Occupied Journal has no recovery action | Open unfinished Journal preserves that draft and provides return after saving/closing. The incoming check-in never replaces it. | `check-in-clarity.spec.ts`, `check-in-magnet-and-map.spec.ts` |
+| F11: Handoff sounds like a completed save | Continue in Journal explains review and Save at the destination. It is the persistent primary action on mobile Review. Saved feedback still follows the actual Journal save. | `check-in-clarity.spec.ts`, `workflow-continuity.spec.ts` |
+| F12: Body-area discovery depends on horizontal scrolling | Mobile has a full-width labeled chooser, all nine areas, a position count, selected-area markers, and an in-sheet All body cues view. Desktop keeps the area rail. | `check-in-clarity.spec.ts`: mobile chooser and viewport matrix |
+| F13: Back and reference returns disagree | Stage changes create history entries. Explicit returns restore the stage, view/query, and scroll. Independent reloads offer fresh/continue with saved step/time. | `check-in-clarity.spec.ts`, `workflow-continuity.spec.ts` |
+| F14: Search ignores its selected scope | Search stays in Matches, All words, or My words. Empty states distinguish no matches from no selections. | `check-in-clarity.spec.ts`: scoped search/reload |
+| F15: Unicode custom-word identities collide | Versioned code-point identities preserve punctuation, emoji, and non-Latin words. Read-boundary migration retains the first known historic choice when old IDs collided rather than inventing extra selections. | `alexithymiaTerms.test.ts`, `workflowDrafts.test.ts`, `check-in-clarity.spec.ts` |
+| F16: Custom-word detail suggests unavailable matching | Words without a profile state that they are not compared with clues. | `check-in-clarity.spec.ts`: Unicode words |
+| F17: Word-view radios lack arrow behavior | Roving tab stop, arrows, Home, and End update focus and selection coherently. | `check-in-clarity.spec.ts`: radio arrows |
+| F18: Need Search receives forced initial focus | Shared dialog entry focuses a non-input control; Search opens through deliberate interaction. | `check-in-clarity.spec.ts`: Need picker focus |
+| F19: Stages and optional scales lack orientation | New stages focus their heading without forcing text entry. Scale descriptions include endpoint meanings. | `check-in-clarity.spec.ts`: stage focus and scale descriptions |
+| F20: Stage changes reset the wrong scroller | Forward stages reset the owning workspace; temporary reference returns restore its position. | `check-in-clarity.spec.ts`: long mobile stage/return |
+| F21: Keyboard focus escapes a sheet after a collapsed disclosure | The shared focus owner includes native disclosure summaries, excludes controls inside closed disclosures, and respects negative tab stops. Forward and reverse tabbing stay inside the sheet; Escape restores its opening control. | `check-in-clarity.spec.ts`: keyboard-only completion, closed/open Body Cues disclosure, Need picker and Journal |
+| F22: Larger text obscures controls and choices | Header icons retain a readable glyph inside their touch target; step counts stay together; word-view labels reflow in full. Mobile search and view controls scroll with their content so an expanded toolbar cannot cover the available words. Magnets with detail text or role badges fit their surface and wrap label/icon/role content without the role badge covering the action text. | `check-in-clarity.spec.ts`: doubled base text at 320×568, full scope labels, icon size, overflow, badge/action non-overlap and Journal completion |
+| F23: Physics control covers a large-text Need name | Shared packing measures the control, places a wide first magnet below its reserved row, and clears its full height when a short row wraps. A restored layout that intersects the control is repacked together to prevent overlaps between repaired and retained positions. Valid saved layouts and the physical forces, pickup and drag behavior stay the same. | `magnetMath.test.ts`: wide-first and short-row cases; `check-in-clarity.spec.ts`: selected Need/control non-overlap at doubled base text |
+
+Additional repairs found during regression work: observation help stays reachable during text entry, pointer actions retain textarea focus until activation so mobile layout changes do not swallow taps, check-in returns do not fade through the underlying navigation, contextual Body Cues edits persist before an immediate return, removing the last Review word still permits uncertainty-only completion, storage failures are visible and block a lossy reference exit, and unavailable speech produces useful feedback. A two-tab test also exposed a shared storage-event feedback loop: shell listeners now react only to their owned keys, and unchanged navigation settings retain their identity. Stale check-in screens refuse to replace a newer or completed draft and keep their current text available with a conflict message.
+
+## Verification
+
+- Foundation: the final `TZ=UTC pnpm check` passed with 350 tests across 63 files, type checking, deterministic compilers, and production-build verification. UTC matches the repository CI environment; the existing History viewport test assumes UTC calendar boundaries.
+- The production catalog data chunk remains unchanged. No authored catalog, evidence source, association, scoring formula, user strategy, or shared magnet-force/pickup implementation changed. The follow-up fixes shared packing around its measured control, including invalid restored positions.
+- Initial repair browser regression: 132 of 133 selected cases passed in the broader serial run, including all 17 then-new check-in cases. The desktop route sweep completed its layout assertions but failed its no-console-warning assertion after one Chromium cross-world service-worker preload warning. That case passed in an isolated clean rerun (1/1), with no app or committed test changes.
+- Offline/reconnect: `TZ=UTC pnpm test:e2e:outage` passed, covering version-safe cache-first upgrade, a fresh offline client, cached deep routes, same-port restart, and cache-miss reconnect.
+
+The new browser coverage exercises widths 320, 375, 390, 430, 768, and 1280, plus 844×390 landscape and reduced-motion states. This is layout and interaction coverage in Chromium, not a claim about physical iPhone behavior.
+
+The October 14 follow-up reproduced the keyboard-disclosure and enlarged-text defects before their fixes. A broader run before the final board-control packing repair passed 131 of 135 selected cases, including all 19 check-in cases. Four checks failed: body-only/shape-only matching timed out during browser-context setup; the all-Need width sweep timed out during `page.evaluate`; desktop route coverage failed to create a browser context; and strategy-draft recovery encountered a closed CDP session after reload. These results are retained as failed checks, not a clean full-suite pass or proof that every failure is infrastructure-only. After rebuilding the control-packing repair, a targeted 40-case run passed 38 cases, including all 19 check-in cases, all nine shared magnet-interaction cases, keyboard focus, navigation persistence, and boot/nav geometry. Body-only/shape-only matching and strategy-draft recovery passed in that run. Two cases remained failed after one explicit retry each: the all-Need route sweep exceeded its 120-second limit, and the desktop route sweep encountered a closed CDP session followed by the catalog service-worker preload warning on retry. No assertions, time limits, or application behavior were relaxed to make them pass.
+
+For the final caption/badge rendering, 25 of 29 focused cases have confirmed passing results. A combined run completed seven cases, then stopped on a browser-context setup timeout; its remaining 21 cases did not run in that invocation. Fresh-browser batches subsequently passed the remaining three existing support cases, six help/choice/Journal cases, four reference/scroll/storage cases, and all four viewport cases. The enlarged-text case also passed in an isolated run with long Other emotion word labels, separate Need badge/action text, full-reference return, and Journal save.
+
+The local execution service disconnected while collecting the final five-case batch, and a read-only recovery attempt did not complete. That batch is not counted as passed. Its enlarged-text case has the separate confirmed result above; four final-source cases still need a confirmed rerun: word/rating clear-and-Undo, optional scales/unavailable speech, stale tabs, and keyboard-only completion. All four passed before the final caption-only styling adjustment. This is partial verification of the final source, not a clean 29-case or full-suite pass.
+
+Browser validation uses Playwright 1.62.1 with a temporary local Chromium 153.0.8010.0 launcher. The environment could not retrieve Playwright's normal browser archive; the launcher and browser remain outside the repository, and no app dependency or committed test configuration was changed for that workaround. The normal pinned Chromium and WebKit/device checks remain release validation.
+
+Two unrelated checks failed identically on the untouched audit baseline in a separate checkout, using the same browser:
+
+| Existing check | Baseline failure |
+| --- | --- |
+| `journal-history.spec.ts`: History and journal inherit every preset, stay within a narrow phone, and allow keyboard reading | The Journal is already open when the test tries to click the day-entry button behind it. |
+| `native-stability.spec.ts`: Bluesky account and profile paths are actionable instead of placeholder controls | The test expects disabled Save this browser / Load saved profile controls that the current account UI no longer renders. |
+
+Those two cases are explicitly excluded from the final broader run using `--grep-invert 'History and journal inherit every preset|Bluesky account and profile paths are actionable'`; they are not counted as passing or silently skipped in committed test code. Their production behavior and test definitions remain outside this check-in repair.
+
+## Remaining release validation
+
+Release recommendation: keep the change in review until normal pinned-browser validation resolves the remaining checks and the device/first-use tasks below have actual results. The repair record does not assert a clean `pnpm check:all` pass.
+
+1. Run the existing [Full repository validation workflow](https://github.com/natanai/allneeds/actions/workflows/batch1-validation.yml) on `codex/support-check-in-clarity`, using its pinned Playwright Chromium. Confirm the four interrupted final cases and investigate the all-Need timeout and desktop preload/protocol failure with the standard browser. The two known baseline test failures remain separately identified.
+2. Complete the Safari, Home Screen, accessibility, lifecycle, and first-use tasks below on a review build.
+3. Reopen any finding when a main action causes a mistaken exit, lost choice, hidden control, or unexplained saved/draft state. Record actual results before recommending release.
+
+
+Physical iPhone Safari and Home Screen checks remain necessary for software-keyboard visibility, safe areas, touch gestures, background/foreground durability, and VoiceOver. The doubled-base-text regression changes the document's root font size to 200%; it is a reflow simulation, not certification of Safari page zoom, iOS Larger Text, or VoiceOver.
+
+Use a review build of this branch, synthetic writing, and a disposable test profile. Record the build, phone/iOS version, Safari or Home Screen mode, setting, observed result, and any recovery needed. These checks are pending; do not infer a pass from the Chromium results.
+
+| Check | Actions | Pass condition |
+| --- | --- | --- |
+| Phone keyboard and safe areas | In Safari and the installed app, enter observation text; open help without dismissing the keyboard first; visit every stage; edit the statement; rotate once. | The tap activates once, writing remains intact, and Back/Close/Done/Continue remain readable and reachable around the keyboard, browser bars, and safe areas. |
+| Actual large text and zoom | Repeat the body chooser, Words, Need picker, and Journal handoff with Safari page zoom at 200%, then with the phone's larger-text setting. | Full action labels and current choices can be read; scrolling reaches every control; no choice is hidden behind persistent controls. |
+| VoiceOver and full workspace navigation | Navigate by headings and controls; cycle forward/back through the whole mobile workspace; select two body areas, change a scale, keep a word as Maybe, clear and Undo, open/close help, and reach Journal. | Stage, selected states, scale meanings, and status changes are understandable; no hidden app navigation receives focus behind the mobile stage; modal navigation stays within the sheet; closing returns to the trigger; no unwanted text-entry focus. |
+| Reference excursion | With a chosen cue and a word search, open a full reference, follow a related link, then return. In the full Body Cues tool, return once without applying, then apply different choices explicitly. | Stage/search/scroll survive; unapplied tool edits do not replace the check-in; applying uses exactly the chosen clues. |
+| Lifecycle and offline return | Write at each stage; background/foreground the app; lock/unlock; reload; close/reopen the installed app; repeat a return while offline. | A deliberate fresh/continue choice and the latest durable draft survive. Draft and saved-entry states remain distinguishable. |
+| Journal recovery and repeated completion | Begin with a different unfinished Journal page, complete the check-in, resolve the older page, return, save the check-in, and use Back/reopen. | Neither draft is overwritten; only the matching check-in completes; one deliberate save creates one entry and leaves no misleading unsaved state. |
+| Profile boundary | First save locally while signed out. In a disposable signed-in profile, save while offline, reconnect, and inspect the backup receipt. | Device save succeeds independently; backup is described as confirmed only after a server-confirmed result; no draft keystrokes are uploaded. |
+| Theme and motion | Use the real presets, reduced motion, and representative high/low roundness while repeating choice/clear/Undo/help. | Selection and keyboard focus remain distinguishable; text/actions stay readable; motion settings do not remove functionality. |
+
+### First-use validation
+
+Have an unfamiliar person attempt these tasks without explaining the new controls first:
+
+1. Find a sensation in Whole-body sense and another in the hands/limbs area, then continue the same check-in.
+2. Continue when no feeling word fits while keeping the situation they wrote.
+3. Keep one word as Maybe and explain what the resulting statement communicates.
+4. Generate a sentence, edit it personally, change a Need, and keep or restore their wording.
+5. Open help and a full reference, then return to the exact task they were doing.
+6. Continue into Journal when another unfinished page already exists, explaining what is saved and what still needs Save.
+
+Record the first chosen control, hesitation, mistaken exits, recovery without prompting, and the person's explanation of each continuation or clearing action. If the facilitator must point out the area chooser, explain an exit, recover writing, or distinguish continuation from clearing, reopen the relevant finding before release. These tasks are proposed evaluation, not results from a user study.
+
+The work refuses stale multi-tab writes; it does not automatically merge them. Identity checks also prevent an old Body Cues or Journal handoff from completing a different check-in. Signed-in backup, arbitrary user-selected theme contrast, actual Safari/iOS text enlargement, and physical-device accessibility remain distinct validation cases. No clinical or user-study outcome is asserted.

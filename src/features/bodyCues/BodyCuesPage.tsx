@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import bodyRegionsRaw from '../../data/body-regions.json';
 import { alexithymiaCandidateByKey, alexithymiaCandidates } from '../alexithymia/alexithymiaData';
@@ -8,7 +8,11 @@ import {
   clearBodyCuesDraft,
   readBodyCuesDraft,
   writeBodyCuesDraft,
+  readAlexithymiaDraft,
+  writeAlexithymiaDraft,
+  type BodyCuesDraft,
 } from '../../persistence/workflowDrafts';
+import { checkInVisit, useCheckInReturnContext, type CheckInLocationState } from '../alexithymia/checkInNavigation';
 import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
 import { computeBodyCueMatches, describeCueIntensity } from './bodyCueMath';
 import styles from './BodyCuesPage.module.css';
@@ -29,13 +33,26 @@ function useMobileResultsLayout() {
 }
 
 export function BodyCuesPage() {
-  const [initialDraft] = useState(readBodyCuesDraft);
+  const navigate = useNavigate();
+  const context = useCheckInReturnContext();
+  const [initialDraft] = useState(() => {
+    const checkIn = context ? readAlexithymiaDraft() : null;
+    return checkIn && checkIn.checkInId === context?.id
+      ? checkIn.bodyTool ?? { selected: checkIn.selectedCues, showAll: false } : readBodyCuesDraft();
+  });
+  const [storageError, setStorageError] = useState('');
+  const persist = useCallback((draft: BodyCuesDraft) => {
+    if (!context) return writeBodyCuesDraft(draft);
+    const checkIn = readAlexithymiaDraft();
+    if (!checkIn || checkIn.checkInId !== context.id) throw new Error('The check-in changed in another tab.');
+    return writeAlexithymiaDraft({ ...checkIn, bodyTool: draft });
+  }, [context]);
   const [selected, setSelected] = useState<Record<string, number>>(() => initialDraft?.selected ?? {});
   const [showAll, setShowAll] = useState(() => initialDraft?.showAll ?? false);
   const [resultsPinned, setResultsPinned] = useState(true);
   const mobileResults = useMobileResultsLayout();
   const draft = useMemo(() => ({ selected, showAll }), [selected, showAll]);
-  const draftRef = useWorkflowDraftPersistence(draft, writeBodyCuesDraft);
+  const draftRef = useWorkflowDraftPersistence(draft, persist, 180, (error) => setStorageError(error ? 'These clues could not be kept. Keep this tool open and check device storage.' : ''));
 
   const scoringSelections = useMemo(() => bodyRegions.flatMap((region) => region.options
     .map((option) => ({ option, intensity: selected[option.id] ?? 0 }))
@@ -51,19 +68,42 @@ export function BodyCuesPage() {
   const shownCount = Math.min(visibleLimit, matches.length);
 
   function updateCue(id: string, value: number) {
-    setSelected((current) => ({ ...current, [id]: value }));
+    const next = { selected: { ...selected, [id]: value }, showAll: false };
+    setSelected(next.selected);
     setShowAll(false);
+    // A browser Back or reference return can happen before the debounce fires.
+    // Keep the contextual working copy current without applying it to the check-in.
+    if (context) {
+      try { persist(next); } catch { setStorageError('These clues could not be kept. Keep this tool open and check device storage.'); }
+    }
   }
 
   function reset() {
     draftRef.current = { selected: {}, showAll: false };
-    clearBodyCuesDraft();
+    if (!context) clearBodyCuesDraft();
+    else {
+      try { persist(draftRef.current); } catch { setStorageError('These clues could not be kept. Keep this tool open and check device storage.'); }
+    }
     setSelected({});
     setShowAll(false);
   }
 
   return (
     <div className={styles.page}>
+      {context ? <div className={styles.checkInHandoff}>
+        <p>Choose clues here, then apply them to your check-in.</p>
+        <button type="button" onClick={() => {
+          const checkIn = readAlexithymiaDraft();
+          if (!checkIn || checkIn.checkInId !== context.id) { setStorageError('A different check-in was started. Your clues have not replaced it.'); return; }
+          try {
+            writeAlexithymiaDraft({ ...checkIn, selectedCues: selected, bodyClear: false, bodyTool: { selected, showAll } });
+            void navigate('/alexithymia-support', { state: { checkIn: {
+              visit: checkInVisit, id: context.id, stage: checkIn.stage, restoreScroll: true,
+            } } satisfies CheckInLocationState });
+          } catch { setStorageError('The check-in could not be updated. Keep these clues open and check device storage.'); }
+        }}>Use these clues in check-in</button>
+      </div> : null}
+      {storageError ? <p role="alert">{storageError}</p> : null}
       <header className={styles.pageHeader}>
         <h1>Body cues</h1>
         <p>Notice what stands out, then compare possible Feeling words.</p>

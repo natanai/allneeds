@@ -72,6 +72,26 @@ describe('magnet math', () => {
     expect(result.height).toBe(64);
   });
 
+  it('places a wide first magnet below the reserved control instead of covering it', () => {
+    const control = { id: 'control', x: 150, y: 12, width: 70, height: 34 };
+    const result = packMagnets([{ id: 'wide', width: 210, height: 90 }], {
+      boardWidth: 240, padding: 12, firstRowRightInset: 78, firstRowMinHeight: 34,
+    });
+    expect(placementsOverlap(result.placements[0]!, control)).toBe(false);
+    expect(result.placements[0]!.y).toBeGreaterThanOrEqual(control.y + control.height);
+    expect(result.placements[0]!.width).toBe(210);
+  });
+
+  it('reserves the full control height when a short first row wraps', () => {
+    const control = { id: 'control', x: 150, y: 12, width: 70, height: 60 };
+    const result = packMagnets([
+      { id: 'small', width: 80, height: 20 },
+      { id: 'wide', width: 210, height: 90 },
+    ], { boardWidth: 240, padding: 12, firstRowRightInset: 78, firstRowMinHeight: 60 });
+    expect(result.placements.every((placement) => !placementsOverlap(placement, control))).toBe(true);
+    expect(result.placements[1]!.y).toBeGreaterThanOrEqual(control.y + control.height);
+  });
+
   it('reads a loose nav arrangement as stable top-to-bottom, left-to-right order', () => {
     const ordered = orderMagnetsByVisualRows([
       { id: 'right', x: 120, y: 5, width: 90, height: 44 },

@@ -9,5 +9,5 @@
 .localNote { margin: 0; color: var(--secondary); font-size: var(--text-xs); line-height: 1.4; }
 .backupActions { display: flex; gap: .5rem; margin-top: .6rem; }
 .backupActions button { min-height: var(--control-min); padding: .45rem .75rem; border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
-.modalBody { min-height: 0; padding: 0; overflow: hidden; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.modalBody { min-height: 0; padding: 0; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
 @media (max-width: 720px) { .newEntry { min-height: var(--control-min); } }

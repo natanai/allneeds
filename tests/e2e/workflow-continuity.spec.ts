@@ -220,7 +220,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await bodySheet.getByRole('button', { name: /Tight or constricted/ }).click();
   await bodySheet.getByLabel('Tight or constricted intensity').fill('70');
   await bodySheet.getByRole('button', { name: 'Done', exact: true }).click();
-  await page.getByRole('button', { name: 'Compare words' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   const candidateSheet = page.getByRole('dialog', { name: 'Anxiety' });
   await candidateSheet.getByRole('button', { name: 'Fits', exact: true }).click();
@@ -232,7 +232,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.getByRole('button', { name: 'Continue previous check-in' }).click();
   await expect(page.getByRole('heading', { name: 'Possible words' })).toBeVisible();
   await expect(page.getByText('Anxiety').first()).toBeVisible();
-  await page.getByRole('button', { name: 'Use these words' }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Start over' }).click();
   await page.reload();
@@ -273,11 +273,10 @@ test('A Journal save completes the matching Alexithymia check-in, not the unfini
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('I heard the meeting move to tomorrow.');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByRole('button', { name: 'Browse all feelings' }).click();
-  await page.getByRole('button', { name: 'No word yet', exact: true }).click();
-  await page.getByRole('button', { name: 'Use these words' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
+  await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
   await page.getByRole('button', { name: 'Build sentence' }).click();
-  await page.getByRole('button', { name: 'Add to Journal' }).click();
+  await page.getByRole('button', { name: 'Continue in Journal' }).click();
   const journalDialog = page.getByRole('dialog', { name: 'Journal' });
   await expect(journalDialog.getByLabel('Reflection')).toHaveValue(/I heard the meeting move to tomorrow/);
 

@@ -398,16 +398,25 @@ export function MagnetBoard({
       ? NAV_REST_PACKING
       : { padding: 12, gapX: 12, gapY: 14, firstRowRightInset: 46 };
     const padding = packing.padding;
+    const toggle = board.querySelector<HTMLElement>(`.${styles.boardToggle}`);
+    const toggleBounds = toggle ? {
+      x: toggle.offsetLeft - 4,
+      y: toggle.offsetTop - 4,
+      width: toggle.offsetWidth + 8,
+      height: toggle.offsetHeight + 8,
+    } : null;
     const packed = packMagnets(measured, {
       boardWidth,
       ...packing,
+      firstRowRightInset: Math.max(packing.firstRowRightInset, toggleBounds ? boardWidth - padding - toggleBounds.x : 0),
+      firstRowMinHeight: toggleBounds ? toggleBounds.y + toggleBounds.height - padding : 0,
     });
     const minimumHeight = variant === 'nav' ? 78 : 112;
     const boardHeight = Math.max(packed.height, minimumHeight);
     const sameStoredSize = stored
       && Math.abs(stored.boardWidth - boardWidth) < 1
       && Math.abs(stored.boardHeight - boardHeight) < 1;
-    const placements = packed.placements.map((placement) => {
+    const restoredPlacements = packed.placements.map((placement) => {
       const current = canReuseCurrent ? magnetsRef.current.get(placement.id) : null;
       const saved = packNavAtRest ? undefined : stored?.magnets[placement.id];
       const restoredX = current?.x
@@ -421,6 +430,9 @@ export function MagnetBoard({
         y: clamp(restoredY, padding, boardHeight - padding - placement.height),
       };
     });
+    const placements = toggleBounds && restoredPlacements.some((placement) => getAabbCollision(placement, toggleBounds))
+      ? packed.placements
+      : restoredPlacements;
 
     board.style.height = `${boardHeight}px`;
     const next = new Map<string, KineticMagnet>();

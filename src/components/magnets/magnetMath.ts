@@ -35,6 +35,7 @@ export type PackMagnetsOptions = {
   gapY?: number;
   padding?: number;
   firstRowRightInset?: number;
+  firstRowMinHeight?: number;
 };
 
 export const NAV_REST_PACKING = {
@@ -187,6 +188,7 @@ export function packMagnets(
     gapY = 14,
     padding = 16,
     firstRowRightInset = 0,
+    firstRowMinHeight = 0,
   }: PackMagnetsOptions,
 ): { height: number; placements: MagnetPlacement[] } {
   const safeWidth = Math.max(boardWidth, padding * 2 + 1);
@@ -203,9 +205,10 @@ export function packMagnets(
       ? Math.max(fullRightEdge - firstRowRightInset, padding + 1)
       : fullRightEdge;
 
-    if (cursorX > padding && cursorX + width > rightEdge) {
+    if (cursorX + width > rightEdge
+      && (cursorX > padding || (cursorY === padding && firstRowRightInset > 0))) {
       cursorX = padding;
-      cursorY += rowHeight + gapY;
+      cursorY += Math.max(rowHeight, cursorY === padding ? firstRowMinHeight : 0) + gapY;
       rowHeight = 0;
     }
 

@@ -171,8 +171,6 @@
 .smallAction,
 .buildButton,
 .customWordButton,
-.notSureChoice,
-.wordAlternatives button,
 .notSureButton {
   min-height: var(--control-min);
   padding: .62rem .88rem;
@@ -187,8 +185,7 @@
 .primaryButton { background: var(--action); }
 .textButton,
 .smallAction,
-.notSureButton,
-.notSureChoice { background: color-mix(in srgb, var(--quiet) 38%, var(--surface-raised) 62%); }
+.notSureButton { background: color-mix(in srgb, var(--quiet) 38%, var(--surface-raised) 62%); }
 
 .primaryButton:disabled,
 .textButton:disabled,
@@ -202,7 +199,7 @@
 .iconButton {
   width: var(--control-min);
   height: var(--control-min);
-  padding: .62rem;
+  padding: calc(var(--control-min) * .22);
   display: inline-grid;
   place-items: center;
   flex: 0 0 auto;
@@ -246,6 +243,7 @@
 
 .appBarTitle {
   display: none;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
   gap: var(--space-2);
@@ -253,7 +251,7 @@
 }
 
 .appBarTitle strong { font: 800 var(--text-sm) / 1 var(--font-display); }
-.appBarTitle small { color: var(--secondary); font-size: var(--text-xs); }
+.appBarTitle small { color: var(--secondary); font-size: var(--text-xs); white-space: nowrap; }
 
 .progress {
   width: min(30rem, 100%);
@@ -453,6 +451,7 @@
 .wordTray > div::-webkit-scrollbar { display: none; }
 
 .detectedTerms a,
+.detectedTerms button,
 .clueTray span,
 .wordTray span {
   min-height: var(--control-min);
@@ -598,7 +597,7 @@
   min-width: 0;
   padding: .16rem;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(5rem, 100%), 1fr));
   gap: var(--space-1);
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--outline) 9%, var(--quiet) 91%);
@@ -608,15 +607,13 @@
   min-width: 0;
   min-height: var(--control-min);
   padding: .38rem .24rem;
-  overflow: hidden;
   border: 0;
   border-radius: calc(var(--radius-lg) * .78);
   background: transparent;
   color: var(--text);
   font-size: var(--text-xs);
   font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
@@ -652,21 +649,6 @@
   justify-self: start;
   background: var(--positive);
 }
-
-.wordAlternatives {
-  padding: .62rem 0 0;
-  display: grid;
-  gap: var(--space-2);
-  border-top: 1px solid color-mix(in srgb, var(--outline) 13%, transparent);
-}
-
-.wordAlternatives button {
-  width: 100%;
-  background: color-mix(in srgb, var(--surface-raised) 84%, var(--quiet) 16%);
-  box-shadow: none;
-}
-
-.wordAlternatives button[aria-pressed='true'] { background: var(--positive); }
 
 .selectionSection,
 .composer {
@@ -745,8 +727,7 @@
   cursor: pointer;
 }
 
-.noWordSelection,
-.notSureChoice { justify-self: start; }
+.noWordSelection { justify-self: start; }
 
 .wordsAlreadyUsed {
   padding: .5rem;
@@ -780,7 +761,7 @@
 
 .composerActions {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-1);
 }
 
@@ -834,17 +815,8 @@
 .regionPickerLabel,
 .regionEyebrow { margin: 0; }
 
-.regionPicker {
-  margin: 0 calc(clamp(.72rem, 1.8vw, 1rem) * -1) .62rem;
-  padding: .48rem clamp(.72rem, 1.8vw, 1rem) .26rem;
-  display: flex;
-  gap: var(--space-1);
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
-}
-
-.regionPicker::-webkit-scrollbar { display: none; }
+.regionPanel { display: none; }
+.regionPicker { display: grid; gap: var(--space-1); }
 
 .regionPicker button {
   min-height: var(--control-min);
@@ -854,7 +826,6 @@
   justify-content: space-between;
   gap: var(--space-2);
   flex: 0 0 auto;
-  scroll-snap-align: start;
   border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--surface-raised) 92%, var(--quiet) 8%);
@@ -1159,8 +1130,8 @@
   .wordToolbar { grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); }
 
   .bodySheetLayout { grid-template-columns: minmax(12rem, 13.5rem) minmax(0, 1fr); align-items: start; gap: var(--space-4); }
-  .regionPanel { padding: .62rem; border-radius: var(--radius-lg); background: color-mix(in srgb, var(--quiet) 28%, var(--surface-raised) 72%); }
-  .regionPicker { max-height: min(60dvh, 33rem); margin: .45rem 0 0; padding: 0; display: grid; gap: var(--space-1); overflow-x: hidden; overflow-y: auto; scroll-snap-type: none; }
+  .regionPanel { display: block; padding: .62rem; border-radius: var(--radius-lg); background: color-mix(in srgb, var(--quiet) 28%, var(--surface-raised) 72%); }
+  .regionPicker { max-height: min(60dvh, 33rem); margin: .45rem 0 0; padding: 0; display: grid; gap: var(--space-1); overflow-x: hidden; overflow-y: auto; }
   .regionPicker button { width: 100%; min-height: var(--control-min); border-color: transparent; border-radius: var(--radius-md); text-align: left; }
   .regionPicker button[aria-pressed='true'] { border-color: color-mix(in srgb, var(--primary) 42%, transparent); }
   .bodyOptions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1279,7 +1250,7 @@
 
   .stageOne:has(.observationField textarea:focus) .stageHeader { display: none; }
   .stageOne:has(.observationField textarea:focus) .observationWorkspace { padding-top: 3.45rem; }
-  .stageOne:has(.observationField textarea:focus) .guideRail > :not(.stickyActions) { display: none; }
+  .stageOne:has(.observationField textarea:focus) .guideRail > :not(.stickyActions):not(.helpButton) { display: none; }
   .stageOne:has(.observationField textarea:focus) .stickyActions {
     top: calc(max(.3rem, env(safe-area-inset-top)) + 3.25rem);
     bottom: auto;
@@ -1292,30 +1263,18 @@
   .wordTray { padding: .6rem; }
 
   .wordToolbar {
-    position: sticky;
-    z-index: 8;
-    top: calc(3.45rem + env(safe-area-inset-top));
     padding: .35rem 0;
     background: color-mix(in srgb, var(--quiet) 42%, var(--surface-raised) 58%);
   }
 
   .wordSearch,
   .segmented { background: color-mix(in srgb, var(--surface-raised) 96%, var(--quiet) 4%); }
-  .wordAlternatives {
-    margin-bottom: calc(var(--control-min) + 1rem + env(safe-area-inset-bottom));
-    scroll-margin-bottom: calc(var(--control-min) + 1rem + env(safe-area-inset-bottom));
-  }
-  .wordAlternatives { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .wordAlternatives .sectionLabel { grid-column: 1 / -1; }
-
   .selectionSection,
   .composer { padding: .65rem; }
   .selectedTermList > li { padding: .46rem .5rem; }
-  .composerActions { grid-template-columns: repeat(4, 1fr); }
 
   .sheet { max-height: calc(100dvh - max(.25rem, env(safe-area-inset-top))); }
   .sheetIntro { margin-bottom: .55rem; }
-  .regionPickerLabel { padding-inline: .05rem; }
   .shapeGroup { padding: .62rem; }
   .decisionButtons { grid-template-columns: 1fr 1fr; }
   .decisionButtons button:last-child { grid-column: 1 / -1; }
@@ -1336,7 +1295,6 @@
 @media (max-width: 370px) {
   .appBar { grid-template-columns: 40px minmax(0, 1fr) 40px 40px; }
   .appBar .iconButton { width: var(--control-min); height: var(--control-min); }
-  .composerActions { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1345,3 +1303,24 @@
   .clueCards > button,
   .shapePositions input:checked + span { transition: none; transform: none; }
 }
+
+.areaChooser { display: grid; gap: var(--space-1); font-size: var(--text-sm); font-weight: 750; }
+.areaChooser select {
+  width: 100%; min-width: 0; min-height: var(--control-min); padding: .55rem .65rem;
+  border: 1px solid var(--outline); border-radius: var(--radius-md);
+  background: var(--surface-raised); color: var(--text); font: inherit; font-size: max(16px, var(--text-base));
+}
+.bodyViewActions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-block: var(--space-2); }
+.bodyViewActions > span { color: var(--secondary); font-size: var(--text-xs); }
+.bodyAreaContent { min-width: 0; display: grid; gap: var(--space-4); }
+.helpButton { padding: 0; min-height: var(--control-min); border: 0; background: transparent; color: var(--primary); text-align: left; text-decoration: underline; font: inherit; font-weight: 750; cursor: pointer; }
+.separateTool { margin-top: var(--space-3); border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent); font-size: var(--text-xs); color: var(--secondary); }
+.separateTool > summary { min-height: var(--control-min); display: flex; align-items: center; cursor: pointer; text-decoration: underline; }
+.notice, .returnNotice {
+  min-width: 0; margin: var(--space-2) 0; padding: .55rem .7rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--outline) 25%, transparent); border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--attention) 22%, var(--surface-raised) 78%); color: var(--text); font-size: var(--text-sm);
+}
+.notice button, .returnNotice a { min-height: var(--control-min); padding: .4rem .6rem; display: inline-flex; align-items: center; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: inherit; font-weight: 750; cursor: pointer; }
+.stageHeader h1:focus { outline: none; }
+@media (min-width: 720px) { .areaChooser { display: none; } }

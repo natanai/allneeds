@@ -6,7 +6,7 @@ async function openWordStep(page: Page) {
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
-  await page.getByRole('button', { name: 'Browse all feelings' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
 }
 
 async function expectWordControlsInsideMainPane(page: Page) {
@@ -16,7 +16,7 @@ async function expectWordControlsInsideMainPane(page: Page) {
   await expect(filters).toBeVisible();
   await expect(sidebar).toBeVisible();
   await expect(page.getByRole('radio', { name: 'Matches' })).toBeVisible();
-  await expect(page.getByRole('radio', { name: 'All feelings' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'All words' })).toBeVisible();
   await expect(page.getByRole('radio', { name: 'My words' })).toBeVisible();
 
   await expect.poll(async () => {

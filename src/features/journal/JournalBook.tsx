@@ -6,7 +6,7 @@ import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { OverlayShell } from '../../components/overlays/OverlayShell';
 import { feelings, needsBySlug } from '../../data/catalog';
 import { clearJournalDraft, readJournalDraft, writeJournalDraft, type JournalComposerDraft } from '../../persistence/workflowDrafts';
-import { createJournalRecord, journalDate, type JournalRecord } from './journalRepository';
+import { createJournalRecord, hasGuidedSupportContent, journalDate, type JournalRecord } from './journalRepository';
 import { ValenceArousalField } from './ValenceArousalField';
 import styles from './JournalBook.module.css';
 
@@ -88,7 +88,7 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
   };
   const save = (event: FormEvent) => {
     event.preventDefault();
-    if (!draft.notes.trim() && !draft.feelings?.length && !draft.selectedNeeds.length && !draft.mood) { setError('Add a reflection, feeling, related need, or mood before saving.'); return; }
+    if (!draft.notes.trim() && !draft.feelings?.length && !draft.selectedNeeds.length && !draft.mood && !hasGuidedSupportContent(draft.guidedSupport)) { setError('Add a reflection, feeling, related need, or mood before saving.'); return; }
     if (draft.experiencedAt && !Number.isFinite(Date.parse(draft.experiencedAt))) { setError('Choose a valid date and time for this moment.'); return; }
     const experiencedAtISO = draft.experiencedAt ? new Date(draft.experiencedAt).toISOString() : undefined;
     if (experiencedAtISO && localDateTime(experiencedAtISO) !== draft.experiencedAt?.slice(0, 16)) { setError('That local time is unavailable because the clocks changed. Choose another time.'); return; }
@@ -171,7 +171,7 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
           <section className={`${styles.reflectionSheet} ${styles.savedSheet}`}><span className={styles.reflectionLabel}>Reflection</span><div className={styles.savedReflection}><p>{entry.notes || 'No written reflection on this page.'}</p>
             {entry.guidedSupport ? <DisclosureRow title="Check-in context">
               {entry.guidedSupport.observation && !entry.notes.includes(entry.guidedSupport.observation) ? <p>Situation: {entry.guidedSupport.observation}</p> : null}
-              {entry.guidedSupport.terms.length ? <p>Chosen words: {entry.guidedSupport.terms.map((term) => `${term.label} (${term.role})`).join(' · ')}</p> : null}
+              {entry.guidedSupport.terms.length ? <p>Chosen words: {entry.guidedSupport.terms.map((term) => `${term.label} (${term.decision === 'maybe' ? 'Maybe · ' : term.decision === 'fits' ? 'Fits · ' : ''}${term.role})`).join(' · ')}</p> : null}
               {entry.guidedSupport.noWordYet ? <p>No emotion word felt clear yet.</p> : null}
               {entry.guidedSupport.bodyClues?.length ? <p>Body clues: {entry.guidedSupport.bodyClues.map((clue) => `${clue.label} (${clue.intensity}%)`).join(' · ')}</p> : entry.guidedSupport.bodyClear ? <p>No clear body clues were reported.</p> : null}
               {entry.guidedSupport.overallRatings && Object.keys(entry.guidedSupport.overallRatings).length ? <p>Overall-feeling clues: {Object.entries(entry.guidedSupport.overallRatings).map(([dimension, value]) => `${dimension === 'power' ? 'Ability to influence' : dimension === 'expectedness' ? 'Familiar or surprising' : dimension === 'pleasantness' ? 'Pleasantness' : 'Energy'} ${Math.round(value * 4) + 1}/5`).join(' · ')}</p> : null}

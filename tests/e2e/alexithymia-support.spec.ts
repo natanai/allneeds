@@ -45,13 +45,13 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await startCheckIn(page);
 
   await page.getByRole('textbox', { name: 'What happened?', exact: true }).fill('I felt blamed and wanted understanding when we stopped talking.');
-  await expect(page.getByRole('link', { name: /Blamed.*Faux Feeling/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Understanding.*Need/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Blamed.*Faux Feeling/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Understanding.*Need/ })).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await addTwoBodyCues(page);
   await addFeelingShape(page);
   await expectNoHorizontalOverflow(page);
-  await page.getByRole('button', { name: 'Compare words' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
 
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   let sheet = page.getByRole('dialog', { name: 'Anxiety' });
@@ -64,6 +64,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet).toHaveCount(0);
 
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
+  await page.getByRole('radio', { name: 'All words' }).click();
   await search.fill('Guilt');
   await page.getByRole('button', { name: /^Guilt, Other emotion word/ }).click();
   sheet = page.getByRole('dialog', { name: 'Guilt' });
@@ -81,19 +82,19 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet).toHaveCount(0);
 
   await expect(page.getByText('My words').first()).toBeVisible();
-  await page.getByRole('button', { name: 'Use these words' }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByLabel('Selected Needs; open ways to support a Need')).toHaveCount(0);
   await page.getByRole('button', { name: /Understanding/ }).click();
   const selectedNeeds = page.getByLabel('Selected Needs; open ways to support a Need');
   await expect(selectedNeeds).toBeVisible();
-  await expect(selectedNeeds.getByRole('link', { name: /Understanding, selected Need, open ways to support it/ })).toHaveAttribute('href', '/needs/understanding');
+  await expect(selectedNeeds.getByRole('button', { name: /Understanding, selected Need, open ways to support it/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Build sentence' }).click();
   const statement = page.getByLabel('Your statement');
-  await expect(statement).toHaveValue(/I feel anxiety, I feel guilt, and I feel blamed because I need understanding/);
+  await expect(statement).toHaveValue(/I feel anxiety, I might feel guilt, and I might feel blamed because I need understanding/);
   await expect(statement).not.toHaveValue(/request|should/i);
   const finishedStatement = await statement.inputValue();
-  await page.getByRole('button', { name: /Add to Journal/ }).click();
+  await page.getByRole('button', { name: /Continue in Journal/ }).click();
 
   const journal = page.getByRole('dialog', { name: 'Journal' });
   await expect(journal.getByLabel('Reflection')).toHaveValue(finishedStatement);
@@ -129,7 +130,7 @@ test('candidate decisions close immediately, while Fits offers optional intensit
   await page.setViewportSize({ width: 390, height: 844 });
   await startCheckIn(page);
   await skipObservation(page);
-  await page.getByRole('button', { name: 'Browse all feelings' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
   await search.fill('Anxiety');
 
@@ -159,7 +160,7 @@ test('candidate decisions close immediately, while Fits offers optional intensit
   })).toBe('fits');
   await page.reload();
   await page.getByRole('button', { name: 'Continue previous check-in' }).click();
-  await page.getByRole('radio', { name: 'All feelings' }).click();
+  await page.getByRole('radio', { name: 'All words' }).click();
   await search.fill('Anxiety');
   await open();
   sheet = page.getByRole('dialog', { name: 'Anxiety' });
@@ -231,20 +232,19 @@ test('body-only and shape-only candidates name the channel used', async ({ page 
   await startCheckIn(page);
   await skipObservation(page);
   await addTwoBodyCues(page);
-  await page.getByRole('button', { name: 'Compare words' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   let sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await expect(sheet.getByText(/% body clue match/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
 
   page.once('dialog', (dialog) => dialog.accept());
-  await page.getByRole('button', { name: 'No word yet' }).click();
-  await page.getByRole('button', { name: 'Use these words' }).click();
+  await page.getByRole('button', { name: 'Continue without a word' }).click();
   await page.getByRole('button', { name: /Start over/ }).click();
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await skipObservation(page);
   await addFeelingShape(page);
-  await page.getByRole('button', { name: 'Compare words' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await expect(sheet.getByText(/% overall-feeling match/)).toBeVisible();
@@ -255,9 +255,8 @@ test('No word yet builds no Feeling, Need, request, or care recommendation', asy
   await page.setViewportSize({ width: 390, height: 844 });
   await startCheckIn(page);
   await skipObservation(page);
-  await page.getByRole('button', { name: 'Browse all feelings' }).click();
-  await page.getByRole('button', { name: 'No word yet' }).click();
-  await page.getByRole('button', { name: 'Use these words' }).click();
+  await page.getByRole('button', { name: 'Continue to words' }).click();
+  await page.getByRole('button', { name: 'Continue without a word' }).click();
   await expect(page.getByText('I’m not sure what I feel yet.')).toBeVisible();
   await expect(page.getByLabel('Selected Needs; open ways to support a Need')).toHaveCount(0);
   await page.getByRole('button', { name: 'Build sentence' }).click();

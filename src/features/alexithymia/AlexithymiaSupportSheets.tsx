@@ -55,14 +55,8 @@ export function SupportSheet({
 }
 
 export function BodyClueSheet({
-  open,
-  regions,
-  openRegion,
-  selected,
-  onRegionChange,
-  onSelectedChange,
-  onNothingClear,
-  onClose,
+  open, regions, openRegion, selected, onRegionChange, onSelectedChange,
+  onNothingClear, onClear, onOpenFull, onClose,
 }: {
   open: boolean;
   regions: BodyRegion[];
@@ -71,78 +65,71 @@ export function BodyClueSheet({
   onRegionChange: (regionId: string) => void;
   onSelectedChange: (selected: Record<string, number>) => void;
   onNothingClear: () => void;
+  onClear: () => void;
+  onOpenFull: () => void;
   onClose: () => void;
 }) {
+  const [showAll, setShowAll] = useState(false);
   const region = regions.find((item) => item.id === openRegion) ?? regions[0]!;
+  const selectedCount = Object.values(selected).filter((value) => value > 0).length;
+  const chooseArea = (id: string) => { onRegionChange(id); setShowAll(false); };
+  const close = () => { setShowAll(false); onClose(); };
   return (
-    <SupportSheet open={open} title="Body clues" titleId="alex-body-sheet-title" onClose={onClose} wide>
-      <p className={styles.sheetIntro}>Choose sensations that stand out. You can leave every other cue off.</p>
+    <SupportSheet open={open} title="Body clues" titleId="alex-body-sheet-title" onClose={close} wide>
+      <p className={styles.sheetIntro}>Choose sensations that stand out. All {regions.length} body areas are available here.</p>
+      <label className={styles.areaChooser}>
+        <span>{showAll ? `Body areas · all ${regions.length}` : `Body area · ${regions.findIndex((item) => item.id === region.id) + 1} of ${regions.length}`}</span>
+        <select aria-label="Body area" value={showAll ? 'all' : region.id} onChange={(event) => {
+          if (event.target.value !== 'all') chooseArea(event.target.value);
+        }}>
+          {showAll ? <option value="all">All {regions.length} body areas</option> : null}
+          {regions.map((item) => <option key={item.id} value={item.id}>{item.label}{item.options.some((option) => (selected[option.id] ?? 0) > 0) ? ' · selected cues' : ''}</option>)}
+        </select>
+      </label>
+      <div className={styles.bodyViewActions}>
+        <button type="button" className={styles.textButton} aria-pressed={showAll} onClick={() => setShowAll((current) => !current)}>{showAll ? 'One body area at a time' : 'All body cues'}</button>
+        <span aria-live="polite">{selectedCount} {selectedCount === 1 ? 'cue' : 'cues'} selected</span>
+      </div>
       <div className={styles.bodySheetLayout}>
         <nav className={styles.regionPanel} aria-label="Body regions">
           <p className={styles.regionPickerLabel}>Choose an area</p>
-          <div className={styles.regionPicker} role="list">
-            {regions.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={item.id === region.id}
-                onClick={() => onRegionChange(item.id)}
-              >
-                <span>{item.label}</span>
-                {item.options.some((option) => (selected[option.id] ?? 0) > 0) ? <span className={styles.regionSelected} aria-label="has selected cues">✓</span> : null}
-              </button>
-            ))}
+          <div className={styles.regionPicker}>
+            {regions.map((item) => <button key={item.id} type="button" aria-pressed={!showAll && item.id === region.id} onClick={() => chooseArea(item.id)}>
+              <span>{item.label}</span>
+              {item.options.some((option) => (selected[option.id] ?? 0) > 0) ? <span className={styles.regionSelected} aria-label="has selected cues">✓</span> : null}
+            </button>)}
           </div>
         </nav>
-
-        <section className={styles.bodyRegionSheet} aria-labelledby={`alex-region-${region.id}`}>
-          <header>
-            <p className={styles.regionEyebrow}>Right now</p>
-            <h3 id={`alex-region-${region.id}`}>{region.label}</h3>
-            <p>{region.prompt}</p>
-          </header>
-          <div className={styles.bodyOptions}>
-            {region.options.map((option) => {
+        <div className={styles.bodyAreaContent}>
+          {(showAll ? regions : [region]).map((area) => <section key={area.id} className={styles.bodyRegionSheet} aria-labelledby={`alex-region-${area.id}`}>
+            <header><p className={styles.regionEyebrow}>Right now</p><h3 id={`alex-region-${area.id}`}>{area.label}</h3><p>{area.prompt}</p></header>
+            <div className={styles.bodyOptions}>{area.options.map((option) => {
               const value = selected[option.id] ?? 0;
               const active = value > 0;
-              return (
-                <article key={option.id} className={styles.bodyOption} data-active={active ? 'true' : undefined}>
-                  <button type="button" aria-pressed={active} onClick={() => {
-                    const next = { ...selected };
-                    if (active) delete next[option.id];
-                    else next[option.id] = Math.max(5, (option.defaultIntensity ?? 5) * 10);
-                    onSelectedChange(next);
-                  }}>
-                    <span><strong>{option.title}</strong><small>{option.note}</small></span>
-                    <span className={styles.bodyCheck} aria-hidden="true">{active ? '✓' : '+'}</span>
-                  </button>
-                  {active ? (
-                    <label className={styles.bodyIntensity}>
-                      <span>Intensity <output>{describeCueIntensity(value)}</output></span>
-                      <input
-                        type="range"
-                        min="5"
-                        max="100"
-                        step="5"
-                        value={value}
-                        aria-label={`${option.title} intensity`}
-                        aria-valuetext={describeCueIntensity(value)}
-                        onInput={(event) => onSelectedChange({ ...selected, [option.id]: Number(event.currentTarget.value) })}
-                      />
-                    </label>
-                  ) : null}
-                </article>
-              );
-            })}
-          </div>
-        </section>
+              return <article key={option.id} className={styles.bodyOption} data-active={active ? 'true' : undefined}>
+                <button type="button" aria-pressed={active} onClick={() => {
+                  const next = { ...selected };
+                  if (active) delete next[option.id]; else next[option.id] = Math.max(5, (option.defaultIntensity ?? 5) * 10);
+                  onSelectedChange(next);
+                }}><span><strong>{option.title}</strong><small>{option.note}</small></span><span className={styles.bodyCheck} aria-hidden="true">{active ? '✓' : '+'}</span></button>
+                {active ? <label className={styles.bodyIntensity}><span>Intensity <output>{describeCueIntensity(value)}</output></span>
+                  <input type="range" min="5" max="100" step="5" value={value} aria-label={`${option.title} intensity`} aria-valuetext={describeCueIntensity(value)}
+                    onInput={(event) => onSelectedChange({ ...selected, [option.id]: Number(event.currentTarget.value) })} />
+                </label> : null}
+              </article>;
+            })}</div>
+          </section>)}
+        </div>
       </div>
-
       <div className={styles.sheetFooterSplit}>
-        <Link to="/feelings/body-cues">Open full Body Cues</Link>
-        <button type="button" className={styles.textButton} onClick={onNothingClear}>Nothing clear in my body</button>
-        <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
+        {selectedCount ? <button type="button" className={styles.textButton} onClick={() => { setShowAll(false); onClear(); }}>Clear body clues</button>
+          : <button type="button" className={styles.textButton} onClick={() => { setShowAll(false); onNothingClear(); }}>Nothing clear in my body</button>}
+        <button type="button" className={styles.primaryButton} onClick={close}>Done</button>
       </div>
+      <details className={styles.separateTool}><summary>Separate Body Cues tool</summary>
+        <p>This opens the full tool outside these steps. Choose “Use these clues in check-in” there to bring its choices back.</p>
+        <button type="button" className={styles.helpButton} onClick={onOpenFull}>Open separate Body Cues tool</button>
+      </details>
     </SupportSheet>
   );
 }
@@ -197,6 +184,7 @@ function ShapeScale({
             <input
               type="radio"
               name={`alex-shape-${dimension}`}
+              aria-describedby={`alex-shape-endpoints-${dimension}`}
               value={position}
               checked={value === position}
               onChange={() => onChange(position)}
@@ -205,7 +193,7 @@ function ShapeScale({
           </label>
         ))}
       </div>
-      <div className={styles.shapeEndpoints} aria-hidden="true"><span>{low}</span><span>{high}</span></div>
+      <div id={`alex-shape-endpoints-${dimension}`} className={styles.shapeEndpoints}><span>{low}</span>{' '}<span>{high}</span></div>
       <button
         type="button"
         className={styles.notSureButton}
@@ -299,6 +287,8 @@ export function CandidateSheet({
   decision,
   intensity,
   cueLabels,
+  previewOnly = false,
+  onOpenReference,
   onDecision,
   onClose,
 }: {
@@ -307,6 +297,8 @@ export function CandidateSheet({
   decision?: 'fits' | 'maybe' | 'not-this-time';
   intensity?: number;
   cueLabels: string[];
+  previewOnly?: boolean;
+  onOpenReference: (route: string) => void;
   onDecision: (decision: 'fits' | 'maybe' | 'not-this-time', intensity?: number) => void;
   onClose: () => void;
 }) {
@@ -345,7 +337,7 @@ export function CandidateSheet({
           )}
           {term.role === 'working' ? <p className={styles.scoreDisclosure}>{term.candidate ? 'This is an emotion word you can use here, but it is not one of the site’s linked Feeling pages.' : 'This is a word you entered for this check-in.'}</p> : null}
 
-          {term.role !== 'faux-feeling' ? (
+          {!previewOnly && term.role !== 'faux-feeling' && term.candidate ? (
             <details className={styles.matchDetails} open>
               <summary>How this was compared</summary>
               {score?.usedChannels.length ? (
@@ -359,24 +351,24 @@ export function CandidateSheet({
             </details>
           ) : null}
 
-          {term.role === 'faux-feeling' ? (
+          {!previewOnly && (term.role === 'faux-feeling' ? (
             <p className={styles.scoreDisclosure}>Faux Feelings are not compared with clues. You can keep this word if it helps describe your experience.</p>
           ) : hasReviewedScore ? (
             <p className={styles.scoreDisclosure}>This percentage shows how closely the word matches the clues you chose. It cannot tell you what you feel; you decide what fits.</p>
           ) : (
-            <p className={styles.scoreDisclosure}>The app cannot compare this word with these clues. You can still decide whether it fits.</p>
-          )}
+            <p className={styles.scoreDisclosure}>{term.candidate ? 'No comparison is available from these clues.' : 'This word is not compared with clues.'} You can still decide whether it fits.</p>
+          ))}
 
-          <div className={styles.decisionButtons} role="group" aria-label={`Does ${term.label} fit?`}>
+          {!previewOnly ? <div className={styles.decisionButtons} role="group" aria-label={`Does ${term.label} fit?`}>
             <button type="button" aria-pressed={decision === 'fits'} onClick={() => {
               if (term.role === 'feeling') setRatingOpen(true);
               else decideAndClose('fits');
             }}>Fits</button>
             <button type="button" aria-pressed={decision === 'maybe'} onClick={() => decideAndClose('maybe')}>Maybe</button>
             <button type="button" aria-pressed={decision === 'not-this-time'} onClick={() => decideAndClose('not-this-time')}>Not this time</button>
-          </div>
+          </div> : null}
 
-          {term.role === 'feeling' && ratingOpen ? (
+          {!previewOnly && term.role === 'feeling' && ratingOpen ? (
             <section className={styles.feelingIntensity} aria-label={`Rate ${term.label}`}>
               <div className={styles.feelingIntensityHeading}>
                 <strong>How intense is this feeling?</strong>
@@ -399,7 +391,10 @@ export function CandidateSheet({
 
           {term.route || term.definitionSource?.startsWith('https://') ? (
             <div className={styles.sheetFooterSplit}>
-              {term.route ? <Link to={term.route}>Open {term.roleLabel} page</Link> : null}
+              {term.route ? <><Link to={term.route} onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                event.preventDefault(); onOpenReference(term.route!);
+              }}>Open full {term.roleLabel} page</Link><small>Leave these steps; a return action keeps your check-in available.</small></> : null}
               {term.definitionSource?.startsWith('https://') ? (
                 <a href={term.definitionSource} target="_blank" rel="noopener noreferrer">Where this definition comes from</a>
               ) : null}
@@ -419,6 +414,7 @@ export function NeedCatalogSheet({
   onQueryChange,
   onSelectedChange,
   onPlayModeChange,
+  onClear,
   onClose,
 }: {
   open: boolean;
@@ -428,6 +424,7 @@ export function NeedCatalogSheet({
   onQueryChange: (query: string) => void;
   onSelectedChange: (slugs: string[]) => void;
   onPlayModeChange: (play: boolean) => void;
+  onClear: () => void;
   onClose: () => void;
 }) {
   const normalized = query.trim().toLocaleLowerCase();
@@ -458,7 +455,6 @@ export function NeedCatalogSheet({
           placeholder="Search all needs"
           autoComplete="off"
           onChange={(event) => onQueryChange(event.target.value)}
-          data-dialog-initial-focus
         />
       </label>
       <p className={styles.selectedCount} aria-live="polite">{selected.length} {selected.length === 1 ? 'Need' : 'Needs'} selected</p>
@@ -473,7 +469,7 @@ export function NeedCatalogSheet({
         />
       ) : <p className={styles.emptyMessage}>No Needs match “{query}”.</p>}
       <div className={styles.sheetFooterSplit}>
-        <button type="button" className={styles.textButton} onClick={() => { onSelectedChange([]); onClose(); }}>Not sure yet</button>
+        <button type="button" className={styles.textButton} onClick={selected.length ? onClear : onClose}>{selected.length ? 'Clear selected Needs' : 'Leave without choosing'}</button>
         <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
       </div>
     </SupportSheet>

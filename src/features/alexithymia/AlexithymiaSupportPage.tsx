@@ -1,5 +1,5 @@
-import { type MouseEvent, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { type MouseEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
@@ -9,9 +9,10 @@ import { ALEXITHYMIA_SUPPORT_LABEL } from '../../data/productLanguage';
 import { analyzeObservation, selectExactObservationEntities } from '../../domain/observationInference';
 import {
   clearAlexithymiaDraft,
+  CheckInDraftConflict,
   readAlexithymiaDraft,
   readJournalDraft,
-  writeAlexithymiaDraft,
+  writeAlexithymiaDraftAgainst,
   writeJournalDraft,
 } from '../../persistence/workflowDrafts';
 import type { AlexithymiaDraft } from '../../persistence/workflowDrafts';
@@ -38,7 +39,8 @@ import {
   selectedShapeDimensions,
 } from './alexithymiaMath';
 import {
-  buildSupportStatement,
+  statementFromDraft,
+  supportStatementBasis,
   catalogOnlyTerms,
   createSupportJournalDraft,
   customTermId,
@@ -48,10 +50,12 @@ import {
   supportTermIndex,
   type SupportTerm,
 } from './alexithymiaTerms';
+import { ObservationHelpContent } from '../observations/ObservationsPage';
+import { checkInVisit, type CheckInLocationState } from './checkInNavigation';
 import { shapeToJournalMood, shapeWithJournalMood } from './shapeCoordinates';
 import styles from './AlexithymiaSupportPage.module.css';
 
-type SheetKind = 'info' | 'matching' | 'body' | 'shape' | 'candidate' | 'needs' | null;
+type SheetKind = 'info' | 'matching' | 'body' | 'shape' | 'candidate' | 'needs' | 'observation' | 'need-preview' | 'replace-statement' | null;
 type WordFilter = 'matches' | 'all' | 'mine';
 
 const stageSteps = [
@@ -69,6 +73,8 @@ const bodyOptionById = new Map(bodyRegions.flatMap((region) => region.options.ma
 
 function emptyDraft(): AlexithymiaDraft {
   return {
+    checkInId: crypto.randomUUID(),
+    updatedAt: new Date().toISOString(),
     stage: 0,
     observation: '',
     openRegion: bodyRegions[0]?.id ?? null,
@@ -112,10 +118,6 @@ function SpeakIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4Z" /><path d="M16 9c1.3 1.6 1.3 4.4 0 6M19 6c3.3 3.3 3.3 8.7 0 12" /></svg>;
 }
 
-function JournalIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h13a1 1 0 0 1 1 1v17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" /><path d="M8 7h7M8 11h7M8 15h4" /></svg>;
-}
-
 function ResetIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 16a8 8 0 1 0 .5-9l-2 3" /></svg>;
 }
@@ -145,19 +147,68 @@ function MatchingSheet({ open, onClose }: { open: boolean; onClose: () => void }
 
 export function AlexithymiaSupportPage() {
   const navigate = useNavigate();
-  const [initialDraft] = useState(() => readAlexithymiaDraft() ?? emptyDraft());
+  const location = useLocation();
+  const routeState = (location.state as CheckInLocationState | null)?.checkIn;
+  const [savedAtEntry] = useState(() => readAlexithymiaDraft());
+  const [initialDraft] = useState(() => {
+    const saved = savedAtEntry ?? emptyDraft();
+    return { ...saved, checkInId: saved.checkInId ?? crypto.randomUUID(),
+      statementBasis: saved.statementBasis ?? supportStatementBasis(saved),
+      statement: saved.statement.trim() && !saved.statementEdited ? statementFromDraft(saved) : saved.statement,
+    };
+  });
   const [draft, setDraft] = useState<AlexithymiaDraft>(initialDraft);
-  const [entryVisible, setEntryVisible] = useState(true);
+  const [entryVisible, setEntryVisible] = useState(!(routeState?.visit === checkInVisit && routeState.id === initialDraft.checkInId));
   const [sheet, setSheet] = useState<SheetKind>(null);
   const [activeTermId, setActiveTermId] = useState<string | null>(null);
-  const [wordFilter, setWordFilter] = useState<WordFilter>('matches');
-  const [wordQuery, setWordQuery] = useState('');
-  const [needQuery, setNeedQuery] = useState('');
+  const [previewNeed, setPreviewNeed] = useState<string | null>(null);
+  const wordFilter: WordFilter = draft.wordFilter ?? 'matches';
+  const wordQuery = draft.wordQuery ?? '';
+  const needQuery = draft.needQuery ?? '';
+  const setWordFilter = (wordFilter: WordFilter) => updateDraft((current) => ({ ...current, wordFilter }));
+  const setWordQuery = (wordQuery: string) => updateDraft((current) => ({ ...current, wordQuery }));
+  const setNeedQuery = (needQuery: string) => updateDraft((current) => ({ ...current, needQuery }));
   const [wordPlayMode, setWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-words'));
   const [partialPlayMode, setPartialPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-partial-words'));
   const [needPlayMode, setNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-needs'));
   const [status, setStatus] = useState('');
-  const draftRef = useWorkflowDraftPersistence(draft, writeAlexithymiaDraft);
+  const [storageError, setStorageError] = useState('');
+  const [journalConflict, setJournalConflict] = useState(false);
+  const [undo, setUndo] = useState<{ draft: AlexithymiaDraft; message: string } | null>(null);
+  const pageRef = useRef<HTMLElement>(null);
+  const expectedStored = useRef(savedAtEntry);
+  const persistDraft = useCallback((next: AlexithymiaDraft) => {
+    const saved = writeAlexithymiaDraftAgainst(next, expectedStored.current);
+    expectedStored.current = saved?.data ?? null;
+    return saved;
+  }, []);
+  const persistenceMessage = (error: unknown) => error instanceof CheckInDraftConflict ? error.message
+    : 'This check-in could not be kept on this device. Keep it open and check available storage.';
+  const draftRef = useWorkflowDraftPersistence(draft, persistDraft, 180, (error) => {
+    setStorageError(error ? persistenceMessage(error) : '');
+  });
+
+  useLayoutEffect(() => {
+    const state = (location.state as CheckInLocationState | null)?.checkIn;
+    setUndo(null);
+    setSheet(null);
+    if (state?.visit === checkInVisit && state.id === draftRef.current.checkInId) {
+      setEntryVisible(false);
+      setDraft((current) => current.stage === state.stage ? current : { ...current, stage: state.stage });
+    } else setEntryVisible(true);
+  }, [location.key, location.state, draftRef]);
+
+  useLayoutEffect(() => {
+    if (entryVisible) return;
+    const state = (location.state as CheckInLocationState | null)?.checkIn;
+    const top = state?.restoreScroll ? draftRef.current.scrollTop ?? 0 : 0;
+    const frame = requestAnimationFrame(() => {
+      pageRef.current?.scrollTo({ top, behavior: 'instant' });
+      if (getComputedStyle(pageRef.current!).position !== 'fixed') window.scrollTo({ top, behavior: 'instant' });
+      pageRef.current?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [draft.stage, entryVisible, location.key, location.state, draftRef]);
 
   const bodySelections = useMemo(() => Object.entries(draft.selectedCues).flatMap(([id, intensity]) => {
     const option = bodyOptionById.get(id);
@@ -185,6 +236,7 @@ export function AlexithymiaSupportPage() {
   const clueTray = [
     ...bodySelections.map(({ option, intensity }) => ({ id: `body:${option.id}`, label: `${option.title} · ${Math.round(intensity)}%` })),
     ...shapeDimensionList.map((dimension) => ({ id: `shape:${dimension}`, label: shapeClueLabel(dimension, draft.shape[dimension] ?? 0) })),
+    ...(draft.bodyClear ? [{ id: 'body:unclear', label: 'No clear body clues' }] : []),
     ...(draft.overallMood ? [{ id: 'shape:other', label: draft.overallMood === 'mixed' ? 'Mixed feelings' : 'Overall feeling: not sure' }] : []),
   ];
   const canCompare = bodySelections.length > 0 || shapeDimensionList.length >= 2;
@@ -217,17 +269,10 @@ export function AlexithymiaSupportPage() {
   ], [draft.customTerms]);
   const normalizedWordQuery = wordQuery.trim().toLocaleLowerCase();
   const visibleTerms = useMemo(() => {
-    if (normalizedWordQuery) {
-      return allSearchTerms
-        .filter((term) => term.label.toLocaleLowerCase().includes(normalizedWordQuery))
-        .sort((left, right) => left.label.localeCompare(right.label));
-    }
-    if (wordFilter === 'mine') return selectedTerms;
-    if (wordFilter === 'all') {
-      return [...profileTerms.filter((term) => term.role === 'feeling'), ...catalogOnlyTerms]
-        .sort((left, right) => left.label.localeCompare(right.label));
-    }
-    return completeMatches.map(({ term }) => term);
+    const scope = wordFilter === 'mine' ? selectedTerms
+      : wordFilter === 'all' ? allSearchTerms : completeMatches.map(({ term }) => term);
+    return scope.filter((term) => !normalizedWordQuery || term.label.toLocaleLowerCase().includes(normalizedWordQuery))
+      .sort((left, right) => wordFilter === 'matches' ? 0 : left.label.localeCompare(right.label));
   }, [allSearchTerms, completeMatches, normalizedWordQuery, selectedTerms, wordFilter]);
 
   const visibleWordItems: MagnetBoardItem[] = visibleTerms.map((term) => {
@@ -279,20 +324,53 @@ export function AlexithymiaSupportPage() {
       kind: 'need' as const,
       tone: 'positive' as const,
       iconUrl: assetPath(`icons/needs/${slug}.svg`),
-      to: `/needs/${slug}`,
+      onActivate: () => openReference(`/needs/${slug}`),
       ariaLabel: `${need.title}, selected Need, open ways to support it`,
     }] : [];
   });
 
   function updateDraft(update: (current: AlexithymiaDraft) => AlexithymiaDraft) {
-    setDraft((current) => update(current));
+    setUndo(null);
+    setDraft((current) => {
+      const next = { ...update(current), updatedAt: new Date().toISOString() };
+      if (current.statement.trim() && !current.statementEdited && !next.statementEdited
+        && supportStatementBasis(current) !== supportStatementBasis(next)) {
+        next.statement = statementFromDraft(next);
+        next.statementBasis = supportStatementBasis(next);
+      }
+      return next;
+    });
   }
 
-  function goToStage(stage: number) {
+  function clearWithUndo(update: (current: AlexithymiaDraft) => AlexithymiaDraft, message: string) {
+    const before = draft;
+    updateDraft(update);
+    setUndo({ draft: before, message });
+  }
+
+  function goToStage(stage: number, restoreScroll = false) {
     setStatus('');
+    setJournalConflict(false);
     updateDraft((current) => ({ ...current, stage }));
     setEntryVisible(false);
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    void navigate('/alexithymia-support', { state: { checkIn: {
+      visit: checkInVisit, id: draft.checkInId!, stage, restoreScroll, previousStage: draft.stage,
+    } } satisfies CheckInLocationState });
+  }
+
+  function openReference(to: string) {
+    const next = { ...draftRef.current, scrollTop: getComputedStyle(pageRef.current!).position === 'fixed'
+      ? pageRef.current!.scrollTop : window.scrollY };
+    try {
+      persistDraft(next);
+      draftRef.current = next;
+      void navigate(to, { state: { returnToCheckIn: { id: next.checkInId! } } satisfies CheckInLocationState });
+    } catch (error) { setStorageError(persistenceMessage(error)); }
+  }
+
+  function previewWord(route: string) {
+    const term = [...termIndex.values()].find((item) => item.route === route);
+    if (term) { setActiveTermId(term.id); setSheet('candidate'); }
   }
 
   function decideTerm(term: SupportTerm, decision: AlexithymiaDraft['decisions'][string], intensity?: number) {
@@ -314,7 +392,7 @@ export function AlexithymiaSupportPage() {
         decisions,
         termOrder,
         feelingIntensities,
-        noWordYet: selected ? false : current.noWordYet,
+        noWordYet: selected ? false : current.stage === 4 && !termOrder.length ? true : current.noWordYet,
       };
     });
   }
@@ -333,16 +411,9 @@ export function AlexithymiaSupportPage() {
     window.requestAnimationFrame(() => setSheet('candidate'));
   }
 
-  function chooseNoWordYet() {
-    updateDraft((current) => ({
-      ...current,
-      decisions: Object.fromEntries(Object.entries(current.decisions)
-        .filter(([, decision]) => decision === 'not-this-time')),
-      termOrder: [],
-      feelingIntensities: {},
-      noWordYet: true,
-    }));
-    setStatus('No word yet selected.');
+  function continueToReview() {
+    updateDraft((current) => ({ ...current, noWordYet: !selectedTerms.length }));
+    goToStage(4);
   }
 
   function moveTerm(id: string, direction: -1 | 1) {
@@ -356,23 +427,29 @@ export function AlexithymiaSupportPage() {
     });
   }
 
-  function buildSentence() {
-    const statement = buildSupportStatement({
-      observation: draft.observation,
-      terms: selectedTerms,
-      needSlugs: draft.selectedNeeds,
-      noWordYet: draft.noWordYet,
+  function buildSentence(replaceEdited = false) {
+    if (draft.statementEdited && draft.statement.trim() && !replaceEdited) {
+      setSheet('replace-statement');
+      return;
+    }
+    const replace = (current: AlexithymiaDraft) => ({ ...current, statement: statementFromDraft(current),
+      statementEdited: false, statementBasis: supportStatementBasis(current),
     });
-    updateDraft((current) => ({ ...current, statement, statementEdited: false }));
-    setStatus(statement ? 'Your draft sentence is ready to edit.' : 'Choose a word, “No word yet,” or a Need first.');
+    if (draft.statement.trim()) clearWithUndo(replace, 'Previous wording replaced.');
+    else updateDraft(replace);
+    setSheet(null);
+    setStatus('Your draft sentence is ready to edit.');
   }
 
   function addToJournal() {
     if (readJournalDraft()) {
-      setStatus('Your Journal has an unfinished page. Save or clear that page first, then return here to add this check-in. Your check-in is preserved.');
+      setJournalConflict(true);
+      setStatus('Your Journal has an unfinished page. Open it to save or clear it, then return to this check-in.');
       return;
     }
-    writeJournalDraft(createSupportJournalDraft({
+    try {
+      persistDraft(draftRef.current);
+      writeJournalDraft(createSupportJournalDraft({
       observation: draft.observation,
       terms: selectedTerms,
       needSlugs: draft.selectedNeeds,
@@ -385,8 +462,12 @@ export function AlexithymiaSupportPage() {
       bodyClear: draft.bodyClear,
       noWordYet: draft.noWordYet,
       feelingIntensities: draft.feelingIntensities,
+      decisions: draft.decisions,
+      checkInId: draft.checkInId,
     }));
-    void navigate('/inventory/journal?compose=new');
+      openReference('/inventory/journal?compose=new');
+    } catch (error) { setStorageError(error instanceof CheckInDraftConflict ? error.message : 'The Journal draft could not be saved. Keep this check-in open and check available device storage.'); }
+
   }
 
   function resetCheckIn(startImmediately = false) {
@@ -394,8 +475,9 @@ export function AlexithymiaSupportPage() {
       'Start a new check-in? This clears the previous check-in on this device. Saved Journal entries will not change.',
     )) return;
     const next = { ...emptyDraft(), stage: startImmediately ? 1 : 0 };
+    try { clearAlexithymiaDraft(); expectedStored.current = null; }
+    catch (error) { setStorageError(persistenceMessage(error)); return; }
     draftRef.current = next;
-    clearAlexithymiaDraft();
     setDraft(next);
     setEntryVisible(!startImmediately);
     setSheet(null);
@@ -404,7 +486,11 @@ export function AlexithymiaSupportPage() {
     setWordQuery('');
     setNeedQuery('');
     setStatus('');
-    if (startImmediately) window.scrollTo({ top: 0, behavior: 'auto' });
+    setUndo(null);
+    setJournalConflict(false);
+    void navigate('/alexithymia-support', { replace: true, state: startImmediately ? { checkIn: {
+      visit: checkInVisit, id: next.checkInId!, stage: 1,
+    } } satisfies CheckInLocationState : null });
   }
 
   const stageTitle = ['What happened?', 'Clues', 'Words', 'Your words'][Math.max(0, draft.stage - 1)] ?? 'Check in';
@@ -428,7 +514,7 @@ export function AlexithymiaSupportPage() {
             ))}
           </ol>
           {hasDraft ? (
-            <p className={styles.savedCheckInNote}>A previous check-in is saved on this device. You can begin fresh or continue it.</p>
+            <p className={styles.savedCheckInNote}>A previous check-in is saved on this device{draft.updatedAt ? ` · ${new Date(draft.updatedAt).toLocaleString()}` : ''}. Continue at {stageSteps[Math.max(0, draft.stage - 1)]?.label ?? 'your last step'}, or begin fresh.</p>
           ) : null}
           <div className={styles.entryActions}>
             <button type="button" className={styles.primaryButton} onClick={() => {
@@ -438,7 +524,7 @@ export function AlexithymiaSupportPage() {
               {hasDraft ? 'Start new check-in' : 'Start check-in'}
             </button>
             {hasDraft ? (
-              <button type="button" className={styles.textButton} onClick={() => setEntryVisible(false)}>
+              <button type="button" className={styles.textButton} onClick={() => goToStage(draft.stage, true)}>
                 Continue previous check-in
               </button>
             ) : null}
@@ -457,10 +543,11 @@ export function AlexithymiaSupportPage() {
   }
 
   return (
-    <article className={styles.page} aria-label={`${ALEXITHYMIA_SUPPORT_LABEL}: ${stageTitle}`}>
+    <article ref={pageRef} className={styles.page} aria-label={`${ALEXITHYMIA_SUPPORT_LABEL}: ${stageTitle}`}>
       <header className={styles.appBar}>
         <button type="button" className={styles.iconButton} aria-label="Back" onClick={() => {
-          if (draft.stage <= 1) setEntryVisible(true);
+          if (draft.stage <= 1) void navigate('/alexithymia-support', { state: null });
+          else if (routeState?.previousStage === draft.stage - 1) void navigate(-1);
           else goToStage(draft.stage - 1);
         }}><BackIcon /></button>
         <div className={styles.appBarCenter}>
@@ -474,9 +561,13 @@ export function AlexithymiaSupportPage() {
           </div>
         </div>
         <button type="button" className={styles.iconButton} aria-label="About this check-in" onClick={() => setSheet('info')}><InfoIcon /></button>
-        <button type="button" className={styles.iconButton} aria-label="Close check-in" onClick={() => void navigate('/feelings')}><CloseIcon /></button>
+        <button type="button" className={styles.iconButton} aria-label="Close check-in" onClick={() => openReference('/feelings')}><CloseIcon /></button>
       </header>
 
+      {storageError ? <p className={styles.notice} role="alert">{storageError}</p> : null}
+      {undo ? <div className={styles.notice} role="status"><span>{undo.message}</span><button type="button" onClick={() => {
+        const previous = undo.draft; updateDraft(() => previous); setStatus('Previous choices restored.');
+      }}>Undo</button></div> : null}
       <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
         <p>Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.</p>
         <p>This is a support tool, not a test, diagnosis, or therapy. It cannot determine what you feel.</p>
@@ -489,7 +580,7 @@ export function AlexithymiaSupportPage() {
         <section className={`${styles.stage} ${styles.stageOne}`} aria-labelledby="alex-stage-one">
           <header className={styles.stageHeader}>
             <p>1 of 4 · What happened?</p>
-            <h1 id="alex-stage-one">What are you trying to put into words?</h1>
+            <h1 tabIndex={-1} id="alex-stage-one">What are you trying to put into words?</h1>
             <p>If it helps, write one or two details someone could have seen or heard, such as what happened or the exact words used.</p>
           </header>
           <div className={styles.observationWorkspace}>
@@ -503,14 +594,17 @@ export function AlexithymiaSupportPage() {
                   onChange={(event) => updateDraft((current) => ({ ...current, observation: event.target.value }))}
                 />
               </label>
+              {draft.observation.trim() ? <button type="button" className={styles.textButton} onMouseDown={keepTextareaFocus} onClick={() => clearWithUndo(
+                (current) => ({ ...current, observation: '' }), 'Observation cleared.',
+              )}>Clear observation</button> : null}
               {(observationMatches.feelings.length || observationMatches.needs.length || observationMatches.fauxFeelings.length) ? (
                 <section className={styles.detectedTerms} aria-label="Words found in what you wrote">
                   <h2>Words in what you wrote</h2>
                   <p>Open a recognized word to learn more. The app has not chosen it for you.</p>
                   <div>
-                    {observationMatches.feelings.map((item) => <Link key={`feeling-${item.slug}`} to={`/feelings/${item.slug}`}>{item.title}<small>Feeling</small></Link>)}
-                    {observationMatches.needs.map((item) => <Link key={`need-${item.slug}`} to={`/needs/${item.slug}`}>{item.title}<small>Need</small></Link>)}
-                    {observationMatches.fauxFeelings.map((item) => <Link key={`faux-${item.slug}`} to={`/faux-feelings/${item.slug}`}>{item.title}<small>Faux Feeling</small></Link>)}
+                    {observationMatches.feelings.map((item) => <button type="button" key={`feeling-${item.slug}`} onMouseDown={keepTextareaFocus} onClick={() => previewWord(`/feelings/${item.slug}`)}>{item.title}<small>Feeling</small></button>)}
+                    {observationMatches.needs.map((item) => <button type="button" key={`need-${item.slug}`} onMouseDown={keepTextareaFocus} onClick={() => { setPreviewNeed(item.slug); setSheet('need-preview'); }}>{item.title}<small>Need</small></button>)}
+                    {observationMatches.fauxFeelings.map((item) => <button type="button" key={`faux-${item.slug}`} onMouseDown={keepTextareaFocus} onClick={() => previewWord(`/faux-feelings/${item.slug}`)}>{item.title}<small>Faux Feeling</small></button>)}
                   </div>
                   {observationMatches.needs.length ? <p>A Need means something that matters, such as rest, safety, connection, or understanding.</p> : null}
                   {observationMatches.fauxFeelings.length ? <p>A Faux Feeling may combine an emotion with an interpretation of what happened. The label does not mean the event was unreal.</p> : null}
@@ -521,10 +615,9 @@ export function AlexithymiaSupportPage() {
               <p className={styles.sectionLabel}>A useful starting point</p>
               <strong>Keep it concrete</strong>
               <p>Names, visible actions, or exact words are enough. You can skip this step if nothing is clear.</p>
-              <Link to="/observations">Get help describing what happened</Link>
+              <button type="button" className={styles.helpButton} onMouseDown={keepTextareaFocus} onClick={() => setSheet('observation')}>Get help describing what happened</button>
               <div className={styles.stickyActions}>
                 <button type="button" className={styles.textButton} onClick={() => {
-                  updateDraft((current) => ({ ...current, observation: '' }));
                   goToStage(2);
                 }} onMouseDown={keepTextareaFocus}>Skip</button>
                 <button type="button" className={styles.primaryButton} onMouseDown={keepTextareaFocus} onClick={() => goToStage(2)}>Continue</button>
@@ -538,7 +631,7 @@ export function AlexithymiaSupportPage() {
         <section className={`${styles.stage} ${styles.stageClues}`} aria-labelledby="alex-stage-two">
           <header className={styles.stageHeader}>
             <p>2 of 4 · Clues</p>
-            <h1 id="alex-stage-two">What can you notice right now?</h1>
+            <h1 tabIndex={-1} id="alex-stage-two">What can you notice right now?</h1>
             <p>Use any clue that is available. You can skip the rest.</p>
           </header>
           <div className={styles.clueWorkspace}>
@@ -559,7 +652,7 @@ export function AlexithymiaSupportPage() {
                   <span className={styles.cardArrow} aria-hidden="true">›</span>
                 </button>
               </div>
-              {!canCompare ? <p className={styles.noClueMessage}>Nothing has to be clear yet. You can still browse words or choose “No word yet.”</p> : null}
+              {!canCompare ? <p className={styles.noClueMessage}>You can continue without clear clues or a feeling word.</p> : null}
             </div>
             <aside className={styles.clueSummary}>
               <section className={styles.clueTray} aria-labelledby="your-clues-title">
@@ -567,14 +660,10 @@ export function AlexithymiaSupportPage() {
                 {clueTray.length ? <div>{clueTray.map((clue) => <span key={clue.id}>{clue.label}</span>)}</div> : <p>No clues selected yet. Start with either source.</p>}
               </section>
               <div className={styles.stickyActions}>
-                <button type="button" className={styles.textButton} onClick={() => {
-                  setWordFilter('all');
+                <button type="button" className={styles.primaryButton} onClick={() => {
+                  setWordFilter(canCompare ? 'matches' : 'all');
                   goToStage(3);
-                }}>Browse all feelings</button>
-                <button type="button" className={styles.primaryButton} disabled={!canCompare} onClick={() => {
-                  setWordFilter('matches');
-                  goToStage(3);
-                }}>Compare words</button>
+                }}>Continue to words</button>
               </div>
             </aside>
           </div>
@@ -585,9 +674,14 @@ export function AlexithymiaSupportPage() {
             openRegion={draft.openRegion ?? bodyRegions[0]?.id ?? ''}
             selected={draft.selectedCues}
             onRegionChange={(openRegion) => updateDraft((current) => ({ ...current, openRegion }))}
-            onSelectedChange={(selectedCues) => updateDraft((current) => ({ ...current, selectedCues, bodyClear: false }))}
+            onSelectedChange={(selectedCues) => updateDraft((current) => ({ ...current, selectedCues, bodyClear: false, bodyTool: undefined }))}
+            onClear={() => {
+              clearWithUndo((current) => ({ ...current, selectedCues: {}, bodyClear: false, bodyTool: undefined }), 'Body clues cleared.');
+              setSheet(null);
+            }}
+            onOpenFull={() => openReference('/feelings/body-cues')}
             onNothingClear={() => {
-              updateDraft((current) => ({ ...current, selectedCues: {}, bodyClear: true }));
+              updateDraft((current) => ({ ...current, selectedCues: {}, bodyClear: true, bodyTool: undefined }));
               setSheet(null);
             }}
             onClose={() => setSheet(null)}
@@ -611,7 +705,7 @@ export function AlexithymiaSupportPage() {
         <section className={`${styles.stage} ${styles.stageWords}`} aria-labelledby="alex-stage-three">
           <header className={styles.stageHeader}>
             <p>3 of 4 · Words</p>
-            <h1 id="alex-stage-three">Possible words</h1>
+            <h1 tabIndex={-1} id="alex-stage-three">Possible words</h1>
             <p>These are words to consider, not answers. More than one may fit, or none yet.</p>
           </header>
           <div className={styles.wordWorkspace}>
@@ -623,8 +717,17 @@ export function AlexithymiaSupportPage() {
                   <input type="search" value={wordQuery} placeholder="Search words" onChange={(event) => setWordQuery(event.target.value)} autoComplete="off" />
                 </label>
                 <div className={styles.segmented} role="radiogroup" aria-label="Word view">
-                  {([['matches', 'Matches'], ['all', 'All feelings'], ['mine', 'My words']] as const).map(([value, label]) => (
-                    <button key={value} type="button" role="radio" aria-checked={wordFilter === value} onClick={() => { setWordFilter(value); setWordQuery(''); }}>{label}</button>
+                  {([['matches', 'Matches'], ['all', 'All words'], ['mine', 'My words']] as const).map(([value, label]) => (
+                    <button key={value} type="button" role="radio" aria-checked={wordFilter === value} tabIndex={wordFilter === value ? 0 : -1} onKeyDown={(event) => {
+                      const values: WordFilter[] = ['matches', 'all', 'mine'];
+                      const index = values.indexOf(value);
+                      const next = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? (index + 1) % 3
+                        : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? (index + 2) % 3
+                          : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : null;
+                      if (next === null) return;
+                      event.preventDefault(); setWordFilter(values[next]!); setWordQuery('');
+                      (event.currentTarget.parentElement?.children[next] as HTMLButtonElement)?.focus();
+                    }} onClick={() => { setWordFilter(value); setWordQuery(''); }}>{label}</button>
                   ))}
                 </div>
               </div>
@@ -639,7 +742,7 @@ export function AlexithymiaSupportPage() {
                   ariaLabel="Possible words"
                 />
               ) : (
-                <p className={styles.emptyMessage}>{wordFilter === 'mine' ? 'No words selected yet.' : normalizedWordQuery ? `No listed words match “${wordQuery}”.` : 'Choose at least two clues to compare words, or browse all feelings.'}</p>
+                <p className={styles.emptyMessage}>{normalizedWordQuery ? `No words in this view match “${wordQuery}”. Try All words, or keep your own word.` : wordFilter === 'mine' ? 'No words selected yet. You can continue without a word.' : 'No matching words to show. Try All words, or continue without a word.'}</p>
               )}
 
               {normalizedWordQuery && !exactSearchTerm ? (
@@ -668,33 +771,19 @@ export function AlexithymiaSupportPage() {
                   <div>{selectedTerms.map((term) => <span key={term.id}>{term.label}<small>{draft.decisions[term.id] === 'fits' ? `Fits${draft.feelingIntensities?.[term.id] ? ` · ${draft.feelingIntensities[term.id]}/10` : ''}` : 'Maybe'}</small></span>)}{draft.noWordYet ? <span>No word yet</span> : null}</div>
                 ) : <p>Open a word to mark it Fits or Maybe.</p>}
               </section>
-              <div className={styles.wordAlternatives}>
-                <p className={styles.sectionLabel}>Other paths</p>
-                <button type="button" aria-pressed={draft.noWordYet} onClick={chooseNoWordYet}>No word yet</button>
-                <button type="button" onClick={() => { setWordFilter('all'); setWordQuery(''); }}>Browse all feelings</button>
-              </div>
+              {selectedTerms.length ? <button type="button" className={styles.textButton} onClick={() => clearWithUndo((current) => ({
+                ...current, decisions: Object.fromEntries(Object.entries(current.decisions).filter(([, decision]) => decision === 'not-this-time')),
+                termOrder: [], feelingIntensities: {}, noWordYet: false,
+              }), 'Selected words cleared.')}>Clear selected words</button> : <p className={styles.noClueMessage}>A feeling word is optional.</p>}
               <p className={styles.liveStatus} role="status">{status}</p>
               <div className={styles.stickyActions}>
                 <button type="button" className={styles.textButton} onClick={() => goToStage(2)}>Back to clues</button>
-                <button type="button" className={styles.primaryButton} disabled={!selectedTerms.length && !draft.noWordYet} onClick={() => goToStage(4)}>Use these words</button>
+                <button type="button" className={styles.primaryButton} onClick={continueToReview}>{selectedTerms.length ? 'Continue' : 'Continue without a word'}</button>
               </div>
             </aside>
           </div>
 
-          <CandidateSheet
-            term={sheet === 'candidate' ? activeTerm : null}
-            score={activeScore}
-            decision={activeTerm ? draft.decisions[activeTerm.id] : undefined}
-            intensity={activeTerm ? draft.feelingIntensities?.[activeTerm.id] : undefined}
-            cueLabels={cueLabels}
-            onDecision={(decision, intensity) => {
-              if (activeTerm) decideTerm(activeTerm, decision, intensity);
-              setStatus(decision === 'not-this-time'
-                ? 'Marked “Not this time” for this check-in.'
-                : `${activeTerm?.label ?? 'Word'} added to Your words${intensity === undefined ? '' : ` · intensity ${intensity}/10`}.`);
-            }}
-            onClose={() => setSheet(null)}
-          />
+
         </section>
       ) : null}
 
@@ -702,7 +791,7 @@ export function AlexithymiaSupportPage() {
         <section className={`${styles.stage} ${styles.stageReview}`} aria-labelledby="alex-stage-four">
           <header className={styles.stageHeader}>
             <p>4 of 4 · Your words</p>
-            <h1 id="alex-stage-four">What fits right now?</h1>
+            <h1 tabIndex={-1} id="alex-stage-four">What fits right now?</h1>
           </header>
           <div className={styles.reviewWorkspace}>
             <div className={styles.reviewSelections}>
@@ -738,17 +827,17 @@ export function AlexithymiaSupportPage() {
                     storageKey="alexithymia-selected-needs"
                     ariaLabel="Selected Needs; open ways to support a Need"
                   />
-                ) : <button type="button" className={styles.notSureChoice} onClick={() => setSheet('needs')}>Not sure yet</button>}
+                ) : <p className={styles.emptyMessage}>No Needs selected. You can continue without choosing one.</p>}
               </section>
             </div>
 
             <div className={styles.reviewOutcome}>
               <section className={styles.composer} aria-labelledby="composer-title">
                 <header><h2 id="composer-title">Put it into your words</h2><p>Start with the words you chose, then edit the sentence however you want.</p></header>
-                <button type="button" className={styles.buildButton} onClick={buildSentence}>Build sentence</button>
+                <button type="button" className={styles.buildButton} onClick={() => buildSentence()}>{draft.statement.trim() ? 'Update draft' : 'Build sentence'}</button>
                 <label>
                   <span className="visually-hidden">Your statement</span>
-                  <textarea rows={6} value={draft.statement} placeholder="Your words will appear here." onChange={(event) => updateDraft((current) => ({ ...current, statement: event.target.value, statementEdited: true }))} />
+                  <textarea rows={6} value={draft.statement} placeholder="Your words will appear here." onChange={(event) => updateDraft((current) => ({ ...current, statement: event.target.value, statementEdited: true, statementBasis: supportStatementBasis(current) }))} />
                 </label>
                 <div className={styles.composerActions}>
                   <button type="button" onClick={async () => {
@@ -760,20 +849,49 @@ export function AlexithymiaSupportPage() {
                     }
                   }} disabled={!draft.statement.trim()}><CopyIcon /><span>Copy</span></button>
                   <button type="button" onClick={() => {
-                    if (!('speechSynthesis' in window) || !draft.statement.trim()) return;
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.speak(new SpeechSynthesisUtterance(draft.statement));
-                    setStatus('Reading your statement aloud.');
+                    if (typeof window.speechSynthesis?.speak !== 'function' || typeof SpeechSynthesisUtterance !== 'function') { setStatus('Read aloud is unavailable in this browser. You can copy your statement instead.'); return; }
+                    if (!draft.statement.trim()) return;
+                    try {
+                      window.speechSynthesis.cancel();
+                      const utterance = new SpeechSynthesisUtterance(draft.statement);
+                      utterance.onerror = () => setStatus('Read aloud could not finish. You can copy your statement instead.');
+                      window.speechSynthesis.speak(utterance);
+                      setStatus('Reading your statement aloud.');
+                    } catch { setStatus('Read aloud is unavailable in this browser. You can copy your statement instead.'); }
                   }} disabled={!draft.statement.trim()}><SpeakIcon /><span>Read aloud</span></button>
-                  <button type="button" onClick={addToJournal} disabled={!draft.statement.trim() && !draft.observation.trim() && !selectedTerms.length && !draft.selectedNeeds.length}><JournalIcon /><span>Add to Journal</span></button>
                   <button type="button" onClick={() => resetCheckIn()}><ResetIcon /><span>Start over</span></button>
                 </div>
+                {draft.statementEdited && draft.statementBasis && draft.statementBasis !== supportStatementBasis(draft) ? <p className={styles.notice}>Your choices changed. Your wording is kept; you can update the draft or keep your own statement.</p> : null}
+                <p className={styles.helperLink}>Journal opens a draft for you to review and save.</p>
+                {journalConflict ? <button type="button" className={styles.primaryButton} onClick={() => openReference('/inventory/journal?compose=new')}>Open unfinished Journal</button> : null}
                 <p className={styles.liveStatus} role="status">{status}</p>
+                <div className={styles.stickyActions}>
+                  <button type="button" className={styles.primaryButton} onClick={addToJournal} disabled={!draft.statement.trim() && !draft.observation.trim() && !selectedTerms.length && !draft.selectedNeeds.length && !bodySelections.length && !draft.bodyClear && !draft.noWordYet && !draft.overallMood && !shapeDimensionList.length}>Continue in Journal</button>
+                </div>
               </section>
               <p className={styles.completion}>These are the words that fit for this moment. You can change them whenever more becomes clear.</p>
             </div>
           </div>
 
+
+        </section>
+      ) : null}
+          <CandidateSheet
+            previewOnly={draft.stage !== 3}
+            onOpenReference={openReference}
+            term={sheet === 'candidate' ? activeTerm : null}
+            score={activeScore}
+            decision={activeTerm ? draft.decisions[activeTerm.id] : undefined}
+            intensity={activeTerm ? draft.feelingIntensities?.[activeTerm.id] : undefined}
+            cueLabels={cueLabels}
+            onDecision={(decision, intensity) => {
+              if (activeTerm) decideTerm(activeTerm, decision, intensity);
+              setStatus(decision === 'not-this-time'
+                ? 'Marked “Not this time” for this check-in.'
+                : `${activeTerm?.label ?? 'Word'} added to Your words${intensity === undefined ? '' : ` · intensity ${intensity}/10`}.`);
+            }}
+            onClose={() => setSheet(null)}
+          />
           <NeedCatalogSheet
             open={sheet === 'needs'}
             query={needQuery}
@@ -782,10 +900,29 @@ export function AlexithymiaSupportPage() {
             onQueryChange={setNeedQuery}
             onSelectedChange={(selectedNeeds) => updateDraft((current) => ({ ...current, selectedNeeds }))}
             onPlayModeChange={setNeedPlayMode}
+            onClear={() => {
+              clearWithUndo((current) => ({ ...current, selectedNeeds: [] }), 'Selected Needs cleared.');
+              setSheet(null);
+            }}
             onClose={() => setSheet(null)}
           />
-        </section>
-      ) : null}
+      <SupportSheet open={sheet === 'observation'} title="Describe what happened" titleId="alex-observation-help" onClose={() => setSheet(null)}>
+        <ObservationHelpContent topic="basics" />
+        <div className={styles.sheetFooter}><button type="button" className={styles.primaryButton} onClick={() => setSheet(null)}>Back to my check-in</button></div>
+      </SupportSheet>
+      <SupportSheet open={sheet === 'need-preview'} title={needsBySlug.get(previewNeed ?? '')?.title ?? 'Need'} titleId="alex-need-preview" onClose={() => setSheet(null)}>
+        <p>{needsBySlug.get(previewNeed ?? '')?.summary}</p>
+        <p className={styles.helperLink}>The full Need page has its evidence and ways to support it. You can return to this check-in.</p>
+        <button type="button" className={styles.textButton} onClick={() => openReference(`/needs/${previewNeed}`)}>Open full Need page</button>
+      </SupportSheet>
+      <SupportSheet open={sheet === 'replace-statement'} title="Replace your edited wording?" titleId="alex-replace-statement" onClose={() => setSheet(null)}>
+        <p>Your wording is kept unless you choose to replace it with this draft.</p>
+        <blockquote>{statementFromDraft(draft)}</blockquote>
+        <div className={styles.sheetFooterSplit}>
+          <button type="button" className={styles.textButton} onClick={() => setSheet(null)}>Keep my wording</button>
+          <button type="button" className={styles.primaryButton} onClick={() => buildSentence(true)}>Replace with this draft</button>
+        </div>
+      </SupportSheet>
     </article>
   );
 }

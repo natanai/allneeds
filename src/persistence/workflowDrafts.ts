@@ -1,8 +1,9 @@
+import { customTermId, legacyCustomTermId } from '../features/alexithymia/customWordIdentity';
 import { getBrowserStorage } from './storage';
 import type { StorageDriver } from './storage';
 import { VersionedStore } from './versionedStore';
 import alexithymiaSupportData from '../data/generated/alexithymiaSupport.json';
-import { normalizeJournalMood, type JournalFeelingRating, type JournalMood, type JournalGuidedSupport } from '../features/journal/journalRepository';
+import { hasGuidedSupportContent, normalizeJournalMood, type JournalFeelingRating, type JournalMood, type JournalGuidedSupport } from '../features/journal/journalRepository';
 
 export const JOURNAL_DRAFT_STORAGE_KEY = 'allneeds.v2.journal.draft';
 export const OBSERVATION_DRAFT_STORAGE_KEY = 'allneeds.v2.observation.draft';
@@ -58,6 +59,14 @@ export type InventoryDraft = {
 };
 
 export type AlexithymiaDraft = {
+  checkInId?: string;
+  bodyTool?: BodyCuesDraft;
+  updatedAt?: string;
+  wordFilter?: 'matches' | 'all' | 'mine';
+  wordQuery?: string;
+  needQuery?: string;
+  scrollTop?: number;
+  statementBasis?: string;
   stage: number;
   observation: string;
   openRegion: string | null;
@@ -124,12 +133,14 @@ function isFeelingRatings(value: unknown) {
 
 function isGuidedSupportDraft(value: unknown) {
   return isRecord(value)
+    && (value.checkInId === undefined || typeof value.checkInId === 'string')
     && typeof value.observation === 'string'
     && typeof value.statement === 'string'
     && Array.isArray(value.terms)
     && value.terms.every((term) => isRecord(term)
       && typeof term.label === 'string'
-      && (term.role === 'feeling' || term.role === 'faux-feeling' || term.role === 'working'))
+      && (term.role === 'feeling' || term.role === 'faux-feeling' || term.role === 'working')
+      && (term.decision === undefined || term.decision === 'fits' || term.decision === 'maybe'))
     && (value.bodyClues === undefined || (Array.isArray(value.bodyClues) && value.bodyClues.every((clue) =>
       isRecord(clue) && typeof clue.id === 'string' && typeof clue.label === 'string'
       && typeof clue.intensity === 'number' && Number.isFinite(clue.intensity))))
@@ -222,7 +233,15 @@ function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
     && typeof value.noWordYet === 'boolean'
     && isStringList(value.selectedNeeds)
     && typeof value.statement === 'string'
-    && typeof value.statementEdited === 'boolean';
+    && typeof value.statementEdited === 'boolean'
+    && (value.checkInId === undefined || typeof value.checkInId === 'string')
+    && (value.bodyTool === undefined || isBodyCuesDraft(value.bodyTool))
+    && (value.wordFilter === undefined || ['matches', 'all', 'mine'].includes(String(value.wordFilter)))
+    && (value.wordQuery === undefined || typeof value.wordQuery === 'string')
+    && (value.needQuery === undefined || typeof value.needQuery === 'string')
+    && (value.statementBasis === undefined || typeof value.statementBasis === 'string')
+    && (value.updatedAt === undefined || (typeof value.updatedAt === 'string' && Number.isFinite(Date.parse(value.updatedAt))))
+    && (value.scrollTop === undefined || (typeof value.scrollTop === 'number' && Number.isFinite(value.scrollTop) && value.scrollTop >= 0));
 }
 
 function isLegacyAlexithymiaDraftV1(value: unknown): value is LegacyAlexithymiaDraftV1 {
@@ -333,9 +352,7 @@ export function writeJournalDraft(
     || draft.editingId
     || draft.mood
     || draft.experiencedAt
-    || draft.guidedSupport?.observation.trim()
-    || draft.guidedSupport?.terms.length
-    || draft.guidedSupport?.statement.trim(),
+    || hasGuidedSupportContent(draft.guidedSupport),
   );
   if (!hasContent) {
     store.clear();
@@ -502,9 +519,24 @@ function readLegacyAlexithymiaDraft(storage: StorageDriver | null) {
   }
 }
 
+function migrateCustomWordIds(draft: AlexithymiaDraft): AlexithymiaDraft {
+  const replacements = new Map<string, string>();
+  for (const word of draft.customTerms) {
+    const oldId = legacyCustomTermId(word);
+    const id = customTermId(word);
+    // A historic collision cannot establish which of several words was chosen.
+    // Retain the first historic identity rather than manufacturing more choices.
+    if (id !== oldId && !replacements.has(oldId) && draft.decisions[oldId]) replacements.set(oldId, id);
+  }
+  if (!replacements.size) return draft;
+  const decisions = { ...draft.decisions };
+  for (const [oldId, id] of replacements) { decisions[id] ??= decisions[oldId]!; delete decisions[oldId]; }
+  return { ...draft, decisions, termOrder: draft.termOrder.map((id) => replacements.get(id) ?? id) };
+}
+
 export function readAlexithymiaDraft(storage: StorageDriver | null = getBrowserStorage()) {
   const result = alexithymiaStore(storage).read();
-  if (result.status === 'ready') return result.value;
+  if (result.status === 'ready') return migrateCustomWordIds(result.value);
   if (result.status !== 'unsupported' || result.foundVersion !== 1) return null;
   const migrated = readLegacyAlexithymiaDraft(storage);
   if (!migrated) return null;
@@ -539,6 +571,7 @@ export function writeAlexithymiaDraft(
   const feelingIntensities = Object.fromEntries(Object.entries(draft.feelingIntensities ?? {})
     .filter(([id, rating]) => draft.decisions[id] === 'fits'
       && Number.isInteger(rating) && rating >= 1 && rating <= 10));
+  if (!storage) throw new Error('Device storage is unavailable. The check-in draft was not saved.');
   const normalized: AlexithymiaDraft = {
     ...draft,
     ...(draft.feelingIntensities !== undefined ? { feelingIntensities } : {}),
@@ -570,6 +603,23 @@ export function writeAlexithymiaDraft(
 
 export function clearAlexithymiaDraft(storage: StorageDriver | null = getBrowserStorage()) {
   alexithymiaStore(storage).clear();
+}
+
+export class CheckInDraftConflict extends Error {
+  constructor() {
+    super('This check-in changed in another tab. Your changes are still on this screen. Reload to open the saved check-in.');
+  }
+}
+
+/** Reject a stale screen rather than replacing a newer or completed check-in. */
+export function writeAlexithymiaDraftAgainst(
+  draft: AlexithymiaDraft,
+  expected: AlexithymiaDraft | null,
+  storage: StorageDriver | null = getBrowserStorage(),
+) {
+  if (!storage) throw new Error('Device storage is unavailable. The check-in draft was not saved.');
+  if (JSON.stringify(readAlexithymiaDraft(storage)) !== JSON.stringify(expected)) throw new CheckInDraftConflict();
+  return writeAlexithymiaDraft(draft, storage);
 }
 
 export function readNeedStrategyDraft(
