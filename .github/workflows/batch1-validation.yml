@@ -2,8 +2,6 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [design/photo-refrigerator-theme]
 
 permissions:
   contents: read
