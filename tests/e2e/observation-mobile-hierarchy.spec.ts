@@ -132,13 +132,14 @@ test('research topics and reference URLs remain contained with doubled phone tex
   await expect(picker).toBeVisible();
   await picker.selectOption('references');
   await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   for (const source of observationGuide.sources) {
     const link = guide.locator(`#observation-guide-source-${source.id}`).getByRole('link');
     await link.scrollIntoViewIfNeeded();
     const box = await link.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+    expect(box!.x, source.id).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width, source.id).toBeLessThanOrEqual(320);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.screenshot({ path: 'test-results/observation-guide-sources-large-text-320.png' });
