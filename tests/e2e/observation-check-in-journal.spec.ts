@@ -302,7 +302,9 @@ test('the optional Journal magnet and menu use the same doorway and remembered p
   await page.goBack();
   await expect(page).toHaveURL(/\/$/);
   await nav.getByRole('link', { name: 'Journal', exact: true }).click();
+  await expect(choice).toBeVisible();
   await page.keyboard.press('Escape');
+  await expect(choice).toHaveCount(0);
   await expect(page).toHaveURL(/\/inventory\/journal$/);
   await page.getByRole('button', { name: 'New entry', exact: true }).click();
   choice = page.getByRole('dialog', { name: 'New entry', exact: true });

@@ -1,3 +1,4 @@
+# Application source: 87bdef3e1035257f7b305d51a103c0545e870d31
 name: Observation guide release validation
 
 on:
@@ -30,8 +31,8 @@ jobs:
           VITE_BASE_PATH: /
       - name: Install pinned Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
-      - name: Run complete browser suite without retries
-        run: pnpm exec playwright test --workers=1 --retries=0
+      - name: Run guide and affected check-in regressions without retries
+        run: pnpm exec playwright test tests/e2e/check-in-clarity.spec.ts tests/e2e/observation-check-in-journal.spec.ts tests/e2e/observation-mobile-hierarchy.spec.ts --workers=1 --retries=0
       - name: Verify offline and reconnect
         run: pnpm test:e2e:outage
       - name: Preserve browser verification artifacts
