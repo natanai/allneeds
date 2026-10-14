@@ -11,7 +11,9 @@ import {
   THEME_KEY,
   themeCssValues,
   themeRoleMetadata,
+  themeAppearance,
 } from './customizerSettings';
+import refrigeratorTheme from './refrigeratorTheme.json' with { type: 'json' };
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const values = new Map(Object.entries(initial));
@@ -81,6 +83,33 @@ describe('saved customizer settings', () => {
       [THEME_KEY]: JSON.stringify({ values: { primary: '#ABCDEF', plum: '#111111' }, updatedAt: 4 }),
     });
     expect(readTheme(storage, null).values.primary).toBe('#ABCDEF');
+  });
+
+  it('upgrades the untouched previous Refrigerator preset without changing its timestamp or corners', () => {
+    const storage = memoryStorage({ [THEME_KEY]: JSON.stringify({
+      values: refrigeratorTheme.previousValues, preset: 'Refrigerator', roundness: 0, updatedAt: 40,
+    }) });
+    expect(readTheme(storage, null)).toEqual({
+      values: refrigeratorTheme.values, preset: 'Refrigerator', roundness: 0, updatedAt: 40,
+      appearance: 'refrigerator',
+    });
+  });
+
+  it('retains user colors and the material after a Refrigerator customization', () => {
+    const values = { ...refrigeratorTheme.values, action: '#ABCDEF' };
+    const storage = memoryStorage({ [THEME_KEY]: JSON.stringify({
+      values, preset: '', appearance: 'refrigerator', roundness: 150, updatedAt: 41,
+    }) });
+    const theme = readTheme(storage, null);
+    expect(theme.values).toEqual(values);
+    expect(theme.roundness).toBe(150);
+    expect(themeAppearance(theme)).toBe('refrigerator');
+    expect(themeCssValues(theme)['--surface-raised']).toBe(values.quiet);
+
+    const editedOld = { ...refrigeratorTheme.previousValues, action: '#ABCDEF' };
+    const old = memoryStorage({ [THEME_KEY]: JSON.stringify({ values: editedOld, preset: 'Refrigerator' }) });
+    expect(readTheme(old, null).values).toEqual(editedOld);
+    expect(themeAppearance({ preset: 'Default' })).toBe('standard');
   });
 
   it('keeps all palette collections on the same compact nine-role semantic model', () => {

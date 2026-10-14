@@ -1,12 +1,12 @@
 import { defaultTheme, type ThemeState, type ThemeValues } from './customizerSettings';
+import refrigeratorTheme from './refrigeratorTheme.json' with { type: 'json' };
 
 export type ThemePreset = Readonly<{
   name: string;
   values: ThemeValues;
   roundness: number;
+  appearance?: ThemeState['appearance'];
 }>;
-
-const paperWhite = '#FFFEF8';
 
 export const themePresets: readonly ThemePreset[] = [
   {
@@ -15,19 +15,10 @@ export const themePresets: readonly ThemePreset[] = [
     roundness: 100,
   },
   {
-    name: 'Refrigerator',
-    values: {
-      primary: '#6F9E91',
-      quiet: paperWhite,
-      text: '#171B19',
-      secondary: '#45524D',
-      action: paperWhite,
-      positive: paperWhite,
-      attention: paperWhite,
-      selection: paperWhite,
-      outline: '#17201D',
-    },
-    roundness: 0,
+    name: refrigeratorTheme.name,
+    values: refrigeratorTheme.values,
+    roundness: refrigeratorTheme.roundness,
+    appearance: 'refrigerator',
   },
   {
     name: 'Pixel Art',

@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme-appearance='standard'] {
   color-scheme: light;
   --primary: #74569b;
   --quiet: #ede4ff;
@@ -65,4 +66,82 @@
   --shadow-tactile: 0 10px 0 color-mix(in srgb, var(--outline) 24%, transparent);
   --shadow-tactile-hover: 0 13px 0 color-mix(in srgb, var(--outline) 28%, transparent);
   --motion-fast: 140ms ease;
+
+  /* Material roles inherit the editable palette; presets can change the material
+     without introducing a second set of feature colors. */
+  --html-background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 65%, #000 5%) 0%, color-mix(in srgb, var(--primary) 55%, #fff 20%) 60%, color-mix(in srgb, var(--primary) 45%, #fff 35%) 100%);
+  --body-background: radial-gradient(circle at top left, color-mix(in srgb, var(--quiet) 60%, transparent) 0 30%, transparent 60%), linear-gradient(135deg, color-mix(in srgb, var(--primary) 75%, #000 5%) 0%, color-mix(in srgb, var(--primary) 55%, #fff 20%) 60%, color-mix(in srgb, var(--primary) 45%, #fff 35%) 100%);
+  --board-background: color-mix(in srgb, var(--surface-raised) 85%, transparent);
+  --board-play-background: color-mix(in srgb, var(--selection) 9%, var(--surface-raised) 91%);
+  --board-foreground: var(--text);
+  --board-outline: var(--outline);
+  --board-border-width: 3px;
+  --board-surface-opacity: 1;
+  --magnet-border-width: 3px;
+  --font-magnet: var(--font-body);
+  --font-nav-magnet: var(--font-display);
+  --nav-magnet-weight: 500;
+  --nav-magnet-spacing: .08em;
+  --nav-magnet-case: uppercase;
+  --nav-shadow-depth: 12px;
+  --nav-active-depth: 9px;
+  --nav-active-hover-depth: 10px;
+  --nav-active-held-depth: 12px;
+  --magnet-label-surface: transparent;
+  --magnet-text-shadow: 0 1px 0 color-mix(in srgb, var(--surface-raised) 80%, transparent);
+  --magnet-focus: color-mix(in srgb, var(--outline) 34%, transparent);
+  --feeling-art-opacity: .9;
+  --feeling-art-filter: none;
+  --feature-role-share: 58%;
+  --sheet-border-wide: 4px;
+  --sheet-border-compact: 3px;
+  --sheet-shadow: 0 26px 0 var(--shadow);
+  --paper-grain: none;
+  --editor-placeholder: color-mix(in srgb, var(--secondary) 50%, transparent);
+  --journal-route-background: transparent;
+  --physics-off: color-mix(in srgb, var(--outline) 42%, transparent);
+  --physics-on: color-mix(in srgb, var(--positive) 55%, transparent);
+  --physics-thumb: color-mix(in srgb, var(--surface-raised) 88%, transparent);
+  --physics-target: 0px;
+}
+
+[data-theme-appearance='refrigerator'] {
+  --html-background: radial-gradient(ellipse at 18% 0%, color-mix(in srgb, var(--quiet) 7%, transparent), transparent 62%), linear-gradient(112deg, var(--primary), color-mix(in srgb, var(--primary) 88%, var(--outline)) 60%, var(--primary));
+  --body-background: var(--html-background);
+  --board-background: radial-gradient(ellipse at 22% 12%, color-mix(in srgb, var(--quiet) 5%, transparent), transparent 65%), var(--primary);
+  --board-play-background: var(--board-background);
+  --board-foreground: var(--primary-fg);
+  --board-outline: color-mix(in srgb, var(--quiet) 24%, var(--primary));
+  --board-border-width: 1px;
+  --board-surface-opacity: .15;
+  --magnet-border-width: 1px;
+  --font-magnet: 'Courier New', Courier, monospace;
+  --font-nav-magnet: var(--font-magnet);
+  --nav-magnet-weight: 700;
+  --nav-magnet-spacing: 0em;
+  --nav-magnet-case: none;
+  --nav-shadow-depth: 2px;
+  --nav-active-depth: 2px;
+  --nav-active-hover-depth: 3px;
+  --nav-active-held-depth: 4px;
+  --magnet-label-surface: var(--quiet);
+  --magnet-text-shadow: none;
+  --magnet-focus: var(--board-foreground);
+  --feeling-art-opacity: .12;
+  --feeling-art-filter: grayscale(1);
+  --feature-role-share: 24%;
+  --sheet-border-wide: 1px;
+  --sheet-border-compact: 1px;
+  --sheet-shadow: 0 5px 20px color-mix(in srgb, var(--outline) 38%, transparent);
+  --shadow-small: 0 2px 3px color-mix(in srgb, var(--outline) 20%, transparent);
+  --shadow-medium: 0 3px 5px color-mix(in srgb, var(--outline) 28%, transparent);
+  --shadow-tactile: 0 2px 2px color-mix(in srgb, var(--outline) 48%, transparent);
+  --shadow-tactile-hover: 0 4px 6px color-mix(in srgb, var(--outline) 45%, transparent);
+  --paper-grain: linear-gradient(106deg, color-mix(in srgb, var(--outline) 2%, transparent), transparent 42%, color-mix(in srgb, var(--outline) 1%, transparent));
+  --editor-placeholder: var(--secondary);
+  --journal-route-background: var(--quiet);
+  --physics-off: color-mix(in srgb, var(--quiet) 40%, var(--primary));
+  --physics-on: color-mix(in srgb, var(--quiet) 70%, var(--primary));
+  --physics-thumb: var(--primary);
+  --physics-target: var(--control-min);
 }

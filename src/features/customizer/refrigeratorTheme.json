@@ -1,0 +1,27 @@
+{
+  "name": "Refrigerator",
+  "appearance": "refrigerator",
+  "roundness": 0,
+  "values": {
+    "primary": "#20211F",
+    "quiet": "#F3F0E7",
+    "text": "#211F1C",
+    "secondary": "#383630",
+    "action": "#F3F0E7",
+    "positive": "#F3F0E7",
+    "attention": "#F3F0E7",
+    "selection": "#F3F0E7",
+    "outline": "#171715"
+  },
+  "previousValues": {
+    "primary": "#6F9E91",
+    "quiet": "#FFFEF8",
+    "text": "#171B19",
+    "secondary": "#45524D",
+    "action": "#FFFEF8",
+    "positive": "#FFFEF8",
+    "attention": "#FFFEF8",
+    "selection": "#FFFEF8",
+    "outline": "#17201D"
+  }
+}

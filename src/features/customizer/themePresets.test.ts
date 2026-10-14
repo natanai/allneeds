@@ -39,19 +39,20 @@ describe('customizer theme presets', () => {
     })).toBe('');
   });
 
-  it('makes Refrigerator square-edged and reuses one paper white across quiet magnet-face roles', () => {
+  it('pairs black enamel with square paper labels and readable printed text', () => {
     const preset = themePresets.find(({ name }) => name === 'Refrigerator');
-    const paperWhite = '#FFFEF8';
+    const paperWhite = '#F3F0E7';
     expect(preset).toMatchObject({
       roundness: 0,
+      appearance: 'refrigerator',
       values: {
-        primary: '#6F9E91',
+        primary: '#20211F',
         quiet: paperWhite,
         action: paperWhite,
         positive: paperWhite,
         attention: paperWhite,
         selection: paperWhite,
-        outline: '#17201D',
+        outline: '#171715',
       },
     });
     expect(new Set([
@@ -61,6 +62,9 @@ describe('customizer theme presets', () => {
       preset?.values.attention,
       preset?.values.selection,
     ])).toEqual(new Set([paperWhite]));
+    expect(contrast(paperWhite, preset!.values.text)).toBeGreaterThanOrEqual(12);
+    expect(contrast(paperWhite, preset!.values.secondary)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(preset!.values.primary, themeCssValues(preset!)['--primary-fg']!)).toBeGreaterThanOrEqual(4.5);
   });
 
   it('gives every preset a distinct complete runtime theme without expanding the editable role set', () => {
@@ -73,7 +77,9 @@ describe('customizer theme presets', () => {
       expect(preset.roundness).toBeGreaterThanOrEqual(0);
       expect(preset.roundness).toBeLessThanOrEqual(200);
       const css = themeCssValues(preset);
-      expect(css['--surface-raised']).toBe(`color-mix(in srgb, ${preset.values.quiet} 12%, #FFFFFF 88%)`);
+      expect(css['--surface-raised']).toBe(preset.appearance === 'refrigerator'
+        ? preset.values.quiet
+        : `color-mix(in srgb, ${preset.values.quiet} 12%, #FFFFFF 88%)`);
       expect(css['--btn-bg']).toBe(preset.values.action);
       expect(css['--corner-scale']).toBe(String(preset.roundness / 100));
       expect(css['--btn-fg']).toMatch(/^#[0-9A-F]{6}$/);

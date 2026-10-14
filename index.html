@@ -56,6 +56,8 @@
         };
         var hexPattern = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
         var root = document.documentElement;
+        // Vite embeds the same canonical preset used by the runtime, without a startup fetch.
+        var refrigerator = /* allneeds:refrigerator-theme */ null;
 
         function parse(storage) {
           try {
@@ -74,7 +76,10 @@
         function color(value) {
           if (typeof value !== 'string') return '';
           var prefixed = value.trim().charAt(0) === '#' ? value.trim() : '#' + value.trim();
-          return hexPattern.test(prefixed) ? prefixed.toUpperCase() : '';
+          if (!hexPattern.test(prefixed)) return '';
+          return (prefixed.length === 4
+            ? '#' + prefixed.slice(1).split('').map(function (digit) { return digit + digit; }).join('')
+            : prefixed).toUpperCase();
         }
 
         function luminance(value) {
@@ -102,6 +107,16 @@
         var theme = session && (!local || timestamp(session) > timestamp(local)) ? session : local;
         if (!theme || !theme.values || typeof theme.values !== 'object') return;
 
+        if (refrigerator && theme.preset === refrigerator.name
+          && Object.keys(refrigerator.previousValues).every(function (name) {
+            return (color(theme.values[name]) || color(theme.values[legacy[name]])) === refrigerator.previousValues[name];
+          })) {
+          theme = Object.assign({}, theme, { values: refrigerator.values });
+        }
+        var appearance = theme.appearance === 'refrigerator' || theme.preset === 'Refrigerator'
+          ? 'refrigerator' : 'standard';
+        root.setAttribute('data-theme-appearance', appearance);
+
         var applied = false;
         var resolved = {};
         Object.keys(variables).forEach(function (name) {
@@ -120,7 +135,8 @@
         var action = resolved.action;
         var outline = resolved.outline;
         var selection = resolved.selection;
-        var surface = quiet ? 'color-mix(in srgb, ' + quiet + ' 12%, #FFFFFF 88%)' : '';
+        var surface = quiet ? (appearance === 'refrigerator'
+          ? quiet : 'color-mix(in srgb, ' + quiet + ' 12%, #FFFFFF 88%)') : '';
         if (surface) root.style.setProperty('--surface-raised', surface);
         if (resolved.primary) root.style.setProperty('--primary-fg', foreground(resolved.primary));
         if (resolved.text) root.style.setProperty('--text-fg', foreground(resolved.text));

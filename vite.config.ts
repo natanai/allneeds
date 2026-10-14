@@ -306,8 +306,18 @@ function runtimeCatalogPlugin(): Plugin {
   };
 }
 
+function savedThemePrepaintPlugin(): Plugin {
+  return {
+    name: 'allneeds-saved-theme-prepaint',
+    transformIndexHtml(html) {
+      const theme = readFileSync(resolve('src/features/customizer/refrigeratorTheme.json'), 'utf8');
+      return html.replace('/* allneeds:refrigerator-theme */ null', JSON.stringify(JSON.parse(theme)));
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [runtimeCatalogPlugin(), react()],
+  plugins: [runtimeCatalogPlugin(), savedThemePrepaintPlugin(), react()],
   base: process.env.VITE_BASE_PATH || '/',
   server: {
     proxy: {
