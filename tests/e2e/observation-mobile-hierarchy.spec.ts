@@ -126,6 +126,8 @@ test('research topics and reference URLs remain contained with doubled phone tex
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto('/observations');
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await page.getByRole('heading', { name: 'Observations', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'test-results/observation-page-large-text-320.png' });
   const guide = page.locator('#observation-guide');
   await guide.locator(':scope > summary').click();
   const picker = guide.getByRole('combobox', { name: 'Research topic', exact: true });
