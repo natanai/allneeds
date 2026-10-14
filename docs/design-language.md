@@ -374,12 +374,13 @@ See `docs/journal-history.md` for persistence, calculations, and review checks.
 
 ## Decision log
 
-### 2026-10-14 — Approved Observation guide integration (implementation branch; not published)
+### 2026-10-14 — Approved Observation guide integration (validated for site-test; not published)
 
-- The approved short introduction, research introduction, eight guide topics and 18-reference library supersede the earlier preview copy and source set. The [approved package](./observation-research-guide-proposal-2026-10-14.md) owns the wording; the [implementation record](./observation-research-implementation-2026-10-14.md) records verification and the pending browser gate.
+- The approved short introduction, research introduction, eight guide topics and 18-reference library supersede the earlier preview copy and source set. The [approved package](./observation-research-guide-proposal-2026-10-14.md) owns the wording; the [implementation record](./observation-research-implementation-2026-10-14.md) records foundation, browser and visual verification.
 - Preserve one topic at a time, the existing three-column desktop topic index and native mobile Research topic picker. All screen sizes read one complete canonical dataset.
 - Research reads as the approved explanatory paragraphs with inline numbered citations, rather than separate method/finding/relevance/limit cards. Source-library entries show bibliographic wording and raw publisher or official-resource URLs; internal appraisal notes remain outside the UI.
 - Reference activation selects the library and focuses the matching source. Plain text rendering, Customizer-owned citation targets, focus treatment and wrapping preserve readable, accessible research without introducing a separate control language.
+- Page and Quick Check grids must not impose a wider minimum than the available phone width. Let titles, guide words and Quick Check status rows reflow with enlarged text, preserving labels and Info targets. The strict 320-pixel doubled-text regression covers document and reference-link containment.
 
 ### 2026-10-11
 
