@@ -132,7 +132,20 @@ test('research topics and reference URLs remain contained with doubled phone tex
   await expect(picker).toBeVisible();
   await picker.selectOption('references');
   await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
-  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  const layout = await page.evaluate(() => ({
+    viewport: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+    overflow: [...document.querySelectorAll<HTMLElement>('body *')].flatMap((element) => {
+      const box = element.getBoundingClientRect();
+      if (!box.width || box.right <= document.documentElement.clientWidth) return [];
+      const style = getComputedStyle(element);
+      return [{ tag: element.tagName, class: element.className, text: element.textContent?.trim().slice(0, 50),
+        left: box.left, right: box.right, width: box.width, minWidth: style.minWidth, display: style.display }];
+    }).slice(0, 18),
+  }));
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    { message: JSON.stringify(layout) }).toBe(true);
   for (const source of observationGuide.sources) {
     const link = guide.locator(`#observation-guide-source-${source.id}`).getByRole('link');
     await link.scrollIntoViewIfNeeded();
