@@ -1,5 +1,6 @@
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
@@ -11,12 +12,14 @@
 }
 
 .header > div {
+  min-width: 0;
   display: grid;
   gap: var(--space-1);
 }
 
 .header h1 {
   margin: 0;
+  overflow-wrap: anywhere;
   font-family: var(--font-display);
   font-size: clamp(1.45rem, 4vw, 2.25rem);
   letter-spacing: .01em;
@@ -605,6 +608,7 @@
 
 .guide {
   overflow: hidden;
+  overflow-wrap: anywhere;
   border-block: 1px solid color-mix(in srgb, var(--outline) 14%, transparent);
 }
 
