@@ -105,9 +105,21 @@ test('both emotional maps repaint their whole surface while selecting and draggi
   expect(first).not.toBe(baseline);
   expect(second).not.toBe(first);
   await expect(sheet.locator('output')).toHaveText('Valence +3 · Arousal +3');
+  await expect(sheet.getByText('Point selected', { exact: true })).toBeVisible();
+  const alternatives = sheet.getByRole('group', { name: 'Instead of a point', exact: true });
+  await expect(alternatives).toBeVisible();
+  await expect(alternatives.getByRole('button', { name: 'Mixed feelings' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(alternatives.getByRole('button', { name: 'Not sure' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(alternatives.getByRole('button', { name: 'Clear' })).toHaveCount(0);
+  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.getByRole('button', { name: /^Overall feeling/ }).click();
+  await expect(sheet.locator('output')).toHaveText('Valence +3 · Arousal +3');
 
   await sheet.getByRole('button', { name: 'Mixed feelings' }).click();
   await expect(sheet.locator('output')).toHaveText('Mixed feelings selected');
+  await expect(sheet.getByText('Point selected', { exact: true })).toHaveCount(0);
+  await alternatives.getByRole('button', { name: 'Not sure', exact: true }).click();
+  await expect(sheet.locator('output')).toHaveText('Not sure selected');
   await sheet.getByRole('button', { name: 'Clear' }).click();
   await expect(sheet.locator('output')).toHaveText('No point placed yet');
 });

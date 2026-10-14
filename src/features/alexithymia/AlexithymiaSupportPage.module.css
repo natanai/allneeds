@@ -357,25 +357,9 @@
 .wordSidebar { min-width: 0; }
 
 .guideRail {
-  padding: .72rem .78rem;
-  border-top: 2px solid color-mix(in srgb, var(--primary) 72%, transparent);
-  background: color-mix(in srgb, var(--selection) 12%, var(--surface-raised) 88%);
+  display: grid;
+  gap: var(--space-3);
 }
-
-.guideRail > strong {
-  display: block;
-  margin-top: .42rem;
-  font: 800 var(--text-sm) / 1.15 var(--font-display);
-}
-
-.guideRail > p:not(.sectionLabel) {
-  margin: .25rem 0 .5rem;
-  color: var(--secondary);
-  font-size: var(--text-xs);
-  line-height: 1.38;
-}
-
-.guideRail > a { font-size: var(--text-xs); }
 
 .observationField textarea,
 .composer textarea {
@@ -477,6 +461,11 @@
 }
 
 .helperLink { margin: 0; font-size: var(--text-xs); }
+
+.observationHelp { display: grid; gap: var(--space-3); }
+.observationHelp h3 { margin: 0; font: 800 var(--text-base) / 1.15 var(--font-display); }
+.observationHelp p { margin: .5rem 0; font-size: var(--text-sm); line-height: 1.4; }
+.observationHelp > section + section { padding-top: var(--space-3); border-top: 1px solid color-mix(in srgb, var(--outline) 13%, transparent); }
 
 .stickyActions {
   position: fixed;
@@ -1238,19 +1227,8 @@
 
   .observationField textarea { min-height: 7.2rem; padding: .72rem; font-size: var(--text-base); }
 
-  .guideRail {
-    padding: .55rem 0 0;
-    border-top-width: 1px;
-    background: transparent;
-  }
-  .guideRail .sectionLabel { display: none; }
-  .guideRail > strong { margin-top: 0; font-size: var(--text-xs); }
-  .guideRail > p:not(.sectionLabel) { margin: .18rem 0 .35rem; font-size: var(--text-xs); }
-  .guideRail > a { font-size: var(--text-xs); }
-
   .stageOne:has(.observationField textarea:focus) .stageHeader { display: none; }
   .stageOne:has(.observationField textarea:focus) .observationWorkspace { padding-top: 3.45rem; }
-  .stageOne:has(.observationField textarea:focus) .guideRail > :not(.stickyActions):not(.helpButton) { display: none; }
   .stageOne:has(.observationField textarea:focus) .stickyActions {
     top: calc(max(.3rem, env(safe-area-inset-top)) + 3.25rem);
     bottom: auto;
