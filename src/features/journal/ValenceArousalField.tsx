@@ -125,12 +125,20 @@ export function ValenceArousalField({ mood, onChange }: Props) {
         onFocus={() => { if (hasPoint) setMoving(true); }}
       ><span className="visually-hidden">{valueText}</span></button>
     </div>
-    <output className={`${styles.values} ${moving ? styles.moving : ''}`} aria-live="polite">{valueText}</output>
-    <small className={styles.help}>Drag or tap the point. Left/right changes valence (pleasantness); up/down changes arousal (activation or energy).</small>
-    <div className={styles.states} aria-label="Other mood choices">
-      <button type="button" aria-pressed={mood?.kind === 'mixed'} onClick={() => onChange({ kind: 'mixed' })}>Mixed feelings</button>
-      <button type="button" aria-pressed={mood?.kind === 'unsure'} onClick={() => onChange({ kind: 'unsure' })}>Not sure</button>
-      <button type="button" disabled={!mood} onClick={() => onChange(undefined)}>Clear</button>
+    <div className={styles.choiceSummary}>
+      <div>
+        {hasPoint ? <small className={styles.selectionLabel}>Point selected</small> : null}
+        <output className={`${styles.values} ${moving ? styles.moving : ''}`} aria-live="polite">{valueText}</output>
+      </div>
+      <button type="button" className={styles.clear} disabled={!mood} onClick={() => onChange(undefined)}>Clear</button>
     </div>
+    <small className={styles.help}>Drag or tap the point. Left/right changes valence (pleasantness); up/down changes arousal (activation or energy).</small>
+    <fieldset className={styles.alternatives}>
+      <legend>Instead of a point</legend>
+      <div className={styles.states}>
+        <button type="button" aria-pressed={mood?.kind === 'mixed'} onClick={() => onChange({ kind: 'mixed' })}>Mixed feelings</button>
+        <button type="button" aria-pressed={mood?.kind === 'unsure'} onClick={() => onChange({ kind: 'unsure' })}>Not sure</button>
+      </div>
+    </fieldset>
   </div>;
 }

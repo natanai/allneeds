@@ -23,8 +23,15 @@ test('observation help and word previews stay in the check-in; Skip preserves wr
   await page.setViewportSize({ width: 390, height: 844 });
   const observation = 'I noticed anxiety when the meeting ended.';
   await start(page, observation);
+  await expect(page.getByRole('heading', { name: 'Keep it concrete', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Get help describing what happened' }).click();
-  await expect(page.getByRole('dialog', { name: 'Describe what happened' })).toBeVisible();
+  const help = page.getByRole('dialog', { name: 'Describe what happened' });
+  await expect(help).toBeVisible();
+  await expect(help.getByRole('heading', { name: 'Keep it concrete', exact: true })).toBeVisible();
+  await expect(help).toContainText('They closed the laptop.');
+  await expect(help).toContainText('Your own feelings can stay in the text too.');
+  await expect(help).toContainText('This leaves the check-in');
+  await expect(help).not.toContainText('Quick Check only suggests details');
   await expect(page).toHaveURL(/alexithymia-support$/);
   await page.getByRole('button', { name: 'Back to my check-in' }).click();
   await page.getByRole('button', { name: /^Anxiety\s*Feeling$/ }).click();
@@ -42,6 +49,37 @@ test('observation help and word previews stay in the check-in; Skip preserves wr
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'What happened?', exact: true })).toHaveValue(observation);
 });
+
+for (const viewport of [{ width: 320, height: 568 }, { width: 1280, height: 900 }]) {
+  test(`explicit Observations exit preserves both drafts and returns to the same check-in at ${viewport.width}px`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    const separateObservation = 'The window was open when I arrived.';
+    const checkInObservation = 'The clock showed 3 p.m. when the meeting ended.';
+    await page.goto('/observations');
+    await page.getByRole('textbox', { name: 'What did you notice?' }).fill(separateObservation);
+    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.observation.draft') ?? 'null')?.data?.text)).toBe(separateObservation);
+    await start(page, checkInObservation);
+    const helpButton = page.getByRole('button', { name: 'Get help describing what happened' });
+    await helpButton.scrollIntoViewIfNeeded();
+    const scrollPosition = () => page.evaluate(() => {
+      const workspace = document.querySelector('article[aria-label^="Alexithymia support:"]')!;
+      return getComputedStyle(workspace).position === 'fixed' ? workspace.scrollTop : window.scrollY;
+    });
+    await helpButton.click();
+    const help = page.getByRole('dialog', { name: 'Describe what happened' });
+    await expect(help).toContainText('This leaves the check-in');
+    await expect(help).toContainText('use Return to check-in to come back');
+    const originalScroll = await scrollPosition();
+    await help.getByRole('button', { name: 'Open Observations page', exact: true }).click();
+    await expect(page).toHaveURL(/\/observations$/);
+    await expect(page.getByRole('textbox', { name: 'What did you notice?' })).toHaveText(separateObservation);
+    await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
+    await expect(page.getByRole('textbox', { name: 'What happened?', exact: true })).toHaveValue(checkInObservation);
+    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
+    await expect.poll(async () => Math.abs(await scrollPosition() - originalScroll)).toBeLessThanOrEqual(2);
+    await expect(page.getByRole('button', { name: 'Continue previous check-in', exact: true })).toHaveCount(0);
+  });
+}
 
 test('mobile body-area chooser and all-cues view never leave the check-in; explicit clearing has undo', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -242,6 +280,12 @@ test('unavailable draft storage is reported and reference navigation cannot disc
   });
   await start(page, 'Keep this in-memory observation.');
   await expect(page.getByRole('alert')).toContainText('could not be kept');
+  await page.getByRole('button', { name: 'Get help describing what happened' }).click();
+  const help = page.getByRole('dialog', { name: 'Describe what happened' });
+  await help.getByRole('button', { name: 'Open Observations page', exact: true }).click();
+  await expect(page).toHaveURL(/alexithymia-support$/);
+  await help.getByRole('button', { name: 'Back to my check-in', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: 'What happened?', exact: true })).toHaveValue('Keep this in-memory observation.');
   await page.getByRole('button', { name: 'Close check-in', exact: true }).click();
   await expect(page).toHaveURL(/alexithymia-support$/);
   await expect(page.getByRole('textbox', { name: 'What happened?', exact: true })).toHaveValue('Keep this in-memory observation.');
@@ -310,6 +354,83 @@ test('optional scales describe their meanings and unavailable speech gives usefu
   await journal.locator('summary').filter({ hasText: 'Emotional coordinates' }).click();
   await expect(journal.getByRole('button', { name: 'Mixed feelings', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal.draft') ?? 'null')?.data?.mood)).toEqual({ kind: 'mixed' });
+});
+
+test('read aloud toggles to Stop, ignores old completions, and stops on edits or leaving', async ({ page }) => {
+  type SpeechTrace = {
+    texts: string[];
+    cancellations: number;
+    end: (index: number) => void;
+    fail: (index: number) => void;
+  };
+  type SpeechTestWindow = Window & { speechTrace: SpeechTrace };
+  await page.addInitScript(() => {
+    const completions: Array<() => void> = [];
+    const failures: Array<() => void> = [];
+    const trace = { texts: [] as string[], cancellations: 0,
+      end: (index: number) => completions[index]?.(),
+      fail: (index: number) => failures[index]?.(),
+    };
+    Object.defineProperty(window, 'speechTrace', { value: trace });
+    Object.defineProperty(window, 'speechSynthesis', { value: {
+      cancel: () => { trace.cancellations += 1; },
+      speak: (utterance: SpeechSynthesisUtterance) => {
+        trace.texts.push(utterance.text);
+        const end = utterance.onend;
+        const error = utterance.onerror;
+        // Retain callbacks to simulate a delayed event from a stopped reading.
+        completions.push(() => end?.call(utterance, new Event('end') as SpeechSynthesisEvent));
+        failures.push(() => {
+          const event = new Event('error');
+          Object.defineProperty(event, 'error', { value: 'synthesis-failed' });
+          error?.call(utterance, event as SpeechSynthesisErrorEvent);
+        });
+      },
+    } });
+  });
+  await start(page); await clues(page); await words(page);
+  await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  const statement = page.getByRole('textbox', { name: 'Your statement', exact: true });
+  await statement.fill('Read this synthetic statement.');
+  const read = page.getByRole('button', { name: 'Read aloud', exact: true });
+  const stop = page.getByRole('button', { name: 'Stop reading', exact: true });
+  const trace = () => page.evaluate(() => {
+    const state = (window as SpeechTestWindow).speechTrace;
+    return { texts: state.texts, cancellations: state.cancellations };
+  });
+  await read.click();
+  await expect(stop).toBeVisible();
+  await stop.click();
+  await expect(read).toBeVisible();
+  expect((await trace()).texts).toEqual(['Read this synthetic statement.']);
+  expect((await trace()).cancellations).toBe(2);
+  await expect(page.getByRole('status').filter({ hasText: 'Reading stopped.' })).toBeVisible();
+  await read.click();
+  await page.evaluate(() => (window as SpeechTestWindow).speechTrace.end(0));
+  await expect(stop).toBeVisible();
+  await page.evaluate(() => (window as SpeechTestWindow).speechTrace.end(1));
+  await expect(read).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Finished reading' })).toBeVisible();
+  await read.click();
+  const beforeEdit = (await trace()).cancellations;
+  await statement.fill('The edited statement.');
+  await expect(read).toBeVisible();
+  expect((await trace()).cancellations).toBe(beforeEdit + 1);
+  await read.click();
+  await page.evaluate(() => (window as SpeechTestWindow).speechTrace.fail(3));
+  await expect(read).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Read aloud could not finish' })).toBeVisible();
+  await read.click();
+  const beforeBack = (await trace()).cancellations;
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Possible words', exact: true })).toBeVisible();
+  expect((await trace()).cancellations).toBe(beforeBack + 1);
+  await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await read.click();
+  const beforeExit = (await trace()).cancellations;
+  await page.getByRole('button', { name: 'Close check-in', exact: true }).click();
+  await expect(page).toHaveURL(/\/feelings$/);
+  expect((await trace()).cancellations).toBe(beforeExit + 1);
 });
 
 test('an older tab cannot overwrite edits or a new check-in from another tab', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { type MouseEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { type MouseEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
@@ -118,6 +118,10 @@ function SpeakIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4Z" /><path d="M16 9c1.3 1.6 1.3 4.4 0 6M19 6c3.3 3.3 3.3 8.7 0 12" /></svg>;
 }
 
+function StopIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1" /></svg>;
+}
+
 function ResetIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 16a8 8 0 1 0 .5-9l-2 3" /></svg>;
 }
@@ -172,6 +176,19 @@ export function AlexithymiaSupportPage() {
   const [partialPlayMode, setPartialPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-partial-words'));
   const [needPlayMode, setNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-needs'));
   const [status, setStatus] = useState('');
+  const [reading, setReading] = useState(false);
+  const readingRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const stopReading = useCallback(() => {
+    const utterance = readingRef.current;
+    if (!utterance) return;
+    readingRef.current = null;
+    utterance.onend = null;
+    utterance.onerror = null;
+    setReading(false);
+    setStatus('Reading stopped.');
+    window.speechSynthesis.cancel();
+  }, []);
+  useEffect(() => stopReading, [stopReading, draft.statement, draft.stage, entryVisible, location.key]);
   const [storageError, setStorageError] = useState('');
   const [journalConflict, setJournalConflict] = useState(false);
   const [undo, setUndo] = useState<{ draft: AlexithymiaDraft; message: string } | null>(null);
@@ -366,6 +383,39 @@ export function AlexithymiaSupportPage() {
       draftRef.current = next;
       void navigate(to, { state: { returnToCheckIn: { id: next.checkInId! } } satisfies CheckInLocationState });
     } catch (error) { setStorageError(persistenceMessage(error)); }
+  }
+
+  function toggleReadAloud() {
+    if (readingRef.current) {
+      stopReading();
+      return;
+    }
+    if (typeof window.speechSynthesis?.speak !== 'function' || typeof SpeechSynthesisUtterance !== 'function') {
+      setStatus('Read aloud is unavailable in this browser. You can copy your statement instead.');
+      return;
+    }
+    if (!draft.statement.trim()) return;
+    try {
+      const utterance = new SpeechSynthesisUtterance(draft.statement);
+      const finish = (message: string) => {
+        if (readingRef.current !== utterance) return;
+        readingRef.current = null;
+        setReading(false);
+        setStatus(message);
+      };
+      utterance.onend = () => finish('Finished reading your statement.');
+      utterance.onerror = (event) => finish(event.error === 'canceled' || event.error === 'interrupted'
+        ? 'Reading stopped.' : 'Read aloud could not finish. You can copy your statement instead.');
+      window.speechSynthesis.cancel();
+      readingRef.current = utterance;
+      setReading(true);
+      setStatus('Reading your statement aloud.');
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      readingRef.current = null;
+      setReading(false);
+      setStatus('Read aloud is unavailable in this browser. You can copy your statement instead.');
+    }
   }
 
   function previewWord(route: string) {
@@ -612,9 +662,6 @@ export function AlexithymiaSupportPage() {
               ) : null}
             </div>
             <aside className={styles.guideRail}>
-              <p className={styles.sectionLabel}>A useful starting point</p>
-              <strong>Keep it concrete</strong>
-              <p>Names, visible actions, or exact words are enough. You can skip this step if nothing is clear.</p>
               <button type="button" className={styles.helpButton} onMouseDown={keepTextareaFocus} onClick={() => setSheet('observation')}>Get help describing what happened</button>
               <div className={styles.stickyActions}>
                 <button type="button" className={styles.textButton} onClick={() => {
@@ -848,17 +895,7 @@ export function AlexithymiaSupportPage() {
                       setStatus('Copy was unavailable. Select the statement to copy it.');
                     }
                   }} disabled={!draft.statement.trim()}><CopyIcon /><span>Copy</span></button>
-                  <button type="button" onClick={() => {
-                    if (typeof window.speechSynthesis?.speak !== 'function' || typeof SpeechSynthesisUtterance !== 'function') { setStatus('Read aloud is unavailable in this browser. You can copy your statement instead.'); return; }
-                    if (!draft.statement.trim()) return;
-                    try {
-                      window.speechSynthesis.cancel();
-                      const utterance = new SpeechSynthesisUtterance(draft.statement);
-                      utterance.onerror = () => setStatus('Read aloud could not finish. You can copy your statement instead.');
-                      window.speechSynthesis.speak(utterance);
-                      setStatus('Reading your statement aloud.');
-                    } catch { setStatus('Read aloud is unavailable in this browser. You can copy your statement instead.'); }
-                  }} disabled={!draft.statement.trim()}><SpeakIcon /><span>Read aloud</span></button>
+                  <button type="button" onClick={toggleReadAloud} disabled={!reading && !draft.statement.trim()}>{reading ? <StopIcon /> : <SpeakIcon />}<span>{reading ? 'Stop reading' : 'Read aloud'}</span></button>
                   <button type="button" onClick={() => resetCheckIn()}><ResetIcon /><span>Start over</span></button>
                 </div>
                 {draft.statementEdited && draft.statementBasis && draft.statementBasis !== supportStatementBasis(draft) ? <p className={styles.notice}>Your choices changed. Your wording is kept; you can update the draft or keep your own statement.</p> : null}
@@ -907,7 +944,18 @@ export function AlexithymiaSupportPage() {
             onClose={() => setSheet(null)}
           />
       <SupportSheet open={sheet === 'observation'} title="Describe what happened" titleId="alex-observation-help" onClose={() => setSheet(null)}>
-        <ObservationHelpContent topic="basics" />
+        <div className={styles.observationHelp}>
+          <section aria-labelledby="alex-observation-writing-tips">
+            <h3 id="alex-observation-writing-tips">Keep it concrete</h3>
+            <ObservationHelpContent topic="sensory" />
+            <p>You can skip this step if nothing is clear.</p>
+          </section>
+          <section aria-labelledby="alex-observation-full-page">
+            <h3 id="alex-observation-full-page">Full Observations page</h3>
+            <p>This leaves the check-in to open Quick Check, examples, and the full guide. Your check-in stays saved; use Return to check-in to come back.</p>
+            <button type="button" className={styles.textButton} onClick={() => openReference('/observations')}>Open Observations page</button>
+          </section>
+        </div>
         <div className={styles.sheetFooter}><button type="button" className={styles.primaryButton} onClick={() => setSheet(null)}>Back to my check-in</button></div>
       </SupportSheet>
       <SupportSheet open={sheet === 'need-preview'} title={needsBySlug.get(previewNeed ?? '')?.title ?? 'Need'} titleId="alex-need-preview" onClose={() => setSheet(null)}>
