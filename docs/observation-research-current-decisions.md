@@ -4,6 +4,8 @@ Updated: 2026-10-14. Research target: `site-test`. **The corrected 18-source cor
 
 This is the current navigation and decision record. It preserves the latest 48-source recommendations and adds four sources already present in the preview but previously outside that audit. Earlier source cards remain historical assessments; their different counts and recommendations are not the current register.
 
+Implementation status: the [exact approved guide is integrated on a dedicated branch](./observation-research-implementation-2026-10-14.md) targeting `site-test`. Foundation checks pass, including 330 tests; responsive browser validation is still required before merge. This does not alter the 18 core approvals or authorize deployment.
+
 ## What a recommendation means
 
 - **RETAIN:** eligible for a narrow proposed research role, not a judgment that every claim is checked or that a study validates allneeds.

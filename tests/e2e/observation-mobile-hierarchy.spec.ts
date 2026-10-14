@@ -1,4 +1,5 @@
 import { expect, test } from './fixtures';
+import observationGuide from '../../src/data/observationGuide.json' with { type: 'json' };
 
 test('mobile keeps observation actions compact and results ahead of secondary controls', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -69,26 +70,44 @@ test('Quick Check shows per-detail guidance without a duplicate recipe', async (
 });
 
 test('the full research index and source library are available on mobile and desktop', async ({ page }) => {
-  for (const width of [390, 1280]) {
+  const withoutCitations = (text: string) => text.replace(/\[\d+(?:,\d+)*\]/g, '').trim();
+  for (const width of [320, 390, 759, 760, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/observations');
     const guide = page.locator('#observation-guide');
     await guide.locator(':scope > summary').click();
     await expect(guide.getByRole('heading', { name: 'Research behind observations' })).toBeVisible();
 
+    const picker = guide.locator('select#observation-research-topic');
+    const tabs = guide.getByRole('navigation', { name: 'Research topics', includeHidden: true });
+    await expect(picker.locator('option')).toHaveCount(9);
+    await expect(tabs.locator('button')).toHaveCount(9);
     if (width < 760) {
-      const picker = guide.locator('select#observation-research-topic');
       await expect(picker).toBeVisible();
-      await expect(picker.locator('option')).toHaveCount(9);
-      await picker.selectOption('references');
+      await expect(tabs).toBeHidden();
     } else {
-      const tabs = guide.getByRole('navigation', { name: 'Research topics' });
-      await expect(tabs.getByRole('button')).toHaveCount(9);
-      await tabs.getByRole('button', { name: 'Source library' }).click();
+      await expect(tabs).toBeVisible();
+      await expect(picker).toBeHidden();
     }
 
-    await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(15);
-    await expect(guide.getByRole('link', { name: /\[15\] Brassil/ })).toBeVisible();
+    for (const topic of observationGuide.sections) {
+      if (width < 760) await picker.selectOption(topic.id);
+      else await tabs.getByRole('button', { name: topic.title, exact: true }).click();
+      const panel = guide.locator('#observation-guide-panel');
+      await expect(panel.getByRole('heading', { name: topic.title, exact: true })).toBeVisible();
+      const paragraphs = await panel.locator(':scope > p').allTextContents();
+      expect(paragraphs.map(withoutCitations)).toEqual(topic.content.flatMap((block) => 'text' in block && typeof block.text === 'string' ? [withoutCitations(block.text)] : []));
+      await expect(panel.locator('details')).toHaveCount(0);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    }
+
+    await expect(guide.locator('[id^="observation-guide-source-"]')).toHaveCount(18);
+    await expect(guide.locator('#observation-guide-source-gollwitzer-sheeran')).toContainText('[18] Gollwitzer');
+    for (const source of observationGuide.sources) {
+      const link = guide.locator(`#observation-guide-source-${source.id}`).getByRole('link');
+      await expect(link).toHaveText(source.url);
+      await expect(link).toHaveAttribute('href', source.url);
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
 });
@@ -99,11 +118,30 @@ test('a study citation opens the matching reference without nested accordions', 
   const guide = page.locator('#observation-guide');
   await guide.locator(':scope > summary').click();
 
-  const citation = guide.getByRole('link', { name: 'Reference 1: Nock & Kurtz' });
+  const citation = guide.getByRole('link', { name: 'Reference 1: Nock & Kurtz' }).first();
   await citation.click();
   const source = guide.locator('#observation-guide-source-nock-kurtz');
   await expect(source).toBeVisible();
-  await expect(source).toContainText('[1] Nock & Kurtz (2005)');
-  await expect(source.locator('a')).toHaveAttribute('href', 'https://doi.org/10.1016/S1077-7229(05)80058-6');
+  await expect(source).toContainText('[1] Nock, M. K., & Kurtz, S. M. S. (2005)');
+  await expect(source).toBeFocused();
+  await expect(source.locator('a')).toHaveAttribute('href', 'https://www.sciencedirect.com/science/article/pii/S1077722905800586');
   await expect(guide.locator('select#observation-research-topic')).toHaveValue('references');
+});
+
+test('grouped introduction references open and focus each matching source repeatedly', async ({ page }) => {
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/observations');
+    const guide = page.locator('#observation-guide');
+    await guide.locator(':scope > summary').click();
+    for (const [number, sourceId] of [[5, 'adriani'], [6, 'epinat-duclos'], [5, 'adriani']] as const) {
+      const citation = guide.getByRole('link', { name: new RegExp(`^Reference ${number}:`) }).first();
+      await citation.focus();
+      await page.keyboard.press('Enter');
+      const source = guide.locator(`#observation-guide-source-${sourceId}`);
+      await expect(source).toBeFocused();
+      await expect(source).toBeInViewport();
+      await expect(guide.locator('select#observation-research-topic')).toHaveValue('references');
+    }
+  }
 });
