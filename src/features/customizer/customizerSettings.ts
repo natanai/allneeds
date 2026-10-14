@@ -1,4 +1,5 @@
 import { normalizeHex } from './colorDrag';
+import refrigeratorTheme from './refrigeratorTheme.json' with { type: 'json' };
 
 export const THEME_KEY = 'nvcApp.theme';
 export const NAV_SETTINGS_KEY = 'nvcApp.navSettings';
@@ -16,6 +17,7 @@ export type ThemeState = {
   roundness: number;
   preset: string;
   updatedAt: number;
+  appearance?: 'refrigerator';
 };
 export type NavItemId = 'home' | 'customizer' | 'journal' | 'checkIn' | 'inventory' | 'observations' | 'fauxFeelings' | 'feelings' | 'needs' | 'bodyCues' | 'journalDashboard';
 export type NavSettings = Record<NavItemId, boolean>;
@@ -152,13 +154,23 @@ export function readTheme(
   session: StorageLike | null = availableStorage('sessionStorage'),
 ): ThemeState {
   const parsed = newestStored(local, session, THEME_KEY) as {
-    values?: unknown; roundness?: unknown; preset?: unknown; updatedAt?: unknown;
+    values?: unknown; roundness?: unknown; preset?: unknown; updatedAt?: unknown; appearance?: unknown;
   } | null;
+  let values = normalizeStoredThemeValues(parsed?.values);
+  // Upgrade only the untouched old preset. Individually edited colors remain user-owned.
+  if (parsed?.preset === refrigeratorTheme.name
+    && (Object.keys(defaultTheme) as Array<keyof ThemeValues>).every((key) =>
+      values[key] === refrigeratorTheme.previousValues[key])) {
+    values = { ...refrigeratorTheme.values };
+  }
   return {
-    values: normalizeStoredThemeValues(parsed?.values),
+    values,
     roundness: clampRoundness(parsed?.roundness),
     preset: typeof parsed?.preset === 'string' ? parsed.preset : '',
     updatedAt: updatedAt(parsed),
+    ...(parsed?.appearance === 'refrigerator' || parsed?.preset === refrigeratorTheme.name
+      ? { appearance: 'refrigerator' as const }
+      : {}),
   };
 }
 
@@ -176,12 +188,22 @@ function contrastForeground(background: string) {
   return blackRatio >= whiteRatio ? '#000000' : '#FFFFFF';
 }
 
-export function themeCssValues(theme: Pick<ThemeState, 'values' | 'roundness'>) {
+type ThemePresentation = Pick<ThemeState, 'values' | 'roundness'>
+  & Partial<Pick<ThemeState, 'appearance' | 'preset'>>;
+
+export function themeAppearance(theme: Partial<Pick<ThemeState, 'appearance' | 'preset'>>) {
+  return theme.appearance === 'refrigerator' || theme.preset === refrigeratorTheme.name
+    ? 'refrigerator' : 'standard';
+}
+
+export function themeCssValues(theme: ThemePresentation) {
   const css: Record<string, string> = {};
   (Object.keys(themeVariables) as Array<keyof ThemeValues>).forEach((key) => {
     css[themeVariables[key]] = normalizeHex(theme.values[key]) ?? defaultTheme[key];
   });
-  css['--surface-raised'] = `color-mix(in srgb, ${css['--quiet']} 12%, #FFFFFF 88%)`;
+  css['--surface-raised'] = themeAppearance(theme) === 'refrigerator'
+    ? css['--quiet']!
+    : `color-mix(in srgb, ${css['--quiet']} 12%, #FFFFFF 88%)`;
   css['--corner-scale'] = String(clampRoundness(theme.roundness) / 100);
   css['--shadow'] = `color-mix(in srgb, ${css['--outline']} 55%, transparent)`;
   css['--btn-bg'] = css['--action']!;
@@ -194,21 +216,26 @@ export function themeCssValues(theme: Pick<ThemeState, 'values' | 'roundness'>) 
 }
 
 export function applyThemeToRoot(
-  theme: Pick<ThemeState, 'values' | 'roundness'>,
+  theme: ThemePresentation,
   root: HTMLElement | null = typeof document === 'undefined' ? null : document.documentElement,
 ) {
   if (!root) return;
   const css = themeCssValues(theme);
   Object.entries(css).forEach(([property, value]) => root.style.setProperty(property, value));
+  root.dataset.themeAppearance = themeAppearance(theme);
+  root.ownerDocument?.querySelector('meta[name="theme-color"]')?.setAttribute(
+    'content', themeAppearance(theme) === 'refrigerator' ? css['--primary']! : '#FFFFFF',
+  );
   root.dataset.themePreapplied = 'true';
 }
 
-export function writeTheme(theme: Pick<ThemeState, 'values' | 'roundness' | 'preset'>) {
+export function writeTheme(theme: Pick<ThemeState, 'values' | 'roundness' | 'preset' | 'appearance'>) {
   const payload: ThemeState = {
     values: { ...defaultTheme },
     roundness: clampRoundness(theme.roundness),
     preset: theme.preset,
     updatedAt: Date.now(),
+    ...(themeAppearance(theme) === 'refrigerator' ? { appearance: 'refrigerator' as const } : {}),
   };
   (Object.keys(defaultTheme) as Array<keyof ThemeValues>).forEach((key) => {
     payload.values[key] = normalizeHex(theme.values[key]) ?? defaultTheme[key];

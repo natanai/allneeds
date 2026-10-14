@@ -145,17 +145,17 @@
 
 .observations {
   --door-fill: var(--primary);
-  --feature-ink: color-mix(in srgb, var(--primary) 58%, var(--outline) 42%);
+  --feature-ink: color-mix(in srgb, var(--primary) var(--feature-role-share), var(--outline));
 }
 
 .feelings {
   --door-fill: var(--action);
-  --feature-ink: color-mix(in srgb, var(--action) 58%, var(--outline) 42%);
+  --feature-ink: color-mix(in srgb, var(--action) var(--feature-role-share), var(--outline));
 }
 
 .needs {
   --door-fill: var(--positive);
-  --feature-ink: color-mix(in srgb, var(--positive) 58%, var(--outline) 42%);
+  --feature-ink: color-mix(in srgb, var(--positive) var(--feature-role-share), var(--outline));
 }
 
 .observations .artwork::before {

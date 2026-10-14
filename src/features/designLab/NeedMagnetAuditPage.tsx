@@ -67,7 +67,7 @@ function CandidateCard({ candidate }: { candidate: NeedMagnetAuditCandidate }) {
         <span className={styles.presetLabel}>presets</span>
         <div className={styles.presetGrid}>
           {themePresets.map((preset) => (
-            <div key={preset.name} className={styles.presetItem} style={themeStyle(preset)}>
+            <div key={preset.name} className={styles.presetItem} style={themeStyle(preset)} data-theme-appearance={preset.appearance ?? 'standard'}>
               <AuditMagnet candidate={candidate} />
               <span>{preset.name}</span>
             </div>

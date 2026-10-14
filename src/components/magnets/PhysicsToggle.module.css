@@ -3,6 +3,8 @@
   align-items: center;
   justify-content: center;
   padding: 0.12rem;
+  min-width: var(--physics-target);
+  min-height: var(--physics-target);
   border: none;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--outline) 10%, transparent);
@@ -39,7 +41,7 @@
   display: inline-flex;
   align-items: center;
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--outline) 42%, transparent);
+  background: var(--physics-off);
   opacity: 0.85;
   transition: background 200ms ease, opacity 200ms ease;
 }
@@ -51,14 +53,14 @@
   width: 0.72rem;
   height: 0.72rem;
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
+  background: var(--physics-thumb);
   box-shadow: 0 1px 4px color-mix(in srgb, var(--outline) 20%, transparent);
   transform: translate3d(0, -50%, 0);
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
 
 .input:checked + .track {
-  background: color-mix(in srgb, var(--positive) 55%, transparent);
+  background: var(--physics-on);
   opacity: 1;
 }
 
@@ -67,5 +69,5 @@
 }
 
 .input:focus-visible + .track {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--positive) 45%, transparent);
+  box-shadow: 0 0 0 2px var(--magnet-focus);
 }

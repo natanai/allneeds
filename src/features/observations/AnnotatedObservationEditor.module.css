@@ -51,7 +51,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-1);
-  color: color-mix(in srgb, var(--secondary) 50%, transparent);
+  color: var(--editor-placeholder);
   pointer-events: none;
 }
 

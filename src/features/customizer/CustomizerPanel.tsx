@@ -227,6 +227,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const [values, setValues] = useState<ThemeValues>(initial.values);
   const [roundness, setRoundness] = useState(initial.roundness);
   const [preset, setPreset] = useState(initialPreset);
+  const [appearance, setAppearance] = useState(initial.appearance);
   const [navSettings, setNavSettings] = useState(readNavSettings);
   const [tiltPermission, setTiltPermission] = useState(detectTiltPermission);
   const [orientationLock, setOrientationLock] = useState(detectOrientationLock);
@@ -235,8 +236,8 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
   const panelRef = useDialogFocus<HTMLElement>({ open: true, onClose, modal: false });
 
   useEffect(() => {
-    writeTheme({ values, roundness, preset });
-  }, [preset, roundness, values]);
+    writeTheme({ values, roundness, preset, appearance });
+  }, [preset, roundness, values, appearance]);
 
   useEffect(() => {
     try { writeNavSettings(navSettings); } catch { window.dispatchEvent(new CustomEvent(NAV_SETTINGS_CHANGED_EVENT, { detail: navSettings })); }
@@ -251,6 +252,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     const match = themePresets.find((candidate) => candidate.name === name);
     if (!match) { setPreset(''); return; }
     setPreset(match.name);
+    setAppearance(match.appearance);
     setValues({ ...match.values });
     setRoundness(match.roundness);
   }
@@ -311,6 +313,7 @@ export function CustomizerPanel({ onClose }: CustomizerPanelProps) {
     setValues({ ...defaultTheme });
     setRoundness(100);
     setPreset('Default');
+    setAppearance(undefined);
     setNavSettings({ ...defaultNavSettings });
     if (orientationLock.locked) unlockOrientation();
   }

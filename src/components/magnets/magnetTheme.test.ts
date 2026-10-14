@@ -59,18 +59,18 @@ describe('magnet theme styling', () => {
 
     expect(activeRule).toContain('background: color-mix(in srgb, var(--selection) 60%, var(--primary) 40%);');
     expect(activeRule).toContain('filter: none;');
-    expect(activeRule).toContain('box-shadow: 0 9px 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);');
+    expect(activeRule).toContain('box-shadow: 0 var(--nav-active-depth) 0 color-mix(in srgb, var(--primary) 64%, var(--outline) 36%);');
     expect(activeRule.match(/box-shadow:/g)).toHaveLength(1);
     expect(activeRule).not.toContain('background-image:');
     expect(activeRule).not.toContain('inset');
     expect(activeRule).not.toContain('drop-shadow(');
     expect(activeRule).not.toContain('text-shadow:');
 
-    expect(activePickedUpRule).toContain('box-shadow: 0 12px 0');
+    expect(activePickedUpRule).toContain('box-shadow: 0 var(--nav-active-held-depth) 0');
     expect(activePickedUpRule.match(/box-shadow:/g)).toHaveLength(1);
     expect(activePickedUpRule).not.toContain('inset');
 
-    expect(desktopActiveRule).toContain('box-shadow: 0 9px 0');
+    expect(desktopActiveRule).toContain('box-shadow: 0 var(--nav-active-depth) 0');
     expect(desktopActiveRule.match(/box-shadow:/g)).toHaveLength(1);
     expect(desktopActiveRule).not.toContain('inset');
     expect(desktopActiveRule).not.toContain('filter:');

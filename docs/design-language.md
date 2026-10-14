@@ -32,6 +32,17 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - The Design Lab main and actual-size previews inherit the live Customizer palette and roundness from the page. The lab must not maintain duplicate live palette or roundness controls. Fixed preset-comparison swatches may render independent preset snapshots because their purpose is explicit side-by-side comparison.
 - The semantic-vocabulary regression test is permanent and should fail if a removed hue-named CSS token or magnet tone is reintroduced into runtime source.
 
+## Refrigerator material preset
+
+**Replacement requested 2026-10-14.** The user's reference is a black refrigerator holding cream printed sheets, small cutout word magnets, and occasional keepsakes. The `Refrigerator` preset now uses charcoal enamel for the canvas and magnet boards, warm paper for reading surfaces and magnet faces, dark printed text, thin paper edges, restrained shadows, and typewriter-style magnet labels. Body text retains the site's readable font. The three home doorways and approved Need artwork remain their canonical identities.
+
+- The nine editable color roles remain authoritative. Material gradients, paper grain, shadows, focus, and physics-switch colors derive from those roles; the photo itself is not a site asset.
+- `appearance: refrigerator` persists separately from the preset name so editing colors or corners keeps the selected material. Choosing another preset or Reset restores the standard material. No additional color controls are introduced.
+- The untouched former green Refrigerator palette migrates to the replacement at the saved-theme read boundary, including first paint. Individually edited palettes and their timestamps are preserved. The runtime and embedded prepaint data consume one canonical `refrigeratorTheme.json`.
+- Cutout labels stay readable over artwork; active navigation remains dimension-neutral. Dark boards retain visible keyboard focus and a contrasting, 44px physics control. Play, drag, fling, touch scrolling, saved layouts, and all route functions remain the existing shared behavior.
+- Mobile History keeps a paper reading surface around its graph and controls. Full-screen Journal, sheets, account/settings controls, graph labels, and strategy cards use the same palette rather than inheriting dark text onto the enamel canvas.
+- Field placeholders retain readable printed ink. Browser/PWA theme-color metadata follows the enamel Primary color during first paint and live edits; switching to a standard preset restores the existing white browser-chrome fallback.
+
 ## Need magnet identities
 
 **Accepted 2026-08-25; refined 2026-08-27.** Need magnets may develop distinct full-face identities while preserving the shared physical magnet shell.

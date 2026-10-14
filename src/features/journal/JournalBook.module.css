@@ -110,7 +110,7 @@
   font-size: var(--text-sm);
   text-align: right;
 }
-.metaRow > div > input::placeholder { color: color-mix(in srgb, var(--secondary) 58%, transparent); opacity: 1; }
+.metaRow > div > input::placeholder { color: var(--field-placeholder); opacity: 1; }
 .metaRow > div > div > button { padding-inline: .45rem; text-align: right; }
 .catalogControl { position: relative; min-width: 0; }
 .catalogControl > button {
