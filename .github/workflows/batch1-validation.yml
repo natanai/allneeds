@@ -1,5 +1,5 @@
 name: Observation guide one-time browser validation
-# Approved application tree: 19d935a3af4f433387a837d37510ff44d1cd9793
+# Approved application tree: c9963daa738327b196640813310a4595c8ec9bde
 
 on:
   push:
