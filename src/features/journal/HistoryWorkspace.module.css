@@ -19,7 +19,9 @@
 .dayEntries { display: grid; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid color-mix(in srgb, var(--outline) 20%, transparent); }
 .dayEntries header { display: grid; gap: .2rem; }
 .dayEntries header strong { font-size: var(--text-sm); }
-.dayEntries header span { font-size: var(--text-xs); color: var(--secondary); }
+.dayRanges { display: grid; gap: .15rem; color: var(--secondary); font-size: var(--text-xs); line-height: 1.5; }
+.dayRanges p { margin: 0; }
+.dayRanges strong { color: var(--text); font-size: inherit; }
 .workspace label { min-width: 0; display: grid; gap: .3rem; font-size: var(--text-xs); font-weight: 700; }
 .workspace :is(select, input) { width: 100%; min-width: 0; }
 .controls select, .seriesControls select { font-size: var(--text-sm); }
@@ -43,7 +45,6 @@
 .series[data-series='2'] { fill: color-mix(in srgb, var(--action) 35%, var(--text)); stroke: color-mix(in srgb, var(--action) 35%, var(--text)); }
 .series[data-previous='true'] { opacity: .45; }
 .seriesLine { stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
-.rangeLine { stroke-width: 1.5; stroke-opacity: .5; }
 .dayCountStem { fill: none; stroke: var(--outline); stroke-opacity: .65; stroke-width: 1.2; stroke-dasharray: 3 4; pointer-events: none; }
 .dayCountAnchor { fill: var(--text); pointer-events: none; }
 .dayCountBadge { fill: var(--surface-raised); stroke: var(--outline); stroke-width: 1.25; pointer-events: none; }

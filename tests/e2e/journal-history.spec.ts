@@ -142,6 +142,31 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
   });
 }
 
+test('daily means omit unexplained whiskers but day detail spells out genuine rating variation', async ({ page }) => {
+  await seed(page); await page.goto('/inventory/journal');
+  const day = await page.evaluate(() => {
+    const key = 'allneeds.v2.journal';
+    const stored = JSON.parse(localStorage.getItem(key)!);
+    const changed = stored.data.entries.find((entry: { id: string }) => entry.id === 'same-b');
+    changed.mood = { kind: 'rated', value: -3, arousal: 4 };
+    localStorage.setItem(key, JSON.stringify(stored));
+    const stamp = new Date(changed.dateISO);
+    const two = (value: number) => String(value).padStart(2, '0');
+    return `${stamp.getFullYear()}-${two(stamp.getMonth() + 1)}-${two(stamp.getDate())}`;
+  });
+  await page.reload();
+  const chart = page.getByTestId('history-chart');
+  await expect(chart.locator('[class*="rangeLine"]')).toHaveCount(0);
+  await expect(chart).toContainText('Points = daily averages');
+  await expect(chart.getByRole('button', { name: /Pleasantness: -1, .*Reported range -3 to [+]1 across 2 ratings/ })).toHaveCount(1);
+  await chart.getByRole('button', { name: `2 journal entries on ${day}. View day` }).click();
+  const ranges = page.getByLabel('Recorded rating ranges');
+  await expect(ranges).toContainText('Pleasantness: -3 to +1 across 2 recorded ratings');
+  await expect(ranges).toContainText('Arousal: -1 to +4 across 2 recorded ratings');
+  await expect(page.getByLabel('Entries on selected day').getByRole('button', { name: /Open journal page/ })).toHaveCount(2);
+  await expect(chart.locator('[class*="rangeLine"]')).toHaveCount(0);
+});
+
 test('daily badges include unrated pages and selecting a day preserves history filters on return', async ({ page }) => {
   await seed(page);
   await page.goto('/inventory/journal');
