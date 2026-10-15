@@ -297,6 +297,37 @@ test('desktop trackpad-style zoom changes the history window without scaling its
   await expect(page.getByRole('button', { name: 'Reset zoom' })).toBeVisible();
 });
 
+test('supplementary Journal History cards keep native fields inside their mobile bounds', async ({ page }) => {
+  await seed(page);
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/inventory/journal');
+    const context = page.locator('details').filter({ has: page.getByText('Context notes', { exact: true }) });
+    await context.locator('summary').click();
+    await expect(context).toHaveAttribute('open', '');
+    await expect(context.locator('ul')).toHaveCount(0); // An empty note list must not reserve blank space.
+    const date = context.locator('input[type="date"]');
+    const note = context.getByLabel('Context note', { exact: true });
+    const addNote = context.getByRole('button', { name: 'Add note' });
+    for (const control of [date, note, addNote]) {
+      const bounds = await control.boundingBox(), card = await context.boundingBox();
+      expect(bounds && card).toBeTruthy();
+      expect(bounds!.x).toBeGreaterThanOrEqual(card!.x + 8);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(card!.x + card!.width - 8);
+    }
+    expect(await date.evaluate((element) => getComputedStyle(element).boxSizing)).toBe('border-box');
+    await page.getByText('Focus & compare', { exact: true }).click();
+    const search = page.getByLabel('Search journal');
+    const filter = page.getByRole('form', { name: 'Filter journal history' });
+    const filterBounds = await filter.boundingBox(), searchBounds = await search.boundingBox();
+    expect(filterBounds && searchBounds).toBeTruthy();
+    expect(searchBounds!.x + searchBounds!.width).toBeLessThanOrEqual(filterBounds!.x + filterBounds!.width + 1);
+    const preference = page.locator('details').filter({ has: page.getByText('New entry preference', { exact: true }) });
+    await expect(preference).toHaveCSS('background-color', await context.evaluate((element) => getComputedStyle(element).backgroundColor));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  }
+});
+
 test('context notes and export respect the visible period and exclude reflections until opted in', async ({ page }) => {
   await seed(page); await page.goto('/inventory/journal');
   await page.getByText('Context notes', { exact: true }).click();

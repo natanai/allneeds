@@ -45,6 +45,10 @@ Feeling, Need, and Tag metadata share one quiet divider-led form section. Feelin
 
 CSV exports the current matching entries with settings and provenance; reflections require opt-in. User text is quoted and spreadsheet formula prefixes are neutralized. The printable recap includes the graph, period, counts, selected settings, comparison, visible context notes, and optional reflections. Files are created locally only on an explicit export action.
 
+## Responsive supplementary controls
+
+The lower History sections retain the shared DisclosureRow card language. All form controls, especially native iOS date inputs, must fit entirely inside the disclosure body's inline padding at 320–430 CSS-pixel widths, not rely on the disclosure's `overflow: hidden` to crop overflowing box widths. Empty context-note lists should not create extra vertical space. New entry preference and Backup & restore appear as standard supporting cards. These constraints apply equally to keyboard focus and the native date picker.
+
 ## Phone and desktop review
 
 1. Open Journal. Confirm the restored full-screen composer opens on the blank, unruled newest page. On phones the reflection sheet should dominate the opening viewport and the original secondary controls should follow below it; on desktop they should occupy the original right sidebar.

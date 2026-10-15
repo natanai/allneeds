@@ -162,7 +162,7 @@ export function JournalPage() {
     </div></header>
     {feedback ? <p className={`${styles.feedback} ${styles[feedback.kind]}`} role="status">{feedback.message}</p> : null}
     <HistoryWorkspace entries={entries} onOpenEntry={openEntry} />
-    <DisclosureRow title="New entry preference" description={entryPreference === 'check-in' ? 'Guided check-in · This device' : entryPreference === 'writing' ? 'Direct writing · This device' : 'Choose each time'}>
+    <DisclosureRow variant="card" title="New entry preference" description={entryPreference === 'check-in' ? 'Guided check-in · This device' : entryPreference === 'writing' ? 'Direct writing · This device' : 'Choose each time'}>
       <div className={styles.entryPreference}><label htmlFor="journal-entry-start">Start new entries with</label><select id="journal-entry-start" value={entryPreference} onChange={(event) => {
         const value = event.target.value as JournalEntryPreference;
         try { writeJournalEntryPreference(value); setEntryPreference(value); }
