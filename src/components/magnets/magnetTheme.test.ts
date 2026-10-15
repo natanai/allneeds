@@ -22,6 +22,18 @@ function ruleBody(selector: string) {
 }
 
 describe('magnet theme styling', () => {
+  it('uses the readable Customizer foreground for shared Need icon ink', () => {
+    expect(ruleBody('.need::before')).toContain('background: currentColor;');
+  });
+
+  it('keeps the content-selection check slot stable and independent of fill colors', () => {
+    const slot = ruleBody('.selectionCheck');
+    expect(slot).toContain('visibility: hidden;');
+    expect(slot).toContain('width: 1em;');
+    expect(slot).toContain('color: var(--text);');
+    expect(ruleBody(".selectionCheck[data-selected='true']").trim()).toBe('visibility: visible;');
+  });
+
   it('keeps navigation surfaces and corners connected to Customizer roles', () => {
     expect(ruleBody('.nav')).toContain('var(--corner-scale)');
     expect(ruleBody('.nav .magnet')).toContain('var(--corner-scale)');

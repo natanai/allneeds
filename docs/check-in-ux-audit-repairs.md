@@ -4,6 +4,8 @@ The October 13, 2026 audit examined the live four-stage support lane and source 
 
 ## Findings and resulting behavior
 
+The [October 15 selection-cue follow-up](./check-in-selection-audit-2026-10-15.md) audits palette-independent answer and view states against current main. It records the selected-Need face override, missing word decisions in Matches/partial views, optional-rating and view-control cues, and unchanged states that already have text/shape confirmation.
+
 | Audit finding | Resulting behavior | Main regression coverage |
 | --- | --- | --- |
 | F01: Help detours break continuity | Observation help and recognized-word previews stay in sheets. Full canonical references have a dedicated return that survives further reference navigation in the same visit. The full Body Cues tool has a check-in working copy and explicit apply action; its independent draft remains separate. | `check-in-clarity.spec.ts`: observation help, nested reference return, Body Cues handoff |

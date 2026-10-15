@@ -1264,6 +1264,9 @@ export function MagnetBoard({
               {item.detail ? <span className={styles.detail}>{item.detail}</span> : null}
             </span>
             {item.badge ? <span className={styles.badge}>{item.badge}</span> : null}
+            {variant === 'content' && item.selected !== undefined ? (
+              <span className={styles.selectionCheck} aria-hidden="true" data-selected={item.selected}>✓</span>
+            ) : null}
           </>
         );
         const shared = {

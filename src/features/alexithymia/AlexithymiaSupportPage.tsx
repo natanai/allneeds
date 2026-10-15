@@ -90,6 +90,10 @@ function roleTone(term: SupportTerm, decision?: AlexithymiaDraft['decisions'][st
   return 'selection' as const;
 }
 
+function wordDecisionLabel(decision?: AlexithymiaDraft['decisions'][string]) {
+  return decision === 'fits' ? 'Fits' : decision === 'maybe' ? 'Maybe' : decision === 'not-this-time' ? 'Not this time' : undefined;
+}
+
 function CopyIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" /></svg>;
 }
@@ -293,18 +297,16 @@ export function AlexithymiaSupportPage() {
     const score = term.candidate ? scoreByCandidateKey.get(term.candidate.key) : null;
     const percent = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
     const decision = draft.decisions[term.id];
-    const detail = observationTermIds.has(term.id)
-      ? `${decision === 'fits' ? 'Fits · ' : decision === 'maybe' ? 'Maybe · ' : ''}${observationSource}`
-      : normalizedWordQuery || wordFilter !== 'matches'
-      ? decision === 'fits' ? 'Fits' : decision === 'maybe' ? 'Maybe' : percent === null ? undefined : `${percent}% clue match`
-      : percent === null ? undefined : `${percent}% clue match`;
+    const choice = wordDecisionLabel(decision);
+    const context = observationTermIds.has(term.id) ? observationSource : percent === null ? undefined : `${percent}% clue match`;
+    const detail = [choice && `${decision === 'fits' ? '✓ ' : ''}${choice}`, context].filter(Boolean).join(' · ') || undefined;
     return {
       id: `alex-word-${term.id}`,
       label: term.label,
       detail,
       badge: term.roleLabel,
       tone: roleTone(term, decision),
-      ariaLabel: `${term.label}, ${term.roleLabel}${detail ? `, ${detail}` : ''}`,
+      ariaLabel: [term.label, term.roleLabel, choice, context].filter(Boolean).join(', '),
       onActivate: () => {
         setActiveTermId(term.id);
         setSheet('candidate');
@@ -314,10 +316,10 @@ export function AlexithymiaSupportPage() {
   const partialWordItems: MagnetBoardItem[] = partialMatches.filter(({ term }) => !observationTermIds.has(term.id)).map(({ term }) => ({
     id: `alex-partial-${term.id}`,
     label: term.label,
-    detail: 'Some clues cannot be compared',
+    detail: [draft.decisions[term.id] === 'fits' ? '✓ Fits' : wordDecisionLabel(draft.decisions[term.id]), 'Some clues cannot be compared'].filter(Boolean).join(' · '),
     badge: term.roleLabel,
     tone: roleTone(term, draft.decisions[term.id]),
-    ariaLabel: `${term.label}, ${term.roleLabel}, some clues cannot be compared`,
+    ariaLabel: [term.label, term.roleLabel, wordDecisionLabel(draft.decisions[term.id]), 'some clues cannot be compared'].filter(Boolean).join(', '),
     onActivate: () => {
       setActiveTermId(term.id);
       setSheet('candidate');

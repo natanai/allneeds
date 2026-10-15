@@ -236,7 +236,7 @@
   width: 1.1rem;
   height: 1.1rem;
   flex: 0 0 auto;
-  background: #000;
+  background: currentColor;
   mask: var(--magnet-icon) center / contain no-repeat;
   -webkit-mask: var(--magnet-icon) center / contain no-repeat;
 }
@@ -367,6 +367,20 @@
   overflow-wrap: anywhere;
   text-transform: uppercase;
 }
+
+/* A reserved slot keeps toggling a choice from changing the magnet's geometry.
+   This is answer state, not the navigation active or pointer-pickup treatment. */
+.selectionCheck {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 1em;
+  width: 1em;
+  color: var(--text);
+  font-weight: 800;
+  visibility: hidden;
+}
+
+.selectionCheck[data-selected='true'] { visibility: visible; }
 
 /* Desktop Chromium/Edge rasterize the always-transformed nav magnets softly at
    common zoom levels. Keep resting nav magnets on the normal layout/text path,

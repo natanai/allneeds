@@ -68,17 +68,25 @@
 .help { display: block; text-align: center; }
 .alternatives { min-width: 0; margin: 0; padding: .35rem 0 0; border: 0; }
 .alternatives legend { padding: 0; color: var(--secondary); font-size: var(--text-xs); }
-.states { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(6rem, 100%), 1fr)); gap: .45rem; }
 .states button {
+  min-width: 0;
   min-height: var(--control-min);
   padding: .4rem .55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
   border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
+  color: var(--text);
   font-size: var(--text-xs);
   font-weight: 750;
 }
 .states button[aria-pressed='true'] { border-color: var(--outline); background: color-mix(in srgb, var(--selection) 32%, var(--surface-raised)); }
+.choiceCheck { flex: 0 0 auto; width: .85em; visibility: hidden; }
+.states button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
 @media (max-width: 420px) {
   .axisLabel { font-size: .61rem; }
 }

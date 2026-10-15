@@ -167,6 +167,7 @@ function ShapeScale({
   onChange,
 }: (typeof shapeControls)[number] & { value?: number; onChange: (value: number | undefined) => void }) {
   const positions = [0, 0.25, 0.5, 0.75, 1];
+  const selectedPosition = positions.indexOf(value ?? -1);
   return (
     <fieldset className={styles.shapeScale}>
       <legend>
@@ -193,11 +194,11 @@ function ShapeScale({
           </label>
         ))}
       </div>
+      <p className={styles.scaleSelection} aria-live="polite">{value === undefined ? 'No rating selected' : selectedPosition < 0 ? 'Previous rating retained' : `Selected: ${selectedPosition + 1} of 5`}</p>
       <div id={`alex-shape-endpoints-${dimension}`} className={styles.shapeEndpoints}><span>{low}</span>{' '}<span>{high}</span></div>
       <button
         type="button"
         className={styles.notSureButton}
-        aria-pressed={value === undefined}
         onClick={() => onChange(undefined)}
       >
         Not sure
@@ -363,9 +364,9 @@ export function CandidateSheet({
             <button type="button" aria-pressed={decision === 'fits'} onClick={() => {
               if (term.role === 'feeling') setRatingOpen(true);
               else decideAndClose('fits');
-            }}>Fits</button>
-            <button type="button" aria-pressed={decision === 'maybe'} onClick={() => decideAndClose('maybe')}>Maybe</button>
-            <button type="button" aria-pressed={decision === 'not-this-time'} onClick={() => decideAndClose('not-this-time')}>Not this time</button>
+            }}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Fits</button>
+            <button type="button" aria-pressed={decision === 'maybe'} onClick={() => decideAndClose('maybe')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Maybe</button>
+            <button type="button" aria-pressed={decision === 'not-this-time'} onClick={() => decideAndClose('not-this-time')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Not this time</button>
           </div> : null}
 
           {!previewOnly && term.role === 'feeling' && ratingOpen ? (
@@ -378,7 +379,7 @@ export function CandidateSheet({
                 {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
                   <button key={value} type="button" aria-label={`${term.label} intensity ${value} of 10`}
                     aria-pressed={intensity === value} onClick={() => decideAndClose('fits', value)}>
-                    {value}
+                    <span className={styles.choiceCheck} aria-hidden="true">✓</span>{value}
                   </button>
                 ))}
               </div>
