@@ -87,6 +87,7 @@ Content and navigation magnets share interaction semantics but may have intentio
 - Content magnets: pickup uses the shared transform chain, higher z-index, lift/scale, shadow, and subtle saturation/brightness change.
 - Desktop navigation magnets intentionally use a crisp resting `left/top` layout path to avoid Chromium text rasterization softness, switching to transforms only once actual dragging begins.
 - Navigation route-active styling may change face/shadow presentation but must not change measured geometry or trigger repacking.
+- Content toggle selections have a small non-color check in a reserved slot, including when selected and default faces have identical colors. Toggling its visibility must not change measured dimensions. It is not a navigation-active or pickup ring; navigation magnets do not receive it. The existing `selected`/`aria-pressed` contract owns this cue, and colors, drag, focus, and physics remain unchanged.
 - A pointer-held magnet must never gain an extra focus/selection ring. Do not hide such a ring with a held-state CSS override; prevent pointer pickup from creating/retaining focus at the interaction source.
 
 Canonical visual implementation: `src/components/magnets/MagnetBoard.module.css`.

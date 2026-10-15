@@ -32,6 +32,16 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - The Design Lab main and actual-size previews inherit the live Customizer palette and roundness from the page. The lab must not maintain duplicate live palette or roundness controls. Fixed preset-comparison swatches may render independent preset snapshots because their purpose is explicit side-by-side comparison.
 - The semantic-vocabulary regression test is permanent and should fail if a removed hue-named CSS token or magnet tone is reintroduced into runtime source.
 
+**Palette-independent choices requested 2026-10-15.** Selection must remain understandable when the person assigns the same color to several functional roles. Color may reinforce a choice, but cannot be its only visible confirmation.
+
+- Selected content magnets in a toggle picker show a small check in a reserved, dimension-stable slot. This is separate from route-active navigation, pointer pickup, and keyboard focus; it does not change their geometry or physical behavior.
+- Check-in word magnets show the actual `Fits`, `Maybe`, or `Not this time` decision in Matches, search, My words, and partial-comparison views. Fits may use a small check; Maybe stays explicitly tentative. A clue-match percentage or `From your observation` label is context, never confirmation of a choice.
+- Existing body-cue checks remain canonical. Decision/intensity buttons and emotional-map alternatives expose their selected response with a check as well as their existing semantic state. An untouched alternative does not acquire a check merely because it is available.
+- Optional situation scales use an inset selection ring and explicit `Selected: N of 5` / `No rating selected` text. A restored in-between rating says `Previous rating retained`; never round it into a button the person did not choose. Their Not sure action clears the rating; it is not a separately persisted response and must not pretend to be a pressed choice on untouched scales.
+- Current word-view tabs use an underline, and the desktop body-area rail uses an inset leading stroke. These are view markers, distinct from checks for chosen body cues. Keep their labels and normal keyboard/focus behavior.
+- Checks and text inherit Customizer-owned foregrounds. Do not introduce fixed rescue colors or overwrite a person's saved palette. Identical fill roles must work; an arbitrary palette with unreadable text/foreground contrast is a separate constraint, not solved by a checkmark.
+- Shared Need icon masks use the current foreground ink rather than fixed black, preserving the same glyph while remaining visible on dark faces. Approved identity-specific artwork and ink treatments keep their existing ownership.
+
 ## Refrigerator material preset
 
 **Replacement requested 2026-10-14.** The user's reference is a black refrigerator holding cream printed sheets, small cutout word magnets, and occasional keepsakes. The `Refrigerator` preset now uses charcoal enamel for the canvas and magnet boards, warm paper for reading surfaces and magnet faces, dark printed text, thin paper edges, restrained shadows, and typewriter-style magnet labels. Body text retains the site's readable font. The three home doorways and approved Need artwork remain their canonical identities.

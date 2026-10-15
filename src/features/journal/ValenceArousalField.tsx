@@ -136,8 +136,8 @@ export function ValenceArousalField({ mood, onChange }: Props) {
     <fieldset className={styles.alternatives}>
       <legend>Instead of a point</legend>
       <div className={styles.states}>
-        <button type="button" aria-pressed={mood?.kind === 'mixed'} onClick={() => onChange({ kind: 'mixed' })}>Mixed feelings</button>
-        <button type="button" aria-pressed={mood?.kind === 'unsure'} onClick={() => onChange({ kind: 'unsure' })}>Not sure</button>
+        <button type="button" aria-pressed={mood?.kind === 'mixed'} onClick={() => onChange({ kind: 'mixed' })}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Mixed feelings</button>
+        <button type="button" aria-pressed={mood?.kind === 'unsure'} onClick={() => onChange({ kind: 'unsure' })}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Not sure</button>
       </div>
     </fieldset>
   </div>;
