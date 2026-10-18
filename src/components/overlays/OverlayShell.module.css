@@ -74,6 +74,8 @@
 .body { min-height: 0; padding: clamp(.72rem, 1.8vw, 1rem); overflow: auto; overscroll-behavior: contain; }
 .body > :first-child { margin-top: 0; }
 .chrome { min-width: 0; }
+.withToolbar { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+.toolbar { min-width: 0; padding: clamp(.72rem, 1.8vw, 1rem); padding-bottom: 0; background: var(--surface-raised); }
 .footer {
   padding: .6rem .75rem;
   border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
@@ -99,5 +101,6 @@
 }
 
 @media (max-width: 640px) {
+  .toolbar { padding: .65rem .7rem 0; }
   .body { padding: .65rem .7rem max(.75rem, env(safe-area-inset-bottom)); }
 }

@@ -12,6 +12,7 @@ type OverlayShellProps = {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  toolbar?: ReactNode;
   variant?: 'dialog' | 'alert' | 'sheet' | 'fullscreen';
   titleId?: string;
   id?: string;
@@ -29,6 +30,7 @@ export function OverlayShell({
   onClose,
   children,
   footer,
+  toolbar,
   variant = 'dialog',
   titleId,
   id,
@@ -57,7 +59,7 @@ export function OverlayShell({
       <section
         ref={dialogRef}
         id={id}
-        className={`${styles.panel} ${styles[variant]} ${wide ? styles.wide : ''} ${fillHeight ? styles.fillHeight : ''}`}
+        className={`${styles.panel} ${styles[variant]} ${wide ? styles.wide : ''} ${fillHeight ? styles.fillHeight : ''} ${toolbar ? styles.withToolbar : ''}`}
         role={dialogRole}
         aria-modal="true"
         aria-labelledby={headingId}
@@ -98,6 +100,7 @@ export function OverlayShell({
             <button type="button" className={styles.close} onClick={onClose} aria-label={closeLabel} {...(closeInitialFocus ? { 'data-dialog-initial-focus': true } : {})}>×</button>
           </header>
         </div>
+        {toolbar ? <div className={styles.toolbar}>{toolbar}</div> : null}
         <div className={`${styles.body} ${bodyClassName}`.trim()} data-overlay-body>{children}</div>
         {footer ? <footer className={styles.footer}>{footer}</footer> : null}
       </section>

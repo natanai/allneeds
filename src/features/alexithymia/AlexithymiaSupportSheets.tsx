@@ -38,6 +38,7 @@ type SupportSheetProps = {
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  toolbar?: React.ReactNode;
   wide?: boolean;
   fillHeight?: boolean;
 };
@@ -49,11 +50,12 @@ export function SupportSheet({
   onClose,
   children,
   footer,
+  toolbar,
   wide = false,
   fillHeight = false,
 }: SupportSheetProps) {
   return (
-    <OverlayShell open={open} variant="sheet" title={title} titleId={titleId} onClose={onClose} wide={wide} footer={footer} fillHeight={fillHeight}>
+    <OverlayShell open={open} variant="sheet" title={title} titleId={titleId} onClose={onClose} wide={wide} footer={footer} toolbar={toolbar} fillHeight={fillHeight}>
       {children}
     </OverlayShell>
   );
@@ -433,6 +435,7 @@ export function NeedCatalogSheet({
   onClear: () => void;
   onClose: () => void;
 }) {
+  const resultsRef = useRef<HTMLDivElement>(null);
   const normalized = query.trim().toLocaleLowerCase();
   const visibleNeeds = normalized
     ? needs.filter((need) => need.title.toLocaleLowerCase().includes(normalized))
@@ -455,9 +458,8 @@ export function NeedCatalogSheet({
         <p className={styles.selectedCount} aria-live="polite">{selected.length} {selected.length === 1 ? 'Need' : 'Needs'} selected</p>
         {selected.length ? <button type="button" className={styles.pickerClear} aria-label="Clear selected Needs" onClick={onClear}>Clear</button> : null}
         <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
-      </div>}>
-      <div className={styles.needToolbar}>
-        <label className={styles.sheetSearch}>
+      </div>}
+      toolbar={<label className={styles.sheetSearch}>
         <span className="visually-hidden">Search all needs</span>
         <SearchIcon />
         <input
@@ -466,25 +468,26 @@ export function NeedCatalogSheet({
           placeholder="Search all needs"
           autoComplete="off"
           onChange={(event) => {
-            event.currentTarget.closest<HTMLElement>('[data-overlay-body]')?.scrollTo({ top: 0 });
+            resultsRef.current?.closest<HTMLElement>('[data-overlay-body]')?.scrollTo({ top: 0 });
             onQueryChange(event.target.value);
           }}
         />
-        </label>
+      </label>}>
+      <div ref={resultsRef}>
+        <DisclosureRow title="About Needs" className={styles.needHelp}>
+          <p>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p>
+        </DisclosureRow>
+        {items.length ? (
+          <MagnetBoard
+            className={styles.needBoard}
+            items={items}
+            playMode={playMode}
+            onPlayModeChange={onPlayModeChange}
+            storageKey={normalized ? `alexithymia-needs:${normalized}` : 'alexithymia-needs'}
+            ariaLabel="Need choices"
+          />
+        ) : <p className={styles.emptyMessage}>No Needs match “{query}”.</p>}
       </div>
-      <DisclosureRow title="About Needs" className={styles.needHelp}>
-        <p>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p>
-      </DisclosureRow>
-      {items.length ? (
-        <MagnetBoard
-          className={styles.needBoard}
-          items={items}
-          playMode={playMode}
-          onPlayModeChange={onPlayModeChange}
-          storageKey={normalized ? `alexithymia-needs:${normalized}` : 'alexithymia-needs'}
-          ariaLabel="Need choices"
-        />
-      ) : <p className={styles.emptyMessage}>No Needs match “{query}”.</p>}
     </SupportSheet>
   );
 }

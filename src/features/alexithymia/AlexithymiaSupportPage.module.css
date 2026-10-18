@@ -632,7 +632,6 @@
 .selectedNeedBoard { min-height: 7rem; }
 .needBoard { border: 0; border-radius: 0; }
 
-.needToolbar { position: sticky; top: 0; z-index: 40; padding-bottom: .4rem; background: var(--surface-raised); }
 .needHelp { margin-bottom: .5rem; }
 .needHelp p { margin: 0; color: var(--secondary); font-size: var(--text-xs); line-height: 1.4; }
 .pickerActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
