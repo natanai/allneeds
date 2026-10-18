@@ -2,6 +2,9 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
+  push:
+    branches: [codex/check-in-sheet-validation-2026-10-17]
+    paths: ['.github/workflows/batch1-validation.yml']
 
 permissions:
   contents: read
@@ -37,3 +40,12 @@ jobs:
 
       - name: Run offline/reconnect verification
         run: pnpm test:e2e:outage
+
+      - name: Preserve synthetic browser test evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: check-in-sheet-browser-evidence
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
