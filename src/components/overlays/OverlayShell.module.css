@@ -13,7 +13,7 @@
 .panel {
   min-width: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
   border: 2px solid var(--outline);
   border-radius: var(--radius-2xl);
@@ -39,7 +39,6 @@
   width: min(100%, 45rem);
   max-height: min(90dvh, 55rem);
   padding-bottom: env(safe-area-inset-bottom);
-  grid-template-rows: auto auto minmax(0, 1fr);
   border-width: 1px 1px 0;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   box-shadow: 0 -10px 34px color-mix(in srgb, var(--outline) 18%, transparent);
@@ -73,6 +72,23 @@
 }
 .body { min-height: 0; padding: clamp(.72rem, 1.8vw, 1rem); overflow: auto; overscroll-behavior: contain; }
 .body > :first-child { margin-top: 0; }
+.chrome { min-width: 0; }
+.footer {
+  padding: .6rem .75rem;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  background: var(--surface-raised);
+}
+
+@media (max-width: 719px) {
+  .sheet { transform: translateY(var(--sheet-drag-y, 0px)); transition: transform 160ms ease-out; }
+  .sheet[data-sheet-dragging='true'] { transition: none; }
+  .sheet .chrome { touch-action: none; user-select: none; cursor: grab; }
+  .sheet[data-sheet-dragging='true'] .chrome { cursor: grabbing; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet { transition: none; }
+}
 
 @media (min-width: 720px) {
   .sheetBackdrop { align-items: center; padding: 1.5rem; }

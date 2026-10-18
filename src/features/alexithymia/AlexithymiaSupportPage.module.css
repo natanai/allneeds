@@ -630,6 +630,14 @@
 .reviewSelections,
 .reviewOutcome { grid-auto-rows: max-content; }
 .selectedNeedBoard { min-height: 7rem; }
+.needBoard { border: 0; border-radius: 0; }
+
+.needToolbar { position: sticky; top: 0; z-index: 40; padding-bottom: .4rem; background: var(--surface-raised); }
+.needHelp { margin-bottom: .5rem; }
+.needHelp p { margin: 0; color: var(--secondary); font-size: var(--text-xs); line-height: 1.4; }
+.pickerActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
+.pickerActions .selectedCount { margin: 0 auto 0 0; }
+.pickerClear { min-height: var(--control-min); padding: .25rem; border: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--text-xs); text-decoration: underline; text-underline-offset: .15em; cursor: pointer; }
 
 .partialWords {
   display: grid;
@@ -789,7 +797,6 @@
 
 .sheetIntro { margin: 0 0 .72rem; color: var(--secondary); font-size: var(--text-xs); line-height: 1.38; }
 
-.sheetFooter,
 .sheetFooterSplit {
   margin-top: .72rem;
   padding-top: .6rem;
@@ -937,6 +944,7 @@
 .shapeMap { min-width: 0; margin-top: var(--space-3); }
 
 .shapeScale {
+  min-width: 0;
   margin: 0;
   padding: .68rem 0;
   border: 0;
@@ -947,17 +955,19 @@
 .shapeScale:first-child { border-top: 0; }
 
 .shapeScale legend {
+  position: relative;
   width: 100%;
   padding: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
+  display: block;
   font: 800 var(--text-sm) / 1.1 var(--font-display);
 }
 
-.shapeScale details { position: relative; font: 400 var(--text-xs) / 1.35 inherit; }
+.shapeScale legend > span { min-height: var(--control-min); padding: .6rem calc(var(--control-min) + var(--space-2)) .6rem 0; display: block; }
+.shapeScale details { font-family: var(--font-body); font-size: var(--text-xs); font-weight: 400; line-height: 1.4; }
 .shapeScale summary {
+  position: absolute;
+  top: 0;
+  right: 0;
   width: var(--control-min);
   height: var(--control-min);
   padding: .32rem;
