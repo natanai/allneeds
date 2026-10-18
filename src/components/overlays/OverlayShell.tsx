@@ -16,6 +16,7 @@ type OverlayShellProps = {
   titleId?: string;
   id?: string;
   wide?: boolean;
+  fillHeight?: boolean;
   closeLabel?: string;
   closeInitialFocus?: boolean;
   bodyClassName?: string;
@@ -32,6 +33,7 @@ export function OverlayShell({
   titleId,
   id,
   wide = false,
+  fillHeight = false,
   closeLabel = `Close ${title}`,
   closeInitialFocus = false,
   bodyClassName = '',
@@ -55,7 +57,7 @@ export function OverlayShell({
       <section
         ref={dialogRef}
         id={id}
-        className={`${styles.panel} ${styles[variant]} ${wide ? styles.wide : ''}`}
+        className={`${styles.panel} ${styles[variant]} ${wide ? styles.wide : ''} ${fillHeight ? styles.fillHeight : ''}`}
         role={dialogRole}
         aria-modal="true"
         aria-labelledby={headingId}

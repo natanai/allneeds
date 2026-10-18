@@ -39,6 +39,7 @@ type SupportSheetProps = {
   children: React.ReactNode;
   footer?: React.ReactNode;
   wide?: boolean;
+  fillHeight?: boolean;
 };
 
 export function SupportSheet({
@@ -49,9 +50,10 @@ export function SupportSheet({
   children,
   footer,
   wide = false,
+  fillHeight = false,
 }: SupportSheetProps) {
   return (
-    <OverlayShell open={open} variant="sheet" title={title} titleId={titleId} onClose={onClose} wide={wide} footer={footer}>
+    <OverlayShell open={open} variant="sheet" title={title} titleId={titleId} onClose={onClose} wide={wide} footer={footer} fillHeight={fillHeight}>
       {children}
     </OverlayShell>
   );
@@ -448,10 +450,10 @@ export function NeedCatalogSheet({
       : [...selected, need.slug]),
   }));
   return (
-    <SupportSheet open={open} title="What matters to you here?" titleId="alex-needs-sheet-title" onClose={onClose} wide
-      footer={<div className={styles.pickerActions}>
+    <SupportSheet open={open} title="What matters to you here?" titleId="alex-needs-sheet-title" onClose={onClose} wide fillHeight
+      footer={<div className={styles.needPickerActions}>
         <p className={styles.selectedCount} aria-live="polite">{selected.length} {selected.length === 1 ? 'Need' : 'Needs'} selected</p>
-        {selected.length ? <button type="button" className={styles.pickerClear} onClick={onClear}>Clear selected Needs</button> : null}
+        {selected.length ? <button type="button" className={styles.pickerClear} aria-label="Clear selected Needs" onClick={onClear}>Clear</button> : null}
         <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
       </div>}>
       <div className={styles.needToolbar}>
@@ -463,7 +465,10 @@ export function NeedCatalogSheet({
           value={query}
           placeholder="Search all needs"
           autoComplete="off"
-          onChange={(event) => onQueryChange(event.target.value)}
+          onChange={(event) => {
+            event.currentTarget.closest<HTMLElement>('[data-overlay-body]')?.scrollTo({ top: 0 });
+            onQueryChange(event.target.value);
+          }}
         />
         </label>
       </div>

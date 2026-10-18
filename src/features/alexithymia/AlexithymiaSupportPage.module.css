@@ -636,7 +636,10 @@
 .needHelp { margin-bottom: .5rem; }
 .needHelp p { margin: 0; color: var(--secondary); font-size: var(--text-xs); line-height: 1.4; }
 .pickerActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
-.pickerActions .selectedCount { margin: 0 auto 0 0; }
+.needPickerActions { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto var(--control-min); align-items: center; column-gap: var(--space-2); }
+.needPickerActions .selectedCount { margin: 0; }
+.needPickerActions .primaryButton { grid-column: 2; grid-row: 1 / span 2; }
+.needPickerActions .pickerClear { justify-self: start; }
 .pickerClear { min-height: var(--control-min); padding: .25rem; border: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--text-xs); text-decoration: underline; text-underline-offset: .15em; cursor: pointer; }
 
 .partialWords {
