@@ -14,10 +14,11 @@ No palette values, Need identities, psychological guidance, catalogue content, s
 
 ## Verification status
 
-- Foundation gate passed: 372 tests / 68 files, TypeScript, deterministic compilers, production build and build verification.
-- Browser verification is **not passed**. The normal Playwright Chromium download returned a truncated/invalid archive. A temporary npm-distributed test browser could not launch (`EACCES`, before any application test opened). No execution-permission workaround was applied.
-- The supported cloud browser cannot reach the local preview (`ERR_CONNECTION_REFUSED`). GitHub's existing manual Full repository validation action is available, but this cloud browser is signed out and the connector exposes no workflow-dispatch operation.
-- The new 11-case browser file and existing full regression suite must run before merge/release. Visual phone/palette review also remains pending. This branch is not a live-site completion claim.
+- Final application source `3d18b5db53a5695f29d8a70d933403843b0d6aa1` passed [Full repository validation, run 39087736496](https://github.com/natanai/allneeds/actions/runs/39087736496): 372 tests / 68 files, TypeScript, deterministic compilers, production build and build verification; all 11 focused sheet cases; all 195 full-suite browser cases in 12.1 minutes, without failures or flaky retries; and offline/reconnect verification.
+- Browser checks used the repository's pinned Playwright 1.62.1 and Chromium 151.0.7922.34 on GitHub's runner. The validation commit differs from the release application only in its validation workflow; the trigger was restored to manual-only after startup. The release PR contains no workflow or dependency changes.
+- Visually inspected final CI screenshots for expanded rating help, normal phone Need selection, 320px/doubled-text Need containment, identical light fill roles, and identical dark fill roles. The selected Need, its check, Search, count/Clear and Done remain visible in the strengthened smallest-screen case.
+- Local-browser limits remain documented: the normal download returned a truncated archive, the temporary npm browser could not launch (`EACCES`), and Cloud Browser could not reach the local preview. No execution-permission workaround or authenticated browser session was used. CI supplied the missing browser verification.
+- This record establishes release readiness, not a claim that a particular deployment is already serving. Main deployment and live asset/UI verification are separate post-merge checks.
 
 ## First CI run and follow-up
 
@@ -25,7 +26,7 @@ The existing Full repository validation workflow ran once on a dedicated validat
 
 [Run 39086085300](https://github.com/natanai/allneeds/actions/runs/39086085300) exercised all 195 cases: 190 passed, one existing moving-magnet scroll wait passed on retry, and four new Need cases failed because their exact Safety locator no longer matched after its accessible name correctly became Safety, selected. All four expanded-help viewport cases and all three gesture cases passed. The four Need assertions now use a state-stable accessible locator. The visual-only scroll in the existing selection case uses native scrollIntoView rather than waiting for a playing physical object to become motionless; physics remains on and application behavior is unchanged by that test adjustment.
 
-Visual inspection also found a real 320px/doubled-text problem: the footer consumed too much of a filtered, content-shrinking sheet. The picker now keeps its workspace height while filtering, uses a stable count/Clear area beside Done, and shows the shorter visible Clear label with the original full accessible name. The strengthened regression requires the entire selected magnet to remain between Search and the scroller's lower edge. Follow-up browser validation is pending; the first run is not described as a pass.
+Visual inspection also found a real 320px/doubled-text problem: the footer consumed too much of a filtered, content-shrinking sheet. The picker now keeps its workspace height while filtering, uses a stable count/Clear area beside Done, and shows the shorter visible Clear label with the original full accessible name. The strengthened regression requires the entire selected magnet to remain between Search and the scroller's lower edge. The first run is not described as a pass; the final passing run is recorded above.
 
 [Run 39087522763](https://github.com/natanai/allneeds/actions/runs/39087522763) ran the focused cases first and stopped early: seven passed, one enlarged-text containment check failed, and three were not run. The selected magnet was still about 14px beneath sticky Search. Search now occupies a real shared toolbar row outside the scrolling results, rather than an overlapping sticky layer. The same strict containment assertion remains; it was not relaxed to accept occlusion.
 
