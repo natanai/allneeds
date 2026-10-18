@@ -170,7 +170,8 @@ for (const scenario of scenarios) {
     await expect(check(safety)).toBeHidden();
     await safety.press('Space');
     await expect(check(safety)).toBeVisible();
-    await safety.scrollIntoViewIfNeeded();
+    // A playing magnet need not become motionless before the browser scrolls it into view.
+    await safety.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'nearest' }));
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     await page.screenshot({ path: `test-results/selection-${scenario.theme.name.replaceAll(' ', '-')}-${scenario.width}.png` });
     await needs.getByRole('button', { name: 'Done', exact: true }).click();

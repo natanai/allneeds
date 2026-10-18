@@ -13,7 +13,7 @@
 .panel {
   min-width: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
   border: 2px solid var(--outline);
   border-radius: var(--radius-2xl);
@@ -39,13 +39,13 @@
   width: min(100%, 45rem);
   max-height: min(90dvh, 55rem);
   padding-bottom: env(safe-area-inset-bottom);
-  grid-template-rows: auto auto minmax(0, 1fr);
   border-width: 1px 1px 0;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   box-shadow: 0 -10px 34px color-mix(in srgb, var(--outline) 18%, transparent);
 }
 .fullscreen { width: 100%; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
 .wide { width: min(100%, 64rem); }
+.sheet.fillHeight { height: min(90dvh, 55rem); }
 
 .handle { width: 2.5rem; height: .25rem; margin: .42rem auto .14rem; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--outline) 26%, transparent); }
 .header {
@@ -73,13 +73,34 @@
 }
 .body { min-height: 0; padding: clamp(.72rem, 1.8vw, 1rem); overflow: auto; overscroll-behavior: contain; }
 .body > :first-child { margin-top: 0; }
+.chrome { min-width: 0; }
+.withToolbar { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+.toolbar { min-width: 0; padding: clamp(.72rem, 1.8vw, 1rem); padding-bottom: 0; background: var(--surface-raised); }
+.footer {
+  padding: .6rem .75rem;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 18%, transparent);
+  background: var(--surface-raised);
+}
+
+@media (max-width: 719px) {
+  .sheet { transform: translateY(var(--sheet-drag-y, 0px)); transition: transform 160ms ease-out; }
+  .sheet[data-sheet-dragging='true'] { transition: none; }
+  .sheet .chrome { touch-action: none; user-select: none; cursor: grab; }
+  .sheet[data-sheet-dragging='true'] .chrome { cursor: grabbing; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet { transition: none; }
+}
 
 @media (min-width: 720px) {
   .sheetBackdrop { align-items: center; padding: 1.5rem; }
   .sheet { max-height: min(86dvh, 54rem); border: 1px solid var(--outline); border-radius: var(--radius-2xl); box-shadow: 0 18px 54px color-mix(in srgb, var(--outline) 22%, transparent); }
+  .sheet.fillHeight { height: min(86dvh, 54rem); }
   .handle { display: none; }
 }
 
 @media (max-width: 640px) {
+  .toolbar { padding: .65rem .7rem 0; }
   .body { padding: .65rem .7rem max(.75rem, env(safe-area-inset-bottom)); }
 }

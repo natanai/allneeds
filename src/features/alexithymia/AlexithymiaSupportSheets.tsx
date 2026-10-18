@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
+import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
 import { OverlayShell } from '../../components/overlays/OverlayShell';
@@ -36,7 +37,10 @@ type SupportSheetProps = {
   titleId: string;
   onClose: () => void;
   children: React.ReactNode;
+  footer?: React.ReactNode;
+  toolbar?: React.ReactNode;
   wide?: boolean;
+  fillHeight?: boolean;
 };
 
 export function SupportSheet({
@@ -45,10 +49,13 @@ export function SupportSheet({
   titleId,
   onClose,
   children,
+  footer,
+  toolbar,
   wide = false,
+  fillHeight = false,
 }: SupportSheetProps) {
   return (
-    <OverlayShell open={open} variant="sheet" title={title} titleId={titleId} onClose={onClose} wide={wide}>
+    <OverlayShell open={open} variant="sheet" title={title} titleId={titleId} onClose={onClose} wide={wide} footer={footer} toolbar={toolbar} fillHeight={fillHeight}>
       {children}
     </OverlayShell>
   );
@@ -169,9 +176,9 @@ function ShapeScale({
   const positions = [0, 0.25, 0.5, 0.75, 1];
   const selectedPosition = positions.indexOf(value ?? -1);
   return (
-    <fieldset className={styles.shapeScale}>
+    <fieldset className={styles.shapeScale} aria-labelledby={`alex-shape-label-${dimension}`}>
       <legend>
-        <span>{label}</span>
+        <span id={`alex-shape-label-${dimension}`}>{label}</span>
         {disclosure ? (
           <details>
             <summary aria-label={`About ${label}`}><InfoIcon /></summary>
@@ -223,7 +230,8 @@ export function FeelingShapeSheet({
   onClose: () => void;
 }) {
   return (
-    <SupportSheet open={open} title="Overall feeling" titleId="alex-shape-sheet-title" onClose={onClose} wide>
+    <SupportSheet open={open} title="Overall feeling" titleId="alex-shape-sheet-title" onClose={onClose} wide
+      footer={<div className={styles.pickerActions}><button type="button" className={styles.primaryButton} onClick={onClose}>Done</button></div>}>
       <p className={styles.sheetIntro}>Place a point for pleasantness and energy, or choose another mood option. Skip anything unclear.</p>
       <div className={styles.shapeGroups}>
         <section className={styles.shapeGroup} aria-labelledby="alex-shape-core-title">
@@ -262,7 +270,6 @@ export function FeelingShapeSheet({
           </div>
         </section>
       </div>
-      <div className={styles.sheetFooter}><button type="button" className={styles.primaryButton} onClick={onClose}>Done</button></div>
     </SupportSheet>
   );
 }
@@ -428,6 +435,7 @@ export function NeedCatalogSheet({
   onClear: () => void;
   onClose: () => void;
 }) {
+  const resultsRef = useRef<HTMLDivElement>(null);
   const normalized = query.trim().toLocaleLowerCase();
   const visibleNeeds = normalized
     ? needs.filter((need) => need.title.toLocaleLowerCase().includes(normalized))
@@ -445,9 +453,13 @@ export function NeedCatalogSheet({
       : [...selected, need.slug]),
   }));
   return (
-    <SupportSheet open={open} title="What matters to you here?" titleId="alex-needs-sheet-title" onClose={onClose} wide>
-      <p className={styles.sheetIntro}>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p>
-      <label className={styles.sheetSearch}>
+    <SupportSheet open={open} title="What matters to you here?" titleId="alex-needs-sheet-title" onClose={onClose} wide fillHeight
+      footer={<div className={styles.needPickerActions}>
+        <p className={styles.selectedCount} aria-live="polite">{selected.length} {selected.length === 1 ? 'Need' : 'Needs'} selected</p>
+        {selected.length ? <button type="button" className={styles.pickerClear} aria-label="Clear selected Needs" onClick={onClear}>Clear</button> : null}
+        <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
+      </div>}
+      toolbar={<label className={styles.sheetSearch}>
         <span className="visually-hidden">Search all needs</span>
         <SearchIcon />
         <input
@@ -455,23 +467,26 @@ export function NeedCatalogSheet({
           value={query}
           placeholder="Search all needs"
           autoComplete="off"
-          onChange={(event) => onQueryChange(event.target.value)}
+          onChange={(event) => {
+            resultsRef.current?.closest<HTMLElement>('[data-overlay-body]')?.scrollTo({ top: 0 });
+            onQueryChange(event.target.value);
+          }}
         />
-      </label>
-      <p className={styles.selectedCount} aria-live="polite">{selected.length} {selected.length === 1 ? 'Need' : 'Needs'} selected</p>
-      {items.length ? (
-        <MagnetBoard
-          className={styles.needBoard}
-          items={items}
-          playMode={playMode}
-          onPlayModeChange={onPlayModeChange}
-          storageKey={normalized ? `alexithymia-needs:${normalized}` : 'alexithymia-needs'}
-          ariaLabel="Need choices"
-        />
-      ) : <p className={styles.emptyMessage}>No Needs match “{query}”.</p>}
-      <div className={styles.sheetFooterSplit}>
-        <button type="button" className={styles.textButton} onClick={selected.length ? onClear : onClose}>{selected.length ? 'Clear selected Needs' : 'Leave without choosing'}</button>
-        <button type="button" className={styles.primaryButton} onClick={onClose}>Done</button>
+      </label>}>
+      <div ref={resultsRef}>
+        <DisclosureRow title="About Needs" className={styles.needHelp}>
+          <p>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p>
+        </DisclosureRow>
+        {items.length ? (
+          <MagnetBoard
+            className={styles.needBoard}
+            items={items}
+            playMode={playMode}
+            onPlayModeChange={onPlayModeChange}
+            storageKey={normalized ? `alexithymia-needs:${normalized}` : 'alexithymia-needs'}
+            ariaLabel="Need choices"
+          />
+        ) : <p className={styles.emptyMessage}>No Needs match “{query}”.</p>}
       </div>
     </SupportSheet>
   );

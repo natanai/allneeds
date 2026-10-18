@@ -378,7 +378,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 430, height: 932 }
     await words(page);
     await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
     await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
-    await page.getByRole('dialog', { name: 'What matters to you here?', exact: true }).getByRole('button', { name: 'Leave without choosing', exact: true }).click();
+    await page.getByRole('dialog', { name: 'What matters to you here?', exact: true }).getByRole('button', { name: 'Done', exact: true }).click();
     const continueButton = page.getByRole('button', { name: 'Continue in Journal', exact: true });
     if (viewport.width >= 720) await continueButton.scrollIntoViewIfNeeded();
     await expect(continueButton).toBeInViewport();
