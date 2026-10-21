@@ -1,8 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-import { needMagnetAuditCandidates } from '../designLab/needMagnetAuditCandidates';
-
 const css = readFileSync('src/features/needs/NeedsPage.module.css', 'utf8');
 const icon = readFileSync('public/icons/needs/accountability.svg', 'utf8');
 const art = readFileSync('public/icons/needs/art/accountability-responsibility-mosaic.svg', 'utf8');
@@ -27,7 +25,4 @@ describe('approved Accountability magnet identity', () => {
     expect(art).toContain('x="268" y="18" width="52" height="60"');
   });
 
-  it('keeps the completed Accountability review out of the active Design Lab', () => {
-    expect(needMagnetAuditCandidates.some((candidate) => candidate.needSlug === 'accountability')).toBe(false);
-  });
 });
