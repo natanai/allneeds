@@ -12,6 +12,7 @@ import {
   type AlexithymiaCandidate,
 } from './alexithymiaData';
 import type { JournalComposerDraft } from '../../persistence/workflowDrafts';
+import type { EntityRef, Need } from '../../domain/models';
 import type { JournalMood, JournalGuidedSupport } from '../journal/journalRepository';
 
 export type SupportTermRole = 'feeling' | 'faux-feeling' | 'working';
@@ -22,6 +23,7 @@ export type SupportTerm = {
   role: SupportTermRole;
   roleLabel: 'Feeling' | 'Faux Feeling' | 'Other emotion word' | 'Your word';
   route: string | null;
+  catalogSlug: string | null;
   definition: string;
   definitionSource: string | null;
   candidate: AlexithymiaCandidate | null;
@@ -37,6 +39,7 @@ export function candidateTerm(candidate: AlexithymiaCandidate): SupportTerm {
     role: candidate.role,
     roleLabel: candidate.role === 'feeling' ? 'Feeling' : 'Other emotion word',
     route: candidate.route,
+    catalogSlug: canonicalFeeling?.slug ?? null,
     definition: canonicalFeeling?.summary ?? candidate.definition ?? '',
     definitionSource: candidate.definitionSource === 'catalog'
       ? candidate.route
@@ -58,6 +61,7 @@ export const catalogOnlyTerms: SupportTerm[] = feelings
     role: 'feeling',
     roleLabel: 'Feeling',
     route: `/feelings/${feeling.slug}`,
+    catalogSlug: feeling.slug,
     definition: feeling.summary,
     definitionSource: `/feelings/${feeling.slug}`,
     candidate: null,
@@ -69,6 +73,7 @@ export const fauxFeelingTerms: SupportTerm[] = fauxFeelings.map((feeling) => ({
   role: 'faux-feeling',
   roleLabel: 'Faux Feeling',
   route: `/faux-feelings/${feeling.slug}`,
+  catalogSlug: feeling.slug,
   definition: `In allneeds, “${feeling.title}” is a Faux Feeling: a word that may combine an emotion with an interpretation of what happened. That label does not mean the event was unreal.`,
   definitionSource: `/faux-feelings/${feeling.slug}`,
   candidate: null,
@@ -81,6 +86,7 @@ export function customWorkingTerm(label: string): SupportTerm {
     role: 'working',
     roleLabel: 'Your word',
     route: null,
+    catalogSlug: null,
     definition: 'A word you entered for this moment. It stays with this check-in and is not added to the site’s Feeling list.',
     definitionSource: null,
     candidate: null,
@@ -95,6 +101,29 @@ export function supportTermIndex(customTerms: string[] = []) {
     ...customTerms.filter((term) => term.trim()).map(customWorkingTerm),
   ];
   return new Map(terms.map((term) => [term.id, term]));
+}
+
+/** Existing cross-reference links are possibilities, never selected Needs. */
+export function suggestedNeedsForTerms(
+  terms: SupportTerm[],
+  decisions: Record<string, string>,
+): Array<{ need: Need; fromFeelings: EntityRef[] }> {
+  const suggestions = new Map<string, { need: Need; fromFeelings: EntityRef[] }>();
+  for (const term of terms) {
+    if (term.role !== 'feeling' || decisions[term.id] !== 'fits' || !term.catalogSlug) continue;
+    const feeling = feelingsBySlug.get(term.catalogSlug);
+    if (!feeling) continue;
+    for (const reference of feeling.needs) {
+      const need = needsBySlug.get(reference.slug);
+      if (!need) continue;
+      const suggestion = suggestions.get(need.slug) ?? { need, fromFeelings: [] };
+      if (!suggestion.fromFeelings.some((source) => source.slug === feeling.slug)) {
+        suggestion.fromFeelings.push({ slug: feeling.slug, title: feeling.title });
+      }
+      suggestions.set(need.slug, suggestion);
+    }
+  }
+  return [...suggestions.values()].sort((a, b) => a.need.title.localeCompare(b.need.title));
 }
 
 function joinWords(words: string[]) {

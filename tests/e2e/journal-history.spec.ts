@@ -371,13 +371,14 @@ test('an optional mood-only page and an experienced date are saved without chang
   await placeEmotionalPoint(page, plane, 0, 0);
   await expect(journal.locator('output')).toHaveText('Valence 0 · Arousal 0');
   await journal.getByText('Date & reflection prompts', { exact: true }).click();
+  const expectedExperiencedISO = await page.evaluate(() => new Date('2026-09-14T17:30').toISOString());
   await journal.getByLabel('When was this moment?').fill('2026-09-14T17:30');
   await journal.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(journal).toHaveCount(0);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.find((item: { id: string }) => !['today', 'yesterday', 'mixed', 'same-a', 'same-b', 'before', 'old'].includes(item.id)));
   expect(saved.mood).toEqual({ kind: 'rated', value: 0, arousal: 0 });
   expect(saved.feelings).toEqual([]); expect(saved.dateISO).toBe(saved.createdAtISO);
-  expect(saved.experiencedAtISO).toContain('2026-09-14');
+  expect(saved.experiencedAtISO).toBe(expectedExperiencedISO);
   await page.goto(`/inventory/journal?entry=${saved.id}`);
   await expect(journal.getByText(/Originally saved/)).toBeVisible();
   await expect(journal.getByText('No written reflection on this page.', { exact: true })).toBeVisible();

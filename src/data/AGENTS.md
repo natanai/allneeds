@@ -2,6 +2,10 @@
 
 This file supplements the root `AGENTS.md` for work under `src/data/`.
 
+## Canonical Feeling ownership
+
+All 48 Feeling entities are owned by `editorialCatalog.json` after the approved 2026-10-28 description repair. `compileFeelingCatalog.mjs` is their shared build-time compiler for the runtime catalog, Alexithymia candidate validation, and the Observation lexicon. Do not restore Feeling entities or summary fallbacks in `generated/legacyData.json`. Preserve the existing Feeling-to-Need references when changing copy; the check-in uses these same links as selectable possibilities, never automatic Need choices. Per-entry sources travel with the summary; source roles and access limits are recorded in `docs/content-evidence-review.md`.
+
 ## Mandatory Need audit handshake
 
 Before auditing, drafting, revising, or implementing a full Need package, read and complete `docs/need-audit-handshake.md`. The H01–H18 checklist must be demonstrated before substantive audit conclusions, and the same IDs must be used in the pre-proposal verification matrix.

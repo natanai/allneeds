@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { expect, test } from './fixtures';
+import { expect, test, openCheckInReview } from './fixtures';
 
 const checkInKey = 'allneeds.v2.alexithymia.draft';
 const journalKey = 'allneeds.v2.journal.draft';
@@ -59,6 +59,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 900 
       await page.getByRole('button', { name: 'Continue', exact: true }).click();
       const suggestedNeeds = page.getByLabel('Needs from your observation', { exact: true });
       await suggestedNeeds.getByRole('button', { name: 'Add Support', exact: true }).click();
+      await openCheckInReview(page);
       await page.getByRole('button', { name: 'Build sentence', exact: true }).click();
       await expect(page.getByRole('textbox', { name: 'Your statement', exact: true })).toHaveValue(/I might feel anxiety/);
       await page.getByRole('button', { name: 'Continue in Journal', exact: true }).click();
@@ -119,6 +120,7 @@ test('can continue without Explore, skip optional clues, and save without endors
   await page.getByRole('button', { name: 'Continue to words', exact: true }).click();
   await expect(page.getByRole('button', { name: /^Anxiety, Feeling.*From your earlier observation/ })).toBeVisible();
   await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   await page.getByRole('button', { name: 'Continue in Journal', exact: true }).click();
   await page.getByRole('dialog', { name: 'Journal', exact: true }).getByRole('button', { name: 'Save', exact: true }).click();
   const entry = await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries[0]);
@@ -160,7 +162,7 @@ test('a guide visit applies text to the same check-in while keeping clues, choic
   await seedCheckIn(page);
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Back', exact: true }).click();
+  for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Get help describing what happened' }).click();
   await page.getByRole('link', { name: 'Observations guide', exact: true }).click();
   await page.getByRole('textbox', { name: 'What did you notice?' }).fill('They closed the laptop.');
@@ -171,6 +173,7 @@ test('a guide visit applies text to the same check-in while keeping clues, choic
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Continue to words', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await openCheckInReview(page);
   await expect(page.getByRole('textbox', { name: 'Your statement', exact: true })).toHaveValue('I want these exact words.');
 });
 
@@ -192,7 +195,7 @@ test('direct writing from a guide visit retains chosen context and completes the
   await seedCheckIn(page);
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Back', exact: true }).click();
+  for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Get help describing what happened' }).click();
   await page.getByRole('link', { name: 'Observations guide', exact: true }).click();
   await page.getByRole('textbox', { name: 'What did you notice?' }).fill(observation);
@@ -211,7 +214,7 @@ test('a stale guide cannot apply over a newer check-in created in another tab', 
   await seedCheckIn(page);
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Back', exact: true }).click();
+  for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Get help describing what happened' }).click();
   await page.getByRole('link', { name: 'Observations guide', exact: true }).click();
   await page.getByRole('textbox', { name: 'What did you notice?' }).fill(observation);
@@ -237,6 +240,7 @@ test('a legacy check-in without an ID is protected as an unrelated unfinished dr
   await expect(page.getByRole('dialog', { name: 'Unfinished check-in', exact: true })).toBeVisible();
   expect((await readDraft(page)).observation).toBe('My earlier observation.');
   await page.getByRole('button', { name: 'Continue saved check-in', exact: true }).click();
+  await openCheckInReview(page);
   await expect(page.getByRole('textbox', { name: 'Your statement', exact: true })).toHaveValue('I want these exact words.');
   await expect(page.getByRole('button', { name: 'Continue previous check-in', exact: true })).toHaveCount(0);
 });

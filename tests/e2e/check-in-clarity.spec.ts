@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect, test } from './fixtures';
+import { expect, test, openCheckInReview } from './fixtures';
 
 async function start(page: Page, observation = '') {
   await page.goto('/alexithymia-support');
@@ -171,20 +171,24 @@ test('Maybe, generated updates, personal edits, Need clearing, and replacement u
   await page.setViewportSize({ width: 390, height: 844 });
   await start(page); await clues(page); await words(page); await maybeFear(page);
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await openCheckInReview(page);
   const statement = page.getByRole('textbox', { name: 'Your statement', exact: true });
   await page.getByRole('button', { name: 'Build sentence', exact: true }).click();
   await expect(statement).toHaveValue('I might feel fear.');
+  await page.getByRole('button', { name: 'Edit Needs', exact: true }).click();
   await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
   const needs = page.getByRole('dialog', { name: 'What matters to you here?', exact: true });
   await expect(needs.getByRole('searchbox')).not.toBeFocused();
   await needs.getByRole('searchbox').fill('Safety');
   await needs.getByRole('button', { name: 'Safety', exact: true }).click();
   await needs.getByRole('button', { name: 'Done', exact: true }).click();
+  await openCheckInReview(page);
   await expect(statement).toHaveValue('I might feel fear because I need safety.');
   const ownWords = 'I want to keep these exact words.';
   await statement.fill(ownWords);
   await page.getByRole('button', { name: 'Edit Needs', exact: true }).click();
-  await needs.getByRole('button', { name: 'Clear selected Needs' }).click();
+  await page.getByRole('button', { name: 'Clear selected Needs', exact: true }).click();
+  await openCheckInReview(page);
   await expect(statement).toHaveValue(ownWords);
   await expect(page.getByText('Your choices changed.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Update draft', exact: true }).click();
@@ -205,6 +209,7 @@ test('uncertainty-only check-in reaches Journal and saves without invented words
   await page.setViewportSize({ width: 390, height: 844 });
   await start(page); await clues(page); await words(page);
   await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   await expect(page.getByRole('textbox', { name: 'Your statement', exact: true })).toBeEmpty();
   await page.getByRole('button', { name: 'Continue in Journal', exact: true }).click();
   const journal = page.getByRole('dialog', { name: 'Journal', exact: true });
@@ -227,11 +232,12 @@ test('an occupied Journal draft has a direct recovery route and never gets overw
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal.draft') ?? 'null')?.data?.notes)).toBe('Keep this first unfinished page.');
   await start(page); await clues(page); await words(page);
   await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   await page.getByRole('button', { name: 'Continue in Journal', exact: true }).click();
   await page.getByRole('button', { name: 'Open unfinished Journal', exact: true }).click();
   await expect(journal.getByRole('textbox', { name: 'Reflection', exact: true })).toHaveValue('Keep this first unfinished page.');
   await journal.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'What fits right now?', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your check-in', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Continue in Journal', exact: true }).click();
   await expect(journal.getByRole('textbox', { name: 'Reflection', exact: true })).toBeEmpty();
 });
@@ -326,16 +332,17 @@ test('long mobile stages reset their own scroller; canonical Need references ret
   await workspace.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect.poll(() => workspace.evaluate((element) => element.scrollTop)).toBe(0);
-  await expect(page.getByRole('heading', { name: 'What fits right now?', exact: true })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'What matters to you here?', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
   const picker = page.getByRole('dialog', { name: 'What matters to you here?', exact: true });
   await picker.getByRole('searchbox').fill('Safety');
   await picker.getByRole('button', { name: 'Safety', exact: true }).click();
   await picker.getByRole('button', { name: 'Done', exact: true }).click();
+  await openCheckInReview(page);
   await page.getByRole('button', { name: 'Safety, selected Need, open ways to support it', exact: true }).click();
   await expect(page).toHaveURL(/needs\/safety$/);
   await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'What fits right now?', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your check-in', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Safety, selected Need, open ways to support it', exact: true })).toBeVisible();
   await page.screenshot({ path: 'test-results/check-in-mobile-review.png' });
 });
@@ -379,6 +386,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 430, height: 932 }
     await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
     await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
     await page.getByRole('dialog', { name: 'What matters to you here?', exact: true }).getByRole('button', { name: 'Done', exact: true }).click();
+    await openCheckInReview(page);
     const continueButton = page.getByRole('button', { name: 'Continue in Journal', exact: true });
     if (viewport.width >= 720) await continueButton.scrollIntoViewIfNeeded();
     await expect(continueButton).toBeInViewport();
@@ -399,8 +407,14 @@ test('clear words is separate from continuing, and undo restores the decision an
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(page.getByText('Fits · 7/10', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await openCheckInReview(page);
   await expect(page.getByText('Feeling · Fits · Intensity 7/10', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Remove Fear', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Remove Fear', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Edit feelings', exact: true }).click();
+  await page.getByRole('button', { name: /^Fear, Feeling/ }).click();
+  await detail.getByRole('button', { name: 'Not this time', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   await expect(page.getByRole('button', { name: 'Continue in Journal', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Continue in Journal', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Journal', exact: true }).getByRole('textbox', { name: 'Reflection', exact: true })).toBeEmpty();
@@ -416,6 +430,7 @@ test('optional scales describe their meanings and unavailable speech gives usefu
   await shape.getByRole('button', { name: 'Done', exact: true }).click();
   await words(page);
   await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   await page.getByRole('textbox', { name: 'Your statement', exact: true }).fill('My own words.');
   await page.getByRole('button', { name: 'Read aloud', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Read aloud is unavailable' })).toBeVisible();
@@ -460,6 +475,7 @@ test('read aloud toggles to Stop, ignores old completions, and stops on edits or
   });
   await start(page); await clues(page); await words(page);
   await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   const statement = page.getByRole('textbox', { name: 'Your statement', exact: true });
   await statement.fill('Read this synthetic statement.');
   const read = page.getByRole('button', { name: 'Read aloud', exact: true });
@@ -493,9 +509,9 @@ test('read aloud toggles to Stop, ignores old completions, and stops on edits or
   await read.click();
   const beforeBack = (await trace()).cancellations;
   await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Possible words', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What matters to you here?', exact: true })).toBeVisible();
   expect((await trace()).cancellations).toBe(beforeBack + 1);
-  await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   await read.click();
   const beforeExit = (await trace()).cancellations;
   await page.getByRole('button', { name: 'Close check-in', exact: true }).click();
@@ -585,6 +601,7 @@ test('doubling the base text size keeps narrow-phone choices and the Journal han
   await needs.getByRole('button', { name: 'Safety', exact: true }).click();
   await needs.getByRole('button', { name: 'Done', exact: true }).click();
   await noOverflow();
+  await openCheckInReview(page);
   const selectedNeed = page.getByRole('button', { name: 'Safety, selected Need, open ways to support it', exact: true });
   await selectedNeed.scrollIntoViewIfNeeded();
   await expect.poll(() => selectedNeed.evaluate((element) => {
@@ -669,6 +686,8 @@ test('keyboard-only completion keeps sheet focus contained and returns to the op
   }
   await page.keyboard.press('Escape');
   await expect(needsTrigger).toBeFocused();
+  await tabTo(page.getByRole('button', { name: 'Continue to your words', exact: true }));
+  await page.keyboard.press('Enter');
   await tabTo(page.getByRole('button', { name: 'Continue in Journal', exact: true }));
   await page.keyboard.press('Enter');
   const journal = page.getByRole('dialog', { name: 'Journal', exact: true });

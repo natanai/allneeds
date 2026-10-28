@@ -2,7 +2,7 @@
 
 > Status: living document. Start here before changing explanatory, psychological, behavioral, health, strategy, or research-facing copy in allneeds.
 >
-> Last updated: 2026-10-14.
+> Last updated: 2026-10-28.
 
 ## Purpose
 
@@ -849,6 +849,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-10-14 | Observation source and copy approval | User delegated the review/approval decision; [corrected complete 18-source package](./observation-research-guide-proposal-2026-10-14.md) approved for its exact educational claims after clinical-evidence and academic editorial review. [Approval record](./observation-research-editorial-approval-2026-10-14.md) documents corrections, source access and scope; other 34 records remain pending | Authorized for educational implementation on site-test; not yet implemented. No main merge or deployment authorization; no independent licensed-clinician sign-off or app clinical validation |
 | 2026-10-14 | Observation approved-guide integration | User authorized implementation and continuation on site-test; exact approved copy, examples and 18 citation uses integrated into the canonical guide and renderer. [Implementation record](./observation-research-implementation-2026-10-14.md) documents completed validation and limits | Validated for site-test through PR #183: 330 tests, production build and six scoped Chromium cases pass. Final captures reviewed; enlarged-text overflow repaired. No production publication |
 | 2026-10-14 | Observation guide production release | User subsequently authorizes integration against newer main, completion checks, merge and live deployment for phone review. Exact approved copy, 18 source uses and review limits remain unchanged. | Main-based PR #190: 366 unit tests pass; browser sweep, corrected test readiness boundaries, repeated handoff, offline checks and visual review are recorded in the [implementation record](./observation-research-implementation-2026-10-14.md). No independent licensed-clinician certification or app-effectiveness claim. |
+| 2026-10-28 | Check-in Feeling descriptions | Complete 48-Feeling summary repair and nine additional-word definition review; Numb rewrite. Exact copy, citations, access limits, and scope are recorded in [Feeling descriptions review](#feeling-descriptions-review-2026-10-28). | Exact package approved 2026-10-28; canonical implementation and requested Needs/recap changes tracked in PR #194, with validation and release status below. |
 
 ## Implementation notes / handoff
 
@@ -869,3 +870,1307 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 ## Accountability
 
 **Status:** fully audited. Content implemented 2026-08-27; Responsibility Mosaic (A1) magnet approved and promoted 2026-08-28. The authoritative current record is `docs/accountability-content-audit.md`.
+
+# Feeling descriptions review, 2026-10-28
+
+**Status: exact package explicitly approved by the user on 2026-10-28 and implemented on the dedicated review branch. Publication status and implementation checks are recorded below.**
+
+## Review scope and result
+
+The user requested a repair of the Calm description shown in the Alexithymia support check-in and a review of the other feeling-word descriptions for the same problem. The screenshot matches the current catalog summary for Calm.
+
+Production baseline: `0c5b73e19f6963a0d38332aafbdfb72149fb0ce5` (main, PR #193). The review covers all **48 canonical Feeling summaries** and all **nine additional emotion-word definitions** available in this check-in, including unscored catalog words. It also checks the shared Faux Feeling explanation and the explanation attached to a user-entered word.
+
+**Proposed changes: 48 Feeling-summary replacements and one additional-word definition replacement (Numb). Eight additional-word definitions are retained verbatim.** The shared Faux Feeling and user-word explanations need no repair for the issue raised.
+
+Every current Feeling summary opens with a body, expression, movement, or thought script and follows with a purported function or explanation. Several individual associations may be plausible. The recurring problem is presenting these scripts as the principal description of the word, then adding mechanisms or evolutionary functions without entry-level source support. Qualifiers such as “may” do not by themselves supply that support. This is an editorial and source-to-claim judgment, not a claim that every physiological or evolutionary topic mentioned has been disproved.
+
+Specific corrections include removing the Calm parasympathetic/integration explanation, Inspired dopamine claim, Peaceful polyvagal claim, Relieved cortisol/reset claim, and Energized metabolic-balance claim. Hurt currently describes only physical pain. In pain identifies pain with nerve signals and a location needing healing. Distressed says Needs compete, contrary to the canonical psychological model.
+
+## Evidence and editorial decisions
+
+1. Explain what a word ordinarily refers to before offering a research interpretation. A dictionary supports that ordinary meaning; it does not establish a neural mechanism, an evolved function, or the effectiveness of this check-in.
+2. Group-level bodily associations do not establish required signs for a particular person. The within-category variability reviewed in R2 and R3 does not support treating the old scripts as diagnostic checklists. It does not make bodily observations useless.
+3. Preserve the catalog as the site’s practical vocabulary. Overlapping words such as Afraid, Scared, and Frightened need not represent distinct biological categories. Anxiety and Anxious remain separate catalog entries with an explicit noun/adjective relationship.
+4. Use research only for the proposition it actually supports. The new Calm and Excited entries use the low-/high-arousal distinction in R1; Loneliness, Inspiration, Pain, and Tiredness use the bounded conceptual claims assigned below. No source is used to infer an individual’s Need or tell the person what action to take.
+5. Let the amount of supported information determine the length. Some words need one sentence. Do not pad them with body imagery, a ceremonial “researchers say” sentence, or a speculative adaptation story.
+
+The proposed copy was read against `docs/human-editorial-style.md`: no em dashes, no imposed body-cue triads, no unsupported mechanism claims, no universal safety inference, and no repeated evolutionary closing formula. Ordinary definitions are editorial paraphrases rather than formal scientific definitions or clinical criteria.
+
+## Approved implementation boundary
+
+- Use the same approved summary on the full Feeling page and in every check-in sheet. `candidateTerm` and `catalogOnlyTerms` already read `Feeling.summary`; no check-in-only text replacement or runtime “humanizer” is proposed.
+- Move the reviewed Feeling entities into `src/data/editorialCatalog.json` under one canonical Feeling owner and teach the deterministic catalog compiler to consume that owner. Preserve catalog order, slugs, titles, relationships, poem content, and other non-summary fields. Retire superseded legacy Feeling records through a deterministic migration after ownership is complete; do not hand-edit improved prose into the imported snapshot or retain shadow summary fallbacks.
+- Replace only the Numb `definition` in the authored `src/data/alexithymiaSupport.json`; keep its current role, source URL, profile key, coordinates, and scoring unchanged. Regenerate its compiled asset through the existing compiler.
+- Carry the per-entry source sets below with the canonical summaries so provenance cannot drift from copy. The source register specifies the exact bibliography and raw human-facing URLs for review. Public source rendering is outside this copy-only package and must not be silently added as a UI redesign. The current check-in-to-Feeling-page navigation remains the same.
+- No expanded/details narrative currently exists for these Feeling summaries, and this package adds none. The final text is exactly the proposed paragraph for each entry below.
+- Catalog membership stays at 48 Feelings, 67 Needs, and 56 Faux Feelings. No term is added, removed, or reclassified. No Need content, associations, body-cue map, weights, shape coordinates, matching formula, observation detector, Journal content, strategy, or user submission is changed.
+- No system-strategy addition, removal, rename, rewrite, or association change is proposed. Repository-resident and profile-owned user content remain protected.
+- After approval, add meaningful coverage at the compiler/data boundary for canonical Feeling ownership, complete 48-entry coverage, source ownership, and consumption of the same summary by candidate and catalog-only check-in terms. Run the foundation gate and scoped existing check-in browser cases after implementation. Do not use literal-copy snapshot tests as a substitute for scientific review.
+
+## Source register
+
+All source destinations were checked on 2026-10-28. Publisher/official destinations are preserved even where automated access was blocked; access notes identify whether full text, abstract, or indexed primary text was examined. A failed crawler fetch is not evidence that the human-facing URL is wrong. No generic doi.org redirects, search-result links, tracking parameters, or ChatGPT links are proposed as citations.
+
+### Lexical references
+
+Each Feeling entry links to its exact Merriam-Webster destination below. These references establish ordinary usage only. Definitions were read at the publisher, including the relevant emotional sense where a word has several senses. Additional linked headwords were checked when a definition was circular: terror, disappointed, resentment, boredom, hope, pride, relief, and distress. Source links are separate from the final proposed paragraph.
+
+### R1
+
+McManus, M. D., Nakamura, J., & Siegel, J. T. (2024). Hiding in plain sight: The distinct importance of low-arousal positive affect. Motivation and Emotion, 48, 336–422.
+
+https://link.springer.com/article/10.1007/s11031-024-10062-5
+
+**Claim supported:** Calm/relaxation as low-arousal positive states and excitement as higher-arousal positive affect.
+
+**Limit:** A narrative synthesis following a systematic search, not a validated rule for identifying an individual's state. The lexical part of each entry is an editorial paraphrase.
+
+**Access:** Publisher full text examined.
+
+DOI identifier: `10.1007/s11031-024-10062-5`.
+
+### R2
+
+Siegel, E. H., et al. (2018). Emotion fingerprints or emotion populations? A meta-analytic investigation of autonomic features of emotion categories. Psychological Bulletin, 144(4), 343–393.
+
+https://doi.apa.org/doi/10.1037/bul0000128
+
+**Claim supported:** Variation within emotion categories and limits on identifying an emotion from an assumed autonomic pattern. Directly supports the variability sentence in Fear; also constrains editorial decisions across the review.
+
+**Limit:** Laboratory studies in nonclinical adults do not settle every theory of emotion or establish that bodily information is useless.
+
+**Access:** Full text examined in PMC; publisher destination resolved from the article DOI but automated publisher access failed.
+
+DOI identifier: `10.1037/bul0000128`.
+
+Author manuscript/full text: https://pmc.ncbi.nlm.nih.gov/articles/PMC5876074/
+
+### R3
+
+Behnke, M., Kreibig, S. D., Kaczmarek, L. D., Assink, M., & Gross, J. J. (2022). Autonomic nervous system activity during positive emotions: A meta-analytic review. Emotion Review, 14(2), 132–160.
+
+https://journals.sagepub.com/doi/full/10.1177/17540739211073084
+
+**Claim supported:** Reviewer evidence for removing confident positive-emotion physiology explanations.
+
+**Limit:** Differences in some measures and considerable variability do not justify replacing the old prose with a claim that no physiological differences can ever be found.
+
+**Access:** Publisher full text examined.
+
+DOI identifier: `10.1177/17540739211073084`.
+
+**Reviewer evidence only.** This source constrains the repair; it is not assigned to a new public paragraph.
+
+### R4
+
+Hawkley, L. C., & Cacioppo, J. T. (2010). Loneliness matters: A theoretical and empirical review of consequences and mechanisms. Annals of Behavioral Medicine, 40(2), 218–227.
+
+https://academic.oup.com/abm/article-lookup/doi/10.1007/s12160-010-9210-8
+
+**Claim supported:** Perceived shortfall in the quantity or quality of connection; loneliness is not equivalent to being alone.
+
+**Limit:** Only this conceptual distinction is used; the entry makes no claim about an individual's evolutionary function or health prognosis.
+
+**Access:** PMC full text and PubMed abstract examined. Publisher link was obtained from PubMed; automated publisher access failed.
+
+DOI identifier: `10.1007/s12160-010-9210-8`.
+
+Author manuscript/full text: https://pmc.ncbi.nlm.nih.gov/articles/PMC3874845/
+
+### R5
+
+Thrash, T. M., & Elliot, A. J. (2003). Inspiration as a psychological construct. Journal of Personality and Social Psychology, 84(4), 871–889.
+
+https://content.apa.org/journals/psp/84/4/871
+
+**Claim supported:** The proposed construct includes evocation, a sense of going beyond an existing possibility, and motivation. The new entry is a plain-language conceptual paraphrase.
+
+**Limit:** The abstract supports this bounded description; it supplies no evidence for the deleted dopamine claim or a single neural explanation.
+
+**Access:** PubMed abstract examined. Publisher link was obtained from PubMed; full text was not accessible.
+
+DOI identifier: `10.1037/0022-3514.84.4.871`.
+
+Verified scholarly record: https://pubmed.ncbi.nlm.nih.gov/12703654/
+
+### R6
+
+Raja, S. N., et al. (2020). The revised International Association for the Study of Pain definition of pain: Concepts, challenges, and compromises. Pain, 161(9), 1976–1982.
+
+https://journals.lww.com/pain/abstract/2020/09000/the_revised_international_association_for_the.6.aspx
+
+**Claim supported:** Pain has sensory and emotional aspects, is personal, and is not identical to nociception or a visible tissue injury.
+
+**Limit:** This definition does not diagnose a cause or prescribe care. Emotional hurt is handled separately through the ordinary-language Hurt entry.
+
+**Access:** PMC full text and IASP terminology page examined; publisher access returned a payment wall.
+
+DOI identifier: `10.1097/j.pain.0000000000001939`.
+
+Author manuscript/full text: https://pmc.ncbi.nlm.nih.gov/articles/PMC7680716/
+
+Official terminology: https://www.iasp-pain.org/resources/terminology/
+
+### R7
+
+Billones, R., Liwang, J. K., Butler, K., Graves, L., & Saligan, L. N. (2021). Dissecting the fatigue experience: A scoping review of fatigue definitions, dimensions, and measures in non-oncologic medical conditions. Brain, Behavior, & Immunity - Health, 15, 100266.
+
+https://www.sciencedirect.com/science/article/pii/S2666354621000697
+
+**Claim supported:** Fatigue has physical and mental dimensions; the old simple energy-store explanation is not retained.
+
+**Limit:** The review concerns medical populations and does not establish a cause for ordinary tiredness. The entry uses a broad word meaning and does not equate tiredness with a disorder.
+
+**Access:** PubMed abstract and indexed publisher text examined; full-text fetches were blocked.
+
+DOI identifier: `10.1016/j.bbih.2021.100266`.
+
+Verified scholarly record: https://pubmed.ncbi.nlm.nih.gov/34589772/
+
+### A1
+
+American Psychological Association. APA Dictionary of Psychology: anger.
+
+https://dictionary.apa.org/anger
+
+**Claim supported:** Anger can concern frustration, perceived injury, or injustice; emotion and aggression are distinguishable.
+
+**Limit:** A lexical reference, not evidence of a dedicated anger circuit or of treatment effectiveness.
+
+**Access:** APA's topic page and indexed dictionary entry examined.
+
+### A2
+
+American Psychological Association. APA Dictionary of Psychology: anxiety.
+
+https://dictionary.apa.org/anxiety
+
+**Claim supported:** Apprehension about a possible unwanted event; anxious is the adjective.
+
+**Limit:** Used for meaning only; the entry does not apply diagnostic criteria or impose a sharp fear/anxiety boundary on an individual.
+
+**Access:** Indexed primary dictionary text examined; direct fetch returned the page shell.
+
+### A3
+
+American Psychological Association. APA Dictionary of Psychology: sadness.
+
+https://dictionary.apa.org/sadness
+
+**Claim supported:** Unhappiness, commonly associated with loss, with a range of intensity.
+
+**Limit:** A lexical description does not establish a depressive disorder or a required precipitating event.
+
+**Access:** Indexed primary dictionary text examined; tracking parameters omitted from the citation URL.
+
+### A4
+
+American Psychological Association. APA Dictionary of Psychology: distress.
+
+https://dictionary.apa.org/distress
+
+**Claim supported:** An unpleasant emotional state whose specific quality can be unspecified or difficult to identify.
+
+**Limit:** A broad term, not a distinct mechanism or proof of a particular Need.
+
+**Access:** Indexed primary dictionary text examined; direct fetch returned the page shell.
+
+### A5
+
+American Psychological Association. APA Dictionary of Psychology: jealousy.
+
+https://dictionary.apa.org/jealousy
+
+**Claim supported:** The narrower relationship-threat sense of jealousy; the Merriam-Webster entry separately supports ordinary envy-related usage.
+
+**Limit:** No partner, rival, relationship type, or cause is inferred from the person's choice of word.
+
+**Access:** Indexed primary dictionary text examined.
+
+## Exact proposed Feeling summaries
+
+The current paragraph is copied verbatim from the baseline for comparison. Only the paragraph under **Proposed** is replacement site copy. **Review finding** and **Sources** are review metadata. Source identifiers resolve to the complete bibliography above; the Merriam-Webster title and URL specify the lexical reference for that entry.
+
+Calm is first for direct comparison with the user’s screenshot. The remaining entries are alphabetical; this review order does not change the live catalog order.
+
+### Calm
+
+Catalog slug: `calm`.
+
+**Current**
+
+> Your breathing steadies, muscles soften, and thoughts move with easy clarity. Calm often arrives when your nervous system registers safety and the pace of life matches your capacity. Researchers often link this regulated state to the parasympathetic response that lets bodies recover and integrate experience.
+
+**Proposed**
+
+Calm describes feeling settled or at ease, with little agitation. Researchers generally group it with other quiet, pleasant states, such as relaxation.
+
+**Review finding:** Remove the bodily triad, effortless-thought imagery, safety inference, and the unsupported parasympathetic recovery-and-integration explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *calm*: https://www.merriam-webster.com/dictionary/calm
+- R1: https://link.springer.com/article/10.1007/s11031-024-10062-5
+
+### Afraid
+
+Catalog slug: `afraid`.
+
+**Current**
+
+> Your body may tighten, your pupils widen, and your heart race as adrenaline prepares you for protection or escape. This feeling can arise when something seems uncertain or unsafe. Many scientists suggest fear may have evolved to help humans detect and respond quickly to danger.
+
+**Proposed**
+
+Afraid means feeling fear or apprehension about something. It overlaps with scared and frightened.
+
+**Review finding:** Remove the fixed adrenaline and pupil narrative and the generic evolutionary attribution.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *afraid*: https://www.merriam-webster.com/dictionary/afraid
+
+### Agitated
+
+Catalog slug: `agitated`.
+
+**Current**
+
+> You might feel restless energy in your limbs, shallow breathing, or an urge to move. This state may appear when your mind or environment feels unsettled. It may have evolved to signal the body to prepare for action or to restore balance.
+
+**Proposed**
+
+Agitated means feeling upset or unsettled.
+
+**Review finding:** Remove the bodily script and the speculative claim that agitation evolved to restore balance.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *agitated*: https://www.merriam-webster.com/dictionary/agitated
+
+### Alarmed
+
+Catalog slug: `alarmed`.
+
+**Current**
+
+> Your heartbeat may spike suddenly, your breath catch, and your body freeze before deciding whether to flee or fight. This feeling may appear when something unexpected challenges your sense of safety. Evolutionarily, this rapid response helps orient attention toward immediate threats.
+
+**Proposed**
+
+Alarmed means feeling urgently concerned or frightened about a possible danger.
+
+**Review finding:** Remove the fixed freeze-flee-fight sequence and the unsupported evolutionary attribution.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *alarmed*: https://www.merriam-webster.com/dictionary/alarmed
+
+### Angry
+
+Catalog slug: `angry`.
+
+**Current**
+
+> Heat might rise in your chest or face, your jaw may tighten, and you may feel energy building to act. Anger often appears when you perceive an obstacle to something deeply important or when a boundary feels crossed. Biologists often view anger as an evolved signal to mobilize energy toward defending fairness or protection.
+
+**Proposed**
+
+Anger involves displeasure about something experienced as hurtful or unfair, or about a blocked goal. Feeling angry does not by itself mean acting aggressively.
+
+**Review finding:** Remove the bodily script and the unsupported general attribution to biologists; preserve the distinction between an emotion and behavior.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *angry*: https://www.merriam-webster.com/dictionary/angry
+- A1: https://dictionary.apa.org/anger
+
+### Antagonistic
+
+Catalog slug: `antagonistic`.
+
+**Current**
+
+> You might feel your chest puff or muscles stiffen as your body prepares to assert itself. This feeling may arise when you sense opposition or threat to your viewpoint or values. Researchers often link such states to dominance and defense systems meant to establish boundaries within social groups.
+
+**Proposed**
+
+Antagonistic describes a feeling of opposition or dislike toward someone or something.
+
+**Review finding:** Remove the postural script and the unsupported dominance-system explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *antagonistic*: https://www.merriam-webster.com/dictionary/antagonistic
+
+### Anxiety
+
+Catalog slug: `anxiety`.
+
+**Current**
+
+> Your stomach may flutter, muscles tense, and thoughts race through possible futures. Anxiety can surface when the unknown feels risky or when you sense you must stay alert. Scientists often believe it may have evolved to help anticipate and prevent harm before it happens.
+
+**Proposed**
+
+Anxiety involves apprehension or worry about possible danger or an unwanted outcome. The concern can be specific or difficult to identify.
+
+**Review finding:** Remove the body script and the unsupported ancestral harm-prevention explanation; the description does not imply an anxiety disorder.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *anxiety*: https://www.merriam-webster.com/dictionary/anxiety
+- A2: https://dictionary.apa.org/anxiety
+
+### Anxious
+
+Catalog slug: `anxious`.
+
+**Current**
+
+> You may notice tightness in your shoulders, a quickened pulse, or restlessness in your legs. This feeling may visit when uncertainty combines with concern about outcomes. It reflects the brain’s vigilance system — a useful adaptation that once helped early humans stay safe from unseen dangers.
+
+**Proposed**
+
+Anxious means feeling worried or apprehensive about what might happen. It is the adjective for anxiety.
+
+**Review finding:** Remove the bodily script and ancestral vigilance story; do not invent a distinct biological category for the adjective.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *anxious*: https://www.merriam-webster.com/dictionary/anxious
+- A2: https://dictionary.apa.org/anxiety
+
+### Bewildered
+
+Catalog slug: `bewildered`.
+
+**Current**
+
+> Your eyes may widen, your forehead wrinkle, and your mind pause as it struggles to make sense of conflicting signals. This feeling can arise when the world suddenly seems unfamiliar. Cognitive scientists suggest confusion encourages humans to slow down and seek new understanding.
+
+**Proposed**
+
+Bewildered means feeling very confused or unable to make sense of what is happening.
+
+**Review finding:** Replace the facial and cognitive script; do not claim that bewilderment necessarily improves understanding.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *bewildered*: https://www.merriam-webster.com/dictionary/bewildered
+
+### Confused
+
+Catalog slug: `confused`.
+
+**Current**
+
+> Your thoughts may feel cloudy or circular, and your body may grow still as your mind tries to orient. Confusion can appear when information conflicts or when expectations aren’t met. It may have evolved to prompt re-evaluation, allowing flexible problem-solving.
+
+**Proposed**
+
+Confused means having difficulty understanding something or making sense of what is happening.
+
+**Review finding:** Use the everyday sense; remove the bodily script and speculative evolutionary problem-solving explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *confused*: https://www.merriam-webster.com/dictionary/confused
+
+### Contented
+
+Catalog slug: `contented`.
+
+**Current**
+
+> Your breath may sink deeper and muscles let go as you register that life feels sufficiently met. Contentment arises when needs feel attended to without striving for more. Studies associate this settled satisfaction with gratitude practices that calm stress responses.
+
+**Proposed**
+
+Contentment is a feeling of satisfaction with how things are at the moment.
+
+**Review finding:** Remove the bodily script, the implication that Needs are all attended to, and the unsourced gratitude-practice and stress-response claim.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *contented*: https://www.merriam-webster.com/dictionary/contented
+
+### Defiant
+
+Catalog slug: `defiant`.
+
+**Current**
+
+> Your spine may straighten and your chest expand as energy gathers to resist control. This feeling may appear when autonomy or dignity feels threatened. Psychologists often view defiance as an adaptive impulse to preserve agency and self-direction.
+
+**Proposed**
+
+Defiant describes feeling resistant to a demand or to someone trying to direct you. It can involve an urge to refuse or push back.
+
+**Review finding:** Remove the postural script and the unsupported general claim that defiance is adaptive; the feeling does not justify any particular behavior.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *defiant*: https://www.merriam-webster.com/dictionary/defiant
+
+### Desperation
+
+Catalog slug: `desperation`.
+
+**Current**
+
+> You may notice shallow breathing, trembling, or frantic energy as your body seeks a way out. This feeling can arise when options seem few and survival feels uncertain. Biologically, such intensity pushes organisms to take immediate action to restore safety.
+
+**Proposed**
+
+Desperation describes severe distress when there seems to be little hope of a way out. It can include an urgent wish for things to change.
+
+**Review finding:** Remove the body script and the unsupported claim that biological intensity requires immediate safety-restoring action.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *desperation*: https://www.merriam-webster.com/dictionary/desperation
+
+### Disappointment
+
+Catalog slug: `disappointment`.
+
+**Current**
+
+> Your shoulders might drop, your face soften, and energy leave your body. This feeling visits when hopes or expectations go unmet. Scientists suggest it may have evolved to help people pause and reassess goals after unmet outcomes.
+
+**Proposed**
+
+Disappointment is the displeasure or sadness felt when a hoped-for or expected outcome does not happen.
+
+**Review finding:** Remove the bodily script and the unsupported adaptation story.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *disappointed*: https://www.merriam-webster.com/dictionary/disappointed
+
+### Distressed
+
+Catalog slug: `distressed`.
+
+**Current**
+
+> Your breathing may quicken, your face tighten, or your chest feel heavy. This feeling can arise when multiple needs compete or when uncertainty feels unmanageable. The human stress response may have evolved to mobilize resources for coping or seeking support.
+
+**Proposed**
+
+Distress is emotional discomfort or suffering. The word can describe a mixture of unpleasant feelings without naming one specific emotion.
+
+**Review finding:** Remove the bodily script, unsupported stress-function story, and the model-inconsistent statement that Needs compete.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *distress*: https://www.merriam-webster.com/dictionary/distress
+- A4: https://dictionary.apa.org/distress
+
+### Embarrassed
+
+Catalog slug: `embarrassed`.
+
+**Current**
+
+> You may feel warmth rise to your face, look down, or avoid eye contact. This feeling occurs when you believe others see you in a way you didn’t intend. Social scientists find embarrassment may have evolved to repair trust by signaling awareness of social norms.
+
+**Proposed**
+
+Embarrassment is feeling self-conscious or awkward about how you appear to other people. It can follow unwanted attention or a perceived social mistake.
+
+**Review finding:** Remove the facial and gaze script and the unsupported general claim that embarrassment evolved to repair trust.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *embarrassed*: https://www.merriam-webster.com/dictionary/embarrassed
+
+### Energized
+
+Catalog slug: `energized`.
+
+**Current**
+
+> Muscles can feel ready and responsive when energy surges through your system. Feeling energized often follows meaningful rest, nourishment, or inspiration. Researchers connect it with metabolic balance that supports sustained focus and movement.
+
+**Proposed**
+
+Energized means feeling lively or having energy available for activity.
+
+**Review finding:** Remove the muscular imagery, assumed causes, and the unsupported metabolic-balance and sustained-focus explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *energized*: https://www.merriam-webster.com/dictionary/energized
+
+### Enraged
+
+Catalog slug: `enraged`.
+
+**Current**
+
+> You might feel heat surge, muscles clench, and vision narrow. This intense state often follows perceived injustice or harm. From an evolutionary view, rage focuses all energy on removing immediate threats or restoring violated boundaries.
+
+**Proposed**
+
+Enraged means intensely angry or furious.
+
+**Review finding:** Remove the bodily script and the claim that rage directs all energy toward removing threats.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *enraged*: https://www.merriam-webster.com/dictionary/enraged
+
+### Excited
+
+Catalog slug: `excited`.
+
+**Current**
+
+> Your pulse may quicken and attention sharpen as anticipation builds. Excitement surfaces when a valued event draws near or fresh challenges invite engagement. Psychologists describe it as high-arousal energy that prepares the body for purposeful action.
+
+**Proposed**
+
+Excitement is a state of heightened enthusiasm or eager anticipation. It usually involves more emotional activation than calm or relaxation.
+
+**Review finding:** Remove the pulse and attention script and the claim that this state prepares the body for purposeful action.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *excited*: https://www.merriam-webster.com/dictionary/excited
+- R1: https://link.springer.com/article/10.1007/s11031-024-10062-5
+
+### Fear
+
+Catalog slug: `fear`.
+
+**Current**
+
+> Your heartbeat accelerates, palms sweat, and you may instinctively scan your surroundings. This feeling surfaces when safety seems at risk. Evolutionarily, fear’s quick activation of the fight–flight system has been essential for survival.
+
+**Proposed**
+
+Fear is an unpleasant feeling related to perceived danger or harm. Its bodily expression varies with the person and situation.
+
+**Review finding:** Remove the fixed heart-rate and sweating script and the identification of conscious fear with one fight-or-flight system.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *fear*: https://www.merriam-webster.com/dictionary/fear
+- R2: https://doi.apa.org/doi/10.1037/bul0000128
+
+### Frightened
+
+Catalog slug: `frightened`.
+
+**Current**
+
+> You may feel frozen, breathless, or small in your body. This state may arise when a danger feels overwhelming. The freeze response is an ancient mammalian defense meant to increase survival when escape seems impossible.
+
+**Proposed**
+
+Frightened means feeling afraid in response to something perceived as threatening. It overlaps with scared and afraid.
+
+**Review finding:** Do not equate this everyday word with a particular defensive response or an inability to escape.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *frightened*: https://www.merriam-webster.com/dictionary/frightened
+
+### Frustrated
+
+Catalog slug: `frustrated`.
+
+**Current**
+
+> Your jaw may tighten, brows knit, and energy surge as effort meets resistance. Frustration often arrives when repeated attempts don't land the outcome you imagined. Researchers often view it as a signal to pause, adjust strategy, or seek collaboration before energy is depleted.
+
+**Proposed**
+
+Frustration is the unpleasant feeling associated with an obstacle to a goal or an effort that is not producing the intended result.
+
+**Review finding:** Remove the body script and the implied advice to pause, collaborate, or change strategy.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *frustrated*: https://www.merriam-webster.com/dictionary/frustrated
+
+### Helpless
+
+Catalog slug: `helpless`.
+
+**Current**
+
+> Your body may feel heavy, your movements slow, and your energy drained. This feeling may come when repeated effort fails to bring change. Researchers often see helplessness as a signal to conserve energy until new strategies or support appear.
+
+**Proposed**
+
+Helpless describes feeling unable to deal with a situation or change it through your own actions.
+
+**Review finding:** Remove the bodily script and the unsupported claim that helplessness signals energy conservation; do not infer a history of failed efforts.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *helpless*: https://www.merriam-webster.com/dictionary/helpless
+
+### Hopeful
+
+Catalog slug: `hopeful`.
+
+**Current**
+
+> Your gaze may brighten as you glimpse pathways toward what matters. Hope grows when resources, support, or possibilities seem within reach. Researchers describe it as a forward-looking motivation system that helps people persist through uncertainty.
+
+**Proposed**
+
+Hopeful means wanting a positive outcome and seeing it as possible. The outcome can still be uncertain.
+
+**Review finding:** Remove the gaze imagery, assumed access to resources, and the reduction of hope to one motivation system.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *hope*: https://www.merriam-webster.com/dictionary/hope
+
+### Hostile
+
+Catalog slug: `hostile`.
+
+**Current**
+
+> You might sense tension in your jaw or shoulders, with thoughts focused on opposition. This feeling surfaces when you perceive someone as adversarial or unsafe. It may have evolved to protect social standing and resources within groups.
+
+**Proposed**
+
+Hostile describes strong unfriendliness or ill will toward someone or something. It can include feeling opposed to them.
+
+**Review finding:** Remove the bodily script and the unsupported social-standing and resource-defense adaptation claim.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *hostile*: https://www.merriam-webster.com/dictionary/hostile
+
+### Hurt
+
+Catalog slug: `hurt`.
+
+**Current**
+
+> You may feel sharp, throbbing, or dull sensations signaling that a part of you needs care. Pain can focus attention where healing or rest is required. The capacity to feel physical pain is widely viewed as a universal adaptation protecting organisms from further harm.
+
+**Proposed**
+
+Hurt can mean emotional pain, including feeling wounded by someone's words or actions. The word is also used for physical pain.
+
+**Review finding:** The current entry reduces hurt to physical pain and adds an uncited universal adaptation claim.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *hurt*: https://www.merriam-webster.com/dictionary/hurt
+
+### Impotent
+
+Catalog slug: `impotent`.
+
+**Current**
+
+> You may feel your limbs heavy, your chest sunken, and energy withdrawn inward. This feeling may appear when you sense no power to influence events. It may have evolved to conserve resources when immediate action cannot change the outcome.
+
+**Proposed**
+
+Here, impotent means feeling unable to affect a situation or accomplish what you intend.
+
+**Review finding:** Use the existing nonsexual, everyday sense of lacking power; remove the bodily script and energy-conservation adaptation claim.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *impotent*: https://www.merriam-webster.com/dictionary/impotent
+
+### In pain
+
+Catalog slug: `in-pain`.
+
+**Current**
+
+> Your body’s nerve signals draw focus to a specific spot that needs attention or healing. Pain may bring tears, tension, or stillness. Universally, it may have evolved to protect the body from further harm and prompt restoration.
+
+**Proposed**
+
+Pain is an unpleasant experience involving sensation and emotion. It can occur without a visible injury.
+
+**Review finding:** Correct the identification of pain with nerve signals and a location that requires healing; remove the universal adaptation claim.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *pain*: https://www.merriam-webster.com/dictionary/pain
+- R6: https://journals.lww.com/pain/abstract/2020/09000/the_revised_international_association_for_the.6.aspx
+
+### Inspired
+
+Catalog slug: `inspired`.
+
+**Current**
+
+> Your eyes may widen and posture lift as fresh ideas gather momentum. Inspiration surfaces when something resonates with your values and reveals new possibilities. Neuroscientists note this spark often rides dopamine pathways that fuel curiosity and creative exploration.
+
+**Proposed**
+
+Inspiration involves a sense of new possibility and motivation to act on it. It may be prompted by an idea or by something encountered.
+
+**Review finding:** Remove the bodily script and the unsupported dopamine-pathway explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *inspiration*: https://www.merriam-webster.com/dictionary/inspiration
+- R5: https://content.apa.org/journals/psp/84/4/871
+
+### Irritated
+
+Catalog slug: `irritated`.
+
+**Current**
+
+> You might feel heat behind your eyes or tension around your mouth. Irritation tends to arise from repeated small frustrations or overstimulation. Scientists view it as a mild activation of the same defensive systems that produce anger.
+
+**Proposed**
+
+Irritated means feeling annoyed or bothered, including when something repeatedly frustrates you.
+
+**Review finding:** Remove the bodily script and the unsupported claim that this is a specified defensive-system activation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *irritated*: https://www.merriam-webster.com/dictionary/irritated
+
+### Jealous
+
+Catalog slug: `jealous`.
+
+**Current**
+
+> You may feel tightness in the chest or stomach, and your attention may fixate on a valued bond or resource. This feeling surfaces when something precious feels threatened by loss to another. Evolutionary psychologists often describe jealousy as a mechanism to protect attachment and investment in relationships.
+
+**Proposed**
+
+Jealousy can involve distress about a valued relationship seeming threatened by someone else. In everyday use, jealous can also mean wanting an advantage someone else has.
+
+**Review finding:** Remove the bodily script and the uncited evolutionary relationship-protection explanation; keep ordinary usage distinct from the narrower relationship sense.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *jealous*: https://www.merriam-webster.com/dictionary/jealous
+- A5: https://dictionary.apa.org/jealousy
+
+### Joyful
+
+Catalog slug: `joyful`.
+
+**Current**
+
+> A smile may spread quickly and energy dance through your body when joy bursts forth. Joy often blooms in moments of connection, play, or meaning shared with others. Social scientists view it as a bonding emotion that reinforces cooperative relationships.
+
+**Proposed**
+
+Joyful means feeling joy, or strong happiness and delight.
+
+**Review finding:** Remove the poetic movement and blooming imagery and the unsupported reduction of joy to social bonding.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *joyful*: https://www.merriam-webster.com/dictionary/joyful
+
+### Lonely
+
+Catalog slug: `lonely`.
+
+**Current**
+
+> Your body may ache for touch or warmth, your chest feel hollow, and your mind turn toward memories of connection. This feeling may appear when social bonds feel absent. Research suggests loneliness may have evolved as a signal motivating humans to reconnect with others for mutual survival.
+
+**Proposed**
+
+Loneliness is distress about having less connection, or less satisfying connection, than you want. It can occur while alone or in other people's company.
+
+**Review finding:** Replace the imagined bodily ache and the adaptation claim with the distinction between perceived connection and being alone.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *lonely*: https://www.merriam-webster.com/dictionary/lonely
+- R4: https://academic.oup.com/abm/article-lookup/doi/10.1007/s12160-010-9210-8
+
+### Overwhelmed
+
+Catalog slug: `overwhelmed`.
+
+**Current**
+
+> You may notice shallow breathing, mental fog, or the impulse to withdraw. This feeling may arise when demands exceed what your system can process. It may have evolved as a signal to pause, rest, or seek help before depletion.
+
+**Proposed**
+
+Overwhelmed describes feeling that the intensity of an experience, or what it asks of you, is more than you can manage.
+
+**Review finding:** Remove the body script and the adaptation claim that also implies rest or help as a prescribed response.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *overwhelmed*: https://www.merriam-webster.com/dictionary/overwhelmed
+
+### Peaceful
+
+Catalog slug: `peaceful`.
+
+**Current**
+
+> Your face softens and attention widens when conflicts quiet and surroundings feel safe. Peacefulness appears as competing demands settle and harmony feels possible. Polyvagal research connects it with social engagement states that let people rest and relate.
+
+**Proposed**
+
+Peaceful describes a sense of inner quiet or freedom from agitation. It overlaps with calm and relaxed.
+
+**Review finding:** Remove the bodily script, the inference of environmental safety, and the unsourced polyvagal explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *peaceful*: https://www.merriam-webster.com/dictionary/peaceful
+
+### Playful
+
+Catalog slug: `playful`.
+
+**Current**
+
+> You might feel quick, inventive movements and a spark of mischief when playfulness arrives. This feeling may show up when the environment feels safe enough to experiment and improvise. Biologists note that mammals use play to learn skills and deepen trust.
+
+**Proposed**
+
+Playful means feeling inclined toward play or a lighthearted way of interacting.
+
+**Review finding:** Remove the movement script, the requirement of felt safety, and the cross-species learning-and-trust generalization.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *playful*: https://www.merriam-webster.com/dictionary/playful
+
+### Powerless
+
+Catalog slug: `powerless`.
+
+**Current**
+
+> You might feel tension drain from your muscles and a sense of collapse in your posture. This feeling may come when outcomes seem beyond your control. Scientists suggest it may have evolved to prevent futile effort and redirect focus toward achievable goals.
+
+**Proposed**
+
+Powerless describes a sense of having little or no influence over what happens.
+
+**Review finding:** Remove the collapse script and the unsupported claim that powerlessness prevents futile effort.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *powerless*: https://www.merriam-webster.com/dictionary/powerless
+
+### Proud
+
+Catalog slug: `proud`.
+
+**Current**
+
+> Your chest may rise and shoulders open as you recognize meaningful effort bearing fruit. Pride appears when achievements align with your values and are witnessed by yourself or others. Psychologists link it to a sense of competence that strengthens bonds within communities.
+
+**Proposed**
+
+Proud describes pleasure or satisfaction in an achievement or a valued aspect of yourself. It can also refer to pride in someone else.
+
+**Review finding:** Remove the postural script, the requirement that achievements align with values, and the unsupported community-bonding claim.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *pride*: https://www.merriam-webster.com/dictionary/pride
+
+### Relaxed
+
+Catalog slug: `relaxed`.
+
+**Current**
+
+> Your limbs may feel pleasantly heavy as your nervous system shifts out of high alert. Relaxation grows when you have enough time, space, and permission to unwind. Researchers associate it with parasympathetic activation that aids digestion and repair.
+
+**Proposed**
+
+Relaxed means feeling at ease or under less strain. It can refer to mental ease as well as reduced physical tension.
+
+**Review finding:** Remove the body script and the broad parasympathetic, digestion, and repair mechanism; reduced tension remains a possible meaning, not a required sign.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *relaxed*: https://www.merriam-webster.com/dictionary/relaxed
+
+### Relieved
+
+Catalog slug: `relieved`.
+
+**Current**
+
+> You may feel a long exhale and loosened muscles after strain eases. Relief arrives when a feared outcome passes or support appears in time. Physiologists observe cortisol levels drop during this release, allowing the body to reset.
+
+**Proposed**
+
+Relief is the easing of distress or discomfort when something unwanted ends, lessens, or does not happen.
+
+**Review finding:** Remove the bodily script and the unsupported cortisol-drop and body-reset claim.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *relief*: https://www.merriam-webster.com/dictionary/relief
+
+### Resentful
+
+Catalog slug: `resentful`.
+
+**Current**
+
+> You may feel tightness in your chest and replay thoughts of unfairness. This feeling may build when past actions still feel unresolved. Researchers often view resentment as an emotional reminder to address unmet needs for fairness or acknowledgment.
+
+**Proposed**
+
+Resentment is lingering bitterness or anger about something experienced as hurtful or unfair.
+
+**Review finding:** Remove the bodily script and the claim that resentment identifies particular unmet Needs.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *resentment*: https://www.merriam-webster.com/dictionary/resentment
+
+### Sad
+
+Catalog slug: `sad`.
+
+**Current**
+
+> You might feel tears welling, shoulders drooping, and energy drawing inward. Sadness appears when something meaningful feels lost. Many scientists suggest it may have evolved to slow us down and invite reflection or social comfort.
+
+**Proposed**
+
+Sadness is an unhappy or sorrowful feeling, often associated with loss or disappointment. Its intensity can range from mild to severe.
+
+**Review finding:** Remove the bodily triad and the uncited evolutionary account.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *sad*: https://www.merriam-webster.com/dictionary/sad
+- A3: https://dictionary.apa.org/sadness
+
+### Scared
+
+Catalog slug: `scared`.
+
+**Current**
+
+> Your breath may quicken, your muscles tense, and you may instinctively seek closeness or escape. This feeling may arise when danger feels near. It is part of a deeply conserved biological system designed to protect from harm.
+
+**Proposed**
+
+Scared is an everyday word for feeling fear. People also use afraid and frightened for similar experiences.
+
+**Review finding:** Remove the prescribed body and action pattern and the single-system biological explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *scared*: https://www.merriam-webster.com/dictionary/scared
+
+### Tense
+
+Catalog slug: `tense`.
+
+**Current**
+
+> You may feel your neck or back tighten, jaw clench, and breath stay shallow. Tension shows the body’s effort to hold itself ready under stress. Physiology suggests it’s a short-term survival mechanism that becomes uncomfortable when prolonged.
+
+**Proposed**
+
+Tense means feeling strained or on edge, as when waiting anxiously for something to happen.
+
+**Review finding:** Keep the ordinary sense of strain without presenting a particular muscle and breathing pattern or a survival mechanism.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *tense*: https://www.merriam-webster.com/dictionary/tense
+
+### Terrified
+
+Catalog slug: `terrified`.
+
+**Current**
+
+> You might freeze completely, feel your heart pounding, or lose awareness of your surroundings. This feeling may arise when fear overwhelms capacity to act. Evolutionarily, the freeze response can reduce detection by predators and conserve energy.
+
+**Proposed**
+
+Terrified is a word for intense fear or terror.
+
+**Review finding:** Remove the required-looking freeze narrative and the unsupported predator-detection and energy-conservation explanation.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *terror*: https://www.merriam-webster.com/dictionary/terror
+
+### Thwarted
+
+Catalog slug: `thwarted`.
+
+**Current**
+
+> Your body may lurch forward while something blocks progress, leaving lingering agitation. This feeling may come when effort meets resistance. It may have evolved to motivate persistence or creative problem-solving until the goal is met.
+
+**Proposed**
+
+Thwarted describes the feeling that an intended action or goal has been blocked.
+
+**Review finding:** Remove the bodily script and the claim that this state evolved to ensure persistence or creative problem-solving.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *thwarted*: https://www.merriam-webster.com/dictionary/thwarted
+
+### Tired
+
+Catalog slug: `tired`.
+
+**Current**
+
+> You may feel heaviness in your eyelids, slower thoughts, or a pull toward stillness. Fatigue arises when energy stores are low or overstimulation persists. Rest and sleep needs may have evolved to maintain cellular repair and cognitive clarity.
+
+**Proposed**
+
+Tired means feeling fatigued or short of energy. Tiredness can be physical or mental.
+
+**Review finding:** Remove the body script, the simple energy-store explanation, and the adaptation claim about repair and clarity.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *tired*: https://www.merriam-webster.com/dictionary/tired
+- R7: https://www.sciencedirect.com/science/article/pii/S2666354621000697
+
+### Upset
+
+Catalog slug: `upset`.
+
+**Current**
+
+> You might feel an unsettled stomach, tight chest, or sudden tears. This feeling may emerge when emotions conflict or expectations clash with reality. It reflects the body’s signal that care and recalibration are needed.
+
+**Proposed**
+
+Upset is a broad word for emotional distress. It can describe sadness or anger, including feelings that are difficult to name more precisely.
+
+**Review finding:** Remove the bodily script and the unsupported claim that the body is signaling a need for recalibration.
+
+**Sources:**
+
+- Merriam-Webster.com Dictionary, *upset*: https://www.merriam-webster.com/dictionary/upset
+- A4: https://dictionary.apa.org/distress
+
+## Exact additional emotion-word definitions
+
+All nine are lane-local Other emotion words, not new canonical Feelings. Their existing definitions are lexical descriptions and do not contain the body-script/mechanism pattern. Numb is the one clarity edit: “hard to reach” is replaced with a direct description of reduced emotional feeling. The other eight proposed definitions equal production exactly.
+
+### Bored (Other emotion word)
+
+Profile key: `bored`.
+
+**Current**
+
+> Feeling uninterested or not mentally engaged.
+
+**Retain verbatim**
+
+Feeling uninterested or not mentally engaged.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/bored
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+### Determined (Other emotion word)
+
+Profile key: `determined`.
+
+**Current**
+
+> Feeling firmly resolved to keep moving toward something.
+
+**Retain verbatim**
+
+Feeling firmly resolved to keep moving toward something.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/determined
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+### Disgust (Other emotion word)
+
+Profile key: `disgust`.
+
+**Current**
+
+> A strong feeling of aversion or revulsion.
+
+**Retain verbatim**
+
+A strong feeling of aversion or revulsion.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/disgust
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+### Gratitude (Other emotion word)
+
+Profile key: `gratitude`.
+
+**Current**
+
+> Appreciation for something received or valued.
+
+**Retain verbatim**
+
+Appreciation for something received or valued.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/gratitude
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+### Grief (Other emotion word)
+
+Profile key: `grief`.
+
+**Current**
+
+> Sorrow connected with loss.
+
+**Retain verbatim**
+
+Sorrow connected with loss.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/grief
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+### Guilt (Other emotion word)
+
+Profile key: `guilt`.
+
+**Current**
+
+> Distress about something a person believes they did or failed to do.
+
+**Retain verbatim**
+
+Distress about something a person believes they did or failed to do.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/guilt
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+### Numb (Other emotion word)
+
+Profile key: `numb`.
+
+**Current**
+
+> Feeling emotionally blunted, distant, or hard to reach.
+
+**Proposed**
+
+Feeling little or no emotion.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/numb
+
+**Review finding:** The emotional sense of numb is retained; no trauma mechanism, diagnosis, trigger, or physical-sensation requirement is inferred.
+
+### Shame (Other emotion word)
+
+Profile key: `shame`.
+
+**Current**
+
+> Painful self-consciousness about oneself.
+
+**Retain verbatim**
+
+Painful self-consciousness about oneself.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/shame
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+### Stress (Other emotion word)
+
+Profile key: `stress`.
+
+**Current**
+
+> Feeling taxed or strained by demands.
+
+**Retain verbatim**
+
+Feeling taxed or strained by demands.
+
+**Lexical source:** https://www.merriam-webster.com/dictionary/stress
+
+**Review finding:** The current wording is a bounded ordinary-language description. Retaining it makes no mechanistic or treatment claim.
+
+## Other term explanations checked
+
+**Shared Faux Feeling text, retained verbatim**
+
+> In allneeds, “[term]” is a Faux Feeling: a word that may combine an emotion with an interpretation of what happened. That label does not mean the event was unreal.
+
+This is explicitly the site’s framework explanation, not a finding that an event was unreal or that a specific emotion has been detected. All 56 catalog terms continue to use it without relationship changes.
+
+**User-entered word explanation, retained verbatim**
+
+> A word you entered for this moment. It stays with this check-in and is not added to the site’s Feeling list.
+
+This describes existing product behavior and does not interpret or rewrite the person’s chosen word.
+
+## Preapproval verification and approval state
+
+- Inventory check: every one of the 48 current Feeling slugs has exactly one replacement; none is missing or extra. All nine lane-local definitions are included, with eight exact retentions and one rewrite.
+- Source-to-claim check: lexical meaning, bounded conceptual research, and reviewer-only physiological evidence are distinguished. Source access limitations are recorded above. The removed mechanisms are not retained as implied advice or speculative explanations.
+- Model check: no new description makes a Feeling prove a Need, frames Needs as competing, or prescribes an action. Catalog roles and relationships are preserved.
+- Editorial check: proposed paragraphs contain no em dashes or body-script triads. No generic biological, neurological, or evolutionary closing sentence was added to fill space.
+- Baseline foundation verification on the source commit: `pnpm check` passed, including TypeScript, all **372 tests in 68 files**, production build, and production-asset verification. These checks verify the repository baseline, not scientific validity or an unimplemented UI. No new behavior tests were added for this documentation-only proposal.
+- At the preapproval checkpoint, the branch changed only `docs/content-evidence-review.md`, the protocol’s express preapproval exception. The following implementation record supersedes that checkpoint after user approval.
+- Implementation approval: **APPROVED 2026-10-28**. The user explicitly approved the package, covering the exact 48 summaries, the Numb replacement, eight retained definitions, associated source sets and limitations, and the canonical migration boundary. They also explicitly requested the dedicated Needs step and final-recap repair described below.
+
+
+## 2026-10-28 implementation and additional check-in approval
+
+The user approved the complete description package and requested two additional interaction repairs: give Needs their own skippable step before the sentence builder, populated from the existing Feeling-to-Need cross-references for Feelings marked Fits; and make the final page show the person's existing choices without apparent Feeling-prioritization controls. This explicit instruction supersedes the older four-stage layout and the restriction on displaying Feeling-linked Need possibilities. It does not authorize automatic Need selection or new associations.
+
+### Canonical content implementation
+
+- All 48 approved paragraphs and their source sets now belong to complete canonical Feeling entities in `editorialCatalog.json`. The shared `compileFeelingCatalog.mjs` owner serves the runtime catalog, Alexithymia candidate validation, and Observation lexicon validation. The superseded legacy Feeling array is empty.
+- The migration preserves catalog order, titles, slugs, all 528 forward Feeling-to-Need links, Faux Feeling references, body signals, and poem wording. One inherited poem URL for Thwarted had `utm_source=chatgpt.com`; only that tracking parameter was removed, preserving the same human-facing poem destination.
+- Numb uses the exact approved definition, and its generated runtime asset comes from the existing compiler. Coordinates, clue weights, catalog roles, and matching formulas are unchanged.
+- The Observation lexicon generated output remains byte-identical. Its existing local retrieval vocabulary consumes the revised summaries, so broad suggestion ordering can change without changing a detector, formula, or authored relationship. Regression coverage checks the actual relationship invariant rather than the incidental previous top-four inclusion of Tired for “I need rest.” No legacy prose is retained as a hidden retrieval fallback.
+
+### Needs stage and final recap
+
+- The five stages are What happened, Clues, Words, Needs, and Your words. Step four opens immediately with Possible Needs, naming the canonical Feelings marked Fits that supply each link. Shared Needs appear once, in alphabetical order. Intensity does not rank Needs.
+- Only canonical Feelings with existing links supply these suggestions. Maybe, Not this time, Faux Feelings, custom words, and the nine unbridged emotion words do not acquire inferred relationships. The person can still select any Need using Add Needs. Observation-derived suggestions retain their separate source labels.
+- A suggestion is never a selection. Continue and Skip preserve explicit choices, and the statement and Journal use only the selected Need slugs. Changing Feeling choices updates suggestions without deleting a Need the person already chose.
+- The final page is headed Your check-in. It shows Feeling words with Fits/Maybe and existing intensities in a quiet read-only list. The old reordering handler, arrow controls, row-level removals, and obsolete styles are deleted. Edit feelings returns to Words; Edit Needs returns to the Needs step.
+- Personal sentence edits retain the existing protection and replacement preview. Existing v2 final-page drafts migrate once to step five under schema v3, retaining identity, choices, ratings, source context, and personal text. Earlier steps keep their positions. A failed migration write still permits viewing the saved work.
+
+### Validation and publication
+
+- `pnpm check` passes: TypeScript, **380 tests in 69 files**, deterministic generated-data checks, production build, and production-asset verification. The Observation lexicon remains byte-identical (`24a3d7a75bca`). `git diff --check` passes.
+- A separate migration comparison verifies exact approved summary text for all 48 Feelings, the exact Numb sentence with no other candidate-data changes, all 528 Feeling-to-Need links, and unchanged Feeling identities, Faux Feeling links, and body signals.
+- **84 check-in browser cases pass on the final implementation**, covering the four new Needs/recap cases and existing check-in, chooser, selection, keyboard, observation handoff, and Journal flows. The new cases cover 390px, 1280px, 320px with doubled text, explicit selection versus suggestions, shared-Need deduplication, full-catalog additions, skipping, read-only ratings, personal sentence protection, history, and reload.
+- Reviewed captures show the separate Needs step and quiet recap on phone and desktop. Large-text testing found and repaired fixed-footer obstruction: the check-in scroller reserves space for its fixed controls, and the compact Continue action fits beside Skip. Edit feelings and Edit Needs are secondary text actions.
+- The wider 199-case browser sweep exposed old four-stage navigation assumptions, which were updated. An unrelated Journal test incorrectly compared a local date-time with a UTC calendar-date substring; this failure was reproduced on unchanged main, and the assertion now compares the correct browser-local-to-UTC conversion without changing Journal behavior. A subsequent four-worker sweep encountered browser-session closures, route/catalog timeouts, and a 250ms route-budget failure under load. Serial confirmations and offline recovery results are recorded in PR #194; the parallel attempt is not represented as a clean full-suite pass.
+- Browser checks use **Chromium 153.0.8010.0** supplied outside the repository after the bundled Chromium 151 download returned a truncated archive. No dependency, lockfile, or project browser configuration was changed for this environment workaround. Native iOS Safari and VoiceOver verification are not claimed.
+
+The approved implementation follows the normal branch/PR workflow in [PR #194](https://github.com/natanai/allneeds/pull/194). That PR records final confirmation, merge, and deployment status.

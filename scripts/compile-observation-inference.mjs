@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { compileFeelingCatalog } from '../src/data/compileFeelingCatalog.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sourcePath = resolve(root, 'src/data/observationInference/source.json');
@@ -211,14 +212,9 @@ function validateSource(source) {
 function compileCatalogLexicon(legacyCatalog, editorialCatalog) {
   const legacy = requireObject(legacyCatalog, 'legacy catalog');
   const editorial = requireObject(editorialCatalog, 'editorial catalog');
-  const feelings = requireArray(legacy.feelings, 'legacy catalog feelings').map((feeling, index) => {
-    const item = requireObject(feeling, `legacy catalog feelings[${index}]`);
-    return {
-      slug: requireSlug(item.slug, `legacy catalog feelings[${index}].slug`),
-      title: requireString(item.title, `legacy catalog feelings[${index}].title`),
-      needSatisfaction: item.needSatisfaction,
-    };
-  });
+  const feelings = compileFeelingCatalog(editorial.feelings).map(({ slug, title, needSatisfaction }) => ({
+    slug, title, needSatisfaction,
+  }));
   const referenceSlugs = (references, label) => requireArray(references ?? [], label).map((reference, index) => {
     const item = requireObject(reference, `${label}[${index}]`);
     return requireSlug(item.slug, `${label}[${index}].slug`);

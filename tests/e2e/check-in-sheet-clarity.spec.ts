@@ -109,7 +109,7 @@ for (const viewport of [
     expect(visibleChoice!.y + visibleChoice!.height).toBeLessThanOrEqual(bodyBounds!.y + bodyBounds!.height + 1);
     await page.screenshot({ path: `test-results/need-picker-${viewport.width}${viewport.largeText ? '-large' : ''}.png` });
     await done.click();
-    await page.getByRole('button', { name: 'Edit Needs', exact: true }).click();
+    await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
     await expect(sheet.getByRole('button', { name: 'Safety, selected', exact: true })).toHaveAttribute('aria-pressed', 'true');
   });
 }
@@ -161,7 +161,7 @@ test('touch scrolling the Need board does not dismiss; dragging its header prese
   await sheet.getByRole('button', { name: 'Safety', exact: true }).click();
   await swipe(page, sheet.locator('[data-sheet-chrome]'), 0, 100);
   await expect(sheet).toBeHidden();
-  await page.getByRole('button', { name: 'Edit Needs', exact: true }).click();
+  await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
   await expect(sheet.getByRole('button', { name: 'Safety, selected', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });
 

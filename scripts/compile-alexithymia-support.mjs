@@ -1,9 +1,10 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { compileFeelingCatalog } from '../src/data/compileFeelingCatalog.mjs';
 
 const authoredPath = resolve('src/data/alexithymiaSupport.json');
 const generatedPath = resolve('src/data/generated/alexithymiaSupport.json');
-const legacyCatalogPath = resolve('src/data/generated/legacyData.json');
+const editorialCatalogPath = resolve('src/data/editorialCatalog.json');
 const bodyRegionsPath = resolve('src/data/body-regions.json');
 const dimensions = ['pleasantness', 'energy', 'power', 'expectedness'];
 
@@ -20,7 +21,7 @@ function normalize(value, minimum, maximum) {
   return Number(((value - minimum) / (maximum - minimum)).toFixed(6));
 }
 
-export function compileAlexithymiaSupport(authored, legacyCatalog, bodyRegions) {
+export function compileAlexithymiaSupport(authored, feelings, bodyRegions) {
   asObject(authored, 'root');
   if (authored.version !== 1) fail(`unsupported authored version ${String(authored.version)}.`);
   const sources = asObject(authored.sources, 'sources');
@@ -28,8 +29,8 @@ export function compileAlexithymiaSupport(authored, legacyCatalog, bodyRegions) 
   const candidates = Array.isArray(authored.candidates) ? authored.candidates : fail('candidates must be an array.');
   if (candidates.length !== 24) fail(`expected 24 candidates, found ${candidates.length}.`);
 
-  const feelingSlugs = new Set((legacyCatalog.feelings ?? []).map((feeling) => feeling.slug));
-  const feelingTitles = new Set((legacyCatalog.feelings ?? []).map((feeling) => feeling.title.toLocaleLowerCase()));
+  const feelingSlugs = new Set(feelings.map((feeling) => feeling.slug));
+  const feelingTitles = new Set(feelings.map((feeling) => feeling.title.toLocaleLowerCase()));
   const bodyKeys = new Set((bodyRegions ?? []).flatMap((region) => (region.options ?? [])
     .flatMap((option) => Object.keys(option.emotions ?? {}))));
   const keys = new Set();
@@ -123,9 +124,9 @@ export function compileAlexithymiaSupport(authored, legacyCatalog, bodyRegions) 
 }
 
 const authored = JSON.parse(readFileSync(authoredPath, 'utf8'));
-const legacyCatalog = JSON.parse(readFileSync(legacyCatalogPath, 'utf8'));
+const feelings = compileFeelingCatalog(JSON.parse(readFileSync(editorialCatalogPath, 'utf8')).feelings);
 const bodyRegions = JSON.parse(readFileSync(bodyRegionsPath, 'utf8'));
-const output = `${JSON.stringify(compileAlexithymiaSupport(authored, legacyCatalog, bodyRegions), null, 2)}\n`;
+const output = `${JSON.stringify(compileAlexithymiaSupport(authored, feelings, bodyRegions), null, 2)}\n`;
 
 if (process.argv.includes('--check')) {
   const current = readFileSync(generatedPath, 'utf8');
