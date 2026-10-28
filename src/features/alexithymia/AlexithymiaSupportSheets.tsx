@@ -114,11 +114,11 @@ export function BodyClueSheet({
               const value = selected[option.id] ?? 0;
               const active = value > 0;
               return <article key={option.id} className={styles.bodyOption} data-active={active ? 'true' : undefined}>
-                <button type="button" aria-pressed={active} onClick={() => {
+                <button type="button" aria-pressed={active} aria-label={`${option.title}, ${active ? 'remove' : 'add'} body clue. ${option.note}`} onClick={() => {
                   const next = { ...selected };
                   if (active) delete next[option.id]; else next[option.id] = Math.max(5, (option.defaultIntensity ?? 5) * 10);
                   onSelectedChange(next);
-                }}><span><strong>{option.title}</strong><small>{option.note}</small></span><span className={styles.bodyCheck} aria-hidden="true">{active ? '✓' : '+'}</span></button>
+                }}><span><strong>{option.title}</strong><small>{option.note}</small></span><span className={styles.bodyAction} aria-hidden="true">{active ? 'Remove' : '+'}</span></button>
                 {active ? <label className={styles.bodyIntensity}><span>Intensity <output>{describeCueIntensity(value)}</output></span>
                   <input type="range" min="5" max="100" step="5" value={value} aria-label={`${option.title} intensity`} aria-valuetext={describeCueIntensity(value)}
                     onInput={(event) => onSelectedChange({ ...selected, [option.id]: Number(event.currentTarget.value) })} />
