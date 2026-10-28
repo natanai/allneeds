@@ -194,18 +194,55 @@ test('candidate decisions close immediately, while Fits offers optional intensit
   })).toBe('not-this-time');
 });
 
-test('body intensity keeps the value entered before the sheet closes', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await startCheckIn(page);
-  await skipObservation(page);
-  await page.getByRole('button', { name: /^Body clues/ }).click();
-  const sheet = page.getByRole('dialog', { name: 'Body clues' });
-  await sheet.getByRole('button', { name: /Tight or constricted/ }).click();
-  await sheet.getByLabel('Tight or constricted intensity').fill('80');
-  await expect(sheet.getByLabel('Tight or constricted intensity')).toHaveValue('80');
-  await sheet.getByRole('button', { name: 'Done', exact: true }).click();
-  await expect(page.getByText('Tight or constricted · 80%')).toBeVisible();
-});
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 1280, height: 900 },
+  { width: 320, height: 568, largeText: true },
+]) {
+  test(`body clue Remove action is distinct from keeping intensity at ${viewport.width}px${viewport.largeText ? ' with doubled text' : ''}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await startCheckIn(page);
+    await skipObservation(page);
+    await page.getByRole('button', { name: /^Body clues/ }).click();
+    if (viewport.largeText) await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+    const sheet = page.getByRole('dialog', { name: 'Body clues' });
+    const other = sheet.getByRole('button', { name: /^Tight or constricted/ });
+    await other.click();
+    await sheet.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('40');
+    const cue = sheet.getByRole('button', { name: /^Weighted or pressured/ });
+    await expect(cue).toHaveAttribute('aria-pressed', 'false');
+    await expect(cue).toHaveAccessibleName(/add body clue/);
+    await cue.click();
+    await expect(cue.getByText('Remove', { exact: true })).toBeVisible();
+    await expect(cue).not.toContainText('✓');
+    await expect(cue).toHaveAccessibleName(/remove body clue/);
+    const intensity = sheet.getByRole('slider', { name: 'Weighted or pressured intensity', exact: true });
+    await intensity.fill('80');
+    await expect(intensity).toHaveValue('80');
+    await expect(cue).toHaveAttribute('aria-pressed', 'true');
+    expect(await cue.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+    expect(await cue.locator('strong').evaluate(element => {
+      const word = document.createRange();
+      word.setStart(element.firstChild!, 0);
+      word.setEnd(element.firstChild!, 'Weighted'.length);
+      return word.getClientRects().length;
+    })).toBe(1);
+    await cue.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `test-results/body-remove-${viewport.width}${viewport.largeText ? '-large' : ''}.png` });
+    await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(page.getByText('Weighted or pressured · 80%', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: /^Body clues/ }).click();
+    await expect(intensity).toHaveValue('80');
+    await cue.getByText('Remove', { exact: true }).click();
+    await expect(intensity).toHaveCount(0);
+    await expect(cue).toHaveAttribute('aria-pressed', 'false');
+    await expect(cue).toHaveAccessibleName(/add body clue/);
+    await expect(sheet.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('40');
+    await sheet.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(page.getByText('Weighted or pressured · 80%', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Tight or constricted · 40%', { exact: true })).toBeVisible();
+  });
+}
 
 test('desktop uses a two-pane clue workspace and centered dialog without document overflow', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });

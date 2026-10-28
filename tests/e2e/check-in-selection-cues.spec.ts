@@ -57,7 +57,7 @@ for (const scenario of scenarios) {
     await expect(sensation).toHaveAttribute('aria-pressed', 'false');
     await expect(sensation).toContainText('+');
     await sensation.click();
-    await expect(check(sensation)).toBeVisible();
+    await expect(sensation.getByText('Remove', { exact: true })).toBeVisible();
     await expect(sensation).toHaveAttribute('aria-pressed', 'true');
     if (scenario.width >= 720) {
       const currentArea = body.getByRole('navigation', { name: 'Body regions' }).getByRole('button', { pressed: true });
