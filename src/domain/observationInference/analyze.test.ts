@@ -79,7 +79,11 @@ describe('Observation Inference retrieval-first staging', () => {
     expect(fromFeeling.suggestions.needs.some((candidate) => candidate.basis === 'related')).toBe(true);
 
     const fromNeed = analyzeObservation('I need rest.');
-    expect(fromNeed.suggestions.feelings).toContainEqual(expect.objectContaining({ slug: 'tired', basis: 'related' }));
+    const rest = observationInferenceIndex.catalog.needs.find((need) => need.slug === 'rest')!;
+    // Summary edits can reorder broad retrieval; the authored links remain the invariant.
+    const related = fromNeed.suggestions.feelings.filter((feeling) => feeling.basis === 'related');
+    expect(related.length).toBeGreaterThan(0);
+    expect(related.every((feeling) => rest.feelingSlugs.includes(feeling.slug))).toBe(true);
   });
 
   it('keeps migrated authored cue expressions as related evidence rather than direct self-report', () => {

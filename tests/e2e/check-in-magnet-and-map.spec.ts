@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, test, openCheckInReview } from './fixtures';
 
 test('Check-In is an opt-in navigation magnet with persistent direct routing', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -136,6 +136,7 @@ test('sending a check-in to Journal never overwrites an unfinished writing page'
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: 'Continue without a word' }).click();
+  await openCheckInReview(page);
   await page.getByRole('button', { name: 'Build sentence' }).click();
   await page.getByRole('button', { name: 'Continue in Journal' }).click();
   await expect(page).toHaveURL(/\/alexithymia-support$/);

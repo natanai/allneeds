@@ -170,7 +170,7 @@ describe('workflow drafts', () => {
     expect(storage.getItem(INVENTORY_DRAFT_STORAGE_KEY)).toBeNull();
   });
 
-  it('normalizes the four-stage alexithymia draft and clears a fresh lane', () => {
+  it('normalizes the five-stage alexithymia draft and clears a fresh lane', () => {
     const storage = memoryStorage();
     writeAlexithymiaDraft({
       stage: 12,
@@ -188,7 +188,7 @@ describe('workflow drafts', () => {
       statementEdited: true,
     }, storage);
     expect(readAlexithymiaDraft(storage)).toEqual({
-      stage: 4,
+      stage: 5,
       observation: 'We stopped talking.',
       openRegion: 'chest',
       selectedCues: { tight_chest: 100 },
@@ -298,7 +298,33 @@ describe('workflow drafts', () => {
       statement: '',
       statementEdited: false,
     });
-    expect(JSON.parse(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY) ?? '{}').schemaVersion).toBe(2);
+    expect(JSON.parse(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY) ?? '{}').schemaVersion).toBe(3);
+  });
+
+  it('moves a saved v2 composer to step five exactly once without changing personal choices or wording', () => {
+    const storage = memoryStorage();
+    const old = { checkInId: 'saved', stage: 4, observation: 'The door closed.', openRegion: null,
+      selectedCues: {}, bodyClear: false, shape: {}, decisions: { 'candidate:calm': 'fits' },
+      feelingIntensities: { 'candidate:calm': 4 }, termOrder: ['candidate:calm'], customTerms: [],
+      noWordYet: false, selectedNeeds: ['rest'], statement: 'My own sentence.', statementEdited: true, scrollTop: 800 };
+    storage.setItem(ALEXITHYMIA_DRAFT_STORAGE_KEY, JSON.stringify({ schemaVersion: 2, data: old }));
+    const migrated = { ...old, stage: 5, scrollTop: 0 };
+    expect(readAlexithymiaDraft(storage)).toEqual(migrated);
+    expect(readAlexithymiaDraft(storage)).toEqual(migrated);
+    expect(JSON.parse(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY)!).schemaVersion).toBe(3);
+    storage.setItem(ALEXITHYMIA_DRAFT_STORAGE_KEY, JSON.stringify({ schemaVersion: 2, data: { ...old, stage: 3 } }));
+    expect(readAlexithymiaDraft(storage)).toEqual({ ...old, stage: 3 });
+  });
+
+  it('can display a saved v2 draft even when the migration cannot be written', () => {
+    const storage = memoryStorage();
+    const old = { stage: 4, observation: 'Kept', openRegion: null, selectedCues: {}, bodyClear: false,
+      shape: {}, decisions: {}, termOrder: [], customTerms: [], noWordYet: true, selectedNeeds: [], statement: '', statementEdited: false };
+    const raw = JSON.stringify({ schemaVersion: 2, data: old });
+    storage.setItem(ALEXITHYMIA_DRAFT_STORAGE_KEY, raw);
+    storage.setItem = () => { throw new Error('Read only'); };
+    expect(readAlexithymiaDraft(storage)).toEqual({ ...old, stage: 5, scrollTop: 0 });
+    expect(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY)).toBe(raw);
   });
 
   it('keeps personal-strategy drafts separate by need and clears a default empty form', () => {

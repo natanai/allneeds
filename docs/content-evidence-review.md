@@ -849,7 +849,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 | 2026-10-14 | Observation source and copy approval | User delegated the review/approval decision; [corrected complete 18-source package](./observation-research-guide-proposal-2026-10-14.md) approved for its exact educational claims after clinical-evidence and academic editorial review. [Approval record](./observation-research-editorial-approval-2026-10-14.md) documents corrections, source access and scope; other 34 records remain pending | Authorized for educational implementation on site-test; not yet implemented. No main merge or deployment authorization; no independent licensed-clinician sign-off or app clinical validation |
 | 2026-10-14 | Observation approved-guide integration | User authorized implementation and continuation on site-test; exact approved copy, examples and 18 citation uses integrated into the canonical guide and renderer. [Implementation record](./observation-research-implementation-2026-10-14.md) documents completed validation and limits | Validated for site-test through PR #183: 330 tests, production build and six scoped Chromium cases pass. Final captures reviewed; enlarged-text overflow repaired. No production publication |
 | 2026-10-14 | Observation guide production release | User subsequently authorizes integration against newer main, completion checks, merge and live deployment for phone review. Exact approved copy, 18 source uses and review limits remain unchanged. | Main-based PR #190: 366 unit tests pass; browser sweep, corrected test readiness boundaries, repeated handoff, offline checks and visual review are recorded in the [implementation record](./observation-research-implementation-2026-10-14.md). No independent licensed-clinician certification or app-effectiveness claim. |
-| 2026-10-28 | Check-in Feeling descriptions | Complete 48-Feeling summary repair and nine additional-word definition review prepared; Numb rewrite proposed. Exact copy, citations, access limits, and scope are recorded in [Feeling descriptions review](#feeling-descriptions-review-2026-10-28). | Approval pending; review record only. No production content, UI, scoring, merge, or deployment change. |
+| 2026-10-28 | Check-in Feeling descriptions | Complete 48-Feeling summary repair and nine additional-word definition review; Numb rewrite. Exact copy, citations, access limits, and scope are recorded in [Feeling descriptions review](#feeling-descriptions-review-2026-10-28). | Exact package approved 2026-10-28; canonical implementation and requested Needs/recap changes tracked in PR #194, with validation and release status below. |
 
 ## Implementation notes / handoff
 
@@ -873,7 +873,7 @@ Do not reconstruct Understanding from the older `generated/legacyData.json` clai
 
 # Feeling descriptions review, 2026-10-28
 
-**Status: complete copy proposal prepared; explicit package approval pending. No production content is changed by this review.**
+**Status: exact package explicitly approved by the user on 2026-10-28 and implemented on the dedicated review branch. Publication status and implementation checks are recorded below.**
 
 ## Review scope and result
 
@@ -897,7 +897,7 @@ Specific corrections include removing the Calm parasympathetic/integration expla
 
 The proposed copy was read against `docs/human-editorial-style.md`: no em dashes, no imposed body-cue triads, no unsupported mechanism claims, no universal safety inference, and no repeated evolutionary closing formula. Ordinary definitions are editorial paraphrases rather than formal scientific definitions or clinical criteria.
 
-## Exact implementation boundary after approval
+## Approved implementation boundary
 
 - Use the same approved summary on the full Feeling page and in every check-in sheet. `candidateTerm` and `catalogOnlyTerms` already read `Feeling.summary`; no check-in-only text replacement or runtime “humanizer” is proposed.
 - Move the reviewed Feeling entities into `src/data/editorialCatalog.json` under one canonical Feeling owner and teach the deterministic catalog compiler to consume that owner. Preserve catalog order, slugs, titles, relationships, poem content, and other non-summary fields. Retire superseded legacy Feeling records through a deterministic migration after ownership is complete; do not hand-edit improved prose into the imported snapshot or retain shadow summary fallbacks.
@@ -2134,12 +2134,43 @@ This is explicitly the site’s framework explanation, not a finding that an eve
 
 This describes existing product behavior and does not interpret or rewrite the person’s chosen word.
 
-## Verification and approval state
+## Preapproval verification and approval state
 
 - Inventory check: every one of the 48 current Feeling slugs has exactly one replacement; none is missing or extra. All nine lane-local definitions are included, with eight exact retentions and one rewrite.
 - Source-to-claim check: lexical meaning, bounded conceptual research, and reviewer-only physiological evidence are distinguished. Source access limitations are recorded above. The removed mechanisms are not retained as implied advice or speculative explanations.
 - Model check: no new description makes a Feeling prove a Need, frames Needs as competing, or prescribes an action. Catalog roles and relationships are preserved.
 - Editorial check: proposed paragraphs contain no em dashes or body-script triads. No generic biological, neurological, or evolutionary closing sentence was added to fill space.
 - Baseline foundation verification on the source commit: `pnpm check` passed, including TypeScript, all **372 tests in 68 files**, production build, and production-asset verification. These checks verify the repository baseline, not scientific validity or an unimplemented UI. No new behavior tests were added for this documentation-only proposal.
-- This branch changes only `docs/content-evidence-review.md`, the protocol’s express preapproval exception. The production summaries and generated/runtime assets remain untouched. No merge or deployment has occurred.
-- Implementation approval: **PENDING**. Approval must cover the exact 48 proposed summaries, the Numb replacement, eight retained definitions, associated source sets and limitations, and the copy-only canonical migration boundary above.
+- At the preapproval checkpoint, the branch changed only `docs/content-evidence-review.md`, the protocol’s express preapproval exception. The following implementation record supersedes that checkpoint after user approval.
+- Implementation approval: **APPROVED 2026-10-28**. The user explicitly approved the package, covering the exact 48 summaries, the Numb replacement, eight retained definitions, associated source sets and limitations, and the canonical migration boundary. They also explicitly requested the dedicated Needs step and final-recap repair described below.
+
+
+## 2026-10-28 implementation and additional check-in approval
+
+The user approved the complete description package and requested two additional interaction repairs: give Needs their own skippable step before the sentence builder, populated from the existing Feeling-to-Need cross-references for Feelings marked Fits; and make the final page show the person's existing choices without apparent Feeling-prioritization controls. This explicit instruction supersedes the older four-stage layout and the restriction on displaying Feeling-linked Need possibilities. It does not authorize automatic Need selection or new associations.
+
+### Canonical content implementation
+
+- All 48 approved paragraphs and their source sets now belong to complete canonical Feeling entities in `editorialCatalog.json`. The shared `compileFeelingCatalog.mjs` owner serves the runtime catalog, Alexithymia candidate validation, and Observation lexicon validation. The superseded legacy Feeling array is empty.
+- The migration preserves catalog order, titles, slugs, all 528 forward Feeling-to-Need links, Faux Feeling references, body signals, and poem wording. One inherited poem URL for Thwarted had `utm_source=chatgpt.com`; only that tracking parameter was removed, preserving the same human-facing poem destination.
+- Numb uses the exact approved definition, and its generated runtime asset comes from the existing compiler. Coordinates, clue weights, catalog roles, and matching formulas are unchanged.
+- The Observation lexicon generated output remains byte-identical. Its existing local retrieval vocabulary consumes the revised summaries, so broad suggestion ordering can change without changing a detector, formula, or authored relationship. Regression coverage checks the actual relationship invariant rather than the incidental previous top-four inclusion of Tired for “I need rest.” No legacy prose is retained as a hidden retrieval fallback.
+
+### Needs stage and final recap
+
+- The five stages are What happened, Clues, Words, Needs, and Your words. Step four opens immediately with Possible Needs, naming the canonical Feelings marked Fits that supply each link. Shared Needs appear once, in alphabetical order. Intensity does not rank Needs.
+- Only canonical Feelings with existing links supply these suggestions. Maybe, Not this time, Faux Feelings, custom words, and the nine unbridged emotion words do not acquire inferred relationships. The person can still select any Need using Add Needs. Observation-derived suggestions retain their separate source labels.
+- A suggestion is never a selection. Continue and Skip preserve explicit choices, and the statement and Journal use only the selected Need slugs. Changing Feeling choices updates suggestions without deleting a Need the person already chose.
+- The final page is headed Your check-in. It shows Feeling words with Fits/Maybe and existing intensities in a quiet read-only list. The old reordering handler, arrow controls, row-level removals, and obsolete styles are deleted. Edit feelings returns to Words; Edit Needs returns to the Needs step.
+- Personal sentence edits retain the existing protection and replacement preview. Existing v2 final-page drafts migrate once to step five under schema v3, retaining identity, choices, ratings, source context, and personal text. Earlier steps keep their positions. A failed migration write still permits viewing the saved work.
+
+### Validation and publication
+
+- `pnpm check` passes: TypeScript, **380 tests in 69 files**, deterministic generated-data checks, production build, and production-asset verification. The Observation lexicon remains byte-identical (`24a3d7a75bca`). `git diff --check` passes.
+- A separate migration comparison verifies exact approved summary text for all 48 Feelings, the exact Numb sentence with no other candidate-data changes, all 528 Feeling-to-Need links, and unchanged Feeling identities, Faux Feeling links, and body signals.
+- **84 check-in browser cases pass on the final implementation**, covering the four new Needs/recap cases and existing check-in, chooser, selection, keyboard, observation handoff, and Journal flows. The new cases cover 390px, 1280px, 320px with doubled text, explicit selection versus suggestions, shared-Need deduplication, full-catalog additions, skipping, read-only ratings, personal sentence protection, history, and reload.
+- Reviewed captures show the separate Needs step and quiet recap on phone and desktop. Large-text testing found and repaired fixed-footer obstruction: the check-in scroller reserves space for its fixed controls, and the compact Continue action fits beside Skip. Edit feelings and Edit Needs are secondary text actions.
+- The wider 199-case browser sweep exposed old four-stage navigation assumptions, which were updated. An unrelated Journal test incorrectly compared a local date-time with a UTC calendar-date substring; this failure was reproduced on unchanged main, and the assertion now compares the correct browser-local-to-UTC conversion without changing Journal behavior. A subsequent four-worker sweep encountered browser-session closures, route/catalog timeouts, and a 250ms route-budget failure under load. Serial confirmations and offline recovery results are recorded in PR #194; the parallel attempt is not represented as a clean full-suite pass.
+- Browser checks use **Chromium 153.0.8010.0** supplied outside the repository after the bundled Chromium 151 download returned a truncated archive. No dependency, lockfile, or project browser configuration was changed for this environment workaround. Native iOS Safari and VoiceOver verification are not claimed.
+
+The approved implementation follows the normal branch/PR workflow in [PR #194](https://github.com/natanai/allneeds/pull/194). That PR records final confirmation, merge, and deployment status.

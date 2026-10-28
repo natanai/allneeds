@@ -30,3 +30,10 @@ export const test = base.extend({
 });
 
 export { expect };
+
+/** Review tests may arrive from Words or resume a saved composer. */
+export async function openCheckInReview(page: Page) {
+  const next = page.getByRole('button', { name: 'Continue to your words', exact: true });
+  if (await next.isVisible()) await next.click();
+  await expect(page.getByRole('heading', { name: 'Your check-in', exact: true })).toBeVisible();
+}

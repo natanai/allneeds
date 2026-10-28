@@ -27,6 +27,7 @@ export interface Feeling {
   title: string;
   summary: string;
   needSatisfaction: NeedSatisfaction;
+  sources: EvidenceSource[];
   bodySignals: string[];
   needs: EntityRef[];
   fauxFeelings: EntityRef[];

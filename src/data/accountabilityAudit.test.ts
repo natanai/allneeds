@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import legacyData from './generated/legacyData.json';
 import userStrategies from './userStrategies.json';
-import { needs, needsBySlug, strategiesBySlug } from './catalog';
+import { feelings, needs, needsBySlug, strategiesBySlug } from './catalog';
 
 const approvedSources = [
   {
@@ -71,7 +71,7 @@ describe('approved Accountability audit package', () => {
     expect(legacyData.needs.some((need) => need.slug === 'accountability')).toBe(false);
 
     const reverseReferences = [
-      ...legacyData.feelings.flatMap((feeling) => feeling.needs ?? []),
+      ...feelings.flatMap((feeling) => feeling.needs),
       ...legacyData.fauxFeelings.flatMap((feeling) => feeling.needs ?? []),
     ].filter((need) => need.slug === 'accountability');
 

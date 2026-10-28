@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { expect, test } from './fixtures';
+import { expect, test, openCheckInReview } from './fixtures';
 
 async function startCheckIn(page: Page) {
   await page.goto('/alexithymia-support');
@@ -84,7 +84,8 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(page.getByText('My words').first()).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByLabel('Selected Needs; open ways to support a Need')).toHaveCount(0);
-  await page.getByRole('button', { name: /Understanding/ }).click();
+  await page.getByRole('button', { name: 'Add Understanding', exact: true }).click();
+  await openCheckInReview(page);
   const selectedNeeds = page.getByLabel('Selected Needs; open ways to support a Need');
   await expect(selectedNeeds).toBeVisible();
   await expect(selectedNeeds.getByRole('button', { name: /Understanding, selected Need, open ways to support it/ })).toBeVisible();
@@ -240,6 +241,7 @@ test('body-only and shape-only candidates name the channel used', async ({ page 
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Continue without a word' }).click();
+  await openCheckInReview(page);
   await page.getByRole('button', { name: /Start over/ }).click();
   await page.getByRole('button', { name: 'Start check-in' }).click();
   await skipObservation(page);
@@ -257,6 +259,7 @@ test('No word yet builds no Feeling, Need, request, or care recommendation', asy
   await skipObservation(page);
   await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: 'Continue without a word' }).click();
+  await openCheckInReview(page);
   await expect(page.getByText('I’m not sure what I feel yet.')).toBeVisible();
   await expect(page.getByLabel('Selected Needs; open ways to support a Need')).toHaveCount(0);
   await page.getByRole('button', { name: 'Build sentence' }).click();

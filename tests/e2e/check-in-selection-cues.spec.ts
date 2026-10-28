@@ -175,11 +175,11 @@ for (const scenario of scenarios) {
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     await page.screenshot({ path: `test-results/selection-${scenario.theme.name.replaceAll(' ', '-')}-${scenario.width}.png` });
     await needs.getByRole('button', { name: 'Done', exact: true }).click();
-    await page.getByRole('button', { name: 'Edit Needs', exact: true }).click();
+    await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
     await expect(check(safety)).toBeVisible();
     await needs.getByRole('button', { name: 'Clear selected Needs', exact: true }).click();
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
-    await page.getByRole('button', { name: 'Edit Needs', exact: true }).click();
+    await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
     await expect(check(safety)).toBeVisible();
     await needs.getByRole('button', { name: 'Done', exact: true }).click();
     expect(errors).toEqual([]);

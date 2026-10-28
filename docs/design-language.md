@@ -104,7 +104,13 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 
 ## Alexithymia Support check-in
 
-**Accepted 2026-08-28.** Alexithymia Support is a four-stage, present-moment working surface: `What happened?`, `Clues`, `Words`, and `Your words`. It is not a lesson, detached practice mode, diagnostic test, treatment, or strategy library.
+**Accepted 2026-08-28; expanded 2026-10-28.** Alexithymia Support is a five-stage, present-moment working surface: `What happened?`, `Clues`, `Words`, `Needs`, and `Your words`. It is not a lesson, detached practice mode, diagnostic test, treatment, or strategy library.
+
+**Needs and recap refinement accepted 2026-10-28.** Need selection is its own skippable stage before the final composer. It opens with possible Needs from the existing canonical Feeling-to-Need cross-references for the person's `Fits` choices. Suggestions name their source Feelings and require an explicit selection; they do not create a Need in the sentence or Journal by themselves. Deduplicate shared Needs without treating frequency or Feeling intensity as a probability or priority. Keep observation-derived possibilities separately labeled, and keep the complete Need catalog available through Add Needs above the suggestions. `Maybe`, rejected words, Faux Feelings, and unbridged working words do not acquire invented maps.
+
+- Continue and Skip both preserve prior explicit choices. The final page is a recap and sentence-building surface, not a second Feeling assessment or a ranking task.
+- Show chosen Feeling words, Fits/Maybe decisions, and already reported intensities as a quiet read-only list. Remove the former left/right reordering controls, row-level removal controls, their handler, and their CSS. Do not replace them with another prioritization task or sort by intensity. A secondary Edit feelings action returns to Words; Edit Needs returns to the dedicated Needs stage.
+- Saved four-stage v2 drafts move the old final composer to step five while retaining all choices and personal text. New drafts use schema v3. Earlier stages keep their meaning; migrated final-page scroll resets for the new recap geometry.
 
 **Plain-language addendum accepted 2026-08-29; naming refined 2026-10-11.** The public doorway and in-product label are `Alexithymia support`; an Info disclosure defines alexithymia without requiring the user to identify with it. `Overall feeling` replaces the public label `Feeling shape`, and `Other emotion word` / `Your word` replace the internal-sounding `Working term`. These display labels do not change routes, scoring roles, fixed catalogs, or persistence values.
 
@@ -121,9 +127,9 @@ allneeds should feel tactile, calm, compact, and app-like rather than like a col
 - Intentional reference handoffs provide a dedicated return to the same stage, word view/search, and scroll position. The return action remains available while following further reference routes in that visit. Browser Back and Forward follow the check-in stages. Independent visits and reloads offer fresh/continue with the saved step and last-edited time; they do not force an old check-in to reopen. `Start over` is the explicit whole-check-in discard boundary.
 - First-use text defines unfamiliar terms. Match details use ordinary labels before research terms, and percentages are explained as similarity to chosen clues rather than probability. Observation guidance must never present a person's interpretation, identity, report of harm, or report of coercion as unreal.
 
-**Responsive hierarchy accepted 2026-08-29.** The same four-stage journey must read as a guided workspace rather than a stack of equal cards.
+**Responsive hierarchy accepted 2026-08-29; expanded 2026-10-28.** The same five-stage journey must read as a guided workspace rather than a stack of equal cards.
 
-- The app bar names all four steps on desktop and keeps a compact current-step indicator on mobile. The stage heading owns the primary visual emphasis; clue summaries, alternatives, and research disclosures remain visibly secondary.
+- The app bar names all five steps on desktop and keeps a compact current-step indicator on mobile. The stage heading owns the primary visual emphasis; clue summaries, alternatives, and research disclosures remain visibly secondary.
 - Desktop stages use available width for a task-and-context layout: the active work stays in the main column while selected clues, word choices, or the next action stay in a quieter side rail. Do not render a widened mobile stack or abandon the persistent next action.
 - Mobile remains a single-column, full-bleed flow. Avoid horizontal document panning. Body-area discovery must not depend on discovering a horizontally scrolling strip; use the labeled full-width area chooser and show the area count.
 - In the Body-clue sheet, desktop uses a body-region navigation rail and a separate sensation workspace. Selected sensations may expand to reveal intensity, but unselected sensations should remain compact.

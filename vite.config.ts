@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
+import { compileFeelingCatalog } from './src/data/compileFeelingCatalog.mjs';
 
 type EntityRef = { slug: string; title: string };
 type SupportingSourceKind = 'scholarly' | 'clinical-guidance' | 'official-resource';
@@ -31,17 +32,6 @@ type CatalogStrategySource = {
   evidence?: EvidenceSource;
 };
 type LegacyCatalog = {
-  feelings: Array<{
-    title: string;
-    slug: string;
-    description: string;
-    needSatisfaction: 'met' | 'unmet' | 'both';
-    bodySignals?: string[];
-    needs?: EntityRef[];
-    fauxFeelings?: EntityRef[];
-    poemQuote?: string;
-    poemUrl?: string;
-  }>;
   needs: Array<{
     title: string;
     slug: string;
@@ -81,6 +71,7 @@ type CanonicalEditorialNeed = EditorialNeed & {
   fauxFeelings: EntityRef[];
 };
 type EditorialCatalog = {
+  feelings: unknown;
   needs: Record<string, EditorialNeed>;
   strategies: CatalogStrategySource[];
   strategyProvenance?: Record<string, StrategyProvenance>;
@@ -143,18 +134,7 @@ function runtimeCatalogSource() {
   addStrategyReferences(editorial.strategies, addedStrategyRefsByNeed);
   addStrategyReferences(userStrategies, addedStrategyRefsByNeed);
 
-  const feelings = legacy.feelings.map((feeling) => ({
-    slug: feeling.slug,
-    title: feeling.title,
-    summary: feeling.description,
-    needSatisfaction: feeling.needSatisfaction,
-    bodySignals: feeling.bodySignals ?? [],
-    needs: feeling.needs ?? [],
-    fauxFeelings: feeling.fauxFeelings ?? [],
-    ...(feeling.poemQuote
-      ? { poem: { quotation: feeling.poemQuote, ...(feeling.poemUrl ? { url: feeling.poemUrl } : {}) } }
-      : {}),
-  }));
+  const feelings = compileFeelingCatalog(editorial.feelings);
 
   const canonicalEditorialNeeds = Object.entries(editorial.needs)
     .filter(([, need]) => editorialNeedOwnsEntity(need))

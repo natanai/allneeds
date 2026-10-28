@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { expect, test } from './fixtures';
+import { expect, test, openCheckInReview } from './fixtures';
 
 function collectRuntimeProblems(page: Page) {
   const problems: string[] = [];
@@ -235,6 +235,7 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await expect(page.getByText('Anxiety').first()).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   page.once('dialog', (dialog) => dialog.accept());
+  await openCheckInReview(page);
   await page.getByRole('button', { name: 'Start over' }).click();
   await page.reload();
   await expect(page.getByRole('button', { name: 'Start check-in' })).toBeVisible();
@@ -276,6 +277,7 @@ test('A Journal save completes the matching Alexithymia check-in, not the unfini
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
+  await openCheckInReview(page);
   await page.getByRole('button', { name: 'Build sentence' }).click();
   await page.getByRole('button', { name: 'Continue in Journal' }).click();
   const journalDialog = page.getByRole('dialog', { name: 'Journal' });

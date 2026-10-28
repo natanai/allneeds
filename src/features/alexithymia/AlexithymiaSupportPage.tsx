@@ -42,6 +42,7 @@ import {
 import {
   statementFromDraft,
   supportStatementBasis,
+  suggestedNeedsForTerms,
   catalogOnlyTerms,
   customTermId,
   customWorkingTerm,
@@ -53,17 +54,11 @@ import {
 import { checkInVisit, type CheckInLocationState } from './checkInNavigation';
 import { createCheckInDraft as emptyDraft, journalDraftFromCheckIn } from './checkInDraft';
 import { shapeWithJournalMood } from './shapeCoordinates';
+import { checkInSteps as stageSteps, CHECK_IN_STAGE_COUNT } from './checkInStages';
 import styles from './AlexithymiaSupportPage.module.css';
 
 type SheetKind = 'info' | 'matching' | 'body' | 'shape' | 'candidate' | 'needs' | 'observation' | 'need-preview' | 'replace-statement' | null;
 type WordFilter = 'matches' | 'all' | 'mine';
-
-const stageSteps = [
-  { label: 'What happened', note: 'Name the present moment' },
-  { label: 'Clues', note: 'Notice what is available' },
-  { label: 'Words', note: 'Compare possibilities' },
-  { label: 'Your words', note: 'Choose what fits' },
-] as const;
 
 const bodyRegions = bodyRegionsRaw as unknown as BodyRegion[];
 const bodyOptionById = new Map(bodyRegions.flatMap((region) => region.options.map((option) => [option.id, {
@@ -160,6 +155,7 @@ export function AlexithymiaSupportPage() {
   const [wordPlayMode, setWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-words'));
   const [partialPlayMode, setPartialPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-partial-words'));
   const [needPlayMode, setNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-needs'));
+  const [suggestedNeedPlayMode, setSuggestedNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-suggested-needs'));
   const [status, setStatus] = useState('');
   const [reading, setReading] = useState(false);
   const readingRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -346,6 +342,30 @@ export function AlexithymiaSupportPage() {
       ariaLabel: `${need.title}, selected Need, open ways to support it`,
     }] : [];
   });
+  const suggestedNeedItems: MagnetBoardItem[] = suggestedNeedsForTerms(selectedTerms, draft.decisions)
+    .map(({ need, fromFeelings }) => {
+      const selected = draft.selectedNeeds.includes(need.slug);
+      const source = `From ${fromFeelings.map((feeling) => feeling.title).join(', ')}`;
+      return {
+        id: `alex-suggested-need-${need.slug}`,
+        label: need.title,
+        kind: 'need',
+        badge: 'Need',
+        detail: source,
+        tone: selected ? 'positive' : 'selection',
+        selected,
+        iconUrl: assetPath(`icons/needs/${need.slug}.svg`),
+        ariaLabel: `${need.title}, possible Need, ${source}${selected ? ', selected' : ''}`,
+        onActivate: () => toggleNeed(need.slug),
+      };
+    });
+
+  function toggleNeed(slug: string) {
+    updateDraft((current) => ({ ...current, selectedNeeds: current.selectedNeeds.includes(slug)
+      ? current.selectedNeeds.filter((value) => value !== slug)
+      : [...current.selectedNeeds, slug],
+    }));
+  }
 
   function updateDraft(update: (current: AlexithymiaDraft) => AlexithymiaDraft) {
     setUndo(null);
@@ -443,7 +463,7 @@ export function AlexithymiaSupportPage() {
         decisions,
         termOrder,
         feelingIntensities,
-        noWordYet: selected ? false : current.stage === 4 && !termOrder.length ? true : current.noWordYet,
+        noWordYet: selected ? false : current.stage === CHECK_IN_STAGE_COUNT && !termOrder.length ? true : current.noWordYet,
       };
     });
   }
@@ -462,20 +482,9 @@ export function AlexithymiaSupportPage() {
     window.requestAnimationFrame(() => setSheet('candidate'));
   }
 
-  function continueToReview() {
+  function continueToNeeds() {
     updateDraft((current) => ({ ...current, noWordYet: !selectedTerms.length }));
     goToStage(4);
-  }
-
-  function moveTerm(id: string, direction: -1 | 1) {
-    updateDraft((current) => {
-      const index = current.termOrder.indexOf(id);
-      const nextIndex = index + direction;
-      if (index < 0 || nextIndex < 0 || nextIndex >= current.termOrder.length) return current;
-      const termOrder = [...current.termOrder];
-      [termOrder[index], termOrder[nextIndex]] = [termOrder[nextIndex]!, termOrder[index]!];
-      return { ...current, termOrder };
-    });
   }
 
   function buildSentence(replaceEdited = false) {
@@ -529,7 +538,7 @@ export function AlexithymiaSupportPage() {
     } } satisfies CheckInLocationState : null });
   }
 
-  const stageTitle = ['What happened?', 'Clues', 'Words', 'Your words'][Math.max(0, draft.stage - 1)] ?? 'Check in';
+  const stageTitle = stageSteps[Math.max(0, draft.stage - 1)]?.label ?? 'Check in';
 
   if (entryVisible) {
     const hasDraft = draft.stage > 0;
@@ -541,7 +550,7 @@ export function AlexithymiaSupportPage() {
             <h1 id="alexithymia-title">Find words for right now</h1>
             <p>Use any clues you can notice. The app can compare possible words, but you decide what fits.</p>
           </header>
-          <ol className={styles.entryJourney} aria-label="Four check-in steps">
+          <ol className={styles.entryJourney} aria-label="Five check-in steps">
             {stageSteps.map((step, index) => (
               <li key={step.label}>
                 <span aria-hidden="true">{index + 1}</span>
@@ -587,8 +596,8 @@ export function AlexithymiaSupportPage() {
           else goToStage(draft.stage - 1);
         }}><BackIcon /></button>
         <div className={styles.appBarCenter}>
-          <span className={styles.appBarTitle}><strong>{stageTitle}</strong><small>{draft.stage} of 4</small></span>
-          <div className={styles.progress} role="progressbar" aria-label={`${draft.stage} of 4, ${stageTitle}`} aria-valuemin={1} aria-valuemax={4} aria-valuenow={draft.stage}>
+          <span className={styles.appBarTitle}><strong>{stageTitle}</strong><small>{draft.stage} of {CHECK_IN_STAGE_COUNT}</small></span>
+          <div className={styles.progress} role="progressbar" aria-label={`${draft.stage} of ${CHECK_IN_STAGE_COUNT}, ${stageTitle}`} aria-valuemin={1} aria-valuemax={CHECK_IN_STAGE_COUNT} aria-valuenow={draft.stage}>
             {stageSteps.map((step, index) => (
               <span key={step.label} data-active={index + 1 <= draft.stage ? 'true' : undefined} data-current={index + 1 === draft.stage ? 'true' : undefined}>
                 <i aria-hidden="true">{index + 1}</i><small>{step.label}</small>
@@ -615,7 +624,7 @@ export function AlexithymiaSupportPage() {
       {draft.stage === 1 ? (
         <section className={`${styles.stage} ${styles.stageOne}`} aria-labelledby="alex-stage-one">
           <header className={styles.stageHeader}>
-            <p>1 of 4 · What happened?</p>
+            <p>1 of 5 · What happened?</p>
             <h1 tabIndex={-1} id="alex-stage-one">What are you trying to put into words?</h1>
             <p>If it helps, write one or two details someone could have seen or heard, such as what happened or the exact words used.</p>
           </header>
@@ -663,7 +672,7 @@ export function AlexithymiaSupportPage() {
       {draft.stage === 2 ? (
         <section className={`${styles.stage} ${styles.stageClues}`} aria-labelledby="alex-stage-two">
           <header className={styles.stageHeader}>
-            <p>2 of 4 · Clues</p>
+            <p>2 of 5 · Clues</p>
             <h1 tabIndex={-1} id="alex-stage-two">What can you notice right now?</h1>
             <p>Use any clue that is available. You can skip the rest.</p>
           </header>
@@ -737,7 +746,7 @@ export function AlexithymiaSupportPage() {
       {draft.stage === 3 ? (
         <section className={`${styles.stage} ${styles.stageWords}`} aria-labelledby="alex-stage-three">
           <header className={styles.stageHeader}>
-            <p>3 of 4 · Words</p>
+            <p>3 of 5 · Words</p>
             <h1 tabIndex={-1} id="alex-stage-three">Possible words</h1>
             <p>{draft.observationSuggestions
               ? `These are possibilities from your ${draft.observationSuggestions.text === draft.observation.trim() ? 'observation' : 'earlier observation'} and any clues you chose. More than one may fit, or none yet.`
@@ -813,7 +822,7 @@ export function AlexithymiaSupportPage() {
               <p className={styles.liveStatus} role="status">{status}</p>
               <div className={styles.stickyActions}>
                 <button type="button" className={styles.textButton} onClick={() => goToStage(2)}>Back to clues</button>
-                <button type="button" className={styles.primaryButton} onClick={continueToReview}>{selectedTerms.length ? 'Continue' : 'Continue without a word'}</button>
+                <button type="button" className={styles.primaryButton} onClick={continueToNeeds}>{selectedTerms.length ? 'Continue' : 'Continue without a word'}</button>
               </div>
             </aside>
           </div>
@@ -823,36 +832,75 @@ export function AlexithymiaSupportPage() {
       ) : null}
 
       {draft.stage === 4 ? (
-        <section className={`${styles.stage} ${styles.stageReview}`} aria-labelledby="alex-stage-four">
+        <section className={`${styles.stage} ${styles.stageNeeds}`} aria-labelledby="alex-stage-four">
           <header className={styles.stageHeader}>
-            <p>4 of 4 · Your words</p>
-            <h1 tabIndex={-1} id="alex-stage-four">What fits right now?</h1>
+            <p>4 of 5 · Needs</p>
+            <h1 tabIndex={-1} id="alex-stage-four">What matters to you here?</h1>
+            <p>Choose any Needs that fit. You can add others or skip this step.</p>
+          </header>
+          <div className={styles.needWorkspace}>
+            <div className={styles.needMain}>
+              <section className={styles.selectionSection} aria-labelledby="possible-needs-title">
+                <header><div><h2 id="possible-needs-title">Possible Needs</h2><p>From the Feelings you marked Fits. You decide which Needs matter here.</p></div><button type="button" className={styles.smallAction} onClick={() => setSheet('needs')}>Add Needs</button></header>
+                {suggestedNeedItems.length ? <MagnetBoard
+                  className={styles.suggestedNeedBoard}
+                  items={suggestedNeedItems}
+                  playMode={suggestedNeedPlayMode}
+                  onPlayModeChange={setSuggestedNeedPlayMode}
+                  storageKey="alexithymia-suggested-needs"
+                  ariaLabel="Possible Needs from your Feelings"
+                /> : <p className={styles.emptyMessage}>No Need suggestions from these choices. You can still browse all Needs.</p>}
+              </section>
+              {observationNeeds.length ? (
+                <div className={styles.wordsAlreadyUsed} aria-label="Needs from your observation"><strong>{draft.observationSuggestions ? observationSource : 'Words you already used'}</strong>{observationNeeds.map((need) => <button key={need.slug} type="button" aria-label={`Add ${need.title}`} onClick={() => toggleNeed(need.slug)}>{need.title}<span aria-hidden="true">+</span></button>)}</div>
+              ) : null}
+            </div>
+            <aside className={styles.needSidebar} aria-label="Your Need choices">
+              <section className={styles.selectionSection} aria-labelledby="chosen-needs-title">
+                <header><h2 id="chosen-needs-title">Your Needs</h2><span className={styles.selectedCount} aria-live="polite">{draft.selectedNeeds.length} selected</span></header>
+                {draft.selectedNeeds.length ? <>
+                  <ul className={styles.chosenNeedList}>
+                    {draft.selectedNeeds.flatMap((slug) => {
+                      const need = needsBySlug.get(slug);
+                      return need ? <li key={slug}><span>{need.title}</span><button type="button" className={styles.iconButton} aria-label={`Remove ${need.title}`} onClick={() => toggleNeed(slug)}><CloseIcon /></button></li> : [];
+                    })}
+                  </ul>
+                  <button type="button" className={styles.textButton} onClick={() => clearWithUndo((current) => ({ ...current, selectedNeeds: [] }), 'Selected Needs cleared.')}>Clear selected Needs</button>
+                </> : <p className={styles.emptyMessage}>No Needs selected.</p>}
+              </section>
+              <div className={styles.stickyActions}>
+                <button type="button" className={styles.textButton} onClick={() => goToStage(5)}>Skip</button>
+                <button type="button" className={styles.primaryButton} aria-label="Continue to your words" onClick={() => goToStage(5)}>Continue</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+      ) : null}
+
+      {draft.stage === 5 ? (
+        <section className={`${styles.stage} ${styles.stageReview}`} aria-labelledby="alex-stage-five">
+          <header className={styles.stageHeader}>
+            <p>5 of 5 · Your words</p>
+            <h1 tabIndex={-1} id="alex-stage-five">Your check-in</h1>
+            <p>Review your choices, then put them into your words.</p>
           </header>
           <div className={styles.reviewWorkspace}>
             <div className={styles.reviewSelections}>
               <section className={styles.selectionSection} aria-labelledby="selected-feelings-title">
-                <header><div><h2 id="selected-feelings-title">Your feeling words</h2><p>Your choices, not the app’s conclusion.</p></div><button type="button" className={styles.smallAction} onClick={() => goToStage(3)}>Edit</button></header>
+                <header><h2 id="selected-feelings-title">Your feeling words</h2><button type="button" className={styles.editChoiceButton} onClick={() => goToStage(3)}>Edit feelings</button></header>
                 {selectedTerms.length ? (
-                  <ol className={styles.selectedTermList}>
-                    {selectedTerms.map((term, index) => (
+                  <ul className={styles.selectedTermList}>
+                    {selectedTerms.map((term) => (
                       <li key={term.id}>
                         <span><strong>{term.label}</strong><small>{term.roleLabel} · {draft.decisions[term.id] === 'fits' ? `Fits${draft.feelingIntensities?.[term.id] ? ` · Intensity ${draft.feelingIntensities[term.id]}/10` : ''}` : 'Maybe'}</small></span>
-                        <span className={styles.reorderActions}>
-                          <button type="button" disabled={index === 0} aria-label={`Move ${term.label} earlier`} onClick={() => moveTerm(term.id, -1)}>←</button>
-                          <button type="button" disabled={index === selectedTerms.length - 1} aria-label={`Move ${term.label} later`} onClick={() => moveTerm(term.id, 1)}>→</button>
-                          <button type="button" aria-label={`Remove ${term.label}`} onClick={() => decideTerm(term, 'not-this-time')}><CloseIcon /></button>
-                        </span>
                       </li>
                     ))}
-                  </ol>
+                  </ul>
                 ) : draft.noWordYet ? <p className={styles.noWordSelection}>I’m not sure what I feel yet.</p> : <p className={styles.emptyMessage}>No words selected.</p>}
               </section>
 
               <section className={styles.selectionSection} aria-labelledby="selected-needs-title">
-                <header><div><h2 id="selected-needs-title">What matters to you here?</h2><p>A Need is something that matters, such as safety, connection, rest, or understanding. A Feeling can be a clue, but it cannot prove which Need fits.</p></div><button type="button" className={styles.smallAction} onClick={() => setSheet('needs')}>{draft.selectedNeeds.length ? 'Edit Needs' : 'Add Needs'}</button></header>
-                {observationNeeds.length ? (
-                  <div className={styles.wordsAlreadyUsed} aria-label="Needs from your observation"><strong>{draft.observationSuggestions ? observationSource : 'Words you already used'}</strong>{observationNeeds.map((need) => <button key={need.slug} type="button" aria-label={`Add ${need.title}`} onClick={() => updateDraft((current) => current.selectedNeeds.includes(need.slug) ? current : ({ ...current, selectedNeeds: [...current.selectedNeeds, need.slug] }))}>{need.title}<span aria-hidden="true">+</span></button>)}</div>
-                ) : null}
+                <header><h2 id="selected-needs-title">Your Needs</h2><button type="button" className={styles.editChoiceButton} onClick={() => goToStage(4)}>Edit Needs</button></header>
                 {draft.selectedNeeds.length ? (
                   <MagnetBoard
                     className={styles.selectedNeedBoard}

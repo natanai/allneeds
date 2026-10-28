@@ -8,7 +8,52 @@ import {
   customWorkingTerm,
   customTermId,
   fauxFeelingTerms,
+  profileTerms,
+  catalogOnlyTerms,
+  suggestedNeedsForTerms,
 } from './alexithymiaTerms';
+import { feelingsBySlug, needsBySlug } from '../../data/catalog';
+
+describe('Feeling to Need suggestions', () => {
+  it('uses every existing cross-reference for both profiled and catalog-only Feelings', () => {
+    for (const term of [...profileTerms, ...catalogOnlyTerms].filter((term) => term.role === 'feeling')) {
+      const feeling = feelingsBySlug.get(term.catalogSlug!)!;
+      const suggestions = suggestedNeedsForTerms([term], { [term.id]: 'fits' });
+      expect(suggestions.map(({ need }) => need.slug).sort(), term.label)
+        .toEqual([...new Set(feeling.needs.map((need) => need.slug))].sort());
+      for (const suggestion of suggestions) {
+        expect(suggestion.need).toBe(needsBySlug.get(suggestion.need.slug));
+        expect(suggestion.fromFeelings).toEqual([{ slug: feeling.slug, title: feeling.title }]);
+      }
+    }
+  });
+
+  it('deduplicates shared Needs and retains which fitting Feelings suggested them', () => {
+    const calm = profileTerms.find((term) => term.catalogSlug === 'calm')!;
+    const tired = profileTerms.find((term) => term.catalogSlug === 'tired')!;
+    const decisions = { [calm.id]: 'fits', [tired.id]: 'fits' };
+    const suggestions = suggestedNeedsForTerms([calm, tired], decisions);
+    expect(suggestions.filter(({ need }) => need.slug === 'rest')).toHaveLength(1);
+    expect(suggestions.find(({ need }) => need.slug === 'rest')?.fromFeelings)
+      .toEqual([{ slug: 'calm', title: 'Calm' }, { slug: 'tired', title: 'Tired' }]);
+    expect(suggestedNeedsForTerms([tired, calm], decisions).map(({ need }) => need.slug))
+      .toEqual(suggestions.map(({ need }) => need.slug));
+  });
+
+  it('does not infer a map for tentative, rejected, custom, Faux, or unbridged emotion words', () => {
+    const calm = profileTerms.find((term) => term.catalogSlug === 'calm')!;
+    for (const decision of ['maybe', 'not-this-time', '']) {
+      expect(suggestedNeedsForTerms([calm], { [calm.id]: decision })).toEqual([]);
+    }
+    const unbridged = profileTerms.find((term) => term.label === 'Gratitude')!;
+    const custom = customWorkingTerm('Calm');
+    const faux = fauxFeelingTerms[0]!;
+    expect(suggestedNeedsForTerms([unbridged, custom, faux], {
+      [unbridged.id]: 'fits', [custom.id]: 'fits', [faux.id]: 'fits',
+    })).toEqual([]);
+    expect(suggestedNeedsForTerms([], {})).toEqual([]);
+  });
+});
 
 describe('Alexithymia Support statement builder', () => {
   it('keeps tentative choices tentative and preserves their provenance in Journal', () => {

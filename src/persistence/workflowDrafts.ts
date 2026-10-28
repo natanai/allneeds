@@ -1,4 +1,5 @@
 import { customTermId, legacyCustomTermId } from '../features/alexithymia/customWordIdentity';
+import { CHECK_IN_STAGE_COUNT } from '../features/alexithymia/checkInStages';
 import { getBrowserStorage } from './storage';
 import type { StorageDriver } from './storage';
 import { VersionedStore } from './versionedStore';
@@ -321,7 +322,7 @@ function inventoryDraftStore(storage: StorageDriver | null) {
 function alexithymiaStore(storage: StorageDriver | null) {
   return new VersionedStore<AlexithymiaDraft>({
     key: ALEXITHYMIA_DRAFT_STORAGE_KEY,
-    schemaVersion: 2,
+    schemaVersion: 3,
     storage,
     validate: isAlexithymiaDraft,
   });
@@ -535,14 +536,21 @@ export function migrateAlexithymiaDraftV1(draft: LegacyAlexithymiaDraftV1): Alex
   };
 }
 
-function readLegacyAlexithymiaDraft(storage: StorageDriver | null) {
+function readPreviousAlexithymiaDraft(storage: StorageDriver | null) {
   if (!storage) return null;
   try {
     const parsed: unknown = JSON.parse(storage.getItem(ALEXITHYMIA_DRAFT_STORAGE_KEY) ?? 'null');
-    if (!isRecord(parsed) || parsed.schemaVersion !== 1 || !isLegacyAlexithymiaDraftV1(parsed.data)) {
-      return null;
+    if (!isRecord(parsed)) return null;
+    if (parsed.schemaVersion === 1 && isLegacyAlexithymiaDraftV1(parsed.data)) {
+      return migrateAlexithymiaDraftV1(parsed.data);
     }
-    return migrateAlexithymiaDraftV1(parsed.data);
+    if (parsed.schemaVersion === 2 && isAlexithymiaDraft(parsed.data)) {
+      // Former step four was the composer, now step five. Keep its meaning.
+      return parsed.data.stage >= 4
+        ? { ...parsed.data, stage: CHECK_IN_STAGE_COUNT, scrollTop: 0 }
+        : parsed.data;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -566,10 +574,13 @@ function migrateCustomWordIds(draft: AlexithymiaDraft): AlexithymiaDraft {
 export function readAlexithymiaDraft(storage: StorageDriver | null = getBrowserStorage()) {
   const result = alexithymiaStore(storage).read();
   if (result.status === 'ready') return migrateCustomWordIds(result.value);
-  if (result.status !== 'unsupported' || result.foundVersion !== 1) return null;
-  const migrated = readLegacyAlexithymiaDraft(storage);
+  if (result.status !== 'unsupported' || ![1, 2].includes(result.foundVersion)) return null;
+  const previous = readPreviousAlexithymiaDraft(storage);
+  const migrated = previous ? migrateCustomWordIds(previous) : null;
   if (!migrated) return null;
-  alexithymiaStore(storage).write(migrated);
+  // A read-only device can still display the saved draft. The normal writer
+  // reports a storage failure without losing the person's work on screen.
+  try { alexithymiaStore(storage).write(migrated); } catch { /* Retain it in memory. */ }
   return migrated;
 }
 
@@ -604,7 +615,7 @@ export function writeAlexithymiaDraft(
   const normalized: AlexithymiaDraft = {
     ...draft,
     ...(draft.feelingIntensities !== undefined ? { feelingIntensities } : {}),
-    stage: Math.min(4, Math.max(0, Math.round(draft.stage))),
+    stage: Math.min(CHECK_IN_STAGE_COUNT, Math.max(0, Math.round(draft.stage))),
     observation: draft.observation.trimStart(),
     openRegion: draft.openRegion || null,
     selectedCues,
