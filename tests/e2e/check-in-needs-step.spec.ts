@@ -24,7 +24,7 @@ for (const viewport of [
   { width: 1280, height: 900 },
   { width: 320, height: 568, largeText: true },
 ]) {
-  test(`Needs is a separate step with explicit choices and a read-only feeling recap at ${viewport.width}px${viewport.largeText ? ' with doubled text' : ''}`, async ({ page }) => {
+  test(`Needs is a separate step with explicit choices and feeling recap magnets at ${viewport.width}px${viewport.largeText ? ' with doubled text' : ''}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await startAtWords(page);
@@ -63,11 +63,22 @@ for (const viewport of [
     await expect(page.getByRole('heading', { name: 'Your check-in', exact: true })).toBeFocused();
     await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '5');
     const recap = page.getByRole('region', { name: 'Your feeling words', exact: true });
-    await expect(recap.getByText('Feeling · Fits · Intensity 5/10', { exact: true })).toBeVisible();
-    await expect(recap.getByText('Feeling · Fits · Intensity 8/10', { exact: true })).toBeVisible();
-    await expect(recap.getByText('Other emotion word · Fits', { exact: true })).toBeVisible();
-    await expect(recap.getByRole('listitem')).toHaveCount(3);
-    await expect(recap.getByRole('listitem').getByRole('button')).toHaveCount(0);
+    const wordBoard = recap.getByLabel('Selected feeling words; show descriptions', { exact: true });
+    await expect(wordBoard).toHaveAttribute('data-ready', 'true');
+    await expect(wordBoard.getByRole('switch')).toBeChecked();
+    await expect(wordBoard.getByRole('button')).toHaveCount(3);
+    const calm = wordBoard.getByRole('button', { name: 'Calm, Feeling, Fits · Intensity 5/10, show description', exact: true });
+    await expect(calm).toBeVisible();
+    await expect(wordBoard.getByRole('button', { name: 'Tired, Feeling, Fits · Intensity 8/10, show description', exact: true })).toBeVisible();
+    await expect(wordBoard.getByRole('button', { name: 'Gratitude, Other emotion word, Fits, show description', exact: true })).toBeVisible();
+    await calm.focus();
+    await page.keyboard.press('Enter');
+    const preview = page.getByRole('dialog', { name: 'Calm', exact: true });
+    await expect(preview).toBeVisible();
+    await expect(preview.getByRole('group', { name: 'Does Calm fit?', exact: true })).toHaveCount(0);
+    await expect(preview.getByRole('button', { name: 'Fits', exact: true })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(calm).toBeFocused();
     await expect(page.getByRole('button', { name: /^Move .* (earlier|later)$/ })).toHaveCount(0);
     await page.getByRole('article').evaluate((element) => { element.scrollTop = 0; window.scrollTo(0, 0); });
     await page.screenshot({ path: `test-results/check-in-recap-${viewport.width}${viewport.largeText ? '-large' : ''}.png` });
@@ -85,7 +96,7 @@ for (const viewport of [
     await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Your check-in', exact: true })).toBeVisible();
     await expect(statement).toHaveValue('These are my own words.');
-    await expect(recap.getByText('Feeling · Fits · Intensity 5/10', { exact: true })).toBeVisible();
+    await expect(calm).toBeVisible();
   });
 }
 

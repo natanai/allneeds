@@ -408,7 +408,7 @@ test('clear words is separate from continuing, and undo restores the decision an
   await expect(page.getByText('Fits · 7/10', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await openCheckInReview(page);
-  await expect(page.getByText('Feeling · Fits · Intensity 7/10', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Fear, Feeling, Fits · Intensity 7/10, show description', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Remove Fear', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Edit feelings', exact: true }).click();
   await page.getByRole('button', { name: /^Fear, Feeling/ }).click();

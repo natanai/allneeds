@@ -627,7 +627,7 @@
 
 .wordBoard,
 .needBoard,
-.selectedNeedBoard {
+.recapBoard {
   min-width: 0;
   border-width: 1px;
   border-radius: var(--radius-xl);
@@ -638,7 +638,7 @@
 .wordSidebar,
 .reviewSelections,
 .reviewOutcome { grid-auto-rows: max-content; }
-.selectedNeedBoard { min-height: 7rem; }
+.recapBoard { min-height: 7rem; }
 .needBoard { border: 0; border-radius: 0; }
 
 .needHelp { margin-bottom: .5rem; }
@@ -694,24 +694,6 @@
   flex: 0 0 auto;
   box-shadow: none;
 }
-
-.selectedTermList {
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-2);
-  list-style: none;
-}
-
-.selectedTermList > li {
-  min-width: 0;
-  padding: .45rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--outline) 16%, transparent);
-}
-
-.selectedTermList strong,
-.selectedTermList small { display: block; }
-.selectedTermList small { margin-top: .15rem; color: var(--secondary); font-size: var(--text-xs); }
 
 .editChoiceButton {
   min-height: var(--control-min);
@@ -1280,7 +1262,6 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
   .segmented { background: color-mix(in srgb, var(--surface-raised) 96%, var(--quiet) 4%); }
   .selectionSection,
   .composer { padding: .65rem; }
-  .selectedTermList > li { padding: .46rem 0; }
 
   .sheet { max-height: calc(100dvh - max(.25rem, env(safe-area-inset-top))); }
   .sheetIntro { margin-bottom: .55rem; }

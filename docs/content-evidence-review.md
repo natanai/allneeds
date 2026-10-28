@@ -2164,7 +2164,7 @@ The user approved the complete description package and requested two additional 
 - The final page is headed Your check-in. It shows Feeling words with Fits/Maybe and existing intensities in a quiet read-only list. The old reordering handler, arrow controls, row-level removals, and obsolete styles are deleted. Edit feelings returns to Words; Edit Needs returns to the Needs step.
 - Personal sentence edits retain the existing protection and replacement preview. Existing v2 final-page drafts migrate once to step five under schema v3, retaining identity, choices, ratings, source context, and personal text. Earlier steps keep their positions. A failed migration write still permits viewing the saved work.
 
-### Validation and publication
+### PR #194 validation and publication
 
 - `pnpm check` passes: TypeScript, **380 tests in 69 files**, deterministic generated-data checks, production build, and production-asset verification. The Observation lexicon remains byte-identical (`24a3d7a75bca`). `git diff --check` passes.
 - A separate migration comparison verifies exact approved summary text for all 48 Feelings, the exact Numb sentence with no other candidate-data changes, all 528 Feeling-to-Need links, and unchanged Feeling identities, Faux Feeling links, and body signals.
@@ -2174,3 +2174,5 @@ The user approved the complete description package and requested two additional 
 - Browser checks use **Chromium 153.0.8010.0** supplied outside the repository after the bundled Chromium 151 download returned a truncated archive. No dependency, lockfile, or project browser configuration was changed for this environment workaround. Native iOS Safari and VoiceOver verification are not claimed.
 
 The approved implementation follows the normal branch/PR workflow in [PR #194](https://github.com/natanai/allneeds/pull/194). That PR records final confirmation, merge, and deployment status.
+
+The subsequent user-requested magnet recap replaces the plain Feeling list with the existing shared `MagnetBoard`; its current presentation contract is recorded in [the design language](./design-language.md#alexithymia-support-check-in). It retains the recorded choices and intensities, uses the existing read-only description preview, and does not alter this approved content package. Follow-up verification and release are recorded in that implementation's PR.

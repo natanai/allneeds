@@ -154,6 +154,7 @@ export function AlexithymiaSupportPage() {
   const setNeedQuery = (needQuery: string) => updateDraft((current) => ({ ...current, needQuery }));
   const [wordPlayMode, setWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-words'));
   const [partialPlayMode, setPartialPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-partial-words'));
+  const [selectedWordPlayMode, setSelectedWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-selected-words'));
   const [needPlayMode, setNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-needs'));
   const [suggestedNeedPlayMode, setSuggestedNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-suggested-needs'));
   const [status, setStatus] = useState('');
@@ -341,6 +342,29 @@ export function AlexithymiaSupportPage() {
       onActivate: () => openReference(`/needs/${slug}`),
       ariaLabel: `${need.title}, selected Need, open ways to support it`,
     }] : [];
+  });
+  const selectedWordItems: MagnetBoardItem[] = selectedTerms.map((term) => {
+    const decision = draft.decisions[term.id];
+    const intensity = draft.feelingIntensities?.[term.id];
+    const detail = decision === 'fits'
+      ? `Fits${intensity === undefined ? '' : ` · Intensity ${intensity}/10`}`
+      : 'Maybe';
+    return {
+      id: `alex-selected-word-${term.id}`,
+      label: term.label,
+      detail,
+      badge: term.roleLabel,
+      kind: term.role === 'feeling' ? 'feeling' : 'default',
+      tone: roleTone(term, decision),
+      ...(term.role === 'feeling' && term.catalogSlug
+        ? { iconUrl: assetPath(`icons/feelings/${term.catalogSlug}.svg`) } : {}),
+      ariaLabel: `${term.label}, ${term.roleLabel}, ${detail}, show description`,
+      ariaHasPopup: 'dialog',
+      onActivate: () => {
+        setActiveTermId(term.id);
+        setSheet('candidate');
+      },
+    };
   });
   const suggestedNeedItems: MagnetBoardItem[] = suggestedNeedsForTerms(selectedTerms, draft.decisions)
     .map(({ need, fromFeelings }) => {
@@ -889,13 +913,14 @@ export function AlexithymiaSupportPage() {
               <section className={styles.selectionSection} aria-labelledby="selected-feelings-title">
                 <header><h2 id="selected-feelings-title">Your feeling words</h2><button type="button" className={styles.editChoiceButton} onClick={() => goToStage(3)}>Edit feelings</button></header>
                 {selectedTerms.length ? (
-                  <ul className={styles.selectedTermList}>
-                    {selectedTerms.map((term) => (
-                      <li key={term.id}>
-                        <span><strong>{term.label}</strong><small>{term.roleLabel} · {draft.decisions[term.id] === 'fits' ? `Fits${draft.feelingIntensities?.[term.id] ? ` · Intensity ${draft.feelingIntensities[term.id]}/10` : ''}` : 'Maybe'}</small></span>
-                      </li>
-                    ))}
-                  </ul>
+                  <MagnetBoard
+                    className={styles.recapBoard}
+                    items={selectedWordItems}
+                    playMode={selectedWordPlayMode}
+                    onPlayModeChange={setSelectedWordPlayMode}
+                    storageKey="alexithymia-selected-words"
+                    ariaLabel="Selected feeling words; show descriptions"
+                  />
                 ) : draft.noWordYet ? <p className={styles.noWordSelection}>I’m not sure what I feel yet.</p> : <p className={styles.emptyMessage}>No words selected.</p>}
               </section>
 
@@ -903,7 +928,7 @@ export function AlexithymiaSupportPage() {
                 <header><h2 id="selected-needs-title">Your Needs</h2><button type="button" className={styles.editChoiceButton} onClick={() => goToStage(4)}>Edit Needs</button></header>
                 {draft.selectedNeeds.length ? (
                   <MagnetBoard
-                    className={styles.selectedNeedBoard}
+                    className={styles.recapBoard}
                     items={selectedNeedItems}
                     playMode={needPlayMode}
                     onPlayModeChange={setNeedPlayMode}
