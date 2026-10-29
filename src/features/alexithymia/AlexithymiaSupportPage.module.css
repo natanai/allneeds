@@ -433,14 +433,25 @@
   padding: .12rem 0 .25rem;
   display: flex;
   gap: var(--space-2);
+}
+
+.detectedTerms > div,
+.wordTray > div {
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-width: none;
 }
 
 .detectedTerms > div::-webkit-scrollbar,
-.clueTray > div::-webkit-scrollbar,
 .wordTray > div::-webkit-scrollbar { display: none; }
+
+/* Selected clues are a summary, not a hidden sideways-scrolling carousel. */
+.clueTray > div { flex-wrap: wrap; }
+.clueTray > div > span {
+  flex: 0 1 auto;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
 
 .detectedTerms a,
 .detectedTerms button,

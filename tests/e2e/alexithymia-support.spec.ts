@@ -244,6 +244,41 @@ for (const viewport of [
   });
 }
 
+test('the clue summary wraps chosen cues instead of clipping a hidden horizontal strip', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await startCheckIn(page);
+  await skipObservation(page);
+  await addTwoBodyCues(page);
+
+  const tray = page.locator('section[aria-labelledby="your-clues-title"]');
+  const row = tray.locator(':scope > div');
+  const chips = row.locator(':scope > span');
+  await expect(chips).toHaveCount(2);
+  await expect(tray.getByText('Tight or constricted · 70%', { exact: true })).toBeVisible();
+  await expect(tray.getByText('Weighted or pressured · 70%', { exact: true })).toBeVisible();
+
+  for (const width of [1024, 1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect.poll(() => row.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      return element.scrollWidth <= element.clientWidth + 2
+        && Array.from(element.children).every((child) => {
+          const chip = child.getBoundingClientRect();
+          return chip.left >= bounds.left - 1 && chip.right <= bounds.right + 1;
+        });
+    })).toBe(true);
+    await expectNoHorizontalOverflow(page);
+    await expect(page.getByRole('button', { name: 'Continue to words' })).toBeVisible();
+  }
+
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await expect.poll(async () => {
+    const first = await chips.nth(0).boundingBox();
+    const second = await chips.nth(1).boundingBox();
+    return Boolean(first && second && second.y > first.y + 2);
+  }).toBe(true);
+});
+
 test('desktop uses a two-pane clue workspace and centered dialog without document overflow', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await startCheckIn(page);
