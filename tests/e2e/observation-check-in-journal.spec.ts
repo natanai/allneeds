@@ -43,9 +43,8 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 900 
       await page.getByRole('button', { name: 'Continue', exact: true }).click();
       await page.getByRole('button', { name: /^Body clues/ }).click();
       const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
-      if (viewport.width < 720) await body.getByRole('combobox', { name: 'Body area', exact: true }).selectOption({ label: 'Whole-body sense' });
-      else await body.getByRole('button', { name: 'Whole-body sense', exact: true }).click();
-      await body.getByRole('button', { name: /^Muted or numb/ }).click();
+      await body.getByRole('combobox', { name: 'Body area', exact: true }).selectOption('overall');
+      await body.getByRole('slider', { name: 'Muted or numb intensity' }).fill('5');
       await body.getByRole('button', { name: 'Done', exact: true }).click();
       await page.getByRole('button', { name: 'Continue to words', exact: true }).click();
       await expect(page.getByRole('button', { name: /^Anxiety, Feeling.*From your observation/ })).toBeVisible();

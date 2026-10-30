@@ -138,7 +138,7 @@ test('touch header drags dismiss sheets without clearing answers; short, upward,
   await sheet.getByRole('button', { name: 'Close Overall feeling', exact: true }).click();
   await page.getByRole('button', { name: /^Body clues/ }).click();
   const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
-  await body.getByRole('button', { name: /^Tight or constricted/ }).click();
+  await body.getByRole('slider', { name: 'Tight or constricted intensity' }).fill('5');
   await swipe(page, body.locator('[data-sheet-chrome]'), 0, 100);
   await expect(body).toBeHidden();
   await expect(page.getByRole('button', { name: 'Body clues 1 cue selected.', exact: true })).toBeVisible();

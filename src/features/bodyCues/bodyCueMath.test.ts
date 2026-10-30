@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import bodyRegionsRaw from '../../data/body-regions.json';
 import {
   computeBodyCueMatches,
-  describeCueIntensity,
   MAX_BODY_CUE_ASSOCIATION_WEIGHT,
 } from './bodyCueMath';
 
@@ -63,10 +62,10 @@ describe('body cue inference', () => {
     ], 100)).toEqual([]);
   });
 
-  it('uses the same language as the source sliders', () => {
-    expect(describeCueIntensity(0)).toBe('Off');
-    expect(describeCueIntensity(20)).toBe('Hint · 20%');
-    expect(describeCueIntensity(55)).toBe('Noticeable · 55%');
-    expect(describeCueIntensity(80)).toBe('Strong · 80%');
+  it('preserves match scores when a 0–10 presentation replaces the 0–100 input scale', () => {
+    const option = { emotions: { anxiety: 1.4, calm: 0.7 } };
+    const stored = computeBodyCueMatches([{ option, intensity: 85 }], 100);
+    const displayed = computeBodyCueMatches([{ option, intensity: 8.5 }], 10);
+    expect(displayed).toEqual(stored);
   });
 });

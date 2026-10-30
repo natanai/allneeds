@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { NeedCatalogPicker } from '../../components/forms/NeedCatalogPicker';
 import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { OverlayShell } from '../../components/overlays/OverlayShell';
+import { IntensitySlider, formatIntensityRating } from '../../components/intensity/IntensitySlider';
 import { feelings, needsBySlug } from '../../data/catalog';
 import { clearJournalDraft, readJournalDraft, writeJournalDraft, type JournalComposerDraft } from '../../persistence/workflowDrafts';
 import { createJournalRecord, hasGuidedSupportContent, journalDate, type JournalRecord } from './journalRepository';
@@ -144,10 +145,25 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
                     <div className={styles.feelingOptions}>
                       {catalog.filter((item) => item.title.toLowerCase().includes(feelingSearch.toLowerCase().trim())).map((item) => {
                         const rating = draft.feelings?.find((selected) => selected.feeling.toLowerCase() === item.title.toLowerCase());
-                        return <label key={item.slug} className={styles.feelingRating} data-selected={Boolean(rating)}><span>{item.title}</span><input type="range" min="0" max="10" step="1" value={rating?.intensity ?? 0} aria-label={`${item.title} intensity; 0 means not selected`} onChange={(event) => {
-                          const value = Number(event.target.value);
-                          patch({ feelings: [...(draft.feelings ?? []).filter((selected) => selected.feeling.toLowerCase() !== item.title.toLowerCase()), ...(value ? [{ feeling: item.title, intensity: value }] : [])].sort((a, b) => a.feeling.localeCompare(b.feeling)) });
-                        }} /><output>{rating?.ratingSource === 'unknown' ? '?' : `${rating?.intensity ?? 0}/10`}</output>{rating?.ratingSource === 'unknown' ? <small className={styles.unknownRating}>Intensity was not recorded. Move the slider to rate it.</small> : null}</label>;
+                        return <div key={item.slug} className={styles.feelingRating} data-selected={Boolean(rating)}>
+                          <div className={styles.feelingRatingHeader}>
+                            <strong>{item.title}</strong>
+                            <output>{rating?.ratingSource === 'unknown' ? 'Not rated' : formatIntensityRating(rating?.intensity ?? 0)}</output>
+                          </div>
+                          <IntensitySlider
+                            label={`${item.title} intensity; zero means not selected`}
+                            value={rating?.ratingSource === 'unknown' ? 0 : (rating?.intensity ?? 0)}
+                            min={0} max={10} step={1}
+                            lowLabel="0 · None" middleLabel="5 · Moderate" highLabel="10 · Strong"
+                            onChange={(value) => {
+                              patch({ feelings: [
+                                ...(draft.feelings ?? []).filter((selected) => selected.feeling.toLowerCase() !== item.title.toLowerCase()),
+                                ...(value ? [{ feeling: item.title, intensity: value }] : []),
+                              ].sort((a, b) => a.feeling.localeCompare(b.feeling)) });
+                            }}
+                          />
+                          {rating?.ratingSource === 'unknown' ? <small className={styles.unknownRating}>This intensity was not recorded. Move the slider to rate it.</small> : null}
+                        </div>;
                       })}
                     </div><div className={styles.pickerActions}><button type="button" onClick={() => patch({ feelings: [] })}>Clear</button><button type="button" onClick={() => setPicker(false)}>Done</button></div>
                     </div>
@@ -173,7 +189,7 @@ export function JournalBook({ entries, initialEntryId, signedIn, onSave, onRemov
               {entry.guidedSupport.observation && !entry.notes.includes(entry.guidedSupport.observation) ? <p>Situation: {entry.guidedSupport.observation}</p> : null}
               {entry.guidedSupport.terms.length ? <p>Chosen words: {entry.guidedSupport.terms.map((term) => `${term.label} (${term.decision === 'maybe' ? 'Maybe · ' : term.decision === 'fits' ? 'Fits · ' : ''}${term.role})`).join(' · ')}</p> : null}
               {entry.guidedSupport.noWordYet ? <p>No emotion word felt clear yet.</p> : null}
-              {entry.guidedSupport.bodyClues?.length ? <p>Body clues: {entry.guidedSupport.bodyClues.map((clue) => `${clue.label} (${clue.intensity}%)`).join(' · ')}</p> : entry.guidedSupport.bodyClear ? <p>No clear body clues were reported.</p> : null}
+              {entry.guidedSupport.bodyClues?.length ? <p>Body clues: {entry.guidedSupport.bodyClues.map((clue) => `${clue.label} (${Number((clue.intensity / 10).toFixed(1))}/10)`).join(' · ')}</p> : entry.guidedSupport.bodyClear ? <p>No clear body clues were reported.</p> : null}
               {entry.guidedSupport.overallRatings && Object.keys(entry.guidedSupport.overallRatings).length ? <p>Overall-feeling clues: {Object.entries(entry.guidedSupport.overallRatings).map(([dimension, value]) => `${dimension === 'power' ? 'Ability to influence' : dimension === 'expectedness' ? 'Familiar or surprising' : dimension === 'pleasantness' ? 'Pleasantness' : 'Energy'} ${Math.round(value * 4) + 1}/5`).join(' · ')}</p> : null}
               {entry.guidedSupport.statement && entry.guidedSupport.statement !== entry.notes ? <p>Original check-in statement: {entry.guidedSupport.statement}</p> : null}
             </DisclosureRow> : null}

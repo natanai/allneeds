@@ -5,8 +5,8 @@ import { DisclosureRow } from '../../components/disclosure/DisclosureRow';
 import { MagnetBoard } from '../../components/magnets/MagnetBoard';
 import type { MagnetBoardItem } from '../../components/magnets/MagnetBoard';
 import { OverlayShell } from '../../components/overlays/OverlayShell';
+import { IntensitySlider, formatIntensityRating } from '../../components/intensity/IntensitySlider';
 import { assetPath, needs } from '../../data/catalog';
-import { describeCueIntensity } from '../bodyCues/bodyCueMath';
 import type { CandidateClueScore, ShapeSelections } from './alexithymiaMath';
 import { roundedMatchPercent } from './alexithymiaMath';
 import type { ShapeDimension } from './alexithymiaData';
@@ -62,7 +62,7 @@ export function SupportSheet({
 }
 
 export function BodyClueSheet({
-  open, regions, openRegion, selected, onRegionChange, onSelectedChange,
+  open, regions, selected, onRegionChange, onSelectedChange,
   onNothingClear, onClear, onOpenFull, onClose,
 }: {
   open: boolean;
@@ -76,66 +76,65 @@ export function BodyClueSheet({
   onOpenFull: () => void;
   onClose: () => void;
 }) {
-  const [showAll, setShowAll] = useState(false);
-  const region = regions.find((item) => item.id === openRegion) ?? regions[0]!;
+  const [areaFilter, setAreaFilter] = useState('all');
   const selectedCount = Object.values(selected).filter((value) => value > 0).length;
-  const chooseArea = (id: string) => { onRegionChange(id); setShowAll(false); };
-  const close = () => { setShowAll(false); onClose(); };
+  const close = () => { setAreaFilter('all'); onClose(); };
+  const displayedRegions = areaFilter === 'all' ? regions : regions.filter((region) => region.id === areaFilter);
   return (
     <SupportSheet open={open} title="Body clues" titleId="alex-body-sheet-title" onClose={close} wide>
-      <p className={styles.sheetIntro}>Choose sensations that stand out. All {regions.length} body areas are available here.</p>
+      <p className={styles.sheetIntro}>Move the slider for any sensation you notice. Leave the others at zero. All areas are optional.</p>
       <label className={styles.areaChooser}>
-        <span>{showAll ? `Body areas · all ${regions.length}` : `Body area · ${regions.findIndex((item) => item.id === region.id) + 1} of ${regions.length}`}</span>
-        <select aria-label="Body area" value={showAll ? 'all' : region.id} onChange={(event) => {
-          if (event.target.value !== 'all') chooseArea(event.target.value);
+        <span>Show body sensations in</span>
+        <select aria-label="Body area" value={areaFilter} onChange={(event) => {
+          const next = event.currentTarget.value;
+          setAreaFilter(next);
+          if (next !== 'all') onRegionChange(next);
         }}>
-          {showAll ? <option value="all">All {regions.length} body areas</option> : null}
-          {regions.map((item) => <option key={item.id} value={item.id}>{item.label}{item.options.some((option) => (selected[option.id] ?? 0) > 0) ? ' · selected cues' : ''}</option>)}
+          <option value="all">All areas</option>
+          {regions.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
         </select>
       </label>
       <div className={styles.bodyViewActions}>
-        <button type="button" className={styles.textButton} aria-pressed={showAll} onClick={() => setShowAll((current) => !current)}>{showAll ? 'One body area at a time' : 'All body cues'}</button>
         <span aria-live="polite">{selectedCount} {selectedCount === 1 ? 'cue' : 'cues'} selected</span>
       </div>
       <div className={styles.bodySheetLayout}>
-        <nav className={styles.regionPanel} aria-label="Body regions">
-          <p className={styles.regionPickerLabel}>Choose an area</p>
-          <div className={styles.regionPicker}>
-            {regions.map((item) => <button key={item.id} type="button" aria-pressed={!showAll && item.id === region.id} onClick={() => chooseArea(item.id)}>
-              <span>{item.label}</span>
-              {item.options.some((option) => (selected[option.id] ?? 0) > 0) ? <span className={styles.regionSelected} aria-label="has selected cues">✓</span> : null}
-            </button>)}
-          </div>
-        </nav>
         <div className={styles.bodyAreaContent}>
-          {(showAll ? regions : [region]).map((area) => <section key={area.id} className={styles.bodyRegionSheet} aria-labelledby={`alex-region-${area.id}`}>
-            <header><p className={styles.regionEyebrow}>Right now</p><h3 id={`alex-region-${area.id}`}>{area.label}</h3><p>{area.prompt}</p></header>
+          {displayedRegions.map((area) => <section key={area.id} className={styles.bodyRegionSheet} aria-labelledby={`alex-region-${area.id}`}>
+            <header><h3 id={`alex-region-${area.id}`}>{area.label}</h3><p>{area.prompt}</p></header>
             <div className={styles.bodyOptions}>{area.options.map((option) => {
-              const value = selected[option.id] ?? 0;
-              const active = value > 0;
-              return <article key={option.id} className={styles.bodyOption} data-active={active ? 'true' : undefined}>
-                <button type="button" aria-pressed={active} aria-label={`${option.title}, ${active ? 'remove' : 'add'} body clue. ${option.note}`} onClick={() => {
-                  const next = { ...selected };
-                  if (active) delete next[option.id]; else next[option.id] = Math.max(5, (option.defaultIntensity ?? 5) * 10);
-                  onSelectedChange(next);
-                }}><span><strong>{option.title}</strong><small>{option.note}</small></span><span className={styles.bodyAction} aria-hidden="true">{active ? 'Remove' : '+'}</span></button>
-                {active ? <label className={styles.bodyIntensity}><span>Intensity <output>{describeCueIntensity(value)}</output></span>
-                  <input type="range" min="5" max="100" step="5" value={value} aria-label={`${option.title} intensity`} aria-valuetext={describeCueIntensity(value)}
-                    onInput={(event) => onSelectedChange({ ...selected, [option.id]: Number(event.currentTarget.value) })} />
-                </label> : null}
-              </article>;
+              const stored = selected[option.id] ?? 0;
+              const active = stored > 0;
+              return <div key={option.id} className={styles.bodyOption} data-active={active ? 'true' : undefined}>
+                <div className={styles.bodyOptionHeading}>
+                  <strong>{option.title}</strong>
+                  <output>{formatIntensityRating(stored / 10)}</output>
+                </div>
+                <p className={styles.bodyOptionNote}>{option.note}</p>
+                <IntensitySlider
+                  label={`${option.title} intensity`}
+                  value={stored / 10}
+                  min={0} max={10} step={0.5}
+                  lowLabel="0 · None" middleLabel="5 · Moderate" highLabel="10 · Strong"
+                  onChange={(rating) => {
+                    const next = { ...selected };
+                    if (rating <= 0) delete next[option.id];
+                    else next[option.id] = Math.round(rating * 10);
+                    onSelectedChange(next);
+                  }}
+                />
+              </div>;
             })}</div>
           </section>)}
         </div>
       </div>
       <div className={styles.sheetFooterSplit}>
-        {selectedCount ? <button type="button" className={styles.textButton} onClick={() => { setShowAll(false); onClear(); }}>Clear body clues</button>
-          : <button type="button" className={styles.textButton} onClick={() => { setShowAll(false); onNothingClear(); }}>Nothing clear in my body</button>}
+        {selectedCount ? <button type="button" className={styles.textButton} onClick={() => { setAreaFilter('all'); onClear(); }}>Clear body clues</button>
+          : <button type="button" className={styles.textButton} onClick={() => { setAreaFilter('all'); onNothingClear(); }}>Nothing clear in my body</button>}
         <button type="button" className={styles.primaryButton} onClick={close}>Done</button>
       </div>
       <details className={styles.separateTool}><summary>Separate Body Cues tool</summary>
-        <p>This opens the full tool outside these steps. Choose “Use these clues in check-in” there to bring its choices back.</p>
-        <button type="button" className={styles.helpButton} onClick={onOpenFull}>Open separate Body Cues tool</button>
+        <p>The full tool also compares possible emotion words. You can bring your selections back to this check-in.</p>
+        <button type="button" className={styles.helpButton} onClick={onOpenFull}>Open Body Cues</button>
       </details>
     </SupportSheet>
   );
@@ -311,12 +310,13 @@ export function CandidateSheet({
   onClose: () => void;
 }) {
   const [ratingOpen, setRatingOpen] = useState(false);
+  const [ratingChoice, setRatingChoice] = useState<number | null>(null);
   const ratingRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ratingOpen) return;
     ratingRef.current?.scrollIntoView({ block: 'nearest' });
   }, [ratingOpen]);
-  const close = () => { setRatingOpen(false); onClose(); };
+  const close = () => { setRatingOpen(false); setRatingChoice(null); onClose(); };
   const decideAndClose = (choice: 'fits' | 'maybe' | 'not-this-time', rating?: number) => {
     onDecision(choice, rating);
     close();
@@ -369,7 +369,7 @@ export function CandidateSheet({
 
           {!previewOnly ? <div className={styles.decisionButtons} role="group" aria-label={`Does ${term.label} fit?`}>
             <button type="button" aria-pressed={decision === 'fits'} onClick={() => {
-              if (term.role === 'feeling') setRatingOpen(true);
+              if (term.role === 'feeling') { setRatingChoice(intensity ?? null); setRatingOpen(true); }
               else decideAndClose('fits');
             }}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Fits</button>
             <button type="button" aria-pressed={decision === 'maybe'} onClick={() => decideAndClose('maybe')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Maybe</button>
@@ -382,15 +382,24 @@ export function CandidateSheet({
                 <strong>How intense is this feeling?</strong>
                 <small>{intensity === undefined ? 'Optional · no rating yet' : `Previously rated ${intensity}/10`}</small>
               </div>
-              <div ref={ratingRef} className={styles.feelingIntensityScale} role="group" aria-label={`${term.label} intensity, 1 to 10`}>
-                {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
-                  <button key={value} type="button" aria-label={`${term.label} intensity ${value} of 10`}
-                    aria-pressed={intensity === value} onClick={() => decideAndClose('fits', value)}>
-                    <span className={styles.choiceCheck} aria-hidden="true">✓</span>{value}
-                  </button>
-                ))}
+              <div ref={ratingRef} className={styles.feelingIntensityScale}>
+                <div className={styles.feelingIntensityValue}>
+                  <span>Intensity</span>
+                  <output>{ratingChoice === null ? 'Not rated' : formatIntensityRating(ratingChoice)}</output>
+                </div>
+                <IntensitySlider
+                  label={`${term.label} intensity`}
+                  min={1} max={10} step={1}
+                  value={ratingChoice ?? 5}
+                  lowLabel="1 · Slight" highLabel="10 · Very strong"
+                  onChange={setRatingChoice}
+                  valueText={ratingChoice === null ? 'Intensity not selected' : `${ratingChoice} out of 10`}
+                />
+                <button type="button" className={styles.ratingConfirm} disabled={ratingChoice === null}
+                  onClick={() => { if (ratingChoice !== null) decideAndClose('fits', ratingChoice); }}>
+                  Use this rating
+                </button>
               </div>
-              <div className={styles.feelingIntensityEndpoints}><span>1 · Slight</span><span>10 · Very strong</span></div>
               <button type="button" className={styles.intensitySkip} onClick={() => decideAndClose('fits')}>
                 Leave intensity unrated
               </button>

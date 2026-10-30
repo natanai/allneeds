@@ -247,7 +247,7 @@ export function AlexithymiaSupportPage() {
   });
   const cueLabels = bodySelections.map(({ option }) => option.title);
   const clueTray = [
-    ...bodySelections.map(({ option, intensity }) => ({ id: `body:${option.id}`, label: `${option.title} · ${Math.round(intensity)}%` })),
+    ...bodySelections.map(({ option, intensity }) => ({ id: `body:${option.id}`, label: `${option.title} · ${Number((intensity / 10).toFixed(1))}/10` })),
     ...shapeDimensionList.map((dimension) => ({ id: `shape:${dimension}`, label: shapeClueLabel(dimension, draft.shape[dimension] ?? 0) })),
     ...(draft.bodyClear ? [{ id: 'body:unclear', label: 'No clear body clues' }] : []),
     ...(draft.overallMood ? [{ id: 'shape:other', label: draft.overallMood === 'mixed' ? 'Mixed feelings' : 'Overall feeling: not sure' }] : []),

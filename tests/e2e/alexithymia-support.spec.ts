@@ -14,10 +14,8 @@ async function skipObservation(page: Page) {
 async function addTwoBodyCues(page: Page) {
   await page.getByRole('button', { name: /^Body clues/ }).click();
   const sheet = page.getByRole('dialog', { name: 'Body clues' });
-  await sheet.getByRole('button', { name: /Tight or constricted/ }).click();
-  await sheet.getByLabel('Tight or constricted intensity').fill('70');
-  await sheet.getByRole('button', { name: /Weighted or pressured/ }).click();
-  await sheet.getByLabel('Weighted or pressured intensity').fill('70');
+  await sheet.getByLabel('Tight or constricted intensity').fill('7');
+  await sheet.getByLabel('Weighted or pressured intensity').fill('7');
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
 }
 
@@ -59,8 +57,9 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet.getByText(/^Body clues$/)).toBeVisible();
   await expect(sheet.getByText(/^Overall feeling$/)).toBeVisible();
   await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await expect(sheet.getByRole('group', { name: 'Anxiety intensity, 1 to 10' })).toBeVisible();
-  await sheet.getByRole('button', { name: 'Anxiety intensity 8 of 10' }).click();
+  await expect(sheet.getByRole('slider', { name: 'Anxiety intensity' })).toBeVisible();
+  await sheet.getByRole('slider', { name: 'Anxiety intensity' }).fill('8');
+  await sheet.getByRole('button', { name: 'Use this rating' }).click();
   await expect(sheet).toHaveCount(0);
 
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
@@ -145,7 +144,7 @@ test('candidate decisions close immediately, while Fits offers optional intensit
   await open();
   sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await expect(sheet.getByRole('group', { name: 'Anxiety intensity, 1 to 10' })).toBeVisible();
+  await expect(sheet.getByRole('slider', { name: 'Anxiety intensity' })).toBeVisible();
   await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
   await expect(sheet).toHaveCount(0);
   await open();
@@ -166,7 +165,8 @@ test('candidate decisions close immediately, while Fits offers optional intensit
   await open();
   sheet = page.getByRole('dialog', { name: 'Anxiety' });
   await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Anxiety intensity 4 of 10' }).click();
+  await sheet.getByRole('slider', { name: 'Anxiety intensity' }).fill('4');
+  await sheet.getByRole('button', { name: 'Use this rating' }).click();
   await expect(sheet).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => {
     const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
@@ -199,48 +199,30 @@ for (const viewport of [
   { width: 1280, height: 900 },
   { width: 320, height: 568, largeText: true },
 ]) {
-  test(`body clue Remove action is distinct from keeping intensity at ${viewport.width}px${viewport.largeText ? ' with doubled text' : ''}`, async ({ page }) => {
+  test(`body cues remain visible and zero removes a selection at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await startCheckIn(page);
     await skipObservation(page);
     await page.getByRole('button', { name: /^Body clues/ }).click();
     if (viewport.largeText) await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     const sheet = page.getByRole('dialog', { name: 'Body clues' });
-    const other = sheet.getByRole('button', { name: /^Tight or constricted/ });
-    await other.click();
-    await sheet.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('40');
-    const cue = sheet.getByRole('button', { name: /^Weighted or pressured/ });
-    await expect(cue).toHaveAttribute('aria-pressed', 'false');
-    await expect(cue).toHaveAccessibleName(/add body clue/);
-    await cue.click();
-    await expect(cue.getByText('Remove', { exact: true })).toBeVisible();
-    await expect(cue).not.toContainText('✓');
-    await expect(cue).toHaveAccessibleName(/remove body clue/);
-    const intensity = sheet.getByRole('slider', { name: 'Weighted or pressured intensity', exact: true });
-    await intensity.fill('80');
-    await expect(intensity).toHaveValue('80');
-    await expect(cue).toHaveAttribute('aria-pressed', 'true');
-    expect(await cue.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
-    expect(await cue.locator('strong').evaluate(element => {
-      const word = document.createRange();
-      word.setStart(element.firstChild!, 0);
-      word.setEnd(element.firstChild!, 'Weighted'.length);
-      return word.getClientRects().length;
-    })).toBe(1);
-    await cue.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `test-results/body-remove-${viewport.width}${viewport.largeText ? '-large' : ''}.png` });
+    const first = sheet.getByRole('slider', { name: 'Tight or constricted intensity' });
+    const second = sheet.getByRole('slider', { name: 'Weighted or pressured intensity' });
+    await expect(first).toHaveValue('0');
+    await expect(second).toHaveValue('0');
+    await first.fill('4');
+    await second.fill('8');
+    await expect(sheet.getByText('2 cues selected', { exact: true })).toBeVisible();
     await sheet.getByRole('button', { name: 'Done', exact: true }).click();
-    await expect(page.getByText('Weighted or pressured · 80%', { exact: true })).toBeVisible();
+    await expect(page.getByText('Weighted or pressured · 8/10', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: /^Body clues/ }).click();
-    await expect(intensity).toHaveValue('80');
-    await cue.getByText('Remove', { exact: true }).click();
-    await expect(intensity).toHaveCount(0);
-    await expect(cue).toHaveAttribute('aria-pressed', 'false');
-    await expect(cue).toHaveAccessibleName(/add body clue/);
-    await expect(sheet.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('40');
+    await expect(second).toHaveValue('8');
+    await second.fill('0');
+    await expect(second).toHaveValue('0');
+    await expect(sheet.getByText('1 cue selected', { exact: true })).toBeVisible();
     await sheet.getByRole('button', { name: 'Done', exact: true }).click();
-    await expect(page.getByText('Weighted or pressured · 80%', { exact: true })).toHaveCount(0);
-    await expect(page.getByText('Tight or constricted · 40%', { exact: true })).toBeVisible();
+    await expect(page.getByText('Weighted or pressured · 8/10', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Tight or constricted · 4/10', { exact: true })).toBeVisible();
   });
 }
 
@@ -254,8 +236,8 @@ test('the clue summary wraps chosen cues instead of clipping a hidden horizontal
   const row = tray.locator(':scope > div');
   const chips = row.locator(':scope > span');
   await expect(chips).toHaveCount(2);
-  await expect(tray.getByText('Tight or constricted · 70%', { exact: true })).toBeVisible();
-  await expect(tray.getByText('Weighted or pressured · 70%', { exact: true })).toBeVisible();
+  await expect(tray.getByText('Tight or constricted · 7/10', { exact: true })).toBeVisible();
+  await expect(tray.getByText('Weighted or pressured · 7/10', { exact: true })).toBeVisible();
 
   for (const width of [1024, 1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
