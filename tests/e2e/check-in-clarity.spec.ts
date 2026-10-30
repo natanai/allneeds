@@ -149,19 +149,19 @@ test('mobile body-area chooser and all-cues view never leave the check-in; expli
   const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
   const chooser = body.getByRole('combobox', { name: 'Body area', exact: true });
   await expect(chooser).toBeVisible();
-  await expect(chooser.locator('option')).toHaveCount(9);
-  await chooser.selectOption({ label: 'Whole-body sense' });
-  await body.getByRole('button', { name: /^Muted or numb/ }).click();
-  await body.getByRole('button', { name: 'All body cues', exact: true }).click();
+  await expect(chooser.locator('option')).toHaveCount(10);
+  await chooser.selectOption({ label: 'Overall body experience' });
+  await body.getByRole('slider', { name: 'Muted or numb intensity' }).fill('5');
+  await chooser.selectOption('all');
   await expect(chooser).toHaveValue('all');
   await expect(body.locator('section[aria-labelledby^="alex-region-"]')).toHaveCount(9);
   await expect(page).toHaveURL(/alexithymia-support$/);
-  await body.getByRole('button', { name: /^Tight or constricted/ }).click();
+  
   await page.screenshot({ path: 'test-results/check-in-mobile-body.png' });
   await body.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Body clues 2 cues selected.', exact: true })).toBeVisible();
   await page.getByRole('button', { name: /^Body clues/ }).click();
-  await expect(chooser).toHaveValue('overall');
+  await expect(chooser).toHaveValue('all');
   await body.getByRole('button', { name: 'Clear body clues', exact: true }).click();
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Body clues 2 cues selected.', exact: true })).toBeVisible();
@@ -269,46 +269,46 @@ test('search stays scoped, radios support arrows, and Unicode words remain disti
 
 test('the full Body Cues handoff applies explicitly and leaves the independent tool draft intact', async ({ page }) => {
   await page.goto('/feelings/body-cues');
-  await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('15');
+  await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('1.5');
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.body-cues.draft') ?? 'null')?.data?.selected['chest-tight'])).toBe(15);
   await start(page); await clues(page);
   await page.getByRole('button', { name: /^Body clues/ }).click();
   let body = page.getByRole('dialog', { name: 'Body clues', exact: true });
-  await body.getByRole('button', { name: /^Tight or constricted/ }).click();
-  await body.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('70');
+  
+  await body.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('7');
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
-  await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await body.getByRole('button', { name: 'Open Body Cues', exact: true }).click();
   await expect(page).toHaveURL(/\/feelings\/body-cues$/);
   await expect(body).toHaveCount(0);
-  await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('70');
-  await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('80');
+  await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('7');
+  await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('8');
   await page.getByRole('button', { name: 'Use these clues in check-in', exact: true }).click();
-  await expect(page.getByText('Tight or constricted · 80%', { exact: true })).toBeVisible();
+  await expect(page.getByText('Tight or constricted · 8/10', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.body-cues.draft') ?? 'null')?.data?.selected['chest-tight'])).toBe(15);
   await page.getByRole('button', { name: /^Body clues/ }).click();
   body = page.getByRole('dialog', { name: 'Body clues', exact: true });
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
-  await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await body.getByRole('button', { name: 'Open Body Cues', exact: true }).click();
   await expect(page).toHaveURL(/\/feelings\/body-cues$/);
   await expect(body).toHaveCount(0);
-  await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('85');
+  await page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('8.5');
   await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
-  await expect(page.getByText('Tight or constricted · 80%', { exact: true })).toBeVisible();
+  await expect(page.getByText('Tight or constricted · 8/10', { exact: true })).toBeVisible();
   await expect(page.getByRole('alert')).toHaveCount(0);
   await page.getByRole('button', { name: /^Body clues/ }).click();
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
-  await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await body.getByRole('button', { name: 'Open Body Cues', exact: true }).click();
   await expect(page).toHaveURL(/\/feelings\/body-cues$/);
   await expect(body).toHaveCount(0);
-  await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('85');
+  await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('8.5');
   await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
   await page.getByRole('button', { name: /^Body clues/ }).click();
-  await body.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('95');
+  await body.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('9.5');
   await body.getByText('Separate Body Cues tool', { exact: true }).click();
-  await body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }).click();
+  await body.getByRole('button', { name: 'Open Body Cues', exact: true }).click();
   await expect(page).toHaveURL(/\/feelings\/body-cues$/);
   await expect(body).toHaveCount(0);
-  await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('95');
+  await expect(page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true })).toHaveValue('9.5');
 });
 
 test('the check-in return action survives following another canonical reference', async ({ page }) => {
@@ -375,12 +375,8 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 430, height: 932 }
     await start(page); await clues(page);
     await page.getByRole('button', { name: /^Body clues/ }).click();
     const sheet = page.getByRole('dialog', { name: 'Body clues', exact: true });
-    if (viewport.width < 720) {
-      await sheet.getByRole('combobox', { name: 'Body area', exact: true }).selectOption('overall');
-    } else {
-      await sheet.getByRole('navigation', { name: 'Body regions' }).getByRole('button', { name: 'Whole-body sense', exact: true }).click();
-    }
-    await expect(sheet.getByRole('heading', { name: 'Whole-body sense', exact: true })).toBeVisible();
+    await sheet.getByRole('combobox', { name: 'Body area', exact: true }).selectOption('overall');
+    await expect(sheet.getByRole('heading', { name: 'Overall body experience', exact: true })).toBeVisible();
     await sheet.getByRole('button', { name: 'Nothing clear in my body', exact: true }).click();
     await words(page);
     await page.getByRole('button', { name: 'Continue without a word', exact: true }).click();
@@ -401,7 +397,8 @@ test('clear words is separate from continuing, and undo restores the decision an
   await page.getByRole('button', { name: /^Fear, Feeling/ }).click();
   const detail = page.getByRole('dialog', { name: 'Fear', exact: true });
   await detail.getByRole('button', { name: 'Fits', exact: true }).click();
-  await detail.getByRole('button', { name: 'Fear intensity 7 of 10', exact: true }).click();
+  await detail.getByRole('slider', { name: 'Fear intensity' }).fill('7');
+  await detail.getByRole('button', { name: 'Use this rating' }).click();
   await page.getByRole('button', { name: 'Clear selected words', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Continue without a word', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
@@ -572,8 +569,8 @@ test('doubling the base text size keeps narrow-phone choices and the Journal han
   const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
   const chooser = body.getByRole('combobox', { name: 'Body area', exact: true });
   await chooser.selectOption('overall');
-  await body.getByRole('button', { name: /^Muted or numb/ }).click();
-  await body.getByRole('button', { name: 'All body cues', exact: true }).click();
+  await body.getByRole('slider', { name: 'Muted or numb intensity' }).fill('5');
+  await chooser.selectOption('all');
   expect(await body.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
   await body.getByRole('button', { name: 'Done', exact: true }).click();
   await noOverflow();
@@ -653,9 +650,9 @@ test('keyboard-only completion keeps sheet focus contained and returns to the op
   const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
   await tabTo(body.getByRole('combobox', { name: 'Body area', exact: true }));
   await page.keyboard.press('End');
-  await expect(body.getByRole('heading', { name: 'Whole-body sense', exact: true })).toBeVisible();
-  await tabTo(body.getByRole('button', { name: /^Muted or numb/ }));
-  await page.keyboard.press('Space');
+  await expect(body.getByRole('heading', { name: 'Overall body experience', exact: true })).toBeVisible();
+  await tabTo(body.getByRole('slider', { name: 'Muted or numb intensity' }));
+  await page.keyboard.press('ArrowRight');
   const separateTool = body.locator('summary').filter({ hasText: 'Separate Body Cues tool' });
   await tabTo(separateTool);
   for (let attempt = 0; attempt < 20; attempt += 1) {
@@ -664,7 +661,7 @@ test('keyboard-only completion keeps sheet focus contained and returns to the op
   }
   await tabTo(separateTool);
   await page.keyboard.press('Enter');
-  await tabTo(body.getByRole('button', { name: 'Open separate Body Cues tool', exact: true }));
+  await tabTo(body.getByRole('button', { name: 'Open Body Cues', exact: true }));
   for (let attempt = 0; attempt < 20; attempt += 1) {
     await page.keyboard.press('Shift+Tab');
     expect(await body.evaluate((element) => element.contains(document.activeElement))).toBe(true);
