@@ -156,7 +156,7 @@ test('mobile body-area chooser and all-cues view never leave the check-in; expli
   await expect(chooser).toHaveValue('all');
   await expect(body.locator('section[aria-labelledby^="alex-region-"]')).toHaveCount(9);
   await expect(page).toHaveURL(/alexithymia-support$/);
-  
+  await body.getByRole('slider', { name: 'Tight or constricted intensity' }).fill('5');
   await page.screenshot({ path: 'test-results/check-in-mobile-body.png' });
   await body.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Body clues 2 cues selected.', exact: true })).toBeVisible();
