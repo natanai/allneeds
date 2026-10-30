@@ -58,7 +58,7 @@ export function IntensitySlider({
       <output className={styles.bubble} aria-hidden="true">{formatIntensityRating(value, max)}</output>
     </div>
     {(lowLabel || middleLabel || highLabel) && (
-      <div className={styles.scale} aria-hidden="true">
+      <div className={styles.scale} data-middle={middleLabel ? "true" : "false"} aria-hidden="true">
         <span>{lowLabel ?? ''}</span>
         {middleLabel ? <span>{middleLabel}</span> : null}
         <span>{highLabel ?? ''}</span>
