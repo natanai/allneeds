@@ -98,8 +98,8 @@
   border: 1.5px solid color-mix(in srgb, var(--outline) 75%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface-raised) 40%, transparent);
-  -webkit-backdrop-filter: blur(8px) saturate(180%) brightness(1.06);
-  backdrop-filter: blur(8px) saturate(180%) brightness(1.06);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   box-shadow:
     0 5px 17px color-mix(in srgb, var(--outline) 30%, transparent),
     inset 0 1.5px 1px color-mix(in srgb, white 65%, transparent),
@@ -142,6 +142,8 @@
   width: 52px;
   height: 38px;
   background: color-mix(in srgb, var(--surface-raised) 30%, transparent);
+  -webkit-backdrop-filter: blur(8px) saturate(180%) brightness(1.06);
+  backdrop-filter: blur(8px) saturate(180%) brightness(1.06);
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
