@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import bodyRegionsRaw from '../../data/body-regions.json';
+import { IntensitySlider, formatIntensityRating } from '../../components/intensity/IntensitySlider';
 import { alexithymiaCandidateByKey, alexithymiaCandidates } from '../alexithymia/alexithymiaData';
 import {
   clearBodyCuesDraft,
@@ -14,7 +14,7 @@ import {
 } from '../../persistence/workflowDrafts';
 import { checkInVisit, useCheckInReturnContext, type CheckInLocationState } from '../alexithymia/checkInNavigation';
 import { useWorkflowDraftPersistence } from '../../persistence/useWorkflowDraftPersistence';
-import { computeBodyCueMatches, describeCueIntensity } from './bodyCueMath';
+import { computeBodyCueMatches } from './bodyCueMath';
 import styles from './BodyCuesPage.module.css';
 
 type BodyOption = { id: string; title: string; note: string; emotions?: Record<string, number> };
@@ -180,7 +180,7 @@ export function BodyCuesPage() {
         <section className={styles.sliderPanel} aria-labelledby="body-cues-heading">
           <header className={styles.sliderHeader}>
             <h2 id="body-cues-heading">Cue intensity</h2>
-            <p className={styles.instructions}>Move a slider only when a cue fits. Leave everything else off.</p>
+            <p className={styles.instructions}>Move a slider above zero when you notice a sensation. Leave other sensations at zero.</p>
             <p className={styles.activeCount}>{activeCount} {activeCount === 1 ? 'cue' : 'cues'} selected</p>
           </header>
 
@@ -194,32 +194,20 @@ export function BodyCuesPage() {
                 <div className={styles.options}>
                   {region.options.map((option) => {
                     const value = selected[option.id] ?? 0;
-                    const progressStyle = { '--cue-progress': `${value}%` } as CSSProperties;
                     return (
                       <div className={styles.cue} key={option.id} data-active={value > 0 ? 'true' : undefined}>
                         <div className={styles.cueHeader}>
                           <h4>{option.title}</h4>
-                          <output htmlFor={option.id}>{describeCueIntensity(value)}</output>
+                          <output>{formatIntensityRating(value / 10)}</output>
                         </div>
                         <p className={styles.cueNote}>{option.note}</p>
-                        <div className={styles.sliderWrapper}>
-                          <input
-                            className={styles.slider}
-                            style={progressStyle}
-                            id={option.id}
-                            type="range"
-                            min="0"
-                            max="100"
-                            step="5"
-                            value={value}
-                            aria-label={`${option.title} intensity`}
-                            aria-valuetext={describeCueIntensity(value)}
-                            onChange={(event) => updateCue(option.id, Number(event.target.value))}
-                          />
-                          <span className={styles.scale} aria-hidden="true">
-                            <span>Off</span><span>Hint</span><span>Noticeable</span><span>Strong</span>
-                          </span>
-                        </div>
+                        <IntensitySlider
+                          label={`${option.title} intensity`}
+                          value={value / 10}
+                          min={0} max={10} step={0.5}
+                          lowLabel="0 · None" middleLabel="5 · Moderate" highLabel="10 · Strong"
+                          onChange={(rating) => updateCue(option.id, Math.round(rating * 10))}
+                        />
                       </div>
                     );
                   })}
