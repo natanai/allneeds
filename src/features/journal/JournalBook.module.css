@@ -143,20 +143,20 @@
 .pickerSearch { width: 100%; min-height: var(--control-min); padding: .5rem .62rem; border: 1px solid color-mix(in srgb, var(--outline) 28%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--surface-raised) 94%, var(--quiet) 6%); }
 .feelingOptions { min-height: 0; overflow: auto; overscroll-behavior: contain; border-block: 1px solid color-mix(in srgb, var(--outline) 16%, transparent); }
 .feelingRating {
-  min-height: 54px;
-  padding: .5rem .42rem;
+  min-width: 0;
+  padding: .65rem .5rem .4rem;
   display: grid;
-  grid-template-columns: minmax(6rem, .85fr) minmax(6rem, 1.15fr) 3rem;
-  gap: .5rem;
-  align-items: center;
+  gap: .15rem;
   border-bottom: 1px solid color-mix(in srgb, var(--outline) 12%, transparent);
   font-size: var(--text-sm);
 }
-.feelingRating[data-selected='true'] { background: color-mix(in srgb, var(--positive) 18%, var(--surface-raised)); }
-.feelingRating > span { font-weight: 650; }
-.feelingRating input { width: 100%; min-width: 0; min-height: var(--control-min); accent-color: var(--primary); }
-.feelingRating output { color: var(--secondary); text-align: right; font-variant-numeric: tabular-nums; }
-.unknownRating { grid-column: 1 / -1; padding-bottom: .4rem; }
+.feelingRating[data-selected='true'] {
+  background: color-mix(in srgb, var(--positive) 13%, var(--surface-raised));
+  box-shadow: inset 3px 0 0 var(--outline);
+}
+.feelingRatingHeader { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.feelingRatingHeader output { color: var(--text); font-variant-numeric: tabular-nums; }
+.unknownRating { padding-bottom: .4rem; }
 .pickerActions, .actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .pickerActions { padding-top: .35rem; }
 .pickerActions button, .actions button {
