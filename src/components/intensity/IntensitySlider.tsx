@@ -53,9 +53,14 @@ export function IntensitySlider({
         onPointerDown={() => setDragging(true)}
         onPointerUp={() => setDragging(false)}
         onPointerCancel={() => setDragging(false)}
+        onTouchStart={() => setDragging(true)}
+        onTouchEnd={() => setDragging(false)}
+        onTouchCancel={() => setDragging(false)}
         onBlur={() => setDragging(false)}
       />
-      <output className={styles.bubble} aria-hidden="true">{formatIntensityRating(value, max)}</output>
+      {/* Overlay lives above the native range thumb. The native input still owns every gesture,
+          keyboard action, and screen-reader announcement; this layer never receives pointers. */}
+      <output className={styles.glassThumb} aria-hidden="true">{formatIntensityRating(value, max)}</output>
     </div>
     {(lowLabel || middleLabel || highLabel) && (
       <div className={styles.scale} data-middle={middleLabel ? "true" : "false"} aria-hidden="true">
