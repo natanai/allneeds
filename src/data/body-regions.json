@@ -42,7 +42,7 @@
       },
       {
         "id": "chest-open",
-        "title": "Open, warm, or expansive",
+        "title": "Relaxed or warm",
         "note": "Less tension, easier breathing, or warmth",
         "insight": "An open chest can accompany calm, relief, or joyful connection.",
         "emotions": {
@@ -140,7 +140,7 @@
       },
       {
         "id": "throat-dry",
-        "title": "Dry or closed off",
+        "title": "Dry or scratchy",
         "note": "Dry or scratchy throat or changes in voice",
         "insight": "Dryness can indicate fear or anticipation about speaking up.",
         "emotions": {
@@ -212,7 +212,7 @@
     "options": [
       {
         "id": "head-pressure",
-        "title": "Pressure or band",
+        "title": "Pressure or tightness",
         "note": "Pressure or tightness around the forehead or temples",
         "insight": "Head pressure can signal mental load, stress, or overwhelm asking for relief.",
         "emotions": {
@@ -253,7 +253,7 @@
     "options": [
       {
         "id": "shoulders-weighted",
-        "title": "Weighted or burdened",
+        "title": "Heavy or tense",
         "note": "Heaviness, lowered shoulders, or muscle tightness",
         "insight": "Weighted shoulders can align with stress, guilt, or sadness about responsibility.",
         "emotions": {
@@ -296,7 +296,7 @@
     "options": [
       {
         "id": "limbs-heavy",
-        "title": "Heavy or lead-like",
+        "title": "Heavy or sluggish",
         "note": "Heaviness or difficulty moving the arms or legs",
         "insight": "Heavy limbs can show tiredness, sadness, or numb shutdown.",
         "emotions": {
@@ -320,7 +320,7 @@
       },
       {
         "id": "limbs-tingly",
-        "title": "Tingly or sparkly",
+        "title": "Tingling or pins and needles",
         "note": "Tingling or pins-and-needles sensation",
         "insight": "Tingles can mean excited anticipation or anxious vigilance.",
         "emotions": {
@@ -405,7 +405,7 @@
       },
       {
         "id": "overall-calm",
-        "title": "Grounded or calm",
+        "title": "Steady or relaxed",
         "note": "Relatively steady breathing or reduced muscle tension",
         "insight": "Steady calm can mean needs feel met—contentment, gratitude, or relief.",
         "emotions": {
