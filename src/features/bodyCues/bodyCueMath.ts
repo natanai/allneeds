@@ -53,9 +53,3 @@ export function computeBodyCueMatches(
     .sort((left, right) => right.percent - left.percent || left.key.localeCompare(right.key));
 }
 
-export function describeCueIntensity(value: number) {
-  if (value <= 0) return 'Off';
-  if (value < 35) return `Hint · ${value}%`;
-  if (value < 70) return `Noticeable · ${value}%`;
-  return `Strong · ${value}%`;
-}
