@@ -67,4 +67,5 @@ describe('body cue inference', () => {
     const stored = computeBodyCueMatches([{ option, intensity: 85 }], 100);
     const displayed = computeBodyCueMatches([{ option, intensity: 8.5 }], 10);
     expect(displayed).toEqual(stored);
-  });});
+  });
+});
