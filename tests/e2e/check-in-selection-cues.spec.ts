@@ -53,17 +53,13 @@ for (const scenario of scenarios) {
 
     await page.getByRole('button', { name: /^Body clues/ }).click();
     const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
-    const sensation = body.getByRole('button', { name: /^Tight or constricted/ });
-    await expect(sensation).toHaveAttribute('aria-pressed', 'false');
-    await expect(sensation).toContainText('+');
-    await sensation.click();
-    await expect(sensation.getByText('Remove', { exact: true })).toBeVisible();
-    await expect(sensation).toHaveAttribute('aria-pressed', 'true');
-    if (scenario.width >= 720) {
-      const currentArea = body.getByRole('navigation', { name: 'Body regions' }).getByRole('button', { pressed: true });
-      await expect(currentArea).toHaveCSS('box-shadow', /inset/);
-      await expect(currentArea.getByLabel('has selected cues')).toBeVisible();
-    }
+    const sensation = body.getByRole('slider', { name: 'Tight or constricted intensity' });
+    await expect(sensation).toHaveValue('0');
+    await expect(body.getByRole('combobox', { name: 'Body area' })).toHaveValue('all');
+    await sensation.fill('5');
+    await expect(sensation).toHaveValue('5');
+    await expect(body.getByText('1 cue selected', { exact: true })).toBeVisible();
+    await expect(body.locator('[data-active="true"]').filter({ has: sensation })).toHaveCount(1);
     await body.getByRole('button', { name: 'Done', exact: true }).click();
 
     await page.getByRole('button', { name: /^Overall feeling/ }).click();
@@ -120,7 +116,8 @@ for (const scenario of scenarios) {
     await word.click();
     const candidate = page.getByRole('dialog', { name: 'Anxiety', exact: true });
     await candidate.getByRole('button', { name: 'Fits', exact: true }).click();
-    await candidate.getByRole('button', { name: 'Anxiety intensity 6 of 10', exact: true }).click();
+    await candidate.getByRole('slider', { name: 'Anxiety intensity' }).fill('6');
+    await candidate.getByRole('button', { name: 'Use this rating' }).click();
     await expect(word).toContainText('✓ Fits');
     await expect(word).toContainText(/% clue match/);
     if (scenario.largeText) {
@@ -131,7 +128,7 @@ for (const scenario of scenarios) {
     await word.click();
     await expect(check(candidate.getByRole('button', { name: 'Fits', exact: true }))).toBeVisible();
     await candidate.getByRole('button', { name: 'Fits', exact: true }).click();
-    await expect(check(candidate.getByRole('button', { name: 'Anxiety intensity 6 of 10', exact: true }))).toBeVisible();
+    await expect(candidate.getByRole('slider', { name: 'Anxiety intensity' })).toHaveValue('6');
     await candidate.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
     await word.click();
     await candidate.getByRole('button', { name: 'Maybe', exact: true }).click();
@@ -194,7 +191,7 @@ test('Observation provenance is not a selected word; partial comparisons and cus
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: /^Body clues/ }).click();
   const body = page.getByRole('dialog', { name: 'Body clues', exact: true });
-  await body.getByRole('button', { name: /^Tight or constricted/ }).click();
+  await body.getByRole('slider', { name: 'Tight or constricted intensity' }).fill('5');
   await body.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: /^Overall feeling/ }).click();
   const shape = page.getByRole('dialog', { name: 'Overall feeling', exact: true });
