@@ -169,8 +169,8 @@
   .trackArea input::-moz-range-thumb { transition: none; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .glassThumb {
-    background: var(--surface-raised) !important;
+  .root[data-dragging='true'] .glassThumb {
+    background: var(--surface-raised);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
