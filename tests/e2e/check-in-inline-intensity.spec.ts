@@ -69,6 +69,7 @@ test('dismissal hides a word in every view, with visible Undo and an explicit un
   await page.getByRole('radio', { name: 'All words', exact: true }).click();
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words', exact: true }).fill('Anxiety');
   await expect(magnet).toHaveCount(0);
+  await expect(page.getByText('1 matching word is dismissed for this check-in. Use Show dismissed words to restore it.', { exact: true })).toBeVisible();
   await page.reload();
   await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
   await expect(magnet).toHaveCount(0);

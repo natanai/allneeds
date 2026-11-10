@@ -59,7 +59,7 @@ for (const scenario of scenarios) {
     await sensation.fill('5');
     await expect(sensation).toHaveValue('5');
     await expect(body.getByText('1 cue selected', { exact: true })).toBeVisible();
-    await expect(body.locator('[data-active="true"]').filter({ has: sensation })).toHaveCount(1);
+    await expect(sensation.locator('xpath=ancestor::*[@data-active="true"]')).toHaveCount(1);
     await body.getByRole('button', { name: 'Done', exact: true }).click();
 
     await page.getByRole('button', { name: /^Overall feeling/ }).click();

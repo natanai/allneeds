@@ -293,6 +293,13 @@ export function AlexithymiaSupportPage() {
   }, [allSearchTerms, completeMatches, normalizedWordQuery, selectedTerms, wordFilter, observationTerms]);
 
   const dismissedTerms = allSearchTerms.filter((term) => draft.decisions[term.id] === 'not-this-time');
+  const dismissedMatches = normalizedWordQuery
+    ? dismissedTerms.filter((term) => term.label.toLocaleLowerCase().includes(normalizedWordQuery)).length : 0;
+  const emptyWordsMessage = dismissedMatches
+    ? `${dismissedMatches} matching ${dismissedMatches === 1 ? 'word is' : 'words are'} dismissed for this check-in. Use Show dismissed words to restore ${dismissedMatches === 1 ? 'it' : 'them'}.`
+    : normalizedWordQuery ? `No words in this view match “${wordQuery}”. Try All words, or keep your own word.`
+      : wordFilter === 'mine' ? 'No words selected yet. You can continue without a word.'
+        : 'No matching words to show. Try All words, or continue without a word.';
   function wordItem(term: SupportTerm, id: string, context?: string): MagnetBoardItem {
     const score = term.candidate ? scoreByCandidateKey.get(term.candidate.key) : null;
     const percent = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
@@ -825,7 +832,7 @@ export function AlexithymiaSupportPage() {
                   ariaLabel="Possible words"
                 />
               ) : (
-                <p className={styles.emptyMessage}>{normalizedWordQuery ? `No words in this view match “${wordQuery}”. Try All words, or keep your own word.` : wordFilter === 'mine' ? 'No words selected yet. You can continue without a word.' : 'No matching words to show. Try All words, or continue without a word.'}</p>
+                <p className={styles.emptyMessage}>{emptyWordsMessage}</p>
               )}
 
               {normalizedWordQuery && !exactSearchTerm ? (
