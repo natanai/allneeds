@@ -1324,12 +1324,18 @@ export function MagnetBoard({
             onPointerDown={(event) => {
               if ((event.target as Element).closest('[data-magnet-handle]')) handlePointerDown(event, item.id);
             }}
+            onClick={(event) => {
+              // Capture retargets a pointer click to the physical shell. A
+              // keyboard click still originates on the native handle button.
+              if (event.target !== event.currentTarget && !(event.target as Element).closest('[data-magnet-handle]')) return;
+              handleClick(event, item.id);
+              if (!event.defaultPrevented) item.onActivate?.();
+            }}
             onPointerMove={handlePointerMove} onPointerUp={finishDrag} onPointerCancel={finishDrag} onLostPointerCapture={finishDrag}
           >
             <div className={styles.compoundHeading}>
               <button type="button" className={styles.compoundHandle} data-magnet-handle
-                aria-label={item.ariaLabel} aria-haspopup={item.ariaHasPopup}
-                onClick={(event) => { handleClick(event, item.id); if (!event.defaultPrevented) item.onActivate?.(); }}>
+                aria-label={item.ariaLabel} aria-haspopup={item.ariaHasPopup}>
                 {content}
               </button>
               <div className={styles.compoundActions} data-magnet-controls>{item.actions}</div>

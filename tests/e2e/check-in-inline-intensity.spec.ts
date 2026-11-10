@@ -119,6 +119,17 @@ test('manual Maybe stays tentative, while direct rating transfers to Journal wit
   await page.setViewportSize({ width: 390, height: 844 });
   await openWords(page);
   const magnet = page.getByRole('group', { name: 'Anxiety controls', exact: true });
+  const label = magnet.getByRole('button', { name: /^Anxiety, Feeling/ });
+  await label.click();
+  const preview = page.getByRole('dialog', { name: 'Anxiety', exact: true });
+  await expect(preview).toBeVisible();
+  await page.keyboard.press('Escape');
+  await label.focus();
+  await label.press('Enter');
+  await expect(preview).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(label).toBeFocused();
+  await expect(magnet.getByRole('slider')).toHaveValue('0');
   await magnet.getByRole('slider').fill('9');
   await magnet.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
   const options = page.getByRole('dialog', { name: 'Anxiety', exact: true });
