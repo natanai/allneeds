@@ -142,8 +142,9 @@
   outline-offset: 3px;
 }
 
-.playMode .magnet,
-.playMode .magnet > * {
+.playMode .magnet:not(.compound),
+.playMode .magnet:not(.compound) > *,
+.playMode .compoundHandle {
   cursor: grab;
   touch-action: none;
   -webkit-user-drag: none;
@@ -381,6 +382,41 @@
 }
 
 .selectionCheck[data-selected='true'] { visibility: visible; }
+
+/* Compound magnets keep the shared shell and physics. Native controls are
+   siblings of the drag handle, with their own touch and keyboard ownership. */
+.compound {
+  width: min(17rem, calc(100% - 24px));
+  padding: .45rem .65rem;
+  display: grid;
+  gap: var(--space-1);
+  white-space: normal;
+  text-align: left;
+  cursor: default;
+  touch-action: pan-y;
+}
+.compoundHeading { min-width: 0; display: flex; align-items: start; gap: var(--space-1); }
+.compoundHandle {
+  min-width: 0;
+  min-height: var(--control-min);
+  flex: 1 1 auto;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.compoundHandle:focus-visible { outline: 2px solid var(--magnet-focus); outline-offset: 2px; border-radius: var(--radius-md); }
+.compoundHandle .label { min-width: 0; flex-basis: 100%; overflow-wrap: anywhere; }
+.compoundHandle .detail { min-height: 2.4em; }
+.compoundActions { flex: 0 0 auto; display: flex; }
+.compoundControls { min-width: 0; cursor: auto; }
 
 /* Desktop Chromium/Edge rasterize the always-transformed nav magnets softly at
    common zoom levels. Keep resting nav magnets on the normal layout/text path,

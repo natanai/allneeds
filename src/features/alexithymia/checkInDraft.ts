@@ -1,8 +1,9 @@
 import bodyRegions from '../../data/body-regions.json';
 import { analyzeObservation, selectExactObservationEntities } from '../../domain/observationInference';
 import type { AlexithymiaDraft } from '../../persistence/workflowDrafts';
-import { createSupportJournalDraft, statementFromDraft, supportStatementBasis, supportTermIndex } from './alexithymiaTerms';
+import { createSupportJournalDraft, statementFromDraft, supportStatementBasis, supportTermIndex, type SupportTerm } from './alexithymiaTerms';
 import { shapeToJournalMood } from './shapeCoordinates';
+import { CHECK_IN_STAGE_COUNT } from './checkInStages';
 
 const bodyOptions = new Map(bodyRegions.flatMap((region) => region.options.map((option) => [option.id, option])));
 
@@ -13,6 +14,29 @@ export function createCheckInDraft(): AlexithymiaDraft {
     bodyClear: false, shape: {}, decisions: {}, termOrder: [], customTerms: [],
     noWordYet: false, selectedNeeds: [], statement: '', statementEdited: false,
   };
+}
+
+/** Zero/unset is not a reported rating and is distinct from a dismissal. */
+export function withWordChoice(
+  draft: AlexithymiaDraft,
+  term: SupportTerm,
+  decision: AlexithymiaDraft['decisions'][string] | undefined,
+  intensity?: number,
+): AlexithymiaDraft {
+  if (decision === 'fits' && term.role === 'feeling'
+    && (intensity === undefined || !Number.isInteger(intensity) || intensity < 1 || intensity > 10)) return draft;
+  const decisions = { ...draft.decisions };
+  if (decision === undefined) delete decisions[term.id];
+  else decisions[term.id] = decision;
+  const selected = decision === 'fits' || decision === 'maybe';
+  const termOrder = selected
+    ? draft.termOrder.includes(term.id) ? draft.termOrder : [...draft.termOrder, term.id]
+    : draft.termOrder.filter((id) => id !== term.id);
+  const feelingIntensities = { ...draft.feelingIntensities };
+  if (decision === 'fits' && term.role === 'feeling') feelingIntensities[term.id] = intensity!;
+  else delete feelingIntensities[term.id];
+  return { ...draft, decisions, termOrder, feelingIntensities,
+    noWordYet: selected ? false : draft.stage === CHECK_IN_STAGE_COUNT && !termOrder.length ? true : draft.noWordYet };
 }
 
 /** Copy the practice into the same working flow without endorsing its suggestions. */

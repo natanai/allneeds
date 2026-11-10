@@ -53,10 +53,13 @@ export type MagnetBoardItem = {
   ariaExpanded?: boolean;
   ariaHasPopup?: AriaAttributes['aria-haspopup'];
   ariaControls?: string;
+  /** Separate native controls on a compound content magnet. */
+  actions?: ReactNode;
+  controls?: ReactNode;
 };
 
 type Point = { x: number; y: number };
-type MagnetElement = HTMLAnchorElement | HTMLButtonElement;
+type MagnetElement = HTMLAnchorElement | HTMLButtonElement | HTMLDivElement;
 
 type KineticMagnet = {
   id: string;
@@ -217,6 +220,16 @@ export function MagnetBoard({
   const elementsRef = useRef(new Map<string, MagnetElement>());
   const magnetsRef = useRef(new Map<string, KineticMagnet>());
   const dragRef = useRef<DragState | null>(null);
+  const controlPointerRef = useRef<{ id: string; pointer: number } | null>(null);
+  const controlFocusRef = useRef<string | null>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  // Slider values and choice feedback are not geometry. Keep the live native
+  // controls mounted and measured while their values change under a pointer.
+  const layoutItems = items.some((item) => item.controls)
+    ? JSON.stringify(items.map((item) => [item.id, item.label, item.controls ? null : item.detail, item.badge, item.kind, item.iconUrl]))
+    : items;
+  const controlIsActive = useCallback((id: string) => controlPointerRef.current?.id === id || controlFocusRef.current === id, []);
   const surfaceGestureRef = useRef<SurfaceGesture | null>(null);
   const suppressClickUntilRef = useRef(new Map<string, number>());
   const pointerFieldRef = useRef<PointerField>({
@@ -309,7 +322,7 @@ export function MagnetBoard({
       return;
     }
 
-    const elements = items
+    const elements = itemsRef.current
       .map((item) => ({ item, element: elementsRef.current.get(item.id) }))
       .filter((entry): entry is { item: MagnetBoardItem; element: MagnetElement } => Boolean(entry.element));
     const mobileNavOrder = [
@@ -466,7 +479,7 @@ export function MagnetBoard({
     lastStorageKeyRef.current = storageKey;
     readyRef.current = true;
     setLayoutReady(true);
-  }, [items, playMode, storageKey, variant]);
+  }, [layoutItems, playMode, storageKey, variant]);
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -488,12 +501,26 @@ export function MagnetBoard({
       });
     }
     const observer = new ResizeObserver((entries) => {
-      const nextWidth = entries[0]?.contentRect.width ?? boardRef.current?.clientWidth ?? 0;
-      if (Math.abs(nextWidth - observedWidth) < 0.5) return;
-      observedWidth = nextWidth;
-      run();
+      let changed = false;
+      for (const entry of entries) {
+        if (entry.target === boardRef.current) {
+          const nextWidth = boardRef.current?.clientWidth ?? 0;
+          if (Math.abs(nextWidth - observedWidth) >= 0.5) changed = true;
+          observedWidth = nextWidth;
+        } else {
+          const element = entry.target as HTMLElement;
+          const magnet = magnetsRef.current.get(element.dataset.magnetId ?? '');
+          if (magnet && (Math.abs(element.offsetWidth - magnet.width) >= 0.5 || Math.abs(element.offsetHeight - magnet.height) >= 0.5)) changed = true;
+        }
+      }
+      if (changed) run();
     });
     if (boardRef.current) observer.observe(boardRef.current);
+    elementsRef.current.forEach((element) => {
+      if (element.dataset.compound) observer.observe(element);
+    });
+    if (controlFocusRef.current && !magnetsRef.current.has(controlFocusRef.current)) controlFocusRef.current = null;
+    if (controlPointerRef.current && !magnetsRef.current.has(controlPointerRef.current.id)) controlPointerRef.current = null;
     return () => {
       cancelled = true;
       observer.disconnect();
@@ -584,7 +611,7 @@ export function MagnetBoard({
       for (let substep = 0; substep < stepCount; substep += 1) {
         const liftedId = dragRef.current?.id ?? null;
         magnets.forEach((magnet) => {
-          if (!magnet.dragging && magnet.id !== liftedId) {
+          if (!magnet.dragging && magnet.id !== liftedId && !controlIsActive(magnet.id)) {
             if (pointer.active && pointer.pressed) {
               const collision = getAabbCollision(
                 {
@@ -667,7 +694,7 @@ export function MagnetBoard({
           const waveAge = Math.max((time - wave.startedAt) / 1000, 0);
           const waveRadius = waveAge * DROP_WAVE_SPEED;
           magnets.forEach((magnet) => {
-            if (magnet.dragging || magnet.id === wave.sourceId || wave.reached.has(magnet.id)) return;
+            if (magnet.dragging || controlIsActive(magnet.id) || magnet.id === wave.sourceId || wave.reached.has(magnet.id)) return;
             const dx = magnet.x + magnet.width / 2 - wave.x;
             const dy = magnet.y + magnet.height / 2 - wave.y;
             const distance = Math.max(Math.hypot(dx, dy), 0.001);
@@ -741,9 +768,11 @@ export function MagnetBoard({
                   * influence
                   * approachMultiplier
                 ) / Math.max(resting.mass, 0.5);
-                resting.vx += normalX * pressureAcceleration * step;
-                resting.vy += normalY * pressureAcceleration * step;
-                kickWobble(resting, influence * approachMultiplier * 14 * step);
+                if (!controlIsActive(resting.id)) {
+                  resting.vx += normalX * pressureAcceleration * step;
+                  resting.vy += normalY * pressureAcceleration * step;
+                  kickWobble(resting, influence * approachMultiplier * 14 * step);
+                }
               }
               continue;
             }
@@ -759,13 +788,13 @@ export function MagnetBoard({
             if (falloff > 0) {
               const aSpeed = Math.hypot(a.vx, a.vy);
               const bSpeed = Math.hypot(b.vx, b.vy);
-              if (aSpeed > 45 && !b.dragging) {
+              if (aSpeed > 45 && !b.dragging && !controlIsActive(b.id)) {
                 const transfer = falloff * surfaceCoupling * step;
                 b.vx += (a.vx + (dx / distance) * aSpeed * 0.2) * transfer;
                 b.vy += (a.vy + (dy / distance) * aSpeed * 0.2) * transfer;
                 kickWobble(b, aSpeed * falloff * 0.12 * step);
               }
-              if (bSpeed > 45 && !a.dragging) {
+              if (bSpeed > 45 && !a.dragging && !controlIsActive(a.id)) {
                 const transfer = falloff * surfaceCoupling * step;
                 a.vx += (b.vx - (dx / distance) * bSpeed * 0.2) * transfer;
                 a.vy += (b.vy - (dy / distance) * bSpeed * 0.2) * transfer;
@@ -775,8 +804,8 @@ export function MagnetBoard({
 
             const collision = getAabbCollision(a, b);
             if (!collision) continue;
-            const inverseMassA = a.dragging ? 0 : 1 / a.mass;
-            const inverseMassB = b.dragging ? 0 : 1 / b.mass;
+            const inverseMassA = a.dragging || controlIsActive(a.id) ? 0 : 1 / a.mass;
+            const inverseMassB = b.dragging || controlIsActive(b.id) ? 0 : 1 / b.mass;
             const inverseMassTotal = inverseMassA + inverseMassB;
             if (inverseMassTotal === 0) continue;
 
@@ -812,6 +841,12 @@ export function MagnetBoard({
 
       let isMoving = false;
       magnets.forEach((magnet) => {
+        if (controlIsActive(magnet.id)) {
+          magnet.vx = 0;
+          magnet.vy = 0;
+          magnet.wobble = 0;
+          magnet.wobbleVelocity = 0;
+        }
         const speed = Math.hypot(magnet.vx, magnet.vy);
         if (!magnet.dragging && speed < 1.25) {
           magnet.vx = 0;
@@ -849,7 +884,7 @@ export function MagnetBoard({
       window.cancelAnimationFrame(frame);
       persist();
     };
-  }, [emitRipple, persist, playMode]);
+  }, [controlIsActive, emitRipple, persist, playMode]);
 
   useEffect(() => {
     const saveBeforeLeaving = () => persist();
@@ -984,10 +1019,13 @@ export function MagnetBoard({
   useEffect(() => {
     if (!playMode) return;
     const handlePointerEnd = (event: PointerEvent) => {
+      if (controlPointerRef.current?.pointer === event.pointerId) controlPointerRef.current = null;
       completeDrag(event.pointerId, event.type === 'pointercancel');
       completeSurfaceGesture(event.pointerId);
     };
     const handleBlur = () => {
+      controlPointerRef.current = null;
+      controlFocusRef.current = null;
       const drag = dragRef.current;
       if (drag) completeDrag(drag.pointerId, true);
       const surfaceGesture = surfaceGestureRef.current;
@@ -1053,7 +1091,7 @@ export function MagnetBoard({
     // Pointer pickup is a direct-manipulation state, not keyboard focus.
     // Clear any existing keyboard focus and suppress native pointer focusing so
     // a held magnet never needs a CSS rule that merely hides a focus ring.
-    event.currentTarget.blur();
+    if (document.activeElement instanceof HTMLElement && event.currentTarget.contains(document.activeElement)) document.activeElement.blur();
     if (event.cancelable) event.preventDefault();
     try {
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -1269,6 +1307,36 @@ export function MagnetBoard({
             ) : null}
           </>
         );
+        if (item.controls && variant === 'content') {
+          return <div key={item.id}
+            className={`${classes} ${styles.compound}`} style={customProperties}
+            data-magnet-id={item.id} data-compound="true" role="group" aria-label={`${item.label} controls`}
+            ref={(element) => { if (element) elementsRef.current.set(item.id, element); else elementsRef.current.delete(item.id); }}
+            onPointerDownCapture={(event) => {
+              if (playMode && (event.target as Element).closest('[data-magnet-controls]')) controlPointerRef.current = { id: item.id, pointer: event.pointerId };
+            }}
+            onFocusCapture={(event) => {
+              if ((event.target as Element).closest('[data-magnet-controls]')) controlFocusRef.current = item.id;
+            }}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) controlFocusRef.current = null;
+            }}
+            onPointerDown={(event) => {
+              if ((event.target as Element).closest('[data-magnet-handle]')) handlePointerDown(event, item.id);
+            }}
+            onPointerMove={handlePointerMove} onPointerUp={finishDrag} onPointerCancel={finishDrag} onLostPointerCapture={finishDrag}
+          >
+            <div className={styles.compoundHeading}>
+              <button type="button" className={styles.compoundHandle} data-magnet-handle
+                aria-label={item.ariaLabel} aria-haspopup={item.ariaHasPopup}
+                onClick={(event) => { handleClick(event, item.id); if (!event.defaultPrevented) item.onActivate?.(); }}>
+                {content}
+              </button>
+              <div className={styles.compoundActions} data-magnet-controls>{item.actions}</div>
+            </div>
+            <div className={styles.compoundControls} data-magnet-controls>{item.controls}</div>
+          </div>;
+        }
         const shared = {
           className: classes,
           style: customProperties,

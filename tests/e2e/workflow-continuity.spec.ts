@@ -218,14 +218,13 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: /^Body clues/ }).click();
   const bodySheet = page.getByRole('dialog', { name: 'Body clues' });
-  await bodySheet.getByRole('button', { name: /Tight or constricted/ }).click();
-  await bodySheet.getByLabel('Tight or constricted intensity').fill('70');
+  await bodySheet.getByLabel('Tight or constricted intensity').fill('7');
   await bodySheet.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   const candidateSheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await candidateSheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await candidateSheet.getByRole('button', { name: 'Leave intensity unrated' }).click();
+  await candidateSheet.getByRole('slider', { name: 'Anxiety intensity' }).fill('5');
+  await candidateSheet.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
   await expect(candidateSheet).toHaveCount(0);
   await page.waitForTimeout(250);
 

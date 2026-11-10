@@ -53,13 +53,13 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
 
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   let sheet = page.getByRole('dialog', { name: 'Anxiety' });
+  await sheet.getByText('How this was compared', { exact: true }).click();
   await expect(sheet.getByText(/gives body clues and overall-feeling ratings equal weight/)).toBeVisible();
   await expect(sheet.getByText(/^Body clues$/)).toBeVisible();
   await expect(sheet.getByText(/^Overall feeling$/)).toBeVisible();
-  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
   await expect(sheet.getByRole('slider', { name: 'Anxiety intensity' })).toBeVisible();
   await sheet.getByRole('slider', { name: 'Anxiety intensity' }).fill('8');
-  await sheet.getByRole('button', { name: 'Use this rating' }).click();
+  await sheet.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
   await expect(sheet).toHaveCount(0);
 
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
@@ -124,74 +124,6 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await page.getByRole('combobox', { name: 'History measure' }).selectOption('intensity');
   await page.getByRole('combobox', { name: 'Graph feeling' }).selectOption('Anxiety');
   await expect(page.getByTestId('history-chart').getByRole('button', { name: /^Anxiety: 8,/ })).toBeVisible();
-});
-
-test('candidate decisions close immediately, while Fits offers optional intensity without a Done button', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await startCheckIn(page);
-  await skipObservation(page);
-  await page.getByRole('button', { name: 'Continue to words' }).click();
-  const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
-  await search.fill('Anxiety');
-
-  const open = () => page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
-  await open();
-  let sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await expect(sheet.getByRole('button', { name: 'Done', exact: true })).toHaveCount(0);
-  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
-  await expect(sheet).toHaveCount(0);
-
-  await open();
-  sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await expect(sheet.getByRole('slider', { name: 'Anxiety intensity' })).toBeVisible();
-  await sheet.getByRole('button', { name: 'Close Anxiety' }).click();
-  await expect(sheet).toHaveCount(0);
-  await open();
-  sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await expect(sheet.getByRole('button', { name: 'Fits', exact: true })).toHaveAttribute('aria-pressed', 'false');
-  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await sheet.getByRole('button', { name: 'Leave intensity unrated' }).click();
-  await expect(sheet).toHaveCount(0);
-
-  await expect.poll(() => page.evaluate(() => {
-    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
-    return raw && JSON.parse(raw).data.decisions['candidate:anxiety'];
-  })).toBe('fits');
-  await page.reload();
-  await page.getByRole('button', { name: 'Continue previous check-in' }).click();
-  await page.getByRole('radio', { name: 'All words' }).click();
-  await search.fill('Anxiety');
-  await open();
-  sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await sheet.getByRole('slider', { name: 'Anxiety intensity' }).fill('4');
-  await sheet.getByRole('button', { name: 'Use this rating' }).click();
-  await expect(sheet).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => {
-    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
-    return raw && JSON.parse(raw).data.feelingIntensities?.['candidate:anxiety'];
-  })).toBe(4);
-
-  await open();
-  sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await sheet.getByRole('button', { name: 'Maybe', exact: true }).click();
-  await expect(sheet).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => {
-    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
-    const data = raw && JSON.parse(raw).data;
-    return data?.decisions?.['candidate:anxiety'] === 'maybe'
-      && data?.feelingIntensities?.['candidate:anxiety'] === undefined;
-  })).toBe(true);
-
-  await open();
-  sheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await sheet.getByRole('button', { name: 'Not this time', exact: true }).click();
-  await expect(sheet).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => {
-    const raw = localStorage.getItem('allneeds.v2.alexithymia.draft');
-    return raw && JSON.parse(raw).data.decisions['candidate:anxiety'];
-  })).toBe('not-this-time');
 });
 
 for (const viewport of [

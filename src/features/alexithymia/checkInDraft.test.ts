@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { checkInWithObservation, createCheckInDraft, journalDraftFromCheckIn } from './checkInDraft';
-import { createSupportJournalDraft, statementFromDraft } from './alexithymiaTerms';
+import { checkInWithObservation, createCheckInDraft, journalDraftFromCheckIn, withWordChoice } from './checkInDraft';
+import { createSupportJournalDraft, statementFromDraft, supportTermIndex, customWorkingTerm } from './alexithymiaTerms';
 import { readAlexithymiaDraft, writeAlexithymiaDraftAgainst } from '../../persistence/workflowDrafts';
 import type { StorageDriver } from '../../persistence/storage';
 
@@ -8,6 +8,57 @@ const memory = (): StorageDriver => {
   const values = new Map<string, string>();
   return { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => { values.set(key, value); }, removeItem: (key) => { values.delete(key); } };
 };
+
+describe('direct word ratings', () => {
+  const feeling = supportTermIndex().get('candidate:anxiety')!;
+
+  it('requires a deliberate 1–10 rating to keep a catalog Feeling as Fits', () => {
+    const draft = createCheckInDraft();
+    for (const value of [undefined, 0, -1, 11, 2.5, NaN]) expect(withWordChoice(draft, feeling, 'fits', value)).toBe(draft);
+    const chosen = withWordChoice(draft, feeling, 'fits', 7);
+    expect(chosen.decisions).toEqual({ [feeling.id]: 'fits' });
+    expect(chosen.feelingIntensities).toEqual({ [feeling.id]: 7 });
+    expect(chosen.termOrder).toEqual([feeling.id]);
+    expect(journalDraftFromCheckIn(chosen).feelings).toEqual([{ feeling: 'Anxiety', intensity: 7 }]);
+  });
+
+  it('updates a rating without reordering words or changing other choices', () => {
+    const custom = customWorkingTerm('My own word');
+    const draft = withWordChoice(withWordChoice({ ...createCheckInDraft(), selectedNeeds: ['rest'], statement: 'Keep my text.', statementEdited: true }, custom, 'maybe'), feeling, 'fits', 4);
+    const next = withWordChoice(draft, feeling, 'fits', 9);
+    expect(next.termOrder).toEqual(draft.termOrder);
+    expect(next.selectedNeeds).toEqual(['rest']);
+    expect(next.statement).toBe('Keep my text.');
+    expect(next.decisions[custom.id]).toBe('maybe');
+    expect(next.feelingIntensities).toEqual({ [feeling.id]: 9 });
+  });
+
+  it('distinguishes clearing, tentative keeping, and dismissal without retaining stale ratings', () => {
+    const chosen = withWordChoice(createCheckInDraft(), feeling, 'fits', 6);
+    const clear = withWordChoice(chosen, feeling, undefined);
+    expect(clear.decisions).toEqual({});
+    expect(clear.termOrder).toEqual([]);
+    expect(clear.feelingIntensities).toEqual({});
+    const maybe = withWordChoice(chosen, feeling, 'maybe');
+    expect(maybe.termOrder).toEqual([feeling.id]);
+    expect(maybe.feelingIntensities).toEqual({});
+    expect(journalDraftFromCheckIn(maybe).guidedSupport?.terms[0]?.decision).toBe('maybe');
+    const dismissed = withWordChoice(chosen, feeling, 'not-this-time');
+    expect(dismissed.decisions[feeling.id]).toBe('not-this-time');
+    expect(dismissed.termOrder).toEqual([]);
+    expect(dismissed.feelingIntensities).toEqual({});
+    expect(journalDraftFromCheckIn(dismissed).feelings).toEqual([]);
+    expect(withWordChoice(dismissed, feeling, undefined).decisions).toEqual({});
+  });
+
+  it('keeps other word roles without manufacturing catalog ratings', () => {
+    const custom = customWorkingTerm('Something I am trying to name');
+    const draft = withWordChoice({ ...createCheckInDraft(), customTerms: [custom.label] }, custom, 'fits');
+    expect(draft.decisions[custom.id]).toBe('fits');
+    expect(draft.feelingIntensities).toEqual({});
+    expect(journalDraftFromCheckIn(draft).feelings).toEqual([]);
+  });
+});
 
 describe('Observations into the existing check-in', () => {
   it('retains possibilities across reload without making them reported Feelings, Needs, or ratings', () => {

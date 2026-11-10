@@ -14,8 +14,10 @@ async function keepWord(page: Page, word: string, intensity?: number) {
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill(word);
   await page.getByRole('button', { name: new RegExp(`^${word}, (Feeling|Other emotion word)`) }).click();
   const sheet = page.getByRole('dialog', { name: word, exact: true });
-  await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  if (intensity !== undefined) await sheet.getByRole('button', { name: `${word} intensity ${intensity} of 10`, exact: true }).click();
+  if (intensity !== undefined) {
+    await sheet.getByRole('slider', { name: `${word} intensity`, exact: true }).fill(String(intensity));
+    await sheet.getByRole('button', { name: `Close ${word}`, exact: true }).click();
+  } else await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
   await expect(sheet).toBeHidden();
 }
 
