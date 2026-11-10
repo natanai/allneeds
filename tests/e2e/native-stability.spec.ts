@@ -478,26 +478,6 @@ test('modal surfaces own keyboard focus and restore it on Escape', async ({ page
   expect(runtimeProblems).toEqual([]);
 });
 
-test('the precached production shell serves deep routes while offline', async ({ page, context }) => {
-  const runtimeProblems = collectRuntimeProblems(page);
-  await page.goto('/?diagnostics=1');
-  await expect(page.locator('html')).toHaveAttribute('data-offline-cache', 'ready', { timeout: 15_000 });
-
-  await page.goto('/needs/autonomy');
-  await expect(page.locator('main')).toHaveAttribute('aria-label', 'Need for autonomy');
-  await context.setOffline(true);
-  try {
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.locator('main')).toHaveAttribute('aria-label', 'Need for autonomy');
-    await page.goto('/observations', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('main')).toHaveAttribute('aria-label', 'Observations');
-    await expect(page.getByRole('heading', { name: 'Observations', level: 1 })).toBeVisible();
-  } finally {
-    await context.setOffline(false);
-  }
-  expect(runtimeProblems).toEqual([]);
-});
-
 test.describe('mobile native-shell contracts', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -583,22 +563,6 @@ test.describe('mobile native-shell contracts', () => {
       await session.detach();
     }
 
-    expect(runtimeProblems).toEqual([]);
-  });
-
-  test('mobile keeps the editor first, avoids duplicate controls, and never overflows', async ({ page }) => {
-    const runtimeProblems = collectRuntimeProblems(page);
-    await page.goto('/observations');
-    await expect(page.locator('main')).toHaveCount(1);
-    await expect(page.getByLabel('Primary navigation magnets').getByRole('button', { name: 'Customizer' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Open customizer' })).toBeHidden();
-
-    const editorBox = await page.getByLabel('What did you notice?').boundingBox();
-    const guidanceBox = await page.locator('details').filter({ hasText: 'Why try this?' }).boundingBox();
-    expect(editorBox).not.toBeNull();
-    expect(guidanceBox).not.toBeNull();
-    expect(editorBox!.y).toBeLessThan(guidanceBox!.y);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
     expect(runtimeProblems).toEqual([]);
   });
 

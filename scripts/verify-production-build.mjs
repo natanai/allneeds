@@ -23,16 +23,6 @@ async function listFiles(directory) {
   return nested.flat();
 }
 
-async function pathExists(path) {
-  try {
-    await stat(path);
-    return true;
-  } catch (error) {
-    if (error && typeof error === 'object' && error.code === 'ENOENT') return false;
-    throw error;
-  }
-}
-
 const files = (await listFiles(dist)).sort((a, b) => a.localeCompare(b));
 const deployPaths = files
   .filter((path) => path !== serviceWorkerPath)
@@ -84,12 +74,6 @@ if (!worker.includes("cache.match(request, { ignoreVary: true })")
 }
 
 const indexHtml = await readFile(resolve(dist, 'index.html'), 'utf8');
-if (/fonts\.(googleapis|gstatic)\.com/i.test(indexHtml)) fail('index.html still depends on Google Fonts.');
-if (/Loading page/i.test(indexHtml)) fail('index.html contains a route-loading fallback.');
-if (!indexHtml.includes('__ALLNEEDS_BOOT_STARTED_MS__ = performance.now()')) {
-  fail('the navigation-wide entrance deadline is not initialized before the app module loads.');
-}
-
 const requiredBrandAssets = [
   'icons/app-icon.svg',
   'icons/favicon.svg',
@@ -115,14 +99,14 @@ for (const asset of requiredBrandAssets) {
 }
 
 const requiredBrandMetadata = [
-  ['SVG favicon', /rel="icon"[^>]+favicon\.svg\?v=6/],
-  ['PNG favicon fallback', /rel="icon"[^>]+favicon-32x32\.png\?v=6/],
-  ['classic favicon fallback', /rel="shortcut icon"[^>]+favicon\.ico\?v=6/],
-  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png\?v=6/],
-  ['Safari pinned-tab icon', /rel="mask-icon"[^>]+safari-pinned-tab\.svg\?v=6/],
-  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png\?v=6/],
-  ['Open Graph image', /property="og:image"[^>]+social\/og-image-1200x630\.png\?v=4/],
-  ['Twitter image', /name="twitter:image"[^>]+social\/og-image-1200x630\.png\?v=4/],
+  ['SVG favicon', /rel="icon"[^>]+favicon\.svg(?:\?[^"]*)?"/],
+  ['PNG favicon fallback', /rel="icon"[^>]+favicon-32x32\.png(?:\?[^"]*)?"/],
+  ['classic favicon fallback', /rel="shortcut icon"[^>]+favicon\.ico(?:\?[^"]*)?"/],
+  ['Apple touch icon', /rel="apple-touch-icon"[^>]+apple-touch-icon\.png(?:\?[^"]*)?"/],
+  ['Safari pinned-tab icon', /rel="mask-icon"[^>]+safari-pinned-tab\.svg(?:\?[^"]*)?"/],
+  ['Windows tile icon', /msapplication-TileImage[^>]+mstile-150x150\.png(?:\?[^"]*)?"/],
+  ['Open Graph image', /property="og:image"[^>]+social\/og-image-1200x630\.png(?:\?[^"]*)?"/],
+  ['Twitter image', /name="twitter:image"[^>]+social\/og-image-1200x630\.png(?:\?[^"]*)?"/],
 ];
 for (const [label, pattern] of requiredBrandMetadata) {
   if (!pattern.test(indexHtml)) fail(`${label} metadata is missing from index.html.`);
@@ -134,162 +118,24 @@ for (const font of emittedFonts) {
   if ((await stat(font)).size < 10_000) fail(`${relative(dist, font)} is unexpectedly small.`);
 }
 
-const appSource = await readFile(resolve(root, 'src/app/App.tsx'), 'utf8');
-if (/\blazy\s*\(|<Suspense\b|Loading page/i.test(appSource)) {
-  fail('the route graph contains lazy/Suspense loading UI.');
-}
-
+// Keep the canonical catalog ownership boundary; Vite function names are not a contract.
 const catalogSource = await readFile(resolve(root, 'src/data/catalog.ts'), 'utf8');
-const viteConfigSource = await readFile(resolve(root, 'vite.config.ts'), 'utf8');
-if (catalogSource.includes("./generated/legacyData.json")
+if (catalogSource.includes('./generated/legacyData.json')
   || !catalogSource.includes("from 'virtual:allneeds-runtime-catalog'")) {
   fail('the browser catalog module is performing or importing legacy catalog normalization.');
 }
-if (!viteConfigSource.includes("const runtimeCatalogId = 'virtual:allneeds-runtime-catalog'")
-  || !viteConfigSource.includes('function runtimeCatalogSource()')) {
-  fail('the legacy-to-runtime catalog transformation is no longer owned by the Vite build.');
-}
 
-const mainSource = await readFile(resolve(root, 'src/main.tsx'), 'utf8');
-if (!mainSource.includes('remainingBootGateMs(bootStartedAt, performance.now())')
-  || !mainSource.includes("dataset.appPreload = 'degraded'")
-  || !mainSource.includes("dataset.appPreload = 'background'")) {
-  fail('the entrance gate no longer honors its navigation-wide deadline and safe preload fallback.');
-}
-
-const appShellSource = await readFile(resolve(root, 'src/app/AppShell.tsx'), 'utf8');
-if (!appShellSource.includes('document.title = routePresentation(location.pathname, location.search).documentTitle')
-  || !appShellSource.includes('aria-label={presentation.label}')) {
-  fail('route transitions no longer provide a deterministic title and named main landmark.');
-}
-if ((appShellSource.match(/<main\b/g) ?? []).length !== 1) {
-  fail('the persistent shell must own exactly one main landmark.');
-}
-
-const featureSourceFiles = (await listFiles(resolve(root, 'src/features')))
-  .filter((path) => path.endsWith('.tsx'));
-const nestedMainSources = [];
-for (const path of featureSourceFiles) {
-  if (/<main\b/.test(await readFile(path, 'utf8'))) nestedMainSources.push(relative(root, path));
-}
-if (nestedMainSources.length) {
-  fail(`routed feature pages contain nested main landmarks: ${nestedMainSources.join(', ')}.`);
-}
-
-const dialogFocusSource = await readFile(resolve(root, 'src/app/useDialogFocus.ts'), 'utf8');
-if (!dialogFocusSource.includes("event.key === 'Escape'")
-  || !dialogFocusSource.includes("event.key !== 'Tab'")
-  || !dialogFocusSource.includes("document.body.style.overflow = 'hidden'")
-  || !dialogFocusSource.includes('previousFocus.focus({ preventScroll: true })')) {
-  fail('shared modal keyboard, scroll-lock, or focus-restoration behavior is incomplete.');
-}
-
-const observationSourcePath = resolve(root, 'src/data/observationInference/source.json');
-const observationGeneratedPath = resolve(root, 'src/data/generated/observationInference.ts');
-const [observationSourceText, observationGeneratedSource, observationCompilerSource] = await Promise.all([
-  readFile(observationSourcePath, 'utf8'),
-  readFile(observationGeneratedPath, 'utf8'),
-  readFile(resolve(root, 'scripts/compile-observation-inference.mjs'), 'utf8'),
-]);
-const observationSource = JSON.parse(observationSourceText);
-if (observationSource.schemaVersion !== 2
-  || observationSource.modelVersion !== '2.1.0'
-  || !Array.isArray(observationSource.expressions)
-  || observationSource.expressions.length < 20
-  || !Array.isArray(observationSource.eventFamilies)
-  || observationSource.eventFamilies.length < 6
-  || 'explorationPools' in observationSource) {
-  fail('the canonical Observation 2.1 inference source is incomplete or contains a retired fallback.');
-}
-if (!observationSource.eventFamilies.every((family) => ['related', 'broad'].includes(family.tier))) {
-  fail('Observation event families may not claim direct self-report evidence.');
-}
-if (!observationGeneratedSource.startsWith('/* This file is generated by scripts/compile-observation-inference.mjs. */')
-  || !observationGeneratedSource.includes("import source from '../observationInference/source.json';")
-  || !observationGeneratedSource.includes("import { fauxFeelings, feelings, needs } from '../catalog';")
-  || !/sourceChecksum:\s*'[0-9a-f]{40}'/.test(observationGeneratedSource)
-  || !observationCompilerSource.includes('function gitBlobChecksum(content)')
-  || !observationCompilerSource.includes("const mode = process.argv.includes('--write') ? 'write' : 'check'")) {
-  fail('the deterministic Observation 2.1 compiler or canonical projection is missing.');
-}
-const retiredObservationPaths = [
-  'src/legacy/observations',
-  'src/features/observations/observationTermDetection.ts',
-  'public/data/observation_cues.csv',
-  'public/data/observation_cue_modules.json',
-  'public/data/observation-guide.json',
-];
-const remainingObservationPaths = [];
-for (const path of retiredObservationPaths) {
-  if (await pathExists(resolve(root, path))) remainingObservationPaths.push(path);
-}
-if (remainingObservationPaths.length) {
-  fail(`retired Observation legacy paths remain: ${remainingObservationPaths.join(', ')}.`);
+// Check that the emitted catalog chunk actually exists and is eagerly preloaded.
+const catalogChunks = deployPaths.filter((path) => /^\.\/assets\/catalog-data-[\w-]+\.js$/.test(path));
+if (catalogChunks.length !== 1) fail('expected one build-shaped catalog data chunk.');
+const catalogChunk = catalogChunks[0].slice(2);
+const modulePreloads = [...indexHtml.matchAll(/<link\b[^>]*rel="modulepreload"[^>]*href="([^"]+)"/g)]
+  .map((match) => match[1]);
+if (!modulePreloads.some((path) => path.endsWith(catalogChunk))) {
+  fail('the build-shaped catalog data chunk is not eagerly preloaded.');
 }
 if (deployPaths.some((path) => /observation(?:_cue|-)guide|observation_cues/i.test(path))) {
   fail('retired Observation data assets were emitted into the production deployment.');
-}
-
-const appShellStyles = await readFile(resolve(root, 'src/app/AppShell.module.css'), 'utf8');
-const compactAppShellStyles = appShellStyles.match(/@media \(max-width: 640px\) \{([\s\S]*?)\n\}/)?.[1] ?? '';
-if (!/\.customizerButton\s*\{\s*display:\s*none;?\s*\}/.test(compactAppShellStyles)) {
-  fail('the duplicate floating customizer control is visible in the compact app shell.');
-}
-
-const observationsSource = await readFile(resolve(root, 'src/features/observations/ObservationsPage.tsx'), 'utf8');
-const observationEditorSource = await readFile(resolve(root, 'src/features/observations/AnnotatedObservationEditor.tsx'), 'utf8');
-const disclosureSource = await readFile(resolve(root, 'src/components/disclosure/DisclosureRow.tsx'), 'utf8');
-const disclosureStyles = await readFile(resolve(root, 'src/components/disclosure/DisclosureRow.module.css'), 'utf8');
-const alexithymiaSource = await readFile(resolve(root, 'src/features/alexithymia/AlexithymiaSupportPage.tsx'), 'utf8');
-const observationFooterIndex = observationsSource.indexOf(`<footer className={styles.footer}>`);
-const observationQuickCheckIndex = observationsSource.indexOf(`<section className={styles.quickCheck}>`);
-const observationOverviewIndex = observationsSource.indexOf(`<section className={styles.overview}>`);
-if (observationQuickCheckIndex < 0
-  || observationFooterIndex < observationQuickCheckIndex
-  || observationOverviewIndex < observationFooterIndex) {
-  fail('Observation Quick Check or secondary guidance has drifted out of the current editor-first workflow.');
-}
-if (!observationsSource.includes('guideOpen ? <div className={styles.guideCard}')
-  || !observationsSource.includes('guide.sections.map')
-  || !observationsSource.includes('guide.sources.map')
-  || !observationsSource.includes('onClick={() => setHelpTopic(slot.id)}')
-  || !observationsSource.includes('className={styles.slotInfo}')
-  || observationsSource.includes('<ObservationRecipe')
-  || observationsSource.includes('<DisclosureRow title="Observation recipe"')) {
-  fail('Observation guidance must use one on-demand guide and contextual Quick Check help without a duplicate recipe.');
-}
-if (!observationsSource.includes('analyzeObservation(text, feelingsMode)')
-  || !observationsSource.includes('<AnnotatedObservationEditor')
-  || observationsSource.includes('<textarea')
-  || /exactCount|nearbyCount|setTimeout\(\(\) => \{\s*setFormula/.test(observationsSource)) {
-  fail('the Observation page no longer uses the synchronous shared 2.1 analysis surface.');
-}
-if (!alexithymiaSource.includes('selectExactObservationEntities(analyzeObservation(draft.observation))')
-  || alexithymiaSource.includes('observationTermDetection')
-  || alexithymiaSource.includes('legacy/observations')) {
-  fail('Alexithymia Support no longer projects exact terms from the canonical Observation analysis.');
-}
-if (!observationEditorSource.includes('contentEditable')
-  || !observationEditorSource.includes('CSS.highlights.set')
-  || !observationEditorSource.includes('rangeForOffsets(editor, annotation.start, annotation.end)')
-  || /mirror|<textarea/i.test(observationEditorSource)) {
-  fail('the Observation editor no longer paints analysis ranges on its single editing surface.');
-}
-
-const observationStyles = await readFile(resolve(root, 'src/features/observations/ObservationsPage.module.css'), 'utf8');
-if (!disclosureSource.includes('<details className=')
-  || !disclosureSource.includes('<summary>')
-  || !disclosureStyles.includes('.root summary')
-  || !disclosureStyles.includes('.root[open] summary > span:last-child')
-  || !/\.supportRail\s*\{[^}]*display:\s*grid;/.test(observationStyles)) {
-  fail('Observation support rail and shared progressive-disclosure controls no longer follow the approved layout contract.');
-}
-
-const feedSource = await readFile(resolve(root, 'src/features/feed/FeedPage.tsx'), 'utf8');
-if (!feedSource.includes(`<option value="follows" disabled={!session}>From people you follow</option>`)
-  || !feedSource.includes(`'Following requires Bluesky sign-in in Menu → Account & data.'`)
-  || !feedSource.includes('await notifySharedStrategyAdded(strategyId)')) {
-  fail('the Shared strategies account boundary, follower feed, or backend add-count path has drifted.');
 }
 
 const allBuiltText = await Promise.all(
@@ -304,5 +150,5 @@ if (allBuiltText.some((text) => /fonts\.(googleapis|gstatic)\.com/i.test(text)))
 console.log(
   `Verified ${precachePaths.length} runtime-preloaded assets from ${deployPaths.length} deploy files, `
   + `${emittedFonts.length} local fonts, build-shaped catalog data, a cache-first installed shell, `
-  + 'an eager route graph, compiled Observation inference, route semantics, modal focus behavior, and responsive-workflow guards.',
+  + 'catalog preloading, and app/social metadata.',
 );

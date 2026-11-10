@@ -6,8 +6,6 @@ type RouteExpectation = {
   path: string;
   label: string;
   title?: string;
-  requiresHeading?: boolean;
-  navVisible?: boolean;
 };
 
 const publicRoutes: RouteExpectation[] = [
@@ -55,16 +53,13 @@ for (const reference of [
         await expect(page.locator('html')).toHaveAttribute('data-app-state', 'ready');
         const navBoard = page.getByLabel('Primary navigation magnets');
         const main = page.locator('main');
-        if (route.navVisible === false) {
-          await expect(page.getByRole('navigation', { name: 'Primary' })).toBeHidden();
-        } else {
-          await expect(navBoard).toHaveAttribute('data-ready', 'true');
+        await expect(navBoard).toHaveAttribute('data-ready', 'true');
+        if (reference.viewport.width <= 640) {
+          await expect(page.getByRole('button', { name: 'Open customizer', exact: true })).toBeHidden();
         }
         await expect(main).toHaveCount(1);
         await expect(main).toHaveAttribute('aria-label', route.label);
-        if (route.requiresHeading !== false) {
-          await expect(main.getByRole('heading', { level: 1 }).first()).toBeVisible();
-        }
+        await expect(main.getByRole('heading', { level: 1 }).first()).toBeVisible();
         await expect(page).toHaveTitle(route.title ?? `${route.label} • allneeds.app`);
         await expect(page.getByText('Loading page…', { exact: true })).toHaveCount(0);
 

@@ -1,6 +1,6 @@
 # Local testing guide
 
-This workspace is the local comparison build. It can be run and validated independently of the online `natanai/allneeds` work; publishing remains an explicit step.
+This guide covers the current `natanai/allneeds` repository. Local validation and publishing are separate steps.
 
 ## 1. Install and start
 
@@ -24,12 +24,12 @@ pnpm check:all
 
 That command runs:
 
-1. strict TypeScript validation;
-2. the Vitest unit and persistence suites;
-3. the production Vite build;
+1. compilation of canonical Alexithymia data for the unit suites;
+2. the Vitest domain, data, component, and persistence suites;
+3. canonical compiler checks, strict TypeScript validation, and the production Vite build;
 4. creation of `dist/404.html` for direct SPA deep links;
 5. generation of a content-versioned `dist/service-worker.js` for public app assets only;
-6. production verification that every public artifact is precached, app-shell and asset lookups are cache-first and `Vary`-safe, both product fonts are local, no Google Fonts URL remains, the route graph is eager, and the compact shell keeps optional guidance/control duplicates out of the primary workflow;
+6. production artifact verification: the service-worker manifest matches the runtime precache policy, shell/asset lookups are cache-first and `Vary`-safe, both product fonts are local, no Google Fonts URL remains, app/social metadata resolves to required assets, and the compiled catalog is eagerly preloaded;
 7. the production-browser suite; and
 8. a stopped-server/offline/reconnect verifier.
 
@@ -53,20 +53,19 @@ packing on exit, and persistence after reload. The native-stability spec also
 checks every animation frame for an exposed upper-left pile, enforces the
 `3.5s` entrance gate, verifies warm route changes without replacement loaders,
 round-trips content-magnet coordinates between wide and compact layouts within
-two CSS pixels, exercises modal keyboard containment, opens cached deep routes
-offline, and guards the primary mobile layout/overflow contract. The routed
+two CSS pixels, and exercises modal keyboard containment. The routed
 shell matrix directly opens every route family at desktop and mobile widths,
 then verifies titles, landmarks, shell order, and overflow. It also covers the
 non-sticky persistent nav behavior and filtered browse/scroll restoration
 through Back and Forward. Workflow continuity tests exercise Observation →
 Journal handoff, Journal save/clear, Body Cue reset, Inventory and per-Need
-draft isolation, the four-stage Alexithymia present-moment check-in, and a real
+draft isolation, the five-stage Alexithymia present-moment check-in, and a real
 download → delete → import backup recovery using only visible controls. Feed
 prewarming is intercepted with an empty public response inside automated browser
 checks so an optional external service cannot invalidate otherwise local tests.
 
-`pnpm test:e2e` runs both the shared Playwright suite and an isolated outage
-verifier. The latter starts a production preview on port 4192, activates the
+`pnpm test:e2e` runs both the shared Playwright suite and the canonical isolated outage
+verifier. It replaces the old browser network-toggle smoke test. The verifier starts a production preview on port 4192, activates the
 cache, stops the listener, reloads one deep route, opens another in a fresh tab,
 restarts the same port, and proves a cache-miss request reaches the server.
 Run only the shared suite with `pnpm test:e2e:playwright`, or only the true
@@ -107,25 +106,23 @@ Record milestone measurements in [`ux-validation-log.md`](ux-validation-log.md),
 - Shared feed in `pnpm dev`: pull public strategies and save one locally; confirm the Inventory count changes even if the best-effort live add-count update is unavailable. With a restored production session, confirm the following feed unlocks.
 - Account & data: confirm Bluesky handle validation is active, Profile actions remain unavailable while signed out, and backup/restore stays fully local. Complete OAuth redirect/profile-cookie acceptance on `https://allneeds.app`; the registered client intentionally returns localhost/GitHub preview sign-ins to the official origin.
 - Customizer: change colors/roundness, reload, and confirm the choices persist.
-- Responsive checks: repeat every primary route around 390 × 844 and 1280 × 900; move a magnet in each size and confirm switching sizes does not overwrite the other arrangement. On mobile, confirm Customizer appears only in navigation, the Observation editor appears before its collapsed recipe, and Feed filters/Pull appear before optional sign-in guidance. On desktop, confirm all enabled resting navigation magnets form tight rows while preserving the user's reading order.
+- Responsive checks: repeat every primary route around 390 × 844 and 1280 × 900; move a magnet in each size and confirm switching sizes does not overwrite the other arrangement. On mobile, confirm Customizer appears only in navigation, the Observation editor and results precede secondary guidance, and Feed filters/Pull appear before optional sign-in guidance. On desktop, confirm all enabled resting navigation magnets form tight rows while preserving the user's reading order.
 - Browser history: scroll a long browse page, open a visible result without first scrolling, use Back, and confirm the exact working position returns; deliberate forward navigation should still begin at the top.
 - Production outage/reconnect: `pnpm test:e2e:outage` automates the stopped-listener reload, fresh cached deep link, same-port restart, and cache-miss reconnect. For a milestone manual check, repeat it in the target browser with `?diagnostics=1`. `/allneeds-api` responses must never enter the app-shell cache.
 - Product fonts: in browser network/application tooling, confirm Atkinson Hyperlegible and Manrope load from the local production origin with no request to `fonts.googleapis.com` or `fonts.gstatic.com`.
 - Local metrics: open `/?diagnostics=1`, record the entrance values, follow a primary nav magnet, and confirm the Last route value updates while entrance LCP remains unchanged.
 
-## 5. Compare with the other implementation
+## 5. Run a focused current check
 
-Run this workspace and the other checkout on different ports:
+Build once, then select the relevant current suite:
 
 ```powershell
-# This workspace
-pnpm dev --port 5173
-
-# From the other checkout in a second terminal
-pnpm dev --port 5175
+pnpm build
+pnpm exec playwright test tests/e2e/check-in-inline-intensity.spec.ts
+pnpm exec playwright test tests/e2e/route-shell.spec.ts
 ```
 
-Open both URLs side by side. Because browser storage is scoped by origin/port, test data on port 5173 will not mix with data on port 5175.
+See [test maintenance](test-maintenance.md) before removing or consolidating coverage. Keep tests of current user behavior and persistence even when their fixtures include older saved data.
 
 ## 6. Reset local test data
 
