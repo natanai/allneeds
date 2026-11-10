@@ -53,7 +53,7 @@ test('Journal drafts survive close/reload and successful save or clear removes t
   await dialog.getByLabel('Reflection').fill('I noticed relief after asking for help.');
   await dialog.getByRole('button', { name: 'Feeling', exact: true }).click();
   let feelingPicker = page.getByRole('dialog', { name: 'Feelings' });
-  const relieved = feelingPicker.getByLabel('Relieved intensity; 0 means not selected');
+  const relieved = feelingPicker.getByRole('slider', { name: 'Relieved intensity; zero means not selected', exact: true });
   await relieved.press('End');
   await relieved.press('ArrowLeft');
   await relieved.press('ArrowLeft');
@@ -76,7 +76,7 @@ test('Journal drafts survive close/reload and successful save or clear removes t
   await expect(dialog.getByLabel('Tags', { exact: true })).toHaveValue('work, support');
   await dialog.getByRole('button', { name: 'Feeling', exact: true }).click();
   feelingPicker = page.getByRole('dialog', { name: 'Feelings' });
-  await expect(feelingPicker.getByLabel('Relieved intensity; 0 means not selected')).toHaveValue('8');
+  await expect(feelingPicker.getByRole('slider', { name: 'Relieved intensity; zero means not selected', exact: true })).toHaveValue('8');
   await feelingPicker.getByRole('button', { name: 'Done', exact: true }).click();
 
   await dialog.getByRole('button', { name: 'Clear', exact: true }).click();
@@ -102,13 +102,13 @@ test('Journal drafts survive close/reload and successful save or clear removes t
 test('Body Cue values restore after reload and Reset remains permanent', async ({ page }) => {
   const runtimeProblems = collectRuntimeProblems(page);
   await page.goto('/feelings/body-cues');
-  const cue = page.locator('#chest-tight');
-  await cue.fill('65');
-  await expect(cue).toHaveValue('65');
+  const cue = page.getByRole('slider', { name: 'Tight or constricted intensity', exact: true });
+  await cue.fill('6.5');
+  await expect(cue).toHaveValue('6.5');
   await expect(page.getByText('1 cue selected', { exact: true })).toBeVisible();
 
   await page.reload();
-  await expect(cue).toHaveValue('65');
+  await expect(cue).toHaveValue('6.5');
   await expect(page.getByText('1 cue selected', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Reset all cues' }).click();
   await expect(cue).toHaveValue('0');
@@ -218,14 +218,13 @@ test('Alexithymia stage, clues, decisions, and words restore until Start over', 
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: /^Body clues/ }).click();
   const bodySheet = page.getByRole('dialog', { name: 'Body clues' });
-  await bodySheet.getByRole('button', { name: /Tight or constricted/ }).click();
-  await bodySheet.getByLabel('Tight or constricted intensity').fill('70');
+  await bodySheet.getByLabel('Tight or constricted intensity').fill('7');
   await bodySheet.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'Continue to words' }).click();
   await page.getByRole('button', { name: /^Anxiety, Feeling/ }).click();
   const candidateSheet = page.getByRole('dialog', { name: 'Anxiety' });
-  await candidateSheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await candidateSheet.getByRole('button', { name: 'Leave intensity unrated' }).click();
+  await candidateSheet.getByRole('slider', { name: 'Anxiety intensity' }).fill('5');
+  await candidateSheet.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
   await expect(candidateSheet).toHaveCount(0);
   await page.waitForTimeout(250);
 

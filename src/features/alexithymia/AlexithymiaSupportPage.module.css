@@ -435,15 +435,15 @@
   gap: var(--space-2);
 }
 
-.detectedTerms > div,
-.wordTray > div {
+.detectedTerms > div {
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-width: none;
 }
 
-.detectedTerms > div::-webkit-scrollbar,
-.wordTray > div::-webkit-scrollbar { display: none; }
+.detectedTerms > div::-webkit-scrollbar { display: none; }
+.wordTray > div { flex-wrap: wrap; }
+.wordTray > div > span { min-width: 0; max-width: 100%; flex-wrap: wrap; overflow-wrap: anywhere; }
 
 /* Selected clues are a summary, not a hidden sideways-scrolling carousel. */
 .clueTray > div { flex-wrap: wrap; }
@@ -651,6 +651,34 @@
 .reviewOutcome { grid-auto-rows: max-content; }
 .recapBoard { min-height: 7rem; }
 .needBoard { border: 0; border-radius: 0; }
+
+.wordMagnetAction {
+  width: var(--control-min);
+  height: var(--control-min);
+  padding: .65rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+.wordMagnetAction svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
+.wordRatingStatus { min-width: 0; display: flex; justify-content: space-between; gap: var(--space-1); font-size: var(--text-xs); line-height: 1.4; }
+.wordRatingStatus output { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+.wordMagnetAction:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+.keepWord { min-height: var(--control-min); padding: .3rem .5rem; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: inherit; cursor: pointer; }
+.wordActions { flex-wrap: wrap; }
+.wordActions > .selectedCount { flex: 1 1 6rem; }
+.wordUndo { flex: 0 0 100%; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); font-size: var(--text-xs); }
+.wordUndo button { min-height: var(--control-min); padding: .3rem .5rem; flex: 0 0 auto; border: 0; border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: inherit; text-decoration: underline; cursor: pointer; }
+.dismissedWords { padding: 0; display: grid; list-style: none; }
+.dismissedWords li { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding-block: var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--outline) 15%, transparent); }
+.dismissedWords li > span { min-width: 0; display: grid; overflow-wrap: anywhere; }
+.dismissedWords small { color: var(--secondary); }
 
 .needHelp { margin-bottom: .5rem; }
 .needHelp p { margin: 0; color: var(--secondary); font-size: var(--text-xs); line-height: 1.4; }
@@ -954,7 +982,7 @@
 .matchDetails dd { margin: 0; color: var(--secondary); }
 .scoreDisclosure { color: var(--secondary); font-size: var(--text-xs); }
 
-.decisionButtons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-1); }
+.decisionButtons { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr)); gap: var(--space-1); }
 .decisionButtons button { min-height: var(--control-min); padding: .48rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .2rem; border: 1px solid var(--outline); border-radius: var(--radius-lg); background: var(--surface-raised); color: var(--text); font-weight: 800; cursor: pointer; }
 .decisionButtons button[aria-pressed='true'] { background: var(--positive); }
 
@@ -971,36 +999,9 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
 
 .feelingIntensityHeading { display: grid; gap: .12rem; }
 .feelingIntensityHeading strong { font-size: var(--text-sm); }
-.feelingIntensityHeading small { color: var(--secondary); font-size: var(--text-xs); }
 
-.feelingIntensityScale { display: grid; gap: .1rem; }
 .feelingIntensityValue { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
 .feelingIntensityValue output { font-weight: 750; font-variant-numeric: tabular-nums; }
-.ratingConfirm {
-  justify-self: end;
-  min-height: var(--control-min);
-  padding: .5rem .85rem;
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-md);
-  background: var(--positive);
-  color: var(--text);
-  font: inherit;
-  font-weight: 750;
-  cursor: pointer;
-}
-.ratingConfirm:disabled { opacity: .45; cursor: default; }
-.intensitySkip {
-  justify-self: start;
-  min-height: var(--control-min);
-  padding: .32rem .42rem;
-  border: 0;
-  background: transparent;
-  color: var(--secondary);
-  text-decoration: underline;
-  text-underline-offset: .2rem;
-  cursor: pointer;
-}
-
 .selectedCount { color: var(--secondary); font-size: var(--text-xs); font-weight: 750; }
 
 @media (min-width: 720px) {
@@ -1159,6 +1160,8 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
   .clueTray,
   .wordTray { padding: .6rem; }
 
+  .stageWords { padding-bottom: calc(12rem + env(safe-area-inset-bottom)); }
+
   .wordToolbar {
     padding: .35rem 0;
     background: color-mix(in srgb, var(--quiet) 42%, var(--surface-raised) 58%);
@@ -1172,8 +1175,6 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
   .sheet { max-height: calc(100dvh - max(.25rem, env(safe-area-inset-top))); }
   .sheetIntro { margin-bottom: .55rem; }
   .shapeGroup { padding: .62rem; }
-  .decisionButtons { grid-template-columns: 1fr 1fr; }
-  .decisionButtons button:last-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 430px) {

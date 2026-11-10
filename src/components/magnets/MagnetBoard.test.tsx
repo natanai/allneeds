@@ -4,6 +4,18 @@ import { describe, expect, it } from 'vitest';
 import { MagnetBoard } from './MagnetBoard';
 
 describe('content magnet selection cues', () => {
+  it('renders compound controls beside a real drag-handle button without nesting native controls', () => {
+    const html = renderToStaticMarkup(<MagnetBoard
+      items={[{ id: 'feeling', label: 'Anxiety', kind: 'feeling', selected: true,
+        actions: <><button type="button">Options</button><button type="button">Dismiss</button></>,
+        controls: <input type="range" aria-label="Anxiety intensity" defaultValue={4} /> }]}
+      playMode onPlayModeChange={() => undefined} storageKey="test-controls"
+    />);
+    expect(html).toContain('role="group" aria-label="Anxiety controls"');
+    expect(html).toContain('data-magnet-handle="true"');
+    expect(html).toContain('aria-label="Anxiety intensity"');
+    for (const button of html.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)) expect(button[0]).not.toMatch(/<input|<button.*<button/s);
+  });
   it('reserves a decorative check for both toggle states without changing their accessible names', () => {
     const html = renderToStaticMarkup(<MagnetBoard
       items={[

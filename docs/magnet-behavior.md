@@ -106,11 +106,20 @@ Canonical visual implementation: `src/components/magnets/MagnetBoard.module.css`
 
 ## Accessibility and gesture ownership
 
-- Magnets remain real links/buttons with normal accessible names and keyboard activation.
+- Ordinary magnets remain real links/buttons with normal accessible names and keyboard activation. The approved Words-stage compound magnets are accessible groups containing a real label/drag-handle button and separate native slider/action controls; never nest a slider or button inside the handle button.
 - Keyboard focus must remain visibly indicated when reached by keyboard.
 - Pointer pickup must not manufacture keyboard focus.
-- Touches beginning directly on a magnet belong to that magnet drag once the drag threshold is crossed and must not scroll the document during the active drag.
+- Touches beginning directly on an ordinary magnet or a compound magnet’s label handle belong to that magnet drag once the drag threshold is crossed and must not scroll the document during the active drag. Compound sliders and action buttons own their input independently: do not prevent their native pointer defaults, capture their pointer for magnet dragging, or suppress their keyboard focus. A slider retains the shared native range’s vertical-scroll arbitration.
 - Touches beginning on empty board space remain scroll gestures unless the stationary pusher hold activates.
+
+## Compound word controls (approved 2026-11-10)
+
+- `MagnetBoardItem.actions` and `controls` provide separate native header actions and a control area inside the existing physical shell. The original button/link path remains the owner of ordinary content and navigation magnets.
+- Measure the complete compound shell, including its controls, through the existing packing owner. Artwork continues through the shared Feeling kind and canonical asset URL.
+- A control’s pointer/focus interaction holds its own magnet steady. It remains a surface obstacle, with normal collisions and mass response for other magnets, rather than becoming a lifted pressure source. Do not disable other magnets’ collisions, pressure, tilt, or play semantics.
+- Native value/status changes do not reset layout readiness or reconstruct the physics map. Compound dimension changes, including enlarged-text reflow, are observed and measured normally; viewport-specific layouts remain independent.
+- The check-in consumes the exact existing `IntensitySlider` component and CSS. Magnet-specific track/thumb styling, a second slider implementation, or a new meter skin are outside this approval.
+- Regression coverage includes mouse and native touch rating versus header dragging, keyboard adjustment, stable geometry while rating, early artwork, dismissal/Undo/restore, enlarged text, and the exact reported rating through Journal.
 
 ## Removed/superseded mechanisms — do not resurrect
 

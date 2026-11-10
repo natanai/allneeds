@@ -297,6 +297,7 @@ export function CandidateSheet({
   previewOnly = false,
   onOpenReference,
   onDecision,
+  onClear,
   onClose,
 }: {
   term: SupportTerm | null;
@@ -307,19 +308,12 @@ export function CandidateSheet({
   previewOnly?: boolean;
   onOpenReference: (route: string) => void;
   onDecision: (decision: 'fits' | 'maybe' | 'not-this-time', intensity?: number) => void;
+  onClear: () => void;
   onClose: () => void;
 }) {
-  const [ratingOpen, setRatingOpen] = useState(false);
-  const [ratingChoice, setRatingChoice] = useState<number | null>(null);
-  const ratingRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!ratingOpen) return;
-    ratingRef.current?.scrollIntoView({ block: 'nearest' });
-  }, [ratingOpen]);
-  const close = () => { setRatingOpen(false); setRatingChoice(null); onClose(); };
   const decideAndClose = (choice: 'fits' | 'maybe' | 'not-this-time', rating?: number) => {
     onDecision(choice, rating);
-    close();
+    onClose();
   };
   const match = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
   const singleChannel = score?.complete && score.usedChannels.length === 1
@@ -332,7 +326,7 @@ export function CandidateSheet({
       : 'Clue match';
   const hasReviewedScore = Boolean(score?.usedChannels.length);
   return (
-    <SupportSheet open={Boolean(term)} title={term?.label ?? 'Word details'} titleId="alex-candidate-sheet-title" onClose={close}>
+    <SupportSheet open={Boolean(term)} title={term?.label ?? 'Word details'} titleId="alex-candidate-sheet-title" onClose={onClose}>
       {term ? (
         <>
           <div className={styles.termHeading}>
@@ -345,8 +339,31 @@ export function CandidateSheet({
           )}
           {term.role === 'working' ? <p className={styles.scoreDisclosure}>{term.candidate ? 'This is an emotion word you can use here, but it is not one of the site’s linked Feeling pages.' : 'This is a word you entered for this check-in.'}</p> : null}
 
+          {!previewOnly && term.role === 'feeling' ? (
+            <section className={styles.feelingIntensity} aria-label={`Rate ${term.label}`}>
+              <div className={styles.feelingIntensityHeading}>
+                <strong>How intense is this feeling?</strong>
+              </div>
+              <div className={styles.feelingIntensityValue}>
+                <span>Intensity</span>
+                <output>{intensity === undefined ? 'Not rated' : formatIntensityRating(intensity)}</output>
+              </div>
+              <IntensitySlider
+                label={`${term.label} intensity`} value={intensity ?? 0} min={0} max={10} step={1}
+                lowLabel="0 · Not selected" highLabel="10 · Very strong"
+                valueText={intensity === undefined ? (decision === 'maybe' ? 'Maybe; intensity not rated' : 'Not selected') : `${intensity} out of 10, Fits`}
+                onChange={(value) => { if (value === 0) onClear(); else onDecision('fits', value); }}
+              />
+            </section>
+          ) : null}
+          {!previewOnly ? <div className={styles.decisionButtons} role="group" aria-label={`Does ${term.label} fit?`}>
+            {term.role !== 'feeling' ? <button type="button" aria-pressed={decision === 'fits'} onClick={() => decideAndClose('fits')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Fits</button> : null}
+            <button type="button" aria-pressed={decision === 'maybe'} onClick={() => decideAndClose('maybe')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Maybe</button>
+            <button type="button" aria-pressed={decision === 'not-this-time'} onClick={() => decideAndClose('not-this-time')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Not this time</button>
+          </div> : null}
+
           {!previewOnly && term.role !== 'faux-feeling' && term.candidate ? (
-            <details className={styles.matchDetails} open>
+            <details className={styles.matchDetails}>
               <summary>How this was compared</summary>
               {score?.usedChannels.length ? (
                 <dl>
@@ -366,45 +383,6 @@ export function CandidateSheet({
           ) : (
             <p className={styles.scoreDisclosure}>{term.candidate ? 'No comparison is available from these clues.' : 'This word is not compared with clues.'} You can still decide whether it fits.</p>
           ))}
-
-          {!previewOnly ? <div className={styles.decisionButtons} role="group" aria-label={`Does ${term.label} fit?`}>
-            <button type="button" aria-pressed={decision === 'fits'} onClick={() => {
-              if (term.role === 'feeling') { setRatingChoice(intensity ?? null); setRatingOpen(true); }
-              else decideAndClose('fits');
-            }}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Fits</button>
-            <button type="button" aria-pressed={decision === 'maybe'} onClick={() => decideAndClose('maybe')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Maybe</button>
-            <button type="button" aria-pressed={decision === 'not-this-time'} onClick={() => decideAndClose('not-this-time')}><span className={styles.choiceCheck} aria-hidden="true">✓</span>Not this time</button>
-          </div> : null}
-
-          {!previewOnly && term.role === 'feeling' && ratingOpen ? (
-            <section className={styles.feelingIntensity} aria-label={`Rate ${term.label}`}>
-              <div className={styles.feelingIntensityHeading}>
-                <strong>How intense is this feeling?</strong>
-                <small>{intensity === undefined ? 'Optional · no rating yet' : `Previously rated ${intensity}/10`}</small>
-              </div>
-              <div ref={ratingRef} className={styles.feelingIntensityScale}>
-                <div className={styles.feelingIntensityValue}>
-                  <span>Intensity</span>
-                  <output>{ratingChoice === null ? 'Not rated' : formatIntensityRating(ratingChoice)}</output>
-                </div>
-                <IntensitySlider
-                  label={`${term.label} intensity`}
-                  min={1} max={10} step={1}
-                  value={ratingChoice ?? 5}
-                  lowLabel="1 · Slight" highLabel="10 · Very strong"
-                  onChange={setRatingChoice}
-                  valueText={ratingChoice === null ? 'Intensity not selected' : `${ratingChoice} out of 10`}
-                />
-                <button type="button" className={styles.ratingConfirm} disabled={ratingChoice === null}
-                  onClick={() => { if (ratingChoice !== null) decideAndClose('fits', ratingChoice); }}>
-                  Use this rating
-                </button>
-              </div>
-              <button type="button" className={styles.intensitySkip} onClick={() => decideAndClose('fits')}>
-                Leave intensity unrated
-              </button>
-            </section>
-          ) : null}
 
           {term.route || term.definitionSource?.startsWith('https://') ? (
             <div className={styles.sheetFooterSplit}>

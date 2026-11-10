@@ -396,9 +396,8 @@ test('clear words is separate from continuing, and undo restores the decision an
   await search.fill('Fear');
   await page.getByRole('button', { name: /^Fear, Feeling/ }).click();
   const detail = page.getByRole('dialog', { name: 'Fear', exact: true });
-  await detail.getByRole('button', { name: 'Fits', exact: true }).click();
   await detail.getByRole('slider', { name: 'Fear intensity' }).fill('7');
-  await detail.getByRole('button', { name: 'Use this rating' }).click();
+  await detail.getByRole('button', { name: 'Close Fear', exact: true }).click();
   await page.getByRole('button', { name: 'Clear selected words', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Continue without a word', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
