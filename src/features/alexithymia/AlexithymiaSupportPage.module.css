@@ -672,7 +672,7 @@
 .wordMagnetAction:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
 .keepWord { min-height: var(--control-min); padding: .3rem .5rem; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: inherit; cursor: pointer; }
 .wordActions { flex-wrap: wrap; }
-.wordActions > .selectedCount { flex: 0 0 100%; }
+.wordActions > .selectedCount { flex: 1 1 6rem; }
 .wordUndo { flex: 0 0 100%; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); font-size: var(--text-xs); }
 .wordUndo button { min-height: var(--control-min); padding: .3rem .5rem; flex: 0 0 auto; border: 0; border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: inherit; text-decoration: underline; cursor: pointer; }
 .dismissedWords { padding: 0; display: grid; list-style: none; }
@@ -999,7 +999,6 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
 
 .feelingIntensityHeading { display: grid; gap: .12rem; }
 .feelingIntensityHeading strong { font-size: var(--text-sm); }
-.feelingIntensityHeading small { color: var(--secondary); font-size: var(--text-xs); }
 
 .feelingIntensityValue { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
 .feelingIntensityValue output { font-weight: 750; font-variant-numeric: tabular-nums; }

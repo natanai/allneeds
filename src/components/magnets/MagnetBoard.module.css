@@ -387,7 +387,7 @@
    siblings of the drag handle, with their own touch and keyboard ownership. */
 .compound {
   width: min(17rem, calc(100% - 24px));
-  padding: .45rem .65rem;
+  padding: .45rem 1rem;
   display: grid;
   gap: var(--space-1);
   white-space: normal;

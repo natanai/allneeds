@@ -102,12 +102,14 @@ test('slider gestures keep the magnet steady; dragging the label preserves the r
   const handle = magnet.locator('[data-magnet-handle]');
   const handleBox = (await handle.boundingBox())!;
   const origin = await magnet.evaluate(el => ({ x: parseFloat((el as HTMLElement).style.getPropertyValue('--magnet-x')), y: parseFloat((el as HTMLElement).style.getPropertyValue('--magnet-y')) }));
+  const limits = await magnet.evaluate(el => ({ x: el.parentElement!.clientWidth - (el as HTMLElement).offsetWidth, y: el.parentElement!.clientHeight - (el as HTMLElement).offsetHeight }));
   await page.mouse.move(handleBox.x + 12, handleBox.y + 12);
   await page.mouse.down();
   await page.mouse.move(handleBox.x + 40, handleBox.y + 37, { steps: 6 });
   const moved = await magnet.evaluate(el => ({ x: parseFloat((el as HTMLElement).style.getPropertyValue('--magnet-x')), y: parseFloat((el as HTMLElement).style.getPropertyValue('--magnet-y')) }));
   expect(moved.x - origin.x).toBeGreaterThan(20);
-  expect(moved.y - origin.y).toBeGreaterThan(15);
+  expect(moved.x).toBeCloseTo(Math.min(limits.x, origin.x + 28), 0);
+  expect(moved.y).toBeCloseTo(Math.min(limits.y, origin.y + 25), 0);
   await page.mouse.up();
   await expect(slider).toHaveValue(rating);
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -160,3 +162,29 @@ test.describe('touch ownership', () => {
     await client.detach();
   });
 });
+
+for (const width of [390, 1280]) {
+  test(`matched Feeling artwork and direct controls stay available at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+    await page.goto('/alexithymia-support');
+    await page.getByRole('button', { name: 'Start check-in', exact: true }).click();
+    await page.getByRole('button', { name: 'Skip', exact: true }).click();
+    await page.getByRole('button', { name: /^Body clues/ }).click();
+    const clues = page.getByRole('dialog', { name: 'Body clues', exact: true });
+    await clues.getByRole('slider', { name: 'Tight or constricted intensity', exact: true }).fill('5');
+    await clues.getByRole('button', { name: 'Done', exact: true }).click();
+    await page.getByRole('button', { name: 'Continue to words', exact: true }).click();
+    const board = page.getByLabel('Possible words', { exact: true });
+    const anxiety = board.getByRole('group', { name: 'Anxiety controls', exact: true });
+    await expect(board.getByRole('switch')).toBeChecked();
+    await anxiety.getByRole('slider').fill('7');
+    await expect(anxiety).toContainText('100% clue match');
+    await expect(anxiety.getByText('Fits', { exact: true })).toBeVisible();
+    expect(await anxiety.evaluate(el => getComputedStyle(el, '::after').backgroundImage)).toContain('icons/feelings/anxiety.svg');
+    await board.getByRole('group', { name: 'Fear controls', exact: true }).getByRole('slider').fill('2');
+    await page.getByRole('article').evaluate(el => { el.scrollTop = 0; window.scrollTo(0, 0); });
+    await page.screenshot({ path: `test-results/inline-matched-feelings-${width}.png` });
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByText('2 words selected', { exact: true })).toBeVisible();
+  });
+}

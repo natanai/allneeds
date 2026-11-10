@@ -311,10 +311,9 @@ export function CandidateSheet({
   onClear: () => void;
   onClose: () => void;
 }) {
-  const close = onClose;
   const decideAndClose = (choice: 'fits' | 'maybe' | 'not-this-time', rating?: number) => {
     onDecision(choice, rating);
-    close();
+    onClose();
   };
   const match = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
   const singleChannel = score?.complete && score.usedChannels.length === 1
@@ -327,7 +326,7 @@ export function CandidateSheet({
       : 'Clue match';
   const hasReviewedScore = Boolean(score?.usedChannels.length);
   return (
-    <SupportSheet open={Boolean(term)} title={term?.label ?? 'Word details'} titleId="alex-candidate-sheet-title" onClose={close}>
+    <SupportSheet open={Boolean(term)} title={term?.label ?? 'Word details'} titleId="alex-candidate-sheet-title" onClose={onClose}>
       {term ? (
         <>
           <div className={styles.termHeading}>
@@ -352,7 +351,7 @@ export function CandidateSheet({
               <IntensitySlider
                 label={`${term.label} intensity`} value={intensity ?? 0} min={0} max={10} step={1}
                 lowLabel="0 · Not selected" highLabel="10 · Very strong"
-                valueText={intensity === undefined ? 'Not selected' : `${intensity} out of 10, Fits`}
+                valueText={intensity === undefined ? (decision === 'maybe' ? 'Maybe; intensity not rated' : 'Not selected') : `${intensity} out of 10, Fits`}
                 onChange={(value) => { if (value === 0) onClear(); else onDecision('fits', value); }}
               />
             </section>

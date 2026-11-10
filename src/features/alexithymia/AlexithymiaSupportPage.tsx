@@ -862,7 +862,6 @@ export function AlexithymiaSupportPage() {
               <div className={`${styles.stickyActions} ${styles.wordActions}`}>
                 {undo ? <div className={styles.wordUndo} role="status"><span>{undo.message}</span><button type="button" onClick={undoChange}>Undo</button></div> : null}
                 <span className={styles.selectedCount} aria-live="polite">{selectedTerms.length} {selectedTerms.length === 1 ? 'word' : 'words'} selected</span>
-                <button type="button" className={styles.textButton} onClick={() => goToStage(2)}>Back to clues</button>
                 <button type="button" className={styles.primaryButton} onClick={continueToNeeds}>{selectedTerms.length ? 'Continue' : 'Continue without a word'}</button>
               </div>
             </aside>
@@ -1010,9 +1009,14 @@ export function AlexithymiaSupportPage() {
             onClose={() => setSheet(null)}
           />
           <SupportSheet open={sheet === 'dismissed'} title="Dismissed words" titleId="alex-dismissed-title" onClose={() => setSheet(null)}>
+            {!dismissedTerms.length ? <p>All dismissed words restored.</p> : null}
             <ul className={styles.dismissedWords}>{dismissedTerms.map((term) => <li key={term.id}>
               <span>{term.label}<small>{term.roleLabel}</small></span>
-              <button type="button" className={styles.smallAction} aria-label={`Restore ${term.label}`} onClick={() => clearTerm(term)}>Restore</button>
+              <button type="button" className={styles.smallAction} aria-label={`Restore ${term.label}`} onClick={(event) => {
+                const dialog = event.currentTarget.closest('[role="dialog"]');
+                clearTerm(term);
+                requestAnimationFrame(() => dialog?.querySelector<HTMLButtonElement>('button[aria-label^="Restore "], button[aria-label="Close Dismissed words"]')?.focus());
+              }}>Restore</button>
             </li>)}</ul>
           </SupportSheet>
           <NeedCatalogSheet
