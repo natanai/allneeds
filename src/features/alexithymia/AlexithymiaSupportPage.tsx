@@ -149,12 +149,19 @@ export function AlexithymiaSupportPage() {
   const [previewNeed, setPreviewNeed] = useState<string | null>(null);
   const wordFilter: WordFilter = draft.wordFilter ?? 'matches';
   const wordQuery = draft.wordQuery ?? '';
+  const otherWordsOpen = draft.otherWordsOpen ?? (Boolean(wordQuery.trim()) || wordFilter === 'mine');
   const needQuery = draft.needQuery ?? '';
-  const setWordFilter = (wordFilter: WordFilter) => updateDraft((current) => ({ ...current, wordFilter }));
-  const setWordQuery = (wordQuery: string) => updateDraft((current) => ({ ...current, wordQuery }));
+  const setWordFilter = (wordFilter: WordFilter, clearQuery = false) => updateDraft((current) => {
+    const wordQuery = clearQuery ? '' : current.wordQuery;
+    return { ...current, wordFilter, wordQuery, otherWordsOpen: Boolean(wordQuery?.trim()) || wordFilter === 'mine' };
+  });
+  const setWordQuery = (wordQuery: string) => updateDraft((current) => ({
+    ...current, wordQuery, otherWordsOpen: Boolean(wordQuery.trim()) || current.wordFilter === 'mine',
+  }));
   const setNeedQuery = (needQuery: string) => updateDraft((current) => ({ ...current, needQuery }));
   const [wordPlayMode, setWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-words'));
   const [partialPlayMode, setPartialPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-partial-words'));
+  const [otherWordPlayMode, setOtherWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-other-words'));
   const [selectedWordPlayMode, setSelectedWordPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-selected-words'));
   const [needPlayMode, setNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-needs'));
   const [suggestedNeedPlayMode, setSuggestedNeedPlayMode] = useState(() => readMagnetPlayPreference('alexithymia-suggested-needs'));
@@ -305,43 +312,41 @@ export function AlexithymiaSupportPage() {
     const percent = score?.complete ? roundedMatchPercent(score.clueMatch) : null;
     const decision = draft.decisions[term.id];
     const choice = wordDecisionLabel(decision);
+    const isFeeling = term.role === 'feeling';
+    const kept = decision === 'fits' || decision === 'maybe';
     context ??= observationTermIds.has(term.id) ? observationSource : percent === null ? undefined : `${percent}% clue match`;
     const intensity = draft.feelingIntensities?.[term.id];
-    const detail = term.role === 'feeling' ? context
-      : [choice, context].filter(Boolean).join(' · ') || undefined;
     const openOptions = () => { setActiveTermId(term.id); setSheet('candidate'); };
     return {
       id,
       label: term.label,
-      detail,
-      badge: term.roleLabel,
-      kind: term.role === 'feeling' ? 'feeling' : 'default',
-      ...(term.role === 'feeling' && term.catalogSlug ? { iconUrl: assetPath(`icons/feelings/${term.catalogSlug}.svg`) } : {}),
-      tone: roleTone(term, decision),
+      annotation: decision === 'maybe' ? 'Maybe' : isFeeling ? intensity?.toString() ?? '' : undefined,
+      tone: kept ? roleTone(term, decision) : 'quiet',
       selected: decision === 'fits',
-      ariaLabel: [term.label, term.roleLabel, choice, context].filter(Boolean).join(', '),
-      ariaHasPopup: 'dialog',
-      onActivate: openOptions,
+      ariaLabel: [term.label, term.roleLabel, isFeeling || decision === 'maybe' ? choice : undefined, context].filter(Boolean).join(', '),
+      ariaHasPopup: isFeeling ? 'dialog' : undefined,
+      ariaPressed: isFeeling ? undefined : kept,
+      onActivate: isFeeling ? openOptions : () => kept ? clearTerm(term) : decideTerm(term, 'fits'),
       actions: <>
         <button type="button" className={styles.wordMagnetAction} aria-label={`Options for ${term.label}`} aria-haspopup="dialog" onClick={openOptions}>⋯</button>
         <button type="button" className={styles.wordMagnetAction} aria-label={`Not this time: ${term.label}`} onClick={() => dismissTerm(term)}><CloseIcon /></button>
       </>,
-      controls: term.role === 'feeling' ? <>
-        <div className={styles.wordRatingStatus}><span>{choice ?? 'Not selected'}</span><output>{intensity === undefined ? 'Not rated' : formatIntensityRating(intensity)}</output></div>
-        <IntensitySlider
+      controls: isFeeling ? <IntensitySlider
         label={`${term.label} intensity`} value={intensity ?? 0} min={0} max={10} step={1}
-        lowLabel="0 · Not selected" highLabel="10 · Very strong"
         valueText={intensity === undefined ? (decision === 'maybe' ? 'Maybe; intensity not rated' : 'Not selected') : `${intensity} out of 10, Fits`}
         onChange={(value) => rateTerm(term, value)}
-      /></> : <button type="button" className={styles.keepWord} aria-pressed={decision === 'fits' || decision === 'maybe'}
-        onClick={() => decision === 'fits' || decision === 'maybe' ? clearTerm(term) : decideTerm(term, 'fits')}>
-        {decision === 'fits' || decision === 'maybe' ? 'Remove word' : 'Keep word'}
-      </button>,
+      /> : undefined,
     };
   }
-  const visibleWordItems = visibleTerms.map((term) => wordItem(term, `alex-word-${term.id}`));
-  const partialWordItems = partialMatches.filter(({ term }) => !observationTermIds.has(term.id))
-    .map(({ term }) => wordItem(term, `alex-partial-${term.id}`, 'Some clues cannot be compared'));
+  const visibleWordItems = visibleTerms.filter((term) => term.role === 'feeling').map((term) => wordItem(term, `alex-word-${term.id}`));
+  const partialTerms = !normalizedWordQuery && wordFilter === 'matches'
+    ? partialMatches.filter(({ term }) => !observationTermIds.has(term.id)).map(({ term }) => term) : [];
+  const partialWordItems = partialTerms.filter((term) => term.role === 'feeling')
+    .map((term) => wordItem(term, `alex-partial-${term.id}`, 'Some clues cannot be compared'));
+  const otherWordItems = [
+    ...visibleTerms.filter((term) => term.role !== 'feeling').map((term) => wordItem(term, `alex-word-${term.id}`)),
+    ...partialTerms.filter((term) => term.role !== 'feeling').map((term) => wordItem(term, `alex-partial-${term.id}`, 'Some clues cannot be compared')),
+  ];
   const activeTerm = activeTermId ? termIndex.get(activeTermId) ?? null : null;
   const activeScore = activeTerm?.candidate
     ? scoreByCandidateKey.get(activeTerm.candidate.key) ?? null
@@ -574,8 +579,7 @@ export function AlexithymiaSupportPage() {
     setEntryVisible(!startImmediately);
     setSheet(null);
     setActiveTermId(null);
-    setWordFilter('matches');
-    setWordQuery('');
+    setWordFilter('matches', true);
     setNeedQuery('');
     setStatus('');
     setUndo(null);
@@ -793,9 +797,7 @@ export function AlexithymiaSupportPage() {
           <header className={styles.stageHeader}>
             <p>3 of 5 · Words</p>
             <h1 tabIndex={-1} id="alex-stage-three">Possible words</h1>
-            <p>{draft.observationSuggestions
-              ? `These are possibilities from your ${draft.observationSuggestions.text === draft.observation.trim() ? 'observation' : 'earlier observation'} and any clues you chose. More than one may fit, or none yet.`
-              : 'These are words to consider, not answers. More than one may fit, or none yet.'}</p>
+            <p>Slide to choose intensity; zero clears.</p>
           </header>
           <div className={styles.wordWorkspace}>
             <div className={styles.wordMain}>
@@ -814,32 +816,48 @@ export function AlexithymiaSupportPage() {
                         : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? (index + 2) % 3
                           : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : null;
                       if (next === null) return;
-                      event.preventDefault(); setWordFilter(values[next]!); setWordQuery('');
+                      event.preventDefault(); setWordFilter(values[next]!, true);
                       (event.currentTarget.parentElement?.children[next] as HTMLButtonElement)?.focus();
-                    }} onClick={() => { setWordFilter(value); setWordQuery(''); }}>{label}</button>
+                    }} onClick={() => setWordFilter(value, true)}>{label}</button>
                   ))}
                 </div>
               </div>
 
               {dismissedTerms.length ? <button type="button" className={styles.textButton} onClick={() => setSheet('dismissed')}>Show dismissed words ({dismissedTerms.length})</button> : null}
+              {otherWordItems.length ? (
+                <details className={styles.otherWords} open={otherWordsOpen} onToggle={(event) => {
+                  const open = event.currentTarget.open;
+                  if (open !== otherWordsOpen) updateDraft((current) => ({ ...current, otherWordsOpen: open }));
+                }}>
+                  <summary>Other words</summary>
+                  {otherWordsOpen ? <MagnetBoard
+                    className={styles.wordBoard}
+                    items={otherWordItems}
+                    playMode={otherWordPlayMode}
+                    onPlayModeChange={setOtherWordPlayMode}
+                    storageKey={`alexithymia-other-words:${normalizedWordQuery ? 'search' : wordFilter}`}
+                    ariaLabel="Other word choices"
+                  /> : null}
+                </details>
+              ) : null}
               {visibleWordItems.length ? (
                 <MagnetBoard
                   className={styles.wordBoard}
                   items={visibleWordItems}
                   playMode={wordPlayMode}
                   onPlayModeChange={setWordPlayMode}
-                  storageKey={`alexithymia-words:${normalizedWordQuery ? 'search' : wordFilter}`}
+                  storageKey={`alexithymia-compact-words:${normalizedWordQuery ? 'search' : wordFilter}`}
                   ariaLabel="Possible words"
                 />
-              ) : (
+              ) : !otherWordItems.length && !partialWordItems.length ? (
                 <p className={styles.emptyMessage}>{emptyWordsMessage}</p>
-              )}
+              ) : null}
 
               {normalizedWordQuery && !exactSearchTerm ? (
                 <button type="button" className={styles.customWordButton} onClick={useCustomWord}>Use “{wordQuery.trim()}” as my word</button>
               ) : null}
 
-              {!normalizedWordQuery && wordFilter === 'matches' && partialWordItems.length ? (
+              {partialWordItems.length ? (
                 <section className={styles.partialWords} aria-labelledby="partial-words-title">
                   <header><h2 id="partial-words-title">More words to consider</h2><p>These words fit some clues, but the app cannot compare every clue you chose.</p></header>
                   <MagnetBoard
@@ -847,7 +865,7 @@ export function AlexithymiaSupportPage() {
                     items={partialWordItems}
                     playMode={partialPlayMode}
                     onPlayModeChange={setPartialPlayMode}
-                    storageKey="alexithymia-partial-words"
+                    storageKey="alexithymia-compact-partial-words"
                     ariaLabel="Words that cannot be compared with every clue"
                   />
                 </section>
@@ -855,16 +873,18 @@ export function AlexithymiaSupportPage() {
             </div>
 
             <aside className={styles.wordSidebar} aria-label="Your word choices">
-              <section className={styles.wordTray} aria-label="Your current words">
+              {selectedTerms.length || draft.noWordYet ? <section className={styles.wordTray} aria-label="Your current words">
                 <h2>Your words</h2>
-                {selectedTerms.length || draft.noWordYet ? (
-                  <div>{selectedTerms.map((term) => <span key={term.id}>{term.label}<small>{draft.decisions[term.id] === 'fits' ? `Fits${draft.feelingIntensities?.[term.id] ? ` · ${draft.feelingIntensities[term.id]}/10` : ''}` : 'Maybe'}</small></span>)}{draft.noWordYet ? <span>No word yet</span> : null}</div>
-                ) : <p>Set a Feeling’s intensity to keep it. Word options include Maybe.</p>}
-              </section>
+                <div>{selectedTerms.map((term) => {
+                  const rating = draft.feelingIntensities?.[term.id];
+                  const caption = draft.decisions[term.id] === 'maybe' ? 'Maybe' : rating === undefined ? '' : formatIntensityRating(rating);
+                  return <span key={term.id}>{term.label}{caption ? <small>{caption}</small> : null}</span>;
+                })}{draft.noWordYet ? <span>No word yet</span> : null}</div>
+              </section> : null}
               {selectedTerms.length ? <button type="button" className={styles.textButton} onClick={() => clearWithUndo((current) => ({
                 ...current, decisions: Object.fromEntries(Object.entries(current.decisions).filter(([, decision]) => decision === 'not-this-time')),
                 termOrder: [], feelingIntensities: {}, noWordYet: false,
-              }), 'Selected words cleared.')}>Clear selected words</button> : <p className={styles.noClueMessage}>A feeling word is optional.</p>}
+              }), 'Selected words cleared.')}>Clear selected words</button> : null}
               <p className={styles.liveStatus} role="status">{status}</p>
               <div className={`${styles.stickyActions} ${styles.wordActions}`}>
                 {undo ? <div className={styles.wordUndo} role="status"><span>{undo.message}</span><button type="button" onClick={undoChange}>Undo</button></div> : null}
@@ -1005,6 +1025,7 @@ export function AlexithymiaSupportPage() {
             decision={activeTerm ? draft.decisions[activeTerm.id] : undefined}
             intensity={activeTerm ? draft.feelingIntensities?.[activeTerm.id] : undefined}
             cueLabels={cueLabels}
+            observationSource={draft.stage === 3 && activeTerm && observationTermIds.has(activeTerm.id) ? observationSource : undefined}
             onClear={() => { if (activeTerm) clearTerm(activeTerm); }}
             onDecision={(decision, intensity) => {
               if (decision === 'not-this-time' && activeTerm) { dismissTerm(activeTerm); return; }

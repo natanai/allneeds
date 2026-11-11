@@ -65,7 +65,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   const search = page.getByRole('searchbox', { name: 'Search feelings and other emotion words' });
   await page.getByRole('radio', { name: 'All words' }).click();
   await search.fill('Guilt');
-  await page.getByRole('button', { name: /^Guilt, Other emotion word/ }).click();
+  await page.getByRole('button', { name: 'Options for Guilt', exact: true }).click();
   sheet = page.getByRole('dialog', { name: 'Guilt' });
   await expect(sheet.getByText('Other emotion word')).toBeVisible();
   await expect(sheet.getByRole('link', { name: /Open Other emotion word page/ })).toHaveCount(0);
@@ -73,7 +73,7 @@ test('combined clues, word roles, user-selected Needs, and Journal handoff stay 
   await expect(sheet).toHaveCount(0);
 
   await search.fill('Blamed');
-  await page.getByRole('button', { name: /^Blamed, Faux Feeling/ }).click();
+  await page.getByRole('button', { name: 'Options for Blamed', exact: true }).click();
   sheet = page.getByRole('dialog', { name: 'Blamed' });
   await expect(sheet.getByText(/Faux Feelings are not compared with clues/)).toBeVisible();
   await expect(sheet.getByText(/That label does not mean the event was unreal/)).toBeVisible();

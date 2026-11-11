@@ -386,23 +386,23 @@
 /* Compound magnets keep the shared shell and physics. Native controls are
    siblings of the drag handle, with their own touch and keyboard ownership. */
 .compound {
-  width: min(17rem, calc(100% - 24px));
-  padding: .45rem 1rem;
+  width: max-content;
+  max-width: calc(100% - 24px);
   display: grid;
-  gap: var(--space-1);
+  gap: 0;
   white-space: normal;
   text-align: left;
   cursor: default;
   touch-action: pan-y;
 }
-.compoundHeading { min-width: 0; display: flex; align-items: start; gap: var(--space-1); }
+.compoundWithControls { min-width: min(10.5rem, calc(100% - 24px)); }
+.compoundHeading { min-width: 0; display: flex; align-items: center; gap: var(--space-1); }
 .compoundHandle {
   min-width: 0;
   min-height: var(--control-min);
   flex: 1 1 auto;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1);
   border: 0;
@@ -413,8 +413,8 @@
   cursor: pointer;
 }
 .compoundHandle:focus-visible { outline: 2px solid var(--magnet-focus); outline-offset: 2px; border-radius: var(--radius-md); }
-.compoundHandle .label { min-width: 0; flex-basis: 100%; overflow-wrap: anywhere; }
-.compoundHandle .detail { min-height: 2.4em; }
+.compoundHandle .label { min-width: 0; overflow-wrap: anywhere; }
+.compoundAnnotation { flex: 0 0 auto; min-width: 2ch; font-size: var(--text-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .compoundActions { flex: 0 0 auto; display: flex; }
 .compoundControls { min-width: 0; cursor: auto; }
 

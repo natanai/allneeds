@@ -401,7 +401,7 @@ test('clear words is separate from continuing, and undo restores the decision an
   await page.getByRole('button', { name: 'Clear selected words', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Continue without a word', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await expect(page.getByText('Fits · 7/10', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Your current words', { exact: true }).getByText('7/10', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await openCheckInReview(page);
   await expect(page.getByRole('button', { name: 'Fear, Feeling, Fits · Intensity 7/10, show description', exact: true })).toBeVisible();
@@ -580,15 +580,11 @@ test('doubling the base text size keeps narrow-phone choices and the Journal han
   await maybeFear(page);
   await noOverflow();
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill('Guilt');
-  const otherWord = page.getByRole('button', { name: /^Guilt, Other emotion word/ });
+  const otherWord = page.getByRole('group', { name: 'Guilt controls', exact: true });
   await otherWord.scrollIntoViewIfNeeded();
-  const otherBadge = await otherWord.getByText('Other emotion word', { exact: true }).boundingBox();
-  const otherFace = await otherWord.boundingBox();
-  expect(otherBadge).not.toBeNull();
-  expect(otherFace).not.toBeNull();
-  expect(otherBadge!.x).toBeGreaterThanOrEqual(otherFace!.x - 1);
-  expect(otherBadge!.x + otherBadge!.width).toBeLessThanOrEqual(otherFace!.x + otherFace!.width + 1);
-  await otherWord.click();
+  expect(await otherWord.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  await expect(otherWord.getByRole('button', { name: /^Guilt, Other emotion word/ })).toBeVisible();
+  await otherWord.getByRole('button', { name: 'Options for Guilt', exact: true }).click();
   await page.getByRole('dialog', { name: 'Guilt', exact: true }).getByRole('button', { name: 'Maybe', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Add Needs', exact: true }).click();

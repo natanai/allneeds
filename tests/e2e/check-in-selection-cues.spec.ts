@@ -117,9 +117,9 @@ for (const scenario of scenarios) {
     const candidate = page.getByRole('dialog', { name: 'Anxiety', exact: true });
     await candidate.getByRole('slider', { name: 'Anxiety intensity' }).fill('6');
     await candidate.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
-    await expect(word.getByText('Fits', { exact: true })).toBeVisible();
+    await expect(word.getByText('6', { exact: true })).toBeVisible();
     await expect(word.locator('[data-selected="true"]')).toBeVisible();
-    await expect(word).toContainText(/% clue match/);
+    await expect(word.getByRole('button', { name: /^Anxiety, Feeling.*% clue match/ })).toBeVisible();
     if (scenario.largeText) {
       await word.scrollIntoViewIfNeeded();
       expect(await word.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
@@ -204,9 +204,11 @@ test('Observation provenance is not a selected word; partial comparisons and cus
   await expect(source).not.toContainText(/Fits|Maybe/);
   await expect(page.getByRole('group', { name: 'Anxiety controls', exact: true }).locator('[data-selected="false"]')).toBeHidden();
   await source.click();
-  await page.getByRole('dialog', { name: 'Anxiety', exact: true }).getByRole('button', { name: 'Maybe', exact: true }).click();
+  const options = page.getByRole('dialog', { name: 'Anxiety', exact: true });
+  await expect(options.getByText('From your observation', { exact: true })).toBeVisible();
+  await options.getByRole('button', { name: 'Maybe', exact: true }).click();
   await expect(page.getByRole('group', { name: 'Anxiety controls', exact: true })).toContainText('Maybe');
-  await expect(source).toContainText('From your observation');
+  await expect(source).toHaveAccessibleName(/Maybe.*From your observation/);
 
   const partial = page.getByLabel('Words that cannot be compared with every clue', { exact: true }).locator('[data-magnet-id]').first();
   const partialId = await partial.getAttribute('data-magnet-id');
@@ -214,7 +216,7 @@ test('Observation provenance is not a selected word; partial comparisons and cus
   const candidate = page.getByRole('dialog').last();
   await candidate.getByRole('button', { name: 'Maybe', exact: true }).click();
   await expect(page.locator(`[data-magnet-id="${partialId}"]`)).toContainText('Maybe');
-  await expect(page.locator(`[data-magnet-id="${partialId}"]`)).toContainText('Some clues cannot be compared');
+  await expect(page.locator(`[data-magnet-id="${partialId}"]`).getByRole('button', { name: /Maybe.*Some clues cannot be compared/ })).toBeVisible();
 
   await page.getByRole('radio', { name: 'All words', exact: true }).click();
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words', exact: true }).fill('My uncertain word');

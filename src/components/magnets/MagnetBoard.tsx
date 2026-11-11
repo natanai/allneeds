@@ -50,12 +50,15 @@ export type MagnetBoardItem = {
   active?: boolean;
   selected?: boolean;
   ariaLabel?: string;
+  ariaPressed?: AriaAttributes['aria-pressed'];
   ariaExpanded?: boolean;
   ariaHasPopup?: AriaAttributes['aria-haspopup'];
   ariaControls?: string;
   /** Separate native controls on a compound content magnet. */
   actions?: ReactNode;
   controls?: ReactNode;
+  /** A small, unframed value beside a compound magnet's label. */
+  annotation?: string;
 };
 
 type Point = { x: number; y: number };
@@ -226,8 +229,8 @@ export function MagnetBoard({
   itemsRef.current = items;
   // Slider values and choice feedback are not geometry. Keep the live native
   // controls mounted and measured while their values change under a pointer.
-  const layoutItems = items.some((item) => item.controls)
-    ? JSON.stringify(items.map((item) => [item.id, item.label, item.controls ? null : item.detail, item.badge, item.kind, item.iconUrl]))
+  const layoutItems = items.some((item) => item.controls || item.actions)
+    ? JSON.stringify(items.map((item) => [item.id, item.label, item.detail, item.badge, item.kind, item.iconUrl, Boolean(item.actions), Boolean(item.controls)]))
     : items;
   const controlIsActive = useCallback((id: string) => controlPointerRef.current?.id === id || controlFocusRef.current === id, []);
   const surfaceGestureRef = useRef<SurfaceGesture | null>(null);
@@ -1283,6 +1286,7 @@ export function MagnetBoard({
         className={styles.boardToggle}
       />
       {items.map((item) => {
+        const compound = variant === 'content' && Boolean(item.actions || item.controls);
         const customProperties = {
           '--magnet-tilt': `${getMagnetTilt(item.id)}deg`,
           ...(item.iconUrl ? { '--magnet-icon': `url("${item.iconUrl}")` } : {}),
@@ -1301,15 +1305,16 @@ export function MagnetBoard({
               {item.label}
               {item.detail ? <span className={styles.detail}>{item.detail}</span> : null}
             </span>
+            {compound && item.annotation !== undefined ? <span className={styles.compoundAnnotation} aria-hidden="true">{item.annotation}</span> : null}
             {item.badge ? <span className={styles.badge}>{item.badge}</span> : null}
             {variant === 'content' && item.selected !== undefined ? (
               <span className={styles.selectionCheck} aria-hidden="true" data-selected={item.selected}>✓</span>
             ) : null}
           </>
         );
-        if (item.controls && variant === 'content') {
+        if (compound) {
           return <div key={item.id}
-            className={`${classes} ${styles.compound}`} style={customProperties}
+            className={`${classes} ${styles.compound} ${item.controls ? styles.compoundWithControls : ''}`} style={customProperties}
             data-magnet-id={item.id} data-compound="true" role="group" aria-label={`${item.label} controls`}
             ref={(element) => { if (element) elementsRef.current.set(item.id, element); else elementsRef.current.delete(item.id); }}
             onPointerDownCapture={(event) => {
@@ -1335,12 +1340,12 @@ export function MagnetBoard({
           >
             <div className={styles.compoundHeading}>
               <button type="button" className={styles.compoundHandle} data-magnet-handle
-                aria-label={item.ariaLabel} aria-haspopup={item.ariaHasPopup}>
+                aria-label={item.ariaLabel} aria-haspopup={item.ariaHasPopup} aria-pressed={item.ariaPressed}>
                 {content}
               </button>
-              <div className={styles.compoundActions} data-magnet-controls>{item.actions}</div>
+              {item.actions ? <div className={styles.compoundActions} data-magnet-controls>{item.actions}</div> : null}
             </div>
-            <div className={styles.compoundControls} data-magnet-controls>{item.controls}</div>
+            {item.controls ? <div className={styles.compoundControls} data-magnet-controls>{item.controls}</div> : null}
           </div>;
         }
         const shared = {
