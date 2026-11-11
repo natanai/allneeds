@@ -118,5 +118,8 @@ test('Needs can be skipped with no word, without inventing a Need or losing hist
   await expect(page.getByRole('heading', { name: 'Possible words', exact: true })).toBeFocused();
   await page.goForward();
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '4');
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.alexithymia.draft')!).data.selectedNeeds)).toEqual([]);
+  await expect.poll(() => page.evaluate(() => {
+    const draft = JSON.parse(localStorage.getItem('allneeds.v2.alexithymia.draft') ?? 'null')?.data;
+    return draft ? { stage: draft.stage, selectedNeeds: draft.selectedNeeds } : null;
+  })).toEqual({ stage: 4, selectedNeeds: [] });
 });

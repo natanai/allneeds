@@ -15,7 +15,9 @@ async function words(page: Page) {
 async function maybeFear(page: Page) {
   await page.getByRole('radio', { name: 'All words', exact: true }).click();
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill('Fear');
-  await page.getByRole('button', { name: /^Fear, Feeling/ }).click();
+  const fear = page.getByRole('button', { name: /^Fear, Feeling/ });
+  await fear.evaluate(element => element.scrollIntoView({ block: 'center' }));
+  await fear.click();
   await page.getByRole('dialog', { name: 'Fear', exact: true }).getByRole('button', { name: 'Maybe', exact: true }).click();
 }
 
@@ -264,7 +266,7 @@ test('search stays scoped, radios support arrows, and Unicode words remain disti
   await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
   await expect(page.getByRole('radio', { name: 'My words', exact: true })).toHaveAttribute('aria-checked', 'true');
   await expect(search).toHaveValue('😕');
-  await expect(page.getByRole('button', { name: '😕, Your word, Fits', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '😕, Your word', exact: true, pressed: true })).toBeVisible();
 });
 
 test('the full Body Cues handoff applies explicitly and leaves the independent tool draft intact', async ({ page }) => {
@@ -581,7 +583,7 @@ test('doubling the base text size keeps narrow-phone choices and the Journal han
   await noOverflow();
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill('Guilt');
   const otherWord = page.getByRole('group', { name: 'Guilt controls', exact: true });
-  await otherWord.scrollIntoViewIfNeeded();
+  await otherWord.evaluate(element => element.scrollIntoView({ block: 'center' }));
   expect(await otherWord.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
   await expect(otherWord.getByRole('button', { name: /^Guilt, Other emotion word/ })).toBeVisible();
   await otherWord.getByRole('button', { name: 'Options for Guilt', exact: true }).click();

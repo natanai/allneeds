@@ -328,7 +328,9 @@ export function AlexithymiaSupportPage() {
       ariaPressed: isFeeling ? undefined : kept,
       onActivate: isFeeling ? openOptions : () => kept ? clearTerm(term) : decideTerm(term, 'fits'),
       actions: <>
-        <button type="button" className={styles.wordMagnetAction} aria-label={`Options for ${term.label}`} aria-haspopup="dialog" onClick={openOptions}>⋯</button>
+        <button type="button" className={styles.wordMagnetAction} aria-label={`Options for ${term.label}`} aria-haspopup="dialog" onClick={openOptions}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="4" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="20" cy="12" r="1.5" /></svg>
+        </button>
         <button type="button" className={styles.wordMagnetAction} aria-label={`Not this time: ${term.label}`} onClick={() => dismissTerm(term)}><CloseIcon /></button>
       </>,
       controls: isFeeling ? <IntensitySlider

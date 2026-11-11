@@ -166,6 +166,13 @@ test.describe('touch ownership', () => {
     await expect(otherBoard).toHaveCount(0);
     const afraid = page.getByRole('group', { name: 'Afraid controls', exact: true });
     await expect(afraid).toBeInViewport();
+    const agitated = page.getByRole('group', { name: 'Agitated controls', exact: true });
+    const alarmed = page.getByRole('group', { name: 'Alarmed controls', exact: true });
+    await expect(agitated).toBeInViewport();
+    await expect(alarmed).toBeInViewport();
+    const [left, right] = await Promise.all([agitated.boundingBox(), alarmed.boundingBox()]);
+    expect(Math.abs(left!.y - right!.y)).toBeLessThan(8);
+    expect(right!.x).toBeGreaterThan(left!.x + left!.width);
     await afraid.getByRole('slider').fill('4');
     await page.screenshot({ path: 'test-results/compact-feelings-square-phone.png' });
     await afraid.getByRole('slider').fill('0');
@@ -197,7 +204,7 @@ test.describe('touch ownership', () => {
     await expect(page.getByRole('button', { name: 'Continue without a word', exact: true })).toBeVisible();
   });
 
-  test('a native touch drag rates the feeling without picking up its magnet', async ({ page }) => {
+  test('native touch drags rate on the slider and move on the label', async ({ page }) => {
     await openWords(page);
     const magnet = page.getByRole('group', { name: 'Anxiety controls', exact: true });
     const slider = magnet.getByRole('slider');
@@ -213,7 +220,17 @@ test.describe('touch ownership', () => {
     expect(Math.abs(during.y - before.y)).toBeLessThan(1);
     await expect(magnet).not.toHaveAttribute('data-picked-up');
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    expect(Number(await slider.inputValue())).toBeGreaterThan(0);
+    const rating = await slider.inputValue();
+    expect(Number(rating)).toBeGreaterThan(0);
+    const label = (await magnet.locator('[data-magnet-handle]').boundingBox())!;
+    const x = label.x + label.width / 2;
+    const labelY = label.y + label.height / 2;
+    await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: labelY }] });
+    for (const dx of [8, 16, 24, 32]) await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + dx, y: labelY + 12 }] });
+    await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+    expect((await magnet.boundingBox())!.x - before.x).toBeGreaterThan(20);
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(slider).toHaveValue(rating);
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await client.detach();
   });
