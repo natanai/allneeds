@@ -171,8 +171,8 @@ test.describe('touch ownership', () => {
     await expect(agitated).toBeInViewport();
     await expect(alarmed).toBeInViewport();
     const [left, right] = await Promise.all([agitated.boundingBox(), alarmed.boundingBox()]);
-    expect(Math.abs(left!.y - right!.y)).toBeLessThan(8);
-    expect(right!.x).toBeGreaterThan(left!.x + left!.width);
+    expect.soft(Math.abs(left!.y - right!.y)).toBeLessThan(8);
+    expect.soft(right!.x).toBeGreaterThan(left!.x + left!.width);
     await afraid.getByRole('slider').fill('4');
     await page.screenshot({ path: 'test-results/compact-feelings-square-phone.png' });
     await afraid.getByRole('slider').fill('0');

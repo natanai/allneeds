@@ -655,7 +655,7 @@
 .wordMagnetAction {
   width: var(--control-min);
   height: var(--control-min);
-  padding: .65rem;
+  padding: 0;
   display: grid;
   place-items: center;
   border: 0;

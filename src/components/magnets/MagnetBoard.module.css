@@ -396,7 +396,7 @@
   cursor: default;
   touch-action: pan-y;
 }
-.compoundWithControls { min-width: min(11rem, calc(100% - 24px)); column-gap: 0; }
+.compoundWithControls { min-width: min(10rem, calc(100% - 24px)); column-gap: 0; }
 .compoundBody { min-width: 0; }
 .compoundHandle {
   width: 100%;
@@ -485,7 +485,7 @@
     min-height: var(--control-min);
     padding: 0.36rem 0.58rem;
   }
-  .compoundWithControls { min-width: min(10rem, calc(100% - 24px)); }
+  .compoundWithControls { min-width: min(9rem, calc(100% - 24px)); }
   .compoundWithControls .compoundActions { margin-inline-end: -.25rem; }
 
   .nav {
