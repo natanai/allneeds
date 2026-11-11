@@ -71,6 +71,7 @@ export type AlexithymiaDraft = {
   updatedAt?: string;
   wordFilter?: 'matches' | 'all' | 'mine';
   wordQuery?: string;
+  otherWordsOpen?: boolean;
   needQuery?: string;
   scrollTop?: number;
   statementBasis?: string;
@@ -249,6 +250,7 @@ function isAlexithymiaDraft(value: unknown): value is AlexithymiaDraft {
     && (value.bodyTool === undefined || isBodyCuesDraft(value.bodyTool))
     && (value.wordFilter === undefined || ['matches', 'all', 'mine'].includes(String(value.wordFilter)))
     && (value.wordQuery === undefined || typeof value.wordQuery === 'string')
+    && (value.otherWordsOpen === undefined || typeof value.otherWordsOpen === 'boolean')
     && (value.needQuery === undefined || typeof value.needQuery === 'string')
     && (value.statementBasis === undefined || typeof value.statementBasis === 'string')
     && (value.updatedAt === undefined || (typeof value.updatedAt === 'string' && Number.isFinite(Date.parse(value.updatedAt))))

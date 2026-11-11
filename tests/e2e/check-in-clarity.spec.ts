@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect, test, openCheckInReview } from './fixtures';
+import { expect, test, openCheckInReview, revealWordControl } from './fixtures';
 
 async function start(page: Page, observation = '') {
   await page.goto('/alexithymia-support');
@@ -15,7 +15,9 @@ async function words(page: Page) {
 async function maybeFear(page: Page) {
   await page.getByRole('radio', { name: 'All words', exact: true }).click();
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill('Fear');
-  await page.getByRole('button', { name: /^Fear, Feeling/ }).click();
+  const fear = page.getByRole('button', { name: /^Fear, Feeling/ });
+  await revealWordControl(fear);
+  await fear.click();
   await page.getByRole('dialog', { name: 'Fear', exact: true }).getByRole('button', { name: 'Maybe', exact: true }).click();
 }
 
@@ -264,7 +266,7 @@ test('search stays scoped, radios support arrows, and Unicode words remain disti
   await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
   await expect(page.getByRole('radio', { name: 'My words', exact: true })).toHaveAttribute('aria-checked', 'true');
   await expect(search).toHaveValue('😕');
-  await expect(page.getByRole('button', { name: '😕, Your word, Fits', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '😕, Your word', exact: true, pressed: true })).toBeVisible();
 });
 
 test('the full Body Cues handoff applies explicitly and leaves the independent tool draft intact', async ({ page }) => {
@@ -401,7 +403,7 @@ test('clear words is separate from continuing, and undo restores the decision an
   await page.getByRole('button', { name: 'Clear selected words', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Continue without a word', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await expect(page.getByText('Fits · 7/10', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Your current words', { exact: true }).getByText('7/10', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await openCheckInReview(page);
   await expect(page.getByRole('button', { name: 'Fear, Feeling, Fits · Intensity 7/10, show description', exact: true })).toBeVisible();
@@ -580,15 +582,12 @@ test('doubling the base text size keeps narrow-phone choices and the Journal han
   await maybeFear(page);
   await noOverflow();
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill('Guilt');
-  const otherWord = page.getByRole('button', { name: /^Guilt, Other emotion word/ });
-  await otherWord.scrollIntoViewIfNeeded();
-  const otherBadge = await otherWord.getByText('Other emotion word', { exact: true }).boundingBox();
-  const otherFace = await otherWord.boundingBox();
-  expect(otherBadge).not.toBeNull();
-  expect(otherFace).not.toBeNull();
-  expect(otherBadge!.x).toBeGreaterThanOrEqual(otherFace!.x - 1);
-  expect(otherBadge!.x + otherBadge!.width).toBeLessThanOrEqual(otherFace!.x + otherFace!.width + 1);
-  await otherWord.click();
+  const otherWord = page.getByRole('group', { name: 'Guilt controls', exact: true });
+  expect(await otherWord.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  await expect(otherWord.getByRole('button', { name: /^Guilt, Other emotion word/ })).toBeVisible();
+  const otherOptions = otherWord.getByRole('button', { name: 'Options for Guilt', exact: true });
+  await revealWordControl(otherOptions);
+  await otherOptions.click();
   await page.getByRole('dialog', { name: 'Guilt', exact: true }).getByRole('button', { name: 'Maybe', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Add Needs', exact: true }).click();
@@ -673,6 +672,7 @@ test('keyboard-only completion keeps sheet focus contained and returns to the op
   await page.keyboard.press('Enter');
   await tabTo(page.getByRole('button', { name: 'Continue without a word', exact: true }));
   await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { name: 'What matters to you here?', exact: true })).toBeFocused();
   const needsTrigger = page.getByRole('button', { name: 'Add Needs', exact: true });
   await tabTo(needsTrigger);
   await page.keyboard.press('Enter');

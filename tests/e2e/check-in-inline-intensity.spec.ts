@@ -2,12 +2,12 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 
 const draftKey = 'allneeds.v2.alexithymia.draft';
-async function openWords(page: Page) {
+async function openWords(page: Page, query = 'Anxiety') {
   await page.goto('/alexithymia-support');
   await page.getByRole('button', { name: 'Start check-in', exact: true }).click();
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
   await page.getByRole('button', { name: 'Continue to words', exact: true }).click();
-  await page.getByRole('searchbox', { name: 'Search feelings and other emotion words', exact: true }).fill('Anxiety');
+  if (query) await page.getByRole('searchbox', { name: 'Search feelings and other emotion words', exact: true }).fill(query);
 }
 async function savedChoice(page: Page) {
   return page.evaluate(key => {
@@ -24,12 +24,13 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
     const magnet = page.getByRole('group', { name: 'Anxiety controls', exact: true });
     const slider = magnet.getByRole('slider', { name: 'Anxiety intensity', exact: true });
     await expect(slider).toHaveValue('0');
-    await expect(magnet.getByText('Not selected', { exact: true })).toBeVisible();
-    expect(await magnet.evaluate(el => getComputedStyle(el, '::after').backgroundImage)).toContain('icons/feelings/anxiety.svg');
+    await expect(slider).toHaveAttribute('aria-valuetext', 'Not selected');
+    await expect(magnet).not.toContainText(/Not selected|Not rated|Very strong/);
+    expect(await magnet.evaluate(el => getComputedStyle(el, '::after').backgroundImage)).toBe('none');
     await slider.fill('7');
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    await expect(magnet.getByText('Fits', { exact: true })).toBeVisible();
-    await expect(magnet.locator('output').first()).toHaveText('7/10');
+    await expect(magnet.getByText('7', { exact: true })).toBeVisible();
+    await expect(slider).toHaveAttribute('aria-valuetext', '7 out of 10, Fits');
     await expect(magnet.locator('[data-selected="true"]')).toBeVisible();
     await expect.poll(() => savedChoice(page)).toEqual({ decision: 'fits', rating: 7 });
     await slider.press('ArrowRight');
@@ -152,7 +153,58 @@ test('manual Maybe stays tentative, while direct rating transfers to Journal wit
 
 test.describe('touch ownership', () => {
   test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
-  test('a native touch drag rates the feeling without picking up its magnet', async ({ page }) => {
+  test('other words stay out of the main board and can be kept with one tap', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.addInitScript(() => localStorage.setItem('nvcApp.theme', JSON.stringify({
+      preset: 'Square monochrome', updatedAt: 123, roundness: 0,
+      values: { primary: '#303030', quiet: '#FFFFFF', text: '#171717', secondary: '#303030', outline: '#171717', action: '#FFFFFF', positive: '#FFFFFF', attention: '#FFFFFF', selection: '#FFFFFF' },
+    })));
+    await openWords(page, '');
+    const disclosure = page.locator('summary').filter({ hasText: /^Other words$/ });
+    const otherBoard = page.getByLabel('Other word choices', { exact: true });
+    await expect(disclosure).toBeInViewport();
+    await expect(otherBoard).toHaveCount(0);
+    const afraid = page.getByRole('group', { name: 'Afraid controls', exact: true });
+    await expect(afraid).toBeInViewport();
+    const agitated = page.getByRole('group', { name: 'Agitated controls', exact: true });
+    const alarmed = page.getByRole('group', { name: 'Alarmed controls', exact: true });
+    await expect(agitated).toBeInViewport();
+    await expect(alarmed).toBeInViewport();
+    const [left, right] = await Promise.all([agitated.boundingBox(), alarmed.boundingBox()]);
+    expect.soft(Math.abs(left!.y - right!.y)).toBeLessThan(8);
+    expect.soft(right!.x).toBeGreaterThan(left!.x + left!.width);
+    await afraid.getByRole('slider').fill('4');
+    await page.screenshot({ path: 'test-results/compact-feelings-square-phone.png' });
+    await afraid.getByRole('slider').fill('0');
+    await disclosure.press('Enter');
+    await expect(otherBoard).toBeVisible();
+    await disclosure.press('Enter');
+    await expect(otherBoard).toHaveCount(0);
+
+    await page.getByRole('searchbox').fill('Abandoned');
+    const magnet = otherBoard.getByRole('group', { name: 'Abandoned controls', exact: true });
+    const label = magnet.getByRole('button', { name: 'Abandoned, Faux Feeling', exact: true });
+    await expect(label).toHaveAttribute('aria-pressed', 'false');
+    await expect(magnet.getByRole('slider')).toHaveCount(0);
+    await expect(magnet).not.toContainText(/Keep word|Faux Feeling/);
+    expect(await magnet.evaluate(el => (el as HTMLElement).offsetHeight)).toBeLessThanOrEqual(68);
+    await label.tap();
+    await expect(label).toHaveAttribute('aria-pressed', 'true');
+    await expect(magnet.locator('[data-selected="true"]')).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByText('1 word selected', { exact: true })).toBeVisible();
+    await magnet.getByRole('button', { name: 'Options for Abandoned', exact: true }).tap();
+    const sheet = page.getByRole('dialog', { name: 'Abandoned', exact: true });
+    await expect(sheet.getByText('Faux Feeling', { exact: true })).toBeVisible();
+    await sheet.getByRole('button', { name: 'Close Abandoned', exact: true }).tap();
+    await page.getByRole('radio', { name: 'My words', exact: true }).tap();
+    await expect(label).toHaveAttribute('aria-pressed', 'true');
+    await label.press('Space');
+    await expect(magnet).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Continue without a word', exact: true })).toBeVisible();
+  });
+
+  test('native touch drags rate on the slider and move on the label', async ({ page }) => {
     await openWords(page);
     const magnet = page.getByRole('group', { name: 'Anxiety controls', exact: true });
     const slider = magnet.getByRole('slider');
@@ -168,14 +220,24 @@ test.describe('touch ownership', () => {
     expect(Math.abs(during.y - before.y)).toBeLessThan(1);
     await expect(magnet).not.toHaveAttribute('data-picked-up');
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    expect(Number(await slider.inputValue())).toBeGreaterThan(0);
+    const rating = await slider.inputValue();
+    expect(Number(rating)).toBeGreaterThan(0);
+    const label = (await magnet.locator('[data-magnet-handle]').boundingBox())!;
+    const x = label.x + label.width / 2;
+    const labelY = label.y + label.height / 2;
+    await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: labelY }] });
+    for (const dx of [8, 16, 24, 32]) await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + dx, y: labelY + 12 }] });
+    await expect(magnet).toHaveAttribute('data-picked-up', 'true');
+    expect((await magnet.boundingBox())!.x - before.x).toBeGreaterThan(20);
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(slider).toHaveValue(rating);
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await client.detach();
   });
 });
 
 for (const width of [390, 1280]) {
-  test(`matched Feeling artwork and direct controls stay available at ${width}px`, async ({ page }) => {
+  test(`matched Feelings stay compact and keep scores in options at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
     await page.goto('/alexithymia-support');
     await page.getByRole('button', { name: 'Start check-in', exact: true }).click();
@@ -189,9 +251,14 @@ for (const width of [390, 1280]) {
     const anxiety = board.getByRole('group', { name: 'Anxiety controls', exact: true });
     await expect(board.getByRole('switch')).toBeChecked();
     await anxiety.getByRole('slider').fill('7');
-    await expect(anxiety).toContainText('100% clue match');
-    await expect(anxiety.getByText('Fits', { exact: true })).toBeVisible();
-    expect(await anxiety.evaluate(el => getComputedStyle(el, '::after').backgroundImage)).toContain('icons/feelings/anxiety.svg');
+    await expect(anxiety.getByRole('button', { name: /^Anxiety, Feeling.*100% clue match/ })).toBeVisible();
+    await expect(anxiety).not.toContainText(/clue match|Fits|Not rated/);
+    await expect(anxiety.getByText('7', { exact: true })).toBeVisible();
+    expect(await anxiety.evaluate(el => (el as HTMLElement).offsetHeight)).toBeLessThanOrEqual(120);
+    await anxiety.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
+    const options = page.getByRole('dialog', { name: 'Anxiety', exact: true });
+    await expect(options.getByText('100% body clue match', { exact: true })).toBeVisible();
+    await options.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
     await board.getByRole('group', { name: 'Fear controls', exact: true }).getByRole('slider').fill('2');
     await page.getByRole('article').evaluate(el => { el.scrollTop = 0; window.scrollTo(0, 0); });
     await page.screenshot({ path: `test-results/inline-matched-feelings-${width}.png` });

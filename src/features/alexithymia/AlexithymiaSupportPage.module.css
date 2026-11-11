@@ -655,7 +655,7 @@
 .wordMagnetAction {
   width: var(--control-min);
   height: var(--control-min);
-  padding: .65rem;
+  padding: 0;
   display: grid;
   place-items: center;
   border: 0;
@@ -663,14 +663,15 @@
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   cursor: pointer;
 }
 .wordMagnetAction svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
-.wordRatingStatus { min-width: 0; display: flex; justify-content: space-between; gap: var(--space-1); font-size: var(--text-xs); line-height: 1.4; }
-.wordRatingStatus output { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+.wordMagnetAction circle { fill: currentColor; }
 .wordMagnetAction:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
-.keepWord { min-height: var(--control-min); padding: .3rem .5rem; border: 1px solid var(--outline); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: inherit; cursor: pointer; }
+.otherWords { min-width: 0; }
+.otherWords summary { min-height: var(--control-min); padding: .4rem .25rem; color: var(--secondary); font-size: var(--text-sm); font-weight: 700; cursor: pointer; }
+.otherWords > .wordBoard { margin-block-start: var(--space-1); }
 .wordActions { flex-wrap: wrap; }
 .wordActions > .selectedCount { flex: 1 1 6rem; }
 .wordUndo { flex: 0 0 100%; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); font-size: var(--text-xs); }
@@ -1094,6 +1095,24 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Keep word controls in the scroll viewport above the action bar, even
+     when enlarged text or an Undo message makes the bar wrap. */
+  .page:has(.stageWords) {
+    bottom: var(--word-actions-space, 0px);
+    height: auto;
+    align-content: start;
+    scroll-padding-block-end: .72rem;
+  }
+
+  .page:has(.stageWords)::after {
+    content: '';
+    position: fixed;
+    inset: auto 0 0;
+    z-index: -1;
+    height: var(--word-actions-space, 0px);
+    background: color-mix(in srgb, var(--quiet) 42%, var(--surface-raised) 58%);
+  }
+
   .appBar {
     padding: max(.3rem, env(safe-area-inset-top)) .4rem .3rem;
     gap: var(--space-1);
@@ -1160,7 +1179,7 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
   .clueTray,
   .wordTray { padding: .6rem; }
 
-  .stageWords { padding-bottom: calc(12rem + env(safe-area-inset-bottom)); }
+  .stageWords { min-height: 0; padding-bottom: .72rem; }
 
   .wordToolbar {
     padding: .35rem 0;

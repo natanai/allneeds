@@ -2,6 +2,8 @@
 
 Approved interaction: November 10, 2026. Source baseline: `70b1d41d4d455de9db462fde85f4d966c9abb5a9`. Review: [PR #200](https://github.com/natanai/allneeds/pull/200).
 
+This records the original release. See [the design language](design-language.md) for the current compact Words presentation.
+
 ## Behavior
 
 Words-stage Feeling magnets display their existing canonical artwork and the exact shared `IntensitySlider` component. Its source and CSS are unchanged. Only placement and the existing range/value/callback props differ.

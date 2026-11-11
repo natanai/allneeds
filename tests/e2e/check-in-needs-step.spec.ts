@@ -12,13 +12,14 @@ async function startAtWords(page: Page) {
 
 async function keepWord(page: Page, word: string, intensity?: number) {
   await page.getByRole('searchbox', { name: 'Search feelings and other emotion words' }).fill(word);
-  await page.getByRole('button', { name: new RegExp(`^${word}, (Feeling|Other emotion word)`) }).click();
-  const sheet = page.getByRole('dialog', { name: word, exact: true });
   if (intensity !== undefined) {
-    await sheet.getByRole('slider', { name: `${word} intensity`, exact: true }).fill(String(intensity));
-    await sheet.getByRole('button', { name: `Close ${word}`, exact: true }).click();
-  } else await sheet.getByRole('button', { name: 'Fits', exact: true }).click();
-  await expect(sheet).toBeHidden();
+    await page.getByRole('slider', { name: `${word} intensity`, exact: true }).fill(String(intensity));
+  } else {
+    const toggle = page.getByRole('button', { name: new RegExp(`^${word}, Other emotion word`) });
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  }
+  await expect(page.getByRole('dialog', { name: word, exact: true })).toHaveCount(0);
 }
 
 for (const viewport of [
@@ -117,5 +118,8 @@ test('Needs can be skipped with no word, without inventing a Need or losing hist
   await expect(page.getByRole('heading', { name: 'Possible words', exact: true })).toBeFocused();
   await page.goForward();
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '4');
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.alexithymia.draft')!).data.selectedNeeds)).toEqual([]);
+  await expect.poll(() => page.evaluate(() => {
+    const draft = JSON.parse(localStorage.getItem('allneeds.v2.alexithymia.draft') ?? 'null')?.data;
+    return draft ? { stage: draft.stage, selectedNeeds: draft.selectedNeeds } : null;
+  })).toEqual({ stage: 4, selectedNeeds: [] });
 });

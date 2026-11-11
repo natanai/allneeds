@@ -1,4 +1,4 @@
-import { expect, test as base, type Page } from '@playwright/test';
+import { expect, test as base, type Locator, type Page } from '@playwright/test';
 
 const reviewedSharedStrategies = [
   { id: 37, title: 'Read a character driven novel', body: 'Read a story whose characters feel meaningful.', needIds: ['connection'], visibility: 'public', contributor: { name: 'Nat', location: 'Missouri' } },
@@ -30,6 +30,16 @@ export const test = base.extend({
 });
 
 export { expect };
+
+/** Scroll a packed word clear of the fixed app bar and action area. */
+export async function revealWordControl(control: Locator) {
+  await expect(control).toBeVisible();
+  await expect.poll(() => control.evaluate((element) => {
+    element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+    const { x, y, width, height } = element.getBoundingClientRect();
+    return element.contains(document.elementFromPoint(x + width / 2, y + height / 2));
+  })).toBe(true);
+}
 
 /** Review tests may arrive from Words or resume a saved composer. */
 export async function openCheckInReview(page: Page) {

@@ -294,6 +294,7 @@ export function CandidateSheet({
   decision,
   intensity,
   cueLabels,
+  observationSource,
   previewOnly = false,
   onOpenReference,
   onDecision,
@@ -305,6 +306,7 @@ export function CandidateSheet({
   decision?: 'fits' | 'maybe' | 'not-this-time';
   intensity?: number;
   cueLabels: string[];
+  observationSource?: string;
   previewOnly?: boolean;
   onOpenReference: (route: string) => void;
   onDecision: (decision: 'fits' | 'maybe' | 'not-this-time', intensity?: number) => void;
@@ -333,6 +335,7 @@ export function CandidateSheet({
             <span className={styles.roleBadge}>{term.roleLabel}</span>
             {match !== null ? <strong>{match}% {matchLabel}</strong> : null}
           </div>
+          {observationSource ? <p className={styles.scoreDisclosure}>{observationSource}</p> : null}
 
           {term.role === 'faux-feeling' ? <p className={styles.fauxNotice}>{term.definition}</p> : (
             <p className={styles.termDefinition}>{term.definition}</p>

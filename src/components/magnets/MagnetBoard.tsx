@@ -50,12 +50,15 @@ export type MagnetBoardItem = {
   active?: boolean;
   selected?: boolean;
   ariaLabel?: string;
+  ariaPressed?: AriaAttributes['aria-pressed'];
   ariaExpanded?: boolean;
   ariaHasPopup?: AriaAttributes['aria-haspopup'];
   ariaControls?: string;
   /** Separate native controls on a compound content magnet. */
   actions?: ReactNode;
   controls?: ReactNode;
+  /** A small, unframed value beside a compound magnet's label. */
+  annotation?: string;
 };
 
 type Point = { x: number; y: number };
@@ -80,6 +83,8 @@ type DragState = {
   id: string;
   pointerId: number;
   element: MagnetElement;
+  captureTarget: MagnetElement;
+  pickedUp: boolean;
   startPointer: Point;
   origin: Point;
   pointerScale: Point;
@@ -226,10 +231,13 @@ export function MagnetBoard({
   itemsRef.current = items;
   // Slider values and choice feedback are not geometry. Keep the live native
   // controls mounted and measured while their values change under a pointer.
-  const layoutItems = items.some((item) => item.controls)
-    ? JSON.stringify(items.map((item) => [item.id, item.label, item.controls ? null : item.detail, item.badge, item.kind, item.iconUrl]))
+  const layoutItems = items.some((item) => item.controls || item.actions)
+    ? JSON.stringify(items.map((item) => [item.id, item.label, item.detail, item.badge, item.kind, item.iconUrl, Boolean(item.actions), Boolean(item.controls)]))
     : items;
-  const controlIsActive = useCallback((id: string) => controlPointerRef.current?.id === id || controlFocusRef.current === id, []);
+  const controlIsActive = useCallback((id: string) => {
+    const drag = dragRef.current;
+    return controlPointerRef.current?.id === id || controlFocusRef.current === id || (drag?.id === id && !drag.pickedUp);
+  }, []);
   const surfaceGestureRef = useRef<SurfaceGesture | null>(null);
   const suppressClickUntilRef = useRef(new Map<string, number>());
   const pointerFieldRef = useRef<PointerField>({
@@ -467,7 +475,7 @@ export function MagnetBoard({
         mass: clamp((placement.width * placement.height) / 3_400, 0.75, 3.2),
         wobble: canReuseCurrent ? previous?.wobble ?? 0 : 0,
         wobbleVelocity: canReuseCurrent ? previous?.wobbleVelocity ?? 0 : 0,
-        dragging: dragRef.current?.id === item.id,
+        dragging: dragRef.current?.id === item.id && dragRef.current.pickedUp,
       };
       next.set(item.id, magnet);
       applyPosition(magnet);
@@ -609,7 +617,7 @@ export function MagnetBoard({
       let layoutChanged = false;
 
       for (let substep = 0; substep < stepCount; substep += 1) {
-        const liftedId = dragRef.current?.id ?? null;
+        const liftedId = dragRef.current?.pickedUp ? dragRef.current.id : null;
         magnets.forEach((magnet) => {
           if (!magnet.dragging && magnet.id !== liftedId && !controlIsActive(magnet.id)) {
             if (pointer.active && pointer.pressed) {
@@ -953,8 +961,8 @@ export function MagnetBoard({
     if (boardRef.current) delete boardRef.current.dataset.dragging;
     dragRef.current = null;
     try {
-      if (drag.element.hasPointerCapture(pointerId)) {
-        drag.element.releasePointerCapture(pointerId);
+      if (drag.captureTarget.hasPointerCapture(pointerId)) {
+        drag.captureTarget.releasePointerCapture(pointerId);
       }
     } catch {
       // Pointer capture can already be gone after a browser gesture cancel.
@@ -1046,7 +1054,7 @@ export function MagnetBoard({
     if (!board || !playMode) return;
 
     const keepInteractiveTouchGesture = (event: TouchEvent) => {
-      if ((dragRef.current || surfaceGestureRef.current?.active) && event.cancelable) {
+      if ((dragRef.current?.pickedUp || surfaceGestureRef.current?.active) && event.cancelable) {
         event.preventDefault();
       }
     };
@@ -1057,7 +1065,7 @@ export function MagnetBoard({
     };
   }, [playMode]);
 
-  const handlePointerDown = (event: ReactPointerEvent<MagnetElement>, id: string) => {
+  const handlePointerDown = (event: ReactPointerEvent<MagnetElement>, id: string, handle?: HTMLButtonElement) => {
     if (!playMode || !event.isPrimary || event.button !== 0 || dragRef.current) return;
     const magnet = magnetsRef.current.get(id);
     const board = boardRef.current;
@@ -1068,14 +1076,18 @@ export function MagnetBoard({
       x: boardRect.width > 0 ? board.offsetWidth / boardRect.width : 1,
       y: boardRect.height > 0 ? board.offsetHeight / boardRect.height : 1,
     };
-    magnet.dragging = true;
+    const element = event.currentTarget;
+    const captureTarget = handle ?? element;
+    magnet.dragging = !handle;
     magnet.vx = 0;
     magnet.vy = 0;
-    event.currentTarget.dataset.pickedUp = 'true';
+    if (!handle) element.dataset.pickedUp = 'true';
     dragRef.current = {
       id,
       pointerId: event.pointerId,
-      element: event.currentTarget,
+      element,
+      captureTarget,
+      pickedUp: !handle,
       // iOS Safari can report page coordinates inconsistently after pointer
       // capture on a deeply scrolled document. Client coordinates stay in one
       // viewport coordinate space and therefore cannot accumulate scrollY.
@@ -1088,13 +1100,16 @@ export function MagnetBoard({
       pointerScale,
       moved: false,
     };
+    // A compound label is a real button. Leave touch down on that button so
+    // WebKit can produce its native tap; lift and capture only once it drags.
+    if (handle && event.pointerType === 'touch') return;
     // Pointer pickup is a direct-manipulation state, not keyboard focus.
     // Clear any existing keyboard focus and suppress native pointer focusing so
     // a held magnet never needs a CSS rule that merely hides a focus ring.
-    if (document.activeElement instanceof HTMLElement && event.currentTarget.contains(document.activeElement)) document.activeElement.blur();
+    if (document.activeElement instanceof HTMLElement && element.contains(document.activeElement)) document.activeElement.blur();
     if (event.cancelable) event.preventDefault();
     try {
-      event.currentTarget.setPointerCapture(event.pointerId);
+      captureTarget.setPointerCapture(event.pointerId);
     } catch {
       // Window-level pointer cleanup still completes the drag if capture is unavailable.
     }
@@ -1110,13 +1125,19 @@ export function MagnetBoard({
     }
     const magnet = magnetsRef.current.get(drag.id);
     if (!magnet) return;
-    magnet.dragging = true;
     const distance = Math.hypot(
       event.clientX - drag.startPointer.x,
       event.clientY - drag.startPointer.y,
     );
     if (!drag.moved && distance < DRAG_THRESHOLD) return;
+    magnet.dragging = true;
     if (!drag.moved) {
+      if (!drag.pickedUp) {
+        drag.pickedUp = true;
+        drag.element.dataset.pickedUp = 'true';
+        if (document.activeElement instanceof HTMLElement && drag.element.contains(document.activeElement)) document.activeElement.blur();
+        try { drag.captureTarget.setPointerCapture(event.pointerId); } catch { /* Window cleanup still owns release. */ }
+      }
       drag.moved = true;
       drag.element.dataset.dragging = 'true';
       board.dataset.dragging = 'true';
@@ -1283,6 +1304,7 @@ export function MagnetBoard({
         className={styles.boardToggle}
       />
       {items.map((item) => {
+        const compound = variant === 'content' && Boolean(item.actions || item.controls);
         const customProperties = {
           '--magnet-tilt': `${getMagnetTilt(item.id)}deg`,
           ...(item.iconUrl ? { '--magnet-icon': `url("${item.iconUrl}")` } : {}),
@@ -1301,15 +1323,16 @@ export function MagnetBoard({
               {item.label}
               {item.detail ? <span className={styles.detail}>{item.detail}</span> : null}
             </span>
+            {compound && item.annotation !== undefined ? <span className={styles.compoundAnnotation} aria-hidden="true">{item.annotation}</span> : null}
             {item.badge ? <span className={styles.badge}>{item.badge}</span> : null}
             {variant === 'content' && item.selected !== undefined ? (
               <span className={styles.selectionCheck} aria-hidden="true" data-selected={item.selected}>✓</span>
             ) : null}
           </>
         );
-        if (item.controls && variant === 'content') {
+        if (compound) {
           return <div key={item.id}
-            className={`${classes} ${styles.compound}`} style={customProperties}
+            className={`${classes} ${styles.compound} ${item.controls ? styles.compoundWithControls : ''}`} style={customProperties}
             data-magnet-id={item.id} data-compound="true" role="group" aria-label={`${item.label} controls`}
             ref={(element) => { if (element) elementsRef.current.set(item.id, element); else elementsRef.current.delete(item.id); }}
             onPointerDownCapture={(event) => {
@@ -1322,25 +1345,23 @@ export function MagnetBoard({
               if (!event.currentTarget.contains(event.relatedTarget as Node | null)) controlFocusRef.current = null;
             }}
             onPointerDown={(event) => {
-              if ((event.target as Element).closest('[data-magnet-handle]')) handlePointerDown(event, item.id);
-            }}
-            onClick={(event) => {
-              // Capture retargets a pointer click to the physical shell. A
-              // keyboard click still originates on the native handle button.
-              if (event.target !== event.currentTarget && !(event.target as Element).closest('[data-magnet-handle]')) return;
-              handleClick(event, item.id);
-              if (!event.defaultPrevented) item.onActivate?.();
+              const handle = (event.target as Element).closest<HTMLButtonElement>('[data-magnet-handle]');
+              if (handle) handlePointerDown(event, item.id, handle);
             }}
             onPointerMove={handlePointerMove} onPointerUp={finishDrag} onPointerCancel={finishDrag} onLostPointerCapture={finishDrag}
           >
-            <div className={styles.compoundHeading}>
+            <div className={styles.compoundBody}>
               <button type="button" className={styles.compoundHandle} data-magnet-handle
-                aria-label={item.ariaLabel} aria-haspopup={item.ariaHasPopup}>
+                aria-label={item.ariaLabel} aria-haspopup={item.ariaHasPopup} aria-pressed={item.ariaPressed}
+                onClick={(event) => {
+                  handleClick(event, item.id);
+                  if (!event.defaultPrevented) item.onActivate?.();
+                }}>
                 {content}
               </button>
-              <div className={styles.compoundActions} data-magnet-controls>{item.actions}</div>
+              {item.controls ? <div className={styles.compoundControls} data-magnet-controls>{item.controls}</div> : null}
             </div>
-            <div className={styles.compoundControls} data-magnet-controls>{item.controls}</div>
+            {item.actions ? <div className={styles.compoundActions} data-magnet-controls>{item.actions}</div> : null}
           </div>;
         }
         const shared = {
