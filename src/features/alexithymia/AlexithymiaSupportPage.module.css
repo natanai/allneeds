@@ -667,7 +667,7 @@
   cursor: pointer;
 }
 .wordMagnetAction svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
-.wordMagnetAction circle { fill: currentColor; }
+.wordDetailsAction svg { width: 14px; height: 14px; stroke: #000; stroke-width: 1.5; stroke-linecap: round; }
 .wordMagnetAction:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
 .otherWords { min-width: 0; }
 .otherWords summary { min-height: var(--control-min); padding: .4rem .25rem; color: var(--secondary); font-size: var(--text-sm); font-weight: 700; cursor: pointer; }
