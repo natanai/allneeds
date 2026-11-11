@@ -46,7 +46,7 @@ test('mobile exposes active annotations in a notes ledger while preserving tap-t
   await expect(explanation).toContainText('add a count, duration, or timeframe');
 });
 
-test('retrieval explanations expose raw matched terms instead of generic basis prose', async ({ page }) => {
+test('retrieval explanations expose the actual matched terms', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/observations');
 

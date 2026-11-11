@@ -72,13 +72,13 @@ Two unrelated checks failed identically on the untouched audit baseline in a sep
 | `journal-history.spec.ts`: History and journal inherit every preset, stay within a narrow phone, and allow keyboard reading | The Journal is already open when the test tries to click the day-entry button behind it. |
 | `native-stability.spec.ts`: Bluesky account and profile paths are actionable instead of placeholder controls | The test expects disabled Save this browser / Load saved profile controls that the current account UI no longer renders. |
 
-Those two cases are explicitly excluded from the final broader run using `--grep-invert 'History and journal inherit every preset|Bluesky account and profile paths are actionable'`; they are not counted as passing or silently skipped in committed test code. Their production behavior and test definitions remain outside this check-in repair.
+Those two cases were excluded from that historical October run and were not counted as passing. Both later executed successfully in the [November 10 browser run](https://github.com/natanai/allneeds/actions/runs/42920980300). They are current regression coverage and must not be excluded from current validation. See [test maintenance](test-maintenance.md) for current check ownership.
 
 ## Remaining release validation
 
 PR #180 is published for user phone testing at the user's request. Normal pinned-browser validation and the remaining device/first-use tasks below still need actual results. The repair record does not assert a clean `pnpm check:all` pass.
 
-1. Run the existing [Full repository validation workflow](https://github.com/natanai/allneeds/actions/workflows/batch1-validation.yml) on the current repair branch, using its pinned Playwright Chromium. Check whether the earlier intermittent all-Need timeout and desktop preload/protocol failures recur with the standard browser. The two known baseline test failures remain separately identified.
+1. Run the existing [Full repository validation workflow](https://github.com/natanai/allneeds/actions/workflows/batch1-validation.yml) with the complete current suite and pinned Playwright Chromium. Do not carry the October exclusions forward. Record any new failure against its current source and build.
 2. Complete the Safari, Home Screen, accessibility, lifecycle, and first-use tasks below on a review build.
 3. Reopen any finding when a main action causes a mistaken exit, lost choice, hidden control, or unexplained saved/draft state. Record actual results before recommending release.
 

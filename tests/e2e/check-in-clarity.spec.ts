@@ -609,6 +609,7 @@ test('doubling the base text size keeps narrow-phone choices and the Journal han
   })).toBe(false);
   await selectedNeed.click();
   await page.getByRole('link', { name: 'Return to check-in', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Your check-in', exact: true })).toBeFocused();
   await expect(selectedNeed).toBeVisible();
   await noOverflow();
   const actionText = await selectedNeed.getByText('Open ways to support this Need', { exact: true }).boundingBox();

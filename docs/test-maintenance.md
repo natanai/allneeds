@@ -26,6 +26,8 @@ Updated November 10, 2026 after the direct Feeling-intensity release. Remove a c
 
 Old saved-profile fixtures, ownership-retirement tests, and protected user-strategy tests remain relevant. They protect existing data and current canonical ownership. No test is skipped or excluded to hide a failure.
 
+Current lifecycle boundaries also matter: a changed profile reloads its document, and returning to a check-in restores scroll/focus on an animation frame. Profile tests wait for the applied document; resumed slider and enlarged-text checks wait for the stage heading's focus before interacting or measuring. Their data, intensity, and overflow assertions retain the same expectations and tolerances.
+
 ## Validation
 
 Run `pnpm check` for the foundation layer. Run `pnpm check:all` for release validation with the pinned Playwright browsers installed. A browser test count excludes the standalone outage verifier; it is a separate mandatory part of `pnpm test:e2e`.

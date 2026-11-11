@@ -44,7 +44,7 @@ test('mobile keeps observation actions compact and results ahead of secondary co
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
-test('Quick Check shows per-detail guidance without a duplicate recipe', async ({ page }) => {
+test('Quick Check opens contextual guidance for each observation detail', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/observations');
 

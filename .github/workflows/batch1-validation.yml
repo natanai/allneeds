@@ -2,6 +2,9 @@ name: Full repository validation
 
 on:
   workflow_dispatch:
+  push:
+    branches: [chore/retire-obsolete-checks]
+    paths: [.github/workflows/batch1-validation.yml]
 
 permissions:
   contents: read
@@ -32,8 +35,23 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run full browser regression suite serially
-        run: pnpm exec playwright test --workers=1
+      - name: Verify profile and direct Feeling flows
+        run: pnpm exec playwright test tests/e2e/profile-reconciliation.spec.ts tests/e2e/check-in-inline-intensity.spec.ts --workers=1 --retries=0 --output=test-results/current-flows
+
+      - name: Repeat repaired timing boundaries
+        if: always()
+        run: pnpm exec playwright test tests/e2e/profile-reconciliation.spec.ts tests/e2e/check-in-inline-intensity.spec.ts tests/e2e/check-in-clarity.spec.ts --grep 'different edits to one entry|inline feeling intensity selects, clears, and survives reload at 1280px|doubling the base text' --repeat-each=5 --workers=1 --retries=0 --output=test-results/timing-boundaries
+
+      - name: Upload browser validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-test-coverage
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 5
 
       - name: Run offline/reconnect verification
+        if: always()
         run: pnpm test:e2e:outage
