@@ -82,6 +82,39 @@
 }
 .trackArea input:disabled { opacity: .5; cursor: default; }
 
+/* The inline word strip keeps a native hit area around the hairline. */
+.line .trackArea input { height: 24px; }
+.line .trackArea input::-webkit-slider-runnable-track {
+  height: 2px;
+  border: 0;
+  background: linear-gradient(to right,
+    var(--text) 0 var(--slider-progress),
+    color-mix(in srgb, var(--text) 45%, transparent) var(--slider-progress) 100%);
+  box-shadow: none;
+}
+.line .trackArea input::-moz-range-track {
+  height: 2px;
+  border: 0;
+  background: color-mix(in srgb, var(--text) 45%, transparent);
+}
+.line .trackArea input::-moz-range-progress {
+  height: 2px;
+  background: var(--text);
+}
+.line .trackArea input::-webkit-slider-thumb {
+  margin-top: -11px;
+  border: 0;
+  background: radial-gradient(circle, var(--text) 0 4px, transparent 5px);
+  box-shadow: none;
+}
+.line .trackArea input::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: radial-gradient(circle, var(--text) 0 4px, transparent 5px);
+  box-shadow: none;
+}
+
 /* The thumb-shaped glass capsule is drawn as ordinary DOM, where Safari's
    -webkit-backdrop-filter works. It never owns touch, pointer, or keyboard input. */
 .glassThumb {

@@ -330,8 +330,11 @@ test('long mobile stages reset their own scroller; canonical Need references ret
   await page.setViewportSize({ width: 375, height: 812 });
   await start(page); await clues(page); await words(page); await maybeFear(page);
   await page.getByRole('radio', { name: 'All words', exact: true }).click();
+  const wordScroll = page.getByRole('region', { name: 'Possible words', exact: true });
+  await expect(wordScroll.getByRole('slider', { name: 'Afraid intensity', exact: true })).toBeVisible();
+  await wordScroll.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+  await expect.poll(() => wordScroll.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
   const workspace = page.locator('article[aria-label^="Alexithymia support:"]');
-  await workspace.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect.poll(() => workspace.evaluate((element) => element.scrollTop)).toBe(0);
   await expect(page.getByRole('heading', { name: 'What matters to you here?', exact: true })).toBeFocused();

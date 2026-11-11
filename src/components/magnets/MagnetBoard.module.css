@@ -396,7 +396,12 @@
   cursor: default;
   touch-action: pan-y;
 }
-.compoundWithControls { min-width: min(10rem, calc(100% - 24px)); column-gap: 0; }
+.compoundWithControls {
+  min-width: min(11rem, calc(100% - 24px));
+  padding: .12rem .4rem .12rem .65rem;
+  column-gap: var(--space-1);
+  border-radius: var(--radius-xs);
+}
 .compoundBody { min-width: 0; }
 .compoundHandle {
   width: 100%;
@@ -416,11 +421,10 @@
 .compoundHandle:focus-visible { outline: 2px solid var(--magnet-focus); outline-offset: 2px; border-radius: var(--radius-md); }
 .compoundHandle > * { pointer-events: none; }
 .compoundHandle .label { min-width: 0; overflow-wrap: anywhere; }
-.compoundWithControls .compoundHandle { gap: .14rem; }
+.compoundWithControls .compoundHandle { min-height: 24px; flex-wrap: wrap; gap: 0 .14rem; }
 .compoundWithControls .selectionCheck { flex-basis: .9em; width: .9em; font-size: var(--text-xs); }
 .compoundAnnotation { flex: 0 0 auto; min-width: 2ch; font-size: var(--text-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .compoundActions { display: flex; }
-.compoundWithControls .compoundActions { flex-direction: column; align-self: stretch; justify-content: space-between; }
 .compoundControls { min-width: 0; contain: inline-size; cursor: auto; }
 
 /* Desktop Chromium/Edge rasterize the always-transformed nav magnets softly at
@@ -481,12 +485,11 @@
 }
 
 @media (max-width: 640px) {
-  .board:not(.nav) .magnet {
+  .board:not(.nav) .magnet:not(.compoundWithControls) {
     min-height: var(--control-min);
     padding: 0.36rem 0.58rem;
   }
-  .compoundWithControls { min-width: min(9rem, calc(100% - 24px)); }
-  .compoundWithControls .compoundActions { margin-inline-end: -.25rem; }
+  .compoundWithControls { min-width: min(12rem, calc(100% - 24px)); }
 
   .nav {
     min-height: 4.35rem;
