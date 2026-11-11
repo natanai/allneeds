@@ -1095,6 +1095,23 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Keep word controls in the scroll viewport above the action bar, even
+     when enlarged text or an Undo message makes the bar wrap. */
+  .page:has(.stageWords) {
+    bottom: var(--word-actions-space, 0px);
+    height: auto;
+    scroll-padding-block-end: .72rem;
+  }
+
+  .page:has(.stageWords)::after {
+    content: '';
+    position: fixed;
+    inset: auto 0 0;
+    z-index: -1;
+    height: var(--word-actions-space, 0px);
+    background: color-mix(in srgb, var(--quiet) 42%, var(--surface-raised) 58%);
+  }
+
   .appBar {
     padding: max(.3rem, env(safe-area-inset-top)) .4rem .3rem;
     gap: var(--space-1);
@@ -1161,7 +1178,7 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
   .clueTray,
   .wordTray { padding: .6rem; }
 
-  .stageWords { padding-bottom: calc(12rem + env(safe-area-inset-bottom)); }
+  .stageWords { min-height: 0; padding-bottom: .72rem; }
 
   .wordToolbar {
     padding: .35rem 0;

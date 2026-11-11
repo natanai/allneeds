@@ -183,6 +183,7 @@ export function AlexithymiaSupportPage() {
   const [journalConflict, setJournalConflict] = useState(false);
   const [undo, setUndo] = useState<{ draft: AlexithymiaDraft; message: string } | null>(null);
   const pageRef = useRef<HTMLElement>(null);
+  const wordActionsRef = useRef<HTMLDivElement>(null);
   const expectedStored = useRef(savedAtEntry);
   const persistDraft = useCallback((next: AlexithymiaDraft) => {
     const saved = writeAlexithymiaDraftAgainst(next, expectedStored.current);
@@ -216,6 +217,25 @@ export function AlexithymiaSupportPage() {
     });
     return () => cancelAnimationFrame(frame);
   }, [draft.stage, entryVisible, location.key, location.state, draftRef]);
+
+  useLayoutEffect(() => {
+    const page = pageRef.current;
+    const actions = wordActionsRef.current;
+    if (!page || !actions) return;
+    const reserveActions = () => {
+      const bottom = Number.parseFloat(getComputedStyle(actions).bottom) || 0;
+      page.style.setProperty('--word-actions-space', `${Math.ceil(actions.getBoundingClientRect().height + bottom) + 8}px`);
+    };
+    const observer = new ResizeObserver(reserveActions);
+    reserveActions();
+    observer.observe(actions);
+    window.addEventListener('resize', reserveActions);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', reserveActions);
+      page.style.removeProperty('--word-actions-space');
+    };
+  }, [draft.stage, entryVisible]);
 
   const bodySelections = useMemo(() => Object.entries(draft.selectedCues).flatMap(([id, intensity]) => {
     const option = bodyOptionById.get(id);
@@ -888,7 +908,7 @@ export function AlexithymiaSupportPage() {
                 termOrder: [], feelingIntensities: {}, noWordYet: false,
               }), 'Selected words cleared.')}>Clear selected words</button> : null}
               <p className={styles.liveStatus} role="status">{status}</p>
-              <div className={`${styles.stickyActions} ${styles.wordActions}`}>
+              <div ref={wordActionsRef} className={`${styles.stickyActions} ${styles.wordActions}`}>
                 {undo ? <div className={styles.wordUndo} role="status"><span>{undo.message}</span><button type="button" onClick={undoChange}>Undo</button></div> : null}
                 <span className={styles.selectedCount} aria-live="polite">{selectedTerms.length} {selectedTerms.length === 1 ? 'word' : 'words'} selected</span>
                 <button type="button" className={styles.primaryButton} onClick={continueToNeeds}>{selectedTerms.length ? 'Continue' : 'Continue without a word'}</button>
