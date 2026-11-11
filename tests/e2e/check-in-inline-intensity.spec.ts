@@ -45,6 +45,10 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
       const strip = (await magnet.boundingBox())!;
       expect(strip.height).toBeLessThan(64);
       expect(strip.width).toBeGreaterThan(strip.height * 3);
+    } else {
+      expect(await magnet.getByText('Anxiety', { exact: true }).evaluate(el =>
+        (el as HTMLElement).offsetHeight <= parseFloat(getComputedStyle(el).lineHeight) + 1,
+      )).toBe(true);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     expect(await magnet.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
@@ -239,9 +243,8 @@ test('the mobile Words footer stays reachable as the viewport changes and the bo
   await page.setViewportSize({ width: 393, height: 740 });
   await openWords(page, '');
   const scroller = page.getByRole('region', { name: 'Possible words', exact: true });
-  const slider = scroller.getByRole('slider', { name: 'Angry intensity', exact: true });
-  await expect(slider).toBeVisible();
-  await scroller.evaluate(el => { el.scrollTop = 260; });
+  await expect(scroller.getByRole('heading', { name: 'Possible words', exact: true })).toBeFocused();
+  const slider = scroller.getByRole('slider', { name: 'Sad intensity', exact: true });
   await slider.scrollIntoViewIfNeeded();
   await slider.fill('4');
   await expect.poll(() => scroller.evaluate(el => el.scrollTop)).toBeGreaterThan(100);

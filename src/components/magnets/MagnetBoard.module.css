@@ -421,7 +421,7 @@
 .compoundHandle:focus-visible { outline: 2px solid var(--magnet-focus); outline-offset: 2px; border-radius: var(--radius-md); }
 .compoundHandle > * { pointer-events: none; }
 .compoundHandle .label { min-width: 0; overflow-wrap: anywhere; }
-.compoundWithControls .compoundHandle { min-height: 24px; gap: .14rem; }
+.compoundWithControls .compoundHandle { min-height: 24px; flex-wrap: wrap; gap: 0 .14rem; }
 .compoundWithControls .selectionCheck { flex-basis: .9em; width: .9em; font-size: var(--text-xs); }
 .compoundAnnotation { flex: 0 0 auto; min-width: 2ch; font-size: var(--text-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .compoundActions { display: flex; }
