@@ -115,11 +115,11 @@ Canonical visual implementation: `src/components/magnets/MagnetBoard.module.css`
 ## Compound word controls
 
 - `MagnetBoardItem.actions` and `controls` provide separate native header actions and a control area inside the existing physical shell. The original button/link path remains the owner of ordinary content and navigation magnets.
-- Measure the complete compound shell, including its controls, through the existing packing owner. Words use the ordinary magnet face and content-sized wrapping, without artwork or category badges; recaps still use canonical artwork. An action-only magnet keeps its word and actions in a single row when space allows.
+- Measure the complete compound shell, including its controls, through the existing packing owner. A rated word strip puts its label above a thin line, with options and dismiss beside them. An action-only magnet keeps its word and actions in a single row when space allows. Recaps use canonical artwork.
 - A control’s pointer/focus interaction holds its own magnet steady. It remains a surface obstacle, with normal collisions and mass response for other magnets, rather than becoming a lifted pressure source. Do not disable other magnets’ collisions, pressure, tilt, or play semantics.
 - A compound label stays a native tap target until the drag threshold. Capture and lift on a touch drag; leave taps on the button so they activate normally in mobile WebKit.
 - Native value/status changes do not reset layout readiness or reconstruct the physics map. Compound dimension changes, including enlarged-text reflow, are observed and measured normally; viewport-specific layouts remain independent.
-- The check-in consumes the exact existing `IntensitySlider` component and CSS. Magnet-specific track/thumb styling, a second slider implementation, or a new meter skin are outside this approval.
+- The Words strip uses the line appearance of the shared native `IntensitySlider`. Its hit area and the label are separate so rating can start close to the label without picking up the magnet. The full-size slider is available in the options sheet.
 - Regression coverage includes mouse and native touch rating versus header dragging, keyboard adjustment, stable geometry while rating, compact layout, direct toggling of other words, dismissal/Undo/restore, enlarged text, and the exact reported rating through Journal.
 
 ## Removed/superseded mechanisms — do not resurrect

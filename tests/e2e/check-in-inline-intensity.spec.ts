@@ -40,7 +40,12 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
     const geometry = await slider.boundingBox();
     expect(geometry!.x).toBeGreaterThanOrEqual(0);
     expect(geometry!.x + geometry!.width).toBeLessThanOrEqual(viewport.width);
-    expect(geometry!.height).toBeGreaterThanOrEqual(44);
+    expect(await slider.evaluate(el => (el as HTMLInputElement).offsetHeight)).toBeGreaterThanOrEqual(24);
+    if (!viewport.largeText) {
+      const strip = (await magnet.boundingBox())!;
+      expect(strip.height).toBeLessThan(64);
+      expect(strip.width).toBeGreaterThan(strip.height * 3);
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     expect(await magnet.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
     await page.screenshot({ path: `test-results/inline-feeling-${viewport.width}${viewport.largeText ? '-large' : ''}.png` });
@@ -94,11 +99,11 @@ test('slider gestures keep the magnet steady; dragging the label preserves the r
   await page.mouse.move(box.x + 12, box.y + box.height / 2);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * .75, box.y + box.height / 2, { steps: 14 });
+  expect(Number(await slider.inputValue())).toBeGreaterThan(0);
   const during = (await magnet.boundingBox())!;
   expect(Math.abs(during.x - before.x)).toBeLessThan(1);
   expect(Math.abs(during.y - before.y)).toBeLessThan(1);
   await expect(magnet).not.toHaveAttribute('data-picked-up');
-  await expect(slider.locator('..').locator('..')).toHaveAttribute('data-dragging', 'true');
   await page.mouse.up();
   const rating = await slider.inputValue();
   expect(Number(rating)).toBeGreaterThan(0);
@@ -166,13 +171,7 @@ test.describe('touch ownership', () => {
     await expect(otherBoard).toHaveCount(0);
     const afraid = page.getByRole('group', { name: 'Afraid controls', exact: true });
     await expect(afraid).toBeInViewport();
-    const agitated = page.getByRole('group', { name: 'Agitated controls', exact: true });
-    const alarmed = page.getByRole('group', { name: 'Alarmed controls', exact: true });
-    await expect(agitated).toBeInViewport();
-    await expect(alarmed).toBeInViewport();
-    const [left, right] = await Promise.all([agitated.boundingBox(), alarmed.boundingBox()]);
-    expect.soft(Math.abs(left!.y - right!.y)).toBeLessThan(8);
-    expect.soft(right!.x).toBeGreaterThan(left!.x + left!.width);
+    await expect(page.getByRole('group', { name: 'Angry controls', exact: true })).toBeInViewport();
     await afraid.getByRole('slider').fill('4');
     await page.screenshot({ path: 'test-results/compact-feelings-square-phone.png' });
     await afraid.getByRole('slider').fill('0');
@@ -236,6 +235,32 @@ test.describe('touch ownership', () => {
   });
 });
 
+test('the mobile Words footer stays reachable as the viewport changes and the board scrolls', async ({ page }) => {
+  await page.setViewportSize({ width: 393, height: 740 });
+  await openWords(page, '');
+  const scroller = page.getByRole('region', { name: 'Possible words', exact: true });
+  const slider = scroller.getByRole('slider', { name: 'Angry intensity', exact: true });
+  await expect(slider).toBeVisible();
+  await scroller.evaluate(el => { el.scrollTop = 260; });
+  await slider.scrollIntoViewIfNeeded();
+  await slider.fill('4');
+  await expect.poll(() => scroller.evaluate(el => el.scrollTop)).toBeGreaterThan(100);
+
+  const next = page.getByRole('button', { name: 'Continue', exact: true });
+  for (const height of [641, 740]) {
+    await page.setViewportSize({ width: 393, height });
+    await expect(next).toBeInViewport({ ratio: 1 });
+    await expect.poll(async () => {
+      const [body, footer] = await Promise.all([scroller.boundingBox(), next.locator('..').boundingBox()]);
+      return Boolean(body && footer && body.y + body.height <= footer.y + 1
+        && Math.abs(footer.y + footer.height - height) <= 1);
+    }).toBe(true);
+  }
+  await page.screenshot({ path: 'test-results/words-phone-scrolled.png' });
+  await next.click();
+  await expect(page.getByRole('heading', { name: 'What matters to you here?', exact: true })).toBeFocused();
+});
+
 for (const width of [390, 1280]) {
   test(`matched Feelings stay compact and keep scores in options at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
@@ -254,13 +279,14 @@ for (const width of [390, 1280]) {
     await expect(anxiety.getByRole('button', { name: /^Anxiety, Feeling.*100% clue match/ })).toBeVisible();
     await expect(anxiety).not.toContainText(/clue match|Fits|Not rated/);
     await expect(anxiety.getByText('7', { exact: true })).toBeVisible();
-    expect(await anxiety.evaluate(el => (el as HTMLElement).offsetHeight)).toBeLessThanOrEqual(120);
     await anxiety.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
     const options = page.getByRole('dialog', { name: 'Anxiety', exact: true });
     await expect(options.getByText('100% body clue match', { exact: true })).toBeVisible();
+    const fullSlider = options.getByRole('slider', { name: 'Anxiety intensity' });
+    expect(await fullSlider.evaluate(el => (el as HTMLInputElement).offsetHeight)).toBeGreaterThanOrEqual(44);
     await options.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
     await board.getByRole('group', { name: 'Fear controls', exact: true }).getByRole('slider').fill('2');
-    await page.getByRole('article').evaluate(el => { el.scrollTop = 0; window.scrollTo(0, 0); });
+    await page.getByRole('region', { name: 'Possible words', exact: true }).evaluate(el => { el.scrollTop = 0; window.scrollTo(0, 0); });
     await page.screenshot({ path: `test-results/inline-matched-feelings-${width}.png` });
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.getByText('2 words selected', { exact: true })).toBeVisible();

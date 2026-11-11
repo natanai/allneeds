@@ -18,6 +18,7 @@ type Props = {
   middleLabel?: string;
   highLabel?: string;
   disabled?: boolean;
+  appearance?: 'standard' | 'line';
 };
 
 /**
@@ -26,10 +27,13 @@ type Props = {
  */
 export function IntensitySlider({
   value, onChange, label, min = 0, max = 10, step = 1, id, valueText,
-  lowLabel, middleLabel, highLabel, disabled = false,
+  lowLabel, middleLabel, highLabel, disabled = false, appearance = 'standard',
 }: Props) {
   const generatedId = useId();
   const [dragging, setDragging] = useState(false);
+  const line = appearance === 'line';
+  const startDrag = () => { if (!line) setDragging(true); };
+  const endDrag = () => setDragging(false);
   const fraction = max > min ? Math.max(0, Math.min(1, (value - min) / (max - min))) : 0;
   const positionStyle = {
     '--slider-progress': `${fraction * 100}%`,
@@ -37,7 +41,7 @@ export function IntensitySlider({
     '--slider-bubble-offset': `${(0.5 - fraction) * 24}px`,
   } as CSSProperties;
 
-  return <div className={styles.root} style={positionStyle} data-dragging={dragging ? 'true' : undefined}>
+  return <div className={line ? `${styles.root} ${styles.line}` : styles.root} style={positionStyle} data-dragging={!line && dragging ? 'true' : undefined}>
     <div className={styles.trackArea}>
       <input
         id={id ?? generatedId}
@@ -50,17 +54,17 @@ export function IntensitySlider({
         aria-label={label}
         aria-valuetext={valueText ?? (value === 0 && min === 0 ? 'Not selected' : `${value} out of ${max}`)}
         onChange={(event) => onChange(Number(event.currentTarget.value))}
-        onPointerDown={() => setDragging(true)}
-        onPointerUp={() => setDragging(false)}
-        onPointerCancel={() => setDragging(false)}
-        onTouchStart={() => setDragging(true)}
-        onTouchEnd={() => setDragging(false)}
-        onTouchCancel={() => setDragging(false)}
-        onBlur={() => setDragging(false)}
+        onPointerDown={startDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onTouchStart={startDrag}
+        onTouchEnd={endDrag}
+        onTouchCancel={endDrag}
+        onBlur={endDrag}
       />
       {/* Overlay lives above the native range thumb. The native input still owns every gesture,
           keyboard action, and screen-reader announcement; this layer never receives pointers. */}
-      <output className={styles.glassThumb} aria-hidden="true">{formatIntensityRating(value, max)}</output>
+      {!line ? <output className={styles.glassThumb} aria-hidden="true">{formatIntensityRating(value, max)}</output> : null}
     </div>
     {(lowLabel || middleLabel || highLabel) && (
       <div className={styles.scale} data-middle={middleLabel ? "true" : "false"} aria-hidden="true">

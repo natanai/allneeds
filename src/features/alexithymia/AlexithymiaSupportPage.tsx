@@ -60,6 +60,7 @@ import styles from './AlexithymiaSupportPage.module.css';
 
 type SheetKind = 'info' | 'matching' | 'body' | 'shape' | 'candidate' | 'dismissed' | 'needs' | 'observation' | 'need-preview' | 'replace-statement' | null;
 type WordFilter = 'matches' | 'all' | 'mine';
+const compactWordsQuery = '(max-width: 640px)';
 
 const bodyRegions = bodyRegionsRaw as unknown as BodyRegion[];
 const bodyOptionById = new Map(bodyRegions.flatMap((region) => region.options.map((option) => [option.id, {
@@ -183,7 +184,14 @@ export function AlexithymiaSupportPage() {
   const [journalConflict, setJournalConflict] = useState(false);
   const [undo, setUndo] = useState<{ draft: AlexithymiaDraft; message: string } | null>(null);
   const pageRef = useRef<HTMLElement>(null);
-  const wordActionsRef = useRef<HTMLDivElement>(null);
+  const wordsRef = useRef<HTMLElement>(null);
+  const [compactViewport, setCompactViewport] = useState(() => window.matchMedia(compactWordsQuery).matches);
+  useEffect(() => {
+    const query = window.matchMedia(compactWordsQuery);
+    const update = () => setCompactViewport(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
   const expectedStored = useRef(savedAtEntry);
   const persistDraft = useCallback((next: AlexithymiaDraft) => {
     const saved = writeAlexithymiaDraftAgainst(next, expectedStored.current);
@@ -211,31 +219,14 @@ export function AlexithymiaSupportPage() {
     const state = (location.state as CheckInLocationState | null)?.checkIn;
     const top = state?.restoreScroll ? draftRef.current.scrollTop ?? 0 : 0;
     const frame = requestAnimationFrame(() => {
-      pageRef.current?.scrollTo({ top, behavior: 'instant' });
-      if (getComputedStyle(pageRef.current!).position !== 'fixed') window.scrollTo({ top, behavior: 'instant' });
-      pageRef.current?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+      const page = pageRef.current;
+      if (!page) return;
+      const scroller = getComputedStyle(page).position === 'fixed' ? wordsRef.current ?? page : window;
+      scroller.scrollTo({ top, behavior: 'instant' });
+      page.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(frame);
   }, [draft.stage, entryVisible, location.key, location.state, draftRef]);
-
-  useLayoutEffect(() => {
-    const page = pageRef.current;
-    const actions = wordActionsRef.current;
-    if (!page || !actions) return;
-    const reserveActions = () => {
-      const bottom = Number.parseFloat(getComputedStyle(actions).bottom) || 0;
-      page.style.setProperty('--word-actions-space', `${Math.ceil(actions.getBoundingClientRect().height + bottom) + 8}px`);
-    };
-    const observer = new ResizeObserver(reserveActions);
-    reserveActions();
-    observer.observe(actions);
-    window.addEventListener('resize', reserveActions);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', reserveActions);
-      page.style.removeProperty('--word-actions-space');
-    };
-  }, [draft.stage, entryVisible]);
 
   const bodySelections = useMemo(() => Object.entries(draft.selectedCues).flatMap(([id, intensity]) => {
     const option = bodyOptionById.get(id);
@@ -354,7 +345,7 @@ export function AlexithymiaSupportPage() {
         <button type="button" className={styles.wordMagnetAction} aria-label={`Not this time: ${term.label}`} onClick={() => dismissTerm(term)}><CloseIcon /></button>
       </>,
       controls: isFeeling ? <IntensitySlider
-        label={`${term.label} intensity`} value={intensity ?? 0} min={0} max={10} step={1}
+        appearance="line" label={`${term.label} intensity`} value={intensity ?? 0} min={0} max={10} step={1}
         valueText={intensity === undefined ? (decision === 'maybe' ? 'Maybe; intensity not rated' : 'Not selected') : `${intensity} out of 10, Fits`}
         onChange={(value) => rateTerm(term, value)}
       /> : undefined,
@@ -468,8 +459,9 @@ export function AlexithymiaSupportPage() {
   }
 
   function openReference(to: string) {
-    const next = { ...draftRef.current, scrollTop: getComputedStyle(pageRef.current!).position === 'fixed'
-      ? pageRef.current!.scrollTop : window.scrollY };
+    const page = pageRef.current!;
+    const next = { ...draftRef.current, scrollTop: getComputedStyle(page).position === 'fixed'
+      ? (wordsRef.current ?? page).scrollTop : window.scrollY };
     try {
       persistDraft(next);
       draftRef.current = next;
@@ -660,8 +652,18 @@ export function AlexithymiaSupportPage() {
     );
   }
 
+  const mobileWords = draft.stage === 3 && compactViewport;
+  const storageNotice = storageError ? <p className={styles.notice} role="alert">{storageError}</p> : null;
+  const wordActions = draft.stage === 3 ? (
+    <footer className={mobileWords ? styles.wordActions : `${styles.stickyActions} ${styles.wordActions}`}>
+      {undo ? <div className={styles.wordUndo} role="status"><span>{undo.message}</span><button type="button" onClick={undoChange}>Undo</button></div> : null}
+      <span className={styles.selectedCount} aria-live="polite">{selectedTerms.length} {selectedTerms.length === 1 ? 'word' : 'words'} selected</span>
+      <button type="button" className={styles.primaryButton} onClick={continueToNeeds}>{selectedTerms.length ? 'Continue' : 'Continue without a word'}</button>
+    </footer>
+  ) : null;
+
   return (
-    <article ref={pageRef} className={styles.page} aria-label={`${ALEXITHYMIA_SUPPORT_LABEL}: ${stageTitle}`}>
+    <article ref={pageRef} className={mobileWords ? `${styles.page} ${styles.wordsPage}` : styles.page} aria-label={`${ALEXITHYMIA_SUPPORT_LABEL}: ${stageTitle}`}>
       <header className={styles.appBar}>
         <button type="button" className={styles.iconButton} aria-label="Back" onClick={() => {
           if (draft.stage <= 1) void navigate('/alexithymia-support', { state: null });
@@ -682,7 +684,7 @@ export function AlexithymiaSupportPage() {
         <button type="button" className={styles.iconButton} aria-label="Close check-in" onClick={() => openReference('/feelings')}><CloseIcon /></button>
       </header>
 
-      {storageError ? <p className={styles.notice} role="alert">{storageError}</p> : null}
+      {draft.stage !== 3 ? storageNotice : null}
       {undo && draft.stage !== 3 ? <div className={styles.notice} role="status"><span>{undo.message}</span><button type="button" onClick={undoChange}>Undo</button></div> : null}
       <SupportSheet open={sheet === 'info'} title="About this check-in" titleId="alex-info-sheet-title" onClose={() => setSheet(null)}>
         <p>Alexithymia means having difficulty identifying or describing feelings. You do not need that label or a diagnosis to use this page.</p>
@@ -815,7 +817,8 @@ export function AlexithymiaSupportPage() {
       ) : null}
 
       {draft.stage === 3 ? (
-        <section className={`${styles.stage} ${styles.stageWords}`} aria-labelledby="alex-stage-three">
+        <section ref={wordsRef} className={`${styles.stage} ${styles.stageWords}`} aria-labelledby="alex-stage-three">
+          {storageNotice}
           <header className={styles.stageHeader}>
             <p>3 of 5 · Words</p>
             <h1 tabIndex={-1} id="alex-stage-three">Possible words</h1>
@@ -908,17 +911,12 @@ export function AlexithymiaSupportPage() {
                 termOrder: [], feelingIntensities: {}, noWordYet: false,
               }), 'Selected words cleared.')}>Clear selected words</button> : null}
               <p className={styles.liveStatus} role="status">{status}</p>
-              <div ref={wordActionsRef} className={`${styles.stickyActions} ${styles.wordActions}`}>
-                {undo ? <div className={styles.wordUndo} role="status"><span>{undo.message}</span><button type="button" onClick={undoChange}>Undo</button></div> : null}
-                <span className={styles.selectedCount} aria-live="polite">{selectedTerms.length} {selectedTerms.length === 1 ? 'word' : 'words'} selected</span>
-                <button type="button" className={styles.primaryButton} onClick={continueToNeeds}>{selectedTerms.length ? 'Continue' : 'Continue without a word'}</button>
-              </div>
+              {mobileWords ? null : wordActions}
             </aside>
           </div>
-
-
         </section>
       ) : null}
+      {mobileWords ? wordActions : null}
 
       {draft.stage === 4 ? (
         <section className={`${styles.stage} ${styles.stageNeeds}`} aria-labelledby="alex-stage-four">

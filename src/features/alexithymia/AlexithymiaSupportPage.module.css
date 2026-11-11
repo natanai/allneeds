@@ -1095,22 +1095,9 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Keep word controls in the scroll viewport above the action bar, even
-     when enlarged text or an Undo message makes the bar wrap. */
-  .page:has(.stageWords) {
-    bottom: var(--word-actions-space, 0px);
-    height: auto;
-    align-content: start;
-    scroll-padding-block-end: .72rem;
-  }
-
-  .page:has(.stageWords)::after {
-    content: '';
-    position: fixed;
-    inset: auto 0 0;
-    z-index: -1;
-    height: var(--word-actions-space, 0px);
-    background: color-mix(in srgb, var(--quiet) 42%, var(--surface-raised) 58%);
+  .page.wordsPage {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: clip;
   }
 
   .appBar {
@@ -1179,7 +1166,24 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
   .clueTray,
   .wordTray { padding: .6rem; }
 
-  .stageWords { min-height: 0; padding-bottom: .72rem; }
+  .stageWords {
+    min-height: 0;
+    padding-bottom: .72rem;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-padding-block: .72rem;
+  }
+
+  .wordActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-1);
+    padding: .42rem max(.72rem, env(safe-area-inset-right)) max(.42rem, env(safe-area-inset-bottom)) max(.72rem, env(safe-area-inset-left));
+    border-top: 1px solid color-mix(in srgb, var(--outline) 14%, transparent);
+    background: color-mix(in srgb, var(--surface-raised) 95%, var(--quiet) 5%);
+  }
+  .wordActions > button { min-width: 0; padding-inline: .5rem; }
 
   .wordToolbar {
     padding: .35rem 0;
