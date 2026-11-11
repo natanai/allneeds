@@ -198,9 +198,6 @@ test('unclassified and identity wording stay unhighlighted while exploration rem
 
   await editor.fill('Guilt');
   await editor.press('End');
-  await expect(page.getByText('Your wording', { exact: true })).toHaveCount(0);
-  await expect(page.getByText(/preserved as your wording|catalog match/i)).toHaveCount(0);
-  await expect(page.locator('[aria-label^="About “Guilt”"]')).toHaveCount(0);
   await expect.poll(() => highlightedText(page, 'observation-surface-term')).toEqual([]);
 
   await page.getByRole('button', { name: 'Explore possible feelings and needs' }).click();

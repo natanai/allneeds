@@ -1,21 +1,14 @@
-import { execFileSync } from 'node:child_process';
-
 import { describe, expect, it } from 'vitest';
 
+import { fauxFeelings, feelings, needs } from '../catalog';
 import { observationInferenceIndex } from '../generated/observationInference';
+import source from './source.json';
 
 describe('Observation inference compiler', () => {
-  it('keeps generated output synchronized with the canonical source', () => {
-    expect(() => execFileSync(process.execPath, ['scripts/compile-observation-inference.mjs', '--check'], {
-      cwd: process.cwd(),
-      stdio: 'pipe',
-    })).not.toThrow();
-  });
-
   it('contains the complete canonical entity lexicon and four valid formula slots', () => {
-    expect(observationInferenceIndex.catalog.feelings).toHaveLength(48);
-    expect(observationInferenceIndex.catalog.needs).toHaveLength(67);
-    expect(observationInferenceIndex.catalog.fauxFeelings).toHaveLength(56);
+    expect(observationInferenceIndex.catalog.feelings.map((item) => item.slug)).toEqual(feelings.map((item) => item.slug));
+    expect(observationInferenceIndex.catalog.needs.map((item) => item.slug)).toEqual(needs.map((item) => item.slug));
+    expect(observationInferenceIndex.catalog.fauxFeelings.map((item) => item.slug)).toEqual(fauxFeelings.map((item) => item.slug));
     expect(observationInferenceIndex.slots.map((slot) => slot.id)).toEqual(['time', 'context', 'sensory', 'measure']);
     expect(observationInferenceIndex.slots.every((slot) => slot.detectors.length > 0)).toBe(true);
     expect(observationInferenceIndex.catalog.needs.every((need) => (
@@ -23,11 +16,11 @@ describe('Observation inference compiler', () => {
     ))).toBe(true);
   });
 
-  it('keeps every migrated cue relationship in one normalized expression', () => {
+  it('preserves complete expression identities and unique cue provenance', () => {
     const cueIds = observationInferenceIndex.expressions.flatMap((expression) => expression.cueIds);
     expect(cueIds).toHaveLength(observationInferenceIndex.provenance.cueRows);
     expect(new Set(cueIds).size).toBe(cueIds.length);
-    expect(observationInferenceIndex.expressions).toHaveLength(28);
+    expect(observationInferenceIndex.expressions.map((item) => item.id)).toEqual(source.expressions.map((item) => item.id));
   });
 
   it('derives Faux Feeling to Need links from the current canonical Need owners', () => {

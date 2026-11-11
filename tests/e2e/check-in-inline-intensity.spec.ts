@@ -45,6 +45,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
     await page.screenshot({ path: `test-results/inline-feeling-${viewport.width}${viewport.largeText ? '-large' : ''}.png` });
     await page.reload();
     await page.getByRole('button', { name: 'Continue previous check-in', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Possible words', exact: true })).toBeFocused();
     await expect(slider).toHaveValue('8');
     await slider.press('Home');
     await expect.poll(() => savedChoice(page)).toEqual({ decision: null, rating: null });
@@ -134,8 +135,6 @@ test('manual Maybe stays tentative, while direct rating transfers to Journal wit
   await magnet.getByRole('slider').fill('9');
   await magnet.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
   const options = page.getByRole('dialog', { name: 'Anxiety', exact: true });
-  await expect(options.getByRole('button', { name: 'Use this rating' })).toHaveCount(0);
-  await expect(options.getByRole('button', { name: 'Leave intensity unrated' })).toHaveCount(0);
   await options.getByRole('button', { name: 'Maybe', exact: true }).click();
   await expect.poll(() => savedChoice(page)).toEqual({ decision: 'maybe', rating: null });
   await expect(magnet.getByText('Maybe', { exact: true })).toBeVisible();

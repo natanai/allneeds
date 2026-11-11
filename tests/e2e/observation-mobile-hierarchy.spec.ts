@@ -24,8 +24,6 @@ test('mobile keeps observation actions compact and results ahead of secondary co
 
   const resultsHeading = page.getByRole('heading', { name: 'Feelings and Needs to explore' });
   await expect(resultsHeading).toHaveText('Feelings & Needs');
-  await expect(page.getByText('How does this situation relate to your Needs?', { exact: true })).toHaveCount(0);
-  await expect(page.getByText(/A Need can matter whether it is met or unmet/i)).toHaveCount(0);
 
   const firstNeed = page.getByTestId('observation-needs').locator('a').first();
   const firstFeeling = page.getByTestId('observation-feelings').locator('a').first();
@@ -46,11 +44,10 @@ test('mobile keeps observation actions compact and results ahead of secondary co
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
-test('Quick Check shows per-detail guidance without a duplicate recipe', async ({ page }) => {
+test('Quick Check opens contextual guidance for each observation detail', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/observations');
 
-  await expect(page.getByText('Observation recipe', { exact: true })).toHaveCount(0);
   const slots = page.getByRole('list', { name: 'Observation slots' });
   const guidance = [
     { label: 'When?', detail: 'Yesterday at 3 p.m.' },

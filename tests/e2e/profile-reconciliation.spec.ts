@@ -45,12 +45,22 @@ async function signInReturn(
   await page.goto(`${path}${path.includes('?') ? '&' : '?'}auth=verified`);
 }
 
+async function waitForAppliedProfile(page: Page) {
+  // Applying a changed profile reloads the document. Reading storage before
+  // that navigation completes can run in the outgoing page's context.
+  await page.waitForFunction(() => (
+    (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)?.type === 'reload'
+  ));
+  await expect(page.locator('html')).toHaveAttribute('data-app-state', 'ready');
+}
+
 test('native local-entry confirmation merges into the profile without a comparison screen or second save step', async ({ page }) => {
   const device = snapshot([entry('phone', 'Written while signed out')]);
   const profile = snapshot([entry('account', 'Already in my account')], 'profile');
   const saves: Record<string, unknown>[] = [];
   const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, device, profile, '/inventory/journal', saves);
+  await waitForAppliedProfile(page);
 
   await page.getByLabel('Period', { exact: true }).selectOption('all');
   await page.getByText('Journal entries', { exact: true }).click();
@@ -72,6 +82,7 @@ test('discarding local entries loads the account copy and keeps a recovery copy'
   const device = snapshot([entry('phone', 'Discard this local entry')]);
   const dialogs = respondToDialogs(page, [false, true]);
   await signInReturn(page, device, snapshot([entry('account', 'Keep this account entry')], 'profile'));
+  await waitForAppliedProfile(page);
   await page.getByLabel('Period', { exact: true }).selectOption('all');
   await page.getByText('Journal entries', { exact: true }).click();
   await expect(page.getByText('Keep this account entry', { exact: true })).toBeVisible();
@@ -85,6 +96,7 @@ test('discarding local entries loads the account copy and keeps a recovery copy'
 test('routine profile differences use one browser-native load confirmation', async ({ page }) => {
   const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, snapshot([]), snapshot([entry('account', 'Account entry')], 'profile'));
+  await waitForAppliedProfile(page);
   await page.getByLabel('Period', { exact: true }).selectOption('all');
   await page.getByText('Journal entries', { exact: true }).click();
   await expect(page.getByText('Account entry', { exact: true })).toBeVisible();
@@ -106,6 +118,7 @@ test('canceling the warning leaves local data unchanged', async ({ page }) => {
 test('different edits to one entry are treated as local content at risk and preserve both when merged', async ({ page }) => {
   const dialogs = respondToDialogs(page, [true]);
   await signInReturn(page, snapshot([entry('same-id', 'Phone edit')]), snapshot([entry('same-id', 'Account edit')]));
+  await waitForAppliedProfile(page);
   await expect.poll(() => dialogs.length).toBe(1);
   expect(dialogs[0]).toContain('1 local journal entry');
   const ids = await page.evaluate(() => JSON.parse(localStorage.getItem('allneeds.v2.journal')!).data.entries.map((item: { id: string }) => item.id));

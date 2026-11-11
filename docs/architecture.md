@@ -225,7 +225,7 @@ draft boundaries, real backup recovery, and stopped-listener/same-port reconnect
 accessibility and canonical visual-diff tooling remain milestone work rather
 than being implied by the current smoke coverage.
 
-The production build also runs `scripts/verify-production-build.mjs`. It fails when the service-worker manifest differs from `dist`, an API/external URL enters the precache, navigations or hashed assets lose their cache-first/`Vary`-safe contract, either local product font disappears, Google Fonts returns as a runtime dependency, lazy/Suspense route-loading UI is introduced, the canonical Observation compiler/index is incomplete or a retired Observation legacy/public path returns, routed features create nested `main` landmarks, route title/naming behavior disappears, shared modal focus behavior becomes incomplete, or the compact shell regresses its single Customizer entry and primary-work-before-guidance contracts.
+The production build runs the canonical compiler checks, TypeScript, and `scripts/verify-production-build.mjs`. The verifier inspects emitted artifacts: runtime precache membership, API/external exclusions, cache-first and `Vary`-safe service-worker behavior, local fonts, required app/social assets and metadata, the eagerly preloaded catalog chunk, and retired public Observation assets. It retains the canonical catalog import boundary, but does not pin JSX, CSS, component names, or compiler function text. Route landmarks/titles, startup, modal focus, and responsive workflows belong to the production-browser tests; see [test maintenance](test-maintenance.md) for the current ownership map.
 
 ## GitHub Pages
 
