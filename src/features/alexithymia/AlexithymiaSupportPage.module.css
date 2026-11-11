@@ -1100,6 +1100,7 @@ button[aria-pressed='true'] > .choiceCheck { visibility: visible; }
   .page:has(.stageWords) {
     bottom: var(--word-actions-space, 0px);
     height: auto;
+    align-content: start;
     scroll-padding-block-end: .72rem;
   }
 
