@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 
 import { themePresets } from '../../src/features/customizer/themePresets';
 import type { ThemePreset } from '../../src/features/customizer/themePresets';
-import { expect, test } from './fixtures';
+import { expect, revealWordControl, test } from './fixtures';
 
 const flatLight: ThemePreset = {
   name: 'Equal light faces', roundness: 100,
@@ -112,8 +112,13 @@ for (const scenario of scenarios) {
     const view = page.getByRole('radio', { name: 'Matches', exact: true });
     await expect(view).toHaveCSS('text-decoration-line', 'underline');
     const word = page.getByLabel('Possible words', { exact: true }).getByRole('group', { name: 'Anxiety controls', exact: true });
+    const options = word.getByRole('button', { name: 'Options for Anxiety', exact: true });
+    const openOptions = async () => {
+      if (scenario.largeText) await revealWordControl(options);
+      await options.click();
+    };
     await expect(word).not.toContainText(/Fits|Maybe/);
-    await word.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
+    await openOptions();
     const candidate = page.getByRole('dialog', { name: 'Anxiety', exact: true });
     await candidate.getByRole('slider', { name: 'Anxiety intensity' }).fill('6');
     await candidate.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
@@ -125,15 +130,15 @@ for (const scenario of scenarios) {
       expect(await word.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
       await page.screenshot({ path: 'test-results/selection-large-text-word.png' });
     }
-    await word.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
+    await openOptions();
     await expect(candidate.locator('output').first()).toHaveText('6/10');
     await expect(candidate.getByRole('slider', { name: 'Anxiety intensity' })).toHaveValue('6');
     await candidate.getByRole('button', { name: 'Close Anxiety', exact: true }).click();
-    await word.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
+    await openOptions();
     await candidate.getByRole('button', { name: 'Maybe', exact: true }).click();
     await expect(word).toContainText('Maybe');
     await expect(word.locator('[data-selected="false"]')).toBeHidden();
-    await word.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
+    await openOptions();
     await expect(check(candidate.getByRole('button', { name: 'Maybe', exact: true }))).toBeVisible();
     await candidate.getByRole('button', { name: 'Not this time', exact: true }).click();
     await expect(word).toHaveCount(0);
@@ -144,7 +149,7 @@ for (const scenario of scenarios) {
     const dismissed = page.getByRole('dialog', { name: 'Dismissed words', exact: true });
     await dismissed.getByRole('button', { name: 'Restore Anxiety', exact: true }).click();
     await dismissed.getByRole('button', { name: 'Close Dismissed words', exact: true }).click();
-    await word.getByRole('button', { name: 'Options for Anxiety', exact: true }).click();
+    await openOptions();
     await candidate.getByRole('button', { name: 'Maybe', exact: true }).click();
     await page.getByRole('button', { name: 'Continue', exact: true }).click();
 
