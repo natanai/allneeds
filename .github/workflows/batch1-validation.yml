@@ -1,74 +1,39 @@
-name: Thin Words magnets release validation
+name: Full repository validation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [feat/thin-check-in-magnets]
-    paths: [.github/workflows/batch1-validation.yml]
 
 permissions:
   contents: read
 
 jobs:
-  chromium:
+  validate:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - name: Build and check source
-        run: ${{ matrix.shard == 1 && 'pnpm check' || 'pnpm build' }}
-        env:
-          VITE_BASE_PATH: /
-      - run: pnpm exec playwright install --with-deps chromium
-      - name: Run browser regression shard
-        run: pnpm exec playwright test --workers=1 --shard=${{ matrix.shard }}/4
-      - name: Run offline/reconnect verification
-        if: ${{ always() && matrix.shard == 1 }}
-        run: pnpm test:e2e:outage
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: chromium-words-${{ matrix.shard }}
-          path: test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+      - name: Checkout
+        uses: actions/checkout@v6
 
-  mobile-webkit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - name: Setup Node
+        uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run foundation checks
+        run: pnpm check
         env:
           VITE_BASE_PATH: /
-      - run: pnpm exec playwright install --with-deps webkit
-      - name: Verify strip geometry, the scroll area, and the footer
-        run: |
-          cat > playwright.thin-words.config.ts <<'EOF'
-          import { defineConfig, devices } from '@playwright/test';
-          import config from './playwright.config';
-          export default defineConfig({
-            ...config,
-            projects: [{ name: 'mobile-webkit', use: { ...devices['iPhone 13'] } }],
-          });
-          EOF
-          pnpm exec playwright test -c playwright.thin-words.config.ts tests/e2e/check-in-inline-intensity.spec.ts --grep 'at (320|390)px|other words stay out|mobile Words footer|dismissal hides|manual Maybe' --workers=1
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: webkit-words
-          path: test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run full browser regression suite serially
+        run: pnpm exec playwright test --workers=1
+
+      - name: Run offline/reconnect verification
+        run: pnpm test:e2e:outage
